@@ -16,7 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.command.CommandGoal;
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.command.goal.DebugGoal;
 import org.eclipse.che.ide.command.goal.RunGoal;
 import org.eclipse.che.ide.command.toolbar.commands.button.GoalButton;
@@ -39,9 +39,9 @@ import static java.util.Collections.emptyList;
 @Singleton
 public class ExecuteCommandViewImpl implements ExecuteCommandView {
 
-    private final Map<CommandGoal, List<ContextualCommand>> commands;
+    private final Map<CommandGoal, List<CommandImpl>> commands;
     /** Stores created buttons by goals in order to reuse it. */
-    private final Map<CommandGoal, GoalButton>              buttonsCache;
+    private final Map<CommandGoal, GoalButton>        buttonsCache;
 
     private final FlowPanel         buttonsPanel;
     private final RunGoal           runGoal;
@@ -72,7 +72,7 @@ public class ExecuteCommandViewImpl implements ExecuteCommandView {
     }
 
     @Override
-    public void setCommands(Map<CommandGoal, List<ContextualCommand>> commands) {
+    public void setCommands(Map<CommandGoal, List<CommandImpl>> commands) {
         this.commands.clear();
         this.commands.putAll(commands);
 
@@ -97,7 +97,7 @@ public class ExecuteCommandViewImpl implements ExecuteCommandView {
         final GoalButton button = buttonsCache.getOrDefault(goal, goalButtonFactory.newButton(goal, delegate));
         buttonsCache.put(goal, button);
 
-        final List<ContextualCommand> commandsOfGoal = commands.getOrDefault(goal, emptyList());
+        final List<CommandImpl> commandsOfGoal = commands.getOrDefault(goal, emptyList());
         final GoalButtonDataProvider dataProvider = button.getPopupItemDataProvider();
 
         dataProvider.setCommands(commandsOfGoal);

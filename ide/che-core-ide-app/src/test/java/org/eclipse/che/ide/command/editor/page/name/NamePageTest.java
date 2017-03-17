@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.command.editor.page.name;
 
 import org.eclipse.che.ide.api.command.CommandExecutor;
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
 import org.junit.Before;
@@ -50,7 +50,7 @@ public class NamePageTest {
     @Mock
     private DirtyStateListener dirtyStateListener;
     @Mock
-    private ContextualCommand  editedCommand;
+    private CommandImpl        editedCommand;
 
     @Before
     public void setUp() throws Exception {

@@ -17,8 +17,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.command.toolbar.CommandCreationGuide;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
@@ -49,16 +49,16 @@ public class EmptyListWidget extends FlowPanel {
         commandManager.addCommandLoadedListener(this::updateState);
         commandManager.addCommandChangedListener(new CommandManager.CommandChangedListener() {
             @Override
-            public void onCommandAdded(ContextualCommand command) {
+            public void onCommandAdded(CommandImpl command) {
                 updateState();
             }
 
             @Override
-            public void onCommandUpdated(ContextualCommand previousCommand, ContextualCommand command) {
+            public void onCommandUpdated(CommandImpl previousCommand, CommandImpl command) {
             }
 
             @Override
-            public void onCommandRemoved(ContextualCommand command) {
+            public void onCommandRemoved(CommandImpl command) {
                 updateState();
             }
         });

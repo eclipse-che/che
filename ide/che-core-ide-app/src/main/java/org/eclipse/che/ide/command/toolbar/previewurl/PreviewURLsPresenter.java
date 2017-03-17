@@ -24,8 +24,8 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
@@ -107,7 +107,7 @@ public class PreviewURLsPresenter implements Presenter, PreviewURLsView.ActionDe
     private Promise<String> getPreviewUrl(int pid, Machine machine) {
         return execAgentCmdManager.getProcess(machine.getId(), pid)
                                   .then((Function<GetProcessResponseDto, String>)process -> {
-                                      final Optional<ContextualCommand> commandOptional = commandManager.getCommand(process.getName());
+                                      final Optional<CommandImpl> commandOptional = commandManager.getCommand(process.getName());
 
                                       return commandOptional.map(command -> command.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME))
                                                             .orElse(null);

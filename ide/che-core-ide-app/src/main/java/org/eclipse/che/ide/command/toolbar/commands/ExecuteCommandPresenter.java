@@ -19,8 +19,8 @@ import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandGoal;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.command.toolbar.CommandCreationGuide;
@@ -52,17 +52,17 @@ public class ExecuteCommandPresenter implements Presenter, ExecuteCommandView.Ac
         commandManager.addCommandLoadedListener(this::updateView);
         commandManager.addCommandChangedListener(new CommandManager.CommandChangedListener() {
             @Override
-            public void onCommandAdded(ContextualCommand command) {
+            public void onCommandAdded(CommandImpl command) {
                 updateView();
             }
 
             @Override
-            public void onCommandUpdated(ContextualCommand previousCommand, ContextualCommand command) {
+            public void onCommandUpdated(CommandImpl previousCommand, CommandImpl command) {
                 updateView();
             }
 
             @Override
-            public void onCommandRemoved(ContextualCommand command) {
+            public void onCommandRemoved(CommandImpl command) {
                 updateView();
             }
         });
@@ -78,7 +78,7 @@ public class ExecuteCommandPresenter implements Presenter, ExecuteCommandView.Ac
     }
 
     @Override
-    public void onCommandExecute(ContextualCommand command, @Nullable Machine machine) {
+    public void onCommandExecute(CommandImpl command, @Nullable Machine machine) {
         final CommandExecutor commandExecutor = commandExecutorProvider.get();
 
         if (machine == null) {

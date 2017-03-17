@@ -14,12 +14,9 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.selection.Selection;
@@ -31,11 +28,7 @@ import org.eclipse.che.ide.machine.chooser.MachineChooser;
 
 import java.util.Map;
 
-/**
- * Implementation of {@link CommandExecutor}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Implementation of {@link CommandExecutor}. */
 public class CommandExecutorImpl implements CommandExecutor {
 
     private final MacroProcessor          macroProcessor;
@@ -61,42 +54,36 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     @Override
-    public void executeCommand(Command command, final Machine machine) {
+    public void executeCommand(Command command, Machine machine) {
         final String name = command.getName();
         final String type = command.getType();
         final String commandLine = command.getCommandLine();
         final Map<String, String> attributes = command.getAttributes();
 
-        macroProcessor.expandMacros(commandLine).then(new Operation<String>() {
-            @Override
-            public void apply(String expandedCommandLine) throws OperationException {
-                final CommandImpl expandedCommand = new CommandImpl(name, expandedCommandLine, type, attributes);
-                final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
-                final String machineId = machine.getId();
+        macroProcessor.expandMacros(commandLine).then(expandedCommandLine -> {
+            final CommandImpl expandedCommand = new CommandImpl(name, expandedCommandLine, type, attributes);
+            final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
+            final String machineId = machine.getId();
 
-                processesPanelPresenter.addCommandOutput(machineId, console);
+            processesPanelPresenter.addCommandOutput(machineId, console);
 
-                execAgentCommandManager.startProcess(machineId, expandedCommand)
-                                       .thenIfProcessStartedEvent(console.getProcessStartedOperation())
-                                       .thenIfProcessDiedEvent(console.getProcessDiedOperation())
-                                       .thenIfProcessStdOutEvent(console.getStdOutOperation())
-                                       .thenIfProcessStdErrEvent(console.getStdErrOperation());
-            }
+            execAgentCommandManager.startProcess(machineId, expandedCommand)
+                                   .thenIfProcessStartedEvent(console.getProcessStartedOperation())
+                                   .thenIfProcessDiedEvent(console.getProcessDiedOperation())
+                                   .thenIfProcessStdOutEvent(console.getStdOutOperation())
+                                   .thenIfProcessStdErrEvent(console.getStdErrOperation());
         });
     }
 
     @Override
-    public void executeCommand(final ContextualCommand command) {
+    public void executeCommand(CommandImpl command) {
         final Machine selectedMachine = getSelectedMachine();
 
         if (selectedMachine != null) {
             executeCommand(command, selectedMachine);
         } else {
-            machineChooser.show().then(new Operation<Machine>() {
-                @Override
-                public void apply(Machine arg) throws OperationException {
-                    executeCommand(command, arg);
-                }
+            machineChooser.show().then(machine -> {
+                executeCommand(command, machine);
             });
         }
     }

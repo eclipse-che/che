@@ -25,12 +25,12 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
+import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
 import org.eclipse.che.ide.api.command.CommandManager.CommandLoadedListener;
 import org.eclipse.che.ide.api.command.CommandType;
-import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -170,14 +170,14 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void onCommandDuplicate(ContextualCommand command) {
+    public void onCommandDuplicate(CommandImpl command) {
         commandManager.createCommand(command)
                       .then(this::refreshViewAndSelectCommand)
                       .catchError(showErrorNotification(messages.unableDuplicate()));
     }
 
     @Override
-    public void onCommandRemove(ContextualCommand command) {
+    public void onCommandRemove(CommandImpl command) {
         dialogFactory.createConfirmDialog(messages.removeCommandConfirmationTitle(),
                                           messages.removeCommandConfirmationMessage(command.getName()),
                                           () -> commandManager.removeCommand(command.getName())
@@ -199,17 +199,17 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void onCommandAdded(ContextualCommand command) {
+    public void onCommandAdded(CommandImpl command) {
         refreshView();
     }
 
     @Override
-    public void onCommandUpdated(ContextualCommand previousCommand, ContextualCommand command) {
+    public void onCommandUpdated(CommandImpl previousCommand, CommandImpl command) {
         refreshView();
     }
 
     @Override
-    public void onCommandRemoved(ContextualCommand command) {
+    public void onCommandRemoved(CommandImpl command) {
         refreshView();
     }
 
@@ -218,7 +218,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         refreshViewAndSelectCommand(null);
     }
 
-    private void refreshViewAndSelectCommand(ContextualCommand command) {
+    private void refreshViewAndSelectCommand(CommandImpl command) {
         refreshViewTask.delayAndSelectCommand(command);
     }
 
@@ -241,7 +241,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         private final CommandManager       commandManager;
         private final CommandUtils         commandUtils;
 
-        private ContextualCommand commandToSelect;
+        private CommandImpl commandToSelect;
 
         @Inject
         public RefreshViewTask(CommandsExplorerView view,
@@ -269,7 +269,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
             }
         }
 
-        void delayAndSelectCommand(@Nullable ContextualCommand command) {
+        void delayAndSelectCommand(@Nullable CommandImpl command) {
             if (command != null) {
                 commandToSelect = command;
             }
@@ -278,7 +278,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         }
 
         private void refreshView() {
-            final Map<CommandGoal, List<ContextualCommand>> commandsByGoals = new HashMap<>();
+            final Map<CommandGoal, List<CommandImpl>> commandsByGoals = new HashMap<>();
 
             // all predefined commandToSelect goals must be shown in the view
             // so populate map by all registered commandToSelect goals

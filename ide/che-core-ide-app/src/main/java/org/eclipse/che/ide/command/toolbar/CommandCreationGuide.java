@@ -16,14 +16,11 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerPresenter;
 import org.eclipse.che.ide.command.goal.RunGoal;
 import org.eclipse.che.ide.command.node.NodeFactory;
-
-import static java.util.Collections.emptyList;
 
 /**
  * Guides the user into the flow of creating a command and helps
@@ -64,9 +61,8 @@ public class CommandCreationGuide {
     public void guide(CommandGoal goal) {
         workspaceAgentProvider.get().setActivePart(commandsExplorerPresenterProvider.get());
 
-        commandManager.createCommand(goal.getId(), "custom", new ApplicableContext(true, emptyList()))
-                      .then(command -> {
-                          editorAgentProvider.get().openEditor(nodeFactory.newCommandFileNode(command));
-                      });
+        commandManager.createCommand(goal.getId(), "custom").then(command -> {
+            editorAgentProvider.get().openEditor(nodeFactory.newCommandFileNode(command));
+        });
     }
 }

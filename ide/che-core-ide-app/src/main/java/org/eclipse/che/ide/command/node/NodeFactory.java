@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.command.node;
 
 import org.eclipse.che.ide.api.command.CommandGoal;
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public interface NodeFactory {
 
     CommandGoalNode newCommandGoalNode(CommandGoal data, List<? extends AbstractCommandNode> commands);
 
-    ExecutableCommandNode newExecutableCommandNode(ContextualCommand command, ExecutableCommandNode.ActionDelegate actionDelegate);
+    ExecutableCommandNode newExecutableCommandNode(CommandImpl command, ExecutableCommandNode.ActionDelegate actionDelegate);
 
-    CommandFileNode newCommandFileNode(ContextualCommand data);
+    CommandFileNode newCommandFileNode(CommandImpl data);
 }

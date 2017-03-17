@@ -17,8 +17,8 @@ import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.machine.chooser.MachineChooser;
@@ -74,13 +74,13 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
 
     @Override
     public void onFilterChanged(String filterValue) {
-        final List<ContextualCommand> filteredCommands = commandManager.getCommands();
+        final List<CommandImpl> filteredCommands = commandManager.getCommands();
 
         if (!filterValue.isEmpty()) {
-            final ListIterator<ContextualCommand> it = filteredCommands.listIterator();
+            final ListIterator<CommandImpl> it = filteredCommands.listIterator();
 
             while (it.hasNext()) {
-                final ContextualCommand command = it.next();
+                final CommandImpl command = it.next();
 
                 if (!containsIgnoreCase(command.getName(), filterValue)) {
                     it.remove();
@@ -92,7 +92,7 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
     }
 
     @Override
-    public void onCommandExecute(final ContextualCommand command) {
+    public void onCommandExecute(CommandImpl command) {
         view.close();
 
         if (getMachines().isEmpty()) {

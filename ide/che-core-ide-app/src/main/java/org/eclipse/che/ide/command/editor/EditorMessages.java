@@ -43,12 +43,6 @@ public interface EditorMessages extends Messages {
     @Key("page.goal.title")
     String pageGoalTitle();
 
-    @Key("page.context.title")
-    String pageContextTitle();
-
-    @Key("page.context.workspace.label")
-    String pageContextWorkspaceLabel();
-
     @Key("page.projects.title")
     String pageProjectsTitle();
 

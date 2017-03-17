@@ -18,9 +18,9 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.resources.Container;
@@ -113,7 +113,7 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
 
     private Operation<Project> addCommands(CompleteCallback callback) {
         return project -> {
-            Promise<ContextualCommand> chain = null;
+            Promise<CommandImpl> chain = null;
             for (final CommandDto command : dataObject.getCommands()) {
                 if (chain == null) {
                     chain = addCommand(project, command);
@@ -132,20 +132,21 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
         };
     }
 
-    private Promise<ContextualCommand> addCommand(Project project, CommandDto command) {
-        final String name = project.getName() + ": " + command.getName();
+    private Promise<CommandImpl> addCommand(Project project, CommandDto commandDto) {
+        final String name = project.getName() + ": " + commandDto.getName();
         final String absoluteProjectPath = appContext.getProjectsRoot().append(project.getPath()).toString();
-        final String commandLine = command.getCommandLine().replaceAll(PROJECT_PATH_MACRO_REGEX, absoluteProjectPath);
+        final String commandLine = commandDto.getCommandLine().replaceAll(PROJECT_PATH_MACRO_REGEX, absoluteProjectPath);
 
         final ApplicableContext applicableContext = new ApplicableContext();
         applicableContext.addProject(project.getPath());
-        final ContextualCommand contextualCommand = new ContextualCommand(name,
-                                                                          commandLine,
-                                                                          command.getType(),
-                                                                          command.getAttributes(),
-                                                                          applicableContext);
 
-        return commandManager.createCommand(contextualCommand);
+        final CommandImpl command = new CommandImpl(name,
+                                                    commandLine,
+                                                    commandDto.getType(),
+                                                    commandDto.getAttributes(),
+                                                    applicableContext);
+
+        return commandManager.createCommand(command);
     }
 
     private Operation<Project> onComplete(final CompleteCallback callback) {

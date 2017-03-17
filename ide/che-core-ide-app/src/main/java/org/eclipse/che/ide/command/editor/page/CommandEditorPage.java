@@ -12,7 +12,7 @@ package org.eclipse.che.ide.command.editor.page;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.command.editor.CommandEditor;
 
 /**
@@ -34,7 +34,7 @@ public interface CommandEditorPage {
      * Typically, implementor should hold the given {@code command}
      * instance for subsequent modifying it directly and do pages's initial setup.
      */
-    void edit(ContextualCommand command);
+    void edit(CommandImpl command);
 
     /**
      * Whether the page has been modified or not?

@@ -29,6 +29,6 @@ public interface ProjectsPageView extends View<ProjectsPageView.ActionDelegate> 
     interface ActionDelegate {
 
         /** Called when applicable project has been changed. */
-        void onApplicableProjectChanged(Project project, boolean value);
+        void onApplicableProjectChanged(Project project, boolean applicable);
     }
 }

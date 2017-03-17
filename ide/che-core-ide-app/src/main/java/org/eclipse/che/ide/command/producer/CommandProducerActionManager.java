@@ -43,7 +43,7 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_TOOLBAR;
 import static org.eclipse.che.ide.api.constraints.Anchor.AFTER;
 
 /**
- * Manages actions for the contextual commands.
+ * Manages actions for the commands.
  * <p>Manager gets all registered {@link CommandProducer}s and creates related actions in context menus.
  * <p>Manager listens all machines's state (running/destroyed) in order to
  * create/remove actions for the related {@link CommandProducer}s in case

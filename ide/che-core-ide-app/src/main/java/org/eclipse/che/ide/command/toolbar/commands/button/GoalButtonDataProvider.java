@@ -12,7 +12,7 @@ package org.eclipse.che.ide.command.toolbar.commands.button;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.ui.menubutton.MenuPopupItemDataProvider;
 import org.eclipse.che.ide.ui.menubutton.PopupItem;
@@ -26,9 +26,9 @@ import static java.util.stream.Collectors.toList;
 /** Provides items for {@link GoalButton}. */
 public class GoalButtonDataProvider implements MenuPopupItemDataProvider {
 
-    private final List<ContextualCommand> commands;
-    private final AppContext              appContext;
-    private final PopupItemFactory        popupItemFactory;
+    private final List<CommandImpl> commands;
+    private final AppContext        appContext;
+    private final PopupItemFactory  popupItemFactory;
 
     private ItemDataChangeHandler handler;
     private PopupItem             defaultItem;
@@ -61,7 +61,7 @@ public class GoalButtonDataProvider implements MenuPopupItemDataProvider {
             items.add(popupItemFactory.newMachinePopupItem((MachinePopupItem)defaultItem));
         }
 
-        for (ContextualCommand command : commands) {
+        for (CommandImpl command : commands) {
             items.add(popupItemFactory.newCommandPopupItem(command));
         }
 
@@ -86,7 +86,7 @@ public class GoalButtonDataProvider implements MenuPopupItemDataProvider {
         List<PopupItem> items = new ArrayList<>();
 
         if (parent instanceof CommandPopupItem) {
-            ContextualCommand command = ((CommandPopupItem)parent).getCommand();
+            CommandImpl command = ((CommandPopupItem)parent).getCommand();
             List<MachineEntity> machines = appContext.getActiveRuntime().getMachines();
 
             items.addAll(machines.stream()
@@ -102,7 +102,7 @@ public class GoalButtonDataProvider implements MenuPopupItemDataProvider {
         this.handler = handler;
     }
 
-    public void setCommands(List<ContextualCommand> commands) {
+    public void setCommands(List<CommandImpl> commands) {
         this.commands.clear();
         this.commands.addAll(commands);
 

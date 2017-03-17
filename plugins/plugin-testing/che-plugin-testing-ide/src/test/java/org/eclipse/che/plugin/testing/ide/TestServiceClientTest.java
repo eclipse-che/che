@@ -30,8 +30,6 @@ import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.execagent.ExecAgentPromise;
@@ -55,6 +53,7 @@ import org.mockito.Spy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +62,6 @@ import static java.util.Arrays.asList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -87,21 +85,21 @@ public class TestServiceClientTest implements MockitoPrinter {
     @Mock
     private AsyncRequestFactory        asyncRequestFactory;
     @Mock
-    private DtoUnmarshallerFactory  dtoUnmarshallerFactory;
+    private DtoUnmarshallerFactory     dtoUnmarshallerFactory;
     @Mock
-    private CommandManager          commandManager;
+    private CommandManager             commandManager;
     @Mock
-    private ExecAgentCommandManager execAgentCommandManager;
+    private ExecAgentCommandManager    execAgentCommandManager;
     @Mock
-    private PromiseProvider         promiseProvider;
+    private PromiseProvider            promiseProvider;
     @Mock
-    private MacroProcessor          macroProcessor;
+    private MacroProcessor             macroProcessor;
     @Mock
-    private CommandConsoleFactory   commandConsoleFactory;
+    private CommandConsoleFactory      commandConsoleFactory;
     @Mock
-    private ProcessesPanelPresenter processesPanelPresenter;
+    private ProcessesPanelPresenter    processesPanelPresenter;
     @Mock
-    private DtoFactory              dtoFactory;
+    private DtoFactory                 dtoFactory;
     @Mock
     private TestGoal                testGoal;
 
@@ -231,44 +229,44 @@ public class TestServiceClientTest implements MockitoPrinter {
 
     @Test
     public void createCompileCommandFromStandardMavenCommands() {
-        when(commandManager.getCommands()).thenReturn(asList(new ContextualCommand("run",
-                                                                                   "mvn run -f ${current.project.path}",
-                                                                                   "mvn"),
-                                                             new ContextualCommand("build",
-                                                                                   "mvn clean install -f ${current.project.path}",
-                                                                                   "mvn")));
+        when(commandManager.getCommands()).thenReturn(asList(new CommandImpl("run",
+                                                                             "mvn run -f ${current.project.path}",
+                                                                             "mvn"),
+                                                             new CommandImpl("build",
+                                                                             "mvn clean install -f ${current.project.path}",
+                                                                             "mvn")));
         testServiceClient.getOrCreateTestCompileCommand();
-        verify(commandManager).createCommand(eq("Test"),
-                                             eq("mvn"),
-                                             eq("test-compile"),
-                                             eq("mvn test-compile -f ${current.project.path}"),
-                                             any(ApplicableContext.class));
+        verify(commandManager).createCommand("Test",
+                                             "mvn",
+                                             "test-compile",
+                                             "mvn test-compile -f ${current.project.path}",
+                                             Collections.emptyMap());
     }
 
     @Test
     public void createCompileCommandFromSCLEnabledMavenBuildCommand() {
-        when(commandManager.getCommands()).thenReturn(asList(new ContextualCommand("build",
-                                                                                   "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
-                                                                                   "mvn")));
+        when(commandManager.getCommands()).thenReturn(asList(new CommandImpl("build",
+                                                                             "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
+                                                                             "mvn")));
         testServiceClient.getOrCreateTestCompileCommand();
-        verify(commandManager).createCommand(eq("Test"),
-                                             eq("mvn"),
-                                             eq("test-compile"),
-                                             eq("scl enable rh-maven33 'mvn test-compile -f ${current.project.path}'"),
-                                             any(ApplicableContext.class));
+        verify(commandManager).createCommand("Test",
+                                             "mvn",
+                                             "test-compile",
+                                             "scl enable rh-maven33 'mvn test-compile -f ${current.project.path}'",
+                                             Collections.emptyMap());
     }
 
     @Test
     public void reuseExistingCompileCommand() {
-        ContextualCommand existingCompileCommand = new ContextualCommand("test-compile",
-                                                                         "mvn test-compile -f ${current.project.path}",
-                                                                         "mvn");
-        when(commandManager.getCommands()).thenReturn(asList(new ContextualCommand("run",
-                                                                                   "mvn run -f ${current.project.path}",
-                                                                                   "mvn"),
-                                                             new ContextualCommand("build",
-                                                                                   "mvn clean install -f ${current.project.path}",
-                                                                                   "mvn"),
+        CommandImpl existingCompileCommand = new CommandImpl("test-compile",
+                                                             "mvn test-compile -f ${current.project.path}",
+                                                             "mvn");
+        when(commandManager.getCommands()).thenReturn(asList(new CommandImpl("run",
+                                                                             "mvn run -f ${current.project.path}",
+                                                                             "mvn"),
+                                                             new CommandImpl("build",
+                                                                             "mvn clean install -f ${current.project.path}",
+                                                                             "mvn"),
                                                              existingCompileCommand));
 
         testServiceClient.getOrCreateTestCompileCommand();
@@ -278,9 +276,9 @@ public class TestServiceClientTest implements MockitoPrinter {
 
     @Test
     public void noBuildCommand() {
-        when(commandManager.getCommands()).thenReturn(asList(new ContextualCommand("customBuild",
-                                                                                   "mvn clean install -f ${current.project.path}",
-                                                                                   "mvn")));
+        when(commandManager.getCommands()).thenReturn(asList(new CommandImpl("customBuild",
+                                                                             "mvn clean install -f ${current.project.path}",
+                                                                             "mvn")));
 
         testServiceClient.getOrCreateTestCompileCommand();
 
@@ -289,9 +287,9 @@ public class TestServiceClientTest implements MockitoPrinter {
 
     @Test
     public void buildCommandNotAMavenCommand() {
-        when(commandManager.getCommands()).thenReturn(asList(new ContextualCommand("build",
-                                                                                   "mvn clean install -f ${current.project.path}",
-                                                                                   "someOtherType")));
+        when(commandManager.getCommands()).thenReturn(asList(new CommandImpl("build",
+                                                                             "mvn clean install -f ${current.project.path}",
+                                                                             "someOtherType")));
 
         testServiceClient.getOrCreateTestCompileCommand();
 
@@ -300,22 +298,22 @@ public class TestServiceClientTest implements MockitoPrinter {
 
     @Test
     public void mavenBuildCommandHasNoCleanInstallPart() {
-        when(commandManager.getCommands()).thenReturn(asList(new ContextualCommand("build",
-                                                                                   "mvn clean SomeOtherGoalInTeMiddle install -f ${current.project.path}",
-                                                                                   "mvn")));
+        when(commandManager.getCommands()).thenReturn(asList(new CommandImpl("build",
+                                                                             "mvn clean SomeOtherGoalInTeMiddle install -f ${current.project.path}",
+                                                                             "mvn")));
 
         testServiceClient.getOrCreateTestCompileCommand();
 
         verify(promiseProvider).resolve(null);
     }
 
-    private Promise<ContextualCommand> createCommandPromise(ContextualCommand command) {
-        return new PromiseMocker<ContextualCommand>().applyOnThenPromise(command).getPromise();
+    private Promise<CommandImpl> createCommandPromise(CommandImpl command) {
+        return new PromiseMocker<CommandImpl>().applyOnThenPromise(command).getPromise();
     }
 
     @Test
     public void runTestsDirectlyBecauseNoCompilationCommand() {
-        Promise<ContextualCommand> compileCommandPromise = createCommandPromise(null);
+        Promise<CommandImpl> compileCommandPromise = createCommandPromise(null);
         testServiceClient.runTestsAfterCompilation(projectPath, testFramework, parameters, statusNotification, compileCommandPromise);
 
         verify(statusNotification).setContent("Executing the tests without preliminary compilation.");
@@ -325,9 +323,9 @@ public class TestServiceClientTest implements MockitoPrinter {
 
     @Test
     public void runTestsDirectlyBecauseNoDevMachine() {
-        Promise<ContextualCommand> compileCommandPromise = createCommandPromise(new ContextualCommand("test-compile",
-                                                                                                      "mvn test-compile -f ${current.project.path}",
-                                                                                                      "mvn"));
+        Promise<CommandImpl> compileCommandPromise = createCommandPromise(new CommandImpl("test-compile",
+                                                                                          "mvn test-compile -f ${current.project.path}",
+                                                                                          "mvn"));
 
         when(devMachine.getDescriptor()).thenReturn(null);
 
@@ -373,9 +371,10 @@ public class TestServiceClientTest implements MockitoPrinter {
 
     @Test
     public void cancelledTestsBecauseCompilationNotStarted() {
-        Promise<ContextualCommand> compileCommandPromise = createCommandPromise(new ContextualCommand("test-compile",
-                                                                                                      "mvn test-compile -f ${current.project.path}",
-                                                                                                      "mvn"));
+        Promise<CommandImpl> compileCommandPromise = createCommandPromise(new CommandImpl(
+                                                                                          "test-compile",
+                                                                                          "mvn test-compile -f ${current.project.path}",
+                                                                                          "mvn"));
 
         when(devMachine.getDescriptor()).thenReturn(machine);
 
@@ -398,9 +397,10 @@ public class TestServiceClientTest implements MockitoPrinter {
 
     @Test
     public void cancelledTestsBecauseCompilationFailed() {
-        Promise<ContextualCommand> compileCommandPromise = createCommandPromise(new ContextualCommand("test-compile",
-                                                                                                      "mvn test-compile -f ${current.project.path}",
-                                                                                                      "mvn"));
+        Promise<CommandImpl> compileCommandPromise = createCommandPromise(new CommandImpl(
+                                                                                          "test-compile",
+                                                                                          "mvn test-compile -f ${current.project.path}",
+                                                                                          "mvn"));
 
         when(devMachine.getDescriptor()).thenReturn(machine);
 
@@ -429,7 +429,7 @@ public class TestServiceClientTest implements MockitoPrinter {
     @Test
     public void sucessfulTestsAfterCompilation() {
 
-        Promise<ContextualCommand> compileCommandPromise = createCommandPromise(new ContextualCommand(
+        Promise<CommandImpl> compileCommandPromise = createCommandPromise(new CommandImpl(
                                                                                           "test-compile",
                                                                                           "mvn test-compile -f ${current.project.path}",
                                                                                           "mvn"));

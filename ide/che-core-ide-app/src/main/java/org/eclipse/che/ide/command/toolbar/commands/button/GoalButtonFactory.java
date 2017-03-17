@@ -18,7 +18,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandGoal;
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.command.goal.DebugGoal;
 import org.eclipse.che.ide.command.goal.RunGoal;
@@ -70,7 +70,7 @@ public class GoalButtonFactory {
 
         button.setActionHandler(item -> {
             if (item instanceof CommandPopupItem) {
-                final ContextualCommand command = ((CommandPopupItem)item).getCommand();
+                final CommandImpl command = ((CommandPopupItem)item).getCommand();
 
                 delegate.onCommandExecute(command, null);
                 dataProvider.setDefaultItem(item);

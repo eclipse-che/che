@@ -12,7 +12,7 @@ package org.eclipse.che.ide.command.explorer;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandGoal;
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 
@@ -32,7 +32,7 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
      * @param commands
      *         commands grouped by its type
      */
-    void setCommands(Map<CommandGoal, List<ContextualCommand>> commands);
+    void setCommands(Map<CommandGoal, List<CommandImpl>> commands);
 
     /** Returns the currently selected command goal or {@code null} if none. */
     @Nullable
@@ -40,10 +40,10 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
 
     /** Returns the currently selected command or {@code null} if none. */
     @Nullable
-    ContextualCommand getSelectedCommand();
+    CommandImpl getSelectedCommand();
 
     /** Select the given {@code command}. */
-    void selectCommand(ContextualCommand command);
+    void selectCommand(CommandImpl command);
 
     /** The action delegate for this view. */
     interface ActionDelegate extends BaseActionDelegate {
@@ -57,7 +57,7 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
          * @param command
          *         command duplication of which is requested
          */
-        void onCommandDuplicate(ContextualCommand command);
+        void onCommandDuplicate(CommandImpl command);
 
         /**
          * Called when removing command is requested.
@@ -65,6 +65,6 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
          * @param command
          *         command removing of which is requested
          */
-        void onCommandRemove(ContextualCommand command);
+        void onCommandRemove(CommandImpl command);
     }
 }

@@ -13,7 +13,7 @@ package org.eclipse.che.ide.command.toolbar.commands;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandGoal;
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.List;
@@ -23,12 +23,12 @@ import java.util.Map;
 public interface ExecuteCommandView extends View<ExecuteCommandView.ActionDelegate> {
 
     /** Set commands grouped by goals for displaying in the view. */
-    void setCommands(Map<CommandGoal, List<ContextualCommand>> commands);
+    void setCommands(Map<CommandGoal, List<CommandImpl>> commands);
 
     interface ActionDelegate {
 
         /** Called when command execution is requested. */
-        void onCommandExecute(ContextualCommand command, @Nullable Machine machine);
+        void onCommandExecute(CommandImpl command, @Nullable Machine machine);
 
         /** Called when guide of commands creation is requested. */
         void onGuide(CommandGoal goal);

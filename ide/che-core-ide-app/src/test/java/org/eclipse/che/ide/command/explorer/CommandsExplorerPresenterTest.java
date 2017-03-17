@@ -20,9 +20,10 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.command.CommandGoal;
+import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandType;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
@@ -84,17 +85,17 @@ public class CommandsExplorerPresenterTest {
     private CommandsExplorerPresenter presenter;
 
     @Mock
-    private Promise<Void>                                voidPromise;
+    private Promise<Void>                           voidPromise;
     @Mock
-    private Promise<ContextualCommand>                   commandPromise;
+    private Promise<CommandImpl>                    commandPromise;
     @Mock
-    private Promise<CommandType>                         commandTypePromise;
+    private Promise<CommandType>                    commandTypePromise;
     @Captor
-    private ArgumentCaptor<Operation<PromiseError>>      errorOperationCaptor;
+    private ArgumentCaptor<Operation<PromiseError>> errorOperationCaptor;
     @Captor
-    private ArgumentCaptor<Operation<ContextualCommand>> commandOperationCaptor;
+    private ArgumentCaptor<Operation<CommandImpl>>  commandOperationCaptor;
     @Captor
-    private ArgumentCaptor<Operation<CommandType>>       commandTypeOperationCaptor;
+    private ArgumentCaptor<Operation<CommandType>>  commandTypeOperationCaptor;
 
     @Test
     public void shouldSetViewDelegate() throws Exception {
@@ -119,7 +120,7 @@ public class CommandsExplorerPresenterTest {
 
         presenter.go(container);
 
-        verify(refreshViewTask).delayAndSelectCommand(isNull(ContextualCommand.class));
+        verify(refreshViewTask).delayAndSelectCommand(isNull(CommandImpl.class));
         verify(container).setWidget(view);
     }
 
@@ -168,7 +169,7 @@ public class CommandsExplorerPresenterTest {
 
         when(commandManager.createCommand(anyString(),
                                           anyString(),
-                                          any(ContextualCommand.ApplicableContext.class))).thenReturn(commandPromise);
+                                          any(ApplicableContext.class))).thenReturn(commandPromise);
         when(commandPromise.then(any(Operation.class))).thenReturn(commandPromise);
         when(commandPromise.catchError(any(Operation.class))).thenReturn(commandPromise);
 
@@ -184,7 +185,7 @@ public class CommandsExplorerPresenterTest {
 
         verify(commandManager).createCommand(eq(commandGoalId),
                                              eq(commandTypeId),
-                                             any(ContextualCommand.ApplicableContext.class));
+                                             any(ApplicableContext.class));
     }
 
     @Test(expected = OperationException.class)
@@ -204,7 +205,7 @@ public class CommandsExplorerPresenterTest {
 
         when(commandManager.createCommand(anyString(),
                                           anyString(),
-                                          any(ContextualCommand.ApplicableContext.class))).thenReturn(commandPromise);
+                                          any(ApplicableContext.class))).thenReturn(commandPromise);
         when(commandPromise.then(any(Operation.class))).thenReturn(commandPromise);
         when(commandPromise.catchError(any(Operation.class))).thenReturn(commandPromise);
 
@@ -220,7 +221,7 @@ public class CommandsExplorerPresenterTest {
 
         verify(commandManager).createCommand(eq(commandGoalId),
                                              eq(commandTypeId),
-                                             any(ContextualCommand.ApplicableContext.class));
+                                             any(ApplicableContext.class));
 
         verify(commandPromise).catchError(errorOperationCaptor.capture());
         errorOperationCaptor.getValue().apply(mock(PromiseError.class));
@@ -230,8 +231,8 @@ public class CommandsExplorerPresenterTest {
 
     @Test
     public void shouldDuplicateCommand() throws Exception {
-        ContextualCommand command = mock(ContextualCommand.class);
-        when(commandManager.createCommand(any(ContextualCommand.class))).thenReturn(commandPromise);
+        CommandImpl command = mock(CommandImpl.class);
+        when(commandManager.createCommand(any(CommandImpl.class))).thenReturn(commandPromise);
         when(commandPromise.then(any(Operation.class))).thenReturn(commandPromise);
 
         presenter.onCommandDuplicate(command);
@@ -241,8 +242,8 @@ public class CommandsExplorerPresenterTest {
 
     @Test(expected = OperationException.class)
     public void shouldShowNotificationWhenFailedToDuplicateCommand() throws Exception {
-        ContextualCommand command = mock(ContextualCommand.class);
-        when(commandManager.createCommand(any(ContextualCommand.class))).thenReturn(commandPromise);
+        CommandImpl command = mock(CommandImpl.class);
+        when(commandManager.createCommand(any(CommandImpl.class))).thenReturn(commandPromise);
         when(commandPromise.then(any(Operation.class))).thenReturn(commandPromise);
 
         presenter.onCommandDuplicate(command);
@@ -263,7 +264,7 @@ public class CommandsExplorerPresenterTest {
                                                any(CancelCallback.class))).thenReturn(confirmDialog);
         ArgumentCaptor<ConfirmCallback> confirmCallbackCaptor = ArgumentCaptor.forClass(ConfirmCallback.class);
 
-        ContextualCommand command = mock(ContextualCommand.class);
+        CommandImpl command = mock(CommandImpl.class);
         String cmdName = "build";
         when(command.getName()).thenReturn(cmdName);
         when(commandManager.removeCommand(anyString())).thenReturn(voidPromise);
@@ -285,7 +286,7 @@ public class CommandsExplorerPresenterTest {
                                                anyString(),
                                                any(ConfirmCallback.class),
                                                any(CancelCallback.class))).thenReturn(confirmDialog);
-        ContextualCommand command = mock(ContextualCommand.class);
+        CommandImpl command = mock(CommandImpl.class);
 
         presenter.onCommandRemove(command);
 
@@ -307,7 +308,7 @@ public class CommandsExplorerPresenterTest {
         when(commandManager.removeCommand(anyString())).thenReturn(voidPromise);
 
         // when
-        presenter.onCommandRemove(mock(ContextualCommand.class));
+        presenter.onCommandRemove(mock(CommandImpl.class));
 
         // then
         verify(dialogFactory).createConfirmDialog(anyString(), anyString(), confirmCallbackCaptor.capture(), isNull(CancelCallback.class));
@@ -323,30 +324,29 @@ public class CommandsExplorerPresenterTest {
     public void shouldRefreshViewWhenCommandsAreLoaded() throws Exception {
         presenter.onCommandsLoaded();
 
-        verify(refreshViewTask).delayAndSelectCommand(isNull(ContextualCommand.class));
+        verify(refreshViewTask).delayAndSelectCommand(isNull(CommandImpl.class));
     }
 
     @Test
     public void shouldRefreshViewWhenCommandAdded() throws Exception {
-        ContextualCommand command = mock(ContextualCommand.class);
+        CommandImpl command = mock(CommandImpl.class);
 
         presenter.onCommandAdded(command);
 
-        verify(refreshViewTask).delayAndSelectCommand(isNull(ContextualCommand.class));
+        verify(refreshViewTask).delayAndSelectCommand(isNull(CommandImpl.class));
     }
 
     @Test
     public void shouldRefreshViewWhenCommandUpdated() throws Exception {
-        presenter.onCommandUpdated(mock(ContextualCommand.class), mock(ContextualCommand.class));
+        presenter.onCommandUpdated(mock(CommandImpl.class), mock(CommandImpl.class));
 
-        verify(refreshViewTask).delayAndSelectCommand(isNull(ContextualCommand.class));
+        verify(refreshViewTask).delayAndSelectCommand(isNull(CommandImpl.class));
     }
 
     @Test
     public void shouldRefreshViewWhenCommandRemoved() throws Exception {
-        presenter.onCommandRemoved(mock(ContextualCommand.class));
+        presenter.onCommandRemoved(mock(CommandImpl.class));
 
-        verify(refreshViewTask).delayAndSelectCommand(isNull(ContextualCommand.class));
+        verify(refreshViewTask).delayAndSelectCommand(isNull(CommandImpl.class));
     }
-
 }

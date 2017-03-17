@@ -13,16 +13,16 @@ package org.eclipse.che.ide.command.toolbar.commands.button;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.ui.menubutton.PopupItem;
 
-/** A {@link PopupItem} represents {@link ContextualCommand}. */
+/** A {@link PopupItem} represents {@link CommandImpl}. */
 public class CommandPopupItem implements PopupItem {
 
-    private final ContextualCommand command;
+    private final CommandImpl command;
 
     @Inject
-    public CommandPopupItem(@Assisted ContextualCommand command) {
+    public CommandPopupItem(@Assisted CommandImpl command) {
         this.command = command;
     }
 
@@ -36,7 +36,7 @@ public class CommandPopupItem implements PopupItem {
         return command.getApplicableContext().isWorkspaceApplicable();
     }
 
-    public ContextualCommand getCommand() {
+    public CommandImpl getCommand() {
         return command;
     }
 }

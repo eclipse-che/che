@@ -14,18 +14,18 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.ui.menubutton.PopupItem;
 
-/** Item contains {@link ContextualCommand} and {@link Machine}. */
+/** Item contains {@link CommandImpl} and {@link Machine}. */
 public class MachinePopupItem implements PopupItem {
 
-    private final ContextualCommand command;
-    private final Machine           machine;
-    private final String            name;
+    private final CommandImpl command;
+    private final Machine     machine;
+    private final String      name;
 
     @AssistedInject
-    public MachinePopupItem(@Assisted ContextualCommand command, @Assisted Machine machine) {
+    public MachinePopupItem(@Assisted CommandImpl command, @Assisted Machine machine) {
         this.command = command;
         this.machine = machine;
         this.name = machine.getConfig().getName();
@@ -48,7 +48,7 @@ public class MachinePopupItem implements PopupItem {
         return false;
     }
 
-    public ContextualCommand getCommand() {
+    public CommandImpl getCommand() {
         return command;
     }
 

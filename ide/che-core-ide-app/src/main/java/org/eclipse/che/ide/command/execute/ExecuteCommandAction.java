@@ -16,24 +16,20 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.command.CommandExecutor;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-/**
- * Action for executing a {@link ContextualCommand}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Action for executing a {@link CommandImpl}. */
 class ExecuteCommandAction extends Action {
 
-    private final ContextualCommand command;
-    private final CommandExecutor   commandExecutor;
-    private final CommandManager    commandManager;
+    private final CommandImpl     command;
+    private final CommandExecutor commandExecutor;
+    private final CommandManager  commandManager;
 
     @Inject
-    ExecuteCommandAction(@Assisted ContextualCommand command,
+    ExecuteCommandAction(@Assisted CommandImpl command,
                          CommandUtils commandUtils,
                          CommandExecutor commandExecutor,
                          CommandManager commandManager) {

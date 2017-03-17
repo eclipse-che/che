@@ -15,8 +15,8 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.command.BaseCommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoal;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
@@ -98,7 +98,7 @@ public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.
     private Set<CommandGoal> getCustomGoals() {
         final Set<CommandGoal> list = new HashSet<>();
 
-        for (ContextualCommand command : commandManager.getCommands()) {
+        for (CommandImpl command : commandManager.getCommands()) {
             final String goalId = command.getGoal();
 
             final Optional<CommandGoal> goalOptional = goalRegistry.getPredefinedGoalById(goalId);

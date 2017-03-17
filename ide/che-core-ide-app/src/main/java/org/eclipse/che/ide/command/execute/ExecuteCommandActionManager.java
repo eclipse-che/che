@@ -17,10 +17,10 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
 import org.eclipse.che.ide.api.command.CommandManager.CommandLoadedListener;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.component.Component;
 
@@ -88,13 +88,13 @@ public class ExecuteCommandActionManager implements Component,
 
     @Override
     public void onCommandsLoaded() {
-        for (ContextualCommand command : commandManager.getCommands()) {
+        for (CommandImpl command : commandManager.getCommands()) {
             addAction(command);
         }
     }
 
     @Override
-    public void onCommandAdded(ContextualCommand command) {
+    public void onCommandAdded(CommandImpl command) {
         addAction(command);
     }
 
@@ -102,7 +102,7 @@ public class ExecuteCommandActionManager implements Component,
      * Creates action for executing the given command and
      * adds created action to the appropriate action group.
      */
-    private void addAction(ContextualCommand command) {
+    private void addAction(CommandImpl command) {
         final ExecuteCommandAction action = executeCommandActionFactory.create(command);
 
         actionManager.registerAction("command_" + command.getName(), action);
@@ -115,7 +115,7 @@ public class ExecuteCommandActionManager implements Component,
      * Returns the action group which is appropriate for placing the action for executing the given command.
      * If appropriate action group doesn't exist it will be created and added to the right place.
      */
-    private DefaultActionGroup getActionGroupForCommand(ContextualCommand command) {
+    private DefaultActionGroup getActionGroupForCommand(CommandImpl command) {
         String goalId = command.getGoal();
 
         if (isNullOrEmpty(goalId)) {
@@ -137,13 +137,13 @@ public class ExecuteCommandActionManager implements Component,
     }
 
     @Override
-    public void onCommandUpdated(ContextualCommand previousCommand, ContextualCommand command) {
+    public void onCommandUpdated(CommandImpl previousCommand, CommandImpl command) {
         removeAction(previousCommand);
         addAction(command);
     }
 
     @Override
-    public void onCommandRemoved(ContextualCommand command) {
+    public void onCommandRemoved(CommandImpl command) {
         removeAction(command);
     }
 
@@ -151,7 +151,7 @@ public class ExecuteCommandActionManager implements Component,
      * Removes action for executing the given command and
      * removes the appropriate action group in case it's empty.
      */
-    private void removeAction(ContextualCommand command) {
+    private void removeAction(CommandImpl command) {
         final Action action = command2Action.remove(command.getName());
 
         if (action != null) {

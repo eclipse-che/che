@@ -45,5 +45,5 @@ public interface CommandExecutor {
      *         command to execute
      * @see Macro
      */
-    void executeCommand(ContextualCommand command);
+    void executeCommand(CommandImpl command);
 }

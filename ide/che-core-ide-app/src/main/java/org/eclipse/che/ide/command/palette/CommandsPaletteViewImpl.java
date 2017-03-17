@@ -27,7 +27,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.command.CommandGoal;
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.command.node.CommandGoalNode;
 import org.eclipse.che.ide.command.node.ExecutableCommandNode;
@@ -133,18 +133,18 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     }
 
     @Override
-    public void setCommands(Map<CommandGoal, List<ContextualCommand>> commands) {
+    public void setCommands(Map<CommandGoal, List<CommandImpl>> commands) {
         renderCommands(commands);
     }
 
     /** Render commands grouped by goals. */
-    private void renderCommands(Map<CommandGoal, List<ContextualCommand>> commands) {
+    private void renderCommands(Map<CommandGoal, List<CommandImpl>> commands) {
         tree.getNodeStorage().clear();
 
-        for (Entry<CommandGoal, List<ContextualCommand>> entry : commands.entrySet()) {
+        for (Entry<CommandGoal, List<CommandImpl>> entry : commands.entrySet()) {
             List<ExecutableCommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
 
-            for (final ContextualCommand command : entry.getValue()) {
+            for (final CommandImpl command : entry.getValue()) {
                 commandNodes.add(nodeFactory.newExecutableCommandNode(command, () -> delegate.onCommandExecute(command)));
             }
 

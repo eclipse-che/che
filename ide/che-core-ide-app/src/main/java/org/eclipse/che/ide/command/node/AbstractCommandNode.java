@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.command.node;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.command.CommandUtils;
@@ -21,18 +21,12 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.List;
 
-/**
- * Abstract tree node that represents {@link ContextualCommand}.
- *
- * @author Artem Zatsarynnyi
- */
-class AbstractCommandNode extends SyntheticNode<ContextualCommand> {
+/** Abstract tree node that represents {@link CommandImpl}. */
+class AbstractCommandNode extends SyntheticNode<CommandImpl> {
 
     private final CommandUtils commandUtils;
 
-    AbstractCommandNode(ContextualCommand data,
-                        NodeSettings nodeSettings,
-                        CommandUtils commandUtils) {
+    AbstractCommandNode(CommandImpl data, NodeSettings nodeSettings, CommandUtils commandUtils) {
         super(data, nodeSettings);
 
         this.commandUtils = commandUtils;

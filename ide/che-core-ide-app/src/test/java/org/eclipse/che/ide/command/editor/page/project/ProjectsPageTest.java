@@ -13,8 +13,8 @@ package org.eclipse.che.ide.command.editor.page.project;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
+import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
@@ -54,7 +54,7 @@ public class ProjectsPageTest {
     @Mock
     private DirtyStateListener dirtyStateListener;
     @Mock
-    private ContextualCommand  editedCommand;
+    private CommandImpl        editedCommand;
     @Mock
     private ApplicableContext  editedCommandApplicableContext;
 

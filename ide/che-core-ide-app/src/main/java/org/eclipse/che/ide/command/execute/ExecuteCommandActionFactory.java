@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.execute;
 
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 
 /**
  * Factory for creating {@link ExecuteCommandAction} instances.
@@ -20,5 +20,5 @@ import org.eclipse.che.ide.api.command.ContextualCommand;
 public interface ExecuteCommandActionFactory {
 
     /** Creates new instance of {@link ExecuteCommandAction} for executing the specified {@code command}. */
-    ExecuteCommandAction create(ContextualCommand command);
+    ExecuteCommandAction create(CommandImpl command);
 }

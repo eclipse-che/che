@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.command.palette;
 
 import org.eclipse.che.ide.api.command.CommandGoal;
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public interface CommandsPaletteView extends View<CommandsPaletteView.ActionDele
      * @param commands
      *         commands grouped by type
      */
-    void setCommands(Map<CommandGoal, List<ContextualCommand>> commands);
+    void setCommands(Map<CommandGoal, List<CommandImpl>> commands);
 
     /** The action delegate for this view. */
     interface ActionDelegate {
@@ -45,6 +45,6 @@ public interface CommandsPaletteView extends View<CommandsPaletteView.ActionDele
         void onFilterChanged(String filterValue);
 
         /** Called when command execution is requested. */
-        void onCommandExecute(ContextualCommand command);
+        void onCommandExecute(CommandImpl command);
     }
 }

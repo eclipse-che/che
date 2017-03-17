@@ -18,9 +18,9 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
@@ -29,7 +29,6 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
 import org.eclipse.che.ide.command.editor.page.commandline.CommandLinePage;
-import org.eclipse.che.ide.command.editor.page.context.ContextPage;
 import org.eclipse.che.ide.command.editor.page.goal.GoalPage;
 import org.eclipse.che.ide.command.editor.page.name.NamePage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
@@ -79,8 +78,6 @@ public class CommandEditorTest {
     @Mock
     private GoalPage                 goalPage;
     @Mock
-    private ContextPage              contextPage;
-    @Mock
     private ProjectsPage             projectsPage;
     @Mock
     private PreviewUrlPage           previewUrlPage;
@@ -105,16 +102,16 @@ public class CommandEditorTest {
     @Mock
     private CommandFileNode                editedCommandFile;
     @Mock
-    private ContextualCommand              editedCommand;
+    private CommandImpl                    editedCommand;
     @Mock
     private EditorAgent.OpenEditorCallback openEditorCallback;
 
     @Mock
-    private Promise<ContextualCommand>                   commandPromise;
+    private Promise<CommandImpl>                    commandPromise;
     @Captor
-    private ArgumentCaptor<Operation<ContextualCommand>> operationCaptor;
+    private ArgumentCaptor<Operation<CommandImpl>>  operationCaptor;
     @Captor
-    private ArgumentCaptor<Operation<PromiseError>>      errorOperationCaptor;
+    private ArgumentCaptor<Operation<PromiseError>> errorOperationCaptor;
 
     @Before
     public void setUp() throws Exception {
@@ -133,13 +130,11 @@ public class CommandEditorTest {
 
         verify(commandLinePage).setDirtyStateListener(any(DirtyStateListener.class));
         verify(goalPage).setDirtyStateListener(any(DirtyStateListener.class));
-        verify(contextPage).setDirtyStateListener(any(DirtyStateListener.class));
         verify(projectsPage).setDirtyStateListener(any(DirtyStateListener.class));
         verify(previewUrlPage).setDirtyStateListener(any(DirtyStateListener.class));
 
         verify(commandLinePage).edit(editor.editedCommand);
         verify(goalPage).edit(editor.editedCommand);
-        verify(contextPage).edit(editor.editedCommand);
         verify(projectsPage).edit(editor.editedCommand);
         verify(previewUrlPage).edit(editor.editedCommand);
     }
@@ -220,7 +215,7 @@ public class CommandEditorTest {
 
     @Test
     public void shouldCloseEditorWhenEditedCommandRemoved() throws Exception {
-        ContextualCommand removedCommand = mock(ContextualCommand.class);
+        CommandImpl removedCommand = mock(CommandImpl.class);
         when(removedCommand.getName()).thenReturn(EDITED_COMMAND_NAME);
 
         editor.onCommandRemoved(removedCommand);

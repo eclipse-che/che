@@ -13,7 +13,7 @@ package org.eclipse.che.ide.command.node;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.command.CommandUtils;
 
@@ -28,7 +28,7 @@ public class ExecutableCommandNode extends AbstractCommandNode implements HasAct
     private final ActionDelegate actionDelegate;
 
     @Inject
-    public ExecutableCommandNode(@Assisted ContextualCommand data,
+    public ExecutableCommandNode(@Assisted CommandImpl data,
                                  @Assisted ActionDelegate actionDelegate,
                                  CommandUtils commandUtils) {
         super(data, null, commandUtils);

@@ -16,7 +16,7 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
+import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
@@ -31,18 +31,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Presenter for {@link CommandEditorPage} which allows to edit command's applicable projects.
- *
- * @author Artem Zatsarynnyi
- */
+/** Presenter for {@link CommandEditorPage} which allows to edit command's applicable projects. */
 public class ProjectsPage extends AbstractCommandEditorPage implements ProjectsPageView.ActionDelegate,
                                                                        ResourceChangedHandler {
 
     private final ProjectsPageView view;
     private final AppContext       appContext;
-
-    private final Map<Project, Boolean> projectsState;
 
     /** Initial value of the applicable projects list. */
     private List<String> applicableProjectsInitial;
@@ -58,8 +52,6 @@ public class ProjectsPage extends AbstractCommandEditorPage implements ProjectsP
         this.appContext = appContext;
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
-
-        projectsState = new HashMap<>();
 
         view.setDelegate(this);
     }
@@ -80,7 +72,7 @@ public class ProjectsPage extends AbstractCommandEditorPage implements ProjectsP
 
     /** Refresh 'Projects' section in the view. */
     private void refreshProjects() {
-        projectsState.clear();
+        final Map<Project, Boolean> projectsState = new HashMap<>();
 
         for (Project project : appContext.getProjects()) {
             ApplicableContext context = editedCommand.getApplicableContext();
@@ -104,15 +96,25 @@ public class ProjectsPage extends AbstractCommandEditorPage implements ProjectsP
     }
 
     @Override
-    public void onApplicableProjectChanged(Project project, boolean value) {
-        projectsState.put(project, value);
-
+    public void onApplicableProjectChanged(Project project, boolean applicable) {
         final ApplicableContext context = editedCommand.getApplicableContext();
 
-        if (value) {
+        if (applicable) {
+            // if command is bound with one project at least
+            // then remove command from the workspace
+            if (context.getApplicableProjects().isEmpty()) {
+                context.setWorkspaceApplicable(false);
+            }
+
             context.addProject(project.getPath());
         } else {
             context.removeProject(project.getPath());
+
+            // if command isn't bound to any project
+            // then save it to the workspace
+            if (context.getApplicableProjects().isEmpty()) {
+                context.setWorkspaceApplicable(true);
+            }
         }
 
         notifyDirtyStateChanged();

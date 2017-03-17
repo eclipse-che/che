@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor.page;
 
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 
 /**
  * Abstract {@link CommandEditorPage} that provides basic functionality.
@@ -21,7 +21,7 @@ public abstract class AbstractCommandEditorPage implements CommandEditorPage {
 
     private final String title;
 
-    protected ContextualCommand editedCommand;
+    protected CommandImpl editedCommand;
 
     private DirtyStateListener listener;
 
@@ -36,7 +36,7 @@ public abstract class AbstractCommandEditorPage implements CommandEditorPage {
     }
 
     @Override
-    public void edit(ContextualCommand command) {
+    public void edit(CommandImpl command) {
         editedCommand = command;
 
         initialize();

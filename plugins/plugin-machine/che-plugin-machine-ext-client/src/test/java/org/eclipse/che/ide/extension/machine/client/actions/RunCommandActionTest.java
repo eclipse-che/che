@@ -16,7 +16,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.junit.Before;
@@ -54,7 +53,7 @@ public class RunCommandActionTest {
     @Mock
     private ActionEvent                 event;
     @Mock
-    private ContextualCommand           command;
+    private CommandImpl                 command;
     @Mock
     private AppContext                  appContext;
 

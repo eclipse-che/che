@@ -28,11 +28,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-/**
- * Responsible for managing the commands which are stored with workspace.
- *
- * @author Artem Zatsarynnyi
- */
+/** Responsible for managing the commands which are stored with workspace. */
 @Singleton
 class WorkspaceCommandManagerDelegate {
 

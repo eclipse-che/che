@@ -11,9 +11,9 @@
 package org.eclipse.che.ide.command.editor.page.goal;
 
 import org.eclipse.che.ide.api.command.CommandGoal;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
+import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
@@ -62,7 +62,7 @@ public class GoalPageTest {
     @Mock
     private DirtyStateListener dirtyStateListener;
     @Mock
-    private ContextualCommand  editedCommand;
+    private CommandImpl        editedCommand;
     @Mock
     private ApplicableContext  editedCommandApplicableContext;
 

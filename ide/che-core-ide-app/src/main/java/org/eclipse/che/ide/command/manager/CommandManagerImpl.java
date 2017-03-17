@@ -26,11 +26,10 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
-import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -45,21 +44,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
-/**
- * Implementation of {@link CommandManager}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Implementation of {@link CommandManager}. */
 @Singleton
-public class CommandManagerImpl implements CommandManager,
-                                           Component,
-                                           WorkspaceReadyHandler {
+public class CommandManagerImpl implements CommandManager, Component, WorkspaceReadyHandler {
 
     private final AppContext                      appContext;
     private final PromiseProvider                 promiseProvider;
@@ -69,9 +63,10 @@ public class CommandManagerImpl implements CommandManager,
     private final EventBus                        eventBus;
     private final SelectionAgent                  selectionAgent;
 
-    private final Map<String, ContextualCommand> commands;
-    private final Set<CommandLoadedListener>     commandLoadedListeners;
-    private final Set<CommandChangedListener>    commandChangedListeners;
+    /** Map of the commands' names to the commands. */
+    private final Map<String, CommandImpl>    commands;
+    private final Set<CommandLoadedListener>  commandLoadedListeners;
+    private final Set<CommandChangedListener> commandChangedListeners;
 
     @Inject
     public CommandManagerImpl(AppContext appContext,
@@ -113,27 +108,25 @@ public class CommandManagerImpl implements CommandManager,
                 final ApplicableContext context = new ApplicableContext();
                 context.setWorkspaceApplicable(true);
 
-                CommandManagerImpl.this.commands.put(workspaceCommand.getName(), new ContextualCommand(workspaceCommand, context));
+                this.commands.put(workspaceCommand.getName(), new CommandImpl(workspaceCommand, context));
             }
 
             // get all commands related to the projects
             for (Project project : appContext.getProjects()) {
                 for (CommandImpl projectCommand : projectCommandManager.getCommands(project)) {
-                    final ContextualCommand existedCommand = CommandManagerImpl.this.commands.get(projectCommand.getName());
+                    final CommandImpl existedCommand = this.commands.get(projectCommand.getName());
 
                     if (existedCommand == null) {
                         final ApplicableContext context = new ApplicableContext();
                         context.addProject(project.getPath());
 
-                        CommandManagerImpl.this.commands.put(projectCommand.getName(),
-                                                             new ContextualCommand(projectCommand, context));
+                        this.commands.put(projectCommand.getName(), new CommandImpl(projectCommand, context));
                     } else {
-                        if (projectCommand.equals(existedCommand)) {
+                        if (projectCommand.equalsIgnoreContext(existedCommand)) {
                             existedCommand.getApplicableContext().addProject(project.getPath());
                         } else {
                             // normally, should never happen
-                            Log.error(CommandManagerImpl.this.getClass(),
-                                      "Different commands with the same names found");
+                            Log.error(CommandManagerImpl.this.getClass(), "Different commands with the same names found");
                         }
                     }
                 }
@@ -144,15 +137,15 @@ public class CommandManagerImpl implements CommandManager,
     }
 
     @Override
-    public List<ContextualCommand> getCommands() {
+    public List<CommandImpl> getCommands() {
         return commands.values()
                        .stream()
-                       .map(ContextualCommand::new)
-                       .collect(Collectors.toList());
+                       .map(CommandImpl::new)
+                       .collect(toList());
     }
 
     @Override
-    public java.util.Optional<ContextualCommand> getCommand(String name) {
+    public java.util.Optional<CommandImpl> getCommand(String name) {
         return commands.values()
                        .stream()
                        .filter(command -> name.equals(command.getName()))
@@ -160,16 +153,16 @@ public class CommandManagerImpl implements CommandManager,
     }
 
     @Override
-    public List<ContextualCommand> getApplicableCommands() {
+    public List<CommandImpl> getApplicableCommands() {
         return commands.values()
                        .stream()
                        .filter(this::isCommandApplicable)
-                       .map(ContextualCommand::new)
-                       .collect(Collectors.toList());
+                       .map(CommandImpl::new)
+                       .collect(toList());
     }
 
     @Override
-    public boolean isCommandApplicable(ContextualCommand command) {
+    public boolean isCommandApplicable(CommandImpl command) {
         return isMachineSelected() || isCommandApplicableToCurrentProject(command);
 
     }
@@ -186,7 +179,7 @@ public class CommandManagerImpl implements CommandManager,
     }
 
     /** Checks whether the given command is applicable to the current project. */
-    private boolean isCommandApplicableToCurrentProject(ContextualCommand command) {
+    private boolean isCommandApplicableToCurrentProject(CommandImpl command) {
         final List<String> applicableProjects = command.getApplicableContext().getApplicableProjects();
 
         if (applicableProjects.isEmpty()) {
@@ -205,44 +198,56 @@ public class CommandManagerImpl implements CommandManager,
     }
 
     @Override
-    public Promise<ContextualCommand> createCommand(String goalId, String commandTypeId, ApplicableContext applicableContext) {
-        return createCommand(goalId, commandTypeId, null, applicableContext);
+    public Promise<CommandImpl> createCommand(String goalId, String typeId) {
+        return createCommand(goalId,
+                             typeId,
+                             null,
+                             null,
+                             new HashMap<>(),
+                             new ApplicableContext(true, emptyList()));
     }
 
     @Override
-    public Promise<ContextualCommand> createCommand(String goalId,
-                                                    String commandTypeId,
-                                                    String commandName,
-                                                    ApplicableContext applicableContext) {
-        return createCommand(goalId, commandTypeId, null, null, applicableContext);
+    public Promise<CommandImpl> createCommand(String goalId, String typeId, ApplicableContext context) {
+        return createCommand(goalId, typeId, null, null, new HashMap<>(), context);
     }
 
     @Override
-    public Promise<ContextualCommand> createCommand(String goalId,
-                                                    String commandTypeId,
-                                                    String commandName,
-                                                    String commandLine,
-                                                    ApplicableContext applicableContext) {
-        final CommandType commandType = commandTypeRegistry.getCommandTypeById(commandTypeId);
+    public Promise<CommandImpl> createCommand(String goalId,
+                                              String typeId,
+                                              String name,
+                                              String commandLine,
+                                              Map<String, String> attributes) {
+        return createCommand(goalId, typeId, name, commandLine, attributes, new ApplicableContext(true, emptyList()));
+    }
+
+    @Override
+    public Promise<CommandImpl> createCommand(String goalId,
+                                              String typeId,
+                                              @Nullable String name,
+                                              @Nullable String commandLine,
+                                              Map<String, String> attributes,
+                                              ApplicableContext context) {
+        final CommandType commandType = commandTypeRegistry.getCommandTypeById(typeId);
 
         if (commandType == null) {
-            return promiseProvider.reject(new Exception("Unknown command type: '" + commandTypeId + "'"));
+            return promiseProvider.reject(new Exception("Unknown command type: '" + typeId + "'"));
         }
 
-        final Map<String, String> attributes = new HashMap<>(1);
-        attributes.put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, commandType.getPreviewUrlTemplate());
-        attributes.put(COMMAND_GOAL_ATTRIBUTE_NAME, goalId);
+        final Map<String, String> attr = new HashMap<>(attributes);
+        attr.put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, commandType.getPreviewUrlTemplate());
+        attr.put(COMMAND_GOAL_ATTRIBUTE_NAME, goalId);
 
-        return createCommand(new ContextualCommand(getUniqueCommandName(commandTypeId, commandName),
-                                                   commandLine != null ? commandLine : commandType.getCommandLineTemplate(),
-                                                   commandTypeId,
-                                                   attributes,
-                                                   applicableContext));
+        return createCommand(new CommandImpl(getUniqueCommandName(typeId, name),
+                                             commandLine != null ? commandLine : commandType.getCommandLineTemplate(),
+                                             typeId,
+                                             attr,
+                                             context));
     }
 
     @Override
-    public Promise<ContextualCommand> createCommand(ContextualCommand command) {
-        return doCreateCommand(command).then((Function<ContextualCommand, ContextualCommand>)newCommand -> {
+    public Promise<CommandImpl> createCommand(CommandImpl command) {
+        return doCreateCommand(command).then((Function<CommandImpl, CommandImpl>)newCommand -> {
             // postpone the notification because
             // listeners should be notified after returning from #createCommand method
             Scheduler.get().scheduleDeferred(() -> notifyCommandAdded(newCommand));
@@ -251,17 +256,19 @@ public class CommandManagerImpl implements CommandManager,
         });
     }
 
-    /** Adds the command without notifying listeners. */
-    private Promise<ContextualCommand> doCreateCommand(ContextualCommand command) {
+    /** Does the actual work for command creation. Doesn't notify listeners. */
+    private Promise<CommandImpl> doCreateCommand(CommandImpl command) {
         final ApplicableContext context = command.getApplicableContext();
+        if (!context.isWorkspaceApplicable() && context.getApplicableProjects().isEmpty()) {
+            return promiseProvider.reject(new Exception("Command has to be applicable to the workspace or at least one project"));
+        }
 
         final CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
-
         if (commandType == null) {
             return promiseProvider.reject(new Exception("Unknown command type: '" + command.getType() + "'"));
         }
 
-        final ContextualCommand newCommand = new ContextualCommand(command);
+        final CommandImpl newCommand = new CommandImpl(command);
         newCommand.setName(getUniqueCommandName(command.getType(), command.getName()));
 
         final ArrayOf<Promise<?>> commandPromises = Collections.arrayOf();
@@ -293,22 +300,22 @@ public class CommandManagerImpl implements CommandManager,
         }
 
         return promiseProvider.all2(commandPromises)
-                              .then((Function<ArrayOf<?>, ContextualCommand>)ignore -> {
+                              .then((Function<ArrayOf<?>, CommandImpl>)ignore -> {
                                   commands.put(newCommand.getName(), newCommand);
                                   return newCommand;
                               });
     }
 
     @Override
-    public Promise<ContextualCommand> updateCommand(final String commandName, final ContextualCommand commandToUpdate) {
-        final ContextualCommand existedCommand = commands.get(commandName);
+    public Promise<CommandImpl> updateCommand(String name, CommandImpl commandToUpdate) {
+        final CommandImpl existedCommand = commands.get(name);
 
         if (existedCommand == null) {
-            return promiseProvider.reject(new Exception("Command '" + commandName + "' does not exist."));
+            return promiseProvider.reject(new Exception("Command '" + name + "' does not exist."));
         }
 
-        return doRemoveCommand(commandName).thenPromise(aVoid -> doCreateCommand(commandToUpdate)
-                .then((Function<ContextualCommand, ContextualCommand>)updatedCommand -> {
+        return doRemoveCommand(name).thenPromise(aVoid -> doCreateCommand(commandToUpdate)
+                .then((Function<CommandImpl, CommandImpl>)updatedCommand -> {
                     // listeners should be notified after returning from #updateCommand method
                     // so let's postpone notification
                     Scheduler.get().scheduleDeferred(() -> notifyCommandUpdated(existedCommand, updatedCommand));
@@ -318,14 +325,14 @@ public class CommandManagerImpl implements CommandManager,
     }
 
     @Override
-    public Promise<Void> removeCommand(final String commandName) {
-        final ContextualCommand command = commands.get(commandName);
+    public Promise<Void> removeCommand(String name) {
+        final CommandImpl command = commands.get(name);
 
         if (command == null) {
-            return promiseProvider.reject(new Exception("Command '" + commandName + "' does not exist."));
+            return promiseProvider.reject(new Exception("Command '" + name + "' does not exist."));
         }
 
-        return doRemoveCommand(commandName).then(aVoid -> {
+        return doRemoveCommand(name).then(aVoid -> {
             // listeners should be notified after returning from #removeCommand method
             // so let's postpone notification
             Scheduler.get().scheduleDeferred(() -> notifyCommandRemoved(command));
@@ -333,11 +340,11 @@ public class CommandManagerImpl implements CommandManager,
     }
 
     /** Removes the command without notifying listeners. */
-    private Promise<Void> doRemoveCommand(final String commandName) {
-        final ContextualCommand command = commands.get(commandName);
+    private Promise<Void> doRemoveCommand(String name) {
+        final CommandImpl command = commands.get(name);
 
         if (command == null) {
-            return promiseProvider.reject(new Exception("Command '" + commandName + "' does not exist."));
+            return promiseProvider.reject(new Exception("Command '" + name + "' does not exist."));
         }
 
         final ApplicableContext context = command.getApplicableContext();
@@ -345,7 +352,7 @@ public class CommandManagerImpl implements CommandManager,
         final ArrayOf<Promise<?>> commandPromises = Collections.arrayOf();
 
         if (context.isWorkspaceApplicable()) {
-            final Promise<Void> p = workspaceCommandManager.removeCommand(commandName).then((Function<Void, Void>)aVoid -> {
+            final Promise<Void> p = workspaceCommandManager.removeCommand(name).then((Function<Void, Void>)aVoid -> {
                 command.getApplicableContext().setWorkspaceApplicable(false);
                 return null;
             });
@@ -360,7 +367,7 @@ public class CommandManagerImpl implements CommandManager,
                 continue;
             }
 
-            final Promise<Void> p = projectCommandManager.removeCommand(project, commandName).then((Function<Void, Void>)aVoid -> {
+            final Promise<Void> p = projectCommandManager.removeCommand(project, name).then((Function<Void, Void>)aVoid -> {
                 command.getApplicableContext().removeProject(projectPath);
                 return null;
             });
@@ -410,24 +417,24 @@ public class CommandManagerImpl implements CommandManager,
         commandLoadedListeners.forEach(CommandLoadedListener::onCommandsLoaded);
     }
 
-    private void notifyCommandAdded(ContextualCommand command) {
+    private void notifyCommandAdded(CommandImpl command) {
         commandChangedListeners.forEach(listener -> listener.onCommandAdded(command));
     }
 
-    private void notifyCommandRemoved(ContextualCommand command) {
+    private void notifyCommandRemoved(CommandImpl command) {
         commandChangedListeners.forEach(listener -> listener.onCommandRemoved(command));
     }
 
-    private void notifyCommandUpdated(ContextualCommand prevCommand, ContextualCommand command) {
+    private void notifyCommandUpdated(CommandImpl prevCommand, CommandImpl command) {
         commandChangedListeners.forEach(listener -> listener.onCommandUpdated(prevCommand, command));
     }
 
     /**
-     * Returns {@code customName} if it's unique within the given {@code customType}
-     * or newly generated name if it isn't unique within the given {@code customType}.
+     * Returns {@code customName} if it's unique within the given {@code commandTypeId}
+     * or newly generated name if it isn't unique within the given {@code commandTypeId}.
      */
-    private String getUniqueCommandName(String customType, @Nullable String customName) {
-        final CommandType commandType = commandTypeRegistry.getCommandTypeById(customType);
+    private String getUniqueCommandName(String commandTypeId, @Nullable String customName) {
+        final CommandType commandType = commandTypeRegistry.getCommandTypeById(commandTypeId);
         final Set<String> commandNames = commands.keySet();
 
         final String newCommandName;

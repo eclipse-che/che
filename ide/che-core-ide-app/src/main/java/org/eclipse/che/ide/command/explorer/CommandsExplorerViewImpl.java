@@ -21,7 +21,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.command.CommandGoal;
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.command.CommandResources;
@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
@@ -50,10 +51,10 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
     private static final CommandsExplorerViewImplUiBinder UI_BINDER = GWT.create(CommandsExplorerViewImplUiBinder.class);
 
-    private final CommandsTreeRenderer                    treeRenderer;
-    private final NodeFactory                             nodeFactory;
+    private final CommandsTreeRenderer              treeRenderer;
+    private final NodeFactory                       nodeFactory;
     /** Mapping of the commands to the rendered tree nodes. */
-    private final Map<ContextualCommand, CommandFileNode> commandNodes;
+    private final Map<CommandImpl, CommandFileNode> commandNodes;
 
     @UiField(provided = true)
     Tree tree;
@@ -101,19 +102,19 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
     }
 
     @Override
-    public void setCommands(Map<CommandGoal, List<ContextualCommand>> commands) {
+    public void setCommands(Map<CommandGoal, List<CommandImpl>> commands) {
         treeRenderer.setDelegate(delegate);
 
         renderCommands(commands);
     }
 
-    private void renderCommands(Map<CommandGoal, List<ContextualCommand>> commands) {
+    private void renderCommands(Map<CommandGoal, List<CommandImpl>> commands) {
         commandNodes.clear();
         tree.getNodeStorage().clear();
 
-        for (Map.Entry<CommandGoal, List<ContextualCommand>> entry : commands.entrySet()) {
+        for (Entry<CommandGoal, List<CommandImpl>> entry : commands.entrySet()) {
             List<CommandFileNode> commandNodes = new ArrayList<>(entry.getValue().size());
-            for (ContextualCommand command : entry.getValue()) {
+            for (CommandImpl command : entry.getValue()) {
                 final CommandFileNode commandFileNode = nodeFactory.newCommandFileNode(command);
                 commandNodes.add(commandFileNode);
 
@@ -145,7 +146,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
     @Nullable
     @Override
-    public ContextualCommand getSelectedCommand() {
+    public CommandImpl getSelectedCommand() {
         final List<Node> selectedNodes = tree.getSelectionModel().getSelectedNodes();
 
         if (!selectedNodes.isEmpty()) {
@@ -160,7 +161,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
     }
 
     @Override
-    public void selectCommand(ContextualCommand command) {
+    public void selectCommand(CommandImpl command) {
         tree.getSelectionModel().setSelection(singletonList(commandNodes.get(command)));
     }
 

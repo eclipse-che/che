@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -35,7 +35,7 @@ public class CommandFileNode extends AbstractCommandNode implements HasAction, V
     private final EditorAgent editorAgent;
 
     @Inject
-    public CommandFileNode(@Assisted ContextualCommand data,
+    public CommandFileNode(@Assisted CommandImpl data,
                            CommandUtils commandUtils,
                            EditorAgent editorAgent) {
         super(data, null, commandUtils);

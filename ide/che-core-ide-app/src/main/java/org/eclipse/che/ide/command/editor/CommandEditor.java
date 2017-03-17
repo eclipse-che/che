@@ -22,9 +22,9 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -36,7 +36,6 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.commandline.CommandLinePage;
-import org.eclipse.che.ide.command.editor.page.context.ContextPage;
 import org.eclipse.che.ide.command.editor.page.goal.GoalPage;
 import org.eclipse.che.ide.command.editor.page.name.NamePage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
@@ -52,11 +51,7 @@ import java.util.List;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
 
-/**
- * Presenter for command editor.
- *
- * @author Artem Zatsarynnyi
- */
+/** Presenter for command editor. */
 public class CommandEditor extends AbstractEditorPresenter implements CommandEditorView.ActionDelegate,
                                                                       CommandChangedListener {
 
@@ -75,9 +70,9 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
     /** Edited command. */
     @VisibleForTesting
-    protected ContextualCommand editedCommand;
+    protected CommandImpl editedCommand;
     /** Initial (before any modification) name of the edited command. */
-    private   String            commandNameInitial;
+    private   String      commandNameInitial;
 
     @Inject
     public CommandEditor(CommandEditorView view,
@@ -88,7 +83,6 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                          ProjectsPage projectsPage,
                          CommandLinePage commandLinePage,
                          GoalPage goalPage,
-                         ContextPage contextPage,
                          PreviewUrlPage previewUrlPage,
                          NotificationManager notificationManager,
                          DialogFactory dialogFactory,
@@ -114,7 +108,6 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         pages = new LinkedList<>();
         pages.add(previewUrlPage);
         pages.add(projectsPage);
-        pages.add(contextPage);
         pages.add(goalPage);
         pages.add(commandLinePage);
         pages.add(namePage);
@@ -131,7 +124,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
         if (file instanceof CommandFileNode) {
             // make a copy of the given command to avoid modifying of the provided command
-            editedCommand = new ContextualCommand(((CommandFileNode)file).getData());
+            editedCommand = new CommandImpl(((CommandFileNode)file).getData());
 
             initializePages();
 
@@ -171,7 +164,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         final VirtualFile file = getEditorInput().getFile();
 
         if (file instanceof CommandFileNode) {
-            final ContextualCommand command = ((CommandFileNode)file).getData();
+            final CommandImpl command = ((CommandFileNode)file).getData();
             final Icon icon = iconRegistry.getIconIfExist("command.type." + command.getType());
 
             if (icon != null) {
@@ -295,15 +288,15 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     }
 
     @Override
-    public void onCommandAdded(ContextualCommand command) {
+    public void onCommandAdded(CommandImpl command) {
     }
 
     @Override
-    public void onCommandUpdated(ContextualCommand previousCommand, ContextualCommand command) {
+    public void onCommandUpdated(CommandImpl previousCommand, CommandImpl command) {
     }
 
     @Override
-    public void onCommandRemoved(ContextualCommand command) {
+    public void onCommandRemoved(CommandImpl command) {
         if (command.getName().equals(editedCommand.getName())) {
             editorAgent.closeEditor(this);
             Scheduler.get().scheduleDeferred(() -> commandManager.removeCommandChangedListener(this));

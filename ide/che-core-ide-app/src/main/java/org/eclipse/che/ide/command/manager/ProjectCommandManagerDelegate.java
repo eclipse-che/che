@@ -31,11 +31,7 @@ import java.util.Map;
 
 import static org.eclipse.che.api.project.shared.Constants.COMMANDS_ATTRIBUTE_NAME;
 
-/**
- * Responsible for managing the commands which are stored with projects.
- *
- * @author Artem Zatsarynnyi
- */
+/** Responsible for managing the commands which are stored with projects. */
 @Singleton
 class ProjectCommandManagerDelegate {
 
