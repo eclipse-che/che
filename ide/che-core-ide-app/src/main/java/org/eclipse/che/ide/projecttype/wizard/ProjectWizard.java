@@ -137,14 +137,11 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
         final String absoluteProjectPath = appContext.getProjectsRoot().append(project.getPath()).toString();
         final String commandLine = commandDto.getCommandLine().replaceAll(PROJECT_PATH_MACRO_REGEX, absoluteProjectPath);
 
-        final ApplicableContext applicableContext = new ApplicableContext();
-        applicableContext.addProject(project.getPath());
-
         final CommandImpl command = new CommandImpl(name,
                                                     commandLine,
                                                     commandDto.getType(),
                                                     commandDto.getAttributes(),
-                                                    applicableContext);
+                                                    new ApplicableContext(project.getPath()));
 
         return commandManager.createCommand(command);
     }

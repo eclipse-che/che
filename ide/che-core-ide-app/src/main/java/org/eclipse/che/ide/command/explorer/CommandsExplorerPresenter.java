@@ -46,11 +46,11 @@ import org.eclipse.che.ide.command.type.chooser.CommandTypeChooser;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Arrays.stream;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
@@ -152,10 +152,11 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     private ApplicableContext getDefaultContext() {
         final ApplicableContext context = new ApplicableContext();
 
-        if (appContext.getProjects().length == 0) {
-            context.setWorkspaceApplicable(true);
-        } else {
-            stream(appContext.getProjects()).forEach(p -> context.addProject(p.getPath()));
+        if (appContext.getProjects().length > 0) {
+            context.setWorkspaceApplicable(false);
+
+            Arrays.stream(appContext.getProjects())
+                  .forEach(p -> context.addProject(p.getPath()));
         }
 
         return context;

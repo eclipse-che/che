@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 
@@ -69,7 +68,7 @@ public class CommandImpl implements Command {
         this.commandLine = commandLine;
         this.typeId = typeId;
         this.attributes = attributes;
-        this.context = new ApplicableContext(true, emptyList());
+        this.context = new ApplicableContext();
     }
 
     /** Creates new {@link CommandImpl} based on the provided data. */
@@ -120,8 +119,8 @@ public class CommandImpl implements Command {
     }
 
     /** Sets command's goal ID. */
-    public void setGoal(String id) {
-        getAttributes().put(COMMAND_GOAL_ATTRIBUTE_NAME, id);
+    public void setGoal(String goalId) {
+        getAttributes().put(COMMAND_GOAL_ATTRIBUTE_NAME, goalId);
     }
 
     /** Returns command's applicable context. */
@@ -183,9 +182,16 @@ public class CommandImpl implements Command {
         private boolean      workspaceApplicable;
         private List<String> projects;
 
-        /** Creates 'empty' applicable context. */
+        /** Creates new {@link ApplicableContext} which is workspace applicable. */
         public ApplicableContext() {
+            workspaceApplicable = true;
             projects = new ArrayList<>();
+        }
+
+        /** Creates new {@link ApplicableContext} which is applicable to the single project only. */
+        public ApplicableContext(String projectPath) {
+            projects = new ArrayList<>();
+            projects.add(projectPath);
         }
 
         /** Creates new {@link ApplicableContext} based on the provided data. */
@@ -194,9 +200,9 @@ public class CommandImpl implements Command {
             this.projects = projects;
         }
 
-        /** Creates copy of the given {@code applicableContext}. */
-        public ApplicableContext(ApplicableContext applicableContext) {
-            this(applicableContext.isWorkspaceApplicable(), new ArrayList<>(applicableContext.getApplicableProjects()));
+        /** Creates copy of the given {@code context}. */
+        public ApplicableContext(ApplicableContext context) {
+            this(context.isWorkspaceApplicable(), new ArrayList<>(context.getApplicableProjects()));
         }
 
         /** Returns {@code true} if command is applicable to the workspace and {@code false} otherwise. */

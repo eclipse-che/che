@@ -39,6 +39,7 @@ import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent.WorkspaceReadyHandler;
 import org.eclipse.che.ide.util.loging.Log;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +47,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
@@ -103,34 +103,27 @@ public class CommandManagerImpl implements CommandManager, Component, WorkspaceR
 
     private void fetchCommands() {
         // get all commands related to the workspace
-        workspaceCommandManager.getCommands(appContext.getWorkspaceId()).then(commands -> {
-            for (CommandImpl workspaceCommand : commands) {
-                final ApplicableContext context = new ApplicableContext();
-                context.setWorkspaceApplicable(true);
-
-                this.commands.put(workspaceCommand.getName(), new CommandImpl(workspaceCommand, context));
-            }
+        workspaceCommandManager.getCommands(appContext.getWorkspaceId()).then(workspaceCommands -> {
+            workspaceCommands.forEach(workspaceCommand -> commands.put(workspaceCommand.getName(),
+                                                                       new CommandImpl(workspaceCommand, new ApplicableContext())));
 
             // get all commands related to the projects
-            for (Project project : appContext.getProjects()) {
-                for (CommandImpl projectCommand : projectCommandManager.getCommands(project)) {
-                    final CommandImpl existedCommand = this.commands.get(projectCommand.getName());
+            Arrays.stream(appContext.getProjects())
+                  .forEach(project -> projectCommandManager.getCommands(project).forEach(projectCommand -> {
+                      final CommandImpl existedCommand = commands.get(projectCommand.getName());
 
-                    if (existedCommand == null) {
-                        final ApplicableContext context = new ApplicableContext();
-                        context.addProject(project.getPath());
-
-                        this.commands.put(projectCommand.getName(), new CommandImpl(projectCommand, context));
-                    } else {
-                        if (projectCommand.equalsIgnoreContext(existedCommand)) {
-                            existedCommand.getApplicableContext().addProject(project.getPath());
-                        } else {
-                            // normally, should never happen
-                            Log.error(CommandManagerImpl.this.getClass(), "Different commands with the same names found");
-                        }
-                    }
-                }
-            }
+                      if (existedCommand == null) {
+                          commands.put(projectCommand.getName(),
+                                       new CommandImpl(projectCommand, new ApplicableContext(project.getPath())));
+                      } else {
+                          if (projectCommand.equalsIgnoreContext(existedCommand)) {
+                              existedCommand.getApplicableContext().addProject(project.getPath());
+                          } else {
+                              // normally, should never happen
+                              Log.error(CommandManagerImpl.this.getClass(), "Different commands with the same names found");
+                          }
+                      }
+                  }));
 
             notifyCommandsLoaded();
         });
@@ -204,7 +197,7 @@ public class CommandManagerImpl implements CommandManager, Component, WorkspaceR
                              null,
                              null,
                              new HashMap<>(),
-                             new ApplicableContext(true, emptyList()));
+                             new ApplicableContext());
     }
 
     @Override
@@ -218,7 +211,7 @@ public class CommandManagerImpl implements CommandManager, Component, WorkspaceR
                                               String name,
                                               String commandLine,
                                               Map<String, String> attributes) {
-        return createCommand(goalId, typeId, name, commandLine, attributes, new ApplicableContext(true, emptyList()));
+        return createCommand(goalId, typeId, name, commandLine, attributes, new ApplicableContext());
     }
 
     @Override
