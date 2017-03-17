@@ -19,6 +19,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
@@ -29,10 +30,13 @@ import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.command.CommandResources;
+import org.eclipse.che.ide.command.node.NodeFactory;
 import org.eclipse.che.ide.command.type.chooser.CommandTypeChooser;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,11 +58,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Tests for {@link CommandsExplorerPresenter}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Tests for {@link CommandsExplorerPresenter}. */
 @RunWith(GwtMockitoTestRunner.class)
 public class CommandsExplorerPresenterTest {
 
@@ -80,6 +80,12 @@ public class CommandsExplorerPresenterTest {
     private CommandsExplorerPresenter.RefreshViewTask refreshViewTask;
     @Mock
     private DialogFactory                             dialogFactory;
+    @Mock
+    private NodeFactory                               nodeFactory;
+    @Mock
+    private EditorAgent                               editorAgent;
+    @Mock
+    private AppContext                                appContext;
 
     @InjectMocks
     private CommandsExplorerPresenter presenter;
@@ -164,9 +170,8 @@ public class CommandsExplorerPresenterTest {
         when(selectedCommandGoal.getId()).thenReturn(commandGoalId);
 
         when(view.getSelectedGoal()).thenReturn(selectedCommandGoal);
-
         when(commandTypeChooser.show(anyInt(), anyInt())).thenReturn(commandTypePromise);
-
+        when(appContext.getProjects()).thenReturn(new Project[0]);
         when(commandManager.createCommand(anyString(),
                                           anyString(),
                                           any(ApplicableContext.class))).thenReturn(commandPromise);
@@ -200,9 +205,8 @@ public class CommandsExplorerPresenterTest {
         when(selectedCommandGoal.getId()).thenReturn(commandGoalId);
 
         when(view.getSelectedGoal()).thenReturn(selectedCommandGoal);
-
         when(commandTypeChooser.show(anyInt(), anyInt())).thenReturn(commandTypePromise);
-
+        when(appContext.getProjects()).thenReturn(new Project[0]);
         when(commandManager.createCommand(anyString(),
                                           anyString(),
                                           any(ApplicableContext.class))).thenReturn(commandPromise);

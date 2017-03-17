@@ -23,6 +23,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.DelayedTask;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.command.CommandImpl;
@@ -49,15 +50,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.stream;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 
-/**
- * Presenter for Commands Explorer.
- *
- * @author Artem Zatsarynnyi
- */
+/** Presenter for Commands Explorer. */
 @Singleton
 public class CommandsExplorerPresenter extends BasePresenter implements CommandsExplorerView.ActionDelegate,
                                                                         Component,
@@ -75,6 +73,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     private final DialogFactory        dialogFactory;
     private final NodeFactory          nodeFactory;
     private final EditorAgent          editorAgent;
+    private final AppContext           appContext;
 
     @Inject
     public CommandsExplorerPresenter(CommandsExplorerView view,
@@ -87,7 +86,8 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
                                      RefreshViewTask refreshViewTask,
                                      DialogFactory dialogFactory,
                                      NodeFactory nodeFactory,
-                                     EditorAgent editorAgent) {
+                                     EditorAgent editorAgent,
+                                     AppContext appContext) {
         this.view = view;
         this.resources = commandResources;
         this.workspaceAgent = workspaceAgent;
@@ -99,6 +99,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         this.dialogFactory = dialogFactory;
         this.nodeFactory = nodeFactory;
         this.editorAgent = editorAgent;
+        this.appContext = appContext;
 
         view.setDelegate(this);
     }
@@ -144,11 +145,20 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandAdd(int left, int top) {
-        // by default, command should be applicable to the workspace only
-        final ApplicableContext defaultApplicableContext = new ApplicableContext();
-        defaultApplicableContext.setWorkspaceApplicable(true);
+        commandTypeChooser.show(left, top).then(createCommand(getDefaultContext()));
+    }
 
-        commandTypeChooser.show(left, top).then(createCommand(defaultApplicableContext));
+    /** Returns the default {@link ApplicableContext} for the new command. */
+    private ApplicableContext getDefaultContext() {
+        final ApplicableContext context = new ApplicableContext();
+
+        if (appContext.getProjects().length == 0) {
+            context.setWorkspaceApplicable(true);
+        } else {
+            stream(appContext.getProjects()).forEach(p -> context.addProject(p.getPath()));
+        }
+
+        return context;
     }
 
     /** Returns an operation which creates a command with the given context. */
