@@ -37,7 +37,6 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(MockitoTestNGListener.class)
 public class HttpSshServiceClientTest {
-
     private final static String SSH_KEY_SERVICE = "service";
     private final static String SSH_SERVICE_URL = "apiUrl/ssh";
     private final static String SSH_KEY_NAME    = "name";
