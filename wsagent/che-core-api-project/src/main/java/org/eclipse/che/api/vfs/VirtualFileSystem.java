@@ -18,7 +18,10 @@ import org.eclipse.che.api.vfs.search.SearcherProvider;
  * Only children of root folder may be accessible through this API.
  *
  * @author andrew00x
+ *
+ * @deprecated VFS components are now considered deprecated and will be replaced by standard JDK routines.
  */
+@Deprecated
 public interface VirtualFileSystem {
     /**
      * Get root folder of virtual file system. Any files in higher level than root are not accessible through virtual file system API.

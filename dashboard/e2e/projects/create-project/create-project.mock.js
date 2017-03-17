@@ -9,3 +9,19 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+
+exports.noWorkspaces = function () {
+
+  angular.module('userDashboardMock', ['userDashboard', 'ngMockE2E'])
+    .run(['$httpBackend', 'cheAPIBuilder', 'cheHttpBackendProvider', ($httpBackend, cheAPIBuilder, cheHttpBackendProvider) => {
+
+      let cheBackend = cheHttpBackendProvider.buildBackend($httpBackend, cheAPIBuilder);
+
+      $httpBackend.whenGET('/api/project-template/all').passThrough();
+      $httpBackend.whenGET('/api/stack?maxItems=50').passThrough();
+
+      cheBackend.setup();
+
+    }]);
+
+};

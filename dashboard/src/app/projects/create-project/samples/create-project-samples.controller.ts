@@ -16,7 +16,10 @@ import {CheAPI} from '../../../../components/api/che-api.factory';
  * @author Florent Benoit
  */
 export class CreateProjectSamplesController {
+  $filter: ng.IFilterService;
+
   templates: Array<che.IProjectTemplate>;
+  filteredAndSortedTemplates: Array<che.IProjectTemplate>;
   selectedTemplateName: string = '';
 
   currentStackTags: string[];
@@ -26,29 +29,51 @@ export class CreateProjectSamplesController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI: CheAPI) {
+  constructor($scope, $filter: ng.IFilterService, cheAPI: CheAPI) {
+    this.$filter = $filter;
+
     this.templates = cheAPI.getProjectTemplate().getAllProjectTemplates();
     if (!this.templates.length) {
       cheAPI.getProjectTemplate().fetchTemplates();
     }
+
+    $scope.$watch(() => {
+      return this.currentStackTags;
+    }, () => {
+      this.filterAndSortTemplates();
+    });
   }
 
   /**
-   * Returns filtered list of templates.
+   * Returns list of filtered and sorted templates.
    *
    * @return {che.IProjectTemplate[]}
    */
-  getFilteredTemplates(): che.IProjectTemplate[] {
+  getTemplates(): che.IProjectTemplate[] {
+    return this.filteredAndSortedTemplates;
+  }
+
+  /**
+   * Filters templates by tags and sort them by project type and template name.
+   */
+  filterAndSortTemplates(): void {
     let stackTags = !this.currentStackTags ? [] : this.currentStackTags.map((tag: string) => tag.toLowerCase());
 
+    let filteredTemplates;
     if (!stackTags.length) {
-      return this.templates;
+      filteredTemplates = this.templates;
+    } else {
+      filteredTemplates = this.templates.filter((template: che.IProjectTemplate) => {
+        let templateTags = template.tags.map((tag: string) => tag.toLowerCase());
+        return stackTags.some((tag: string) => templateTags.indexOf(tag) > -1);
+      });
     }
 
-    return this.templates.filter((template: che.IProjectTemplate) => {
-      let templateTags = template.tags.map((tag: string) => tag.toLowerCase());
-      return stackTags.some((tag: string) => templateTags.indexOf(tag) > -1);
-    });
+    this.filteredAndSortedTemplates = this.$filter('orderBy')(filteredTemplates, 'projectType', 'displayName');
+
+    if (this.filteredAndSortedTemplates.length) {
+      this.initItem(this.filteredAndSortedTemplates[0]);
+    }
   }
 
   /**
