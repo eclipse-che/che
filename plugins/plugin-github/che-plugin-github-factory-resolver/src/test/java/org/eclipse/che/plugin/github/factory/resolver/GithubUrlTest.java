@@ -53,7 +53,7 @@ public class GithubUrlTest {
      */
     @Test
     public void checkDockerfileLocation() {
-        assertEquals(githubUrl.codenvyDockerFileLocation(), "https://raw.githubusercontent.com/eclipse/che/master/.codenvy.dockerfile");
+        assertEquals(githubUrl.dockerFileLocation(), "https://raw.githubusercontent.com/eclipse/che/master/.codenvy.dockerfile");
     }
 
     /**
@@ -61,7 +61,7 @@ public class GithubUrlTest {
      */
     @Test
     public void checkCodenvyFactoryJsonFileLocation() {
-        assertEquals(githubUrl.codenvyFactoryJsonFileLocation(), "https://raw.githubusercontent.com/eclipse/che/master/.codenvy.json");
+        assertEquals(githubUrl.factoryJsonFileLocation(), "https://raw.githubusercontent.com/eclipse/che/master/.codenvy.json");
     }
 
     /**

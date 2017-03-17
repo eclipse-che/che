@@ -164,7 +164,7 @@ public class URLFactoryBuilderTest {
         when(URLChecker.exists(myLocation)).thenReturn(FALSE);
         when(URLFetcher.fetch(myLocation)).thenReturn(jsonFactory);
 
-        FactoryDto factory = urlFactoryBuilder.createFactory(CreateFactoryParams.create().codenvyJsonFileLocation(myLocation));
+        FactoryDto factory = urlFactoryBuilder.createFactory(CreateFactoryParams.create().jsonFileLocation(myLocation));
 
         assertEquals(templateFactory, factory);
 

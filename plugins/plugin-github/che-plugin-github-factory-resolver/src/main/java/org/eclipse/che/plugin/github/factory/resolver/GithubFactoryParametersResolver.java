@@ -88,13 +88,13 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
 
         // create factory from the following location if location exists, else create default factory
         FactoryDto factory = urlFactoryBuilder.createFactory(
-                CreateFactoryParams.create().codenvyJsonFileLocation(githubUrl.codenvyFactoryJsonFileLocation()));
+                CreateFactoryParams.create().jsonFileLocation(githubUrl.factoryJsonFileLocation()));
 
         // add workspace configuration if not defined
         if (factory.getWorkspace() == null) {
             factory.setWorkspace(urlFactoryBuilder.buildWorkspaceConfig(githubUrl.repository(),
                                                                         githubUrl.username(),
-                                                                        githubUrl.codenvyDockerFileLocation()));
+                                                                        githubUrl.dockerFileLocation()));
         }
 
         // Compute project configuration

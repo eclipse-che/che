@@ -120,20 +120,20 @@ public class GithubUrl {
     }
 
     /**
-     * Provides the location to codenvy dockerfile
+     * Provides the location to dockerfile
      *
      * @return location of dockerfile in a repository
      */
-    protected String codenvyDockerFileLocation() {
+    protected String dockerFileLocation() {
         return "https://raw.githubusercontent.com/" + this.username + "/" + this.repository + "/" + this.branch() + "/.codenvy.dockerfile";
     }
 
     /**
-     * Provides the location to codenvy factory json file
+     * Provides the location to factory json file
      *
-     * @return location of codenvy factory json file in a repository
+     * @return location of factory json file in a repository
      */
-    protected String codenvyFactoryJsonFileLocation() {
+    protected String factoryJsonFileLocation() {
         return "https://raw.githubusercontent.com/" + this.username + "/" + this.repository + "/" + this.branch() + "/.codenvy.json";
     }
 

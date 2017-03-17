@@ -78,8 +78,8 @@ public class URLFactoryBuilder {
     public FactoryDto createFactory(CreateFactoryParams createFactoryParams) {
 
         // Check if there is factory json file inside the repository
-        if (createFactoryParams != null && createFactoryParams.codenvyJsonFileLocation() != null) {
-            String factoryJsonContent = URLFetcher.fetch(createFactoryParams.codenvyJsonFileLocation());
+        if (createFactoryParams != null && createFactoryParams.jsonFileLocation() != null) {
+            String factoryJsonContent = URLFetcher.fetch(createFactoryParams.jsonFileLocation());
             if (!Strings.isNullOrEmpty(factoryJsonContent)) {
                 // Adapt an old factory format to a new one if necessary
                 try {

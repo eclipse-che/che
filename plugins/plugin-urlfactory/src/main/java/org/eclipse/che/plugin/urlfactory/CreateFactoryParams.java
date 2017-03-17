@@ -19,7 +19,7 @@ public class CreateFactoryParams {
     /**
      * Location (url) to the json file.
      */
-    private String codenvyJsonFileLocation;
+    private String jsonFileLocation;
 
     /**
      * Use the create method
@@ -37,11 +37,11 @@ public class CreateFactoryParams {
 
     /**
      * Defines the path to the codenvy json file location
-     * @param codenvyJsonFileLocation the url to grab the json file location
+     * @param jsonFileLocation the url to grab the json file location
      * @return the current instance.
      */
-    public CreateFactoryParams codenvyJsonFileLocation(String codenvyJsonFileLocation) {
-        this.codenvyJsonFileLocation = codenvyJsonFileLocation;
+    public CreateFactoryParams jsonFileLocation(String jsonFileLocation) {
+        this.jsonFileLocation = jsonFileLocation;
         return this;
     }
 
@@ -49,8 +49,8 @@ public class CreateFactoryParams {
      * Defines the path to the codenvy json file location
      * @return the url to grab the json file location
      */
-    public String codenvyJsonFileLocation() {
-        return this.codenvyJsonFileLocation;
+    public String jsonFileLocation() {
+        return this.jsonFileLocation;
     }
 
 }
