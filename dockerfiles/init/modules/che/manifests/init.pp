@@ -7,13 +7,6 @@ class che {
     mode    => "644",
   }
 
-  # creating che.properties
-  file { "/opt/che/config/che.properties":
-    ensure  => "present",
-    content => template("che/che.properties.erb"),
-    mode    => "644",
-  }
-
   if $che_dev_env == "on" {
     file { "/opt/che/che.sh":
       ensure  => "present",
