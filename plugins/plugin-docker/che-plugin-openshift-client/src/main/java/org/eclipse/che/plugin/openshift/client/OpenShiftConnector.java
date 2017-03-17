@@ -53,6 +53,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
+import org.eclipse.che.plugin.docker.client.json.ContainerProcesses;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
@@ -82,6 +83,7 @@ import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
+import org.eclipse.che.plugin.docker.client.params.TopParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.DisconnectContainerFromNetworkParams;
@@ -161,6 +163,8 @@ public class OpenShiftConnector extends DockerConnector {
     private static final String OPENSHIFT_IMAGE_PULL_POLICY_IFNOTPRESENT = "IfNotPresent";
     private static final Long UID_ROOT                                   = Long.valueOf(0);
     private static final Long UID_USER                                   = Long.valueOf(1000);
+    private static final String PS_COMMAND                               = "ps";
+    private static final String TOP_REGEX_PATTERN                        = " +";
 
     private Map<String, KubernetesExecHolder> execMap = new HashMap<>();
 
@@ -719,6 +723,69 @@ public class OpenShiftConnector extends DockerConnector {
                 // We can ignore it.
             }
         }
+    }
+
+    @Override
+    public ContainerProcesses top(final TopParams params) throws IOException {
+        String containerId = params.getContainer();
+        Pod pod = getChePodByContainerId(containerId);
+        String podName = pod.getMetadata().getName();
+        String[] command;
+        final String[] psArgs = params.getPsArgs();
+        if (psArgs != null && psArgs.length != 0) {
+            int length = psArgs.length + 1;
+            command = new String[length];
+            command[0] = PS_COMMAND;
+            System.arraycopy(psArgs, 0, command, 1, psArgs.length);
+        } else {
+            command = new String[1];
+            command[0] = PS_COMMAND;
+        }
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ContainerProcesses processes = new ContainerProcesses();
+        try (ExecWatch watch = openShiftClient.pods()
+                .inNamespace(openShiftCheProjectName)
+                .withName(podName)
+                .redirectingOutput()
+                .redirectingError()
+                .exec(command)) {
+            Thread.sleep(2500);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(watch.getOutput()));
+            boolean first = true;
+            int limit = 0;
+            try {
+                List<String[]> procList = new ArrayList<>();
+                while (reader.ready()) {
+                    String line = reader.readLine();
+                    if (line == null || line.isEmpty()) {
+                        continue;
+                    }
+                    if (line.startsWith("rpc error")) {
+                        throw new IOException(line);
+                    }
+                    line = line.trim();
+                    if (first) {
+                        String[] elements = line.split(TOP_REGEX_PATTERN);
+                        limit = elements.length;
+                        first = false;
+                        processes.setTitles(elements);
+                    } else {
+                        String[] elements = line.split(TOP_REGEX_PATTERN, limit);
+                        procList.add(elements);
+                    }
+                }
+                processes.setProcesses(procList.toArray(new String[0][0]));
+            } catch (IOException e) {
+                throw new OpenShiftException(e.getMessage());
+            }
+        } catch (KubernetesClientException e) {
+            throw new OpenShiftException(e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            executor.shutdown();
+        }
+        return processes;
     }
 
     @Override
