@@ -41,6 +41,7 @@ node default {
   #
   $workspace_java_options = getValue("CHE_WORKSPACE_JAVA_OPTIONS", "-Xms256m -Xmx2048m -Djava.security.egd=file:/dev/./urandom")
 
+  $che_jmx_enabled = getValue("CHE_JMX_ENABLED", "false")
   $che_jmx_username = getValue("CHE_JMX_USERNAME", "admin")
   $che_jmx_password = getValue("CHE_JMX_PASSWORD", "Che")
   ###############################
