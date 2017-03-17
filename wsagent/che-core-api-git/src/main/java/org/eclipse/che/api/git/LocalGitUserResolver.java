@@ -10,12 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.git;
 
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.git.shared.GitUser;
 import org.slf4j.Logger;
@@ -40,12 +35,12 @@ public class LocalGitUserResolver implements GitUserResolver {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalGitUserResolver.class);
 
-    private final String                 preferencessUrl;
+    private final String                 apiUrl;
     private final HttpJsonRequestFactory requestFactory;
 
     @Inject
     public LocalGitUserResolver(@Named("che.api") String apiUrl, HttpJsonRequestFactory requestFactory) {
-        this.preferencessUrl = apiUrl + "/preferences";
+        this.apiUrl = apiUrl;
         this.requestFactory = requestFactory;
     }
 
@@ -54,15 +49,14 @@ public class LocalGitUserResolver implements GitUserResolver {
         String name = null;
         String email = null;
         try {
-            Map<String, String> preferences = requestFactory.fromUrl(preferencessUrl)
+            Map<String, String> preferences = requestFactory.fromUrl(apiUrl + "/preferences")
                                                             .useGetMethod()
                                                             .addQueryParam("filter", "git.committer.\\w+")
                                                             .request()
                                                             .asProperties();
             name = preferences.get("git.committer.name");
             email = preferences.get("git.committer.email");
-        } catch (ServerException | IOException |
-                 ForbiddenException | BadRequestException | ConflictException | NotFoundException | UnauthorizedException e) {
+        } catch (ApiException | IOException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
         GitUser gitUser = newDto(GitUser.class);
