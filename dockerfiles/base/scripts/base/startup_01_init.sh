@@ -23,6 +23,7 @@ OPTIONAL DOCKER PARAMETERS:${ADDITIONAL_OPTIONAL_DOCKER_PARAMETERS}
   -v <LOCAL_PATH>:/chedir              Soure repository to convert into workspace with Chedir utility${ADDITIONAL_OPTIONAL_DOCKER_MOUNTS}  
     
 COMMANDS:
+  archetype                            Generate, build, and run custom assemblies of ${CHE_MINI_PRODUCT_NAME}
   action <action-name>                 Start action on ${CHE_MINI_PRODUCT_NAME} instance
   backup                               Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
   config                               Generates a ${CHE_MINI_PRODUCT_NAME} config from vars; run on any start / restart
