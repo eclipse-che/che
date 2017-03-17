@@ -30,7 +30,7 @@ import {CreateFactoryGit} from './git/create-factory-git.directive';
 
 export class CreateFactoryConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
 
     register.controller('CreateFactoryCtrl', CreateFactoryCtrl);
 
@@ -58,7 +58,7 @@ export class CreateFactoryConfig {
 
 
     // config routes
-    register.app.config(function ($routeProvider) {
+    register.app.config(($routeProvider: any) => {
       $routeProvider.accessWhen('/factories/create-factory', {
         title: 'New Factory',
         templateUrl: 'app/factories/create-factory/create-factory.html',

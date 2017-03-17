@@ -18,14 +18,14 @@
 
 -->
 <che-toolbar
-        che-title="{{factoryDetailsCtrl.factory.name ? factoryDetailsCtrl.factory.name : factoryDetailsCtrl.factory.id}}"
-        che-title-icons-controller="factoryDetailsCtrl"
+        che-title="{{factoryDetailsController.factory.name ? factoryDetailsController.factory.name : factoryDetailsController.factory.id}}"
+        che-title-icons-controller="factoryDetailsController"
         che-button-name="Open"
-        che-button-href="{{factoryDetailsCtrl.getFactoryIdUrl()}}"
+        che-button-href="{{factoryDetailsController.getFactoryIdUrl()}}"
         che-button-href-target="_blank"
         che-breadcrumb-title="All factories"
         che-breadcrumb-href="#/factories">
 </che-toolbar>
 <md-content md-scroll-y flex class="factory-details factory-details-content">
-  <cdvy-factory-information cdvy-factory="factoryDetailsCtrl.factory"></cdvy-factory-information>
+  <cdvy-factory-information cdvy-factory="factoryDetailsController.factory"></cdvy-factory-information>
 </md-content>

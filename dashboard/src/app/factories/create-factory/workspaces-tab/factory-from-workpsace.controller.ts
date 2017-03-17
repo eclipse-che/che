@@ -9,6 +9,8 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheAPI} from '../../../../components/api/che-api.factory';
+import {CheNotification} from '../../../../components/notification/che-notification.factory';
 
 /**
  * Controller for creating factory from a workspace.
@@ -16,12 +18,22 @@
  * @author Michail Kuznyetsov
  */
 export class FactoryFromWorkspaceCtrl {
+  private $filter: ng.IFilterService;
+  private cheAPI: CheAPI;
+  private cheNotification: CheNotification;
+  private workspaces: Array<che.IWorkspace>;
+  private workspacesById: Map<string, che.IWorkspace>;
+  private filtersWorkspaceSelected: any;
+  private workspaceFilter: any;
+  private isLoading: boolean;
+  private isImporting: boolean;
+  private factoryContent: any;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($filter, cheAPI,  cheNotification) {
+  constructor($filter: ng.IFilterService, cheAPI: CheAPI, cheNotification: CheNotification) {
     this.$filter = $filter;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
@@ -31,7 +43,7 @@ export class FactoryFromWorkspaceCtrl {
 
     this.filtersWorkspaceSelected = {};
 
-    this.workspaceFilter = {config:{name: ''}};
+    this.workspaceFilter = {config: {name: ''}};
 
     this.isLoading = true;
 
@@ -41,8 +53,7 @@ export class FactoryFromWorkspaceCtrl {
     promise.then(() => {
         this.isLoading = false;
         this.updateData();
-      },
-      (error) => {
+      }, (error: any) => {
         this.isLoading = false;
         if (error.status === 304) {
           this.updateData();
@@ -51,7 +62,7 @@ export class FactoryFromWorkspaceCtrl {
 
   }
 
-  updateData() {
+  updateData(): void {
     this.setAllFiltersWorkspaces(true);
   }
 
@@ -59,7 +70,7 @@ export class FactoryFromWorkspaceCtrl {
    * Get factory content from workspace
    * @param workspace is selected workspace
    */
-  getFactoryContentFromWorkspace(workspace) {
+  getFactoryContentFromWorkspace(workspace: che.IWorkspace) {
     let factoryContent = this.cheAPI.getFactory().getFactoryContentFromWorkspace(workspace);
     if (factoryContent) {
       this.factoryContent = this.$filter('json')(factoryContent, 2);
@@ -70,10 +81,10 @@ export class FactoryFromWorkspaceCtrl {
 
     let promise = this.cheAPI.getFactory().fetchFactoryContentFromWorkspace(workspace);
 
-    promise.then((factoryContent) => {
+    promise.then((factoryContent: any) => {
       this.isImporting = false;
       this.factoryContent = this.$filter('json')(factoryContent, 2);
-    }, (error) => {
+    }, (error: any) => {
       let message = (error.data && error.data.message) ? error.data.message : 'Get factory configuration failed.'
       if (error.status === 400) {
         message = 'Factory can\'t be created. The selected workspace has no projects defined. Project sources must be available from an external storage.';
@@ -82,7 +93,6 @@ export class FactoryFromWorkspaceCtrl {
       this.isImporting = false;
       this.factoryContent = null;
       this.cheNotification.showError(message);
-      console.log('error', error);
     });
   }
 
@@ -90,8 +100,8 @@ export class FactoryFromWorkspaceCtrl {
    * Set all workspaces in the filters of workspaces
    * @param isChecked is setting value
    */
-  setAllFiltersWorkspaces(isChecked) {
-    this.workspaces.forEach((workspace) => {
+  setAllFiltersWorkspaces(isChecked: boolean) {
+    this.workspaces.forEach((workspace: che.IWorkspace) => {
       this.filtersWorkspaceSelected[workspace.id] = isChecked;
     });
   }
@@ -101,7 +111,7 @@ export class FactoryFromWorkspaceCtrl {
    * @param workspaceId
    * @returns {String} workspace name
    */
-  getWorkspaceName(workspaceId) {
+  getWorkspaceName(workspaceId: string) {
     let workspace = this.workspacesById.get(workspaceId);
     if (workspace && workspace.config.name) {
       return workspace.config.name;

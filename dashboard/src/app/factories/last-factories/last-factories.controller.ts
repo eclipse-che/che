@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheFactory} from '../../../components/api/che-factory.factory';
 
 /**
  * @ngdoc controller
@@ -18,22 +19,28 @@
  */
 export class LastFactoriesController {
 
+  private cheFactory: CheFactory;
+  private factories: Array<che.IFactory>;
+  private factoriesOrderBy: string;
+  private maxItems: number;
+  private isLoading: boolean;
+
 
   /**
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI) {
+  constructor(cheFactory: CheFactory) {
+    this.cheFactory = cheFactory;
 
-    this.factories = cheAPI.getFactory().getPageFactories();
+    this.factories = this.cheFactory.getPageFactories();
 
-    //TODO we should change to modificationDate after model's change
+    // todo we should change to modificationDate after model's change
     this.factoriesOrderBy = '-creator.created';
-
     this.maxItems = 5;
 
-    //TODO add OrderBy to condition in fetch API
-    let promise = cheAPI.getFactory().fetchFactories(this.maxItems, 0);
+    // todo add OrderBy to condition in fetch API
+    let promise = this.cheFactory.fetchFactories(this.maxItems, 0);
 
     this.isLoading = true;
     promise.finally(() => {
@@ -45,12 +52,16 @@ export class LastFactoriesController {
   /**
    * Update factories array
    */
-  updateFactories() {
-    this.factories = this.cheAPI.getFactory().getPageFactories();
+  updateFactories(): void {
+    this.factories = this.cheFactory.getPageFactories();
   }
 
-  getFactories() {
+  /**
+   * Returns the list of factories.
+   *
+   * @returns {Array<che.IFactory>}
+   */
+  getFactories(): Array<che.IFactory> {
     return this.factories;
   }
-
 }

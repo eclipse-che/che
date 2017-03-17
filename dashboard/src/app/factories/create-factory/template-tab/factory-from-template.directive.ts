@@ -15,6 +15,17 @@
  * @author Oleksii Orel
  */
 export class FactoryFromTemplate {
+  private restrict: string;
+  private templateUrl: string;
+  private controller: string;
+  private controllerAs: string;
+  private bindToController: boolean;
+  private replace: boolean;
+
+  private scope: {
+    [propName: string]: string;
+  };
+
 
   /**
    * Default constructor that is using resource

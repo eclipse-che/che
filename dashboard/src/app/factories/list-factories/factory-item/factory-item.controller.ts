@@ -9,18 +9,25 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheFactory} from '../../../../components/api/che-factory.factory';
+import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
 
 /**
  * Controller for a factory item.
  * @author Oleksii Orel
  */
-export class FactoryItemCtrl {
+export class FactoryItemController {
+  private $location: ng.ILocationService;
+  private cheFactory: CheFactory;
+  private cheEnvironmentRegistry: CheEnvironmentRegistry;
+  private lodash: _.LoDashStatic;
+  private factory: che.IFactory;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location, cheFactory, cheEnvironmentRegistry, lodash) {
+  constructor($location: ng.ILocationService, cheFactory: CheFactory, cheEnvironmentRegistry: CheEnvironmentRegistry, lodash: _.LoDashStatic) {
     this.$location = $location;
     this.cheFactory = cheFactory;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
@@ -28,21 +35,27 @@ export class FactoryItemCtrl {
   }
 
   /**
-   * Detect factory links.
-   * @returns [string]
+   * Returns the list of factory links.
+   *
+   * @returns {Array<any>}
    */
-  getFactoryLinks() {
+  getFactoryLinks(): Array<any> {
     return this.cheFactory.detectLinks(this.factory);
   }
 
   /**
    * Redirect to factory details.
    */
-  redirectToFactoryDetails() {
+  redirectToFactoryDetails(): void {
     this.$location.path('/factory/' + this.factory.id);
   }
 
-  getMemoryLimit() {
+  /**
+   * Returns display value of memory limit.
+   *
+   * @returns {string} display value of memory limit
+   */
+  getMemoryLimit(): string {
     if (!this.factory.workspace) {
       return '-';
     }
@@ -56,11 +69,12 @@ export class FactoryItemCtrl {
 
     let limits = this.lodash.pluck(machines, 'attributes.memoryLimitBytes');
     let total = 0;
-    limits.forEach((limit) => {
+    limits.forEach((limit: number) => {
       if (limit) {
-        total += limit / (1024*1024);
+        total += limit / (1024 * 1024);
       }
     });
+
     return (total > 0) ? total + ' MB' : '-';
   }
 }

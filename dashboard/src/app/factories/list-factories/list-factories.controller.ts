@@ -9,23 +9,45 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
+import {CheAPI} from "../../../components/api/che-api.factory";
+import {CheNotification} from "../../../components/notification/che-notification.factory";
 
 /**
  * Controller for the factories.
  * @author Florent Benoit
  * @author Oleksii Orel
  */
-export class ListFactoriesCtrl {
+export class ListFactoriesController {
 
-  private confirmDialogService: any;
+  private confirmDialogService: ConfirmDialogService;
+  private cheAPI: CheAPI;
+  private cheNotification: CheNotification;
+  private $q: ng.IQService;
+  private $log: ng.ILogService;
+
+  private maxItems: number;
+  private skipCount: number;
+
+  private factoriesOrderBy: string;
+  private factoriesFilter: any;
+  private factoriesSelectedStatus: any;
+  private isNoSelected: boolean;
+  private isAllSelected: boolean;
+  private isBulkChecked: boolean;
+
+  private isLoading: boolean;
+  private factories: any;
+  private pagesInfo: any;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($q, $mdDialog, cheAPI, cheNotification, $rootScope, confirmDialogService: any) {
+  constructor($q: ng.IQService, $log: ng.ILogService, cheAPI: CheAPI, cheNotification: CheNotification, $rootScope: che.IRootScopeService,
+              confirmDialogService: ConfirmDialogService) {
     this.$q = $q;
-    this.$mdDialog = $mdDialog;
+    this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
     this.confirmDialogService = confirmDialogService;
@@ -40,15 +62,13 @@ export class ListFactoriesCtrl {
     this.isAllSelected = false;
     this.isBulkChecked = false;
 
-    this.factoriesSelectedStatus = {};
     this.isLoading = true;
     this.factories = cheAPI.getFactory().getPageFactories();
 
-    this.isLoading = true;
     let promise = cheAPI.getFactory().fetchFactories(this.maxItems, this.skipCount);
     promise.then(() => {
       this.isLoading = false;
-    }, (error) => {
+    }, (error: any) => {
       this.isLoading = false;
       if (error.status !== 304) {
         this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Failed to retrieve the list of factories.');
@@ -61,27 +81,27 @@ export class ListFactoriesCtrl {
   }
 
   /**
-   * Check all factories in list
+   * Make all factories in list checked.
    */
-  selectAllFactories() {
-    this.factories.forEach((factory) => {
+  selectAllFactories(): void {
+    this.factories.forEach((factory: che.IFactory) => {
       this.factoriesSelectedStatus[factory.id] = true;
     });
   }
 
   /**
-   * Uncheck all factories in list
+   * Make all factories in list unchecked.
    */
-  deselectAllFactories() {
-    this.factories.forEach((factory) => {
+  deselectAllFactories(): any {
+    this.factories.forEach((factory: che.IFactory) => {
       this.factoriesSelectedStatus[factory.id] = false;
     });
   }
 
   /**
-   * Change bulk selection value
+   * Change bulk selection value.
    */
-  changeBulkSelection() {
+  changeBulkSelection(): void {
     if (this.isBulkChecked) {
       this.deselectAllFactories();
       this.isBulkChecked = false;
@@ -93,13 +113,13 @@ export class ListFactoriesCtrl {
   }
 
   /**
-   * Update factories selected status
+   * Update factories selected status.
    */
-  updateSelectedStatus() {
+  updateSelectedStatus(): void {
     this.isNoSelected = true;
     this.isAllSelected = true;
 
-    this.factories.forEach((factory) => {
+    this.factories.forEach((factory: che.IFactory) => {
       if (this.factoriesSelectedStatus[factory.id]) {
         this.isNoSelected = false;
       } else {
@@ -120,7 +140,7 @@ export class ListFactoriesCtrl {
   /**
    * Delete all selected factories
    */
-  deleteSelectedFactories() {
+  deleteSelectedFactories(): void {
     let factoriesSelectedStatusKeys = Object.keys(this.factoriesSelectedStatus);
     let checkedFactoriesKeys = [];
 
@@ -129,7 +149,7 @@ export class ListFactoriesCtrl {
       return;
     }
 
-    factoriesSelectedStatusKeys.forEach((key) => {
+    factoriesSelectedStatusKeys.forEach((key: string) => {
       if (this.factoriesSelectedStatus[key] === true) {
         checkedFactoriesKeys.push(key);
       }
@@ -147,13 +167,13 @@ export class ListFactoriesCtrl {
       let isError = false;
       let deleteFactoryPromises = [];
 
-      checkedFactoriesKeys.forEach((factoryId) => {
+      checkedFactoriesKeys.forEach((factoryId: string) => {
         this.factoriesSelectedStatus[factoryId] = false;
 
         let promise = this.cheAPI.getFactory().deleteFactoryById(factoryId);
 
         promise.then(() => {
-        }, (error) => {
+        }, (error: any) => {
           isError = true;
           this.$log.error('Cannot delete factory: ', error);
         });
@@ -187,7 +207,7 @@ export class ListFactoriesCtrl {
    * Ask for loading the users page in asynchronous way
    * @param pageKey - the key of page
    */
-  fetchFactoriesPage(pageKey) {
+  fetchFactoriesPage(pageKey: string): void {
     this.isLoading = true;
     let promise = this.cheAPI.getFactory().fetchFactoryPage(pageKey);
 
@@ -205,7 +225,7 @@ export class ListFactoriesCtrl {
    * Returns true if the next page is exist.
    * @returns {boolean}
    */
-  hasNextPage() {
+  hasNextPage(): boolean {
     if (this.pagesInfo.countOfPages) {
       return this.pagesInfo.currentPageNumber < this.pagesInfo.countOfPages;
     }
@@ -216,7 +236,7 @@ export class ListFactoriesCtrl {
    * Returns true if the last page is exist.
    * @returns {boolean}
    */
-  hasLastPage() {
+  hasLastPage(): boolean {
     if (this.pagesInfo.countOfPages) {
       return this.pagesInfo.currentPageNumber < this.pagesInfo.countOfPages;
     }
@@ -227,7 +247,7 @@ export class ListFactoriesCtrl {
    * Returns true if the previous page is exist.
    * @returns {boolean}
    */
-  hasPreviousPage() {
+  hasPreviousPage(): boolean {
     return this.pagesInfo.currentPageNumber > 1;
   }
 
@@ -235,7 +255,7 @@ export class ListFactoriesCtrl {
    * Returns true if we have more then one page.
    * @returns {boolean}
    */
-  isPagination() {
+  isPagination(): boolean {
     if (this.pagesInfo.countOfPages) {
       return this.pagesInfo.countOfPages > 1;
     }

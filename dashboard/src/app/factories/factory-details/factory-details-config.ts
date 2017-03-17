@@ -10,22 +10,22 @@
  */
 'use strict';
 
-import {FactoryDetailsCtrl} from '../factory-details/factory-details.controller';
+import {FactoryDetailsController} from '../factory-details/factory-details.controller';
 import {InformationTabConfig} from './information-tab/information-tab-config';
 
 
 export class FactoryDetailsConfig {
 
-  constructor(register) {
-    register.controller('FactoryDetailsCtrl', FactoryDetailsCtrl);
+  constructor(register: che.IRegisterService) {
+    register.controller('FactoryDetailsController', FactoryDetailsController);
 
     // config routes
-    register.app.config(function ($routeProvider) {
+    register.app.config(($routeProvider: any) => {
       let locationProvider = {
         title: 'Factory',
         templateUrl: 'app/factories/factory-details/factory-details.html',
-        controller: 'FactoryDetailsCtrl',
-        controllerAs: 'factoryDetailsCtrl'
+        controller: 'FactoryDetailsController',
+        controllerAs: 'factoryDetailsController'
       };
 
       $routeProvider.accessWhen('/factory/:id', locationProvider)
@@ -35,6 +35,5 @@ export class FactoryDetailsConfig {
 
     // config files
     new InformationTabConfig(register);
-
   }
 }

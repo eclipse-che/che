@@ -15,6 +15,16 @@
  * @author Oleksii Orel
  */
 export class FactoryFromFile {
+  private restrict: string;
+  private templateUrl: string;
+  private replace: boolean;
+  private controller: string;
+  private controllerAs: string;
+  private bindToController: boolean;
+
+  private scope: {
+    [propName: string]: string;
+  };
 
   /**
    * Default constructor that is using resource
@@ -38,7 +48,7 @@ export class FactoryFromFile {
     };
   }
 
-  link($scope, element) {
+  link($scope: ng.IScope, element: ng.IAugmentedJQuery) {
     $scope.clickUpload = () => {
       // search the input fields
       let inputElements = element.find('input');

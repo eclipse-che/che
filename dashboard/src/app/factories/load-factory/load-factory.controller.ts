@@ -19,7 +19,6 @@ import {RouteHistory} from '../../../components/routing/route-history.service';
  * @author Ann Shumilova
  */
 export class LoadFactoryController {
-
   private cheAPI: CheAPI;
   private $websocket: ng.websocket.IWebSocketProvider;
   private $timeout: ng.ITimeoutService;
@@ -107,12 +106,12 @@ export class LoadFactoryController {
       promise.then((factory: che.IFactory) => {
         this.factory = factory;
 
-        //Check factory polices:
+        // check factory polices:
         if (!this.checkPolicies(this.factory)) {
           return;
         }
 
-        //Check factory contains workspace config:
+        // check factory contains workspace config:
         if (!this.factory.workspace) {
           this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
           this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Factory has no workspace config.';
@@ -132,12 +131,12 @@ export class LoadFactoryController {
    * @returns {any}
    */
   processFactoryParameters(parameters: any): ng.IPromise<any> {
-    //User name and factory name should be handled differently:
-    if (parameters['name'] || parameters['user']) {
-      if (Object.keys(parameters).length == 2) {
-        return this.processUser(parameters['user'], parameters['name']);
+    // user name and factory name should be handled differently:
+    if (parameters.name || parameters.user) {
+      if (Object.keys(parameters).length === 2) {
+        return this.processUser(parameters.user, parameters.name);
       } else {
-        let paramName = parameters['user'] ? 'Factory name' : 'User name';
+        let paramName = parameters.name ? 'Factory name' : 'User name';
         this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Invalid factory URL. ' + paramName + ' is missed or misspelled.';
         this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
         return null;
@@ -174,7 +173,7 @@ export class LoadFactoryController {
     if (!factory.policies || !factory.policies.referer) {
       return true;
     }
-    //Process referrer:
+    // process referrer:
     let factoryReferrer  = factory.policies.referer;
     let referrer = document.referrer;
     if (referrer && (referrer.indexOf(factoryReferrer) >= 0)) {
@@ -212,7 +211,7 @@ export class LoadFactoryController {
         });
         break;
       case 'perAccount' :
-        //TODO when account is ready
+        // todo when account is ready
         workspace = this.lodash.find(this.workspaces, (w: che.IWorkspace) => {
           return this.factory.workspace.name === w.config.name;
         });
@@ -249,11 +248,11 @@ export class LoadFactoryController {
    */
   createWorkspace(): any {
     let config = this.factory.workspace;
-    //set factory attribute:
+    // set factory attribute:
     let attrs = {factoryId: this.factory.id};
     config.name = this.getWorkspaceName(config.name);
 
-    //TODO: fix account when ready:
+    // todo: fix account when ready:
     let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, config, attrs);
     creationPromise.then((data: any) => {
       this.$timeout(() => {
@@ -320,7 +319,7 @@ export class LoadFactoryController {
     let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
     this.loadFactoryService.goToNextStep();
 
-    startWorkspacePromise.then((data) => {
+    startWorkspacePromise.then((data:  any) => {
       console.log('Workspace started', data);
     }, (error) => {
       let errorMessage;
@@ -458,7 +457,7 @@ export class LoadFactoryController {
     promise.then(() => {
       let projects = this.cheAPI.getWorkspace().getWorkspacesById().get(this.workspace.id).config.projects;
       this.detectProjectsToImport(projects, bus);
-    }, (error) => {
+    }, (error: any) => {
       if (error.status !== 304) {
         let projects = this.cheAPI.getWorkspace().getWorkspacesById().get(this.workspace.id).config.projects;
         this.detectProjectsToImport(projects, bus);
@@ -540,7 +539,7 @@ export class LoadFactoryController {
         this.finish();
       }
       bus.unsubscribe(channel);
-    }, (error) => {
+    }, (error: any) => {
       bus.unsubscribe(channel);
       this.handleError(error);
 
@@ -566,15 +565,14 @@ export class LoadFactoryController {
 
     var ideParams = [];
     if (this.routeParams) {
-      if (this.routeParams['id'] || (this.routeParams['name'] && this.routeParams['user'])) {
+      if (this.routeParams.id || (this.routeParams.name && this.routeParams.user)) {
         ideParams.push('factory-id:' + this.factory.id);
       } else {
         // add every factory parameter by prefix
-        Object.keys(this.routeParams).forEach((key) => {
+        Object.keys(this.routeParams).forEach((key: string) => {
           ideParams.push('factory-' + key + ':' + this.$window.encodeURIComponent(this.routeParams[key]));
         });
       }
-
 
       // add factory mode
       ideParams.push('factory:' + 'true');

@@ -17,12 +17,15 @@
  * @author Florent Benoit
  */
 export class FactoryCommandController {
+  private $mdDialog: ng.material.IDialogService;
+  private factoryObject: any;
+  private onChange: Function;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog) {
+  constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
   }
 
@@ -30,7 +33,7 @@ export class FactoryCommandController {
    * User clicked on the add button to add a new command
    * @param $event
    */
-  addCommand() {
+  addCommand(): void {
     if (!this.factoryObject) {
       this.factoryObject = {};
     }
@@ -60,7 +63,7 @@ export class FactoryCommandController {
    * Remove command based on the provided index
    * @param index the index in the array of workspace commands
    */
-  removeCommand(index) {
+  removeCommand(index: number): void {
     this.factoryObject.workspace.commands.splice(index, 1);
 
     this.onChange();
@@ -71,7 +74,7 @@ export class FactoryCommandController {
    * @param $event the mouse event
    * @param index the index in the array of workspace commands
    */
-  editCommand($event, index) {
+  editCommand($event: any, index: number): void {
     this.$mdDialog.show({
       targetEvent: $event,
       controller: 'FactoryCommandDialogEditController',
@@ -87,7 +90,13 @@ export class FactoryCommandController {
     });
   }
 
-  callbackEditAction(index, newValue) {
+  /**
+   * Callback on edit action.
+   *
+   * @param index commands index
+   * @param newValue value to update with
+   */
+  callbackEditAction(index: number, newValue: string) {
     this.factoryObject.workspace.commands[index].commandLine = newValue;
 
     this.onChange();

@@ -15,7 +15,7 @@ import {LastFactories} from './last-factories.directive';
 
 export class LastFactoriesConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
     register.controller('LastFactoriesController', LastFactoriesController);
     register.directive('cdvyLastFactories', LastFactories);
   }

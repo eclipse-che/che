@@ -25,10 +25,10 @@
     <div layout="row"
          layout-align="start center"
          class="che-checkbox-area"
-         ng-if="factoryItemCtrl.isSelectable === true">
-      <che-list-item-checked ng-model="factoryItemCtrl.isSelect"
-                             che-aria-label-checkbox="Factory {{factoryItemCtrl.factory.name}}"
-                             ng-click="factoryItemCtrl.onCheckboxClick()"></che-list-item-checked>
+         ng-if="factoryItemController.isSelectable === true">
+      <che-list-item-checked ng-model="factoryItemController.isSelect"
+                             che-aria-label-checkbox="Factory {{factoryItemController.factory.name}}"
+                             ng-click="factoryItemController.onCheckboxClick()"></che-list-item-checked>
     </div>
     <div flex
          layout-xs="column" layout-gt-xs="row"
@@ -37,19 +37,19 @@
          class="che-list-item-details">
       <div flex-gt-xs="25"
            class="che-list-item-name"
-           ng-click="factoryItemCtrl.redirectToFactoryDetails();">
+           ng-click="factoryItemController.redirectToFactoryDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Factory</span>
-        <span tooltip="Created: {{factoryItemCtrl.factory.creator.created | amDateFormat:'dddd, MMMM Do, YYYY'}}"
-              class="che-hover">{{factoryItemCtrl.factory.name ? factoryItemCtrl.factory.name : factoryItemCtrl.getFactoryLinks()[0]}}</span>
+        <span tooltip="Created: {{factoryItemController.factory.creator.created | amDateFormat:'dddd, MMMM Do, YYYY'}}"
+              class="che-hover">{{factoryItemController.factory.name ? factoryItemController.factory.name : factoryItemController.getFactoryLinks()[0]}}</span>
       </div>
-      <div flex-gt-xs="60" ng-click="factoryItemCtrl.redirectToFactoryDetails();">
+      <div flex-gt-xs="60" ng-click="factoryItemController.redirectToFactoryDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>RAM</span>
-        <span class="factory-consumed-value">{{factoryItemCtrl.getMemoryLimit()}}</span>
+        <span class="factory-consumed-value">{{factoryItemController.getMemoryLimit()}}</span>
       </div>
       <div flex-gt-xs="15">
         <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
         <span class="che-list-actions">
-          <a tooltip="Open in IDE" ng-href="#/load-factory/{{factoryItemCtrl.factory.id}}">
+          <a tooltip="Open in IDE" ng-href="#/load-factory/{{factoryItemController.factory.id}}">
             <span class="fa fa-chevron-circle-right factory-action"></span>
           </a>
         </span>

@@ -15,6 +15,16 @@
  * @author Florent Benoit
  */
 export class FactoryActionBox {
+  private restrict: string;
+  private templateUrl: string;
+  private replace: boolean;
+  private controller: string;
+  private controllerAs: string;
+  private bindToController: boolean;
+
+  private scope: {
+    [propName: string]: string;
+  };
 
   /**
    * Default constructor that is using resource

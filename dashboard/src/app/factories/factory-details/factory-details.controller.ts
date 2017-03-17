@@ -9,30 +9,32 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
+import {CheFactory} from '../../../components/api/che-factory.factory';
 
 /**
  * Controller for a factory details.
  * @author Florent Benoit
  */
-export class FactoryDetailsCtrl {
+export class FactoryDetailsController {
+  private cheFactory: CheFactory;
+  private factory: che.IFactory;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($route, cheAPI, cheNotification) {
+  constructor($route: ng.route.IRouteService, cheFactory: CheFactory, cheNotification: CheNotification) {
     'ngInject';
 
-    this.cheAPI = cheAPI;
+    this.cheFactory = cheFactory;
     let factoryId = $route.current.params.id;
+    this.factory = this.cheFactory.getFactoryById(factoryId);
 
-    this.factory = cheAPI.getFactory().getFactoryById(factoryId);
-
-    cheAPI.getFactory().fetchFactoryById(factoryId).then((factory) => {
+    cheFactory.fetchFactoryById(factoryId).then((factory: che.IFactory) => {
       this.factory = factory;
-    }, (error) => {
+    }, (error: any) => {
       cheNotification.showError(error.data.message ? error.data.message : 'Get factory failed.');
-      console.log('error', error);
     });
   }
 
@@ -40,11 +42,11 @@ export class FactoryDetailsCtrl {
    * Returns the factory url based on id.
    * @returns {link.href|*} link value
    */
-  getFactoryIdUrl() {
+  getFactoryIdUrl(): string {
     if (!this.factory) {
       return null;
     }
-    return this.cheAPI.getFactory().getFactoryIdUrl(this.factory);
+    return this.cheFactory.getFactoryIdUrl(this.factory);
   }
 }
 

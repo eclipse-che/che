@@ -256,7 +256,7 @@ export class CheFactory {
    * @param pageKey - the key of page ('first', 'prev', 'next', 'last'  or '1', '2', '3' ...)
    * @returns {*} the promise
    */
-  fetchFactoryPage(pageKey) {
+  fetchFactoryPage(pageKey: string) {
     let deferred = this.$q.defer();
     let pageNumber;
     if ('first' === pageKey) {

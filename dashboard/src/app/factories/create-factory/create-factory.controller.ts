@@ -9,6 +9,8 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheAPI} from '../../../components/api/che-api.factory';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
 
 /**
  * Controller for a create factory.
@@ -16,12 +18,32 @@
  * @author Florent Benoit
  */
 export class CreateFactoryCtrl {
+  private $location: ng.ILocationService;
+  private $log: ng.ILogService;
+  private cheAPI: CheAPI;
+  private cheNotification: CheNotification;
+  private lodash: _.LoDashStatic;
+  private $filter: ng.IFilterService;
+  private $document: ng.IDocumentService;
+  private isLoading: boolean;
+  private isImporting: boolean;
+  private stackRecipeMode: string;
+  private factoryContent: any;
+  private factoryObject: any;
+  private form: any;
+  private name: string;
+  private factoryId: string;
+  private factoryLink: string;
+  private factoryBadgeUrl: string;
+  private markdown: string;
+
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location, cheAPI, $log, cheNotification, $scope, $filter, lodash, $document) {
+  constructor($location: ng.ILocationService, cheAPI: CheAPI, $log: ng.ILogService, cheNotification: CheNotification, $scope: ng.IScope,
+              $filter: ng.IFilterService, lodash: _.LoDashStatic, $document: ng.IDocumentService) {
     this.$location = $location;
     this.cheAPI = cheAPI;
     this.$log = $log;
@@ -41,11 +63,10 @@ export class CreateFactoryCtrl {
       this.factoryContent = this.$filter('json')(angular.fromJson(this.factoryObject));
     }, true);
 
-    $scope.$watch('createFactoryCtrl.gitLocation', (newValue) => {
+    $scope.$watch('createFactoryCtrl.gitLocation', (newValue: string) => {
       // update underlying model
-      // Updating first project item
+      // updating first project item
       if (!this.factoryObject) {
-        //fetch it !
         let templateName = 'git';
         let promise = this.cheAPI.getFactoryTemplate().fetchFactoryTemplate(templateName);
 
@@ -59,22 +80,20 @@ export class CreateFactoryCtrl {
       }
 
     }, true);
-
-    this.form;
   }
 
   /**
    * Clear factory content
    */
-  clearFactoryContent() {
+  clearFactoryContent(): void {
     this.factoryContent = null;
   }
 
-  setForm(form) {
+  setForm(form: any): void {
     this.form = form;
   }
 
-  isFormInvalid() {
+  isFormInvalid(): boolean {
     return this.form.$invalid;
   }
 
@@ -82,7 +101,7 @@ export class CreateFactoryCtrl {
    * Update the source project location for git
    * @param location the new location
    */
-  updateGitProjectLocation(location) {
+  updateGitProjectLocation(location: string): void {
     let project = this.factoryObject.workspace.projects[0];
     project.source.type = 'git';
     project.source.location = location;
@@ -92,7 +111,7 @@ export class CreateFactoryCtrl {
    * Create a new factory by factory content
    * @param factoryContent
    */
-  createFactoryByContent(factoryContent) {
+  createFactoryByContent(factoryContent: any): void {
     if (!factoryContent) {
       return;
     }
@@ -110,10 +129,10 @@ export class CreateFactoryCtrl {
 
     let promise = this.cheAPI.getFactory().createFactoryByContent(factoryContent);
 
-    promise.then((factory) => {
+    promise.then((factory: che.IFactory) => {
       this.isImporting = false;
 
-      this.lodash.find(factory.links, (link) => {
+      this.lodash.find(factory.links, (link: any) => {
         if (link.rel === 'accept' || link.rel === 'accept-named') {
           this.factoryLink = link.href;
         }
@@ -125,7 +144,7 @@ export class CreateFactoryCtrl {
       this.factoryBadgeUrl = parser.protocol + '//' + parser.hostname + '/factory/resources/codenvy-contribute.svg';
 
       this.markdown = '[![Contribute](' + this.factoryBadgeUrl + ')](' + this.factoryLink + ')';
-    }, (error) => {
+    }, (error: any) => {
       this.isImporting = false;
       this.cheNotification.showError(error.data.message ? error.data.message : 'Create factory failed.');
       this.$log.error(error);
@@ -137,7 +156,7 @@ export class CreateFactoryCtrl {
   /*
    * Flow of creating a factory is finished, we can redirect to details of factory
    */
-  finishFlow() {
+  finishFlow(): void {
     this.clearFactoryContent();
     this.$location.path('/factory/' + this.factoryId);
   }

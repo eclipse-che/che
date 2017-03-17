@@ -17,13 +17,18 @@
  * @author Florent Benoit
  */
 export class FactoryActionBoxController {
-
+  private $mdDialog: ng.material.IDialogService;
+  private actions: Array<any>;
+  private selectedAction: string;
+  private factoryObject: any;
+  private lifecycle: any;
+  private onChange: Function;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog) {
+  constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
 
     this.actions = [];
@@ -37,7 +42,7 @@ export class FactoryActionBoxController {
    * @param $event the mouse event
    * @param index the index in the array of factory actions
    */
-  editAction($event, index) {
+  editAction($event: any, index: number): void {
     let action = this.factoryObject.ide[this.lifecycle].actions[index];
     this.$mdDialog.show({
       targetEvent: $event,
@@ -55,13 +60,19 @@ export class FactoryActionBoxController {
     });
   }
 
-  callbackEditAction(index, newValue) {
+  /**
+   * Edit action callback.
+   *
+   * @param index the index in the array of factory actions
+   * @param newValue new value
+   */
+  callbackEditAction(index: number, newValue: any): void {
     this.factoryObject.ide[this.lifecycle].actions[index].properties = newValue;
 
     this.onChange();
   }
 
-  addAction() {
+  addAction(): void {
     if (!this.factoryObject.ide) {
       this.factoryObject.ide = {};
     }
@@ -70,7 +81,7 @@ export class FactoryActionBoxController {
         this.factoryObject.ide[this.lifecycle].actions = [];
     }
 
-    var actionToAdd;
+    let actionToAdd;
     if ('openfile' === this.selectedAction) {
       actionToAdd = {
         "properties": {
@@ -97,7 +108,7 @@ export class FactoryActionBoxController {
    * Remove action based on the provided index
    * @param index the index in the array of factory actions
    */
-  removeAction(index) {
+  removeAction(index: number): void {
     this.factoryObject.ide[this.lifecycle].actions.splice(index, 1);
 
     this.onChange();

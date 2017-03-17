@@ -14,18 +14,18 @@
 import {FactoryDetailsConfig} from './factory-details/factory-details-config';
 import {CreateFactoryConfig} from './create-factory/create-factory-config';
 import {LastFactoriesConfig} from './last-factories/last-factories-config';
-import {ListFactoriesCtrl} from './list-factories/list-factories.controller';
-import {FactoryItemCtrl} from './list-factories/factory-item/factory-item.controller';
+import {ListFactoriesController} from './list-factories/list-factories.controller';
+import {FactoryItemController} from './list-factories/factory-item/factory-item.controller';
 import {CheFactoryItem} from './list-factories/factory-item/factory-item.directive';
 import {LoadFactoryController} from './load-factory/load-factory.controller';
 import {LoadFactoryService} from './load-factory/load-factory.service';
 
 export class FactoryConfig {
 
-  constructor(register) {
-    register.controller('ListFactoriesCtrl', ListFactoriesCtrl);
+  constructor(register: che.IRegisterService) {
+    register.controller('ListFactoriesController', ListFactoriesController);
 
-    register.controller('FactoryItemCtrl', FactoryItemCtrl);
+    register.controller('FactoryItemController', FactoryItemController);
     register.directive('cdvyFactoryItem', CheFactoryItem);
 
     register.controller('LoadFactoryController', LoadFactoryController);
@@ -36,7 +36,7 @@ export class FactoryConfig {
       $routeProvider.accessWhen('/factories', {
         title: 'Factories',
         templateUrl: 'app/factories/list-factories/list-factories.html',
-        controller: 'ListFactoriesCtrl',
+        controller: 'ListFactoriesController',
         controllerAs: 'listFactoriesCtrl'
       })
         .accessWhen('/load-factory', {
@@ -58,7 +58,6 @@ export class FactoryConfig {
     new FactoryDetailsConfig(register);
     new CreateFactoryConfig(register);
     new LastFactoriesConfig(register);
-
   }
 }
 

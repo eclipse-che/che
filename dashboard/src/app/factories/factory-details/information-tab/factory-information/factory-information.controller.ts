@@ -9,24 +9,45 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheAPI} from '../../../../../components/api/che-api.factory';
+import {CheNotification} from '../../../../../components/notification/che-notification.factory';
 
 /**
  * Controller for a factory information.
  * @author Oleksii Orel
  */
-export class FactoryInformationCtrl {
+export class FactoryInformationController {
 
   private  confirmDialogService: any;
+  private cheAPI: CheAPI;
+  private cheNotification: CheNotification;
+  private $location: ng.ILocationService;
+  private $log: ng.ILogService;
+  private $timeout: ng.ITimeoutService;
+  private lodash: _.LoDashStatic;
+  private $filter: ng.IFilterService;
+
+  private timeoutPromise: ng.IPromise<any>;
+  private editorLoadedPromise: ng.IPromise<any>;
+  private editorOptions: any;
+  private factoryInformationForm: any;
+  private stackRecipeMode: string;
+  private factory: che.IFactory;
+  private copyOriginFactory: che.IFactory;
+  private factoryContent: any;
+  private stack: any;
+  private recipeUrl: string;
+  private recipeScript: string;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($scope, cheAPI,  cheNotification, $location, $mdDialog, $log, $timeout, lodash, $filter, $q, confirmDialogService: any) {
+  constructor($scope: ng.IScope, cheAPI: CheAPI, cheNotification: CheNotification, $location: ng.ILocationService, $log: ng.ILogService,
+              $timeout: ng.ITimeoutService, lodash: _.LoDashStatic, $filter: ng.IFilterService, $q: ng.IQService, confirmDialogService: any) {
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
     this.$location = $location;
-    this.$mdDialog = $mdDialog;
     this.$log = $log;
     this.$timeout = $timeout;
     this.lodash = lodash;
@@ -43,12 +64,11 @@ export class FactoryInformationCtrl {
     let editorLoadedDefer = $q.defer();
     this.editorLoadedPromise = editorLoadedDefer.promise;
     this.editorOptions = {
-      onLoad: ((instance) => {
+      onLoad: ((instance: any) => {
         editorLoadedDefer.resolve(instance);
       })
     };
 
-    this.factoryInformationForm;
     this.stackRecipeMode = 'current-recipe';
 
     this.updateData();
@@ -59,11 +79,10 @@ export class FactoryInformationCtrl {
     });
   }
 
-
   /**
    * Update factory content data for editor
    */
-  updateData() {
+  updateData(): void {
     if (!this.factory) {
       return;
     }
@@ -80,17 +99,28 @@ export class FactoryInformationCtrl {
           this.$timeout(() => {
             instance.refresh();
           }, 500);
-        })
+        });
       }
       this.factoryContent = factoryContent;
     }
   }
 
-  getObjectKeys(targetObject) {
+  /**
+   * Returns object's attributes.
+   *
+   * @param targetObject object to process
+   * @returns {string[]}
+   */
+  getObjectKeys(targetObject: any): Array<string> {
     return Object.keys(targetObject);
   }
 
-  isFactoryChanged() {
+  /**
+   * Returns the factory's data changed state.
+   *
+   * @returns {boolean}
+   */
+  isFactoryChanged(): boolean {
     if (!this.copyOriginFactory) {
       return false;
     }
@@ -103,7 +133,10 @@ export class FactoryInformationCtrl {
     return angular.equals(this.copyOriginFactory, testFactory) !== true;
   }
 
-  updateFactory() {
+  /**
+   * Update factory data.
+   */
+  updateFactory(): void {
     this.factoryContent = this.$filter('json')(this.copyOriginFactory);
 
     if (this.factoryInformationForm.$invalid || !this.isFactoryChanged()) {
@@ -118,9 +151,10 @@ export class FactoryInformationCtrl {
 
   /**
    * Returns the factory url based on id.
+   *
    * @returns {link.href|*} link value
    */
-  getFactoryIdUrl() {
+  getFactoryIdUrl(): string {
     return this.cheAPI.getFactory().getFactoryIdUrl(this.factory);
   }
 
@@ -129,50 +163,61 @@ export class FactoryInformationCtrl {
    *
    * @returns {link.href|*} link value
    */
-  getFactoryNamedUrl() {
+  getFactoryNamedUrl(): string {
     return this.cheAPI.getFactory().getFactoryNamedUrl(this.factory);
   }
 
   /**
    * Callback to update factory
    */
-  doUpdateFactory(factory) {
+  doUpdateFactory(factory: che.IFactory): void {
     let promise = this.cheAPI.getFactory().setFactory(factory);
 
-    promise.then((factory) => {
+    promise.then((factory: che.IFactory) => {
       this.factory = factory;
       this.cheNotification.showInfo('Factory information successfully updated.');
-    }, (error) => {
+    }, (error: any) => {
       this.cheNotification.showError(error.data.message ? error.data.message : 'Update factory failed.');
       this.$log.log(error);
     });
   }
 
-  factoryEditorOnFocus() {
+  /**
+   * Handler for factory editor focus event.
+   */
+  factoryEditorOnFocus(): void {
     if (this.timeoutPromise) {
       this.$timeout.cancel(this.timeoutPromise);
       this.doUpdateFactory(this.copyOriginFactory);
     }
   }
 
-  factoryEditorReset() {
+  /**
+   * Resets factory editor.
+   */
+  factoryEditorReset(): void {
     this.factoryContent = this.$filter('json')(this.copyOriginFactory, 2);
   }
 
-  updateFactoryContent() {
+  /**
+   * Updates factory's content.
+   */
+  updateFactoryContent(): void {
     let promise = this.cheAPI.getFactory().setFactoryContent(this.factory.id, this.factoryContent);
 
-    promise.then((factory) => {
+    promise.then((factory: che.IFactory) => {
       this.factory = factory;
       this.cheNotification.showInfo('Factory information successfully updated.');
-    }, (error) => {
+    }, (error: any) => {
       this.factoryContent = this.$filter('json')(this.copyOriginFactory, 2);
       this.cheNotification.showError(error.data.message ? error.data.message : 'Update factory failed.');
       this.$log.error(error);
     });
   }
 
-  // perform factory deletion.
+  /**
+   * Deletes factory with confirmation.
+   */
   deleteFactory(): void {
     let content = 'Please confirm removal for the factory \'' + (this.factory.name ? this.factory.name : this.factory.id) + '\'.';
     let promise = this.confirmDialogService.showConfirmDialog('Remove the factory', content, 'Delete');
@@ -182,7 +227,7 @@ export class FactoryInformationCtrl {
       let promise = this.cheAPI.getFactory().deleteFactoryById(this.factory.id);
       promise.then(() => {
         this.$location.path('/factories');
-      }, (error) => {
+      }, (error: any) => {
         this.cheNotification.showError(error.data.message ? error.data.message : 'Delete failed.');
         this.$log.log(error);
       });
@@ -192,31 +237,30 @@ export class FactoryInformationCtrl {
   /**
    * Callback when changing stack tab
    */
-  setStackTab() {
+  setStackTab(): void {
+    //
   }
-
 
   /**
    * Callback when stack has been set
    * @param stack  the selected stack
    */
-  cheStackLibrarySelecter(stack) {
-    this.stack = stack
+  cheStackLibrarySelecter(stack: any): void {
+    this.stack = stack;
   }
 
   /**
-   * Callback when user ask to validate a stack
+   * Callback when user asks to validate a stack
    * We need then to create (if required) recipe and update JSON factory configuration
    */
-
-  validateStack() {
-    //check predefined recipe location
+  validateStack(): void {
+    // check predefined recipe location
     if (this.stack) {
       // needs to get recipe URL from stack
       let promise = this.computeRecipeForStack(this.stack);
-      promise.then((recipe) => {
+      promise.then((recipe: any) => {
         this.createRecipe(recipe);
-      }, (error) => {
+      }, (error: any) => {
         this.cheNotification.showError(error.data.message ? error.data.message : 'Error during recipe creation.');
       });
     } else if (this.recipeUrl) {
@@ -224,9 +268,9 @@ export class FactoryInformationCtrl {
     } else if (this.recipeScript) {
       // create recipe from script
       let promise = this.submitRecipe('generated-script', this.recipeScript);
-      promise.then((recipe) => {
+      promise.then((recipe: any) => {
         this.createRecipe(recipe);
-      }, (error) => {
+      }, (error: any) => {
         this.cheNotification.showError(error.data.message ? error.data.message : 'Error during recipe creation.');
       });
     }
@@ -236,7 +280,7 @@ export class FactoryInformationCtrl {
    * Get recipe link from newly created recipe
    * @param recipe the recipe result
    */
-  createRecipe(recipe) {
+  createRecipe(recipe: any): void {
     let findLink = this.lodash.find(recipe.links, (link) => {
       return link.rel === 'get recipe script';
     });
@@ -248,7 +292,7 @@ export class FactoryInformationCtrl {
   /**
    * User has selected a stack. needs to find or add recipe for that stack
    */
-  computeRecipeForStack(stack) {
+  computeRecipeForStack(stack: any): void {
     // look at recipe
     let recipeSource = stack.source;
 

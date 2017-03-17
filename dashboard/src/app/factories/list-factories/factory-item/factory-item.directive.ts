@@ -15,25 +15,26 @@
  * @author Oleksii Orel
  */
 export class CheFactoryItem {
+  restrict: string = 'E';
+
+  templateUrl: string = 'app/factories/list-factories/factory-item/factory-item.html';
+  replace = false;
+
+  controller: string = 'FactoryItemController';
+  controllerAs: string = 'factoryItemController';
+
+  bindToController: boolean = true;
+
+  // we require ngModel as we want to use it inside our directive
+  require: Array<string> = ['ngModel'];
+  scope: {
+    [propName: string]: string;
+  };
 
   /**
    * Default constructor.
    */
   constructor() {
-    this.restrict = 'E';
-
-    this.templateUrl = 'app/factories/list-factories/factory-item/factory-item.html';
-    this.replace = false;
-
-    this.controller = 'FactoryItemCtrl';
-    this.controllerAs = 'factoryItemCtrl';
-
-    this.bindToController = true;
-
-    // we require ngModel as we want to use it inside our directive
-    this.require = ['ngModel'];
-
-    // scope values
     this.scope = {
       factory: '=cdvyFactory',
       isChecked: '=cdvyChecked',

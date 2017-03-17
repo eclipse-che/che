@@ -15,13 +15,21 @@
  * @author Florent Benoit
  */
 export class CreateFactoryGit {
+  private restrict: string;
+  private templateUrl: string;
+  private controller: string;
+  private controllerAs: string;
+  private bindToController: boolean;
+
+  private scope: {
+    [propName: string]: string;
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor() {
-
     this.controller = 'CreateFactoryGitController';
     this.controllerAs = 'createFactoryGitCtrl';
     this.bindToController = true;

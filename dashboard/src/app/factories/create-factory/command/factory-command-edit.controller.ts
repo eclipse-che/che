@@ -17,19 +17,23 @@
  * @author Florent Benoit
  */
 export class FactoryCommandDialogEditController {
+  private $mdDialog: ng.material.IDialogService;
+  private callbackController: any;
+  private index: number;
+  private selectedValue: any;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog) {
+  constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
   }
 
   /**
    * Callback of the edit button of the dialog.
    */
-  edit() {
+  edit(): void {
     this.$mdDialog.hide();
     this.callbackController.callbackEditAction(this.index, this.selectedValue);
   }
@@ -38,7 +42,7 @@ export class FactoryCommandDialogEditController {
   /**
    * Callback of the cancel button of the dialog.
    */
-  abort() {
+  abort(): void {
     this.$mdDialog.hide();
   }
 }

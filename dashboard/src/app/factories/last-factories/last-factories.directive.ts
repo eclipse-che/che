@@ -17,7 +17,12 @@
  * @author Oleksii Orel
  */
 export class LastFactories {
-
+  private restrict: string;
+  private templateUrl: string;
+  private replace: boolean;
+  private controller: string;
+  private controllerAs: string;
+  private bindToController: boolean;
 
   /**
    * Default constructor that is using resource
@@ -31,5 +36,4 @@ export class LastFactories {
     this.controllerAs = 'lastFactoriesController';
     this.bindToController = true;
   }
-
 }

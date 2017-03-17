@@ -15,6 +15,16 @@
  * @author Oleksii Orel
  */
 export class FactoryInformation {
+  private restrict: string;
+  private templateUrl: string;
+  private replace: boolean;
+  private controller: string;
+  private controllerAs: string;
+  private bindToController: boolean;
+
+  private scope: {
+    [propName: string]: string;
+  };
 
   /**
    * Default constructor that is using resource
@@ -26,8 +36,8 @@ export class FactoryInformation {
     this.templateUrl = 'app/factories/factory-details/information-tab/factory-information/factory-information.html';
     this.replace = false;
 
-    this.controller = 'FactoryInformationCtrl';
-    this.controllerAs = 'factoryInformationCtrl';
+    this.controller = 'FactoryInformationController';
+    this.controllerAs = 'factoryInformationController';
 
     this.bindToController = true;
 

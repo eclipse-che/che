@@ -10,14 +10,14 @@
  */
 'use strict';
 
-import {FactoryInformationCtrl} from '../information-tab/factory-information/factory-information.controller';
+import {FactoryInformationController} from '../information-tab/factory-information/factory-information.controller';
 import {FactoryInformation} from '../information-tab/factory-information/factory-information.directive';
 
 
 export class InformationTabConfig {
 
-  constructor(register) {
-    register.controller('FactoryInformationCtrl', FactoryInformationCtrl);
+  constructor(register: che.IRegisterService) {
+    register.controller('FactoryInformationController', FactoryInformationController);
     register.directive('cdvyFactoryInformation', FactoryInformation);
   }
 }
