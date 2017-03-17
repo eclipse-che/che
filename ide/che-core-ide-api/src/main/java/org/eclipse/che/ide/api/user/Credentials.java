@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.subversion;
+package org.eclipse.che.ide.api.user;
 
 /**
  * Credentials object for subversion operations.
