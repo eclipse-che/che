@@ -121,6 +121,7 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
 import org.eclipse.che.ide.editor.orion.client.menu.EditorContextMenu;
 import org.eclipse.che.ide.editor.orion.client.signature.SignatureHelpView;
+import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesManager;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -183,6 +184,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     private final AppContext                    appContext;
     private final SignatureHelpView             signatureHelpView;
     private final EditorContextMenu             contextMenu;
+    private EditorPropertiesManager editorPropertiesManager;
 
     private final AnnotationRendering rendering = new AnnotationRendering();
     private HasKeyBindings           keyBindingsManager;
@@ -222,7 +224,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                                 final NotificationManager notificationManager,
                                 final AppContext appContext,
                                 final SignatureHelpView signatureHelpView,
-                                final EditorContextMenu contextMenu) {
+                                final EditorContextMenu contextMenu,
+                                final EditorPropertiesManager editorPropertiesManager) {
         this.codeAssistantFactory = codeAssistantFactory;
         this.deletedFilesController = deletedFilesController;
         this.breakpointManager = breakpointManager;
@@ -243,6 +246,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         this.appContext = appContext;
         this.signatureHelpView = signatureHelpView;
         this.contextMenu = contextMenu;
+        this.editorPropertiesManager = editorPropertiesManager;
 
         keyBindingsManager = new TemporaryKeyBindingsManager();
 
@@ -260,7 +264,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         editorInit = new OrionEditorInit(configuration,
                                          this.codeAssistantFactory,
                                          this.quickAssistant,
-                                         this);
+                                         this,
+                                         editorPropertiesManager);
 
         Promise<Void> initializerPromise = editorModule.getInitializerPromise();
         initializerPromise.catchError(new Operation<PromiseError>() {

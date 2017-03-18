@@ -602,6 +602,10 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
 
     @Override
     public void showCompletionsProposals(final List<CompletionProposal> proposals) {
+        internalShowCompletionsProposals(proposals, false);
+    }
+
+    private void internalShowCompletionsProposals(List<CompletionProposal> proposals, boolean triggered) {
         if (proposals == null || proposals.isEmpty()) {
             /** Hide autocompletion when it's visible and it is nothing to propose */
             if (assistWidget.isVisible()) {
@@ -611,17 +615,12 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
             return;
         }
 
-        assistWidget.show(proposals);
+        assistWidget.show(proposals, triggered);
     }
 
     @Override
     public void showCompletionProposals(final CompletionsSource completionsSource) {
-        completionsSource.computeCompletions(new CompletionReadyCallback() {
-            @Override
-            public void onCompletionReady(List<CompletionProposal> proposals) {
-                showCompletionsProposals(proposals);
-            }
-        });
+        completionsSource.computeCompletions(this::internalShowCompletionsProposals);
     }
 
     @Override

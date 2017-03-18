@@ -19,6 +19,8 @@ public interface CompletionReadyCallback {
     /**
      * Callback used to be called when the completion proposals are computed.
      * @param proposals the proposals
+     *
+     * @param triggered is this completion triggered by typing
      */
-    void onCompletionReady(List<CompletionProposal> proposals);
+    void onCompletionReady(List<CompletionProposal> proposals, boolean triggered);
 }

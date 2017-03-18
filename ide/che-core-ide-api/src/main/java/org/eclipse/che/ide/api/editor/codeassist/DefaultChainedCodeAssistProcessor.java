@@ -79,6 +79,11 @@ public abstract class DefaultChainedCodeAssistProcessor implements CodeAssistPro
         return errorMessage;
     }
 
+    @Override
+    public List<String> getTriggerCharacters() {
+        return null;
+    }
+
     /**
      * Returns the injected processors.
      * @return injected processors

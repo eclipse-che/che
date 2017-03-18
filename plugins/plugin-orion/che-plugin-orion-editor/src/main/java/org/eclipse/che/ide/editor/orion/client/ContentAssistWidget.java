@@ -409,8 +409,9 @@ public class ContentAssistWidget implements EventListener {
      *
      * @param proposals
      *         proposals to display
+     * @param triggered
      */
-    public void show(final List<CompletionProposal> proposals) {
+    public void show(final List<CompletionProposal> proposals, boolean triggered) {
         this.proposals = proposals;
 
         OrionTextViewOverlay textView = textEditor.getTextView();
@@ -430,7 +431,7 @@ public class ContentAssistWidget implements EventListener {
         }
 
         /* Automatically apply the completion proposal if it only one. */
-        if (getTotalItems() == 1) {
+        if (getTotalItems() == 1 && triggered) {
             applyProposal(proposals.get(0));
             return;
         }

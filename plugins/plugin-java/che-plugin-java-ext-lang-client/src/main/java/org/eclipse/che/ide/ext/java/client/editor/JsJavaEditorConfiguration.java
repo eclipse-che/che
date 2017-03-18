@@ -31,6 +31,7 @@ import java.util.Map;
 
 import static org.eclipse.che.ide.api.editor.partition.DefaultPartitioner.DEFAULT_PARTITIONING;
 import static org.eclipse.che.ide.api.editor.partition.DocumentPartitioner.DEFAULT_CONTENT_TYPE;
+import static org.eclipse.che.ide.ext.java.jdt.JavaPartitions.JAVA_PARTITIONING;
 
 /**
  * Text editor configuration for java files.
@@ -60,7 +61,7 @@ public class JsJavaEditorConfiguration extends DefaultTextEditorConfiguration {
 
         final JavaCodeAssistProcessor codeAssistProcessor = codeAssistProcessorFactory.create(editor);
         this.codeAssistProcessors = new HashMap<>();
-        this.codeAssistProcessors.put(DEFAULT_CONTENT_TYPE, codeAssistProcessor);
+        this.codeAssistProcessors.put(JAVA_PARTITIONING, codeAssistProcessor);
         this.quickAssistProcessors = quickAssistProcessorFactory.create(editor);
 
         this.documentPositionMap = docPositionMapProvider.get();
@@ -115,6 +116,12 @@ public class JsJavaEditorConfiguration extends DefaultTextEditorConfiguration {
                                       final JavaReconcilerStrategy javaReconcilerStrategy) {
         final Reconciler reconciler = reconcilerFactory.create(DEFAULT_PARTITIONING, getPartitioner());
         reconciler.addReconcilingStrategy(DEFAULT_CONTENT_TYPE, javaReconcilerStrategy);
+        reconciler.addReconcilingStrategy(JAVA_PARTITIONING, javaReconcilerStrategy);
         return reconciler;
+    }
+
+    @Override
+    public DocumentPartitioner getPartitioner() {
+        return partitioner;
     }
 }

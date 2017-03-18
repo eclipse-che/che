@@ -10,14 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.editor;
 
-import com.google.common.base.Strings;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.codeassist.CodeAssistCallback;
+import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
+import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
+import org.eclipse.che.ide.api.editor.link.HasLinkedMode;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -27,11 +31,6 @@ import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactoringUpdater;
 import org.eclipse.che.ide.ext.java.shared.dto.ProposalPresentation;
 import org.eclipse.che.ide.ext.java.shared.dto.Proposals;
-import org.eclipse.che.ide.api.editor.codeassist.CodeAssistCallback;
-import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
-import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
-import org.eclipse.che.ide.api.editor.link.HasLinkedMode;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
@@ -39,6 +38,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -205,6 +205,11 @@ public class JavaCodeAssistProcessor implements CodeAssistProcessor {
     @Override
     public String getErrorMessage() {
         return this.errorMessage;
+    }
+
+    @Override
+    public List<String> getTriggerCharacters() {
+        return Arrays.asList(".", "::");
     }
 
     public void disableCodeAssistant(String errorMessage) {

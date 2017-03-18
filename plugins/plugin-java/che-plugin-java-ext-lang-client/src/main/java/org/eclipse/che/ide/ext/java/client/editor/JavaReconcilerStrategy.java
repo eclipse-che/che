@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.java.client.editor;
 
 import com.google.common.base.Optional;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
@@ -28,7 +29,6 @@ import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.dto.HighlightedPosition;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
-import org.eclipse.che.ide.ext.java.shared.dto.ReconcileResult;
 import org.eclipse.che.ide.project.ResolvingProjectStateHolder;
 import org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingProjectState;
 import org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingProjectStateListener;
@@ -50,6 +50,7 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
     private final ResolvingProjectStateHolderRegistry resolvingProjectStateHolderRegistry;
     private final JavaLocalizationConstant            localizationConstant;
     private final JavaReconcileClient                 client;
+    private final Timer                               reconcileTimer;
 
     private EditorWithErrors            editorWithErrors;
     private ResolvingProjectStateHolder resolvingProjectStateHolder;
@@ -72,6 +73,15 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
         if (editor instanceof EditorWithErrors) {
             this.editorWithErrors = ((EditorWithErrors)editor);
         }
+        //Timer allow prevent tons of request for reconcile current file at the short time period
+        //for now we set timer to 1 second, all calling fro reconcile with periods less then 1 second will be skip.
+        reconcileTimer = new Timer() {
+            @Override
+            public void run() {
+               parse();
+            }
+        };
+
     }
 
     @Override
@@ -100,7 +110,8 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
 
     @Override
     public void reconcile(final DirtyRegion dirtyRegion, final Region subRegion) {
-        parse();
+        reconcileTimer.cancel();
+        reconcileTimer.schedule(1_000);
     }
 
     void parse() {
@@ -113,22 +124,19 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
 
             try {
                 client.reconcile(project.get().getLocation().toString(), JavaUtil.resolveFQN(getFile()),
-                                 new JavaReconcileClient.ReconcileCallback() {
-                                     @Override
-                                     public void onReconcile(ReconcileResult result) {
-                                         if (resolvingProjectStateHolder != null && resolvingProjectStateHolder.getState() == IN_PROGRESS) {
-                                             disableReconciler(localizationConstant.codeAssistErrorMessageResolvingProject());
-                                             return;
-                                         } else {
-                                             codeAssistProcessor.enableCodeAssistant();
-                                         }
-
-                                         if (result == null) {
-                                             return;
-                                         }
-                                         doReconcile(result.getProblems());
-                                         highlighter.reconcile(result.getHighlightedPositions());
+                                 result -> {
+                                     if (resolvingProjectStateHolder != null && resolvingProjectStateHolder.getState() == IN_PROGRESS) {
+                                         disableReconciler(localizationConstant.codeAssistErrorMessageResolvingProject());
+                                         return;
+                                     } else {
+                                         codeAssistProcessor.enableCodeAssistant();
                                      }
+
+                                     if (result == null) {
+                                         return;
+                                     }
+                                     doReconcile(result.getProblems());
+                                     highlighter.reconcile(result.getHighlightedPositions());
                                  });
             } catch (RuntimeException e) {
                 Log.info(getClass(), e.getMessage());
@@ -141,7 +149,8 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
 
     @Override
     public void reconcile(final Region partition) {
-        parse();
+        reconcileTimer.cancel();
+        reconcileTimer.schedule(1_000);
     }
 
     public VirtualFile getFile() {
