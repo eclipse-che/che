@@ -24,6 +24,10 @@ che:
     - '/etc/passwd:/etc/passwd:ro'
 <% end -%>
   ports:
+<% if @che_jmx_enabled == 'true' -%>
+    - '32001:32001'
+    - '32101:32101'
+<% end -%>
     - '<%= scope.lookupvar('che::che_port') -%>:<%= scope.lookupvar('che::che_port') -%>'
 <% if scope.lookupvar('che::che_env') == 'development' -%>
     - '<%= scope.lookupvar('che::che_debug_port') -%>:<%= scope.lookupvar('che::che_debug_port') -%>'

@@ -276,7 +276,7 @@ stop_test_server() {
 
 test1() {
   HTTP_CODE=$(curl -I localhost:${AGENT_EXTERNAL_PORT}/alpine-release \
-                          -s -o "${LOGS}" --connect-timeout 5 \
+                          -s -o /dev/null --connect-timeout 5 \
                           --write-out '%{http_code}') || echo "28" >> "${LOGS}"
   
   if check_http_code $HTTP_CODE; then
@@ -288,7 +288,7 @@ test1() {
 
 test2() {
   HTTP_CODE=$(curl -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
-                          -s -o "${LOGS}" --connect-timeout 5 \
+                          -s -o /dev/null --connect-timeout 5 \
                           --write-out '%{http_code}') || echo "28" >> "${LOGS}"
 
   if check_http_code $HTTP_CODE; then
@@ -302,7 +302,7 @@ test3() {
    HTTP_CODE=$(docker_run --entrypoint=curl \
                           $(eval "echo \${IMAGE_${CHE_PRODUCT_NAME}}") \
                             -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
-                            -s -o "${LOGS}" \
+                            -s -o /dev/null \
                             --write-out '%{http_code}')
 
   if check_http_code $HTTP_CODE; then
@@ -316,7 +316,7 @@ test4() {
   HTTP_CODE=$(docker_run --entrypoint=curl \
                          $(eval "echo \${IMAGE_${CHE_PRODUCT_NAME}}") \
                            -I ${AGENT_INTERNAL_IP}:${AGENT_INTERNAL_PORT}/alpine-release \
-                           -s -o "${LOGS}" \
+                           -s -o /dev/null \
                            --write-out '%{http_code}')  
 
   if check_http_code $HTTP_CODE; then
