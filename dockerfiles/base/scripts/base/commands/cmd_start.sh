@@ -56,9 +56,8 @@ pre_cmd_start() {
       --pull)
         FORCE_UPDATE="--pull"
         shift ;;
-      *) error "Unknown parameter: $1"
-         shift
-         return 2 ;;
+      *)
+        shift ;;
     esac
   done
 }

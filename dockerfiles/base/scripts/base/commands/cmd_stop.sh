@@ -17,6 +17,8 @@ help_cmd_stop() {
   text "\n"
   text "PARAMETERS:\n"
   text "  --skip:graceful                   Do not wait for confirmation that workspaces have stopped\n"
+  text "  --user <username>                 Admin user name for authenticated Che systems\n"
+  text "  --password <password>             Admin password for authenticated Che systems\n"
   text "\n"
 }
 
