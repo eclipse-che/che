@@ -299,14 +299,6 @@ check_containers_are_running() {
   done <<< "${LIST_OF_COMPOSE_CONTAINERS}"
 }
 
-skip_config() {
-  if [ "${CHE_SKIP_CONFIG}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
 skip_preflight() {
   if [ "${CHE_SKIP_PREFLIGHT}" = "true" ]; then
     return 0
