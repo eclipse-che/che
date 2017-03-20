@@ -1134,14 +1134,14 @@ public final class ResourceManager {
 
     private Promise<Void> onExternalDeltaMoved(final ResourceDelta delta) {
         //search resource to remove at first
-        return findResource(delta.getFromPath(), true).thenPromise(new Function<Optional<Resource>, Promise<Void>>() {
-            @Override
-            public Promise<Void> apply(final Optional<Resource> toRemove) throws FunctionException {
-                if (!toRemove.isPresent()) {
-                    return promises.resolve(null);
-                }
-
-                store.dispose(delta.getFromPath(), true);
+//        return findResource(delta.getFromPath(), true).thenPromise(new Function<Optional<Resource>, Promise<Void>>() {
+//            @Override
+//            public Promise<Void> apply(final Optional<Resource> toRemove) throws FunctionException {
+//                if (!toRemove.isPresent()) {
+//                    return promises.resolve(null);
+//                }
+        final Optional<Resource> toRemove = store.getResource(delta.getFromPath());
+        store.dispose(delta.getFromPath(), true);
 
                 return findResource(delta.getToPath(), true).then(new Function<Optional<Resource>, Void>() {
                     @Override
@@ -1161,8 +1161,8 @@ public final class ResourceManager {
                         return null;
                     }
                 });
-            }
-        });
+//            }
+//        });
     }
 
     private Promise<Void> onExternalDeltaAdded(final ResourceDelta delta) {
