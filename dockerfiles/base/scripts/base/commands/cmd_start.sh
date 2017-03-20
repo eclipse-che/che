@@ -56,9 +56,8 @@ pre_cmd_start() {
       --pull)
         FORCE_UPDATE="--pull"
         shift ;;
-      *) error "Unknown parameter: $1"
-         shift
-         return 2 ;;
+      *)
+        shift ;;
     esac
   done
 }
@@ -297,14 +296,6 @@ check_containers_are_running() {
       fi
     done <<< "${CONTAINER_ID_MATCHING_SERVICE_NAMES}"
   done <<< "${LIST_OF_COMPOSE_CONTAINERS}"
-}
-
-skip_config() {
-  if [ "${CHE_SKIP_CONFIG}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
 }
 
 skip_preflight() {
