@@ -13,7 +13,7 @@
 <che-label-container che-label-name="Git URL">
   <form name="createFactoryGitForm">
     <div class="create-factory-git-input">
-      <che-input che-form="createFactoryGitForm"
+      <che-input-box che-form="createFactoryGitForm"
                  che-name="remoteGitURL"
                  che-place-holder="Repository URL"
                  che-width="auto"
@@ -22,7 +22,7 @@
                  required>
         <div ng-message="gitUrl">Invalid Git URL</div>
         <div ng-message="required">A repository URL is required.</div>
-      </che-input>
+      </che-input-box>
     </div>
   </form>
 </che-label-container>

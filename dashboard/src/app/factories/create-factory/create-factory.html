@@ -29,7 +29,7 @@
       <ng-form name="createFactoryForm">
         <div layout="column" class="create-factory-input"
              ng-init="createFactoryCtrl.setForm(createFactoryForm)">
-          <che-input che-form="createFactoryForm"
+          <che-input-box che-form="createFactoryForm"
                      che-name="name"
                      che-place-holder="Name of the factory"
                      aria-label="Name of the factory"
@@ -45,7 +45,7 @@
             </div>
             <div ng-message="minlength">The name has to be more than 3 characters long.</div>
             <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
-          </che-input>
+          </che-input-box>
         </div>
       </ng-form>
     </che-label-container>
@@ -92,13 +92,13 @@
             </div>
           </md-tab-body>
         </md-tab>
-        <md-tab md-on-select="createFactoryCtrl.clearFactoryContent()">
+        <md-tab md-on-select="createFactoryCtrl.clearFactoryContent(); templateSelected = true;" md-on-deselect="templateSelected = false;">
           <md-tab-label>
             <md-icon md-font-icon="fa fa-magic" class="che-tab-label-icon"></md-icon>
             <span class="che-tab-label-title">Template</span>
           </md-tab-label>
           <md-tab-body>
-            <div layout-fill layout="row" layout-align="start center">
+            <div layout-fill layout="row" layout-align="start center" ng-if="templateSelected">
               <cdvy-factory-from-template cdvy-factory-content="createFactoryCtrl.factoryContent"
                                           cdvy-is-importing="createFactoryCtrl.isImporting" layout="column"
                                           flex></cdvy-factory-from-template>

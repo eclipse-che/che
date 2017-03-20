@@ -71,23 +71,22 @@
     <md-radio-group ng-model="factoryInformationController.stackRecipeMode">
       <md-radio-button value="current-recipe">Use current recipe</md-radio-button>
       <div ng-if="factoryInformationController.stackRecipeMode === 'current-recipe'">
-        <div>
-          <a href="{{factoryInformationController.copyOriginFactory.workspace.environments[0].recipe.location}}"
-            target="_blank">{{factoryInformationController.copyOriginFactory.workspace.environments[0].recipe.location}}</a>
+        <div ng-if="factoryInformationController.getRecipe()">
+          {{factoryInformationController.getRecipe()}}
         </div>
-
+        <div ng-if="!factoryInformationController.getRecipe()">
+          none
+        </div>
       </div>
       <md-radio-button value="from-stack">Configure recipe from a stack</md-radio-button>
     </md-radio-group>
     <div ng-if="factoryInformationController.stackRecipeMode === 'from-stack'">
-      <che-workspace-select-stack che-tab-name="tabName"
-                                  che-on-tab-change="factoryInformationController.setStackTab(tabName)"
-                                  che-stack="stack"
-                                  che-stack-change="factoryInformationController.cheStackLibrarySelecter(stack)"
-                                  che-recipe-script="factoryInformationController.recipeScript"
-                                  che-recipe-url="factoryInformationController.recipeUrl"></che-workspace-select-stack>
-      <che-button-primary che-button-title="Validate"
-                          ng-click="factoryInformationController.validateStack()"></che-button-primary>
+      <workspace-select-stack workspace-stack-on-change="factoryInformationController.onWorkspaceStackChanged(config, stackId)"
+                              workspace-name="factoryInformationController.workspaceName"
+                              environment-name="factoryInformationController.environmentName"
+                              workspace-imported-recipe="factoryInformationController.workspaceImportedRecipe"></workspace-select-stack>
+      <che-button-primary che-button-title="Save" class="save-stack-button"
+                          ng-click="factoryInformationController.saveStack()"></che-button-primary>
     </div>
   </che-label-container>
 

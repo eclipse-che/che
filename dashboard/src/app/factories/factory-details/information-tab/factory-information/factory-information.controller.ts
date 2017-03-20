@@ -35,9 +35,11 @@ export class FactoryInformationController {
   private factory: che.IFactory;
   private copyOriginFactory: che.IFactory;
   private factoryContent: any;
-  private stack: any;
-  private recipeUrl: string;
-  private recipeScript: string;
+  private workspaceImportedRecipe: any;
+  private environmentName: string;
+  private workspaceName: string;
+  private stackId: string;
+  private workspaceConfig: any;
 
   /**
    * Default constructor that is using resource injection
@@ -86,6 +88,9 @@ export class FactoryInformationController {
     if (!this.factory) {
       return;
     }
+
+    this.workspaceName = this.factory.workspace.name;
+    this.environmentName = this.factory.workspace.defaultEnv;
 
     this.copyOriginFactory = angular.copy(this.factory);
     if (this.copyOriginFactory.links) {
@@ -235,122 +240,38 @@ export class FactoryInformationController {
   }
 
   /**
-   * Callback when changing stack tab
+   * Returns the recipe value of the environment.
+   *
+   * @returns {any}
    */
-  setStackTab(): void {
-    //
-  }
-
-  /**
-   * Callback when stack has been set
-   * @param stack  the selected stack
-   */
-  cheStackLibrarySelecter(stack: any): void {
-    this.stack = stack;
-  }
-
-  /**
-   * Callback when user asks to validate a stack
-   * We need then to create (if required) recipe and update JSON factory configuration
-   */
-  validateStack(): void {
-    // check predefined recipe location
-    if (this.stack) {
-      // needs to get recipe URL from stack
-      let promise = this.computeRecipeForStack(this.stack);
-      promise.then((recipe: any) => {
-        this.createRecipe(recipe);
-      }, (error: any) => {
-        this.cheNotification.showError(error.data.message ? error.data.message : 'Error during recipe creation.');
-      });
-    } else if (this.recipeUrl) {
-      this.updateMachineRecipeLocation(this.recipeUrl);
-    } else if (this.recipeScript) {
-      // create recipe from script
-      let promise = this.submitRecipe('generated-script', this.recipeScript);
-      promise.then((recipe: any) => {
-        this.createRecipe(recipe);
-      }, (error: any) => {
-        this.cheNotification.showError(error.data.message ? error.data.message : 'Error during recipe creation.');
-      });
+  getRecipe(): string {
+    if (this.copyOriginFactory && this.copyOriginFactory.workspace) {
+      let environement = this.copyOriginFactory.workspace.environments[this.copyOriginFactory.workspace.defaultEnv];
+      return environement.recipe.location || environement.recipe.content;
     }
+    return null;
   }
 
   /**
-   * Get recipe link from newly created recipe
-   * @param recipe the recipe result
+   * Handles stack and workspace config changes.
+   *
+   * @param config workspace config
+   * @param stackId stack id
    */
-  createRecipe(recipe: any): void {
-    let findLink = this.lodash.find(recipe.links, (link) => {
-      return link.rel === 'get recipe script';
-    });
-    if (findLink) {
-      this.updateMachineRecipeLocation(findLink.href);
-    }
+  onWorkspaceStackChanged(config: any, stackId: string): void {
+    this.stackId = stackId;
+    this.workspaceConfig = config;
   }
 
   /**
-   * User has selected a stack. needs to find or add recipe for that stack
+   * Saves stacks changes in workspace config inside factory.
    */
-  computeRecipeForStack(stack: any): void {
-    // look at recipe
-    let recipeSource = stack.source;
-
-    let promise;
-
-    // what is type of source ?
-    if ('image' === recipeSource.type) {
-      // needs to add recipe for that script
-      promise = this.submitRecipe('generated-' + stack.name, 'FROM ' + recipeSource.origin);
-    } else if ('recipe' === recipeSource.type) {
-      promise = this.submitRecipe('generated-' + stack.name, recipeSource.origin);
-    } else {
-      throw 'Not implemented';
-    }
-
-    return promise;
-  }
-
-  /**
-   * Create a new recipe based on a given name and a given script
-   * @param recipeName the name of the recipe
-   * @param recipeScript the content of the docker script for example
-   * @returns {recipe} promise
-   */
-  submitRecipe(recipeName, recipeScript) {
-    let recipe = {
-      type: 'docker',
-      name: recipeName,
-      permissions: {
-        groups: [
-          {
-            name: 'public',
-            acl: [
-              'read'
-            ]
-          }
-        ],
-        users: {}
-      },
-      script: recipeScript
-    };
-
-    return this.cheAPI.getRecipe().create(recipe);
-  }
-
-  /**
-   * Update the machine recipe URL
-   * @param recipeURL
-   */
-  updateMachineRecipeLocation(recipeURL) {
+  saveStack(): void {
     if (!this.copyOriginFactory) {
       return;
     }
-    let machineConfig = this.copyOriginFactory.workspace.environments[0].machines[0];
-    machineConfig.source.type = 'recipe';
-    machineConfig.source.location = recipeURL;
+    this.copyOriginFactory.workspace.environments[this.factory.workspace.defaultEnv] = this.workspaceConfig.environments[this.workspaceConfig.defaultEnv];
 
     this.updateFactory();
   }
-
 }

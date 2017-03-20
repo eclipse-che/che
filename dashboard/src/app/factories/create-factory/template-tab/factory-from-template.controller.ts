@@ -23,21 +23,29 @@ export class FactoryFromTemplateCtrl {
   private isImporting: boolean;
   private factoryContent: any;
   private editorOptions: any;
+  private templateName: string;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($filter: ng.IFilterService, cheAPI: CheAPI, cheNotification: CheNotification) {
+  constructor($filter: ng.IFilterService, cheAPI: CheAPI, cheNotification: CheNotification, $timeout: ng.ITimeoutService) {
     this.$filter = $filter;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
 
     this.isImporting = false;
     this.factoryContent = null;
+    this.templateName = 'minimal';
+    this.getFactoryTemplate(this.templateName);
 
     this.editorOptions = {
-      mode: 'application/json'
+      mode: 'application/json',
+      onLoad: (editor: any) => {
+        $timeout(() => {
+          editor.refresh();
+        }, 1000);
+      }
     };
   }
 
