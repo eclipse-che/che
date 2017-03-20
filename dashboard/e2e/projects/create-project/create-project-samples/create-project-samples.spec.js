@@ -12,16 +12,19 @@
 
 describe('create workspace with project', () => {
   let createProjectPageObject;
+  let createProjectMock;
   let utils;
 
   beforeEach(() => {
     createProjectPageObject = require('../create-project.po');
+    createProjectMock = require('../create-project.mock');
     utils = require('../../../utils');
   });
 
   describe('bugfix https://github.com/eclipse/che/issues/4247', () => {
 
     it('should be selected the very first template in samples list', () => {
+      browser.addMockModule('userDashboardMock', createProjectMock.noWorkspaces);
       browser.get('/');
 
       // user is redirected to create-project view
