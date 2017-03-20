@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.hover;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.common.base.Joiner;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -29,13 +29,10 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConf
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.Hover;
-import org.eclipse.lsp4j.MarkedString;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
-import com.google.common.base.Joiner;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides hover LS functionality for Orion editor.
@@ -95,9 +92,9 @@ public class HoverProvider implements OrionHoverHandler {
 
 			private String renderContent(Hover hover) {
 				List<String> contents = new ArrayList<String>();
-				for (Either<String, MarkedString> dto : hover.getContents()) {
+				for (String dto : hover.getContents()) {
 					// plain markdown text
-					contents.add(dto.isLeft() ? dto.getLeft() : dto.getRight().getValue());
+					contents.add(dto);
 				}
 				return Joiner.on("\n\n").join(contents);
 			}

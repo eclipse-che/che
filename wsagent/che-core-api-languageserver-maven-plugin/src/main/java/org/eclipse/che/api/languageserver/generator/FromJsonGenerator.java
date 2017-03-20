@@ -117,7 +117,7 @@ public class FromJsonGenerator extends ConversionGenerator {
         String innerName = varName + "e";
         String typesName = innerName + "cls";
 
-        Collection<Type> allDisjoinTypes = Either.getAllDisjoinTypes(Either.getLeftDisjointType(paramType));
+        Collection<Type> allDisjoinTypes = EitherUtil.getAllDisjoinTypes(EitherUtil.getLeftDisjointType(paramType));
         Set<Class<?>> leftClasses = allDisjoinTypes.stream().map(t -> getRawClass(t)).collect(Collectors.toSet());
 
         out.println(indent + String.format("JsonDecision[] %1$s= new JsonDecision[] {", typesName));
@@ -136,12 +136,12 @@ public class FromJsonGenerator extends ConversionGenerator {
         out.println(indent + String.format("%1$s %2$s;", paramType.getTypeName(), varName));
         out.println(indent + String.format("if (EitherUtil.matches(%1$s, %2$s)) {", valueAccess, typesName));
 
-        generateFromJson(indent + INDENT, out, innerName, valueAccess, Either.getLeftDisjointType(paramType));
+        generateFromJson(indent + INDENT, out, innerName, valueAccess, EitherUtil.getLeftDisjointType(paramType));
 
         out.println(indent + INDENT + String.format("%1$s= Either.forLeft(%2$s);", varName, innerName));
         out.println(indent + "} else  {");
 
-        generateFromJson(indent + INDENT, out, innerName, valueAccess, Either.getRightDisjointType(paramType));
+        generateFromJson(indent + INDENT, out, innerName, valueAccess, EitherUtil.getRightDisjointType(paramType));
         out.println(indent + INDENT + String.format("%1$s= Either.forRight(%2$s);", varName, innerName));
         out.println(indent + "}");
     }

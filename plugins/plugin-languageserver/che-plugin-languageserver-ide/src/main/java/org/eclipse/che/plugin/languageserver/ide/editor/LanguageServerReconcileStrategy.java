@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
@@ -20,11 +22,6 @@ import org.eclipse.che.plugin.languageserver.ide.editor.sync.TextDocumentSynchro
 import org.eclipse.che.plugin.languageserver.ide.editor.sync.TextDocumentSynchronizeFactory;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
-import org.eclipse.lsp4j.TextDocumentSyncOptions;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
-
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 
 /**
  * Responsible for document synchronization
@@ -40,8 +37,8 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
     public LanguageServerReconcileStrategy(TextDocumentSynchronizeFactory synchronizeFactory,
                                            @Assisted ServerCapabilities serverCapabilities) {
 
-        Either<TextDocumentSyncKind, TextDocumentSyncOptions> documentSync = serverCapabilities.getTextDocumentSync();
-        synchronize = synchronizeFactory.getSynchronize(documentSync.isLeft() ? documentSync.getLeft() : documentSync.getRight().getChange());
+        TextDocumentSyncKind documentSync = serverCapabilities.getTextDocumentSync();
+        synchronize = synchronizeFactory.getSynchronize(documentSync);
     }
 
     @Override

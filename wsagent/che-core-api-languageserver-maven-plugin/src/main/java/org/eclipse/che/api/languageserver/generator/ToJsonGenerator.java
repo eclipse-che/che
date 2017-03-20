@@ -99,10 +99,10 @@ public class ToJsonGenerator extends ConversionGenerator {
 		
 		out.println(indent+String.format("%1$s %2$s;", json.element(), varName));
 		out.println(indent+String.format("if (%1$s.getLeft() != null) {", valueAccess));
-		generateToJson(indent+INDENT, out, innerName, valueAccess+".getLeft()", Either.getLeftDisjointType(paramType));
+		generateToJson(indent+INDENT, out, innerName, valueAccess+".getLeft()", EitherUtil.getLeftDisjointType(paramType));
 		out.println(indent+INDENT+String.format("%1$s= %2$s;", varName, innerName));
 		out.println(indent+"} else  {");
-		generateToJson(indent+INDENT, out, innerName, valueAccess+".getRight()", Either.getRightDisjointType(paramType));
+		generateToJson(indent+INDENT, out, innerName, valueAccess+".getRight()",  EitherUtil.getRightDisjointType(paramType));
 		out.println(indent+INDENT+String.format("%1$s= %2$s;", varName, innerName));
 		out.println(indent+"}");
 	}

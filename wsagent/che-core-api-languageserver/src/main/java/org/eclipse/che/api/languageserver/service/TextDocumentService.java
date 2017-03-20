@@ -10,19 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
+import com.google.inject.Singleton;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
@@ -34,7 +22,6 @@ import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.LocationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SignatureHelpDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SymbolInformationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.TextEditDto;
-import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
@@ -48,15 +35,24 @@ import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageServer;
 
-import com.google.inject.Singleton;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 /**
  * REST API for the textDoc
-
-	Dispatches onto the {@link LanguageServerRegistryImpl}.
+ * 
+ * Dispatches onto the {@link LanguageServerRegistryImpl}.
  */
 @Singleton
 @Path("languageserver/textDocument")
@@ -87,53 +83,41 @@ public class TextDocumentService {
     @Path("completion")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public CompletionListDto completion(TextDocumentPositionParams textDocumentPositionParams) throws InterruptedException,
-                                                                                                      ExecutionException,
-                                                                                                      LanguageServerException {
+    public CompletionListDto completion(TextDocumentPositionParams textDocumentPositionParams)
+                    throws InterruptedException, ExecutionException, LanguageServerException {
         textDocumentPositionParams.getTextDocument().setUri(prefixURI(textDocumentPositionParams.getTextDocument().getUri()));
         textDocumentPositionParams.setUri(prefixURI(textDocumentPositionParams.getUri()));
         LanguageServer server = getServer(textDocumentPositionParams.getTextDocument().getUri());
         if (server == null) {
             return null;
         }
-        Either<List<CompletionItem>, CompletionList> result = server.getTextDocumentService()
-                     .completion(textDocumentPositionParams).get();
-        if (result.isLeft()) {
-        	CompletionListDto ret= new CompletionListDto();
-        	List<CompletionItem> items= new ArrayList<>();
-        	for (CompletionItem item : result.getLeft()) {
-				items.add(new CompletionItemDto(item));
-			}
-        	ret.setItems(items);
-        	return ret;
-        } else {
-           	return new CompletionListDto(result.getRight());
-        }
+        CompletionList result = server.getTextDocumentService().completion(textDocumentPositionParams).get();
+
+        return new CompletionListDto(result);
     }
 
     @POST
     @Path("documentSymbol")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends SymbolInformationDto> documentSymbol(DocumentSymbolParams documentSymbolParams) throws ExecutionException,
-                                                                                                                 InterruptedException,
-                                                                                                                 LanguageServerException {
+    public List<? extends SymbolInformationDto> documentSymbol(DocumentSymbolParams documentSymbolParams)
+                    throws ExecutionException, InterruptedException, LanguageServerException {
         documentSymbolParams.getTextDocument().setUri(prefixURI(documentSymbolParams.getTextDocument().getUri()));
         LanguageServer server = getServer(documentSymbolParams.getTextDocument().getUri());
         if (server == null) {
             return Collections.emptyList();
         }
 
-        return server.getTextDocumentService().documentSymbol(documentSymbolParams).get().stream().map(o->new SymbolInformationDto(o)).collect(Collectors.toList());
+        return server.getTextDocumentService().documentSymbol(documentSymbolParams).get().stream().map(o -> new SymbolInformationDto(o))
+                        .collect(Collectors.toList());
     }
 
     @POST
     @Path("references")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends LocationDto> references(ReferenceParams params) throws ExecutionException,
-                                                                                 InterruptedException,
-                                                                                 LanguageServerException {
+    public List<? extends LocationDto> references(ReferenceParams params)
+                    throws ExecutionException, InterruptedException, LanguageServerException {
         params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
         LanguageServer server = getServer(params.getTextDocument().getUri());
         if (server == null) {
@@ -142,19 +126,17 @@ public class TextDocumentService {
 
         List<? extends Location> locations = server.getTextDocumentService().references(params).get();
         locations.forEach(o -> {
-                o.setUri(removePrefixUri(o.getUri()));
+            o.setUri(removePrefixUri(o.getUri()));
         });
-        return locations.stream().map(o->new LocationDto(o)).collect(Collectors.toList());
+        return locations.stream().map(o -> new LocationDto(o)).collect(Collectors.toList());
     }
-
 
     @POST
     @Path("definition")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends LocationDto> definition(TextDocumentPositionParams params) throws ExecutionException,
-                                                                                            InterruptedException,
-                                                                                            LanguageServerException {
+    public List<? extends LocationDto> definition(TextDocumentPositionParams params)
+                    throws ExecutionException, InterruptedException, LanguageServerException {
         params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
         LanguageServer server = getServer(params.getTextDocument().getUri());
         if (server == null) {
@@ -163,19 +145,17 @@ public class TextDocumentService {
 
         List<? extends Location> locations = server.getTextDocumentService().definition(params).get();
         locations.forEach(o -> {
-                o.setUri(removePrefixUri(o.getUri()));
+            o.setUri(removePrefixUri(o.getUri()));
         });
-        return locations.stream().map(o->new LocationDto(o)).collect(Collectors.toList());
+        return locations.stream().map(o -> new LocationDto(o)).collect(Collectors.toList());
     }
-
 
     @POST
     @Path("completionItem/resolve")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public CompletionItemDto resolveCompletionItem(ExtendedCompletionItemDto unresolved) throws InterruptedException,
-                                                                                     ExecutionException,
-                                                                                     LanguageServerException {
+    public CompletionItemDto resolveCompletionItem(ExtendedCompletionItemDto unresolved)
+                    throws InterruptedException, ExecutionException, LanguageServerException {
         LanguageServer server = getServer(prefixURI(unresolved.getTextDocumentIdentifier().getUri()));
         if (server != null) {
             return new CompletionItemDto(server.getTextDocumentService().resolveCompletionItem(unresolved).get());
@@ -190,7 +170,7 @@ public class TextDocumentService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public HoverDto hover(TextDocumentPositionParams positionParams)
-            throws LanguageServerException, ExecutionException, InterruptedException {
+                    throws LanguageServerException, ExecutionException, InterruptedException {
         positionParams.getTextDocument().setUri(prefixURI(positionParams.getTextDocument().getUri()));
         positionParams.setUri(prefixURI(positionParams.getUri()));
         LanguageServer server = getServer(positionParams.getTextDocument().getUri());
@@ -207,7 +187,7 @@ public class TextDocumentService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public SignatureHelpDto signatureHelp(TextDocumentPositionParams positionParams)
-            throws LanguageServerException, ExecutionException, InterruptedException {
+                    throws LanguageServerException, ExecutionException, InterruptedException {
         positionParams.getTextDocument().setUri(prefixURI(positionParams.getTextDocument().getUri()));
         positionParams.setUri(prefixURI(positionParams.getUri()));
         LanguageServer server = getServer(positionParams.getTextDocument().getUri());
@@ -223,13 +203,13 @@ public class TextDocumentService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<? extends TextEditDto> formatting(DocumentFormattingParams params)
-            throws InterruptedException, ExecutionException, LanguageServerException {
+                    throws InterruptedException, ExecutionException, LanguageServerException {
         params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
         LanguageServer server = getServer(params.getTextDocument().getUri());
         if (server == null) {
             return Collections.emptyList();
         }
-        return server.getTextDocumentService().formatting(params).get().stream().map(o->new TextEditDto(o)).collect(Collectors.toList());
+        return server.getTextDocumentService().formatting(params).get().stream().map(o -> new TextEditDto(o)).collect(Collectors.toList());
 
     }
 
@@ -238,13 +218,14 @@ public class TextDocumentService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<? extends TextEditDto> rangeFormatting(DocumentRangeFormattingParams params)
-            throws InterruptedException, ExecutionException, LanguageServerException {
+                    throws InterruptedException, ExecutionException, LanguageServerException {
         params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
         LanguageServer server = getServer(params.getTextDocument().getUri());
         if (server == null) {
             return Collections.emptyList();
         }
-        return server.getTextDocumentService().rangeFormatting(params).get().stream().map(o->new TextEditDto(o)).collect(Collectors.toList());
+        return server.getTextDocumentService().rangeFormatting(params).get().stream().map(o -> new TextEditDto(o))
+                        .collect(Collectors.toList());
 
     }
 
@@ -253,13 +234,14 @@ public class TextDocumentService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<? extends TextEditDto> onTypeFormatting(DocumentOnTypeFormattingParams params)
-            throws InterruptedException, ExecutionException, LanguageServerException {
+                    throws InterruptedException, ExecutionException, LanguageServerException {
         params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
         LanguageServer server = getServer(params.getTextDocument().getUri());
         if (server == null) {
             return Collections.emptyList();
         }
-        return server.getTextDocumentService().onTypeFormatting(params).get().stream().map(o->new TextEditDto(o)).collect(Collectors.toList());
+        return server.getTextDocumentService().onTypeFormatting(params).get().stream().map(o -> new TextEditDto(o))
+                        .collect(Collectors.toList());
 
     }
 
@@ -312,14 +294,14 @@ public class TextDocumentService {
     @POST
     @Path("documentHighlight")
     @Consumes(MediaType.APPLICATION_JSON)
-	public DocumentHighlight documentHighlight(TextDocumentPositionParams positionParams)
-			throws LanguageServerException, InterruptedException, ExecutionException {
-    	positionParams.getTextDocument().setUri(prefixURI(positionParams.getTextDocument().getUri()));
-    	LanguageServer server = getServer(positionParams.getTextDocument().getUri());
-    	if (server != null) {
-    		return server.getTextDocumentService().documentHighlight(positionParams).get().get(0);
-    	}
-    	return null;
+    public DocumentHighlight documentHighlight(TextDocumentPositionParams positionParams)
+                    throws LanguageServerException, InterruptedException, ExecutionException {
+        positionParams.getTextDocument().setUri(prefixURI(positionParams.getTextDocument().getUri()));
+        LanguageServer server = getServer(positionParams.getTextDocument().getUri());
+        if (server != null) {
+            return server.getTextDocumentService().documentHighlight(positionParams).get().get(0);
+        }
+        return null;
     }
 
     private LanguageServer getServer(String uri) throws LanguageServerException {

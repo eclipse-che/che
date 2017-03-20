@@ -18,13 +18,11 @@ import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.WorkspaceEdi
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
 import org.eclipse.lsp4j.Hover;
-import org.eclipse.lsp4j.MarkedString;
 import org.eclipse.lsp4j.ParameterInformation;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -76,8 +74,7 @@ public class DtoConversionTest {
 
     @Test
     public void testEitherConversion() {
-        List<Either<String, MarkedString>> entries = Arrays.asList(Either.forLeft("foobar"),
-                        Either.forRight(new MarkedString("barLanguage", "bar")));
+        List<String> entries = Arrays.asList("foobar", "bar");
         Hover hover = new Hover(entries, new Range(new Position(0, 1), new Position(2, 3)));
 
         HoverDto originalDto = new HoverDto(hover);

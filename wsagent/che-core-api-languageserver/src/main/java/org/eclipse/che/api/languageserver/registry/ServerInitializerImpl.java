@@ -10,17 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-
-import javax.annotation.PreDestroy;
-
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsMessenger;
@@ -29,7 +20,6 @@ import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
-import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -39,8 +29,16 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import javax.annotation.PreDestroy;
+
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Anatoliy Bazko
@@ -74,9 +72,8 @@ public class ServerInitializerImpl implements ServerInitializer {
 			}
 			
 			@Override
-			public CompletableFuture<MessageActionItem> showMessageRequest(ShowMessageRequestParams requestParams) {
-				// TODO Auto-generated method stub
-				return null;
+			public CompletableFuture<Void> showMessageRequest(ShowMessageRequestParams requestParams) {
+				return CompletableFuture.completedFuture(null);
 			}
 			
 			@Override
@@ -178,7 +175,6 @@ public class ServerInitializerImpl implements ServerInitializer {
         }
     }
 
-    @SuppressWarnings("deprecation")
 	protected InitializeParams prepareInitializeParams(String projectPath) {
         InitializeParams initializeParams = new InitializeParams();
         initializeParams.setProcessId(PROCESS_ID);

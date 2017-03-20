@@ -85,10 +85,10 @@ public class ToDtoGenerator extends ConversionGenerator {
 		
 		out.println(indent+String.format("%1$s %2$s;", paramType.getTypeName(), varName));
 		out.println(indent+String.format("if (%1$s.getLeft() != null) {", valueAccess));
-		generateToDto(indent+INDENT, out, innerName, valueAccess+".getLeft()", Either.getLeftDisjointType(paramType));
+		generateToDto(indent+INDENT, out, innerName, valueAccess+".getLeft()", EitherUtil.getLeftDisjointType(paramType));
 		out.println(indent+INDENT+String.format("%1$s= Either.forLeft(%2$s);", varName, innerName));
 		out.println(indent+"} else  {");
-		generateToDto(indent+INDENT, out, innerName, valueAccess+".getRight()", Either.getRightDisjointType(paramType));
+		generateToDto(indent+INDENT, out, innerName, valueAccess+".getRight()", EitherUtil.getRightDisjointType(paramType));
 		out.println(indent+INDENT+String.format("%1$s= Either.forRight(%2$s);", varName, innerName));
 		out.println(indent+"}");
 	}
