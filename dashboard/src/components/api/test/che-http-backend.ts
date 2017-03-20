@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheAPIBuilder} from '../builder/che-api-builder.factory';
 
 /**
  * This class is providing helper methods for simulating a fake HTTP backend simulating
@@ -37,7 +38,7 @@ export class CheHttpBackend {
   /**
    * Constructor to use
    */
-  constructor(private $httpBackend, private cheAPIBuilder) {
+  constructor($httpBackend: ng.IHttpBackendService, cheAPIBuilder: CheAPIBuilder) {
     this.httpBackend = $httpBackend;
     this.projectsPerWorkspace = new Map();
     this.workspaces = new Map();
@@ -59,7 +60,7 @@ export class CheHttpBackend {
   /**
    * Setup all data that should be retrieved on calls
    */
-  setup() {
+  setup(): void {
     // add the remote call
     let workspaceReturn = [];
     let workspaceKeys = this.workspaces.keys();
@@ -88,14 +89,14 @@ export class CheHttpBackend {
       this.httpBackend.when('GET', this.workspaceAgentMap.get(key) + '/project-type').respond(this.projectTypesWorkspaces.get(key));
     }
 
-    //profiles
+    // profiles
     this.httpBackend.when('GET', '/api/profile').respond(this.defaultProfile);
     let profileKeys = this.profilesMap.keys();
     for (let key of profileKeys) {
       this.httpBackend.when('GET', '/api/profile/' + key).respond(this.profilesMap.get(key));
     }
 
-    //preferences
+    // preferences
     this.httpBackend.when('GET', '/api/preferences').respond(this.defaultPreferences);
     this.httpBackend.when('DELETE', '/api/preferences').respond(200, {});
 
@@ -118,7 +119,7 @@ export class CheHttpBackend {
    * Set workspace auto snapshot status
    * @param isAutoSnapshot {boolean}
    */
-  setWorkspaceAutoSnapshot(isAutoSnapshot: boolean) {
+  setWorkspaceAutoSnapshot(isAutoSnapshot: boolean): void {
     this.isAutoSnapshot = isAutoSnapshot;
   }
 
@@ -126,7 +127,7 @@ export class CheHttpBackend {
    * Set workspace auto restore status
    * @param isAutoRestore {boolean}
    */
-  setWorkspaceAutoRestore(isAutoRestore: boolean) {
+  setWorkspaceAutoRestore(isAutoRestore: boolean): void {
     this.isAutoRestore = isAutoRestore;
   }
 
@@ -135,8 +136,8 @@ export class CheHttpBackend {
    * Add the given workspaces on this backend
    * @param workspaces an array of workspaces
    */
-  addWorkspaces(workspaces) {
-    workspaces.forEach((workspace) => {
+  addWorkspaces(workspaces: any[]): void {
+    workspaces.forEach((workspace: any) => {
 
       // if there is a workspace ID, add empty projects
       if (workspace.id) {
@@ -152,7 +153,7 @@ export class CheHttpBackend {
    * Add the given stacks on this backend
    * @param stacks an array of stacks
    */
-  addStacks(stacks) {
+  addStacks(stacks: any): void {
     this.stacks.push(...stacks);
   }
 
@@ -162,7 +163,7 @@ export class CheHttpBackend {
    * @param workspace the workspace to use for adding projects
    * @param projects the projects to add
    */
-  addProjects(workspace, projects) {
+  addProjects(workspace: any, projects: any[]): void {
     // we need the workspaceReference ID
     if (!workspace.id) {
       throw 'no workspace id set';
@@ -179,7 +180,7 @@ export class CheHttpBackend {
       workspaceFound.config.projects = [];
     }
     if (projects) {
-      projects.forEach((project) => {
+      projects.forEach((project: any) => {
         existingProjects.push(project);
       });
     }
@@ -191,7 +192,7 @@ export class CheHttpBackend {
     }
 
     // add each project
-    projects.forEach((project) => {
+    projects.forEach((project: any) => {
         this.projectsPerWorkspace.get(workspace.id).push(project);
         this.httpBackend.when('PUT', this.workspaceAgentMap.get(workspace.id) + '/project/' + project.name).respond(200, {});
         this.httpBackend.when('GET', this.workspaceAgentMap.get(workspace.id) + '/project/resolve/' + project.name).respond(200, []);
@@ -208,7 +209,7 @@ export class CheHttpBackend {
    * @param workspaceId the workspaceId of the project types
    * @param projectTypes
    */
-  addProjectTypes(workspaceId, projectTypes) {
+  addProjectTypes(workspaceId: string, projectTypes: any[]): void {
     this.projectTypesWorkspaces.set(workspaceId, projectTypes);
   }
 
@@ -217,9 +218,9 @@ export class CheHttpBackend {
    * @param workspaceId the workspaceId of the runt
    * @param runtime runtime to add
    */
-  addWorkspaceAgent(workspaceId, runtime) {
+  addWorkspaceAgent(workspaceId: any, runtime: any): void {
     if (runtime && runtime.links) {
-      runtime.links.forEach((link) => {
+      runtime.links.forEach((link: any) => {
         if (link.rel === 'wsagent') {
           this.workspaceAgentMap.set(workspaceId, link.href);
         }
@@ -231,7 +232,7 @@ export class CheHttpBackend {
    * Add the given profile
    * @param profile
    */
-  addDefaultProfile(profile) {
+  addDefaultProfile(profile: any): void {
     this.defaultProfile = profile;
   }
 
@@ -239,7 +240,7 @@ export class CheHttpBackend {
    * Add the given preferences
    * @param preferences
    */
-  addDefaultPreferences(preferences) {
+  addDefaultPreferences(preferences: any): void {
     this.defaultPreferences = preferences;
   }
 
@@ -247,7 +248,7 @@ export class CheHttpBackend {
    * Add the given preferences
    * @param preferences
    */
-  setPreferences(preferences) {
+  setPreferences(preferences: any): void {
     this.httpBackend.when('POST', '/api/preferences').respond(preferences);
     this.defaultPreferences = preferences;
   }
@@ -256,7 +257,7 @@ export class CheHttpBackend {
    * Add the given profile
    * @param profile
    */
-  addProfileId(profile) {
+  addProfileId(profile: any): void {
     this.profilesMap.put(profile.id, profile);
   }
 
@@ -265,7 +266,7 @@ export class CheHttpBackend {
    * Set attributes of the current user
    * @param attributes
    */
-  setAttributes(attributes) {
+  setAttributes(attributes: any): void {
     this.httpBackend.when('PUT', '/api/profile/attributes').respond(attributes);
     this.defaultProfile.attributes = attributes;
   }
@@ -274,7 +275,7 @@ export class CheHttpBackend {
    * Add the given project templates
    * @param projectTemplates
    */
-  addProjectTemplates(projectTemplates) {
+  addProjectTemplates(projectTemplates: any): void {
     this.httpBackend.when('GET', '/api/project-template/all').respond(projectTemplates);
   }
 
@@ -282,7 +283,7 @@ export class CheHttpBackend {
    * Gets the internal http backend used
    * @returns {CheHttpBackend.httpBackend|*}
    */
-  getHttpBackend() {
+  getHttpBackend(): ng.IHttpBackendService {
     return this.httpBackend;
   }
 
@@ -290,7 +291,7 @@ export class CheHttpBackend {
    * Add the project details
    * @param projectDetails the project details
    */
-  addProjectDetails(projectDetails) {
+  addProjectDetails(projectDetails: any): void {
     this.projectDetailsMap.set(projectDetails.workspaceId + '/' + projectDetails.name, projectDetails);
   }
 
@@ -300,7 +301,7 @@ export class CheHttpBackend {
    * @param projectName
    * @param newProjectDetails
    */
-  addUpdatedProjectDetails(workspaceId, projectName, newProjectDetails) {
+  addUpdatedProjectDetails(workspaceId: string, projectName: string, newProjectDetails: any): void {
     this.httpBackend.when('PUT', '/project/' + workspaceId + '/' + projectName).respond(newProjectDetails);
   }
 
@@ -309,7 +310,7 @@ export class CheHttpBackend {
    * @param workspaceId the id of project workspace
    * @param projectName the project name
    */
-  addFetchProjectDetails(workspaceId, projectName) {
+  addFetchProjectDetails(workspaceId: string, projectName: string): void {
     this.httpBackend.when('GET', '/project/' + projectName)
       .respond(this.projectDetailsMap.get(workspaceId + '/' + projectName));
   }
@@ -320,7 +321,7 @@ export class CheHttpBackend {
    * @param projectName the project name
    * @param newProjectName the new project name
    */
-  addUpdatedProjectName(workspaceId, projectName, newProjectName) {
+  addUpdatedProjectName(workspaceId: string, projectName: string, newProjectName: string): void {
     this.httpBackend.when('POST', '/project/rename/' + projectName + '?name=' + newProjectName).respond(newProjectName);
   }
 
@@ -330,7 +331,7 @@ export class CheHttpBackend {
    * @param projectPath
    * @param remoteArray
    */
-  addRemoteGitUrlArray(workspaceId, projectPath, remoteArray) {
+  addRemoteGitUrlArray(workspaceId: string, projectPath: string, remoteArray: any[]): void {
     this.remoteGitUrlArraysMap.set(workspaceId + projectPath, remoteArray);
   }
 
@@ -340,7 +341,7 @@ export class CheHttpBackend {
    * @param projectPath
    * @param localUrl
    */
-  addLocalGitUrl(workspaceId, projectPath, localUrl) {
+  addLocalGitUrl(workspaceId: string, projectPath: string, localUrl: string): void {
     this.localGitUrlsMap.set(workspaceId + projectPath, localUrl);
   }
 
@@ -350,7 +351,7 @@ export class CheHttpBackend {
    * @param projectPath
    * @param localUrl
    */
-  addRemoteSvnUrl(workspaceId, projectPath, localUrl) {
+  addRemoteSvnUrl(workspaceId: string, projectPath: string, localUrl: string): void {
     this.remoteSvnUrlsMap.set(workspaceId + projectPath, localUrl);
   }
 
@@ -359,7 +360,7 @@ export class CheHttpBackend {
    * @param workspaceId
    * @param projectPath
    */
-  getLocalGitUrl(workspaceId, projectPath) {
+  getLocalGitUrl(workspaceId: string, projectPath: string): void {
     this.httpBackend.when('GET', this.workspaceAgentMap.get(workspaceId) + '/git/read-only-url?projectPath=' + projectPath)
       .respond(this.localGitUrlsMap.get(workspaceId + projectPath));
   }
@@ -369,7 +370,7 @@ export class CheHttpBackend {
    * @param workspaceId
    * @param projectPath
    */
-  getRemoteGitUrlArray(workspaceId, projectPath) {
+  getRemoteGitUrlArray(workspaceId: string, projectPath: string): void {
     this.httpBackend.when('POST', this.workspaceAgentMap.get(workspaceId) + '/git/remote-list?projectPath=' + projectPath)
       .respond(this.remoteGitUrlArraysMap.get(workspaceId + projectPath));
   }
@@ -379,11 +380,11 @@ export class CheHttpBackend {
    * @param workspaceId
    * @param projectPath
    */
-  getRemoteSvnUrl(workspaceId, projectPath) {
-    let svnInfo: {items: any[]} = {};
+  getRemoteSvnUrl(workspaceId: string, projectPath: string): void {
+    let svnInfo: {items?: any[]} = {};
     svnInfo.items = [{uRL: this.remoteSvnUrlsMap.get(workspaceId + projectPath)}];
 
-    this.httpBackend.when('POST', this.workspaceAgentMap.get(workspaceId) + '/svn/info?workspaceId='+workspaceId).respond(svnInfo);
+    this.httpBackend.when('POST', this.workspaceAgentMap.get(workspaceId) + '/svn/info?workspaceId=' + workspaceId).respond(svnInfo);
   }
 
 }

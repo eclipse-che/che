@@ -47,16 +47,21 @@ public class FileOpenCloseEventListener {
             @Override
             public void onFileOperation(FileEvent event) {
                 final Path path = event.getFile().getLocation();
+                final EditorAgent editorAgent = editorAgentProvider.get();
 
                 switch (event.getOperationType()) {
                     case OPEN: {
-                        processFileOpen(path);
+                        if (editorAgent.getOpenedEditor(path) == null) {                 // if we haven't any editor for given path yet
+                            Log.debug(getClass(), "Subscribe file for event handling");  // we subscribe for event handling otherwise we
+                                                                                         // do nothing
+                            processFileOpen(path);
+                        }
 
                         break;
                     }
                     case CLOSE: {
                         final EditorPartPresenter closingEditor = event.getEditorTab().getRelativeEditorPart();
-                        final List<EditorPartPresenter> openedEditors = editorAgentProvider.get().getOpenedEditors();
+                        final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
 
                         processFileClose(closingEditor, openedEditors, path);
 
