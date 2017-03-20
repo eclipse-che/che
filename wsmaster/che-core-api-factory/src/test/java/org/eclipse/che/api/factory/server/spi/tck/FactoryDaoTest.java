@@ -54,7 +54,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -149,7 +148,7 @@ public class FactoryDaoTest {
         update.setName("new-name");
         update.setV("5_0");
         final long currentTime = System.currentTimeMillis();
-        update.setPolicies(new PoliciesImpl("ref", "match", "per-click", currentTime, currentTime + 1000));
+        update.setPolicies(new PoliciesImpl("ref", "per-click", currentTime, currentTime + 1000));
         update.setCreator(new AuthorImpl(userId, currentTime));
         update.setButton(new ButtonImpl(new ButtonAttributesImpl("green", "icon", "opacity 0.9", true),
                                         Button.Type.NOLOGO));
@@ -208,13 +207,13 @@ public class FactoryDaoTest {
 
     @Test(dependsOnMethods = "shouldUpdateFactory")
     public void shouldFindFactoryByEmbeddedAttributes() throws Exception {
-        final List<Pair<String, String>> attributes = ImmutableList.of(Pair.of("policies.match", "match"),
+        final List<Pair<String, String>> attributes = ImmutableList.of(Pair.of("policies.referer", "referrer"),
                                                                        Pair.of("policies.create", "perClick"),
                                                                        Pair.of("workspace.defaultEnv", "env1"));
         final FactoryImpl factory1 = factories[1];
         final FactoryImpl factory3 = factories[3];
         factory1.getPolicies().setCreate("perAccount");
-        factory3.getPolicies().setMatch("update");
+        factory3.getPolicies().setReferer("ref2");
         factoryDao.update(factory1);
         factoryDao.update(factory3);
         final List<FactoryImpl> result = factoryDao.getByAttribute(factories.length, 0, attributes);
@@ -252,7 +251,7 @@ public class FactoryDaoTest {
         final ButtonImpl factoryButton = new ButtonImpl(new ButtonAttributesImpl("red", "logo", "style", true),
                                                         Button.Type.LOGO);
         final AuthorImpl creator = new AuthorImpl(userId, timeMs);
-        final PoliciesImpl policies = new PoliciesImpl("referrer", "match", "perClick", timeMs, timeMs + 1000);
+        final PoliciesImpl policies = new PoliciesImpl("referrer", "perClick", timeMs, timeMs + 1000);
         final Set<FactoryImage> images = new HashSet<>();
         final List<ActionImpl> a1 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key1", "value1"))));
         final OnAppLoadedImpl onAppLoaded = new OnAppLoadedImpl(a1);
