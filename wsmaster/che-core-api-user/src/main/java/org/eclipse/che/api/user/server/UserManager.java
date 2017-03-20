@@ -31,7 +31,6 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -72,13 +71,6 @@ public class UserManager {
         this.preferencesDao = preferencesDao;
         this.eventService = eventService;
         this.reservedNames = Sets.newHashSet(reservedNames);
-    }
-
-
-    @Inject
-    private void subscribe(EventService eventService) {
-        eventService.subscribe(new RemovePreferencesBeforeUserRemovedEventSubscriber(), BeforeUserRemovedEvent.class);
-        eventService.subscribe(new RemoveProfileBeforeUserRemovedEventSubscriber(), BeforeUserRemovedEvent.class);
     }
 
     /**
@@ -266,21 +258,9 @@ public class UserManager {
             return;
         }
 
+        preferencesDao.remove(id);
+        profileDao.remove(id);
         eventService.publish(new BeforeUserRemovedEvent(user)).propagateException();
         userDao.remove(id);
-    }
-
-    private class RemovePreferencesBeforeUserRemovedEventSubscriber extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
-        @Override
-        public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
-            preferencesDao.remove(event.getUser().getId());
-        }
-    }
-
-    private class RemoveProfileBeforeUserRemovedEventSubscriber extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
-        @Override
-        public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
-            profileDao.remove(event.getUser().getId());
-        }
     }
 }
