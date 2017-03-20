@@ -228,7 +228,7 @@ public class JpaUserDao implements UserDao {
     }
 
     @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
-    protected void doRemove(String id) throws ServerException {
+    protected void doRemove(String id) {
         final EntityManager manager = managerProvider.get();
         final UserImpl user = manager.find(UserImpl.class, id);
         if (user != null) {
