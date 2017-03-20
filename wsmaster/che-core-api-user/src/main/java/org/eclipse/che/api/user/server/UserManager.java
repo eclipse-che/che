@@ -12,20 +12,26 @@ package org.eclipse.che.api.user.server;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.google.inject.persist.Transactional;
 
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
+import org.eclipse.che.api.user.server.event.PostUserPersistedEvent;
+import org.eclipse.che.api.user.server.event.UserCreatedEvent;
+import org.eclipse.che.api.user.server.event.UserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -34,7 +40,6 @@ import java.util.Set;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.user.server.Constants.ID_LENGTH;
@@ -50,22 +55,30 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 @Singleton
 public class UserManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UserManager.class);
-
     private final UserDao       userDao;
     private final ProfileDao    profileDao;
     private final PreferenceDao preferencesDao;
     private final Set<String>   reservedNames;
+    private final EventService  eventService;
 
     @Inject
     public UserManager(UserDao userDao,
                        ProfileDao profileDao,
                        PreferenceDao preferencesDao,
+                       EventService eventService,
                        @Named("che.auth.reserved_user_names") String[] reservedNames) {
         this.userDao = userDao;
         this.profileDao = profileDao;
         this.preferencesDao = preferencesDao;
+        this.eventService = eventService;
         this.reservedNames = Sets.newHashSet(reservedNames);
+    }
+
+
+    @Inject
+    private void subscribe(EventService eventService) {
+        eventService.subscribe(new RemovePreferencesBeforeUserRemovedEventSubscriber(), BeforeUserRemovedEvent.class);
+        eventService.subscribe(new RemoveProfileBeforeUserRemovedEventSubscriber(), BeforeUserRemovedEvent.class);
     }
 
     /**
@@ -91,30 +104,18 @@ public class UserManager {
                                            newUser.getName(),
                                            firstNonNull(newUser.getPassword(), generate("", PASSWORD_LENGTH)),
                                            newUser.getAliases());
-        try {
-            userDao.create(user);
-            profileDao.create(new ProfileImpl(user.getId()));
-            preferencesDao.setPreferences(user.getId(), ImmutableMap.of("temporary", Boolean.toString(isTemporary),
-                                                                        "codenvy:created", Long.toString(currentTimeMillis())));
-        } catch (ConflictException | ServerException x) {
-            // optimistic rollback(won't remove profile if userDao.remove failed)
-            // remove operation is not-found-safe so if any exception
-            // during the either user or profile creation occurs remove all entities
-            // NOTE: this logic must be replaced with transaction management
-            try {
-                userDao.remove(user.getId());
-                profileDao.remove(user.getId());
-                preferencesDao.remove(user.getId());
-            } catch (ServerException rollbackEx) {
-                LOG.error(format("An attempt to clean up resources due to user creation failure was unsuccessful." +
-                                 "Now the system may be in inconsistent state. " +
-                                 "User with id '%s' must not exist",
-                                 user.getId()),
-                          rollbackEx);
-            }
-            throw x;
-        }
+        doCreate(user, isTemporary);
+        eventService.publish(new UserCreatedEvent(user));
         return user;
+    }
+
+    @Transactional(rollbackOn = {RuntimeException.class, ApiException.class})
+    protected void doCreate(UserImpl user, boolean isTemporary) throws ConflictException, ServerException {
+        userDao.create(user);
+        eventService.publish(new PostUserPersistedEvent(new UserImpl(user))).propagateException();
+        profileDao.create(new ProfileImpl(user.getId()));
+        preferencesDao.setPreferences(user.getId(), ImmutableMap.of("temporary", Boolean.toString(isTemporary),
+                                                                    "codenvy:created", Long.toString(currentTimeMillis())));
     }
 
     /**
@@ -252,6 +253,34 @@ public class UserManager {
      */
     public void remove(String id) throws ServerException, ConflictException {
         requireNonNull(id, "Required non-null id");
+        doRemove(id);
+        eventService.publish(new UserRemovedEvent(id));
+    }
+
+    @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
+    protected void doRemove(String id) throws ServerException {
+        UserImpl user;
+        try {
+            user = userDao.getById(id);
+        } catch (NotFoundException ignored) {
+            return;
+        }
+
+        eventService.publish(new BeforeUserRemovedEvent(user)).propagateException();
         userDao.remove(id);
+    }
+
+    private class RemovePreferencesBeforeUserRemovedEventSubscriber extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
+        @Override
+        public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
+            preferencesDao.remove(event.getUser().getId());
+        }
+    }
+
+    private class RemoveProfileBeforeUserRemovedEventSubscriber extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
+        @Override
+        public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
+            profileDao.remove(event.getUser().getId());
+        }
     }
 }
