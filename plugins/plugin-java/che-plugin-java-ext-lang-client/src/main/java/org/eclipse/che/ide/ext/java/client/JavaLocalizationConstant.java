@@ -36,6 +36,9 @@ public interface JavaLocalizationConstant extends Messages {
     @Key("action.newClass.description")
     String actionNewClassDescription();
 
+    @Key("action.newClass.nameIsInvalid")
+    String actionNewClassNameIsInvalid();
+
     @Key("action.newPackage.title")
     String actionNewPackageTitle();
 

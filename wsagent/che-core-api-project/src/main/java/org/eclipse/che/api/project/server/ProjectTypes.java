@@ -25,6 +25,8 @@ import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.ErrorCodes.ATTRIBUTE_NAME_PROBLEM;
+import static org.eclipse.che.api.core.ErrorCodes.PROJECT_TYPE_IS_NOT_REGISTERED;
 
 /**
  * @author gazarenkov
@@ -54,19 +56,19 @@ public class ProjectTypes {
 
         ProjectTypeDef tmpPrimary;
         if (type == null) {
-            this.problems.add(new Problem(12, "No primary type defined for " + projectPath + " Base Project Type assigned."));
+            this.problems.add(new Problem(PROJECT_TYPE_IS_NOT_REGISTERED, "No primary type defined for " + projectPath + " Base Project Type assigned."));
             tmpPrimary = ProjectTypeRegistry.BASE_TYPE;
         } else {
             try {
                 tmpPrimary = projectTypeRegistry.getProjectType(type);
             } catch (NotFoundException e) {
-                this.problems.add(new Problem(12, "Primary type " + type + " defined for " + projectPath +
+                this.problems.add(new Problem(PROJECT_TYPE_IS_NOT_REGISTERED, "Primary type " + type + " defined for " + projectPath +
                                              " is not registered. Base Project Type assigned."));
                 tmpPrimary = ProjectTypeRegistry.BASE_TYPE;
             }
 
             if (!tmpPrimary.isPrimaryable()) {
-                this.problems.add(new Problem(12, "Project type " + tmpPrimary.getId() + " is not allowable to be primary type. Base Project Type assigned."));
+                this.problems.add(new Problem(PROJECT_TYPE_IS_NOT_REGISTERED, "Project type " + tmpPrimary.getId() + " is not allowable to be primary type. Base Project Type assigned."));
                 tmpPrimary = ProjectTypeRegistry.BASE_TYPE;
             }
         }
@@ -93,12 +95,12 @@ public class ProjectTypes {
             try {
                 mixin = projectTypeRegistry.getProjectType(mixinFromConfig);
             } catch (NotFoundException e) {
-                this.problems.add(new Problem(12, "Project type " + mixinFromConfig + " is not registered. Skipped."));
+                this.problems.add(new Problem(PROJECT_TYPE_IS_NOT_REGISTERED, "Project type " + mixinFromConfig + " is not registered. Skipped."));
                 continue;
             }
 
             if (!mixin.isMixable()) {
-                this.problems.add(new Problem(12, "Project type " + mixin + " is not allowable to be mixin. It not mixable. Skipped."));
+                this.problems.add(new Problem(PROJECT_TYPE_IS_NOT_REGISTERED, "Project type " + mixin + " is not allowable to be mixin. It not mixable. Skipped."));
                 continue;
             }
 
@@ -110,7 +112,7 @@ public class ProjectTypes {
             for (Attribute attr : mixin.getAttributes()) {
                 final String attrName = attr.getName();
                 if (attributeDefs.containsKey(attrName)) {
-                    this.problems.add(new Problem(13,
+                    this.problems.add(new Problem(ATTRIBUTE_NAME_PROBLEM,
                                                   format("Attribute name conflict. Duplicated attributes detected for %s. " +
                                                          "Attribute %s declared in %s already declared in %s. Skipped.",
                                                          projectPath, attrName, mixin.getId(), attributeDefs.get(attrName).getProjectType())));
@@ -189,7 +191,7 @@ public class ProjectTypes {
                 for (Attribute attr : pt.getAttributes()) {
                     final String attrName = attr.getName();
                     if (attributeDefs.containsKey(attrName)) {
-                        problems.add(new Problem(13,
+                        problems.add(new Problem(ATTRIBUTE_NAME_PROBLEM,
                                                  format("Attribute name conflict. Duplicated attributes detected for %s. " +
                                                         "Attribute %s declared in %s already declared in %s. Skipped.",
                                                         projectPath, attrName, pt.getId(), attributeDefs.get(attrName).getProjectType())));

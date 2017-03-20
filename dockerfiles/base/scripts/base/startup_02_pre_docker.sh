@@ -692,3 +692,11 @@ is_boot2docker() {
     return 1
   fi
 }
+
+skip_config() {
+  if [ "${CHE_SKIP_CONFIG}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}

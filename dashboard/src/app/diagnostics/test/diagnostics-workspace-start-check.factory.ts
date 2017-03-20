@@ -206,8 +206,11 @@ export class DiagnosticsWorkspaceStartCheck {
           this.workspaceCallback.stateRunning('RUNNING');
           this.cheWorkspace.fetchWorkspaces().then(() => {
             let workspace = diagnosticCallback.getShared('workspace');
+            let workspaceId = workspace.id;
             this.cheWorkspace.fetchWorkspaceDetails(workspace.id).then(() => {
-              diagnosticCallback.shared('workspace', this.cheWorkspace.getWorkspaceById(workspace.id));
+              let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
+              diagnosticCallback.shared('workspace', workspace);
+              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['USER_TOKEN']);
               diagnosticCallback.success('Starting workspace OK');
             })
           });
@@ -248,8 +251,11 @@ export class DiagnosticsWorkspaceStartCheck {
             }
             hint += 'specific to your environment. See the `' + this.cheBranding.getCLI().configName + '` file for specifics.';
             diagnosticCallback.notifyFailure('The workspace started, but ' + this.cheBranding.getName() + ' <--> Workspace connection not established', hint);
+            let workspaceId = workspace.id;
             this.cheWorkspace.fetchWorkspaceDetails(workspace.id).then(() => {
-              diagnosticCallback.shared('workspace', this.cheWorkspace.getWorkspaceById(workspace.id));
+              let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
+              diagnosticCallback.shared('workspace', workspace);
+              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['USER_TOKEN']);
               let newCallback : DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent by using Workspace Agent IP');
               this.diagnosticsRunningWorkspaceCheck.checkWsAgent(newCallback, false);
               let websocketCallback : DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent with websocket');

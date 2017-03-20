@@ -132,6 +132,10 @@ public class JavaUtils {
                                                               "(?:" + "\\." + IDENTIFIER_FIRST_SYMBOL + IDENTIFIER_NOT_FIRST_SYMBOL + "*)" +
                                                               "*$)";
     public static final  RegExp JAVA_PACKAGE_FQN_PATTERN    = RegExp.compile(RESERVED_WORDS + JAVA_IDENTIFIER);
+    public static final  RegExp JAVA_CLASS_NAME_PATTERN     = RegExp.compile(RESERVED_WORDS +
+                                                                             "(^" +
+                                                                             "(?:" + IDENTIFIER_FIRST_SYMBOL + IDENTIFIER_NOT_FIRST_SYMBOL +
+                                                                             "*)*$)");
 
     private JavaUtils() {
     }
@@ -217,10 +221,7 @@ public class JavaUtils {
     }
 
     private static IStatus validateCompilationUnitName(String name) {
-//        return JavaConventions.validateCompilationUnitName(name, JavaCore.getOption(JavaCore.COMPILER_SOURCE),
-//                                                           JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE));
-        //TODO provide more simple way to check java names
-        return OK_STATUS;
+        return JAVA_CLASS_NAME_PATTERN.test(name) ? OK_STATUS : new Status(ERROR, "unknown", null, null);
     }
 
     private static IStatus validatePackageName(String name) {
