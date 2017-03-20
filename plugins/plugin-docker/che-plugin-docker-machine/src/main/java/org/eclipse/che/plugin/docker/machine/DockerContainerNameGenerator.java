@@ -28,8 +28,9 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
     private static final String NODE_HOST_GROUP    = "(/|(/[0-9a-z.-]+/))?";
     private static final String WORKSPACE_ID_GROUP = "(?<workspaceId>workspace[0-9a-z]+)";
     private static final String MACHINE_ID_GROUP   = "(?<machineId>machine[0-9a-z]+)";
+    private static final String SERVER_ID_GROUP   = "(?<serverId>server[0-9a-z]+)";
 
-    private static final String  CONTAINER_NAME_REGEX   = "^" + NODE_HOST_GROUP + WORKSPACE_ID_GROUP + "_" + MACHINE_ID_GROUP + "_.+$";
+    private static final String  CONTAINER_NAME_REGEX   = "^" + NODE_HOST_GROUP + WORKSPACE_ID_GROUP + SERVER_ID_GROUP + "_" + MACHINE_ID_GROUP + "_.+$";
     private static final Pattern CONTAINER_NAME_PATTERN = Pattern.compile(CONTAINER_NAME_REGEX);
 
     /**
@@ -41,14 +42,16 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
      *         unique workspace id, see more (@link WorkspaceConfig#getId)
      * @param machineId
      *         unique machine id, see more {@link Machine#getId()}
+     * @param serverId
+     *         unique server containter id
      * @param userName
      *         name of the user who is docker container owner
      * @param machineName
      *         name of the workspace machine, see more {@link MachineConfig#getName()}
      */
     @Override
-    public String generateContainerName(String workspaceId, String machineId, String userName, String machineName) {
-        String containerName = workspaceId + '_' + machineId + '_' + userName + '_' + machineName;
+    public String generateContainerName(String workspaceId, String machineId, String serverId, String userName, String machineName) {
+        String containerName = workspaceId + '_' + machineId + '_' + serverId + '_' + userName + '_' + machineName;
         return containerName.toLowerCase().replaceAll("[^a-z0-9_-]+", "");
     }
 
@@ -68,7 +71,8 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
         if (matcher.matches()) {
             String workspaceId = matcher.group("workspaceId");
             String machineId = matcher.group("machineId");
-            containerNameInfo = new ContainerNameInfo(workspaceId, machineId);
+            String serverId = matcher.group("serverId");
+            containerNameInfo = new ContainerNameInfo(workspaceId, machineId, serverId);
         }
         return Optional.ofNullable(containerNameInfo);
     }
@@ -81,10 +85,12 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
 
         private final String workspaceId;
         private final String machineId;
+        private final String serverId;
 
-        private ContainerNameInfo(String workspaceId, String machineId) {
+        private ContainerNameInfo(String workspaceId, String machineId, String serverId) {
             this.workspaceId = workspaceId;
             this.machineId = machineId;
+            this.serverId = serverId;
         }
 
         /**
@@ -101,11 +107,19 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
             return workspaceId;
         }
 
+        /**
+         * Return serverId of the server.
+         */
+        public String getServerId() {
+            return serverId;
+        }
+
         @Override
         public String toString() {
             return "ContainerNameInfo{" +
                    "workspaceId='" + workspaceId + '\'' +
                    ", machineId='" + machineId + '\'' +
+                   ", serverId='" + serverId + '\'' +
                    '}';
         }
 
@@ -115,7 +129,8 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
             if (!(obj instanceof ContainerNameInfo)) return false;
             final ContainerNameInfo other = (ContainerNameInfo)obj;
             return Objects.equals(workspaceId, other.workspaceId)
-                   && Objects.equals(machineId, other.machineId);
+                   && Objects.equals(machineId, other.machineId)
+                   && Objects.equals(serverId, other.serverId);
         }
 
         @Override
@@ -123,6 +138,7 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
             int hash = 7;
             hash = 31 * hash + Objects.hashCode(workspaceId);
             hash = 31 * hash + Objects.hashCode(machineId);
+            hash = 31 * hash + Objects.hashCode(serverId);
             return hash;
         }
     }

@@ -716,6 +716,7 @@ public class CheEnvironmentEngine {
 
         service.setContainerName(containerNameGenerator.generateContainerName(workspaceId,
                                                                               service.getId(),
+                                                                              "server"+System.getenv("CHE_CONTAINER"),
                                                                               namespace,
                                                                               machineName));
     }

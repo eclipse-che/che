@@ -34,6 +34,7 @@ public class DockerContainerNameGeneratorTest {
     private static final String MACHINE_NAME = "ws-machine";
     private static final String MACHINE_ID   = "machineic131ppamujngv6y";
     private static final String USER_NAME    = "some_user";
+    private static final String CHE_SERVER_CONTAINER_ID    = System.getenv("CHE_CONTAINER");
 
     @InjectMocks
     private DockerContainerNameGenerator nameGenerator;
@@ -41,13 +42,13 @@ public class DockerContainerNameGeneratorTest {
     @Test
     public void containerNameShouldBeGenerated() {
         String expectedResult = "workspacebbbx2ree3iykn8gc_machineic131ppamujngv6y_some_user_ws-machine";
-        String actualResult = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
+        String actualResult = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID,CHE_SERVER_CONTAINER_ID, USER_NAME, MACHINE_NAME);
         assertEquals(expectedResult, actualResult);
     }
 
     @Test
     public void machineNameShouldBeReturnedByGeneratedContainerName() {
-        String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
+        String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID,CHE_SERVER_CONTAINER_ID, USER_NAME, MACHINE_NAME);
 
         Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(generatedName);
 
