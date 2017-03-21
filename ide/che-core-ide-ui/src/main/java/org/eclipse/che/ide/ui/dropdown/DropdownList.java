@@ -89,6 +89,7 @@ public class DropdownList extends Composite {
         dropButtonPanel.getElement().appendChild(RESOURCES.expansionImage().getSvg().getElement());
 
         dropdownContentPanel = new FlowPanel();
+        dropdownContentPanel.ensureDebugId("dropdown-list-content-panel");
 
         dropdownPopupPanel = new PopupPanel(true);
         dropdownPopupPanel.removeStyleName("gwt-PopupPanel");
