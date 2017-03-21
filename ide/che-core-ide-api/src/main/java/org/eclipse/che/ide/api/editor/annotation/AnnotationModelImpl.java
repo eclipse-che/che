@@ -61,17 +61,17 @@ public class AnnotationModelImpl implements AnnotationModel {
 
     @Override
     public void addAnnotation(final Annotation annotation, final Position position) {
+        addAnnotation(annotation, position, true);
+    }
+
+    protected void addAnnotation(final Annotation annotation, final Position position, final boolean fireEvent) {
+        annotations.put(annotation, position);
+        positions.put(position, annotation);
         try {
-            addAnnotation(annotation, position, true);
+            addPosition(position);
         } catch (BadLocationException ignore) {
             //ignore invalid location
         }
-    }
-
-    protected void addAnnotation(final Annotation annotation, final Position position, final boolean fireEvent) throws BadLocationException {
-        annotations.put(annotation, position);
-        positions.put(position, annotation);
-        addPosition(position);
         getAnnotationModelEvent().annotationAdded(annotation);
         if (fireEvent) {
             fireModelChanged();
