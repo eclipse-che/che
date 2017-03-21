@@ -62,6 +62,7 @@ class ProcessWidget extends FlowPanel {
         durationLabel = new Label();
         durationLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
         durationLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetPidLabel());
+        durationLabel.ensureDebugId("dropdown-processes-label-duration");
 
         updateDurationTimer = new UpdateDurationTimer();
         if (!stopped) {
@@ -71,6 +72,7 @@ class ProcessWidget extends FlowPanel {
         pidLabel = new Label('#' + Integer.toString(process.getPid()));
         pidLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
         pidLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetPidLabel());
+        pidLabel.ensureDebugId("dropdown-processes-label-pid");
 
         add(createMachineNameLabel(process));
         add(createCommandNameLabel(process));
@@ -83,29 +85,33 @@ class ProcessWidget extends FlowPanel {
     }
 
     private Label createMachineNameLabel(Process process) {
-        final Label machineNameLabel = new InlineHTML(process.getMachine().getConfig().getName() + ":&nbsp;");
-        machineNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
-        machineNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetMachineNameLabel());
+        final Label label = new InlineHTML(process.getMachine().getConfig().getName() + ":&nbsp;");
 
-        Tooltip.create((Element)machineNameLabel.getElement(),
+        label.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
+        label.addStyleName(RESOURCES.commandToolbarCss().processWidgetMachineNameLabel());
+        label.ensureDebugId("dropdown-processes-machine-name");
+
+        Tooltip.create((Element)label.getElement(),
                        BOTTOM,
                        MIDDLE,
                        process.getCommandLine().split("\\n"));
 
-        return machineNameLabel;
+        return label;
     }
 
     private Label createCommandNameLabel(Process process) {
-        final Label commandNameLabel = new InlineHTML(process.getName());
-        commandNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
-        commandNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetCommandNameLabel());
+        final Label label = new InlineHTML(process.getName());
 
-        Tooltip.create((Element)commandNameLabel.getElement(),
+        label.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
+        label.addStyleName(RESOURCES.commandToolbarCss().processWidgetCommandNameLabel());
+        label.ensureDebugId("dropdown-processes-command-name");
+
+        Tooltip.create((Element)label.getElement(),
                        BOTTOM,
                        MIDDLE,
                        process.getCommandLine().split("\\n"));
 
-        return commandNameLabel;
+        return label;
     }
 
     private ActionButton createStopButton(Process process, StopProcessHandler handler) {
@@ -114,10 +120,9 @@ class ProcessWidget extends FlowPanel {
 
         final ActionButton button = new ActionButton(safeHtmlBuilder.toSafeHtml());
         button.addClickHandler(event -> handler.onStopProcess(process));
+        button.ensureDebugId("dropdown-processes-stop");
 
         Tooltip.create((Element)button.getElement(), BOTTOM, MIDDLE, "Stop");
-
-        button.ensureDebugId("dropdown-processes-stop");
 
         return button;
     }
@@ -128,10 +133,9 @@ class ProcessWidget extends FlowPanel {
 
         final ActionButton button = new ActionButton(safeHtmlBuilder.toSafeHtml());
         button.addClickHandler(event -> handler.onRerunProcess(process));
+        button.ensureDebugId("dropdown-processes-rerun");
 
         Tooltip.create((Element)button.getElement(), BOTTOM, MIDDLE, "Re-run");
-
-        button.ensureDebugId("dropdown-processes-rerun");
 
         return button;
     }
