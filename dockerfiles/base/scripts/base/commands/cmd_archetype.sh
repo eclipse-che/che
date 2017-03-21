@@ -28,6 +28,8 @@ help_cmd_archetype() {
   text "  run                         Starts ${CHE_MINI_PRODUCT_NAME} from custom assembly in '/archetype'\n"
   text "\n"
   text "PARAMETERS:\n"
+  text "  --che                       For run and stop commands. Select Che assembly\n"
+  text "  --codenvy                   For run and stop commands. Select Codenvy assembly\n"
   text "  --archid=<id>               Different archetypes generate different types of customizations\n"
   text "  --archversion=<version>     Sets archetype version - default = tag of CLI image\n"
   text "  --version=<version>         Sets custom assembly version - default = archetype version\n"
@@ -71,17 +73,28 @@ pre_cmd_archetype() {
 
 ##############################
 # REPLACE THIS WITH $(get_image_version) AFTER CI SYSTEMS GENERATING
-  ARCHETYPE_VERSION=5.5.0-SNAPSHOT
+  ARCHETYPE_VERSION=5.6.0-SNAPSHOT
   ASSEMBLY_VERSION=$ARCHETYPE_VERSION
   ASSEMBLY_GROUP="com.sample"
   ASSEMBLY_ID="assembly"
   SKIP_INTERACTIVE=false
+  ASSEMBLY_TYPE="che"
 
   for i in "$@"
   do
     case $1 in
-      all|generate|build|run)
+      all|generate|build|run|stop)
         ARCHETYPE_ACTION=$1
+        shift
+        ;;
+
+      --che)
+        ASSEMBLY_TYPE="che"
+        shift
+        ;;
+
+      --codenvy)
+        ASSEMBLY_TYPE="codenvy"
         shift
         ;;
 
@@ -159,6 +172,9 @@ cmd_archetype() {
     ;;
     run)
       cmd_lifecycle arun
+    ;;
+    stop)
+      cmd_lifecycle astop
     ;;
     all)
       cmd_lifecycle agenerate || true

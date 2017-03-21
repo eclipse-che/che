@@ -9,14 +9,14 @@
 #   Tyler Jewell - Initial Implementation
 #
 
-pre_cmd_arun() {
+pre_cmd_astop() {
   if [ ! -d /archetype/$ASSEMBLY_ID ]; then
     error "Assembly at ${ARCHETYPE_MOUNT}/$ASSEMBLY_ID not found."
     return 2
   fi
 }
 
-cmd_arun() {
+cmd_astop() {
 
 case $ASSEMBLY_TYPE in
     codenvy )      CLI_IMAGE=codenvy/cli:nightly
@@ -31,12 +31,12 @@ esac
 
   cd /archetype/$ASSEMBLY_ID
 
-  RUN_COMMAND="docker run -it --rm --name run-che \
+  STOP_COMMAND="docker run -it --rm --name run-che \
                    -v /var/run/docker.sock:/var/run/docker.sock \
                    -v \"${DATA_MOUNT}\":${CHE_CONTAINER_ROOT} \
                    -v \"${ARCHETYPE_MOUNT}\"/\"${ASSEMBLY_LOCATION}\":/assembly \
                       ${CLI_IMAGE} \
-                          start --skip:nightly"
-  log ${RUN_COMMAND}
-  eval ${RUN_COMMAND}
+                          stop --skip:nightly --skip:graceful"
+  log ${STOP_COMMAND}
+  eval ${STOP_COMMAND}
 }
