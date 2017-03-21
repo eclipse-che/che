@@ -146,194 +146,277 @@ import static org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar.BLANK_
 @Singleton
 public class StandardComponentInitializer {
 
-    public static final String NAVIGATE_TO_FILE    = "navigateToFile";
-    public static final String FULL_TEXT_SEARCH    = "fullTextSearch";
-    public static final String FIND_ACTION         = "findActionAction";
-    public static final String FORMAT              = "format";
-    public static final String COPY                = "copy";
-    public static final String CUT                 = "cut";
-    public static final String PASTE               = "paste";
-    public static final String SWITCH_LEFT_TAB     = "switchLeftTab";
-    public static final String SWITCH_RIGHT_TAB    = "switchRightTab";
-    public static final String OPEN_RECENT_FILES   = "openRecentFiles";
-    public static final String DELETE_ITEM         = "deleteItem";
-    public static final String NEW_FILE            = "newFile";
-    public static final String CREATE_PROJECT      = "createProject";
-    public static final String IMPORT_PROJECT      = "importProject";
-    public static final String CLOSE_ACTIVE_EDITOR = "closeActiveEditor";
-    public static final String SIGNATURE_HELP      = "signatureHelp";
-    public static final String RENAME              = "renameResource";
-    public static final String SHOW_REFERENCE      = "showReference";
+    public static final String NAVIGATE_TO_FILE      = "navigateToFile";
+    public static final String FULL_TEXT_SEARCH      = "fullTextSearch";
+    public static final String FIND_ACTION           = "findActionAction";
+    public static final String FORMAT                = "format";
+    public static final String COPY                  = "copy";
+    public static final String CUT                   = "cut";
+    public static final String PASTE                 = "paste";
+    public static final String SWITCH_LEFT_TAB       = "switchLeftTab";
+    public static final String SWITCH_RIGHT_TAB      = "switchRightTab";
+    public static final String OPEN_RECENT_FILES     = "openRecentFiles";
+    public static final String DELETE_ITEM           = "deleteItem";
+    public static final String NEW_FILE              = "newFile";
+    public static final String CREATE_PROJECT        = "createProject";
+    public static final String IMPORT_PROJECT        = "importProject";
+    public static final String CLOSE_ACTIVE_EDITOR   = "closeActiveEditor";
+    public static final String SIGNATURE_HELP        = "signatureHelp";
+    public static final String RENAME                = "renameResource";
+    public static final String SHOW_REFERENCE        = "showReference";
+    public static final String SHOW_COMMANDS_PALETTE = "showCommandsPalette";
+
+    public interface ParserResource extends ClientBundle {
+        @Source("org/eclipse/che/ide/blank.svg")
+        SVGResource samplesCategoryBlank();
+    }
 
     @Inject
-    private EditorRegistry               editorRegistry;
+    private EditorRegistry editorRegistry;
+
     @Inject
-    private FileTypeRegistry             fileTypeRegistry;
+    private FileTypeRegistry fileTypeRegistry;
+
     @Inject
-    private Resources                    resources;
+    private Resources resources;
+
     @Inject
-    private KeyBindingAgent              keyBinding;
+    private KeyBindingAgent keyBinding;
+
     @Inject
-    private ActionManager                actionManager;
+    private ActionManager actionManager;
+
     @Inject
-    private SaveAction                   saveAction;
+    private SaveAction saveAction;
+
     @Inject
-    private SaveAllAction                saveAllAction;
+    private SaveAllAction saveAllAction;
+
     @Inject
-    private ShowPreferencesAction        showPreferencesAction;
+    private ShowPreferencesAction showPreferencesAction;
+
     @Inject
-    private FindActionAction             findActionAction;
+    private FindActionAction findActionAction;
+
     @Inject
-    private NavigateToFileAction         navigateToFileAction;
+    private NavigateToFileAction navigateToFileAction;
+
     @Inject
     @MainToolbar
-    private ToolbarPresenter             toolbarPresenter;
+    private ToolbarPresenter toolbarPresenter;
+
     @Inject
-    private CutResourceAction            cutResourceAction;
+    private CutResourceAction cutResourceAction;
+
     @Inject
-    private CopyResourceAction           copyResourceAction;
+    private CopyResourceAction copyResourceAction;
+
     @Inject
-    private PasteResourceAction          pasteResourceAction;
+    private PasteResourceAction pasteResourceAction;
+
     @Inject
-    private DeleteResourceAction         deleteResourceAction;
+    private DeleteResourceAction deleteResourceAction;
+
     @Inject
-    private RenameItemAction             renameItemAction;
+    private RenameItemAction renameItemAction;
+
     @Inject
-    private CollapseAllAction            collapseAllAction;
+    private CollapseAllAction collapseAllAction;
+
     @Inject
-    private SplitVerticallyAction        splitVerticallyAction;
+    private SplitVerticallyAction splitVerticallyAction;
+
     @Inject
-    private SplitHorizontallyAction      splitHorizontallyAction;
+    private SplitHorizontallyAction splitHorizontallyAction;
+
     @Inject
-    private CloseAction                  closeAction;
+    private CloseAction closeAction;
+
     @Inject
-    private CloseAllAction               closeAllAction;
+    private CloseAllAction closeAllAction;
+
     @Inject
-    private CloseOtherAction             closeOtherAction;
+    private CloseOtherAction closeOtherAction;
+
     @Inject
-    private CloseAllExceptPinnedAction   closeAllExceptPinnedAction;
+    private CloseAllExceptPinnedAction closeAllExceptPinnedAction;
+
     @Inject
-    private ReopenClosedFileAction       reopenClosedFileAction;
+    private ReopenClosedFileAction reopenClosedFileAction;
+
     @Inject
-    private PinEditorTabAction           pinEditorTabAction;
+    private PinEditorTabAction pinEditorTabAction;
+
     @Inject
-    private GoIntoAction                 goIntoAction;
+    private GoIntoAction goIntoAction;
+
     @Inject
-    private EditFileAction               editFileAction;
+    private EditFileAction editFileAction;
+
     @Inject
-    private OpenFileAction               openFileAction;
+    private OpenFileAction openFileAction;
+
     @Inject
-    private ShowHiddenFilesAction        showHiddenFilesAction;
+    private ShowHiddenFilesAction showHiddenFilesAction;
+
     @Inject
-    private FormatterAction              formatterAction;
+    private FormatterAction formatterAction;
+
     @Inject
-    private UndoAction                   undoAction;
+    private UndoAction undoAction;
+
     @Inject
-    private RedoAction                   redoAction;
+    private RedoAction redoAction;
+
     @Inject
-    private UploadFileAction             uploadFileAction;
+    private UploadFileAction uploadFileAction;
+
     @Inject
-    private UploadFolderAction           uploadFolderAction;
+    private UploadFolderAction uploadFolderAction;
+
     @Inject
-    private DownloadProjectAction        downloadProjectAction;
+    private DownloadProjectAction downloadProjectAction;
+
     @Inject
-    private DownloadWsAction             downloadWsAction;
+    private DownloadWsAction downloadWsAction;
+
     @Inject
-    private DownloadResourceAction       downloadResourceAction;
+    private DownloadResourceAction downloadResourceAction;
+
     @Inject
-    private ImportProjectAction          importProjectAction;
+    private ImportProjectAction importProjectAction;
+
     @Inject
-    private CreateProjectAction          createProjectAction;
+    private CreateProjectAction createProjectAction;
+
     @Inject
     private ConvertFolderToProjectAction convertFolderToProjectAction;
+
     @Inject
-    private FullTextSearchAction         fullTextSearchAction;
+    private FullTextSearchAction fullTextSearchAction;
+
     @Inject
-    private NewFolderAction              newFolderAction;
+    private NewFolderAction newFolderAction;
+
     @Inject
-    private NewFileAction                newFileAction;
+    private NewFileAction newFileAction;
+
     @Inject
-    private NewXmlFileAction             newXmlFileAction;
+    private NewXmlFileAction newXmlFileAction;
+
     @Inject
-    private ImageViewerProvider          imageViewerProvider;
+    private ImageViewerProvider imageViewerProvider;
+
     @Inject
-    private ProjectConfigurationAction   projectConfigurationAction;
+    private ProjectConfigurationAction projectConfigurationAction;
+
     @Inject
-    private ExpandEditorAction           expandEditorAction;
+    private ExpandEditorAction expandEditorAction;
+
     @Inject
-    private CompleteAction               completeAction;
+    private CompleteAction completeAction;
+
     @Inject
-    private SwitchPreviousEditorAction   switchPreviousEditorAction;
+    private SwitchPreviousEditorAction switchPreviousEditorAction;
+
     @Inject
-    private SwitchNextEditorAction       switchNextEditorAction;
+    private SwitchNextEditorAction switchNextEditorAction;
+
     @Inject
-    private HotKeysListAction            hotKeysListAction;
+    private HotKeysListAction hotKeysListAction;
+
     @Inject
-    private OpenRecentFilesAction        openRecentFilesAction;
+    private OpenRecentFilesAction openRecentFilesAction;
+
     @Inject
-    private ClearRecentListAction        clearRecentFilesAction;
+    private ClearRecentListAction clearRecentFilesAction;
+
     @Inject
-    private CloseActiveEditorAction      closeActiveEditorAction;
+    private CloseActiveEditorAction closeActiveEditorAction;
+
     @Inject
-    private ShowCommandsPaletteAction    showCommandsPaletteAction;
+    private MessageLoaderResources messageLoaderResources;
+
     @Inject
-    private MessageLoaderResources       messageLoaderResources;
+    private EditorResources editorResources;
+
     @Inject
-    private EditorResources              editorResources;
+    private PopupResources popupResources;
+
     @Inject
-    private PopupResources               popupResources;
+    private ShowReferenceAction showReferenceAction;
+
     @Inject
-    private ShowReferenceAction          showReferenceAction;
+    private RevealResourceAction revealResourceAction;
+
     @Inject
-    private RevealResourceAction         revealResourceAction;
+    private RefreshPathAction refreshPathAction;
+
     @Inject
-    private RefreshPathAction            refreshPathAction;
+    private LinkWithEditorAction linkWithEditorAction;
+
     @Inject
-    private LinkWithEditorAction         linkWithEditorAction;
+    private SignatureHelpAction signatureHelpAction;
+
     @Inject
-    private SignatureHelpAction          signatureHelpAction;
+    private MaximizePartAction maximizePartAction;
+
     @Inject
-    private MaximizePartAction           maximizePartAction;
+    private MinimizePartAction minimizePartAction;
+
     @Inject
-    private MinimizePartAction           minimizePartAction;
+    private RestorePartAction restorePartAction;
+
     @Inject
-    private RestorePartAction            restorePartAction;
+    private ShowCommandsPaletteAction showCommandsPaletteAction;
+
     @Inject
-    private PerspectiveManager           perspectiveManager;
+    private PerspectiveManager perspectiveManager;
 
     @Inject
     @Named("XMLFileType")
     private FileType xmlFile;
+
     @Inject
     @Named("TXTFileType")
     private FileType txtFile;
+
     @Inject
     @Named("JsonFileType")
     private FileType jsonFile;
+
     @Inject
     @Named("MDFileType")
     private FileType mdFile;
+
     @Inject
     @Named("PNGFileType")
     private FileType pngFile;
+
     @Inject
     @Named("BMPFileType")
     private FileType bmpFile;
+
     @Inject
     @Named("GIFFileType")
     private FileType gifFile;
+
     @Inject
     @Named("ICOFileType")
     private FileType iconFile;
+
     @Inject
     @Named("SVGFileType")
     private FileType svgFile;
+
     @Inject
     @Named("JPEFileType")
     private FileType jpeFile;
+
     @Inject
     @Named("JPEGFileType")
     private FileType jpegFile;
+
     @Inject
     @Named("JPGFileType")
     private FileType jpgFile;
@@ -345,19 +428,26 @@ public class StandardComponentInitializer {
     private FileType              commandFileType;
     @Inject
     private WsConnectionListener wsConnectionListener;
+
     @Inject
     private ProjectConfigSynchronized projectConfigSynchronized;
+
     @Inject
-    private TreeResourceRevealer  treeResourceRevealer; //just to work with it
+    private TreeResourceRevealer treeResourceRevealer; //just to work with it
+
     // do not remove the injections below
     @Inject
-    private ServerMacro           serverMacro;
+    private ServerMacro serverMacro;
+
     @Inject
-    private ServerProtocolMacro   serverProtocolMacro;
+    private ServerProtocolMacro serverProtocolMacro;
+
     @Inject
-    private ServerHostNameMacro   serverHostNameMacro;
+    private ServerHostNameMacro serverHostNameMacro;
+
     @Inject
-    private ServerPortMacro       serverPortMacro;
+    private ServerPortMacro serverPortMacro;
+
 
     /** Instantiates {@link StandardComponentInitializer} an creates standard content. */
     @Inject
@@ -640,7 +730,7 @@ public class StandardComponentInitializer {
         editorTabContextMenu.add(splitVerticallyAction);
         actionManager.registerAction(SIGNATURE_HELP, signatureHelpAction);
 
-        actionManager.registerAction("showCommandsPalette", showCommandsPaletteAction);
+        actionManager.registerAction(SHOW_COMMANDS_PALETTE, showCommandsPaletteAction);
         DefaultActionGroup runGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RUN);
         runGroup.add(showCommandsPaletteAction);
 
@@ -671,11 +761,11 @@ public class StandardComponentInitializer {
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('e').build(), OPEN_RECENT_FILES);
         keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.DELETE).build(), DELETE_ITEM);
 
-        keyBinding.getGlobal().addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F10).build(), "showCommandsPalette");
-
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('N').build(), NEW_FILE);
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('x').build(), CREATE_PROJECT);
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('A').build(), IMPORT_PROJECT);
+
+        keyBinding.getGlobal().addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F10).build(), SHOW_COMMANDS_PALETTE);
 
         if (UserAgent.isMac()) {
             keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('w').build(), CLOSE_ACTIVE_EDITOR);
@@ -688,26 +778,24 @@ public class StandardComponentInitializer {
 
         final Map<String, Perspective> perspectives = perspectiveManager.getPerspectives();
         if (perspectives.size() > 1) { //if registered perspectives will be more then 2 Main Menu -> Window
-            // will appears and contains all of them as sub-menu
+                                       // will appears and contains all of them as sub-menu
             final DefaultActionGroup windowMenu = new DefaultActionGroup("Window", true, actionManager);
             actionManager.registerAction("Window", windowMenu);
             final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
             mainMenu.add(windowMenu);
-            for (Perspective perspective : perspectives.values()) {
+            for(Perspective perspective : perspectives.values()) {
                 final Action action = new Action(perspective.getPerspectiveName()) {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         perspectiveManager.setPerspectiveId(perspective.getPerspectiveId());
                     }
-                };
-                actionManager.registerAction(perspective.getPerspectiveId(), action);
-                windowMenu.add(action);
-            }
+            };
+            actionManager.registerAction(perspective.getPerspectiveId(), action);
+            windowMenu.add(action);
         }
+
     }
 
-    public interface ParserResource extends ClientBundle {
-        @Source("org/eclipse/che/ide/blank.svg")
-        SVGResource samplesCategoryBlank();
-    }
+}
+
 }
