@@ -16,11 +16,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>5.5.0</version>
+        <version>5.6.0-openshift-connector-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>5.5.0</version>
+    <version>5.6.0-openshift-connector-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -43,7 +43,7 @@
     <properties>
         <che.docs.version>5.5.0</che.docs.version>
         <che.lib.version>5.5.0</che.lib.version>
-        <che.version>5.5.0</che.version>
+        <che.version>5.6.0-openshift-connector-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -96,56 +96,56 @@
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>go-agents</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <type>tar.gz</type>
                 <classifier>linux_amd64</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>go-agents</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <type>tar.gz</type>
                 <classifier>linux_arm7</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>go-agents</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>ls-csharp-agent</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>ls-json-agent</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>ls-php-agent</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>ls-python-agent</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>ls-typescript-agent</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>ssh-agent</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>unison-agent</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -155,7 +155,7 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-account</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <classifier>tests</classifier>
             </dependency>
             <dependency>
@@ -206,7 +206,7 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-factory</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <classifier>tests</classifier>
             </dependency>
             <dependency>
@@ -253,7 +253,7 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-machine</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <classifier>tests</classifier>
             </dependency>
             <dependency>
@@ -325,7 +325,7 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-user</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <classifier>tests</classifier>
             </dependency>
             <dependency>
@@ -397,17 +397,17 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-db</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-db-vendor-h2</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-db-vendor-postgresql</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -452,7 +452,7 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>wsagent</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -681,7 +681,7 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-languageserver-ide</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
@@ -801,7 +801,7 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-requirejs</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>

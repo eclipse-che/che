@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.5.0</version>
+        <version>5.6.0-openshift-connector-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-ide-war</artifactId>
     <packaging>war</packaging>
@@ -407,7 +407,7 @@
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-dyna-provider-generator-maven-plugin</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>

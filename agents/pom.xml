@@ -16,12 +16,11 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.5.0</version>
+        <version>5.6.0-openshift-connector-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-agents-parent</artifactId>
-    <version>5.5.0</version>
     <packaging>pom</packaging>
     <name>Che Agents Parent</name>
     <modules>
