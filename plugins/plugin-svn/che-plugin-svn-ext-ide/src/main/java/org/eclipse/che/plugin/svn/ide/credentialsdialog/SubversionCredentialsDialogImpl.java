@@ -14,6 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.api.user.Credentials;
 import org.eclipse.che.ide.user.AskCredentialsDialogImpl;
@@ -33,7 +34,8 @@ public class SubversionCredentialsDialogImpl extends AskCredentialsDialogImpl im
     private AsyncCallback<Credentials> callback;
 
     @Inject
-    public SubversionCredentialsDialogImpl(SubversionCredentialsDialogView view) {
+    public SubversionCredentialsDialogImpl(SubversionCredentialsDialogView view, CoreLocalizationConstant localizationConstant) {
+        super(localizationConstant);
         this.view = view;
         this.view.setDelegate(this);
     }
