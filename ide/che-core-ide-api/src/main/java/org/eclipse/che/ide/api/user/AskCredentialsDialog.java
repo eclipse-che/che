@@ -9,16 +9,16 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 //TODO This is used in wizard/ProjectImporter, find a solution to move it to plugin-svn.
-package org.eclipse.che.ide.api.subversion;
+package org.eclipse.che.ide.api.user;
 
 import org.eclipse.che.api.promises.client.Promise;
 
 /**
- * Dialog for retrieving credentials for SVN operations.
+ * Dialog for retrieving credentials for operations.
  *
  * @author Igor Vinokur
  */
-public interface SubversionCredentialsDialog {
+public interface AskCredentialsDialog {
 
     /**
      * Returns credentials from dialog.
