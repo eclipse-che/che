@@ -349,6 +349,7 @@ public final class ResourceManager {
                     public Promise<Folder> apply(final ItemReference reference) throws FunctionException {
 
                         final Resource createdFolder = newResourceFrom(reference);
+                        store.register(createdFolder);
                         eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(createdFolder, ADDED | DERIVED)));
 
                         return promises.resolve(createdFolder.asFolder());
@@ -392,6 +393,7 @@ public final class ResourceManager {
                     public Promise<File> apply(final ItemReference reference) throws FunctionException {
 
                         final Resource createdFile = newResourceFrom(reference);
+                        store.register(createdFile);
                         eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(createdFile, ADDED | DERIVED)));
 
                         return promises.resolve(createdFile.asFile());
@@ -1228,18 +1230,23 @@ public final class ResourceManager {
     }
 
     private Promise<Void> onExternalDeltaRemoved(final ResourceDelta delta) {
-        return findResource(delta.getFromPath(), true).then(new Function<Optional<Resource>, Void>() {
-            @Override
-            public Void apply(Optional<Resource> resource) throws FunctionException {
+
+        final Optional<Resource> resource = store.getResource(delta.getFromPath());
+
+//        return findResource(delta.getFromPath(), true).then(new Function<Optional<Resource>, Void>() {
+//            @Override
+//            public Void apply(Optional<Resource> resource) throws FunctionException {
 
                 if (resource.isPresent()) {
                     store.dispose(resource.get().getLocation(), true);
                     eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource.get(), REMOVED | DERIVED)));
                 }
 
-                return null;
-            }
-        });
+//                return null;
+//            }
+//        });
+
+        return promises.resolve(null);
     }
 
     protected Promise<Resource[]> search(final Container container, String fileMask, String contentMask) {
