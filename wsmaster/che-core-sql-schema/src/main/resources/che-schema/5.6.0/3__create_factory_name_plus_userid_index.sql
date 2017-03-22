@@ -13,4 +13,4 @@
 -- from Codenvy S.A..
 --
 
-CREATE UNIQUE INDEX index_name_plus_userid ON che_factory (user_id, name);
+CREATE UNIQUE INDEX index_che_factory_name_user_id ON che_factory (user_id, name);
