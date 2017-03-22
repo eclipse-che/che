@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.annotation;
 
+import org.eclipse.che.ide.api.editor.text.Position;
+import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import org.eclipse.che.ide.api.editor.text.Position;
-import org.eclipse.che.ide.api.editor.text.TypedPosition;
-import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
 
 /**
  * An iterator iteration over a Positions and mapping positions to
@@ -27,7 +26,7 @@ final class AnnotationsIterator implements Iterator<Annotation> {
 
     private Annotation next;
 
-    private final List<TypedPosition> positions;
+    private final List<Position> positions;
 
     private int index;
 
@@ -37,9 +36,8 @@ final class AnnotationsIterator implements Iterator<Annotation> {
      * @param positions
      *         positions to iterate over
      * @param map
-     *         a map to map positions to annotations
      */
-    public AnnotationsIterator(final List<TypedPosition> positions,
+    public AnnotationsIterator(final List<Position> positions,
                                final Map<Position, Annotation> map) {
         this.positions = positions;
         this.index = 0;
