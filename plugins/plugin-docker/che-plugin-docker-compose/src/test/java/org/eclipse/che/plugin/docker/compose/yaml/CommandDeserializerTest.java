@@ -137,7 +137,7 @@ public class CommandDeserializerTest {
                 {"\"echo ${PWD}\"", asList("echo", "${PWD}"), 2},
                 {"\"(Test)\"", singletonList("(Test)"), 1},
 
-                {"", singletonList(""), 1},
+                {"\"\"", singletonList(""), 1},
         };
     }
 
