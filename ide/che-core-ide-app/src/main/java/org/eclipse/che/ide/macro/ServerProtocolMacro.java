@@ -19,6 +19,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.macro.BaseMacro;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
 import org.eclipse.che.ide.api.machine.DevMachine;
@@ -61,9 +62,9 @@ public class ServerProtocolMacro extends AbstractServerMacro {
                 continue;
             }
 
-            Macro macro = new CustomMacro(KEY.replace("%", entry.getKey()),
-                                          entry.getValue().getProtocol(),
-                                          "Returns protocol of a server registered by name");
+            Macro macro = new BaseMacro(KEY.replace("%", entry.getKey()),
+                                        entry.getValue().getProtocol(),
+                                        "Returns protocol of a server registered by name");
 
             macros.add(macro);
 
@@ -71,9 +72,9 @@ public class ServerProtocolMacro extends AbstractServerMacro {
             if (entry.getKey().endsWith("/tcp")) {
                 final String port = entry.getKey().substring(0, entry.getKey().length() - 4);
 
-                Macro shortMacro = new CustomMacro(KEY.replace("%", port),
-                                                   entry.getValue().getProtocol(),
-                                                   "Returns protocol of a server registered by name");
+                Macro shortMacro = new BaseMacro(KEY.replace("%", port),
+                                                 entry.getValue().getProtocol(),
+                                                 "Returns protocol of a server registered by name");
 
                 macros.add(shortMacro);
             }

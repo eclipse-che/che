@@ -17,26 +17,26 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.Server;
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.macro.Macro;
-import org.eclipse.che.ide.api.macro.MacroRegistry;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.macro.BaseMacro;
+import org.eclipse.che.ide.api.macro.Macro;
+import org.eclipse.che.ide.api.macro.MacroRegistry;
 
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Provide mapping internal port, i.e. ${server.port.8080} to 127.0.0.1:21212.
+ * For every server in WsAgent's machine registers a {@link Macro} that
+ * returns server's external address in form <b>hostname:port</b>.
  *
  * @author Vlad Zhukovskiy
  */
 @Singleton
-public class ServerPortProvider implements WsAgentStateHandler {
+public class ServerAddressMacroRegistrar implements WsAgentStateHandler {
 
-    public static final String KEY_TEMPLATE = "${server.port.%}";
+    public static final String MACRO_NAME_TEMPLATE = "${server.port.%}";
 
     private final MacroRegistry macroRegistry;
     private final AppContext    appContext;
@@ -44,35 +44,34 @@ public class ServerPortProvider implements WsAgentStateHandler {
     private Set<Macro> macros;
 
     @Inject
-    public ServerPortProvider(EventBus eventBus,
-                              MacroRegistry macroRegistry,
-                              AppContext appContext) {
+    public ServerAddressMacroRegistrar(EventBus eventBus,
+                                       MacroRegistry macroRegistry,
+                                       AppContext appContext) {
         this.macroRegistry = macroRegistry;
         this.appContext = appContext;
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
 
-        registerProviders();
+        registerMacros();
     }
 
-    private void registerProviders() {
+    private void registerMacros() {
         Machine devMachine = appContext.getDevMachine();
         if (devMachine != null) {
-            macros = getProviders(devMachine);
+            macros = getMacros(devMachine);
             macroRegistry.register(macros);
         }
     }
 
-    private Set<Macro> getProviders(Machine machine) {
+    private Set<Macro> getMacros(Machine machine) {
         Set<Macro> macros = Sets.newHashSet();
         for (Map.Entry<String, ? extends Server> entry : machine.getRuntime().getServers().entrySet()) {
-            macros.add(new AddressMacro(entry.getKey(),
-                                           entry.getValue().getAddress(),
-                                           entry.getKey()));
+            macros.add(new ServerAddressMacro(entry.getKey(),
+                                              entry.getValue().getAddress()));
 
             if (entry.getKey().endsWith("/tcp")) {
-                macros.add(new AddressMacro(entry.getKey().substring(0, entry.getKey().length() - 4),
-                                               entry.getValue().getAddress(), entry.getKey()));
+                macros.add(new ServerAddressMacro(entry.getKey().substring(0, entry.getKey().length() - 4),
+                                                  entry.getValue().getAddress()));
             }
         }
 
@@ -81,7 +80,7 @@ public class ServerPortProvider implements WsAgentStateHandler {
 
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
-        registerProviders();
+        registerMacros();
     }
 
     @Override
@@ -93,31 +92,11 @@ public class ServerPortProvider implements WsAgentStateHandler {
         macros.clear();
     }
 
-    private class AddressMacro implements Macro {
-
-        String variable;
-        String address;
-        String description;
-
-        AddressMacro(String internalPort, String address, String description) {
-            this.variable = KEY_TEMPLATE.replaceAll("%", internalPort);
-            this.address = address;
-            this.description = description;
-        }
-
-        @Override
-        public String getName() {
-            return variable;
-        }
-
-        @Override
-        public String getDescription() {
-            return description;
-        }
-
-        @Override
-        public Promise<String> expand() {
-            return Promises.resolve(address);
+    private class ServerAddressMacro extends BaseMacro {
+        ServerAddressMacro(String internalPort, String externalAddress) {
+            super(MACRO_NAME_TEMPLATE.replaceAll("%", internalPort),
+                  externalAddress,
+                  "Returns external address of the server running on port " + internalPort + " in form hostname:port.");
         }
     }
 }

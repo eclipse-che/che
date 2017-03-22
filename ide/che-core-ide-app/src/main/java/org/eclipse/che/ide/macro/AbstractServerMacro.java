@@ -58,7 +58,7 @@ public abstract class AbstractServerMacro implements WsAgentStateHandler {
      * @see AbstractServerMacro#getMacros(DevMachine)
      * @since 4.7.0
      */
-    private void registerProviders() {
+    private void registerMacros() {
         final DevMachine devMachine = appContext.getDevMachine();
 
         if (devMachine == null) {
@@ -81,7 +81,7 @@ public abstract class AbstractServerMacro implements WsAgentStateHandler {
      * @see AbstractServerMacro#getMacros(DevMachine)
      * @since 4.7.0
      */
-    private void unregisterProviders() {
+    private void unregisterMacros() {
         final DevMachine devMachine = appContext.getDevMachine();
 
         if (devMachine == null) {
@@ -108,12 +108,12 @@ public abstract class AbstractServerMacro implements WsAgentStateHandler {
     /** {@inheritDoc} */
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
-        registerProviders();
+        registerMacros();
     }
 
     /** {@inheritDoc} */
     @Override
     public void onWsAgentStopped(WsAgentStateEvent event) {
-        unregisterProviders();
+        unregisterMacros();
     }
 }

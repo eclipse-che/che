@@ -40,7 +40,7 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.ShowConsoleTreeAction;
-import org.eclipse.che.ide.extension.machine.client.command.macros.ServerPortProvider;
+import org.eclipse.che.ide.extension.machine.client.command.macros.ServerAddressMacroRegistrar;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusHandler;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalInitializePromiseHolder;
 import org.eclipse.che.ide.extension.machine.client.processes.NewTerminalAction;
@@ -73,7 +73,7 @@ public class MachineExtension {
     public MachineExtension(final MachineResources machineResources,
                             final TerminalResources terminalResources,
                             final EventBus eventBus,
-                            final Provider<ServerPortProvider> machinePortProvider,
+                            final Provider<ServerAddressMacroRegistrar> machinePortProvider,
                             final PerspectiveManager perspectiveManager,
                             final Provider<MachineStatusHandler> machineStatusHandlerProvider,
                             final AppContext appContext,

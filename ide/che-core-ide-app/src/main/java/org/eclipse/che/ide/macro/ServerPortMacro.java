@@ -18,6 +18,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.macro.BaseMacro;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
 import org.eclipse.che.ide.api.machine.DevMachine;
@@ -62,9 +63,9 @@ public class ServerPortMacro extends AbstractServerMacro {
 
             final String externalPort = entry.getValue().getAddress().split(":")[1];
 
-            Macro macro = new CustomMacro(KEY.replace("%", entry.getKey()),
-                                          externalPort,
-                                          "Returns port of a server registered by name");
+            Macro macro = new BaseMacro(KEY.replace("%", entry.getKey()),
+                                        externalPort,
+                                        "Returns port of a server registered by name");
 
             macros.add(macro);
 
@@ -72,9 +73,9 @@ public class ServerPortMacro extends AbstractServerMacro {
             if (entry.getKey().endsWith("/tcp")) {
                 final String port = entry.getKey().substring(0, entry.getKey().length() - 4);
 
-                Macro shortMacro = new CustomMacro(KEY.replace("%", port),
-                                                   externalPort,
-                                                   "Returns port of a server registered by name");
+                Macro shortMacro = new BaseMacro(KEY.replace("%", port),
+                                                 externalPort,
+                                                 "Returns port of a server registered by name");
 
                 macros.add(shortMacro);
             }

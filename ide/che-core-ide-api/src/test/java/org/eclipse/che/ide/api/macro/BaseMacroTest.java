@@ -8,13 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.machine;
+package org.eclipse.che.ide.api.macro;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.ide.macro.CustomMacro;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,42 +19,39 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.assertSame;
 
 /**
- * Unit tests for the {@link CustomMacro}
+ * Unit tests for the {@link BaseMacro}
  *
  * @author Vlad Zhukovskyi
  */
 @RunWith(GwtMockitoTestRunner.class)
-public class CustomMacroTest {
+public class BaseMacroTest {
 
-    public static final String KEY   = "key";
-    public static final String VALUE = "value";
+    public static final String NAME        = "name";
+    public static final String VALUE       = "value";
     public static final String DESCRIPTION = "description";
 
-    private CustomMacro provider;
+    private BaseMacro macro;
 
     @Before
     public void init() throws Exception {
-        provider = new CustomMacro(KEY, VALUE, DESCRIPTION);
+        macro = new BaseMacro(NAME, VALUE, DESCRIPTION);
     }
 
     @Test
     public void getKey() throws Exception {
-        assertSame(provider.getName(), KEY);
+        assertSame(macro.getName(), NAME);
     }
 
     @Test
     public void getValue() throws Exception {
-        provider.expand().then(new Operation<String>() {
-            @Override
-            public void apply(String value) throws OperationException {
-                assertSame(value, VALUE);
-            }
+        macro.expand().then(value -> {
+            assertSame(value, VALUE);
         });
     }
 
     @Test
     public void getDescription() throws Exception {
-        assertSame(provider.getDescription(), DESCRIPTION);
+        assertSame(macro.getDescription(), DESCRIPTION);
     }
 
 }
