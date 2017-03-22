@@ -74,7 +74,6 @@ import static java.util.Arrays.copyOf;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingResumeEvent;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingSuspendEvent;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
-import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.COPIED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.DERIVED;
@@ -761,7 +760,6 @@ public final class ResourceManager {
     }
 
     private Promise<Optional<Resource>> findResource(final Path absolutePath, boolean quiet) {
-
         return ps.getItem(absolutePath).then((Function<ItemReference, Optional<Resource>>)itemReference -> {
             final Resource resource = newResourceFrom(itemReference);
 
@@ -780,6 +778,42 @@ public final class ResourceManager {
             }
 
             return Optional.absent();
+        });
+    }
+
+    private Promise<Optional<Resource>> findResourceForExternalOperation(final Path absolutePath, boolean quiet) {
+        final Promise<Void> derived = promises.resolve(null);
+
+        for (int i = absolutePath.segmentCount() - 1; i > 0; i--) {
+            final Path pathToCache = absolutePath.removeLastSegments(i);
+
+            derived.thenPromise(arg -> loadAndRegisterResources(pathToCache));
+        }
+
+        return derived.thenPromise(ignored -> findResource(absolutePath, quiet));
+    }
+
+    private Promise<Void> loadAndRegisterResources(Path absolutePath) {
+        return ps.getTree(absolutePath, 1, true).then((Function<TreeElement, Void>)treeElement -> {
+            final Optional<Resource[]> optionalChildren = store.get(absolutePath);
+
+            if (optionalChildren.isPresent()) {
+                for (Resource child : optionalChildren.get()) {
+                    store.dispose(child.getLocation(), false);
+                }
+            }
+
+            for (TreeElement element : treeElement.getChildren()) {
+                final Resource resource = newResourceFrom(element.getNode());
+
+                if (resource.isProject()) {
+                    inspectProject(resource.asProject());
+                }
+
+                store.register(resource);
+            }
+
+            return null;
         });
     }
 
@@ -939,7 +973,7 @@ public final class ResourceManager {
         final Optional<Resource> toRemove = store.getResource(delta.getFromPath());
         store.dispose(delta.getFromPath(), true);
 
-        return findResource(delta.getToPath(), true).then((Function<Optional<Resource>, Void>)resource -> {
+        return findResourceForExternalOperation(delta.getToPath(), true).then((Function<Optional<Resource>, Void>)resource -> {
 
             if (resource.isPresent() && toRemove.isPresent()) {
                 Resource intercepted = resource.get();
@@ -957,7 +991,7 @@ public final class ResourceManager {
     }
 
     private Promise<Void> onExternalDeltaAdded(final ResourceDelta delta) {
-        return findResource(delta.getToPath(), true).then((Function<Optional<Resource>, Void>)resource -> {
+        return findResourceForExternalOperation(delta.getToPath(), true).then((Function<Optional<Resource>, Void>)resource -> {
             if (resource.isPresent()) {
                 Resource intercepted = resource.get();
 
@@ -995,7 +1029,7 @@ public final class ResourceManager {
             return null;
         }
 
-        return findResource(delta.getToPath(), true).then((Function<Optional<Resource>, Void>)resource -> {
+        return findResourceForExternalOperation(delta.getToPath(), true).then((Function<Optional<Resource>, Void>)resource -> {
             if (resource.isPresent()) {
                 if (resource.get() instanceof Container) {
                     ((Container)resource.get()).synchronize();
