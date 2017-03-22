@@ -1,0 +1,76 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.ide.api.jsonrpc;
+
+import com.google.gwt.user.client.Random;
+import com.google.gwt.user.client.Timer;
+import com.google.inject.Inject;
+
+import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
+import org.eclipse.che.ide.util.loging.Log;
+
+import javax.inject.Singleton;
+
+import static com.google.gwt.user.client.Window.Location.getHost;
+import static com.google.gwt.user.client.Window.Location.getProtocol;
+import static java.util.Collections.singletonMap;
+
+/**
+ * Initializes json rpc connection to workspace master
+ */
+@Singleton
+public class WorkspaceMasterJsonRpcInitializer {
+    private static final int ENDPOINT_ID = Random.nextInt(Integer.MAX_VALUE);
+
+    private final JsonRpcInitializer initializer;
+
+    @Inject
+    public WorkspaceMasterJsonRpcInitializer(JsonRpcInitializer initializer) {
+        this.initializer = initializer;
+        internalInitialize();
+    }
+
+    private static native String getRestContext() /*-{
+        if ($wnd.IDE && $wnd.IDE.config) {
+            return $wnd.IDE.config.restContext;
+        } else {
+            return null;
+        }
+    }-*/;
+
+    public void initialize() {
+        Log.debug(WorkspaceMasterJsonRpcInitializer.class, "Initializing JSON RPC websocket connection to workspace master");
+        try {
+            internalInitialize();
+        } catch (Exception e) {
+            Log.debug(WorkspaceMasterJsonRpcInitializer.class, "Failed, will try one more time.");
+            new Timer() {
+                @Override
+                public void run() {
+                    internalInitialize();
+                }
+            }.schedule(1_000);
+        }
+    }
+
+    private void internalInitialize() {
+        String protocol = "https:".equals(getProtocol()) ? "wss://" : "ws://";
+        String host = getHost();
+        String context = getRestContext().replace("/api", "") + "/websocket/";
+        String workspaceMasterUrl = protocol + host + context + ENDPOINT_ID;
+
+        initializer.initialize("ws-master", singletonMap("url", workspaceMasterUrl));
+    }
+
+    public void terminate() {
+        initializer.terminate("ws-master");
+    }
+}
