@@ -13,7 +13,6 @@ package org.eclipse.che.ide.part.explorer.project.synchronize;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -21,14 +20,17 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.event.SelectionChangedEvent;
-import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.marker.Marker;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.util.loging.Log;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -43,7 +45,7 @@ import static org.eclipse.che.ide.api.resources.Project.ProblemProjectMarker.PRO
  * Project problem with code 10 means that project exist in workspace but it is absent on file system.
  */
 @Singleton
-public class ProjectConfigSynchronized implements SelectionChangedHandler {
+public class ProjectConfigSynchronized {
     private final AppContext               appContext;
     private final DialogFactory            dialogFactory;
     private final CoreLocalizationConstant locale;
@@ -51,8 +53,8 @@ public class ProjectConfigSynchronized implements SelectionChangedHandler {
     private final ChangeLocationWidget     changeLocationWidget;
 
     @Inject
-    public ProjectConfigSynchronized(EventBus eventBus,
-                                     AppContext appContext,
+    public ProjectConfigSynchronized(AppContext appContext,
+                                     ProjectExplorerPresenter projectExplorerPresenter,
                                      DialogFactory dialogFactory,
                                      CoreLocalizationConstant locale,
                                      NotificationManager notificationManager,
@@ -63,16 +65,23 @@ public class ProjectConfigSynchronized implements SelectionChangedHandler {
         this.notificationManager = notificationManager;
         this.changeLocationWidget = changeLocationWidget;
 
-        eventBus.addHandler(SelectionChangedEvent.TYPE, this);
+        projectExplorerPresenter.getTree().getNodeLoader().addBeforeLoadHandler(event -> {
+            final Node requestedNode = event.getRequestedNode();
+            if (requestedNode == null || !(requestedNode instanceof ResourceNode)) {
+                return;
+            }
+
+            final ResourceNode resourceNode = (ResourceNode)requestedNode;
+            final Resource data = resourceNode.getData();
+            if (!data.isProject()) {
+                return;
+            }
+
+            checkProjectProblems((Project)data);
+        });
     }
 
-    @Override
-    public void onSelectionChanged(SelectionChangedEvent event) {
-        final Project project = appContext.getRootProject();
-        if (project == null) {
-            return;
-        }
-
+    private void checkProjectProblems(Project project) {
         final Optional<Marker> marker = project.getMarker(PROBLEM_PROJECT);
         if (!marker.isPresent()) {
             return;
@@ -83,7 +92,8 @@ public class ProjectConfigSynchronized implements SelectionChangedHandler {
 
         //If no project folder on file system
         final String noProjectFolderProblem = problems.get(NO_PROJECT_ON_FILE_SYSTEM);
-        if (!isNullOrEmpty(noProjectFolderProblem)) {
+        final List<String> importingProjects = appContext.getImportingProjects();
+        if (!isNullOrEmpty(noProjectFolderProblem) && !importingProjects.contains(project.getPath())) {
             showImportDialog(project);
         }
     }
