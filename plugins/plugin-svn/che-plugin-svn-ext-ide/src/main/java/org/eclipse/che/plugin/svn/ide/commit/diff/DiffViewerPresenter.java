@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
+import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
@@ -35,7 +35,7 @@ public class DiffViewerPresenter extends SubversionActionPresenter implements Di
     @Inject
     protected DiffViewerPresenter(AppContext appContext,
                                   SubversionOutputConsoleFactory consoleFactory,
-                                  SubversionCredentialsDialog credentialsDialog,
+                                  AskCredentialsDialog credentialsDialog,
                                   SubversionExtensionLocalizationConstants constants,
                                   NotificationManager notificationManager,
                                   ProcessesPanelPresenter processesPanelPresenter,
