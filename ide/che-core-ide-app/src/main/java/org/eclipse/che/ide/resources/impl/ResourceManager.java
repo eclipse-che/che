@@ -353,26 +353,6 @@ public final class ResourceManager {
                         eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(createdFolder, ADDED | DERIVED)));
 
                         return promises.resolve(createdFolder.asFolder());
-
-//                        return getRemoteResources(parent, path.segmentCount(), true)
-//                                .then(new Function<Resource[], Folder>() {
-//                                    @Override
-//                                    public Folder apply(Resource[] resources) throws FunctionException {
-//
-//                                        final Path referencePath = Path.valueOf(reference.getPath());
-//
-//                                        for (Resource descendant : resources) {
-//                                            if (descendant.getLocation().equals(referencePath)) {
-//                                                eventBus.fireEvent(
-//                                                        new ResourceChangedEvent(new ResourceDeltaImpl(descendant, ADDED | DERIVED)));
-//
-//                                                return (Folder)descendant;
-//                                            }
-//                                        }
-//
-//                                        throw new IllegalArgumentException("Failed to locate created folder");
-//                                    }
-//                                });
                     }
                 });
             }
@@ -397,26 +377,6 @@ public final class ResourceManager {
                         eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(createdFile, ADDED | DERIVED)));
 
                         return promises.resolve(createdFile.asFile());
-
-//                        return getRemoteResources(parent, DEPTH_ONE, true)
-//                                .then(new Function<Resource[], File>() {
-//                                    @Override
-//                                    public File apply(Resource[] resources) throws FunctionException {
-//
-//                                        final Path referencePath = Path.valueOf(reference.getPath());
-//
-//                                        for (Resource descendant : resources) {
-//                                            if (descendant.getLocation().equals(referencePath)) {
-//                                                eventBus.fireEvent(
-//                                                        new ResourceChangedEvent(new ResourceDeltaImpl(descendant, ADDED | DERIVED)));
-//
-//                                                return (File)descendant;
-//                                            }
-//                                        }
-//
-//                                        throw new IllegalArgumentException("Failed to locate created file");
-//                                    }
-//                                });
                     }
                 });
             }
@@ -917,41 +877,6 @@ public final class ResourceManager {
 
             return Optional.absent();
         });
-
-//        //search resource in local cache
-//        final Optional<Resource> optionalCachedResource = store.getResource(absolutePath);
-//        if (optionalCachedResource.isPresent()) {
-//            return promises.resolve(optionalCachedResource);
-//        }
-//
-//        //request from server
-//        final Path projectPath = Path.valueOf(absolutePath.segment(0)).makeAbsolute();
-//        final Optional<Resource> optProject = store.getResource(projectPath);
-//        final boolean isPresent = optProject.isPresent();
-//
-//        checkState(isPresent || quiet, "Resource with path '" + projectPath + "' doesn't exists");
-//
-//        if (!isPresent) {
-//            return promises.resolve(Optional.<Resource>absent());
-//        }
-//
-//        final Resource project = optProject.get();
-//        checkState(project.getResourceType() == PROJECT, "Resource with path '" + projectPath + "' isn't a project");
-//
-//        final int seekDepth = absolutePath.segmentCount() - 1;
-//
-//        return getRemoteResources((Container)project, seekDepth, true).then(new Function<Resource[], Optional<Resource>>() {
-//            @Override
-//            public Optional<Resource> apply(Resource[] resources) throws FunctionException {
-//                for (Resource resource : resources) {
-//                    if (absolutePath.equals(resource.getLocation())) {
-//                        return of(resource);
-//                    }
-//                }
-//
-//                return absent();
-//            }
-//        });
     }
 
     private boolean isResourceOpened(final Resource resource) {
@@ -1135,13 +1060,6 @@ public final class ResourceManager {
     }
 
     private Promise<Void> onExternalDeltaMoved(final ResourceDelta delta) {
-        //search resource to remove at first
-//        return findResource(delta.getFromPath(), true).thenPromise(new Function<Optional<Resource>, Promise<Void>>() {
-//            @Override
-//            public Promise<Void> apply(final Optional<Resource> toRemove) throws FunctionException {
-//                if (!toRemove.isPresent()) {
-//                    return promises.resolve(null);
-//                }
         final Optional<Resource> toRemove = store.getResource(delta.getFromPath());
         store.dispose(delta.getFromPath(), true);
 
@@ -1163,8 +1081,6 @@ public final class ResourceManager {
                         return null;
                     }
                 });
-//            }
-//        });
     }
 
     private Promise<Void> onExternalDeltaAdded(final ResourceDelta delta) {
@@ -1233,18 +1149,10 @@ public final class ResourceManager {
 
         final Optional<Resource> resource = store.getResource(delta.getFromPath());
 
-//        return findResource(delta.getFromPath(), true).then(new Function<Optional<Resource>, Void>() {
-//            @Override
-//            public Void apply(Optional<Resource> resource) throws FunctionException {
-
                 if (resource.isPresent()) {
                     store.dispose(resource.get().getLocation(), true);
                     eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource.get(), REMOVED | DERIVED)));
                 }
-
-//                return null;
-//            }
-//        });
 
         return promises.resolve(null);
     }
