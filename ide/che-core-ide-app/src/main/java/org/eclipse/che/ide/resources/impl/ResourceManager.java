@@ -140,14 +140,12 @@ public final class ResourceManager {
     private final PromiseProvider        promises;
     private final DtoFactory             dtoFactory;
     private final ProjectTypeRegistry    typeRegistry;
-    private       DevMachine             devMachine;
-
     /**
      * Link to the workspace content root. Immutable among the workspace life.
      */
     private final Container          workspaceRoot;
     private final WsAgentURLModifier urlModifier;
-
+    private       DevMachine             devMachine;
     /**
      * Internal store, which caches requested resources from the server.
      */
@@ -551,11 +549,13 @@ public final class ResourceManager {
 
                                              for (ProjectConfigDto projectConfigDto : cachedConfigs) {
                                                  if (projectConfigDto.getPath().equals(destination.toString())) {
-                                                     final Project newResource = resourceFactory.newProjectImpl(projectConfigDto, ResourceManager.this);
+                                                     final Project newResource =
+                                                             resourceFactory.newProjectImpl(projectConfigDto, ResourceManager.this);
                                                      store.register(newResource);
                                                      eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(newResource, source,
                                                                                                                        ADDED | MOVED_FROM |
-                                                                                                                       MOVED_TO | DERIVED)));
+                                                                                                                       MOVED_TO |
+                                                                                                                       DERIVED)));
 
                                                      return newResource;
                                                  }
@@ -1063,24 +1063,24 @@ public final class ResourceManager {
         final Optional<Resource> toRemove = store.getResource(delta.getFromPath());
         store.dispose(delta.getFromPath(), true);
 
-                return findResource(delta.getToPath(), true).then(new Function<Optional<Resource>, Void>() {
-                    @Override
-                    public Void apply(final Optional<Resource> resource) throws FunctionException {
+        return findResource(delta.getToPath(), true).then(new Function<Optional<Resource>, Void>() {
+            @Override
+            public Void apply(final Optional<Resource> resource) throws FunctionException {
 
-                        if (resource.isPresent() && toRemove.isPresent()) {
-                            Resource intercepted = resource.get();
+                if (resource.isPresent() && toRemove.isPresent()) {
+                    Resource intercepted = resource.get();
 
-                            if (!store.getResource(intercepted.getLocation()).isPresent()) {
-                                store.register(intercepted);
-                            }
-
-                            eventBus.fireEvent(new ResourceChangedEvent(
-                                    new ResourceDeltaImpl(intercepted, toRemove.get(), ADDED | MOVED_FROM | MOVED_TO | DERIVED)));
-                        }
-
-                        return null;
+                    if (!store.getResource(intercepted.getLocation()).isPresent()) {
+                        store.register(intercepted);
                     }
-                });
+
+                    eventBus.fireEvent(new ResourceChangedEvent(
+                            new ResourceDeltaImpl(intercepted, toRemove.get(), ADDED | MOVED_FROM | MOVED_TO | DERIVED)));
+                }
+
+                return null;
+            }
+        });
     }
 
     private Promise<Void> onExternalDeltaAdded(final ResourceDelta delta) {
@@ -1149,10 +1149,10 @@ public final class ResourceManager {
 
         final Optional<Resource> resource = store.getResource(delta.getFromPath());
 
-                if (resource.isPresent()) {
-                    store.dispose(resource.get().getLocation(), true);
-                    eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource.get(), REMOVED | DERIVED)));
-                }
+        if (resource.isPresent()) {
+            store.dispose(resource.get().getLocation(), true);
+            eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource.get(), REMOVED | DERIVED)));
+        }
 
         return promises.resolve(null);
     }
