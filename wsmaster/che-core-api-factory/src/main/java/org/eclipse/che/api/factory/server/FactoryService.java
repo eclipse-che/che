@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.fileupload.FileItem;
+import org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -183,6 +184,9 @@ public class FactoryService extends Service {
             }
             requiredNotNull(factory, "factory configuration");
             processDefaults(factory);
+            if (factory.getWorkspace() != null) {
+                AddExecAgentInWorkspaceFilter.addExecAgent(factory.getWorkspace().getEnvironments());
+            }
             createValidator.validateOnCreate(factory);
             return injectLinks(asDto(factoryManager.saveFactory(factory, images)), images);
         } catch (IOException ioEx) {
