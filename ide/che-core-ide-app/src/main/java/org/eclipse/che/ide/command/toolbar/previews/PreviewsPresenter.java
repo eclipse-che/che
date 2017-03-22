@@ -139,7 +139,15 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
             String serverUrl = server.getUrl();
 
             if (previewUrl.startsWith(serverUrl)) {
-                return Optional.of(previewUrl.replace(serverUrl, devMachine.getDisplayName() + ':' + entry.getKey()));
+                String displayName = previewUrl.replace(serverUrl, devMachine.getDisplayName() + ':' + entry.getKey());
+
+                // cut protocol from display name
+                final int protocolIndex = displayName.lastIndexOf('/');
+                if (protocolIndex > -1) {
+                    displayName = displayName.substring(0, protocolIndex);
+                }
+
+                return Optional.of(displayName);
             }
         }
 
