@@ -25,21 +25,18 @@ WITH dupes AS
         GROUP BY name, user_id
         HAVING count(*) > 1)
    ),
- uniques AS
- (
- WITH q as
-  (
-    SELECT *, row_number()
-    OVER (PARTITION BY name,user_id ORDER BY name,user_id)
-    AS rn FROM che_factory
-  )
-  SELECT id FROM q WHERE rn = 1
- )
-
+   uniques AS
+   ( WITH q as
+     ( SELECT *, row_number()
+       OVER (PARTITION BY name,user_id ORDER BY name,user_id)
+       AS rn FROM che_factory
+     )
+   SELECT id FROM q WHERE rn = 1
+   )
 UPDATE che_factory
-   SET name = concat(che_factory.name, '-', right(dupes.id, 9))
-  FROM dupes, uniques
- WHERE dupes.id = che_factory.id AND NOT EXISTS (SELECT id FROM uniques WHERE che_factory.id = uniques.id);
+SET name = concat(che_factory.name, '-', right(dupes.id, 9))
+FROM dupes, uniques
+WHERE dupes.id = che_factory.id AND NOT EXISTS (SELECT id FROM uniques WHERE che_factory.id = uniques.id);
 
 
 CREATE UNIQUE INDEX index_name_plus_userid ON che_factory (user_id, name);
