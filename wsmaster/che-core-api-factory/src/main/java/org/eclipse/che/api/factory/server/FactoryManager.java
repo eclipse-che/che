@@ -141,12 +141,8 @@ public class FactoryManager {
                                                                                   ServerException {
         requireNonNull(update);
         final AuthorImpl creator = factoryDao.getById(update.getId()).getCreator();
-        FactoryImpl updateImpl = new FactoryImpl(update, images);
-        if (isNullOrEmpty(updateImpl.getName())) {
-            updateImpl.setName(NameGenerator.generate("f", 9));
-        }
         return factoryDao.update(FactoryImpl.builder()
-                                            .from(updateImpl)
+                                            .from(new FactoryImpl(update, images))
                                             .setCreator(new AuthorImpl(creator.getUserId(), creator.getCreated()))
                                             .build());
     }

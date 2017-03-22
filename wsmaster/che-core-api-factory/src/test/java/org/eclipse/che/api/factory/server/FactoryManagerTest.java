@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server;
 
-import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
 import org.mockito.ArgumentCaptor;
@@ -22,9 +21,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 
 /**
@@ -47,18 +44,6 @@ public class FactoryManagerTest {
         final FactoryImpl factory = FactoryImpl.builder().generateId().build();
         factoryManager.saveFactory(factory);
         verify(factoryDao).create(factoryCaptor.capture());
-        assertFalse(isNullOrEmpty(factoryCaptor.getValue().getName()));
-    }
-
-    @Test
-    public void shouldGenerateNameOnFactoryUpdate() throws Exception {
-        final AuthorImpl author = new AuthorImpl();
-        author.setCreated(1231241234L);
-        author.setUserId("user123123");
-        final FactoryImpl factory = FactoryImpl.builder().generateId().setCreator(author).build();
-        when(factoryDao.getById(eq(factory.getId()))).thenReturn(factory);
-        factoryManager.updateFactory(factory);
-        verify(factoryDao).update(factoryCaptor.capture());
         assertFalse(isNullOrEmpty(factoryCaptor.getValue().getName()));
     }
 }
