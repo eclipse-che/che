@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.toolbar.previewurl;
+package org.eclipse.che.ide.command.toolbar.previews;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -21,27 +21,27 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlItemRenderer.HEADER_WIDGET;
+import static org.eclipse.che.ide.command.toolbar.previews.PreviewUrlItemRenderer.HEADER_WIDGET;
 
-/** Implementation of {@link PreviewURLsView} that displays preview URLs in a dropdown list. */
+/** Implementation of {@link PreviewsView} that displays preview URLs in a dropdown list. */
 @Singleton
-public class PreviewURLsViewImpl implements PreviewURLsView {
+public class PreviewsViewImpl implements PreviewsView {
 
     /** Mapping of URL to list item. */
-    private final Map<String, BaseListItem<String>> listItems;
-    private final DropdownList                      dropdownList;
+    private final Map<PreviewUrl, BaseListItem<PreviewUrl>> listItems;
+    private final DropdownList                              dropdownList;
 
     private ActionDelegate delegate;
 
     @Inject
-    public PreviewURLsViewImpl() {
+    public PreviewsViewImpl() {
         listItems = new HashMap<>();
 
         dropdownList = new DropdownList(HEADER_WIDGET);
         dropdownList.setWidth("43px");
         dropdownList.ensureDebugId("dropdown-preview_url");
         dropdownList.setSelectionHandler(item -> {
-            for (Entry<String, BaseListItem<String>> entry : listItems.entrySet()) {
+            for (Entry<PreviewUrl, BaseListItem<PreviewUrl>> entry : listItems.entrySet()) {
                 if (item.equals(entry.getValue())) {
                     delegate.onUrlChosen(entry.getKey());
                     return;
@@ -61,21 +61,21 @@ public class PreviewURLsViewImpl implements PreviewURLsView {
     }
 
     @Override
-    public void addUrl(String url) {
-        if (listItems.containsKey(url)) {
+    public void addUrl(PreviewUrl previewUrl) {
+        if (listItems.containsKey(previewUrl)) {
             return; // no sense to add the equals URLs even if they belong to different commands
         }
 
-        final BaseListItem<String> listItem = new BaseListItem<>(url);
-        final PreviewUrlItemRenderer renderer = new PreviewUrlItemRenderer(listItem);
+        BaseListItem<PreviewUrl> listItem = new BaseListItem<>(previewUrl);
+        PreviewUrlItemRenderer renderer = new PreviewUrlItemRenderer(listItem);
 
-        listItems.put(url, listItem);
+        listItems.put(previewUrl, listItem);
         dropdownList.addItem(listItem, renderer);
     }
 
     @Override
-    public void removeUrl(String url) {
-        final BaseListItem<String> listItem = listItems.remove(url);
+    public void removeUrl(PreviewUrl previewUrl) {
+        final BaseListItem<PreviewUrl> listItem = listItems.remove(previewUrl);
 
         if (listItem != null) {
             dropdownList.removeItem(listItem);

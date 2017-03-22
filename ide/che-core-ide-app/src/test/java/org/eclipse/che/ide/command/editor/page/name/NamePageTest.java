@@ -27,11 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Tests for {@link NamePage}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Tests for {@link NamePage}. */
 @RunWith(MockitoJUnitRunner.class)
 public class NamePageTest {
 

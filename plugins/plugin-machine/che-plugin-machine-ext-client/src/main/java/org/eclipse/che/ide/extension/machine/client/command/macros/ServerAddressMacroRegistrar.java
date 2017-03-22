@@ -96,7 +96,7 @@ public class ServerAddressMacroRegistrar implements WsAgentStateHandler {
         ServerAddressMacro(String internalPort, String externalAddress) {
             super(MACRO_NAME_TEMPLATE.replaceAll("%", internalPort),
                   externalAddress,
-                  "Returns external address of the server running on port " + internalPort + " in form hostname:port.");
+                  "Returns external address of the server running on port " + internalPort);
         }
     }
 }

@@ -20,11 +20,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-/**
- * Tests for {@link ShowCommandsPaletteAction}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Tests for {@link ShowCommandsPaletteAction}. */
 @RunWith(MockitoJUnitRunner.class)
 public class ShowCommandsPaletteActionTest {
 

@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandPresenter;
-import org.eclipse.che.ide.command.toolbar.previewurl.PreviewURLsPresenter;
+import org.eclipse.che.ide.command.toolbar.previews.PreviewsPresenter;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListPresenter;
 import org.eclipse.che.ide.ui.menubutton.MenuPopupButton;
 
@@ -28,7 +28,7 @@ import javax.inject.Singleton;
 public class CommandToolbarPresenter implements Presenter, CommandToolbarView.ActionDelegate {
 
     private final ProcessesListPresenter  processesListPresenter;
-    private final PreviewURLsPresenter    previewURLsPresenter;
+    private final PreviewsPresenter       previewsPresenter;
     private final ExecuteCommandPresenter executeCommandPresenter;
     private final ToolbarButtonsFactory   toolbarButtonsFactory;
     private final CommandToolbarView      view;
@@ -37,12 +37,12 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
     @Inject
     public CommandToolbarPresenter(CommandToolbarView view,
                                    ProcessesListPresenter processesListPresenter,
-                                   PreviewURLsPresenter previewURLsPresenter,
+                                   PreviewsPresenter previewsPresenter,
                                    ExecuteCommandPresenter executeCommandPresenter,
                                    ToolbarButtonsFactory toolbarButtonsFactory) {
         this.view = view;
         this.processesListPresenter = processesListPresenter;
-        this.previewURLsPresenter = previewURLsPresenter;
+        this.previewsPresenter = previewsPresenter;
         this.executeCommandPresenter = executeCommandPresenter;
         this.toolbarButtonsFactory = toolbarButtonsFactory;
 
@@ -64,7 +64,7 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
 
         executeCommandPresenter.go(view.getCommandsPanelContainer());
         processesListPresenter.go(view.getProcessesListContainer());
-        previewURLsPresenter.go(view.getPreviewUrlsListContainer());
+        previewsPresenter.go(view.getPreviewUrlsListContainer());
 
         view.addButton(openCommandsPaletteButton);
     }

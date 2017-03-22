@@ -30,4 +30,10 @@ public interface ToolbarMessages extends Messages {
 
     @Key("goal_button.tooltip.execute_prompt")
     String goalButtonTooltipExecutePrompt(String commandName);
+
+    @Key("previews.tooltip")
+    String previewsTooltip();
+
+    @Key("previews.error.not_available")
+    String previewsNotAvailableError();
 }

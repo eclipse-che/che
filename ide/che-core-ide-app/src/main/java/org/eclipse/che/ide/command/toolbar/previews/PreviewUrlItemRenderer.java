@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.toolbar.previewurl;
+package org.eclipse.che.ide.command.toolbar.previews;
 
 import elemental.dom.Element;
 
@@ -19,20 +19,26 @@ import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.command.CommandResources;
+import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
-import org.eclipse.che.ide.ui.dropdown.StringItemRenderer;
+import org.eclipse.che.ide.ui.dropdown.DropdownListItemRenderer;
 
+import static com.google.gwt.dom.client.Style.Unit.PX;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /** Renders widgets for the 'Previews' list. Always returns the same instance of header widget. */
-class PreviewUrlItemRenderer extends StringItemRenderer {
+class PreviewUrlItemRenderer implements DropdownListItemRenderer {
 
     static final HeaderWidget HEADER_WIDGET = new HeaderWidget();
 
-    PreviewUrlItemRenderer(BaseListItem<String> item) {
-        super(item);
+    private final BaseListItem<PreviewUrl> item;
+
+    private Widget listWidget;
+
+    PreviewUrlItemRenderer(BaseListItem<PreviewUrl> item) {
+        this.item = item;
     }
 
     @Override
@@ -40,9 +46,20 @@ class PreviewUrlItemRenderer extends StringItemRenderer {
         return HEADER_WIDGET;
     }
 
+    @Override
+    public Widget renderListWidget() {
+        if (listWidget == null) {
+            listWidget = new Label(item.getValue().getDisplayName());
+            listWidget.getElement().getStyle().setMarginBottom(0, PX);
+        }
+
+        return listWidget;
+    }
+
     private static class HeaderWidget extends Label {
 
         private static final CommandResources RESOURCES = GWT.create(CommandResources.class);
+        private static final ToolbarMessages  MESSAGES  = GWT.create(ToolbarMessages.class);
 
         HeaderWidget() {
             super();
@@ -53,7 +70,7 @@ class PreviewUrlItemRenderer extends StringItemRenderer {
             safeHtmlBuilder.appendHtmlConstant(FontAwesome.BULLSEYE);
             getElement().setInnerSafeHtml(safeHtmlBuilder.toSafeHtml());
 
-            Tooltip.create((Element)getElement(), BOTTOM, MIDDLE, "Previews");
+            Tooltip.create((Element)getElement(), BOTTOM, MIDDLE, MESSAGES.previewsTooltip());
         }
     }
 }

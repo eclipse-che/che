@@ -11,10 +11,10 @@
 package org.eclipse.che.ide.command.editor.page.goal;
 
 import org.eclipse.che.ide.api.command.CommandGoal;
-import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
+import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
+import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
 import org.junit.Before;
@@ -37,11 +37,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Tests for {@link GoalPage}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Tests for {@link GoalPage}. */
 @RunWith(MockitoJUnitRunner.class)
 public class GoalPageTest {
 

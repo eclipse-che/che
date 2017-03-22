@@ -8,18 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.toolbar.previewurl;
+package org.eclipse.che.ide.command.toolbar.previews;
 
 import org.eclipse.che.ide.api.mvp.View;
 
 /** View for displaying preview URLs. */
-public interface PreviewURLsView extends View<PreviewURLsView.ActionDelegate> {
+public interface PreviewsView extends View<PreviewsView.ActionDelegate> {
 
     /** Add preview URL to the view. */
-    void addUrl(String url);
+    void addUrl(PreviewUrl previewUrl);
 
     /** Remove preview URL from the view. */
-    void removeUrl(String url);
+    void removeUrl(PreviewUrl previewUrl);
 
     /** Remove all preview URLs from the view. */
     void removeAll();
@@ -27,6 +27,6 @@ public interface PreviewURLsView extends View<PreviewURLsView.ActionDelegate> {
     interface ActionDelegate {
 
         /** Called when preview URL has been chosen. */
-        void onUrlChosen(String url);
+        void onUrlChosen(PreviewUrl previewUrl);
     }
 }

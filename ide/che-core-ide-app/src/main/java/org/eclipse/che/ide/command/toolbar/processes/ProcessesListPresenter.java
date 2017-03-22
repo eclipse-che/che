@@ -38,7 +38,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
 
     private final ProcessesListView         view;
     private final EventBus                  eventBus;
-    private final ExecAgentCommandManager   execAgentCommandManager;
+    private final ExecAgentCommandManager   execAgentClient;
     private final AppContext                appContext;
     private final CommandManager            commandManager;
     private final Provider<CommandExecutor> commandExecutorProvider;
@@ -48,13 +48,13 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
     @Inject
     public ProcessesListPresenter(final ProcessesListView view,
                                   EventBus eventBus,
-                                  final ExecAgentCommandManager execAgentCommandManager,
+                                  final ExecAgentCommandManager execAgentClient,
                                   final AppContext appContext,
                                   CommandManager commandManager,
                                   Provider<CommandExecutor> commandExecutorProvider) {
         this.view = view;
         this.eventBus = eventBus;
-        this.execAgentCommandManager = execAgentCommandManager;
+        this.execAgentClient = execAgentClient;
         this.appContext = appContext;
         this.commandManager = commandManager;
         this.commandExecutorProvider = commandExecutorProvider;
@@ -105,7 +105,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
 
         if (runtime != null) {
             for (Machine machine : runtime.getMachines()) {
-                execAgentCommandManager.getProcesses(machine.getId(), false).then(processes -> {
+                execAgentClient.getProcesses(machine.getId(), false).then(processes -> {
                     for (GetProcessesResponseDto p : processes) {
                         final Process process = new ProcessImpl(p.getName(),
                                                                 p.getCommandLine(),
@@ -130,7 +130,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
      *         machine where process were run or currently running
      */
     private void addProcessToList(int pid, Machine machine) {
-        execAgentCommandManager.getProcess(machine.getId(), pid).then(processDto -> {
+        execAgentClient.getProcess(machine.getId(), pid).then(processDto -> {
             final Process process = new ProcessImpl(processDto.getName(),
                                                     processDto.getCommandLine(),
                                                     processDto.getPid(),
@@ -162,6 +162,6 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
 
     @Override
     public void onStopProcess(Process process) {
-        execAgentCommandManager.killProcess(process.getMachine().getId(), process.getPid());
+        execAgentClient.killProcess(process.getMachine().getId(), process.getPid());
     }
 }

@@ -61,8 +61,8 @@ import org.eclipse.che.ide.command.toolbar.ToolbarButtonsFactory;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandView;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandViewImpl;
 import org.eclipse.che.ide.command.toolbar.commands.button.PopupItemFactory;
-import org.eclipse.che.ide.command.toolbar.previewurl.PreviewURLsView;
-import org.eclipse.che.ide.command.toolbar.previewurl.PreviewURLsViewImpl;
+import org.eclipse.che.ide.command.toolbar.previews.PreviewsView;
+import org.eclipse.che.ide.command.toolbar.previews.PreviewsViewImpl;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListView;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListViewImpl;
 import org.eclipse.che.ide.command.type.CommandTypeRegistryImpl;
@@ -123,7 +123,7 @@ public class CommandApiModule extends AbstractGinModule {
         bind(CommandToolbarView.class).to(CommandToolbarViewImpl.class).in(Singleton.class);
         bind(ExecuteCommandView.class).to(ExecuteCommandViewImpl.class).in(Singleton.class);
         bind(ProcessesListView.class).to(ProcessesListViewImpl.class).in(Singleton.class);
-        bind(PreviewURLsView.class).to(PreviewURLsViewImpl.class).in(Singleton.class);
+        bind(PreviewsView.class).to(PreviewsViewImpl.class).in(Singleton.class);
 
         install(new GinFactoryModuleBuilder().build(ToolbarButtonsFactory.class));
         install(new GinFactoryModuleBuilder().build(PopupItemFactory.class));

@@ -20,11 +20,7 @@ import org.junit.runner.RunWith;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-/**
- * Tests for {@link ProjectSwitcher}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Tests for {@link ProjectSwitcher}. */
 @RunWith(GwtMockitoTestRunner.class)
 public class ProjectSwitcherTest {
 

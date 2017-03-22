@@ -34,7 +34,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     private final MacroProcessor          macroProcessor;
     private final CommandConsoleFactory   commandConsoleFactory;
     private final ProcessesPanelPresenter processesPanelPresenter;
-    private final ExecAgentCommandManager execAgentCommandManager;
+    private final ExecAgentCommandManager execAgentClient;
     private final MachineChooser          machineChooser;
     private final SelectionAgent          selectionAgent;
 
@@ -42,13 +42,13 @@ public class CommandExecutorImpl implements CommandExecutor {
     public CommandExecutorImpl(MacroProcessor macroProcessor,
                                CommandConsoleFactory commandConsoleFactory,
                                ProcessesPanelPresenter processesPanelPresenter,
-                               ExecAgentCommandManager execAgentCommandManager,
+                               ExecAgentCommandManager execAgentClient,
                                MachineChooser machineChooser,
                                SelectionAgent selectionAgent) {
         this.macroProcessor = macroProcessor;
         this.commandConsoleFactory = commandConsoleFactory;
         this.processesPanelPresenter = processesPanelPresenter;
-        this.execAgentCommandManager = execAgentCommandManager;
+        this.execAgentClient = execAgentClient;
         this.machineChooser = machineChooser;
         this.selectionAgent = selectionAgent;
     }
@@ -67,11 +67,11 @@ public class CommandExecutorImpl implements CommandExecutor {
 
             processesPanelPresenter.addCommandOutput(machineId, console);
 
-            execAgentCommandManager.startProcess(machineId, expandedCommand)
-                                   .thenIfProcessStartedEvent(console.getProcessStartedOperation())
-                                   .thenIfProcessDiedEvent(console.getProcessDiedOperation())
-                                   .thenIfProcessStdOutEvent(console.getStdOutOperation())
-                                   .thenIfProcessStdErrEvent(console.getStdErrOperation());
+            execAgentClient.startProcess(machineId, expandedCommand)
+                           .thenIfProcessStartedEvent(console.getProcessStartedOperation())
+                           .thenIfProcessDiedEvent(console.getProcessDiedOperation())
+                           .thenIfProcessStdOutEvent(console.getStdOutOperation())
+                           .thenIfProcessStdErrEvent(console.getStdErrOperation());
         });
     }
 

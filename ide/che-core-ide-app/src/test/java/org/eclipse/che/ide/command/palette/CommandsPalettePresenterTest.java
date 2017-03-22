@@ -44,11 +44,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Tests for {@link CommandsPalettePresenter}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Tests for {@link CommandsPalettePresenter}. */
 @RunWith(MockitoJUnitRunner.class)
 public class CommandsPalettePresenterTest {
 

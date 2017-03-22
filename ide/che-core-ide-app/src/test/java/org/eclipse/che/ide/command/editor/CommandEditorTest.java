@@ -53,11 +53,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Tests for {@link CommandEditor}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Tests for {@link CommandEditor}. */
 @RunWith(GwtMockitoTestRunner.class)
 public class CommandEditorTest {
 

@@ -31,11 +31,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Tests for {@link ProjectsPage}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Tests for {@link ProjectsPage}. */
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectsPageTest {
 
