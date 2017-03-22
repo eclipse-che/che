@@ -68,8 +68,8 @@ public class EnvironmentDeserializerTest {
                  + " dev-machine: \n"
                  + "  image: codenvy/ubuntu_jdk8\n"
                  + "  environment:\n"
-                 + "   MYSQL_ROOT_PASSWORD: ",
-                 ImmutableMap.of("MYSQL_ROOT_PASSWORD", null)
+                 + "   MYSQL_ROOT_PASSWORD: \"\"",
+                 ImmutableMap.of("MYSQL_ROOT_PASSWORD", "")
                 },
 
                 // dictionary format, value of variable contains colon sign
