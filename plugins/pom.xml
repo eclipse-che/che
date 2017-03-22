@@ -50,7 +50,6 @@
         <module>plugin-nodejs-debugger</module>
         <module>plugin-php</module>
         <module>plugin-ssh-machine</module>
-        <module>plugin-ssh-key</module>
         <module>plugin-languageserver</module>
         <module>plugin-json</module>
         <module>plugin-composer</module>

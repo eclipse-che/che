@@ -70,12 +70,14 @@
               <che-toggle-button ng-repeat="namespace in workspaceDetailsController.getNamespaces()"
                                  che-title="{{namespace.label}}"
                                  che-value="{{namespace.id}}"
-                                 class="namespace-button">
+                                 class="namespace-toggle-button">
               </che-toggle-button>
             </che-toggle>
             <che-button-default ng-if="!workspaceDetailsController.isCreationFlow"
                                 che-button-title="{{workspaceDetailsController.getNamespaceLabel(workspaceDetailsController.namespaceId)}}"
-                                ng-click="workspaceDetailsController.namespaceOnClick(workspaceDetailsController.namespaceId)"></che-button-default>
+                                ng-disabled="workspaceDetailsController.getNamespace(workspaceDetailsController.namespaceId)"
+                                ng-click="workspaceDetailsController.namespaceOnClick(workspaceDetailsController.namespaceId)"
+                                class="namespace-button"></che-button-default>
           </che-label-container>
 
           <!-- Status -->
