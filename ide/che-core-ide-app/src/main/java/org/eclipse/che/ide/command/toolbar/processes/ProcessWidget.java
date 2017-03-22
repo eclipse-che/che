@@ -73,6 +73,7 @@ class ProcessWidget extends FlowPanel {
         pidLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
         pidLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetPidLabel());
         pidLabel.ensureDebugId("dropdown-processes-label-pid");
+        Tooltip.create((Element)pidLabel.getElement(), BOTTOM, MIDDLE, "PID");
 
         add(createMachineNameLabel(process));
         add(createCommandNameLabel(process));
