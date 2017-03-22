@@ -14,7 +14,3 @@
 --
 
 CREATE UNIQUE INDEX index_name_plus_userid ON che_factory (user_id, name);
-
-
-
-
