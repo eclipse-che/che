@@ -632,16 +632,8 @@ public final class ResourceManager {
 
                     @Override
                     public void visit(Resource resource) {
-                        if (resource.getResourceType() == PROJECT) {
-                            final Optional<ProjectConfigDto> optionalConfig = findProjectConfigDto(resource.getLocation());
-
-                            if (optionalConfig.isPresent()) {
-                                final Optional<ProblemProjectMarker> optionalMarker = getProblemMarker(optionalConfig.get());
-
-                                if (optionalMarker.isPresent()) {
-                                    resource.addMarker(optionalMarker.get());
-                                }
-                            }
+                        if (resource.isProject()) {
+                            inspectProject(resource.asProject());
                         }
 
                         if (size > resources.length - 1) { //check load factor and increase resource array
@@ -776,16 +768,8 @@ public final class ResourceManager {
             store.dispose(absolutePath, false);
             store.register(resource);
 
-            if (resource.getResourceType() == PROJECT) {
-                final Optional<ProjectConfigDto> optionalConfig = findProjectConfigDto(resource.getLocation());
-
-                if (optionalConfig.isPresent()) {
-                    final Optional<ProblemProjectMarker> optionalMarker = getProblemMarker(optionalConfig.get());
-
-                    if (optionalMarker.isPresent()) {
-                        resource.addMarker(optionalMarker.get());
-                    }
-                }
+            if (resource.isProject()) {
+                inspectProject(resource.asProject());
             }
 
             return fromNullable(resource);
@@ -797,6 +781,18 @@ public final class ResourceManager {
 
             return Optional.absent();
         });
+    }
+
+    private void inspectProject(Project project) {
+        final Optional<ProjectConfigDto> optionalConfig = findProjectConfigDto(project.getLocation());
+
+        if (optionalConfig.isPresent()) {
+            final Optional<ProblemProjectMarker> optionalMarker = getProblemMarker(optionalConfig.get());
+
+            if (optionalMarker.isPresent()) {
+                project.addMarker(optionalMarker.get());
+            }
+        }
     }
 
     private boolean isResourceOpened(final Resource resource) {
