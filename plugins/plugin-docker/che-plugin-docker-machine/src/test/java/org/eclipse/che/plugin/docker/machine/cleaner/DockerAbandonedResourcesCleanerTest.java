@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.lang.System.getenv;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
@@ -60,6 +61,7 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(MockitoTestNGListener.class)
 public class DockerAbandonedResourcesCleanerTest {
+    private static final String CHE_SERVER_CONTAINER_ID = getenv("HOSTNAME");
 
     private static final String machineId1   = "machineid1";
     private static final String workspaceId1 = "workspaceid1";
