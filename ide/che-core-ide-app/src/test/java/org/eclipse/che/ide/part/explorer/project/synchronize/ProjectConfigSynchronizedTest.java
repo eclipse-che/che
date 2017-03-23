@@ -13,7 +13,6 @@ package org.eclipse.che.ide.part.explorer.project.synchronize;
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
@@ -24,17 +23,20 @@ import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.marker.Marker;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.ui.smartTree.NodeLoader;
+import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.event.BeforeLoadEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 
@@ -60,9 +62,9 @@ public class ProjectConfigSynchronizedTest {
     private final static String REMOVE_BUTTON        = "Remove";
 
     @Mock
-    private EventBus                 eventBus;
-    @Mock
     private AppContext               appContext;
+    @Mock
+    private ProjectExplorerPresenter projectExplorerPresenter;
     @Mock
     private DialogFactory            dialogFactory;
     @Mock
@@ -72,11 +74,6 @@ public class ProjectConfigSynchronizedTest {
     @Mock
     private ChangeLocationWidget     changeLocationWidget;
 
-    @InjectMocks
-    private ProjectConfigSynchronized projectConfigSynchronized;
-
-    @Mock
-    private Project                      rootProject;
     @Mock
     private Optional<Marker>             problemMarker;
     @Mock
@@ -92,26 +89,42 @@ public class ProjectConfigSynchronizedTest {
     @Mock
     private SourceStorageDto             sourceStorage;
     @Mock
+    private BeforeLoadEvent              beforeLoadEvent;
+    @Mock
     private Container                    wsRoot;
     @Mock
     private Project.ProjectRequest       projectRequest;
+    @Mock
+    private Tree                         tree;
+    @Mock
+    private NodeLoader                   nodeLoader;
+    @Mock
+    private ResourceNode                 requestedNode;
+    @Mock
+    private Project                      resource;
 
     @Captor
-    private ArgumentCaptor<ConfirmCallback> confirmCallbackArgumentCaptor;
+    private ArgumentCaptor<ConfirmCallback>                   confirmCallbackArgumentCaptor;
     @Captor
-    private ArgumentCaptor<CancelCallback>  cancelCallbackArgumentCaptor;
+    private ArgumentCaptor<CancelCallback>                    cancelCallbackArgumentCaptor;
     @Captor
-    private ArgumentCaptor<Operation<Void>> projectDeleted;
+    private ArgumentCaptor<Operation<Void>>                   projectDeleted;
+    @Captor
+    private ArgumentCaptor<BeforeLoadEvent.BeforeLoadHandler> beforeLoadHandlerArgumentCaptor;
 
-    Map<Integer, String> problems;
+    private Map<Integer, String> problems;
 
     @Before
     public void setUp() {
-        when(appContext.getRootProject()).thenReturn(rootProject);
-        when(rootProject.getMarker(Project.ProblemProjectMarker.PROBLEM_PROJECT)).thenReturn(problemMarker);
-        when(rootProject.getName()).thenReturn(PROJECT_NAME);
+        when(resource.getMarker(Project.ProblemProjectMarker.PROBLEM_PROJECT)).thenReturn(problemMarker);
+        when(resource.getName()).thenReturn(PROJECT_NAME);
         when(problemMarker.isPresent()).thenReturn(true);
         when(problemMarker.get()).thenReturn(problemProjectMarker);
+        when(projectExplorerPresenter.getTree()).thenReturn(tree);
+        when(tree.getNodeLoader()).thenReturn(nodeLoader);
+        when(beforeLoadEvent.getRequestedNode()).thenReturn(requestedNode);
+        when(requestedNode.getData()).thenReturn(resource);
+        when(resource.isProject()).thenReturn(true);
 
         problems = new HashMap<>();
         problems.put(10, "Error project");
@@ -128,33 +141,31 @@ public class ProjectConfigSynchronizedTest {
                                                anyObject(),
                                                anyObject())).thenReturn(confirmDialog);
 
-        when(rootProject.getSource()).thenReturn(sourceStorage);
+        when(resource.getSource()).thenReturn(sourceStorage);
         when(sourceStorage.getLocation()).thenReturn(PROJECT_LOCATION);
         when(appContext.getWorkspaceRoot()).thenReturn(wsRoot);
         when(wsRoot.importProject()).thenReturn(projectRequest);
         when(projectRequest.withBody(anyObject())).thenReturn(projectRequest);
         when(projectRequest.send()).thenReturn(projectPromise);
+
+        ProjectConfigSynchronized projectConfigSynchronized = new ProjectConfigSynchronized(appContext,
+                                                                                            projectExplorerPresenter,
+                                                                                            dialogFactory,
+                                                                                            locale,
+                                                                                            notificationManager,
+                                                                                            changeLocationWidget);
     }
 
-    @Test
-    public void shouldSubscribeOnSelectionChangedEvent() throws Exception {
-        verify(eventBus).addHandler(SelectionChangedEvent.TYPE, projectConfigSynchronized);
-    }
-
-    @Test
-    public void dialogIsNotShownIfRootProjectIsNull() throws Exception {
-        when(appContext.getRootProject()).thenReturn(null);
-
-        projectConfigSynchronized.onSelectionChanged(null);
-
-        verify(confirmDialog, never()).show();
+    private void subscribeToOnBeforeLoadNodeEvent() throws Exception {
+        verify(nodeLoader).addBeforeLoadHandler(beforeLoadHandlerArgumentCaptor.capture());
+        beforeLoadHandlerArgumentCaptor.getValue().onBeforeLoad(beforeLoadEvent);
     }
 
     @Test
     public void dialogIsNotShownIfProjectHasNotMarkers() throws Exception {
         when(problemMarker.isPresent()).thenReturn(false);
 
-        projectConfigSynchronized.onSelectionChanged(null);
+        subscribeToOnBeforeLoadNodeEvent();
 
         verify(confirmDialog, never()).show();
     }
@@ -163,27 +174,20 @@ public class ProjectConfigSynchronizedTest {
     public void dialogIsNotShownIfNoProjectProblem() throws Exception {
         problems.clear();
 
-        projectConfigSynchronized.onSelectionChanged(null);
+        subscribeToOnBeforeLoadNodeEvent();
 
         verify(confirmDialog, never()).show();
-    }
-
-    @Test
-    public void dialogShouldBeShow() throws Exception {
-        projectConfigSynchronized.onSelectionChanged(null);
-
-        verify(confirmDialog).show();
     }
 
     @Test
     public void removeButtonIsClicked() throws Exception {
         String projectRemoved = "project removed";
 
-        when(rootProject.delete()).thenReturn(deleteProjectPromise);
+        when(resource.delete()).thenReturn(deleteProjectPromise);
         when(deleteProjectPromise.then(Matchers.<Operation<Void>>any())).thenReturn(deleteProjectPromise);
         when(locale.projectRemoved(PROJECT_NAME)).thenReturn(projectRemoved);
 
-        projectConfigSynchronized.onSelectionChanged(null);
+        subscribeToOnBeforeLoadNodeEvent();
 
         verify(dialogFactory).createConfirmDialog(eq(SYNCH_DIALOG_TITLE),
                                                   eq(SYNCH_DIALOG_CONTENT),
@@ -194,7 +198,7 @@ public class ProjectConfigSynchronizedTest {
         verify(confirmDialog).show();
 
         cancelCallbackArgumentCaptor.getValue().cancelled();
-        verify(rootProject).delete();
+        verify(resource).delete();
 
         verify(deleteProjectPromise).then(projectDeleted.capture());
         projectDeleted.getValue().apply(null);
@@ -203,7 +207,7 @@ public class ProjectConfigSynchronizedTest {
 
     @Test
     public void importButtonIsClicked() throws Exception {
-        projectConfigSynchronized.onSelectionChanged(null);
+        subscribeToOnBeforeLoadNodeEvent();
 
         verify(dialogFactory).createConfirmDialog(eq(SYNCH_DIALOG_TITLE),
                                                   eq(SYNCH_DIALOG_CONTENT),
@@ -215,7 +219,7 @@ public class ProjectConfigSynchronizedTest {
 
         confirmCallbackArgumentCaptor.getValue().accepted();
         verify(wsRoot).importProject();
-        verify(projectRequest).withBody(rootProject);
+        verify(projectRequest).withBody(resource);
         verify(projectRequest).send();
     }
 
@@ -230,7 +234,7 @@ public class ProjectConfigSynchronizedTest {
                                                anyObject(),
                                                anyObject())).thenReturn(changeConfirmDialog);
 
-        projectConfigSynchronized.onSelectionChanged(null);
+        subscribeToOnBeforeLoadNodeEvent();
 
         verify(dialogFactory).createConfirmDialog(eq(SYNCH_DIALOG_TITLE),
                                                   eq(SYNCH_DIALOG_CONTENT),
@@ -253,7 +257,7 @@ public class ProjectConfigSynchronizedTest {
         verify(sourceStorage).setType("github");
 
         verify(wsRoot).importProject();
-        verify(projectRequest).withBody(rootProject);
+        verify(projectRequest).withBody(resource);
         verify(projectRequest).send();
     }
 }

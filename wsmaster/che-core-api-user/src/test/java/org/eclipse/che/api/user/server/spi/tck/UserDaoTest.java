@@ -13,14 +13,9 @@ package org.eclipse.che.api.user.server.spi.tck;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.user.server.Constants;
-import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.eclipse.che.api.user.server.event.PostUserPersistedEvent;
-import org.eclipse.che.api.user.server.event.UserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -43,11 +38,9 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertTrue;
 
 /**
@@ -262,28 +255,6 @@ public class UserDaoTest {
         assertEqualsNoPassword(userDao.getById(newUser.getId()), newUser);
     }
 
-    @Test(dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingUserById",
-          expectedExceptions = NotFoundException.class)
-    public void shouldNotCreateUserWhenSubscriberThrowsExceptionOnUserStoring() throws Exception {
-        final UserImpl newUser = new UserImpl("user123",
-                                              "user123@eclipse.org",
-                                              "user_name",
-                                              "password",
-                                              asList("google:user123", "github:user123"));
-        CascadeEventSubscriber<PostUserPersistedEvent> subscriber = mockCascadeEventSubscriber();
-        doThrow(new ConflictException("error")).when(subscriber).onCascadeEvent(any());
-        eventService.subscribe(subscriber, PostUserPersistedEvent.class);
-
-        try {
-            userDao.create(newUser);
-            fail("UserDao#create had to throw conflict exception");
-        } catch (ConflictException ignored) {
-        }
-
-        eventService.unsubscribe(subscriber, PostUserPersistedEvent.class);
-        userDao.getById(newUser.getId());
-    }
-
     @Test(expectedExceptions = ConflictException.class)
     public void shouldThrowConflictExceptionWhenCreatingUserWithExistingId() throws Exception {
         final UserImpl newUser = new UserImpl(users[0].getId(),
@@ -398,51 +369,6 @@ public class UserDaoTest {
 
         userDao.remove(user.getId());
         userDao.getById(user.getId());
-    }
-
-    @Test
-    public void shouldFireBeforeUserRemovedEventOnRemoveExistedUser() throws Exception {
-        final UserImpl user = users[0];
-        final BeforeUserRemovedEvent[] firedEvent = {null};
-        EventSubscriber<BeforeUserRemovedEvent> beforeUserRemovedSubscriber = event -> firedEvent[0] = event;
-        eventService.subscribe(beforeUserRemovedSubscriber, BeforeUserRemovedEvent.class);
-
-        userDao.remove(user.getId());
-
-        assertNotNull(firedEvent[0]);
-        assertEquals(firedEvent[0].getUser().getId(), user.getId());
-        eventService.unsubscribe(beforeUserRemovedSubscriber, BeforeUserRemovedEvent.class);
-    }
-
-    @Test
-    public void shouldFireUserRemovedEventOnRemoveExistedUser() throws Exception {
-        final UserImpl user = users[0];
-        final UserRemovedEvent[] firedEvent = {null};
-        EventSubscriber<UserRemovedEvent> userRemovedSubscriber = event -> firedEvent[0] = event;
-        eventService.subscribe(userRemovedSubscriber, UserRemovedEvent.class);
-
-        userDao.remove(user.getId());
-
-        assertNotNull(firedEvent[0]);
-        assertEquals(firedEvent[0].getUserId(), user.getId());
-        eventService.unsubscribe(userRemovedSubscriber, UserRemovedEvent.class);
-    }
-
-    @Test(dependsOnMethods = "shouldGetUserById")
-    public void shouldNotRemoveUserWhenSubscriberThrowsExceptionOnUserRemoving() throws Exception {
-        final UserImpl user = users[0];
-        CascadeEventSubscriber<BeforeUserRemovedEvent> subscriber = mockCascadeEventSubscriber();
-        doThrow(new ServerException("error")).when(subscriber).onCascadeEvent(any());
-        eventService.subscribe(subscriber, BeforeUserRemovedEvent.class);
-
-        try {
-            userDao.remove(user.getId());
-            fail("UserDao#remove had to throw server exception");
-        } catch (ServerException ignored) {
-        }
-
-        assertEqualsNoPassword(userDao.getById(user.getId()), user);
-        eventService.unsubscribe(subscriber, BeforeUserRemovedEvent.class);
     }
 
     @Test
