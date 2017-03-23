@@ -39,7 +39,7 @@ cmd_abuild() {
                    -v \"${ARCHETYPE_MOUNT}/${ASSEMBLY_ID}\":/home/user/che-build \
                    -w /home/user/che-build \
                       ${UTILITY_IMAGE_DEV} \
-                          mvn clean install"
+                          mvn clean install -pl '${ASSEMBLY_GROUP}.${ASSEMBLY_TYPE}:assembly-main' --am"
   log ${GENERATE_COMMAND}
   eval ${GENERATE_COMMAND}
 }
