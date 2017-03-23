@@ -37,6 +37,8 @@ func newFinalizer(reader io.ReadCloser, conn *websocket.Conn, file *os.File) *re
 		writeDone:  false,
 		fileClosed: false,
 		reader:     reader,
+		conn:       conn,
+		file:       file,
 	}
 }
 

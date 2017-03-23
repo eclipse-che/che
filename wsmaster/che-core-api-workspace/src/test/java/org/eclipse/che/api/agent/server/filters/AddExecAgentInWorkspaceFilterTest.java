@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.filters;
 
+import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -117,29 +118,137 @@ public class AddExecAgentInWorkspaceFilterTest {
         EnvironmentDto environment = newDto(EnvironmentDto.class);
         ExtendedMachineDto machine = newDto(ExtendedMachineDto.class);
         return new Object[][] {
+                // no error if no envs
+                {emptyMap(), emptyMap()},
+
+                // no error if no machines in env
                 {singletonMap("e1", cloneDto(environment)),
                  singletonMap("e1", cloneDto(environment))},
 
-                {emptyMap(), emptyMap()},
-
+                // no error if no agents in machine
                 {singletonMap("e1", cloneDto(environment).withMachines(singletonMap("m1", cloneDto(machine)))),
                  singletonMap("e1", cloneDto(environment).withMachines(singletonMap("m1", cloneDto(machine))))},
 
+                // no error if agents list is empty
                 {singletonMap("e1", cloneDto(environment)
                         .withMachines(singletonMap("m1", cloneDto(machine).withAgents(emptyList())))),
                  singletonMap("e1", cloneDto(environment)
                          .withMachines(singletonMap("m1", cloneDto(machine).withAgents(emptyList()))))},
 
+                // don't add exec if existing agent is not terminal but start as terminal
                 {singletonMap("e1", cloneDto(environment).withMachines(
                         singletonMap("m1", cloneDto(machine).withAgents(singletonList("org.eclipse.che.terminal1"))))),
                  singletonMap("e1", cloneDto(environment).withMachines(singletonMap("m1", cloneDto(machine)
                          .withAgents(singletonList("org.eclipse.che.terminal1")))))},
 
+                // add exec agent if terminal is present
                 {singletonMap("e1", cloneDto(environment).withMachines(
                         singletonMap("m1", cloneDto(machine).withAgents(singletonList("org.eclipse.che.terminal"))))),
                  singletonMap("e1", cloneDto(environment).withMachines(
                          singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
                                                                                 "org.eclipse.che.exec")))))},
-        };
+
+                // don't change agents if exec is present
+                {singletonMap("e1", cloneDto(environment).withMachines(
+                        singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.exec",
+                                                                               "org.eclipse.che.terminal"))))),
+                 singletonMap("e1", cloneDto(environment).withMachines(
+                         singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.exec",
+                                                                                "org.eclipse.che.terminal")))))},
+
+                // don't change agents if exec is present in the end of agents
+                {singletonMap("e1", cloneDto(environment).withMachines(
+                        singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                               "org.eclipse.che.exec"))))),
+                 singletonMap("e1", cloneDto(environment).withMachines(
+                         singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                "org.eclipse.che.exec")))))},
+
+                // don't change agents if exec is present between other agents
+                {singletonMap("e1", cloneDto(environment).withMachines(
+                        singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                               "org.eclipse.che.ls.php",
+                                                                               "org.eclipse.che.exec",
+                                                                               "org.eclipse.che.ls.json"))))),
+                 singletonMap("e1", cloneDto(environment).withMachines(
+                         singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                "org.eclipse.che.ls.php",
+                                                                                "org.eclipse.che.exec",
+                                                                                "org.eclipse.che.ls.json")))))},
+
+                // add exec in the end if terminal is present
+                {singletonMap("e1", cloneDto(environment).withMachines(
+                        singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                               "org.eclipse.che.ls.php",
+                                                                               "org.eclipse.che.ls.json"))))),
+                 singletonMap("e1", cloneDto(environment).withMachines(
+                         singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                "org.eclipse.che.ls.php",
+                                                                                "org.eclipse.che.ls.json",
+                                                                                "org.eclipse.che.exec")))))},
+
+                // add exec into each machine with terminal
+                {singletonMap("e1", cloneDto(environment).withMachines(
+                        ImmutableMap.of("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                  "org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.ls.json")),
+                                        "m2", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.terminal",
+                                                                                  "org.eclipse.che.ls.json")),
+                                        "m3", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.ls.json")))
+                )),
+                 singletonMap("e1", cloneDto(environment).withMachines(
+                         ImmutableMap.of("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                   "org.eclipse.che.ls.php",
+                                                                                   "org.eclipse.che.ls.json",
+                                                                                   "org.eclipse.che.exec")),
+                                         "m2", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                   "org.eclipse.che.terminal",
+                                                                                   "org.eclipse.che.ls.json",
+                                                                                   "org.eclipse.che.exec")),
+                                         "m3", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                   "org.eclipse.che.ls.json")))
+                 ))},
+
+                // add exec into each machine with terminal in every env
+                {ImmutableMap.of("e1", cloneDto(environment).withMachines(
+                        ImmutableMap.of("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                  "org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.ls.json")),
+                                        "m2", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.terminal",
+                                                                                  "org.eclipse.che.ls.json")),
+                                        "m3", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.ls.json")))
+                                 ),
+                                 "e2", cloneDto(environment).withMachines(
+                                ImmutableMap.of("m4", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                          "org.eclipse.che.ls.php",
+                                                                                          "org.eclipse.che.ls.json")),
+                                                "m5", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                          "org.eclipse.che.ls.json")))
+                        )),
+                 ImmutableMap.of("e1", cloneDto(environment).withMachines(
+                         ImmutableMap.of("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                   "org.eclipse.che.ls.php",
+                                                                                   "org.eclipse.che.ls.json",
+                                                                                   "org.eclipse.che.exec")),
+                                         "m2", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                   "org.eclipse.che.terminal",
+                                                                                   "org.eclipse.che.ls.json",
+                                                                                   "org.eclipse.che.exec")),
+                                         "m3", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                   "org.eclipse.che.ls.json")))
+                                 ),
+                                 "e2", cloneDto(environment).withMachines(
+                                 ImmutableMap.of("m4", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                           "org.eclipse.che.ls.php",
+                                                                                           "org.eclipse.che.ls.json",
+                                                                                           "org.eclipse.che.exec")),
+                                                 "m5", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                           "org.eclipse.che.ls.json")))
+                         ))},
+                };
     }
 }

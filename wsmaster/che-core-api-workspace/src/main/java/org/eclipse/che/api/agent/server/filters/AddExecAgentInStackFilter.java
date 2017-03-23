@@ -34,9 +34,7 @@ public class AddExecAgentInStackFilter extends CheMethodInvokerFilter {
         switch (methodName) {
             case "createStack": {
                 StackDto stack = (StackDto)arguments[0];
-                if (stack.getWorkspaceConfig() != null) {
-                    AddExecAgentInWorkspaceFilter.addExecAgent(stack.getWorkspaceConfig().getEnvironments());
-                }
+                AddExecAgentInEnvironmentUtil.addExecAgent(stack.getWorkspaceConfig());
             }
         }
     }

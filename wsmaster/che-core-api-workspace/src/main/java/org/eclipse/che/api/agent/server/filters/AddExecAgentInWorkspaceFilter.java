@@ -11,15 +11,12 @@
 package org.eclipse.che.api.agent.server.filters;
 
 import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericResourceMethod;
 
 import javax.ws.rs.Path;
-import java.util.Map;
 
 /**
  * Adds exec agent into each environment in workspace config where terminal agent is present.
@@ -38,24 +35,7 @@ public class AddExecAgentInWorkspaceFilter extends CheMethodInvokerFilter {
             case "create":
             case "startFromConfig": {
                 WorkspaceConfigDto workspaceConfig = (WorkspaceConfigDto)arguments[0];
-                addExecAgent(workspaceConfig.getEnvironments());
-            }
-        }
-    }
-
-    public static void addExecAgent(Map<String, EnvironmentDto> environments) {
-        if (environments != null) {
-            for (EnvironmentDto environment : environments.values()) {
-                if (environment != null && environment.getMachines() != null) {
-                    for (ExtendedMachineDto machine : environment.getMachines().values()) {
-                        if (machine.getAgents() != null) {
-                            if (machine.getAgents().contains("org.eclipse.che.terminal") &&
-                                !machine.getAgents().contains("org.eclipse.che.exec")) {
-                                machine.getAgents().add("org.eclipse.che.exec");
-                            }
-                        }
-                    }
-                }
+                AddExecAgentInEnvironmentUtil.addExecAgent(workspaceConfig);
             }
         }
     }
