@@ -105,6 +105,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Singleton
 public class CheEnvironmentEngine {
 
+    private static final String CHE_SERVER_CONTAINER_ID = System.getenv("HOSTNAME");
     private static final NoOpStartedHandler NO_OP_HANDLER = new NoOpStartedHandler();
     private static final Logger             LOG           = getLogger(CheEnvironmentEngine.class);
 
@@ -716,7 +717,7 @@ public class CheEnvironmentEngine {
 
         service.setContainerName(containerNameGenerator.generateContainerName(workspaceId,
                                                                               service.getId(),
-                                                                              "server"+System.getenv("CHE_CONTAINER"),
+                                                                              CHE_SERVER_CONTAINER_ID,
                                                                               namespace,
                                                                               machineName));
     }
