@@ -57,7 +57,7 @@ public class GithubUrlTest {
     }
 
     /**
-     * Check when there is .codenvy.json file in the getRepository
+     * Check when there is .codenvy.json file in the repository
      */
     @Test
     public void checkCodenvyFactoryJsonFileLocation() {
@@ -65,7 +65,7 @@ public class GithubUrlTest {
     }
 
     /**
-     * Check the original getRepository
+     * Check the original repository
      */
     @Test
     public void checkRepositoryLocation() {
