@@ -49,14 +49,14 @@
 
         .dropButton {
             float: right;
-            margin-top: 2px;
-            margin-right: 3px;
-            transform: scaleY(0.5) rotate(90deg);
+            padding-top: 2px;
+            padding-right: 3px;
+            padding-left: 7px;
         }
 
         .dropButton svg {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 7px;
             fill: selectCommandActionColor;
         }
 
