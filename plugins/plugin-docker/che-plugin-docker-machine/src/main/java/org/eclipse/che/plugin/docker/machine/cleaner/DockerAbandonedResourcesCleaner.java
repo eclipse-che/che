@@ -54,7 +54,7 @@ import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator
  */
 @Singleton
 public class DockerAbandonedResourcesCleaner implements Runnable {
-    private static final String            CHE_SERVER_CONTAINER_ID = "server" + getenv("CHE_CONTAINER");
+    private static final String            CHE_SERVER_CONTAINER_ID = getenv("HOSTNAME");
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerAbandonedResourcesCleaner.class);
 
