@@ -14,7 +14,6 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.plugin.urlfactory.CreateFactoryParams;
 import org.eclipse.che.plugin.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.plugin.urlfactory.URLFactoryBuilder;
 
@@ -87,8 +86,7 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
         final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get("url"));
 
         // create factory from the following location if location exists, else create default factory
-        FactoryDto factory = urlFactoryBuilder.createFactory(
-                CreateFactoryParams.create().jsonFileLocation(githubUrl.factoryJsonFileLocation()));
+        FactoryDto factory = urlFactoryBuilder.createFactory(githubUrl.factoryJsonFileLocation());
 
         // add workspace configuration if not defined
         if (factory.getWorkspace() == null) {

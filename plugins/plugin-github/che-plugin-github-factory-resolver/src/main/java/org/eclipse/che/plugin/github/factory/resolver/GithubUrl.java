@@ -43,9 +43,21 @@ public class GithubUrl {
     private String branch = DEFAULT_BRANCH_NAME;
 
     /**
-     * subfolder if any
+     * Subfolder if any
      */
     private String subfolder;
+
+
+    /**
+     * Dockerfile filename
+     */
+    private String dockerfileFilename;
+
+    /**
+     * Factory json filename
+     */
+    private String factoryFilename;
+
 
     /**
      * Creation of this instance is made by the parser so user may not need to create a new instance directly
@@ -79,6 +91,24 @@ public class GithubUrl {
 
     protected GithubUrl repository(String repository) {
         this.repository = repository;
+        return this;
+    }
+
+    public String dockerfileFilename() {
+        return this.dockerfileFilename;
+    }
+
+    protected GithubUrl dockerfileFilename(String dockerfileFilename) {
+        this.dockerfileFilename = dockerfileFilename;
+        return this;
+    }
+
+    public String factoryFilename() {
+        return this.factoryFilename;
+    }
+
+    protected GithubUrl factoryFilename(String factoryFilename) {
+        this.factoryFilename = factoryFilename;
         return this;
     }
 
@@ -120,12 +150,13 @@ public class GithubUrl {
     }
 
     /**
-     * Provides the location to dockerfile
+     * Provides the location to dockerfileFilename
      *
-     * @return location of dockerfile in a repository
+     * @return location of dockerfileFilename in a repository
      */
     protected String dockerFileLocation() {
-        return "https://raw.githubusercontent.com/" + this.username + "/" + this.repository + "/" + this.branch() + "/.codenvy.dockerfile";
+        return "https://raw.githubusercontent.com/" + this.username + "/" + this.repository + "/" + this.branch + "/" +
+               dockerfileFilename;
     }
 
     /**
@@ -134,7 +165,7 @@ public class GithubUrl {
      * @return location of factory json file in a repository
      */
     protected String factoryJsonFileLocation() {
-        return "https://raw.githubusercontent.com/" + this.username + "/" + this.repository + "/" + this.branch() + "/.codenvy.json";
+        return "https://raw.githubusercontent.com/" + this.username + "/" + this.repository + "/" + this.branch + "/" + factoryFilename;
     }
 
     /**

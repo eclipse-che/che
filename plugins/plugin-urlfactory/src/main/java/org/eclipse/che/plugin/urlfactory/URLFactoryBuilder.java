@@ -71,15 +71,15 @@ public class URLFactoryBuilder {
     /**
      * Build a default factory using the provided json file or create default one
      *
-     * @param createFactoryParams
-     *         optional parameters
+     * @param jsonFileLocation
+     *         location of factory json file
      * @return a factory
      */
-    public FactoryDto createFactory(CreateFactoryParams createFactoryParams) {
+    public FactoryDto createFactory(String jsonFileLocation) {
 
         // Check if there is factory json file inside the repository
-        if (createFactoryParams != null && createFactoryParams.jsonFileLocation() != null) {
-            String factoryJsonContent = URLFetcher.fetch(createFactoryParams.jsonFileLocation());
+        if (jsonFileLocation != null) {
+            String factoryJsonContent = URLFetcher.fetch(jsonFileLocation);
             if (!Strings.isNullOrEmpty(factoryJsonContent)) {
                 // Adapt an old factory format to a new one if necessary
                 try {

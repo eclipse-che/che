@@ -57,8 +57,11 @@ public class GithubUrlParser {
                     url));
         }
 
-        return new GithubUrl().username(matcher.group("repoUser")).repository(matcher.group("repoName")).branch(matcher.group("branchName"))
-                              .subfolder(matcher.group("subFolder"));
-
+        return new GithubUrl().username(matcher.group("repoUser"))
+                              .repository(matcher.group("repoName"))
+                              .branch(matcher.group("branchName"))
+                              .subfolder(matcher.group("subFolder"))
+                              .dockerfileFilename(".runtime.dockerfile")
+                              .factoryFilename(".factory.json");
     }
 }
