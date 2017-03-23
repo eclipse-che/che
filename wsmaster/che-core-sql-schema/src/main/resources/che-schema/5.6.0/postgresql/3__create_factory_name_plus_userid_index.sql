@@ -13,9 +13,13 @@
 -- from Codenvy S.A..
 --
 
+
+-- Generate names where they are not set.
 UPDATE che_factory
 SET name = concat('f', right(id, 9)) WHERE name IS NULL OR name = '';
 
+-- Make names unique for the same user, e.g if there is more than one factory with same name and user,
+-- leave first one and rename others.
 WITH dupes AS
   ( SELECT id, user_id, name
     FROM che_factory
@@ -38,5 +42,5 @@ SET name = concat(che_factory.name, '-', right(dupes.id, 9))
 FROM dupes, uniques
 WHERE dupes.id = che_factory.id AND NOT EXISTS (SELECT id FROM uniques WHERE che_factory.id = uniques.id);
 
-
+ -- Create composite unique index.
 CREATE UNIQUE INDEX index_che_factory_name_user_id ON che_factory (user_id, name);
