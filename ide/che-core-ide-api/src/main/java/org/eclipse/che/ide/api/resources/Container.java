@@ -218,7 +218,6 @@ public interface Container extends Resource {
      *         if arguments is not a valid. Reasons include:
      *         <ul>
      *         <li>Invalid project name</li>
-     *         <li>Invalid project type</li>
      *         </ul>
      * @throws IllegalStateException
      *         if creation was failed. Reasons include:
