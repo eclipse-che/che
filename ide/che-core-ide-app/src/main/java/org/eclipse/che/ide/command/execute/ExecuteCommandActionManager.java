@@ -17,11 +17,11 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
+import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
 import org.eclipse.che.ide.api.command.CommandManager.CommandLoadedListener;
-import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.component.Component;
 
 import java.util.HashMap;
@@ -35,40 +35,42 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
 /**
  * Manager listens for creating/removing commands and adds/removes
  * related {@link ExecuteCommandAction}s in the context menus.
- *
- * @author Artem Zatsarynnyi
  */
 @Singleton
-public class ExecuteCommandActionManager implements Component,
-                                                    CommandLoadedListener,
-                                                    CommandChangedListener {
+public class ExecuteCommandActionManager implements Component, CommandLoadedListener, CommandChangedListener {
+
+    private static final String COMMANDS_ACTION_GROUP_ID_PREFIX = "commandsActionGroup";
+    private static final String COMMAND_ACTION_ID_PREFIX        = "command_";
+    private static final String GOAL_ACTION_GROUP_ID_PREFIX     = "goal_";
 
     private final CommandManager              commandManager;
     private final ActionManager               actionManager;
     private final CommandsActionGroup         commandsActionGroup;
     private final GoalPopUpGroupFactory       goalPopUpGroupFactory;
-    private final ExecuteCommandActionFactory executeCommandActionFactory;
+    private final ExecuteCommandActionFactory commandActionFactory;
     private final CommandGoalRegistry         goalRegistry;
 
-    private final Map<String, Action>             command2Action;
-    private final Map<String, DefaultActionGroup> commandGoalPopUpGroups;
+    /** Map of command's name to an appropriate {@link ExecuteCommandAction}. */
+    private final Map<String, Action>             commandActions;
+    /** Map of command goal's ID to an appropriate action group. */
+    private final Map<String, DefaultActionGroup> goalPopUpGroups;
 
     @Inject
     public ExecuteCommandActionManager(CommandManager commandManager,
                                        ActionManager actionManager,
                                        CommandsActionGroup commandsActionGroup,
                                        GoalPopUpGroupFactory goalPopUpGroupFactory,
-                                       ExecuteCommandActionFactory executeCommandActionFactory,
+                                       ExecuteCommandActionFactory commandActionFactory,
                                        CommandGoalRegistry goalRegistry) {
         this.commandManager = commandManager;
         this.actionManager = actionManager;
         this.commandsActionGroup = commandsActionGroup;
         this.goalPopUpGroupFactory = goalPopUpGroupFactory;
-        this.executeCommandActionFactory = executeCommandActionFactory;
+        this.commandActionFactory = commandActionFactory;
         this.goalRegistry = goalRegistry;
 
-        command2Action = new HashMap<>();
-        commandGoalPopUpGroups = new HashMap<>();
+        commandActions = new HashMap<>();
+        goalPopUpGroups = new HashMap<>();
     }
 
     @Override
@@ -78,7 +80,7 @@ public class ExecuteCommandActionManager implements Component,
         commandManager.addCommandLoadedListener(this);
         commandManager.addCommandChangedListener(this);
 
-        actionManager.registerAction("commandsActionGroup", commandsActionGroup);
+        actionManager.registerAction(COMMANDS_ACTION_GROUP_ID_PREFIX, commandsActionGroup);
 
         // inject 'Commands' menu into context menus
         ((DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU)).add(commandsActionGroup);
@@ -88,9 +90,7 @@ public class ExecuteCommandActionManager implements Component,
 
     @Override
     public void onCommandsLoaded() {
-        for (CommandImpl command : commandManager.getCommands()) {
-            addAction(command);
-        }
+        commandManager.getCommands().forEach(this::addAction);
     }
 
     @Override
@@ -103,10 +103,10 @@ public class ExecuteCommandActionManager implements Component,
      * adds created action to the appropriate action group.
      */
     private void addAction(CommandImpl command) {
-        final ExecuteCommandAction action = executeCommandActionFactory.create(command);
+        final ExecuteCommandAction action = commandActionFactory.create(command);
 
-        actionManager.registerAction("command_" + command.getName(), action);
-        command2Action.put(command.getName(), action);
+        actionManager.registerAction(COMMAND_ACTION_ID_PREFIX + command.getName(), action);
+        commandActions.put(command.getName(), action);
 
         getActionGroupForCommand(command).add(action);
     }
@@ -122,13 +122,13 @@ public class ExecuteCommandActionManager implements Component,
             goalId = goalRegistry.getDefaultGoal().getId();
         }
 
-        DefaultActionGroup commandGoalPopUpGroup = commandGoalPopUpGroups.get(goalId);
+        DefaultActionGroup commandGoalPopUpGroup = goalPopUpGroups.get(goalId);
 
         if (commandGoalPopUpGroup == null) {
             commandGoalPopUpGroup = goalPopUpGroupFactory.create(goalId);
 
-            actionManager.registerAction("goal_" + goalId, commandGoalPopUpGroup);
-            commandGoalPopUpGroups.put(goalId, commandGoalPopUpGroup);
+            actionManager.registerAction(GOAL_ACTION_GROUP_ID_PREFIX + goalId, commandGoalPopUpGroup);
+            goalPopUpGroups.put(goalId, commandGoalPopUpGroup);
 
             commandsActionGroup.add(commandGoalPopUpGroup);
         }
@@ -152,13 +152,12 @@ public class ExecuteCommandActionManager implements Component,
      * removes the appropriate action group in case it's empty.
      */
     private void removeAction(CommandImpl command) {
-        final Action action = command2Action.remove(command.getName());
+        final Action commandAction = commandActions.remove(command.getName());
 
-        if (action != null) {
-            final String actionId = actionManager.getId(action);
-
-            if (actionId != null) {
-                actionManager.unregisterAction(actionId);
+        if (commandAction != null) {
+            final String commandActionId = actionManager.getId(commandAction);
+            if (commandActionId != null) {
+                actionManager.unregisterAction(commandActionId);
             }
 
             // remove action from it's action group
@@ -167,16 +166,18 @@ public class ExecuteCommandActionManager implements Component,
                 goalId = goalRegistry.getDefaultGoal().getId();
             }
 
-            final DefaultActionGroup commandGoalPopUpGroup = commandGoalPopUpGroups.get(goalId);
+            // remove action group if it's empty
+            final DefaultActionGroup goalPopUpGroup = goalPopUpGroups.remove(goalId);
 
-            if (commandGoalPopUpGroup != null) {
-                commandGoalPopUpGroup.remove(action);
+            if (goalPopUpGroup != null) {
+                goalPopUpGroup.remove(commandAction);
 
-                // remove action group if it is empty
-                if (commandGoalPopUpGroup.getChildrenCount() == 0) {
-                    actionManager.unregisterAction("goal_" + goalId);
-                    commandsActionGroup.remove(commandGoalPopUpGroup);
-                    commandGoalPopUpGroups.remove(goalId);
+                if (goalPopUpGroup.getChildrenCount() == 0) {
+                    final String goalActionId = actionManager.getId(goalPopUpGroup);
+                    if (goalActionId != null) {
+                        actionManager.unregisterAction(goalActionId);
+                    }
+                    commandsActionGroup.remove(goalPopUpGroup);
                 }
             }
         }
