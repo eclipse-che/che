@@ -17,14 +17,14 @@ public interface BreakpointRenderer {
 
     /**
      * Add a breakpoint mark in the gutter on the given line.
-     * 
+     *
      * @param lineNumber the line where the breakpoint is set
      */
     void addBreakpointMark(int lineNumber);
 
     /**
      * Add a breakpoint mark in the gutter on the given line.
-     * 
+     *
      * @param lineNumber the line where the breakpoint is set
      * @param action to line numbering changes
      */
@@ -33,7 +33,7 @@ public interface BreakpointRenderer {
     /**
      * Removes the breakpoint mark in the gutter on the given line.<br>
      * Does nothing if there is no breakpoint on this line.
-     * 
+     *
      * @param lineNumber the line where the breakpoint is set
      */
     void removeBreakpointMark(int lineNumber);
@@ -46,14 +46,14 @@ public interface BreakpointRenderer {
     /**
      * Changes appearance of the breakpoint on the line to active/inactive.<br>
      * Does nothing if there is no breakpoint of this line.
-     * 
+     *
      * @param lineNumber the line where the breakpoint is set
      */
     void setBreakpointActive(int lineNumber, boolean active);
 
     /**
      * Changes appearance of the line to active/inactive.
-     * 
+     *
      * @param lineNumber the line
      */
     void setLineActive(int lineNumber, boolean active);
@@ -66,7 +66,8 @@ public interface BreakpointRenderer {
 
     /** Reaction on line numbering changes. */
     interface LineChangeAction {
-        /** Action taken on change. */
-        void onLineChange(VirtualFile file, int firstLine, int linesAdded, int linesRemoved);
+        void onAfterLineChanged(VirtualFile file, int firstLine, int linesAdded, int linesRemoved);
+
+        void onBeforeLineChanged(VirtualFile file, int firstLine, int linesAdded, int linesRemoved);
     }
 }

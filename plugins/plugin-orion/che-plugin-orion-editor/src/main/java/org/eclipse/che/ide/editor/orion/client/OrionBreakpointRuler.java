@@ -36,7 +36,7 @@ public class OrionBreakpointRuler implements Gutter {
     private final OrionEditorOverlay          editorOverlay;
     private final OrionAnnotationModelOverlay annotationModel;
 
-    private OrionTextModelOverlay.EventHandler<ModelChangedEventOverlay> modelChangingEventHandler;
+    private boolean hasListeners;
 
     public OrionBreakpointRuler(OrionExtRulerOverlay rulerOverlay, OrionEditorOverlay editorOverlay) {
         this.orionExtRulerOverlay = rulerOverlay;
@@ -64,24 +64,32 @@ public class OrionBreakpointRuler implements Gutter {
         }
 
         addGutterItem(line, gutterId, element);
-        if (modelChangingEventHandler == null) {
-            modelChangingEventHandler = new OrionTextModelOverlay.EventHandler<ModelChangedEventOverlay>() {
-                @Override
-                public void onEvent(ModelChangedEventOverlay parameter) {
-                    int linesAdded = parameter.addedLineCount();
-                    int linesRemoved = parameter.removedLineCount();
-                    int fromLine = editorOverlay.getModel().getLineAtOffset(parameter.start());
-                    String line = editorOverlay.getModel().getLine(fromLine);
+        if (!hasListeners) {
+            addListener("Changing", lineCallback);
+            addListener("Changed", lineCallback);
+            hasListeners = true;
+        }
+    }
 
-                    if (linesAdded > 0 || linesRemoved > 0 || line.trim().isEmpty()) {
-                        removeAnnotations(getAnnotationsFrom(fromLine));
-                        lineCallback.onLineNumberingChange(fromLine, linesRemoved, linesAdded);
+    private void addListener(final String eventType, final LineNumberingChangeCallback lineCallback) {
+        this.editorOverlay.getModel().addEventListener(eventType, new OrionTextModelOverlay.EventHandler<ModelChangedEventOverlay>() {
+            @Override
+            public void onEvent(ModelChangedEventOverlay parameter) {
+                int linesAdded = parameter.addedLineCount();
+                int linesRemoved = parameter.removedLineCount();
+                int fromLine = editorOverlay.getModel().getLineAtOffset(parameter.start());
+                String line = editorOverlay.getModel().getLine(fromLine);
+
+                if (linesAdded > 0 || linesRemoved > 0 || line.trim().isEmpty()) {
+                    removeAnnotations(getAnnotationsFrom(fromLine));
+                    if (eventType.equals("Changing")) {
+                        lineCallback.onBeforeLineNumberingChange(fromLine, linesRemoved, linesAdded);
+                    } else {
+                        lineCallback.onAfterLineNumberingChange(fromLine, linesRemoved, linesAdded);
                     }
                 }
-            };
-
-            this.editorOverlay.getModel().addEventListener("Changed", modelChangingEventHandler, false);
-        }
+            }
+        }, false);
     }
 
     /** {@inheritDoc} */

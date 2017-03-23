@@ -71,7 +71,10 @@ public interface Gutter {
 
     /** Callback to be warned when line numbering changes (lines are removed or inserted). */
     interface LineNumberingChangeCallback {
-        /** Method called when the line numbering changes. */
-        void onLineNumberingChange(int fromLine, int linesRemoved, int linesAdded);
+        /** Method is called before line numbering is changed */
+        void onBeforeLineNumberingChange(int fromLine, int linesRemoved, int linesAdded);
+
+        /** Method is called after line numbering is changed */
+        void onAfterLineNumberingChange(int fromLine, int linesRemoved, int linesAdded);
     }
 }
