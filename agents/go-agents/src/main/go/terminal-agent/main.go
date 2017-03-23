@@ -26,12 +26,10 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"regexp"
 	"time"
 
 	"github.com/eclipse/che/agents/go-agents/src/main/go/core/activity"
 	"github.com/eclipse/che/agents/go-agents/src/main/go/core/auth"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/httputils"
 	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rest"
 	"github.com/eclipse/che/agents/go-agents/src/main/go/terminal-agent/term"
 )
@@ -123,7 +121,7 @@ func main() {
 	}
 
 	// register routes and http handlers
-	r := rest.NewRouter(appHTTPRoutes)
+	r := rest.NewDefaultRouter(basePath, appHTTPRoutes)
 	rest.PrintRoutes(appHTTPRoutes)
 
 	var handler = getHandler(r)
@@ -139,25 +137,13 @@ func main() {
 }
 
 func getHandler(h http.Handler) http.Handler {
-	var handler = h
-	if basePath != "" {
-		if reg, err := regexp.Compile(basePath); err == nil {
-			handler = httputils.BasePathChopper{
-				Pattern:  reg,
-				Delegate: handler,
-			}
-		} else {
-			log.Fatalf("Base path '%s' is not a regexp. Error: %s", basePath, err)
-		}
-	}
-
 	// required authentication for all the requests, if it is configured
 	if authEnabled {
 		cache := auth.NewCache(time.Minute*time.Duration(tokensExpirationTimeoutInMinutes), time.Minute*5)
-		handler = auth.NewCachingHandler(handler, apiEndpoint, droppingTerminalConnectionsUnauthorizedHandler, cache)
+		return auth.NewCachingHandler(h, apiEndpoint, droppingTerminalConnectionsUnauthorizedHandler, cache)
 	}
 
-	return handler
+	return h
 }
 
 func droppingTerminalConnectionsUnauthorizedHandler(w http.ResponseWriter, req *http.Request, err error) {

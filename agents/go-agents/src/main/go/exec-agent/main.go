@@ -17,11 +17,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"time"
 
 	"github.com/eclipse/che/agents/go-agents/src/main/go/core/auth"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/httputils"
 	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rest"
 	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rpc"
 	"github.com/eclipse/che/agents/go-agents/src/main/go/exec-agent/exec"
@@ -146,7 +144,7 @@ func main() {
 	}
 
 	// register routes and http handlers
-	r := rest.NewRouter(appHTTPRoutes)
+	r := rest.NewDefaultRouter(basePath, appHTTPRoutes)
 	rest.PrintRoutes(appHTTPRoutes)
 	rpc.RegisterRoutes(appOpRoutes)
 	rpc.PrintRoutes(appOpRoutes)
@@ -163,26 +161,14 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func getHandler(r rest.Router) http.Handler {
-	var handler http.Handler = r
-	if basePath != "" {
-		if reg, err := regexp.Compile(basePath); err == nil {
-			handler = httputils.BasePathChopper{
-				Pattern:  reg,
-				Delegate: handler,
-			}
-		} else {
-			log.Fatalf("Base path '%s' is not a regexp. Error: %s", basePath, err)
-		}
-	}
-
+func getHandler(h http.Handler) http.Handler {
 	// required authentication for all the requests, if it is configured
 	if authEnabled {
 		cache := auth.NewCache(time.Minute*time.Duration(tokensExpirationTimeoutInMinutes), time.Minute*5)
-		handler = auth.NewCachingHandler(handler, apiEndpoint, droppingRPCChannelsUnauthorizedHandler, cache)
+		return auth.NewCachingHandler(h, apiEndpoint, droppingRPCChannelsUnauthorizedHandler, cache)
 	}
 
-	return handler
+	return h
 }
 
 func droppingRPCChannelsUnauthorizedHandler(w http.ResponseWriter, req *http.Request, err error) {
