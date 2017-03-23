@@ -27,7 +27,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
@@ -35,9 +34,8 @@ import org.eclipse.che.api.ssh.server.jpa.JpaSshDao.RemoveSshKeysBeforeUserRemov
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao.RemovePreferencesBeforeUserRemovedEventSubscriber;
-import org.eclipse.che.api.user.server.jpa.JpaProfileDao.RemoveProfileBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.user.server.jpa.PreferenceEntity;
 import org.eclipse.che.api.user.server.jpa.UserJpaModule;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
@@ -83,7 +81,6 @@ import javax.persistence.EntityManagerFactory;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createAccount;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createPreferences;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createProfile;
@@ -120,6 +117,9 @@ public class CascadeRemovalTest {
     /** Account and User are a root of dependency tree. */
     private AccountImpl account;
     private UserImpl    user;
+
+    private UserManager    userManager;
+    private AccountManager accountManager;
 
     /** Profile depends on user. */
     private ProfileImpl profile;
@@ -175,6 +175,11 @@ public class CascadeRemovalTest {
                 install(new InitModule(PostConstruct.class));
                 bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
                 bind(DBInitializer.class).asEagerSingleton();
+
+                bind(String[].class).annotatedWith(Names.named("che.auth.reserved_user_names")).toInstance(new String[0]);
+                bind(UserManager.class);
+                bind(AccountManager.class);
+
                 install(new UserJpaModule());
                 install(new AccountModule());
                 install(new SshJpaModule());
@@ -194,6 +199,8 @@ public class CascadeRemovalTest {
         eventService = injector.getInstance(EventService.class);
         accountDao = injector.getInstance(AccountDao.class);
         userDao = injector.getInstance(UserDao.class);
+        userManager = injector.getInstance(UserManager.class);
+        accountManager = injector.getInstance(AccountManager.class);
         preferenceDao = injector.getInstance(PreferenceDao.class);
         profileDao = injector.getInstance(ProfileDao.class);
         sshDao = injector.getInstance(SshDao.class);
@@ -212,8 +219,8 @@ public class CascadeRemovalTest {
         createTestData();
 
         // Remove the user, all entries must be removed along with the user
-        accountDao.remove(account.getId());
-        userDao.remove(user.getId());
+        accountManager.remove(account.getId());
+        userManager.remove(user.getId());
 
         // Check all the entities are removed
         assertNull(notFoundToNull(() -> userDao.getById(user.getId())));
@@ -234,8 +241,8 @@ public class CascadeRemovalTest {
 
         // Remove the user, all entries must be rolled back after fail
         try {
-            userDao.remove(user.getId());
-            fail("UserDao#remove had to throw exception");
+            userManager.remove(user.getId());
+            fail("UserManager#remove has to throw exception");
         } catch (Exception ignored) {
         }
 
@@ -250,10 +257,8 @@ public class CascadeRemovalTest {
     @DataProvider(name = "beforeUserRemoveRollbackActions")
     public Object[][] beforeUserRemoveActions() {
         return new Class[][] {
-                {RemovePreferencesBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
-                {RemoveProfileBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
-                {RemoveSshKeysBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
-                };
+                {RemoveSshKeysBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class}
+        };
     }
 
     @Test(dataProvider = "beforeAccountRemoveRollbackActions")
