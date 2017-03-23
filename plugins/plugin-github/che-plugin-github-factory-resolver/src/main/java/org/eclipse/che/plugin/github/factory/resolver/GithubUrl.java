@@ -71,11 +71,11 @@ public class GithubUrl {
      *
      * @return the username part
      */
-    public String username() {
+    public String getUsername() {
         return this.username;
     }
 
-    public GithubUrl username(String userName) {
+    public GithubUrl withUsername(String userName) {
         this.username = userName;
         return this;
     }
@@ -85,29 +85,39 @@ public class GithubUrl {
      *
      * @return the repository part
      */
-    public String repository() {
+    public String getRepository() {
         return this.repository;
     }
 
-    protected GithubUrl repository(String repository) {
+    protected GithubUrl withRepository(String repository) {
         this.repository = repository;
         return this;
     }
 
-    public String dockerfileFilename() {
+    /**
+     * Gets dockerfile file name of this github url
+     *
+     * @return the dockerfile file name
+     */
+    public String getDockerfileFilename() {
         return this.dockerfileFilename;
     }
 
-    protected GithubUrl dockerfileFilename(String dockerfileFilename) {
+    protected GithubUrl withDockerfileFilename(String dockerfileFilename) {
         this.dockerfileFilename = dockerfileFilename;
         return this;
     }
 
-    public String factoryFilename() {
+    /**
+     * Gets factory file name of this github url
+     *
+     * @return the factory file name
+     */
+    public String getFactoryFilename() {
         return this.factoryFilename;
     }
 
-    protected GithubUrl factoryFilename(String factoryFilename) {
+    protected GithubUrl withFactoryFilename(String factoryFilename) {
         this.factoryFilename = factoryFilename;
         return this;
     }
@@ -117,11 +127,11 @@ public class GithubUrl {
      *
      * @return the branch part
      */
-    public String branch() {
+    public String getBranch() {
         return this.branch;
     }
 
-    protected GithubUrl branch(String branch) {
+    protected GithubUrl withBranch(String branch) {
         if (!Strings.isNullOrEmpty(branch)) {
             this.branch = branch;
         }
@@ -133,7 +143,7 @@ public class GithubUrl {
      *
      * @return the subfolder part
      */
-    public String subfolder() {
+    public String getSubfolder() {
         return this.subfolder;
     }
 
@@ -141,10 +151,10 @@ public class GithubUrl {
      * Sets the subfolder represented by the URL.
      *
      * @param subfolder
-     *         path inside the repository
+     *         path inside the getRepository
      * @return current github instance
      */
-    protected GithubUrl subfolder(String subfolder) {
+    protected GithubUrl withSubfolder(String subfolder) {
         this.subfolder = subfolder;
         return this;
     }
@@ -152,7 +162,7 @@ public class GithubUrl {
     /**
      * Provides the location to dockerfile
      *
-     * @return location of dockerfile in a repository
+     * @return location of dockerfile in a getRepository
      */
     protected String dockerFileLocation() {
         return "https://raw.githubusercontent.com/" + this.username + "/" + this.repository + "/" + this.branch + "/" +
@@ -162,7 +172,7 @@ public class GithubUrl {
     /**
      * Provides the location to factory json file
      *
-     * @return location of factory json file in a repository
+     * @return location of factory json file in a getRepository
      */
     protected String factoryJsonFileLocation() {
         return "https://raw.githubusercontent.com/" + this.username + "/" + this.repository + "/" + this.branch + "/" + factoryFilename;

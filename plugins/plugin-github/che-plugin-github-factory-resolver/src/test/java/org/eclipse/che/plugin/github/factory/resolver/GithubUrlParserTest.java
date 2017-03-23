@@ -56,10 +56,10 @@ public class GithubUrlParserTest {
     public void checkParsing(String url, String username, String repository, String branch, String subfolder) {
         GithubUrl githubUrl = githubUrlParser.parse(url);
 
-        assertEquals(githubUrl.username(), username);
-        assertEquals(githubUrl.repository(), repository);
-        assertEquals(githubUrl.branch(), branch);
-        assertEquals(githubUrl.subfolder(), subfolder);
+        assertEquals(githubUrl.getUsername(), username);
+        assertEquals(githubUrl.getRepository(), repository);
+        assertEquals(githubUrl.getBranch(), branch);
+        assertEquals(githubUrl.getSubfolder(), subfolder);
     }
 
     @DataProvider(name = "UrlsProvider")

@@ -57,11 +57,11 @@ public class GithubUrlParser {
                     url));
         }
 
-        return new GithubUrl().username(matcher.group("repoUser"))
-                              .repository(matcher.group("repoName"))
-                              .branch(matcher.group("branchName"))
-                              .subfolder(matcher.group("subFolder"))
-                              .dockerfileFilename(".runtime.dockerfile")
-                              .factoryFilename(".factory.json");
+        return new GithubUrl().withUsername(matcher.group("repoUser"))
+                              .withRepository(matcher.group("repoName"))
+                              .withBranch(matcher.group("branchName"))
+                              .withSubfolder(matcher.group("subFolder"))
+                              .withDockerfileFilename(".runtime.dockerfile")
+                              .withFactoryFilename(".factory.json");
     }
 }

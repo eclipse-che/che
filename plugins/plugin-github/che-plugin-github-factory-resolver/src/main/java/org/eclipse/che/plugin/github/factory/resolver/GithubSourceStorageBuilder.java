@@ -37,10 +37,10 @@ public class GithubSourceStorageBuilder {
     public SourceStorageDto build(GithubUrl githubUrl) {
         // Create map for source storage dto
         Map<String, String> parameters = new HashMap<>(2);
-        parameters.put("branch", githubUrl.branch());
+        parameters.put("branch", githubUrl.getBranch());
 
-        if (!Strings.isNullOrEmpty(githubUrl.subfolder())) {
-            parameters.put("keepDir", githubUrl.subfolder());
+        if (!Strings.isNullOrEmpty(githubUrl.getSubfolder())) {
+            parameters.put("keepDir", githubUrl.getSubfolder());
         }
         return newDto(SourceStorageDto.class).withLocation(githubUrl.repositoryLocation()).withType("git").withParameters(parameters);
     }
