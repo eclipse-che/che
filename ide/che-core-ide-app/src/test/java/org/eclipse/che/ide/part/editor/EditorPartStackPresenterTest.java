@@ -27,7 +27,6 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
-import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
@@ -64,6 +63,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -108,6 +108,8 @@ public class EditorPartStackPresenterTest {
     private CloseAllTabsPaneAction    closeAllTabsPaneAction;
     @Mock
     private EditorPaneMenuItemFactory editorPaneMenuItemFactory;
+    @Mock
+    private EditorAgent               editorAgent;
 
     //additional mocks
     @Mock
@@ -206,7 +208,8 @@ public class EditorPartStackPresenterTest {
                                                  editorPaneMenu,
                                                  actionManager,
                                                  closePaneAction,
-                                                 closeAllTabsPaneAction);
+                                                 closeAllTabsPaneAction,
+                                                 editorAgent);
 
         when(tabItemFactory.createEditorPartButton(partPresenter1, presenter)).thenReturn(editorTab1);
         when(tabItemFactory.createEditorPartButton(partPresenter2, presenter)).thenReturn(editorTab2);
@@ -455,7 +458,7 @@ public class EditorPartStackPresenterTest {
 
         presenter.paneMenuTabItemHandler.onCloseButtonClicked(editorPaneTabMenuItem);
 
-        verify(eventBus).fireEvent(Matchers.<FileEvent>anyObject());
+        verify(editorAgent).closeEditor(any(EditorPartPresenter.class));
     }
 
 }

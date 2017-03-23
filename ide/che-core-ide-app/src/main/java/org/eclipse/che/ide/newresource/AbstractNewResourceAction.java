@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.newresource;
 
+import com.google.common.base.Optional;
+import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
@@ -25,7 +27,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.dialogs.InputDialog;
 import org.eclipse.che.ide.api.dialogs.InputValidator;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -52,13 +54,16 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  * @author Vlad Zhukovskyi
  */
 public abstract class AbstractNewResourceAction extends AbstractPerspectiveAction {
-    private final   InputValidator           fileNameValidator;
+
     protected final String                   title;
     protected final DialogFactory            dialogFactory;
     protected final CoreLocalizationConstant coreLocalizationConstant;
     protected final EventBus                 eventBus;
     protected final AppContext               appContext;
-    private final   NotificationManager      notificationManager;
+    protected final Provider<EditorAgent>    editorAgentProvider;
+
+    private final InputValidator      fileNameValidator;
+    private final NotificationManager notificationManager;
 
     public AbstractNewResourceAction(String title,
                                      String description,
@@ -67,13 +72,15 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
                                      CoreLocalizationConstant coreLocalizationConstant,
                                      EventBus eventBus,
                                      AppContext appContext,
-                                     NotificationManager notificationManager) {
+                                     NotificationManager notificationManager,
+                                     Provider<EditorAgent> editorAgentProvider) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), title, description, null, svgIcon);
         this.dialogFactory = dialogFactory;
         this.coreLocalizationConstant = coreLocalizationConstant;
         this.eventBus = eventBus;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
+        this.editorAgentProvider = editorAgentProvider;
         this.fileNameValidator = new FileNameValidator();
         this.title = title;
     }
@@ -108,7 +115,7 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
         ((Container)resource).newFile(name, getDefaultContent()).then(new Operation<File>() {
             @Override
             public void apply(File newFile) throws OperationException {
-                eventBus.fireEvent(FileEvent.createOpenFileEvent(newFile));
+                editorAgentProvider.get().openEditor(newFile);
                 eventBus.fireEvent(new RevealResourceEvent(newFile));
             }
         }).catchError(new Operation<PromiseError>() {

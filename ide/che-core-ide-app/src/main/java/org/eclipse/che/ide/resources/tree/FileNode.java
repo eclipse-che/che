@@ -17,7 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
 import org.eclipse.che.ide.project.shared.NodesResources;
@@ -34,8 +34,8 @@ import java.util.Set;
  */
 @Beta
 public class FileNode extends ResourceNode<File> implements HasAction {
-    protected final EventBus              eventBus;
     protected final Set<NodeIconProvider> nodeIconProvider;
+    private final   EditorAgent           editorAgent;
 
     @Inject
     public FileNode(@Assisted File resource,
@@ -43,15 +43,16 @@ public class FileNode extends ResourceNode<File> implements HasAction {
                     NodeFactory nodeFactory,
                     NodesResources nodesResources,
                     EventBus eventBus,
-                    Set<NodeIconProvider> nodeIconProvider) {
+                    Set<NodeIconProvider> nodeIconProvider,
+                    EditorAgent editorAgent) {
         super(resource, nodeSettings, nodesResources, nodeFactory, eventBus, nodeIconProvider);
-        this.eventBus = eventBus;
         this.nodeIconProvider = nodeIconProvider;
+        this.editorAgent = editorAgent;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed() {
-        eventBus.fireEvent(FileEvent.createOpenFileEvent(getData()));
+        editorAgent.openEditor(getData());
     }
 }

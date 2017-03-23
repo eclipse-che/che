@@ -11,11 +11,13 @@
 package org.eclipse.che.plugin.filetype.ide.action;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
 import org.eclipse.che.plugin.filetype.ide.MyResources;
@@ -33,14 +35,16 @@ public class CreateMyFileAction extends AbstractNewResourceAction {
                               CoreLocalizationConstant localizationConstant,
                               EventBus eventBus,
                               AppContext appContext,
-                              NotificationManager notificationManager) {
+                              NotificationManager notificationManager,
+                              Provider<EditorAgent> editorAgentProvider) {
         super("Create my File",
               "Create a new file ",
               myResources.icon(),
               dialogFactory,
               localizationConstant,
               eventBus, appContext,
-              notificationManager);
+              notificationManager,
+              editorAgentProvider);
     }
 
     @Override

@@ -12,13 +12,12 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 
@@ -38,17 +37,16 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class EditFileAction extends AbstractPerspectiveAction {
 
-
-    private final AppContext               appContext;
-    private final EventBus                 eventBus;
+    private final AppContext  appContext;
+    private final EditorAgent editorAgent;
 
     @Inject
     public EditFileAction(AppContext appContext,
-                          EventBus eventBus,
-                          Resources resources) {
+                          Resources resources,
+                          EditorAgent editorAgent) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), "Edit file", null, null, resources.defaultFile());
         this.appContext = appContext;
-        this.eventBus = eventBus;
+        this.editorAgent = editorAgent;
     }
 
     /** {@inheritDoc} */
@@ -59,7 +57,7 @@ public class EditFileAction extends AbstractPerspectiveAction {
         checkState(resources != null && resources.length == 1 && resources[0] instanceof File,
                    "Files only are allowed to be opened in editor");
 
-        eventBus.fireEvent(FileEvent.createOpenFileEvent((File)resources[0]));
+        editorAgent.openEditor((File)resources[0]);
     }
 
     /** {@inheritDoc} */
