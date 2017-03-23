@@ -918,4 +918,20 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("empty.state.no.files")
     String emptyStateNoFiles();
+
+    @Key("authentication.dialog.title")
+    String authenticationDialogTitle();
+
+    @Key("authentication.dialog.username")
+    String authenticationDialogUsername();
+
+    @Key("authentication.dialog.password")
+    String authenticationDialogPassword();
+
+    @Key("authentication.dialog.authenticate.button")
+    String authenticationDialogAuthenticate();
+
+    @Key("authentication.dialog.rejected.by.user")
+    String authenticationDialogRejectedByUser();
+
 }

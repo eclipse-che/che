@@ -288,7 +288,11 @@ export class WorkspaceDetailsController {
    */
   getNamespaceLabel(namespaceId: string): string {
     let namespace = this.getNamespace(namespaceId);
-    return namespace.label;
+    if (namespace) {
+      return namespace.label;
+    } else {
+      return namespaceId;
+    }
   }
 
   /**

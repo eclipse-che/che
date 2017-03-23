@@ -33,8 +33,8 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.subversion.Credentials;
-import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
+import org.eclipse.che.ide.api.user.Credentials;
+import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.api.wizard.Wizard.CompleteCallback;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.ExceptionUtils;
@@ -61,7 +61,7 @@ public class ProjectImporter extends AbstractImporter {
 
     private final CoreLocalizationConstant    localizationConstant;
     private final ProjectResolver             projectResolver;
-    private final SubversionCredentialsDialog credentialsDialog;
+    private final AskCredentialsDialog        credentialsDialog;
     private final OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry;
 
 
@@ -70,7 +70,7 @@ public class ProjectImporter extends AbstractImporter {
                            ImportProjectNotificationSubscriberFactory subscriberFactory,
                            AppContext appContext,
                            ProjectResolver projectResolver,
-                           SubversionCredentialsDialog credentialsDialog,
+                           AskCredentialsDialog credentialsDialog,
                            OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry) {
         super(appContext, subscriberFactory);
         this.localizationConstant = localizationConstant;

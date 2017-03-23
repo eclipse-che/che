@@ -10,26 +10,26 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.annotation;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import org.eclipse.che.ide.api.editor.document.DocumentHandle;
+import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
+import org.eclipse.che.ide.api.editor.text.BadLocationException;
+import org.eclipse.che.ide.api.editor.text.BadPositionCategoryException;
+import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.text.Position;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
+import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.eclipse.che.ide.api.editor.text.BadPositionCategoryException;
-import org.eclipse.che.ide.api.editor.text.Position;
-import org.eclipse.che.ide.api.editor.text.TypedPosition;
-import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
-import org.eclipse.che.ide.api.editor.document.DocumentHandle;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
-import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
-import org.eclipse.che.ide.api.editor.text.LinearRange;
-import org.eclipse.che.ide.api.editor.text.TextPosition;
-import org.eclipse.che.ide.util.loging.Log;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 
 /**
  * Default implementation of {@link AnnotationModel}
@@ -51,6 +51,8 @@ public class AnnotationModelImpl implements AnnotationModel {
 
     private final DocumentPositionMap documentPositionMap;
 
+    private PositionHolder positionHolder;
+
     public AnnotationModelImpl(final DocumentPositionMap docPositionMap) {
         this.annotations = new HashMap<>(10);
         this.positions = new IdentityHashMap<>(10);
@@ -65,9 +67,20 @@ public class AnnotationModelImpl implements AnnotationModel {
     protected void addAnnotation(final Annotation annotation, final Position position, final boolean fireEvent) {
         annotations.put(annotation, position);
         positions.put(position, annotation);
+        try {
+            addPosition(position);
+        } catch (BadLocationException ignore) {
+            //ignore invalid location
+        }
         getAnnotationModelEvent().annotationAdded(annotation);
         if (fireEvent) {
             fireModelChanged();
+        }
+    }
+
+    private void addPosition(Position position) throws BadLocationException {
+        if (positionHolder != null) {
+            positionHolder.addPosition(position);
         }
     }
 
@@ -108,8 +121,7 @@ public class AnnotationModelImpl implements AnnotationModel {
     public void removeAnnotation(final Annotation annotation) {
         if (this.annotations.containsKey(annotation)) {
 
-            Position pos = null;
-            pos = this.annotations.get(annotation);
+            Position pos = this.annotations.get(annotation);
 
             this.annotations.remove(annotation);
             positions.remove(pos);
@@ -130,17 +142,23 @@ public class AnnotationModelImpl implements AnnotationModel {
                                                       final int length,
                                                       final boolean canStartBefore,
                                                       final boolean canEndAfter) {
-        //cleanup(true);
+        return getRegionAnnotationIterator(offset, length, canStartBefore, canEndAfter);
+
+    }
+
+    private Iterator<Annotation> getRegionAnnotationIterator(int offset, int length, boolean canStartBefore, boolean canEndAfter) {
+
+
+        cleanup(true);
 
         try {
-            final List<TypedPosition> annotationPos = this.documentPositionMap.getPositions(offset, length, 
-                                                                                            canStartBefore, canEndAfter);
-            return new AnnotationsIterator(annotationPos, this.positions);
-        } catch (final BadPositionCategoryException e) {
-            Log.warn(AnnotationModelImpl.class, "Bad position category (on default category!)");
-            return null;
-        }
+            List<Position> positions = positionHolder.getPositions(offset, length, canStartBefore, canEndAfter);
+            return new AnnotationsIterator(positions, this.positions);
 
+        } catch (BadPositionCategoryException e) {
+            // can happen if e.g. the document doesn't contain such a category, or when removed in a different thread
+            return Collections.<Annotation>emptyList().iterator();
+        }
     }
 
     /**
@@ -248,6 +266,7 @@ public class AnnotationModelImpl implements AnnotationModel {
     @Override
     public void setDocumentHandle(final DocumentHandle handle) {
         this.docHandle = handle;
+        this.positionHolder = new PositionHolder(handle.getDocument());
     }
 
     @Override
@@ -338,4 +357,5 @@ public class AnnotationModelImpl implements AnnotationModel {
         }
         callback.respond(result);
     }
+
 }

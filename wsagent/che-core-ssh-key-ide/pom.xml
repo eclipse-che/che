@@ -14,13 +14,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-plugin-ssh-key-parent</artifactId>
-        <groupId>org.eclipse.che.plugin</groupId>
+        <artifactId>che-agent-parent</artifactId>
+        <groupId>org.eclipse.che.core</groupId>
         <version>5.6.0-SNAPSHOT</version>
     </parent>
+    <groupId>org.eclipse.che.plugin</groupId>
     <artifactId>che-plugin-ssh-key-ide</artifactId>
     <packaging>jar</packaging>
-    <name>Che Plugin :: SSH Key :: Client</name>
+    <name>Che Core :: SSH Key :: Client</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
         <findbugs.failonerror>false</findbugs.failonerror>

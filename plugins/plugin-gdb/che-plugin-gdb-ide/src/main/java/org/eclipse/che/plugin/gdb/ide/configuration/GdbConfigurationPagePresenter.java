@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.ide.configuration;
 
-import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -18,19 +17,11 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.RecipeServiceClient;
-import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
-import org.eclipse.che.ide.json.JsonHelper;
+import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,8 +44,6 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
     private final GdbConfigurationPageView view;
     private final AppContext               appContext;
     private final EntityFactory            entityFactory;
-    private final RecipeServiceClient      recipeServiceClient;
-    private final DtoFactory               dtoFactory;
     private final CurrentProjectPathMacro  currentProjectPathMacro;
 
     private DebugConfiguration editedConfiguration;
@@ -66,15 +55,11 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
     @Inject
     public GdbConfigurationPagePresenter(GdbConfigurationPageView view,
                                          AppContext appContext,
-                                         DtoFactory dtoFactory,
                                          EntityFactory entityFactory,
-                                         RecipeServiceClient recipeServiceClient,
                                          CurrentProjectPathMacro currentProjectPathMacro) {
         this.view = view;
         this.appContext = appContext;
         this.entityFactory = entityFactory;
-        this.recipeServiceClient = recipeServiceClient;
-        this.dtoFactory = dtoFactory;
         this.currentProjectPathMacro = currentProjectPathMacro;
 
         view.setDelegate(this);
@@ -124,16 +109,18 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
     }
 
     private void setHosts(List<Machine> machines) {
-        List<Promise<RecipeDescriptor>> recipePromises = new ArrayList<>(machines.size());
+        Map<String, String> hosts = new HashMap<>();
         for (Machine machine : machines) {
-            String location = machine.getConfig().getSource().getLocation();
-            String recipeId = getRecipeId(location);
-            recipePromises.add(recipeServiceClient.getRecipe(recipeId));
+            String host = machine.getRuntime().getProperties().get("network.ipAddress");
+            if (host == null) {
+                continue;
+            }
+
+            String description = host + " (" + machine.getConfig().getName() + ")";
+            hosts.put(host, description);
         }
 
-        @SuppressWarnings("unchecked")
-        final Promise<RecipeDescriptor>[] recipePromisesArray = (Promise<RecipeDescriptor>[])recipePromises.toArray();
-        setHostsList(recipePromisesArray, machines);
+        view.setHostsList(hosts);
     }
 
     private List<Machine> getMachines() {
@@ -151,34 +138,6 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
             }
         }
         return machines;
-    }
-
-    private void setHostsList(final Promise<RecipeDescriptor>[] recipePromises, final List<Machine> machines) {
-        Promises.all(recipePromises).then(new Operation<JsArrayMixed>() {
-            @Override
-            public void apply(JsArrayMixed recipes) throws OperationException {
-                Map<String, String> hosts = new HashMap<>();
-
-                for (int i = 0; i < recipes.length(); i++) {
-                    String recipeJson = recipes.getObject(i).toString();
-                    RecipeDescriptor recipeDescriptor = dtoFactory.createDtoFromJson(recipeJson, RecipeDescriptor.class);
-
-                    String script = recipeDescriptor.getScript();
-
-                    String host;
-                    try {
-                        Map<String, String> m = JsonHelper.toMap(script);
-                        host = m.containsKey("host") ? m.get("host") : "localhost";
-                    } catch (Exception e) {
-                        host = "localhost";
-                    }
-                    String description = host + " (" + machines.get(i).getConfig().getName() + ")";
-                    hosts.put(host, description);
-                }
-
-                view.setHostsList(hosts);
-            }
-        });
     }
 
     @Override
@@ -227,10 +186,5 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
 
             listener.onDirtyStateChanged();
         }
-    }
-
-    private String getRecipeId(String location) {
-        location = location.substring(0, location.lastIndexOf("/"));
-        return location.substring(location.lastIndexOf("/") + 1);
     }
 }

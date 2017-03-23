@@ -8,22 +8,25 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-//TODO This is used in wizard/ProjectImporter, find a solution to move it to plugin-svn.
-package org.eclipse.che.ide.api.subversion;
+package org.eclipse.che.api.user.server.event;
 
-import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.core.notification.EventOrigin;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 /**
- * Dialog for retrieving credentials for SVN operations.
+ * Will be published when {@link UserImpl user} is created.
  *
- * @author Igor Vinokur
+ * @author Anatolii Bazko
  */
-public interface SubversionCredentialsDialog {
+@EventOrigin("user")
+public class UserCreatedEvent {
 
-    /**
-     * Returns credentials from dialog.
-     *
-     * @return {@link Credentials} that contains user name and password
-     */
-    Promise<Credentials> askCredentials();
+    private final User user;
+
+    public UserCreatedEvent(User user) {this.user = user;}
+
+    public User getUser() {
+        return user;
+    }
 }
