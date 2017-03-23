@@ -22,6 +22,8 @@ import org.eclipse.che.ide.editor.macro.EditorCurrentFilePathMacro;
 import org.eclipse.che.ide.editor.macro.EditorCurrentFileRelativePathMacro;
 import org.eclipse.che.ide.editor.macro.EditorCurrentProjectNameMacro;
 import org.eclipse.che.ide.editor.macro.EditorCurrentProjectTypeMacro;
+import org.eclipse.che.ide.macro.chooser.MacroChooserView;
+import org.eclipse.che.ide.macro.chooser.MacroChooserViewImpl;
 import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileNameMacro;
 import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileParentPathMacro;
 import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFilePathMacro;
@@ -56,5 +58,7 @@ public class MacroApiModule extends AbstractGinModule {
         macrosBinder.addBinding().to(ExplorerCurrentProjectNameMacro.class);
         macrosBinder.addBinding().to(ExplorerCurrentProjectTypeMacro.class);
         macrosBinder.addBinding().to(WorkspaceNameMacro.class);
+
+        bind(MacroChooserView.class).to(MacroChooserViewImpl.class);
     }
 }

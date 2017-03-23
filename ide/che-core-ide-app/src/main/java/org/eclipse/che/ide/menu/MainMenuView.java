@@ -16,7 +16,6 @@ import org.eclipse.che.ide.api.mvp.View;
 /** Main Menu View */
 public interface MainMenuView extends View<MainMenuView.ActionDelegate> {
     /** Needs for delegate some function into MainMenu view. */
-    public interface ActionDelegate {
+    interface ActionDelegate {
     }
-
 }

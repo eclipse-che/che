@@ -18,6 +18,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.macro.BaseMacro;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
 import org.eclipse.che.ide.api.machine.DevMachine;
@@ -26,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Provider which is responsible for the retrieving the port of the registered server.
+ * Macro which is responsible for the retrieving the port of the registered server.
  * <p>
  * Macro provided: <code>${server.[port].port}</code>
  *
@@ -43,16 +44,16 @@ public class ServerPortMacro extends AbstractServerMacro {
     public static final String KEY = "${server.%.port}";
 
     @Inject
-    public ServerPortMacro(MacroRegistry providerRegistry,
+    public ServerPortMacro(MacroRegistry macroRegistry,
                            EventBus eventBus,
                            AppContext appContext) {
-        super(providerRegistry, eventBus, appContext);
+        super(macroRegistry, eventBus, appContext);
     }
 
     /** {@inheritDoc} */
     @Override
     public Set<Macro> getMacros(DevMachine devMachine) {
-        final Set<Macro> providers = Sets.newHashSet();
+        final Set<Macro> macros = Sets.newHashSet();
 
         for (Map.Entry<String, ? extends Server> entry : devMachine.getDescriptor().getRuntime().getServers().entrySet()) {
 
@@ -62,24 +63,24 @@ public class ServerPortMacro extends AbstractServerMacro {
 
             final String externalPort = entry.getValue().getAddress().split(":")[1];
 
-            Macro macro = new CustomMacro(KEY.replace("%", entry.getKey()),
-                                          externalPort,
-                                          "Returns port of a server registered by name");
+            Macro macro = new BaseMacro(KEY.replace("%", entry.getKey()),
+                                        externalPort,
+                                        "Returns port of a server registered by name");
 
-            providers.add(macro);
+            macros.add(macro);
 
             // register port without "/tcp" suffix
             if (entry.getKey().endsWith("/tcp")) {
                 final String port = entry.getKey().substring(0, entry.getKey().length() - 4);
 
-                Macro shortMacro = new CustomMacro(KEY.replace("%", port),
-                                                   externalPort,
-                                                   "Returns port of a server registered by name");
+                Macro shortMacro = new BaseMacro(KEY.replace("%", port),
+                                                 externalPort,
+                                                 "Returns port of a server registered by name");
 
-                providers.add(shortMacro);
+                macros.add(shortMacro);
             }
         }
 
-        return providers;
+        return macros;
     }
 }

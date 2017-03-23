@@ -45,7 +45,7 @@
         }
     </ui:style>
 
-    <g:HTMLPanel addStyleNames="{style.content-block}">
+    <g:HTMLPanel addStyleNames="{style.content-block}" debugId="dialog-confirm">
         <g:SimplePanel ui:field="content" addStyleNames="{style.content}"/>
     </g:HTMLPanel>
 </ui:UiBinder>

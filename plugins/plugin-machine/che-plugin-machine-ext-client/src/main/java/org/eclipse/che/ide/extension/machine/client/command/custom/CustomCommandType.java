@@ -40,7 +40,7 @@ public class CustomCommandType implements CommandType {
         pages = new LinkedList<>();
         pages.add(page);
 
-        iconRegistry.registerIcon(new Icon(ID + ".commands.category.icon", resources.customCommandType()));
+        iconRegistry.registerIcon(new Icon("command.type." + ID, resources.customCommandType()));
     }
 
     @Override

@@ -13,11 +13,13 @@ package org.eclipse.che.ide.ext.web.css;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.web.WebLocalizationConstant;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -37,10 +39,11 @@ public class NewLessFileAction extends AbstractNewResourceAction {
                              CoreLocalizationConstant coreLocalizationConstant,
                              EventBus eventBus,
                              AppContext appContext,
-                             NotificationManager notificationManager) {
+                             NotificationManager notificationManager,
+                             Provider<EditorAgent> editorAgentProvider) {
         super(localizationConstant.newLessFileActionTitle(),
               localizationConstant.newLessFileActionDescription(),
-              null, dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager);
+              null, dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager, editorAgentProvider);
     }
 
     @Override
