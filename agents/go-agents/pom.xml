@@ -16,10 +16,9 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.5.0</version>
+        <version>5.6.0-openshift-connector-SNAPSHOT</version>
     </parent>
     <artifactId>go-agents</artifactId>
-    <version>5.6.0-openshift-connector-SNAPSHOT</version>
     <name>Agent :: Golang agents</name>
     <properties>
         <go.workspace.name>go-workspace</go.workspace.name>

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-sample-parent</artifactId>
         <groupId>org.eclipse.che.sample</groupId>
-        <version>5.5.0</version>
+        <version>5.6.0-openshift-connector-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-sample-plugin-filetype-parent</artifactId>

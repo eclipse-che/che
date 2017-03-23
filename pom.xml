@@ -31,11 +31,7 @@
         <module>agents</module>
         <module>plugins</module>
         <module>samples</module>
-        <!--
-        We avoid to build/maintain dashboard
-        since we are not going to use it
         <module>dashboard</module>
-        -->
         <module>assembly</module>
     </modules>
     <scm>
@@ -47,8 +43,7 @@
     <properties>
         <che.docs.version>5.5.0</che.docs.version>
         <che.lib.version>5.5.0</che.lib.version>
-        <che.openshift.version>5.6.0-openshift-connector-SNAPSHOT</che.openshift.version>
-        <che.version>5.5.0</che.version>
+        <che.version>5.6.0-openshift-connector-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -61,96 +56,96 @@
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-ide-war</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-ide-war</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-ide-war</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
                 <classifier>classes</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-main</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-wsagent-server</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
                 <type>tar.gz</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-wsagent-war</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-wsmaster-war</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>go-agents</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
                 <type>tar.gz</type>
                 <classifier>linux_amd64</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>go-agents</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
                 <type>tar.gz</type>
                 <classifier>linux_arm7</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>go-agents</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>ls-csharp-agent</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>ls-json-agent</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>ls-php-agent</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>ls-python-agent</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>ls-typescript-agent</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>ssh-agent</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>unison-agent</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -176,7 +171,7 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-auth</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -437,7 +432,7 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-ide-stacks</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -457,7 +452,7 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>wsagent</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -561,7 +556,7 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-docker-client</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
@@ -571,7 +566,7 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-docker-machine</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
@@ -601,7 +596,7 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-github-oauth2</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
@@ -756,7 +751,7 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-openshift-client</artifactId>
-                <version>${che.openshift.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
