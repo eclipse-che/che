@@ -150,6 +150,7 @@ ALTER TABLE che_factory ADD CONSTRAINT fk_che_f_user_id FOREIGN KEY (user_id) RE
 ALTER TABLE che_factory ADD CONSTRAINT fk_che_f_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaceconfig (id);
 ALTER TABLE che_factory ADD CONSTRAINT fk_che_f_button_id FOREIGN KEY (button_id) REFERENCES che_factory_button (id);
 ALTER TABLE che_factory ADD CONSTRAINT fk_che_f_ide_id FOREIGN KEY (ide_id) REFERENCES che_factory_ide (id);
+CREATE UNIQUE INDEX index_che_factory_name_user_id ON che_factory (user_id, name);
 --------------------------------------------------------------------------------
 
 
