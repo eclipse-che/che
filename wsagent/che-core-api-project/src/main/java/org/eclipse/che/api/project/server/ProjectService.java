@@ -810,6 +810,10 @@ public class ProjectService extends Service {
                                                                                                                ServerException {
         final FolderEntry folder = projectManager.asFolder(path);
 
+        if (folder == null) {
+            throw new NotFoundException("Folder " + path + " was not found");
+        }
+
         return newDto(TreeElement.class).withNode(injectFolderLinks(asDto(folder)))
                                         .withChildren(getTree(folder, depth, includeFiles));
     }
