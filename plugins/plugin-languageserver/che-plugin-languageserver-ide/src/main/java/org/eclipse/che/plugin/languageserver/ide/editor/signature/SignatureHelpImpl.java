@@ -10,15 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.signature;
 
-import com.google.common.base.Optional;
-
-import org.eclipse.che.api.languageserver.shared.lsapi.SignatureHelpDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.SignatureInformationDTO;
-import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
-import org.eclipse.che.ide.api.editor.signature.SignatureInfo;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
+import org.eclipse.che.ide.api.editor.signature.SignatureInfo;
+import org.eclipse.lsp4j.SignatureInformation;
+
+import com.google.common.base.Optional;
 
 /**
  * @author Evgen Vidolob
@@ -29,12 +28,12 @@ class SignatureHelpImpl implements SignatureHelp {
     private final Optional<Integer>   activeSignature;
     private final Optional<Integer>   activeParameter;
 
-    public SignatureHelpImpl(SignatureHelpDTO dto) {
+    public SignatureHelpImpl(org.eclipse.lsp4j.SignatureHelp dto) {
         activeParameter = Optional.fromNullable(dto.getActiveParameter());
         activeSignature = Optional.fromNullable(dto.getActiveSignature());
         signatureInfos = new ArrayList<>(dto.getSignatures().size());
-        for (SignatureInformationDTO signatureInformationDTO : dto.getSignatures()) {
-            signatureInfos.add(new SignatureInfoImpl(signatureInformationDTO));
+        for (SignatureInformation SignatureInformation : dto.getSignatures()) {
+            signatureInfos.add(new SignatureInfoImpl(SignatureInformation));
         }
     }
 

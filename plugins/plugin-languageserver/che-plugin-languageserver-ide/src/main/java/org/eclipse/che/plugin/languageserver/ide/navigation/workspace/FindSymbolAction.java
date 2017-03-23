@@ -10,15 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.workspace;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.SymbolInformationDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.WorkspaceSymbolParamsDTO;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import javax.validation.constraints.NotNull;
+
+import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceSymbolParams;
 import org.eclipse.che.api.promises.async.Task;
 import org.eclipse.che.api.promises.async.ThrottledDelayer;
 import org.eclipse.che.api.promises.client.Function;
@@ -39,15 +41,14 @@ import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
 import org.eclipse.che.plugin.languageserver.ide.service.WorkspaceServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
+import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.SymbolInformation;
 
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * @author Evgen Vidolob
@@ -121,29 +122,29 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
     }
 
     private Promise<List<SymbolEntry>> searchSymbols(final String value) {
-        WorkspaceSymbolParamsDTO params = dtoFactory.createDto(WorkspaceSymbolParamsDTO.class);
+        ExtendedWorkspaceSymbolParams params = dtoFactory.createDto(ExtendedWorkspaceSymbolParams.class);
         params.setQuery(value);
         params.setFileUri(editorAgent.getActiveEditor().getEditorInput().getFile().getLocation().toString());
-        return workspaceServiceClient.symbol(params).then(new Function<List<SymbolInformationDTO>, List<SymbolEntry>>() {
+        return workspaceServiceClient.symbol(params).then(new Function<List<SymbolInformation>, List<SymbolEntry>>() {
             @Override
-            public List<SymbolEntry> apply(List<SymbolInformationDTO> types) throws FunctionException {
+            public List<SymbolEntry> apply(List<SymbolInformation> types) throws FunctionException {
                 return toSymbolEntries(types, value);
             }
         });
     }
 
-    private List<SymbolEntry> toSymbolEntries(List<SymbolInformationDTO> types, String value) {
+    private List<SymbolEntry> toSymbolEntries(List<SymbolInformation> types, String value) {
         List<SymbolEntry> result = new ArrayList<>();
-        for (SymbolInformationDTO element : types) {
+        for (SymbolInformation element : types) {
             if(!SUPPORTED_OPEN_TYPES.contains(symbolKindHelper.from(element.getKind()))){
                 continue;
             }
             List<Match> matches = fuzzyMatches.fuzzyMatch(value, element.getName());
             if (matches != null) {
-                LocationDTO location = element.getLocation();
+                Location location = element.getLocation();
                 if (location != null && location.getUri() != null) {
                     String filePath = location.getUri();
-                    RangeDTO locationRange = location.getRange();
+                    Range locationRange = location.getRange();
 
                     TextRange range = null;
                     if (locationRange != null) {

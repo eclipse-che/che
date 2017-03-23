@@ -10,22 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.json.languageserver;
 
-import io.typefox.lsapi.services.json.JsonBasedLanguageServer;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.eclipse.che.api.languageserver.shared.model.impl.LanguageDescriptionImpl;
+import static java.util.Arrays.asList;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static java.util.Arrays.asList;
+import org.eclipse.che.api.languageserver.exception.LanguageServerException;
+import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.lsp4j.jsonrpc.Launcher;
+import org.eclipse.lsp4j.services.LanguageClient;
+import org.eclipse.lsp4j.services.LanguageServer;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * @author Evgen Vidolob
@@ -34,49 +34,51 @@ import static java.util.Arrays.asList;
 @Singleton
 public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate {
 
-    private static final String   LANGUAGE_ID = "json";
-    private static final String[] EXTENSIONS  = new String[] {"json", "bowerrc", "jshintrc", "jscsrc", "eslintrc", "babelrc"};
-    private static final String[] MIME_TYPES  = new String[] {"application/json"};
-    private static final LanguageDescriptionImpl description;
+	private static final String LANGUAGE_ID = "json";
+	private static final String[] EXTENSIONS = new String[] { "json", "bowerrc", "jshintrc", "jscsrc", "eslintrc",
+			"babelrc" };
+	private static final String[] MIME_TYPES = new String[] { "application/json" };
+	private static final LanguageDescription description;
 
-    private final Path launchScript;
+	private final Path launchScript;
 
-    static {
-        description = new LanguageDescriptionImpl();
-        description.setFileExtensions(asList(EXTENSIONS));
-        description.setLanguageId(LANGUAGE_ID);
-        description.setMimeTypes(asList(MIME_TYPES));
-    }
+	static {
+		description = new LanguageDescription();
+		description.setFileExtensions(asList(EXTENSIONS));
+		description.setLanguageId(LANGUAGE_ID);
+		description.setMimeTypes(asList(MIME_TYPES));
+	}
 
-    @Inject
-    public JsonLanguageServerLauncher() {
-        launchScript = Paths.get(System.getenv("HOME"), "che/ls-json/launch.sh");
-    }
+	@Inject
+	public JsonLanguageServerLauncher() {
+		launchScript = Paths.get(System.getenv("HOME"), "che/ls-json/launch.sh");
+	}
 
-    @Override
-    public LanguageDescription getLanguageDescription() {
-        return description;
-    }
+	@Override
+	public LanguageDescription getLanguageDescription() {
+		return description;
+	}
 
-    @Override
-    public boolean isAbleToLaunch() {
-        return Files.exists(launchScript);
-    }
+	@Override
+	public boolean isAbleToLaunch() {
+		return Files.exists(launchScript);
+	}
 
-    protected JsonBasedLanguageServer connectToLanguageServer(Process languageServerProcess) {
-        JsonBasedLanguageServer languageServer = new JsonLanguageServer();
-        languageServer.connect(languageServerProcess.getInputStream(), languageServerProcess.getOutputStream());
-        return languageServer;
-    }
+	protected LanguageServer connectToLanguageServer(final Process languageServerProcess, LanguageClient client) {
+		Launcher<LanguageServer> launcher = Launcher.createLauncher(client, LanguageServer.class,
+				languageServerProcess.getInputStream(), languageServerProcess.getOutputStream());
+		launcher.startListening();
+		return launcher.getRemoteProxy();
+	}
 
-    protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
-        ProcessBuilder processBuilder = new ProcessBuilder(launchScript.toString());
-        processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
-        processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
-        try {
-            return processBuilder.start();
-        } catch (IOException e) {
-            throw new LanguageServerException("Can't start JSON language server", e);
-        }
-    }
+	protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
+		ProcessBuilder processBuilder = new ProcessBuilder(launchScript.toString());
+		processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
+		processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
+		try {
+			return processBuilder.start();
+		} catch (IOException e) {
+			throw new LanguageServerException("Can't start JSON language server", e);
+		}
+	}
 }

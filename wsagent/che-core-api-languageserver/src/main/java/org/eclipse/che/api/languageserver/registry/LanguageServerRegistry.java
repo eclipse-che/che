@@ -10,15 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import io.typefox.lsapi.services.LanguageServer;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.shared.ProjectExtensionKey;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.commons.annotation.Nullable;
-
-import java.util.List;
-import java.util.Map;
+import org.eclipse.lsp4j.services.LanguageServer;
 
 /**
  * @author Anatoliy Bazko

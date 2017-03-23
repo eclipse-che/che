@@ -29,10 +29,6 @@
             <artifactId>guice-multibindings</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.typefox.lsapi</groupId>
-            <artifactId>io.typefox.lsapi.services</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>
@@ -56,6 +52,14 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-web-ext-shared</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j</artifactId>
+        </dependency>
+		<dependency>
+		  <groupId>org.eclipse.lsp4j</groupId>
+		  <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
+		</dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>

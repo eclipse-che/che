@@ -10,17 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-import org.eclipse.che.api.languageserver.shared.lsapi.DiagnosticDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.PublishDiagnosticsParamsDTO;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * @author Anatolii Bazko
@@ -35,7 +35,7 @@ public class PublishDiagnosticsProcessor {
         this.editorAgent = editorAgent;
     }
 
-    public void processDiagnostics(PublishDiagnosticsParamsDTO diagnosticsMessage) {
+    public void processDiagnostics(PublishDiagnosticsParams diagnosticsMessage) {
         EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(new Path(diagnosticsMessage.getUri()));
         //TODO add markers
         if (openedEditor == null) {
@@ -49,7 +49,7 @@ public class PublishDiagnosticsProcessor {
                 DiagnosticCollector collector = (DiagnosticCollector)annotationModel;
                 collector.beginReporting();
                 try {
-                    for (DiagnosticDTO diagnostic : diagnosticsMessage.getDiagnostics()) {
+                    for (Diagnostic diagnostic : diagnosticsMessage.getDiagnostics()) {
                         collector.acceptDiagnostic(diagnostic);
                     }
                 } finally {

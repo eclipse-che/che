@@ -33,14 +33,6 @@
             <artifactId>guice-multibindings</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.typefox.lsapi</groupId>
-            <artifactId>io.typefox.lsapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.typefox.lsapi</groupId>
-            <artifactId>io.typefox.lsapi.services</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-languageserver</artifactId>
         </dependency>
@@ -51,6 +43,14 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
         </dependency>
     </dependencies>
 </project>

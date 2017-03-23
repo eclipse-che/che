@@ -13,10 +13,6 @@ package org.eclipse.che.plugin.languageserver.ide.hover;
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.eclipse.che.api.languageserver.shared.lsapi.HoverDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.MarkedStringDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -32,11 +28,11 @@ import org.eclipse.che.ide.util.StringUtils;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
+import org.eclipse.lsp4j.Hover;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.typefox.lsapi.MarkedString;
 
 /**
  * Provides hover LS functionality for Orion editor.
@@ -46,70 +42,64 @@ import io.typefox.lsapi.MarkedString;
 @Singleton
 public class HoverProvider implements OrionHoverHandler {
 
-    private final EditorAgent               editorAgent;
-    private final TextDocumentServiceClient client;
-    private final DtoBuildHelper            helper;
+	private final EditorAgent editorAgent;
+	private final TextDocumentServiceClient client;
+	private final DtoBuildHelper helper;
 
-    @Inject
-    public HoverProvider(EditorAgent editorAgent, TextDocumentServiceClient client, DtoBuildHelper helper) {
-        this.editorAgent = editorAgent;
-        this.client = client;
-        this.helper = helper;
-    }
+	@Inject
+	public HoverProvider(EditorAgent editorAgent, TextDocumentServiceClient client, DtoBuildHelper helper) {
+		this.editorAgent = editorAgent;
+		this.client = client;
+		this.helper = helper;
+	}
 
-    @Override
-    public JsPromise<OrionHoverOverlay> computeHover(OrionHoverContextOverlay context) {
-        EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        if (activeEditor == null || !(activeEditor instanceof TextEditor)) {
-            return null;
-        }
+	@Override
+	public JsPromise<OrionHoverOverlay> computeHover(OrionHoverContextOverlay context) {
+		EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+		if (activeEditor == null || !(activeEditor instanceof TextEditor)) {
+			return null;
+		}
 
-        TextEditor editor = ((TextEditor)activeEditor);
-        if (!(editor.getConfiguration() instanceof LanguageServerEditorConfiguration)) {
-            return null;
-        }
+		TextEditor editor = ((TextEditor) activeEditor);
+		if (!(editor.getConfiguration() instanceof LanguageServerEditorConfiguration)) {
+			return null;
+		}
 
-        LanguageServerEditorConfiguration configuration = (LanguageServerEditorConfiguration)editor.getConfiguration();
-        if (configuration.getServerCapabilities().isHoverProvider() == null || !configuration.getServerCapabilities().isHoverProvider()) {
-            return null;
-        }
+		LanguageServerEditorConfiguration configuration = (LanguageServerEditorConfiguration) editor.getConfiguration();
+		if (configuration.getServerCapabilities().getHoverProvider() == null
+				|| !configuration.getServerCapabilities().getHoverProvider()) {
+			return null;
+		}
 
-        Document document = editor.getDocument();
-        TextDocumentPositionParamsDTO paramsDTO = helper.createTDPP(document, context.getOffset());
+		Document document = editor.getDocument();
+		TextDocumentPositionParams paramsDTO = helper.createTDPP(document, context.getOffset());
 
+		Promise<Hover> promise = client.hover(paramsDTO);
+		Promise<OrionHoverOverlay> then = promise.then(new Function<Hover, OrionHoverOverlay>() {
+			@Override
+			public OrionHoverOverlay apply(Hover arg) throws FunctionException {
+				OrionHoverOverlay hover = OrionHoverOverlay.create();
+				hover.setType("markdown");
+				String content = renderContent(arg);
+				// do not show hover with only white spaces
+				if (StringUtils.isNullOrWhitespace(content)) {
+					return null;
+				}
+				hover.setContent(content);
 
-        Promise<HoverDTO> promise = client.hover(paramsDTO);
-        Promise<OrionHoverOverlay> then = promise.then(new Function<HoverDTO, OrionHoverOverlay>() {
-            @Override
-            public OrionHoverOverlay apply(HoverDTO arg) throws FunctionException {
-                OrionHoverOverlay hover = OrionHoverOverlay.create();
-                hover.setType("markdown");
-                String content = renderContent(arg);
-                //do not show hover with only white spaces
-                if (StringUtils.isNullOrWhitespace(content)) {
-                    return null;
-                }
-                hover.setContent(content);
+				return hover;
+			}
 
-                return hover;
-            }
+			private String renderContent(Hover hover) {
+				List<String> contents = new ArrayList<String>();
+				for (String dto : hover.getContents()) {
+					// plain markdown text
+					contents.add(dto);
+				}
+				return Joiner.on("\n\n").join(contents);
+			}
+		});
+		return (JsPromise<OrionHoverOverlay>) then;
 
-            private String renderContent(HoverDTO hover) {
-                List<String> contents = new ArrayList<String>();
-                for (MarkedStringDTO dto : hover.getContents()) {
-                    String lang = dto.getLanguage();
-                    if (lang == null || MarkedString.PLAIN_STRING.equals(lang)) {
-                        // plain markdown text
-                        contents.add(dto.getValue());
-                    } else {
-                        // markdown code block
-                        contents.add("```" + lang + "\n" + dto.getValue() + "\n```");
-                    }
-                }
-                return Joiner.on("\n\n").join(contents);
-            }
-        });
-        return (JsPromise<OrionHoverOverlay>)then;
-
-    }
+	}
 }

@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.filters;
 
-import com.google.gwt.regexp.shared.MatchResult;
-import com.google.gwt.regexp.shared.RegExp;
-import com.google.inject.Singleton;
+import static org.eclipse.che.plugin.languageserver.ide.filters.Matcher.MatcherUtil.or;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.plugin.languageserver.ide.filters.Matcher.MatcherUtil.*;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.inject.Singleton;
 
 /**
  * @author Evgen Vidolob

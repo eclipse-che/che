@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.filters;
 
-import org.eclipse.che.commons.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * @author Evgen Vidolob

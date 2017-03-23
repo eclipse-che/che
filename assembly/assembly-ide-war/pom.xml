@@ -296,6 +296,24 @@
             <artifactId>plugin-terminal-ui</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+                    <groupId>org.eclipse.xtext</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org.eclipse.xtend.lib</artifactId>
+                    <groupId>org.eclipse.xtend</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.xtext</groupId>
+            <artifactId>org.eclipse.xtext.xbase.lib.gwt</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
