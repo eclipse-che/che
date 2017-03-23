@@ -150,9 +150,9 @@ public class GithubUrl {
     }
 
     /**
-     * Provides the location to dockerfileFilename
+     * Provides the location to dockerfile
      *
-     * @return location of dockerfileFilename in a repository
+     * @return location of dockerfile in a repository
      */
     protected String dockerFileLocation() {
         return "https://raw.githubusercontent.com/" + this.username + "/" + this.repository + "/" + this.branch + "/" +
