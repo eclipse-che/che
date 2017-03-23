@@ -10,57 +10,229 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.filters;
 
+import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.response.Response;
 
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.rest.ApiExceptionMapper;
+import org.eclipse.che.api.core.rest.CheJsonProvider;
+import org.eclipse.che.api.workspace.server.stack.StackService;
+import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
+import org.everrest.assured.EverrestJetty;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.HashSet;
+import java.util.Map;
+
 import static com.jayway.restassured.RestAssured.given;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_STACK_BY_ID;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_STACK;
+import static org.eclipse.che.dto.server.DtoFactory.cloneDto;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 /**
  * @author Alexander Garagatyi
  */
+@Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class AddExecAgentInStackFilterTest {
-    @Test
-    public void newStackShouldBeCreatedForUser() throws ConflictException, ServerException {
+
+    @SuppressWarnings("unused")
+    static final ApiExceptionMapper MAPPER = new ApiExceptionMapper();
+
+    @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+    private CheJsonProvider jsonProvider = new CheJsonProvider(new HashSet<>());
+
+    @Mock
+    private StackService              stackService;
+    @SuppressWarnings("unused")
+    @Spy
+    private AddExecAgentInStackFilter filter;
+    @Captor
+    private ArgumentCaptor<StackDto>  stackCaptor;
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        when(stackService.createStack(any(StackDto.class))).thenReturn(javax.ws.rs.core.Response.status(201).build());
+    }
+
+    @Test(dataProvider = "environmentsProvider")
+    public void shouldAddExecAgentIntoMachineWithTerminalAgent(Map<String, EnvironmentDto> inputEnv,
+                                                               Map<String, EnvironmentDto> expectedEnv) throws ApiException {
+        StackDto inputStack = newDto(StackDto.class)
+                .withWorkspaceConfig(newDto(WorkspaceConfigDto.class).withEnvironments(inputEnv));
+
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType(APPLICATION_JSON)
-                                         .body(stackDto)
+                                         .body(inputStack)
                                          .when()
                                          .post(SECURE_PATH + "/stack");
 
         assertEquals(response.getStatusCode(), 201);
 
-        verify(stackDao).create(any(StackImpl.class));
+        verify(stackService).createStack(stackCaptor.capture());
+        Map<String, EnvironmentDto> actualEnv = stackCaptor.getValue().getWorkspaceConfig().getEnvironments();
+        assertEquals(actualEnv, expectedEnv);
+    }
 
-        final StackDto stackDtoDescriptor = unwrapDto(response, StackDto.class);
+    @DataProvider(name = "environmentsProvider")
+    public static Object[][] environmentsProvider() {
+        EnvironmentDto environment = newDto(EnvironmentDto.class);
+        ExtendedMachineDto machine = newDto(ExtendedMachineDto.class);
+        return new Object[][] {
+                // no error if no envs
+                {emptyMap(), emptyMap()},
 
-        assertEquals(stackDtoDescriptor.getName(), stackDto.getName());
-        assertEquals(stackDtoDescriptor.getCreator(), USER_ID);
-        assertEquals(stackDtoDescriptor.getDescription(), stackDto.getDescription());
-        assertEquals(stackDtoDescriptor.getTags(), stackDto.getTags());
+                // no error if no machines in env
+                {singletonMap("e1", cloneDto(environment)),
+                 singletonMap("e1", cloneDto(environment))},
 
-        assertEquals(stackDtoDescriptor.getComponents(), stackDto.getComponents());
+                // no error if no agents in machine
+                {singletonMap("e1", cloneDto(environment).withMachines(singletonMap("m1", cloneDto(machine)))),
+                 singletonMap("e1", cloneDto(environment).withMachines(singletonMap("m1", cloneDto(machine))))},
 
-        assertEquals(stackDtoDescriptor.getSource(), stackDto.getSource());
+                // no error if agents list is empty
+                {singletonMap("e1", cloneDto(environment)
+                        .withMachines(singletonMap("m1", cloneDto(machine).withAgents(emptyList())))),
+                 singletonMap("e1", cloneDto(environment)
+                         .withMachines(singletonMap("m1", cloneDto(machine).withAgents(emptyList()))))},
 
-        assertEquals(stackDtoDescriptor.getScope(), stackDto.getScope());
+                // don't add exec if existing agent is not terminal but start as terminal
+                {singletonMap("e1", cloneDto(environment).withMachines(
+                        singletonMap("m1", cloneDto(machine).withAgents(singletonList("org.eclipse.che.terminal1"))))),
+                 singletonMap("e1", cloneDto(environment).withMachines(singletonMap("m1", cloneDto(machine)
+                         .withAgents(singletonList("org.eclipse.che.terminal1")))))},
 
-        assertEquals(stackDtoDescriptor.getLinks().size(), 2);
-        assertEquals(stackDtoDescriptor.getLinks().get(0).getRel(), LINK_REL_REMOVE_STACK);
-        assertEquals(stackDtoDescriptor.getLinks().get(1).getRel(), LINK_REL_GET_STACK_BY_ID);
+                // add exec agent if terminal is present
+                {singletonMap("e1", cloneDto(environment).withMachines(
+                        singletonMap("m1", cloneDto(machine).withAgents(singletonList("org.eclipse.che.terminal"))))),
+                 singletonMap("e1", cloneDto(environment).withMachines(
+                         singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                "org.eclipse.che.exec")))))},
+
+                // don't change agents if exec is present
+                {singletonMap("e1", cloneDto(environment).withMachines(
+                        singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.exec",
+                                                                               "org.eclipse.che.terminal"))))),
+                 singletonMap("e1", cloneDto(environment).withMachines(
+                         singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.exec",
+                                                                                "org.eclipse.che.terminal")))))},
+
+                // don't change agents if exec is present in the end of agents
+                {singletonMap("e1", cloneDto(environment).withMachines(
+                        singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                               "org.eclipse.che.exec"))))),
+                 singletonMap("e1", cloneDto(environment).withMachines(
+                         singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                "org.eclipse.che.exec")))))},
+
+                // don't change agents if exec is present between other agents
+                {singletonMap("e1", cloneDto(environment).withMachines(
+                        singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                               "org.eclipse.che.ls.php",
+                                                                               "org.eclipse.che.exec",
+                                                                               "org.eclipse.che.ls.json"))))),
+                 singletonMap("e1", cloneDto(environment).withMachines(
+                         singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                "org.eclipse.che.ls.php",
+                                                                                "org.eclipse.che.exec",
+                                                                                "org.eclipse.che.ls.json")))))},
+
+                // add exec in the end if terminal is present
+                {singletonMap("e1", cloneDto(environment).withMachines(
+                        singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                               "org.eclipse.che.ls.php",
+                                                                               "org.eclipse.che.ls.json"))))),
+                 singletonMap("e1", cloneDto(environment).withMachines(
+                         singletonMap("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                "org.eclipse.che.ls.php",
+                                                                                "org.eclipse.che.ls.json",
+                                                                                "org.eclipse.che.exec")))))},
+
+                // add exec into each machine with terminal
+                {singletonMap("e1", cloneDto(environment).withMachines(
+                        ImmutableMap.of("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                  "org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.ls.json")),
+                                        "m2", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.terminal",
+                                                                                  "org.eclipse.che.ls.json")),
+                                        "m3", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.ls.json")))
+                )),
+                 singletonMap("e1", cloneDto(environment).withMachines(
+                         ImmutableMap.of("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                   "org.eclipse.che.ls.php",
+                                                                                   "org.eclipse.che.ls.json",
+                                                                                   "org.eclipse.che.exec")),
+                                         "m2", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                   "org.eclipse.che.terminal",
+                                                                                   "org.eclipse.che.ls.json",
+                                                                                   "org.eclipse.che.exec")),
+                                         "m3", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                   "org.eclipse.che.ls.json")))
+                 ))},
+
+                // add exec into each machine with terminal in every env
+                {ImmutableMap.of("e1", cloneDto(environment).withMachines(
+                        ImmutableMap.of("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                  "org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.ls.json")),
+                                        "m2", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.terminal",
+                                                                                  "org.eclipse.che.ls.json")),
+                                        "m3", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.ls.json")))
+                                 ),
+                                 "e2", cloneDto(environment).withMachines(
+                                ImmutableMap.of("m4", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                          "org.eclipse.che.ls.php",
+                                                                                          "org.eclipse.che.ls.json")),
+                                                "m5", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                          "org.eclipse.che.ls.json")))
+                        )),
+                 ImmutableMap.of("e1", cloneDto(environment).withMachines(
+                         ImmutableMap.of("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                   "org.eclipse.che.ls.php",
+                                                                                   "org.eclipse.che.ls.json",
+                                                                                   "org.eclipse.che.exec")),
+                                         "m2", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                   "org.eclipse.che.terminal",
+                                                                                   "org.eclipse.che.ls.json",
+                                                                                   "org.eclipse.che.exec")),
+                                         "m3", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                   "org.eclipse.che.ls.json")))
+                                 ),
+                                 "e2", cloneDto(environment).withMachines(
+                                 ImmutableMap.of("m4", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                           "org.eclipse.che.ls.php",
+                                                                                           "org.eclipse.che.ls.json",
+                                                                                           "org.eclipse.che.exec")),
+                                                 "m5", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                           "org.eclipse.che.ls.json")))
+                         ))},
+                };
     }
 }
