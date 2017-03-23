@@ -335,7 +335,6 @@ public final class ResourceManager {
             return ps.createFolder(parent.getLocation().append(name)).thenPromise(reference -> {
                 final Resource createdFolder = newResourceFrom(reference);
                 store.register(createdFolder);
-                eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(createdFolder, ADDED | DERIVED)));
 
                 return promises.resolve(createdFolder.asFolder());
             });
@@ -352,7 +351,6 @@ public final class ResourceManager {
             return ps.createFile(parent.getLocation().append(name), content).thenPromise(reference -> {
                 final Resource createdFile = newResourceFrom(reference);
                 store.register(createdFile);
-                eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(createdFile, ADDED | DERIVED)));
 
                 return promises.resolve(createdFile.asFile());
             });
@@ -718,16 +716,35 @@ public final class ResourceManager {
     }
 
     protected Promise<Optional<File>> getFile(final Path absolutePath) {
-        return findResource(absolutePath, true).then((Function<Optional<Resource>, Optional<File>>)optionalFile -> {
-            if (optionalFile.isPresent()) {
-                final Resource resource = optionalFile.get();
-                checkState(resource.getResourceType() == FILE, "Not a file");
+        final Optional<Resource> resourceOptional = store.getResource(absolutePath);
 
-                return of((File)resource);
-            }
+        if (resourceOptional.isPresent() && resourceOptional.get().isFile()) {
+            return promises.resolve(of(resourceOptional.get().asFile()));
+        }
 
-            return absent();
-        });
+        if (store.getResource(absolutePath.parent()).isPresent()) {
+            return findResource(absolutePath, true).thenPromise(optionalFile -> {
+                if (optionalFile.isPresent()) {
+                    final Resource resource = optionalFile.get();
+                    checkState(resource.getResourceType() == FILE, "Not a file");
+
+                    return promises.resolve(of((File)resource));
+                }
+
+                return promises.resolve(absent());
+            });
+        } else {
+            return findResourceForExternalOperation(absolutePath, true).thenPromise(optionalFile -> {
+                if (optionalFile.isPresent()) {
+                    final Resource resource = optionalFile.get();
+                    checkState(resource.getResourceType() == FILE, "Not a file");
+
+                    return promises.resolve(of((File)resource));
+                }
+
+                return promises.resolve(absent());
+            });
+        }
     }
 
     Optional<Container> parentOf(Resource resource) {
@@ -760,7 +777,7 @@ public final class ResourceManager {
     }
 
     private Promise<Optional<Resource>> findResource(final Path absolutePath, boolean quiet) {
-        return ps.getItem(absolutePath).then((Function<ItemReference, Optional<Resource>>)itemReference -> {
+        return ps.getItem(absolutePath).thenPromise(itemReference -> {
             final Resource resource = newResourceFrom(itemReference);
 
             store.dispose(absolutePath, false);
@@ -770,31 +787,31 @@ public final class ResourceManager {
                 inspectProject(resource.asProject());
             }
 
-            return fromNullable(resource);
-        }).catchError(arg -> {
+            return promises.resolve(fromNullable(resource));
+        }).catchErrorPromise(arg -> {
 
             if (!quiet) {
                 throw new IllegalStateException(arg.getCause());
             }
 
-            return Optional.absent();
+            return promises.resolve(absent());
         });
     }
 
     private Promise<Optional<Resource>> findResourceForExternalOperation(final Path absolutePath, boolean quiet) {
-        final Promise<Void> derived = promises.resolve(null);
+        Promise<Void> derived = promises.resolve(null);
 
         for (int i = absolutePath.segmentCount() - 1; i > 0; i--) {
             final Path pathToCache = absolutePath.removeLastSegments(i);
 
-            derived.thenPromise(arg -> loadAndRegisterResources(pathToCache));
+            derived = derived.thenPromise(arg -> loadAndRegisterResources(pathToCache));
         }
 
         return derived.thenPromise(ignored -> findResource(absolutePath, quiet));
     }
 
     private Promise<Void> loadAndRegisterResources(Path absolutePath) {
-        return ps.getTree(absolutePath, 1, true).then((Function<TreeElement, Void>)treeElement -> {
+        return ps.getTree(absolutePath, 1, true).thenPromise(treeElement -> {
             final Optional<Resource[]> optionalChildren = store.get(absolutePath);
 
             if (optionalChildren.isPresent()) {
@@ -813,7 +830,7 @@ public final class ResourceManager {
                 store.register(resource);
             }
 
-            return null;
+            return promises.resolve(null);
         });
     }
 
@@ -966,14 +983,14 @@ public final class ResourceManager {
             }
         }
 
-        return promise.then((Function<Void, ResourceDelta[]>)ignored -> deltas);
+        return promise.thenPromise(ignored -> promises.resolve(deltas));
     }
 
     private Promise<Void> onExternalDeltaMoved(final ResourceDelta delta) {
         final Optional<Resource> toRemove = store.getResource(delta.getFromPath());
         store.dispose(delta.getFromPath(), true);
 
-        return findResourceForExternalOperation(delta.getToPath(), true).then((Function<Optional<Resource>, Void>)resource -> {
+        return findResourceForExternalOperation(delta.getToPath(), true).thenPromise(resource -> {
 
             if (resource.isPresent() && toRemove.isPresent()) {
                 Resource intercepted = resource.get();
@@ -986,12 +1003,30 @@ public final class ResourceManager {
                                                                                   ADDED | MOVED_FROM | MOVED_TO | DERIVED)));
             }
 
-            return null;
+            return promises.resolve(null);
         });
     }
 
     private Promise<Void> onExternalDeltaAdded(final ResourceDelta delta) {
-        return findResourceForExternalOperation(delta.getToPath(), true).then((Function<Optional<Resource>, Void>)resource -> {
+        if (delta.getToPath().segmentCount() == 1) {
+            return ps.getProjects().thenPromise(updatedConfiguration -> {
+                cachedConfigs = updatedConfiguration.toArray(new ProjectConfigDto[updatedConfiguration.size()]);
+
+                for (ProjectConfigDto config : cachedConfigs) {
+                    if (Path.valueOf(config.getPath()).equals(delta.getToPath())) {
+                        final Project project = resourceFactory.newProjectImpl(config, ResourceManager.this);
+
+                        store.register(project);
+
+                        eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, ADDED)));
+                    }
+                }
+
+                return promises.resolve(null);
+            });
+        }
+
+        return findResourceForExternalOperation(delta.getToPath(), true).thenPromise(resource -> {
             if (resource.isPresent()) {
                 Resource intercepted = resource.get();
 
@@ -1000,25 +1035,9 @@ public final class ResourceManager {
                 }
 
                 eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(intercepted, ADDED | DERIVED)));
-            } else if (delta.getToPath().segmentCount() == 1) {
-                ps.getProjects().then((Function<List<ProjectConfigDto>, Void>)updatedConfiguration -> {
-                    cachedConfigs = updatedConfiguration.toArray(new ProjectConfigDto[updatedConfiguration.size()]);
-
-                    for (ProjectConfigDto config : cachedConfigs) {
-                        if (Path.valueOf(config.getPath()).equals(delta.getToPath())) {
-                            final Project project = resourceFactory.newProjectImpl(config, ResourceManager.this);
-
-                            store.register(project);
-
-                            eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, ADDED)));
-                        }
-                    }
-
-                    return null;
-                });
             }
 
-            return null;
+            return promises.resolve(null);
         });
     }
 
@@ -1029,26 +1048,23 @@ public final class ResourceManager {
             return null;
         }
 
-        return findResourceForExternalOperation(delta.getToPath(), true).then((Function<Optional<Resource>, Void>)resource -> {
+        return findResourceForExternalOperation(delta.getToPath(), true).thenPromise(resource -> {
             if (resource.isPresent()) {
-                if (resource.get() instanceof Container) {
-                    ((Container)resource.get()).synchronize();
-                } else {
-                    eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource.get(), UPDATED | DERIVED)));
-                }
+                eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource.get(), UPDATED | DERIVED)));
             }
 
-            return null;
+            return promises.resolve(null);
         });
     }
 
     private Promise<Void> onExternalDeltaRemoved(final ResourceDelta delta) {
 
-        final Optional<Resource> resource = store.getResource(delta.getFromPath());
+        final Optional<Resource> resourceOptional = store.getResource(delta.getFromPath());
 
-        if (resource.isPresent()) {
-            store.dispose(resource.get().getLocation(), true);
-            eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource.get(), REMOVED | DERIVED)));
+        if (resourceOptional.isPresent()) {
+            final Resource resource = resourceOptional.get();
+            store.dispose(resource.getLocation(), true);
+            eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource, REMOVED | DERIVED)));
         }
 
         return promises.resolve(null);
