@@ -174,6 +174,7 @@ public class ExecuteCommandActionManager implements Component,
 
                 // remove action group if it is empty
                 if (commandGoalPopUpGroup.getChildrenCount() == 0) {
+                    actionManager.unregisterAction("goal_" + goalId);
                     commandsActionGroup.remove(commandGoalPopUpGroup);
                     commandGoalPopUpGroups.remove(goalId);
                 }
