@@ -27,21 +27,21 @@ import org.eclipse.che.ide.util.Pair;
 import java.util.List;
 import java.util.Optional;
 
-/** Popup list for {@link MenuPopupButton}. */
-class PopupItemList extends PopupPanel {
+/** Menu with {@link MenuItem}s list for {@link MenuButton}. */
+class ItemsList extends PopupPanel {
 
-    private final MenuPopupItemDataProvider dataProvider;
-    private final MenuPopupButton.Resources resources;
+    private final ItemsProvider        dataProvider;
+    private final MenuButton.Resources resources;
 
     private ActionHandler actionHandler;
-    private PopupItemList childList;
+    private ItemsList     childList;
 
     private ItemWidget overItem;
 
-    PopupItemList(List<PopupItem> children,
-                  MenuPopupItemDataProvider dataProvider,
-                  MenuPopupButton.Resources resources,
-                  @Nullable String title) {
+    ItemsList(List<MenuItem> children,
+              ItemsProvider dataProvider,
+              MenuButton.Resources resources,
+              @Nullable String title) {
         super(true, false);
 
         this.dataProvider = dataProvider;
@@ -79,9 +79,9 @@ class PopupItemList extends PopupPanel {
 
     private class ItemWidget extends FlowPanel {
 
-        private final PopupItem item;
+        private final MenuItem item;
 
-        ItemWidget(PopupItem item) {
+        ItemWidget(MenuItem item) {
             this.item = item;
 
             addStyleName(resources.css().popupItem());
@@ -114,7 +114,7 @@ class PopupItemList extends PopupPanel {
                 }
 
                 if (dataProvider.isGroup(item)) {
-                    Pair<List<PopupItem>, String> children = dataProvider.getChildren(item);
+                    Pair<List<MenuItem>, String> children = dataProvider.getChildren(item);
                     createChildPopup(children);
                 }
             }, MouseOverEvent.getType());
@@ -130,8 +130,8 @@ class PopupItemList extends PopupPanel {
             }, ClickEvent.getType());
         }
 
-        private void createChildPopup(Pair<List<PopupItem>, String> children) {
-            childList = new PopupItemList(children.first, dataProvider, resources, "Execute on:");
+        private void createChildPopup(Pair<List<MenuItem>, String> children) {
+            childList = new ItemsList(children.first, dataProvider, resources, "Execute on:");
             getActionHandler().ifPresent(actionHandler -> childList.setActionHandler(actionHandler));
             childList.setPopupPosition(getAbsoluteLeft() + getOffsetWidth(), getAbsoluteTop());
             childList.show();

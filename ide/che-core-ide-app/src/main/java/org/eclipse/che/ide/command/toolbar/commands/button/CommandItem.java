@@ -14,15 +14,15 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.ui.menubutton.PopupItem;
+import org.eclipse.che.ide.ui.menubutton.MenuItem;
 
-/** A {@link PopupItem} represents {@link CommandImpl}. */
-public class CommandPopupItem implements PopupItem {
+/** A {@link MenuItem} represents {@link CommandImpl}. */
+public class CommandItem implements MenuItem {
 
     private final CommandImpl command;
 
     @Inject
-    public CommandPopupItem(@Assisted CommandImpl command) {
+    public CommandItem(@Assisted CommandImpl command) {
         this.command = command;
     }
 

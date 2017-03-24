@@ -14,50 +14,71 @@ import elemental.dom.Element;
 
 import com.google.gwt.safehtml.shared.SafeHtml;
 
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.command.CommandGoal;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.ui.Tooltip;
-import org.eclipse.che.ide.ui.menubutton.MenuPopupButton;
-import org.eclipse.che.ide.ui.menubutton.MenuPopupItemDataProvider;
-import org.eclipse.che.ide.ui.menubutton.PopupItem;
+import org.eclipse.che.ide.ui.menubutton.ItemsProvider;
+import org.eclipse.che.ide.ui.menubutton.MenuButton;
+import org.eclipse.che.ide.ui.menubutton.MenuItem;
+import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
+
+import java.util.Optional;
 
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
+import static org.eclipse.che.ide.util.input.KeyMapUtil.getShortcutText;
 
-/** {@link MenuPopupButton} for displaying commands belong to the same {@link CommandGoal}. */
-public class GoalButton extends MenuPopupButton {
+/** {@link MenuButton} displays commands which belong to the same {@link CommandGoal}. */
+public class GoalButton extends MenuButton {
 
-    private final CommandGoal     goal;
-    private final ToolbarMessages messages;
+    private static final String ACTION_PREFIX = "execute_command_";
+
+    private final CommandGoal           goal;
+    private final ToolbarMessages       messages;
+    private final CharCodeWithModifiers keyBinding;
 
     private Tooltip tooltip;
     private String  tooltipText;
 
     GoalButton(CommandGoal goal,
                SafeHtml icon,
-               MenuPopupItemDataProvider dataProvider,
-               ToolbarMessages messages) {
-        super(icon, dataProvider);
+               ItemsProvider itemsProvider,
+               ToolbarMessages messages,
+               ActionManager actionManager,
+               KeyBindingAgent keyBindingAgent,
+               @Nullable CharCodeWithModifiers keyBinding) {
+        super(icon, itemsProvider);
 
         this.goal = goal;
         this.messages = messages;
+        this.keyBinding = keyBinding;
+
+        if (keyBinding != null) {
+            actionManager.registerAction(ACTION_PREFIX + goal.getId(), new ExecuteDefaultCommandAction());
+            keyBindingAgent.getGlobal().addKey(keyBinding, ACTION_PREFIX + goal.getId());
+        }
     }
 
-    public GoalButtonDataProvider getPopupItemDataProvider() {
-        return (GoalButtonDataProvider)dataProvider;
-    }
-
-    public CommandGoal getGoal() {
-        return goal;
+    public GoalButtonItemsProvider getItemProvider() {
+        return (GoalButtonItemsProvider)itemsProvider;
     }
 
     /** Updates button's tooltip depending on it's state (what child elements it contains). */
     public void updateTooltip() {
-        final PopupItem defaultItem = dataProvider.getDefaultItem();
+        final Optional<MenuItem> defaultItem = itemsProvider.getDefaultItem();
 
-        if (defaultItem != null) {
-            setTooltip(messages.goalButtonTooltipExecutePrompt(defaultItem.getName()));
-        } else if (getPopupItemDataProvider().hasGuideOnly()) {
+        if (defaultItem.isPresent()) {
+            String keyBindingString = "";
+            if (keyBinding != null) {
+                keyBindingString = " [" + getShortcutText(keyBinding) + ']';
+            }
+            setTooltip(messages.goalButtonTooltipExecute(defaultItem.get().getName(), keyBindingString));
+        } else if (getItemProvider().hasGuideOnly()) {
             setTooltip(messages.goalButtonTooltipNoCommand(goal.getId()));
         } else {
             setTooltip(messages.goalButtonTooltipChooseCommand(goal.getId()));
@@ -76,5 +97,18 @@ public class GoalButton extends MenuPopupButton {
         }
 
         tooltip = Tooltip.create((Element)getElement(), BOTTOM, MIDDLE, newTooltipText);
+    }
+
+    private class ExecuteDefaultCommandAction extends Action {
+
+        ExecuteDefaultCommandAction() {
+            super("Execute default command of " + goal.getId() + " goal");
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            itemsProvider.getDefaultItem()
+                         .ifPresent(defaultItem -> getActionHandler().ifPresent(handler -> handler.onAction(defaultItem)));
+        }
     }
 }

@@ -12,16 +12,16 @@ package org.eclipse.che.ide.command.toolbar.commands.button;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.ui.menubutton.PopupItem;
+import org.eclipse.che.ide.ui.menubutton.MenuItem;
 
-/** Factory for {@link PopupItem}s for {@link GoalButton}. */
-public interface PopupItemFactory {
+/** Factory for {@link MenuItem}s for {@link GoalButton}. */
+public interface MenuItemsFactory {
 
-    GuidePopupItem newHintPopupItem();
+    GuideItem newGuideItem();
 
-    CommandPopupItem newCommandPopupItem(CommandImpl command);
+    CommandItem newCommandItem(CommandImpl command);
 
-    MachinePopupItem newMachinePopupItem(CommandImpl command, Machine machine);
+    MachineItem newMachineItem(CommandImpl command, Machine machine);
 
-    MachinePopupItem newMachinePopupItem(MachinePopupItem item);
+    MachineItem newMachineItem(MachineItem item);
 }

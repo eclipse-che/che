@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.menubutton;
 
-/** Item for {@link MenuPopupButton}. */
-public interface PopupItem {
+/** Item for {@link MenuButton}. */
+public interface MenuItem {
 
     String getName();
 
