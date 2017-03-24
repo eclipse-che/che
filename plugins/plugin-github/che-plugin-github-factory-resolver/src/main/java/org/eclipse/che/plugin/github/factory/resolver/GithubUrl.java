@@ -12,6 +12,8 @@ package org.eclipse.che.plugin.github.factory.resolver;
 
 import com.google.common.base.Strings;
 
+import java.util.StringJoiner;
+
 /**
  * Representation of a github URL, allowing to get details from it.
  * <p> like
@@ -151,7 +153,7 @@ public class GithubUrl {
      * Sets the subfolder represented by the URL.
      *
      * @param subfolder
-     *         path inside the getRepository
+     *         path inside the repository
      * @return current github instance
      */
     protected GithubUrl withSubfolder(String subfolder) {
@@ -162,20 +164,27 @@ public class GithubUrl {
     /**
      * Provides the location to dockerfile
      *
-     * @return location of dockerfile in a getRepository
+     * @return location of dockerfile in a repository
      */
     protected String dockerFileLocation() {
-        return "https://raw.githubusercontent.com/" + this.username + "/" + this.repository + "/" + this.branch + "/" +
-               dockerfileFilename;
+        return new StringJoiner("/").add("https://raw.githubusercontent.com")
+                                    .add(username)
+                                    .add(repository)
+                                    .add(branch)
+                                    .add(dockerfileFilename).toString();
     }
 
     /**
      * Provides the location to factory json file
      *
-     * @return location of factory json file in a getRepository
+     * @return location of factory json file in a repository
      */
     protected String factoryJsonFileLocation() {
-        return "https://raw.githubusercontent.com/" + this.username + "/" + this.repository + "/" + this.branch + "/" + factoryFilename;
+        return new StringJoiner("/").add("https://raw.githubusercontent.com")
+                                    .add(username)
+                                    .add(repository)
+                                    .add(branch)
+                                    .add(factoryFilename).toString();
     }
 
     /**
