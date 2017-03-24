@@ -64,18 +64,13 @@
           <!-- Namespace -->
           <che-label-container che-label-name="Team"
                                ng-if="workspaceDetailsController.getNamespaces().length > 0">
-            <che-toggle ng-if="workspaceDetailsController.isCreationFlow"
-                        ng-model="workspaceDetailsController.namespaceId"
-                        layout="row">
-              <che-toggle-button ng-repeat="namespace in workspaceDetailsController.getNamespaces()"
-                                 che-title="{{namespace.label}}"
-                                 che-value="{{namespace.id}}"
-                                 class="namespace-toggle-button">
-              </che-toggle-button>
-            </che-toggle>
+            <che-filter-selector che-values="workspaceDetailsController.namespaceLabels"
+                                 ng-if="workspaceDetailsController.isCreationFlow"
+                                 ng-model="workspaceDetailsController.namespaceLabel"
+                                 che-on-change="workspaceDetailsController.onNamespaceChanged"></che-filter-selector>
             <che-button-default ng-if="!workspaceDetailsController.isCreationFlow"
                                 che-button-title="{{workspaceDetailsController.getNamespaceLabel(workspaceDetailsController.namespaceId)}}"
-                                ng-disabled="workspaceDetailsController.getNamespace(workspaceDetailsController.namespaceId)"
+                                ng-disabled="!workspaceDetailsController.getNamespace(workspaceDetailsController.namespaceId) || !workspaceDetailsController.getNamespace(workspaceDetailsController.namespaceId).location"
                                 ng-click="workspaceDetailsController.namespaceOnClick(workspaceDetailsController.namespaceId)"
                                 class="namespace-button"></che-button-default>
           </che-label-container>
