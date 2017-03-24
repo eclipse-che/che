@@ -51,6 +51,9 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
     private final DockerExtConfBindingProvider dockerExtConfBindingProvider;
     private final TerminalVolumeProvider       terminalVolumeProvider;
     private final String                       projectsVolumeOptions;
+    public static final String ETC_PASSWD_VOLUME = "/etc/passwd";
+    public static final String ETC_GROUP_VOLUME = "/etc/group";
+    private final String                      cheUserId;
 
     @Inject
     public LocalCheInfrastructureProvisioner(AgentConfigApplier agentConfigApplier,
@@ -60,7 +63,8 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
                                              @Nullable @Named("che.docker.volumes_projects_options") String projectsVolumeOptions,
                                              WsAgentVolumeProvider wsAgentVolumeProvider,
                                              DockerExtConfBindingProvider dockerExtConfBindingProvider,
-                                             TerminalVolumeProvider terminalVolumeProvider) {
+                                             TerminalVolumeProvider terminalVolumeProvider,
+                                             @Nullable @Named("che.docker.user_id") String cheUserId) {
         super(agentConfigApplier);
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.pathEscaper = pathEscaper;
@@ -68,6 +72,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         this.wsAgentVolumeProvider = wsAgentVolumeProvider;
         this.dockerExtConfBindingProvider = dockerExtConfBindingProvider;
         this.terminalVolumeProvider = terminalVolumeProvider;
+        this.cheUserId = cheUserId;
         if (!Strings.isNullOrEmpty(projectsVolumeOptions)) {
             this.projectsVolumeOptions = ":" + projectsVolumeOptions;
         } else {
@@ -115,6 +120,9 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         environmentVars.put(CheBootstrap.CHE_LOCAL_CONF_DIR, DockerExtConfBindingProvider.EXT_CHE_LOCAL_CONF_DIR);
         devMachine.setEnvironment(environmentVars);
 
+        if (!Strings.isNullOrEmpty(cheUserId)) {
+            envConfig.getMachines().entrySet().forEach(entry -> addVolume(internalEnv, entry.getKey()));
+        }
         // apply basic infra (e.g. agents)
         super.provision(envConfig, internalEnv);
     }
@@ -126,4 +134,24 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
 
         super.provision(machineConfig, internalMachine);
     }
+
+    private void addVolume(CheServicesEnvironmentImpl internalEnv, String machineName) {
+        addVolume(internalEnv, machineName, ETC_PASSWD_VOLUME);
+        addVolume(internalEnv, machineName, ETC_GROUP_VOLUME);
+    }
+
+    private void addVolume(CheServicesEnvironmentImpl internalEnv, String machineName, String volume) {
+        String path;
+        if (projectsVolumeOptions != null && projectsVolumeOptions.contains("Z")) {
+            path = format("%s:%s:ro,Z", volume, volume);
+        } else {
+            path = format("%s:%s:ro", volume, volume);
+        }
+        internalEnv.getServices()
+                .get(machineName)
+                .getVolumes()
+                .add(SystemInfo.isWindows() ? pathEscaper.escapePath(path)
+                                            : path);
+    }
+
 }
