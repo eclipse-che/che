@@ -46,7 +46,7 @@ func NewDefaultRouter(basePath string, restRoutes []RoutesGroup) Router {
 
 	// base path chopping is needed
 	reg, err := regexp.Compile(basePath)
-	if err == nil {
+	if err != nil {
 		panic(fmt.Errorf("Base path '%s' is not a regexp. Error: %s", basePath, err))
 	}
 	defaultRouter := &basePathChoppingRouter{
