@@ -106,8 +106,10 @@ public class ProjectTypeTest {
         assertEquals(3, reg.getProjectTypes().size());
         assertEquals(1, child.getParents().size());
         assertEquals(2, child.getAncestors().size());
-        assertEquals(2, reg.getProjectType("child").getAttributes().size());
-        assertEquals(1, reg.getProjectType("parent").getAttributes().size());
+        assertEquals(2 + reg.getProjectType(BaseProjectType.ID).getAttributes().size(),
+                     reg.getProjectType("child").getAttributes().size());
+        assertEquals(1 + reg.getProjectType(BaseProjectType.ID).getAttributes().size(),
+                     reg.getProjectType("parent").getAttributes().size());
         Assert.assertTrue(reg.getProjectType("child").isTypeOf("parent"));
     }
 
@@ -174,7 +176,8 @@ public class ProjectTypeTest {
         ProjectTypeRegistry reg = new ProjectTypeRegistry(pts);
 
         assertEquals(2, child.getParents().size());
-        assertEquals(3, reg.getProjectType("child").getAttributes().size());
+        assertEquals(3 + reg.getProjectType(BaseProjectType.ID).getAttributes().size(),
+                     reg.getProjectType("child").getAttributes().size());
     }
 
     @Test

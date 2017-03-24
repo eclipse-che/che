@@ -20,7 +20,7 @@ import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.resources.File;
@@ -53,7 +53,7 @@ import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegate, WsAgentStateHandler {
 
     private final MessageBusProvider     messageBusProvider;
-    private final EventBus               eventBus;
+    private final EditorAgent            editorAgent;
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
     private final NavigateToFileView     view;
     private final AppContext             appContext;
@@ -66,12 +66,13 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
                                    EventBus eventBus,
                                    DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                    MessageBusProvider messageBusProvider,
-                                   AppContext appContext) {
+                                   AppContext appContext,
+                                   EditorAgent editorAgent) {
         this.view = view;
         this.appContext = appContext;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.messageBusProvider = messageBusProvider;
-        this.eventBus = eventBus;
+        this.editorAgent = editorAgent;
 
         this.view.setDelegate(this);
 
@@ -101,7 +102,7 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
             @Override
             public void apply(Optional<File> optFile) throws OperationException {
                 if (optFile.isPresent()) {
-                    eventBus.fireEvent(FileEvent.createOpenFileEvent(optFile.get()));
+                    editorAgent.openEditor(optFile.get());
                 }
             }
         });

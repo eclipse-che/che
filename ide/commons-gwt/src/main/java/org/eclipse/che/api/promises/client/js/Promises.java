@@ -18,6 +18,7 @@ import com.google.gwt.core.client.JsArrayMixed;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 
 /**
  * A smattering of useful methods to work with Promises.
@@ -65,12 +66,18 @@ public final class Promises {
      * @param promises
      *         the included promises
      * @return a promise with an array of unit values as fulfillment value
+     * @deprecated use {@link PromiseProvider#all(ArrayOf)}
      */
+    @Deprecated
     public static final native JsPromise<JsArrayMixed> all(ArrayOf<Promise<?>> promises) /*-{
         return Promise.all(promises);
     }-*/;
 
-    /** @see #all(ArrayOf) */
+    /**
+     * @see #all(ArrayOf)
+     * @deprecated use {@link PromiseProvider#all2(Promise[])}
+     */
+    @Deprecated
     public static final JsPromise<JsArrayMixed> all(final Promise<?>... promises) {
         final JsArrayOf<Promise<?>> promisesArray = JavaScriptObject.createArray().cast();
         for (final Promise<?> promise : promises) {
@@ -87,7 +94,9 @@ public final class Promises {
      * @param <U>
      *         the type of the returned promise
      * @return
+     * @deprecated use {@link PromiseProvider#reject(PromiseError)}
      */
+    @Deprecated
     public static final native <U> JsPromise<U> reject(PromiseError reason) /*-{
         return Promise.reject(reason);
     }-*/;
@@ -100,7 +109,9 @@ public final class Promises {
      * @param <U>
      *         the type of the returned promise
      * @return a promise that is resolved with the specified value
+     * @deprecated use {@link PromiseProvider#resolve(U)}
      */
+    @Deprecated
     public static final native <U> JsPromise<U> resolve(U value) /*-{
         return Promise.resolve(value);
     }-*/;

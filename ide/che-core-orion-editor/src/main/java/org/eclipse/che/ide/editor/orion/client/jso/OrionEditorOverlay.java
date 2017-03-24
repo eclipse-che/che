@@ -187,8 +187,20 @@ public class OrionEditorOverlay extends JavaScriptObject {
         return this.getAnnotationModel();
     }-*/;
 
+    public final native void setAnnotationRulerVisible(boolean visible) /*-{
+        this.setAnnotationRulerVisible(visible);
+    }-*/;
+
+    public final native void setFoldingRulerVisible(boolean visible) /*-{
+        this.setFoldingRulerVisible(visible);
+    }-*/;
+
     public final native void setZoomRulerVisible(boolean visible) /*-{
         this.setZoomRulerVisible(visible);
+    }-*/;
+
+    public final native void setOverviewRulerVisible(boolean visible) /*-{
+        this.setOverviewRulerVisible(visible);
     }-*/;
 
     public final native void showProblems(JsArray<OrionProblemOverlay> problems) /*-{

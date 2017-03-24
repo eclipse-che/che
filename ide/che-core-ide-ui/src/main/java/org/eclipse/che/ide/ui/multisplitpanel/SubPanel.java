@@ -105,7 +105,5 @@ public interface SubPanel {
 
         /** Invoked when a {@code widget} on a {@code panel} was double clicked. */
         void onDoubleClicked(SubPanel panel, IsWidget widget);
-
     }
-
 }

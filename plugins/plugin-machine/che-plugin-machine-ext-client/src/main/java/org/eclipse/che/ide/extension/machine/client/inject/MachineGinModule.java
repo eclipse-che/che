@@ -17,7 +17,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.machine.shared.Constants;
-import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.machine.MachineEntity;
@@ -25,10 +25,8 @@ import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClient;
 import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClientImpl;
-import org.eclipse.che.ide.extension.machine.client.command.CommandManagerImpl;
+import org.eclipse.che.ide.extension.machine.client.command.CommandExecutorImpl;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
-import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsView;
-import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsViewImpl;
 import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
 import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectRelativePathMacro;
 import org.eclipse.che.ide.extension.machine.client.command.macros.DevMachineHostNameMacro;
@@ -86,8 +84,7 @@ public class MachineGinModule extends AbstractGinModule {
 
         bind(ProcessesPanelView.class).to(ProcessesPanelViewImpl.class).in(Singleton.class);
 
-        bind(CommandManager.class).to(CommandManagerImpl.class).in(Singleton.class);
-        bind(EditCommandsView.class).to(EditCommandsViewImpl.class).in(Singleton.class);
+        bind(CommandExecutor.class).to(CommandExecutorImpl.class).in(Singleton.class);
 
         bind(TargetsView.class).to(TargetsViewImpl.class).in(Singleton.class);
 

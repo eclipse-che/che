@@ -38,7 +38,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Collections;
-import java.util.Map;
 
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.IMPORT;
@@ -187,7 +186,7 @@ public class ProjectWizardTest {
         when(promiseError.getCause()).thenReturn(exception);
         when(dataObject.getCommands()).thenReturn(Collections.singletonList(command));
         when(command.getCommandLine()).thenReturn("echo 'Hello'");
-        when(commandManager.create(any(String.class), any(String.class), any(String.class), any(Map.class))).thenReturn(createCommandPromise);
+        when(commandManager.createCommand(any(CommandImpl.class))).thenReturn(createCommandPromise);
         when(createCommandPromise.then(any(Operation.class))).thenReturn(createCommandPromise);
         when(createCommandPromise.catchError(any(Operation.class))).thenReturn(createCommandPromise);
 
