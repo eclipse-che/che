@@ -82,6 +82,7 @@ public class StatusPanelGroupViewImpl extends Composite implements StatusPanelGr
         initWidget(rootPanel);
 
         rootPanel.setStyleName(resources.menuCss().menuBar());
+        rootPanel.addStyleName(resources.menuCss().statusPanel());
 
         leftPanel.addStyleName(resources.menuCss().leftPanel());
         leftPanel.getElement().getStyle().setPropertyPx("marginLeft", 1);
@@ -206,7 +207,7 @@ public class StatusPanelGroupViewImpl extends Composite implements StatusPanelGr
     }
 
     private static class SeparatorItem extends Composite {
-        public SeparatorItem(String styleName) {
+        SeparatorItem(String styleName) {
             final FlowPanel widget = new FlowPanel();
             widget.addStyleName(styleName);
             Element separator = widget.getElement();

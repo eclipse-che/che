@@ -11,11 +11,13 @@
 package org.eclipse.che.plugin.nodejs.ide.action;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
 import org.eclipse.che.plugin.nodejs.ide.NodeJsLocalizationConstant;
@@ -36,7 +38,8 @@ public class NewNodeJsFileAction extends AbstractNewResourceAction {
                                CoreLocalizationConstant coreLocalizationConstant,
                                EventBus eventBus,
                                AppContext appContext,
-                               NotificationManager notificationManager) {
+                               NotificationManager notificationManager,
+                               Provider<EditorAgent> editorAgentProvider) {
         super(locale.newNodeJsFileTitle(),
               locale.newNodeJsFileDescription(),
               resources.jsIcon(),
@@ -44,7 +47,8 @@ public class NewNodeJsFileAction extends AbstractNewResourceAction {
               coreLocalizationConstant,
               eventBus,
               appContext,
-              notificationManager);
+              notificationManager,
+              editorAgentProvider);
     }
 
     @Override

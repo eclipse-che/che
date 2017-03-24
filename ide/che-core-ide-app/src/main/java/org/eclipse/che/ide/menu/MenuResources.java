@@ -33,11 +33,15 @@ public interface MenuResources extends ClientBundle {
 
         String leftPanel();
 
+        String triangleSeparator();
+
         String rightPanel();
 
         String customComponent();
 
         String panelSeparator();
+
+        String statusPanel();
     }
 
     @Source({"menu.css", "org/eclipse/che/ide/api/ui/style.css"})

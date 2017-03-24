@@ -12,7 +12,7 @@
 
 -->
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="-100 -100 750 750" width="12px" height="12px"
-     xmlns:xml="http://www.w3.org/XML/1998/namespace">
-    <path d="M485.0,220.0L122.0,12.0c-52.0-30.0-95.0-5.0-96.0,56.0v415.0c0,60.0,43.0,85.0,95.0,55.0  l365.0-205.0C540.0,300.0,540.0,250.0,485.0,220.0z"></path>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='24px' height='6px' viewBox='0 0 550 350'>
+    <path d='M278.5,309.5c0.312-0.38,0.44-0.88,0.78-1.28l223.4-246.8c12.5-13.9,12.5-36.4,0-50.3 c-0.125-0.14-0.25-0.2-0.38-0.27C496.5,4.16,488.45,0,480.0,0H32.6c-9.16,0-17.0,4.4-23.1,11.3L9.4,11.1 c-12.5,14.0-12.5,36.4,0,50.3l224.0,248.0C246.0,323.0,266.0,323.0,278.0,310.0z'
+          style='transform: scaleY(0.8);'/>
 </svg>

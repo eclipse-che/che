@@ -15,17 +15,21 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RadioButton;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.util.UUID;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import org.eclipse.che.commons.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.gwt.dom.client.Element.as;
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
  * Represents mutually-exclusion set of buttons.
@@ -38,10 +42,6 @@ public class RadioButtonGroup extends Composite {
 
     private static final Resources resources = GWT.create(Resources.class);
 
-    static {
-        resources.getCSS().ensureInjected();
-    }
-
     private final String GROUP_NAME;
 
     private List<RadioButton> buttons;
@@ -50,6 +50,7 @@ public class RadioButtonGroup extends Composite {
     /** Creates new mutually-exclusion group of buttons. */
     public RadioButtonGroup() {
         GROUP_NAME = "buttons-group-" + UUID.uuid();
+
         buttons = new ArrayList<>();
         mainPanel = new FlowPanel();
         mainPanel.setStyleName(resources.getCSS().mainPanel());
@@ -58,14 +59,14 @@ public class RadioButtonGroup extends Composite {
     }
 
     /**
-     * Adds the new button to the group.
+     * Adds the new radio button to the group.
      *
      * @param label
-     *         button's label
+     *         radio button's label
      * @param title
-     *         button's tooltip
+     *         radio button's tooltip
      * @param icon
-     *         button's icon
+     *         radio button's icon
      * @param clickHandler
      *         click handler
      */
@@ -75,14 +76,17 @@ public class RadioButtonGroup extends Composite {
         radioButton.setStyleName(resources.getCSS().button());
         radioButton.addClickHandler(clickHandler);
 
-        final Node child = radioButton.getElement().getLastChild();
+        final Element radioButtonElement = radioButton.getElement();
+        final Node labelNode = radioButtonElement.getLastChild();
 
         if (icon != null) {
-            final SVGImage svgImage = new SVGImage(icon);
-            child.insertFirst(svgImage.getElement());
+            labelNode.insertFirst(new SVGImage(icon).getElement());
+        } else {
+            radioButtonElement.getStyle().setWidth(90, PX);
+            as(labelNode).getStyle().setWidth(90, PX);
         }
-        mainPanel.add(radioButton);
 
+        mainPanel.add(radioButton);
         buttons.add(radioButton);
     }
 
@@ -110,5 +114,9 @@ public class RadioButtonGroup extends Composite {
             @ClassName("mx-button")
             String button();
         }
+    }
+
+    static {
+        resources.getCSS().ensureInjected();
     }
 }

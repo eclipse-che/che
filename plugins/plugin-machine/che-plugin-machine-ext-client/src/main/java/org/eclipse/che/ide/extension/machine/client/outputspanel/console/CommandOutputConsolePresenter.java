@@ -25,19 +25,21 @@ import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEvent
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
-import org.eclipse.che.ide.extension.machine.client.processes.ProcessFinishedEvent;
+import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsPresenter.PREVIEW_URL_ATTR;
+import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
 /**
  * Console for command output.
@@ -51,7 +53,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     private final CommandImpl             command;
     private final EventBus                eventBus;
     private final Machine                 machine;
-    private final CommandManager          commandManager;
+    private final CommandExecutor         commandExecutor;
     private final ExecAgentCommandManager execAgentCommandManager;
 
     private int            pid;
@@ -68,7 +70,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     @Inject
     public CommandOutputConsolePresenter(final OutputConsoleView view,
                                          MachineResources resources,
-                                         CommandManager commandManager,
+                                         CommandExecutor commandExecutor,
                                          MacroProcessor macroProcessor,
                                          EventBus eventBus,
                                          ExecAgentCommandManager execAgentCommandManager,
@@ -80,11 +82,11 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         this.command = command;
         this.machine = machine;
         this.eventBus = eventBus;
-        this.commandManager = commandManager;
+        this.commandExecutor = commandExecutor;
 
         view.setDelegate(this);
 
-        final String previewUrl = command.getAttributes().get(PREVIEW_URL_ATTR);
+        final String previewUrl = command.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
         if (!isNullOrEmpty(previewUrl)) {
             macroProcessor.expandMacros(previewUrl).then(new Operation<String>() {
                 @Override
@@ -107,6 +109,12 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     @Override
     public CommandImpl getCommand() {
         return command;
+    }
+
+    @Nullable
+    @Override
+    public int getPid() {
+        return pid;
     }
 
     @Override
@@ -171,6 +179,8 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                 view.toggleScrollToEndButton(true);
 
                 pid = event.getPid();
+
+                eventBus.fireEvent(new ProcessStartedEvent(pid, machine));
             }
         };
     }
@@ -184,7 +194,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                 view.enableStopButton(false);
                 view.toggleScrollToEndButton(false);
 
-                eventBus.fireEvent(new ProcessFinishedEvent(pid));
+                eventBus.fireEvent(new ProcessFinishedEvent(pid, machine));
             }
         };
     }
@@ -227,12 +237,12 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     @Override
     public void reRunProcessButtonClicked() {
         if (isFinished()) {
-            commandManager.executeCommand(command, machine);
+            commandExecutor.executeCommand(command, machine);
         } else {
             execAgentCommandManager.killProcess(machine.getId(), pid).then(new Operation<ProcessKillResponseDto>() {
                 @Override
                 public void apply(ProcessKillResponseDto arg) throws OperationException {
-                    commandManager.executeCommand(command, machine);
+                    commandExecutor.executeCommand(command, machine);
                 }
             });
         }
