@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.pullrequest.client;
 
+import org.eclipse.che.plugin.pullrequest.client.steps.AddHttpForkRemoteStep;
 import org.eclipse.che.plugin.pullrequest.client.steps.AddReviewFactoryLinkStep;
-import org.eclipse.che.plugin.pullrequest.client.steps.AddSshForkRemoteStep;
 import org.eclipse.che.plugin.pullrequest.client.steps.AuthorizeCodenvyOnVCSHostStep;
 import org.eclipse.che.plugin.pullrequest.client.steps.CommitWorkingTreeStep;
 import org.eclipse.che.plugin.pullrequest.client.steps.CreateForkStep;
@@ -47,7 +47,7 @@ public class GitHubContributionWorkflow implements ContributionWorkflow {
     private final DefineExecutionConfiguration    defineExecutionConfiguration;
     private final DetermineUpstreamRepositoryStep determineUpstreamRepositoryStep;
     private final CreateForkStep                  createForkStep;
-    private final AddSshForkRemoteStep            addSshForkRemoteStep;
+    private final AddHttpForkRemoteStep           addHttpForkRemoteStep;
     private final PushBranchOnForkStep            pushBranchOnForkStep;
     private final PushBranchOnOriginStep          pushBranchOnOriginStep;
     private final GenerateReviewFactoryStep       generateReviewFactoryStep;
@@ -64,7 +64,7 @@ public class GitHubContributionWorkflow implements ContributionWorkflow {
                                       DefineExecutionConfiguration defineExecutionConfiguration,
                                       DetermineUpstreamRepositoryStep determineUpstreamRepositoryStep,
                                       CreateForkStep createForkStep,
-                                      AddSshForkRemoteStep addSshForkRemoteStep,
+                                      AddHttpForkRemoteStep addHttpForkRemoteStep,
                                       PushBranchOnForkStep pushBranchOnForkStep,
                                       PushBranchOnOriginStep pushBranchOnOriginStep,
                                       GenerateReviewFactoryStep generateReviewFactoryStep,
@@ -79,7 +79,7 @@ public class GitHubContributionWorkflow implements ContributionWorkflow {
         this.defineExecutionConfiguration = defineExecutionConfiguration;
         this.determineUpstreamRepositoryStep = determineUpstreamRepositoryStep;
         this.createForkStep = createForkStep;
-        this.addSshForkRemoteStep = addSshForkRemoteStep;
+        this.addHttpForkRemoteStep = addHttpForkRemoteStep;
         this.pushBranchOnForkStep = pushBranchOnForkStep;
         this.pushBranchOnOriginStep = pushBranchOnOriginStep;
         this.generateReviewFactoryStep = generateReviewFactoryStep;
@@ -109,7 +109,7 @@ public class GitHubContributionWorkflow implements ContributionWorkflow {
                                           }
                                       },
                                       StepsChain.first(createForkStep)
-                                                .then(addSshForkRemoteStep)
+                                                .then(addHttpForkRemoteStep)
                                                 .then(pushBranchOnForkStep),
                                       StepsChain.first(pushBranchOnOriginStep))
                          .then(generateReviewFactoryStep)
@@ -129,7 +129,7 @@ public class GitHubContributionWorkflow implements ContributionWorkflow {
             public Boolean get() {
                 return context.getForkedRemoteName() == null;
             }
-        }, addSshForkRemoteStep).then(pushBranchOnForkStep);
+        }, addHttpForkRemoteStep).then(pushBranchOnForkStep);
 
         final StepsChain originChain = StepsChain.first(pushBranchOnOriginStep);
 
