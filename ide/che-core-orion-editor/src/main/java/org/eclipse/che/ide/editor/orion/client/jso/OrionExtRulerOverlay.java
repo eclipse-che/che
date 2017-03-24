@@ -12,6 +12,8 @@ package org.eclipse.che.ide.editor.orion.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
+import java.util.function.Consumer;
+
 /**
  * A Ruler is a graphical element that is placed either on the left or on the right side of the view. It can be used to provide the view with per
  * line decoration such as line numbering, bookmarks, breakpoints, folding disclosures, etc.
@@ -164,6 +166,7 @@ public class OrionExtRulerOverlay extends JavaScriptObject {
     public final native void setMultiAnnotationOverlay(OrionAnnotationOverlay annotation) /*-{
         this.setMultiAnnotationOverlay(annotation);
     }-*/;
+
 
     /**
      * Add event listener.
