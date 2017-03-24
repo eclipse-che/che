@@ -11,6 +11,8 @@
 
 package org.eclipse.che.plugin.openshift.client;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,9 +37,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import io.fabric8.openshift.api.model.Route;
-import io.fabric8.openshift.api.model.RouteList;
-
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
@@ -56,7 +55,6 @@ import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
-import org.eclipse.che.plugin.docker.client.json.ImageConfig;
 import org.eclipse.che.plugin.docker.client.json.ImageInfo;
 import org.eclipse.che.plugin.docker.client.json.NetworkCreated;
 import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
@@ -67,11 +65,13 @@ import org.eclipse.che.plugin.docker.client.json.network.IpamConfig;
 import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
-import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.GetEventsParams;
 import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
+import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
 import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
+import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
@@ -79,8 +79,6 @@ import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
-import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
-import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
@@ -123,15 +121,15 @@ import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
 import io.fabric8.kubernetes.client.utils.InputStreamPumper;
-import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.ImageStreamTag;
+import io.fabric8.openshift.api.model.Route;
+import io.fabric8.openshift.api.model.RouteList;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Client for OpenShift API.
@@ -159,8 +157,6 @@ public class OpenShiftConnector extends DockerConnector {
     private static final String OPENSHIFT_VOLUME_STORAGE_CLASS           = "volume.beta.kubernetes.io/storage-class";
     private static final String OPENSHIFT_VOLUME_STORAGE_CLASS_NAME      = "che-workspace";
     private static final String OPENSHIFT_IMAGE_PULL_POLICY_IFNOTPRESENT = "IfNotPresent";
-    private static final Long UID_ROOT                                   = Long.valueOf(0);
-    private static final Long UID_USER                                   = Long.valueOf(1000);
 
     private Map<String, KubernetesExecHolder> execMap = new HashMap<>();
 
@@ -251,8 +247,6 @@ public class OpenShiftConnector extends DockerConnector {
                                                     .getConfig().getExposedPorts().keySet();
         Set<String> exposedPorts = getExposedPorts(containerExposedPorts, imageExposedPorts);
 
-        boolean runContainerAsRoot = runContainerAsRoot(imageForDocker);
-
         String[] envVariables = createContainerParams.getContainerConfig().getEnv();
         String[] volumes = createContainerParams.getContainerConfig().getHostConfig().getBinds();
 
@@ -265,8 +259,7 @@ public class OpenShiftConnector extends DockerConnector {
                                                               containerName,
                                                               exposedPorts,
                                                               envVariables,
-                                                              volumes,
-                                                              runContainerAsRoot);
+                                                              volumes);
 
             containerID = waitAndRetrieveContainerID(deploymentName);
             if (containerID == null) {
@@ -987,8 +980,7 @@ public class OpenShiftConnector extends DockerConnector {
                                              String sanitizedContainerName,
                                              Set<String> exposedPorts,
                                              String[] envVariables,
-                                             String[] volumes,
-                                             boolean runContainerAsRoot) {
+                                             String[] volumes) {
 
         String deploymentName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
         LOG.info("Creating OpenShift deployment {}", deploymentName);
@@ -996,7 +988,89 @@ public class OpenShiftConnector extends DockerConnector {
         Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
 
         LOG.info("Adding container {} to OpenShift deployment {}", sanitizedContainerName, deploymentName);
-        Long UID = runContainerAsRoot ? UID_ROOT : UID_USER;
+        String[] command;
+        String workspaceDir = getWorkspaceDir(volumes);
+        if (workspaceDir != null) {
+            command = new String[3];
+            command[0] = "sh";
+            command[1] = "-c";
+            command[2] = "mkdir -p " + workspaceDir + ";tail -f /dev/null";
+        } else {
+            command = null;
+        }
+        if (command != null) {
+            Deployment deployment = createOpenShiftDeploymentInternal(workspaceID,
+                                                                      imageName,
+                                                                      sanitizedContainerName,
+                                                                      exposedPorts,
+                                                                      envVariables,
+                                                                      volumes,
+                                                                      deploymentName,
+                                                                      selector,
+                                                                      command,
+                                                                      false);
+
+            try {
+                waitAndRetrieveContainerID(deploymentName);
+            } catch (IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
+
+            openShiftClient.extensions()
+                           .deployments()
+                           .inNamespace(this.openShiftCheProjectName)
+                           .delete(deployment);
+            if (!isDeleted(deploymentName)) {
+                LOG.warn("OpenShift deployment {} hasn't been deleted", deploymentName);
+            }
+        }
+        Deployment deployment = createOpenShiftDeploymentInternal(workspaceID,
+                                                       imageName,
+                                                       sanitizedContainerName,
+                                                       exposedPorts,
+                                                       envVariables,
+                                                       volumes,
+                                                       deploymentName,
+                                                       selector,
+                                                       null,
+                                                       true);
+        LOG.info("OpenShift deployment {} created", deploymentName);
+        return deployment.getMetadata().getName();
+    }
+
+    private boolean isDeleted(String deploymentName) {
+        for (int i = 0; i < OPENSHIFT_WAIT_POD_TIMEOUT; i++) {
+            try {
+                Thread.sleep(OPENSHIFT_WAIT_POD_DELAY);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+
+            List<Pod> pods = openShiftClient.pods()
+                                .inNamespace(this.openShiftCheProjectName)
+                                .withLabel(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName)
+                                .list()
+                                .getItems();
+
+            if (pods.size() < 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Deployment createOpenShiftDeploymentInternal(String workspaceID,
+                                                         String imageName,
+                                                         String sanitizedContainerName,
+                                                         Set<String> exposedPorts,
+                                                         String[] envVariables,
+                                                         String[] volumes,
+                                                         String deploymentName,
+                                                         Map<String,
+                                                         String> selector,
+                                                         String[] command,
+                                                         boolean withSubpath) {
+
         Container container = new ContainerBuilder()
                                     .withName(sanitizedContainerName)
                                     .withImage(imageName)
@@ -1007,7 +1081,8 @@ public class OpenShiftConnector extends DockerConnector {
                                         .withPrivileged(false)
                                     .endSecurityContext()
                                     .withLivenessProbe(getLivenessProbeFrom(exposedPorts))
-                                    .withVolumeMounts(getVolumeMountsFrom(volumes, workspaceID))
+                                    .withCommand(command)
+                                    .withVolumeMounts(getVolumeMountsFrom(volumes, workspaceID, withSubpath))
                                     .build();
 
         PodSpec podSpec = new PodSpecBuilder()
@@ -1038,9 +1113,7 @@ public class OpenShiftConnector extends DockerConnector {
                                     .deployments()
                                     .inNamespace(this.openShiftCheProjectName)
                                     .create(deployment);
-
-        LOG.info("OpenShift deployment {} created", deploymentName);
-        return deployment.getMetadata().getName();
+        return deployment;
     }
 
     /**
@@ -1207,8 +1280,7 @@ public class OpenShiftConnector extends DockerConnector {
         throw new OpenShiftException("Timeout while waiting for pods to terminate");
     }
 
-    private List<VolumeMount> getVolumeMountsFrom(String[] volumes, String workspaceID) {
-        List<VolumeMount> vms = new ArrayList<>();
+    private String getWorkspaceDir(String[] volumes) {
         PersistentVolumeClaim pvc = getClaimCheWorkspace();
         if (pvc != null) {
             for (String volume : volumes) {
@@ -1219,10 +1291,32 @@ public class OpenShiftConnector extends DockerConnector {
                     if (subPath.startsWith("/")) {
                         subPath = subPath.substring(1);
                     }
+                    return mountPath + "/" + subPath;
+                }
+            }
+        }
+        return null;
+    }
+
+    private List<VolumeMount> getVolumeMountsFrom(String[] volumes, String workspaceID, boolean withSubPath) {
+        List<VolumeMount> vms = new ArrayList<>();
+        PersistentVolumeClaim pvc = getClaimCheWorkspace();
+        if (pvc != null) {
+            for (String volume : volumes) {
+                String mountPath = volume.split(":",3)[1];
+                if (cheWorkspaceProjectsStorage.equals(mountPath)) {
+                    String hostPath = volume.split(":",3)[0];
+                    String subPath = null;
+                    if (withSubPath) {
+                        subPath = hostPath.replace(cheWorkspaceStorage, "");
+                        if (subPath.startsWith("/")) {
+                            subPath = subPath.substring(1);
+                        }
+                    }
                     VolumeMount vm = new VolumeMountBuilder()
                             .withMountPath(mountPath)
                             .withName(workspacesPersistentVolumeClaim)
-//                            .withSubPath(subPath)
+                            .withSubPath(subPath)
                             .build();
                         vms.add(vm);
                 }
@@ -1420,19 +1514,6 @@ public class OpenShiftConnector extends DockerConnector {
         exposedPorts.addAll(containerExposedPorts);
         exposedPorts.addAll(imageExposedPorts);
         return exposedPorts;
-    }
-
-    /**
-     * When container is expected to be run as root, user field from {@link ImageConfig} is empty.
-     * For non-root user it contains "user" value
-     *
-     * @param imageName
-     * @return true if user property from Image config is empty string, false otherwise
-     * @throws IOException
-     */
-    private boolean runContainerAsRoot(final String imageName) throws IOException {
-        String user = inspectImage(InspectImageParams.create(imageName)).getConfig().getUser();
-        return user != null && user.isEmpty();
     }
 
     /**
