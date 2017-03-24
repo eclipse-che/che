@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.github.factory.resolver;
 
+import org.eclipse.che.plugin.urlfactory.URLParser;
+
 import javax.validation.constraints.NotNull;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,7 +21,7 @@ import java.util.regex.Pattern;
  *
  * @author Florent Benoit
  */
-public class GithubUrlParser {
+public class GithubURLParser implements URLParser<GithubUrl> {
 
     /**
      * Regexp to find repository details (repository name, project name and branch and subfolder)
@@ -37,6 +39,7 @@ public class GithubUrlParser {
      *         a not null string representation of URL
      * @return true if the given URL is a github URL
      */
+    @Override
     public boolean isValid(@NotNull String url) {
         return GITHUB_PATTERN.matcher(url).matches();
     }
@@ -48,6 +51,7 @@ public class GithubUrlParser {
      *         URL to transform into a managed object
      * @return managed github url {@link GithubUrl}.
      */
+    @Override
     public GithubUrl parse(String url) {
         // Apply github url to the regexp
         Matcher matcher = GITHUB_PATTERN.matcher(url);

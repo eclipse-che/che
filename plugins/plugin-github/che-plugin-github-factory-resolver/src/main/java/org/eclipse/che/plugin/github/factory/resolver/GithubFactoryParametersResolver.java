@@ -39,7 +39,7 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
      * Parser which will allow to check validity of URLs and create objects.
      */
     @Inject
-    private GithubUrlParser githubUrlParser;
+    private GithubURLParser githubUrlParser;
 
     /**
      * Builder allowing to build objects from github URL.

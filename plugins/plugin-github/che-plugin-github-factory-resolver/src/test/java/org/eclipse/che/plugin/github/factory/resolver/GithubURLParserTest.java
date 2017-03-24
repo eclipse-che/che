@@ -25,13 +25,13 @@ import static org.testng.Assert.assertTrue;
  * @author Florent Benoit
  */
 @Listeners(MockitoTestNGListener.class)
-public class GithubUrlParserTest {
+public class GithubURLParserTest {
 
     /**
      * Instance of component that will be tested.
      */
     @InjectMocks
-    private GithubUrlParser githubUrlParser;
+    private GithubURLParser githubUrlParser;
 
     /**
      * Check invalid url (not a github one)

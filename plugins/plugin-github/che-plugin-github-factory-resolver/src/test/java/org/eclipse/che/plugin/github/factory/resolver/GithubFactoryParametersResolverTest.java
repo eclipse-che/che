@@ -52,7 +52,7 @@ public class GithubFactoryParametersResolverTest {
      * Parser which will allow to check validity of URLs and create objects.
      */
     @Spy
-    private GithubUrlParser githubUrlParser = new GithubUrlParser();
+    private GithubURLParser githubUrlParser = new GithubURLParser();
 
     /**
      * Converter allowing to convert github URL to other objects.

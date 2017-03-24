@@ -32,7 +32,7 @@ public class GithubUrlTest {
      * Parser used to create the url.
      */
     @InjectMocks
-    private GithubUrlParser githubUrlParser;
+    private GithubURLParser githubUrlParser;
 
     /**
      * Instance of the url created
