@@ -89,7 +89,7 @@ public class InitializeWorkflowContextStep implements Step {
                     context.setOriginRepositoryOwner(vcsHostingService.getRepositoryOwnerFromUrl(originUrl));
                     context.setOriginRepositoryName(vcsHostingService.getRepositoryNameFromUrl(originUrl));
 
-                    context.setContributeToBranchName(getContributeToBranchName(context.getProject()));
+                    setContributeToBranchName(context);
 
                     executor.done(InitializeWorkflowContextStep.this, context);
                 } else {
@@ -100,7 +100,24 @@ public class InitializeWorkflowContextStep implements Step {
         };
     }
 
-    private String getContributeToBranchName(final ProjectConfig project) {
+    protected void setContributeToBranchName(Context context) {
+        String contributeToBranchName = getBranchFromProjectMetadata(context.getProject());
+
+        if (contributeToBranchName != null) {
+            context.setContributeToBranchName(contributeToBranchName);
+            return;
+        }
+
+        vcsServiceProvider.getVcsService(context.getProject()) //
+                          .getBranchName(context.getProject()) //
+                          .then( //
+                          (String branchName) -> {
+                              context.setContributeToBranchName(branchName);
+                              context.getProject().getSource().getParameters().put("branch", branchName);
+                          });
+    }
+
+    private String getBranchFromProjectMetadata(final ProjectConfig project) {
         final Map<String, List<String>> attrs = project.getAttributes();
         if (attrs.containsKey(CONTRIBUTE_TO_BRANCH_VARIABLE_NAME) && !attrs.get(CONTRIBUTE_TO_BRANCH_VARIABLE_NAME).isEmpty()) {
             return attrs.get(CONTRIBUTE_TO_BRANCH_VARIABLE_NAME).get(0);
