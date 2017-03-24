@@ -171,7 +171,8 @@ public class GithubUrl {
                                     .add(username)
                                     .add(repository)
                                     .add(branch)
-                                    .add(dockerfileFilename).toString();
+                                    .add(dockerfileFilename)
+                                    .toString();
     }
 
     /**
@@ -184,7 +185,8 @@ public class GithubUrl {
                                     .add(username)
                                     .add(repository)
                                     .add(branch)
-                                    .add(factoryFilename).toString();
+                                    .add(factoryFilename)
+                                    .toString();
     }
 
     /**

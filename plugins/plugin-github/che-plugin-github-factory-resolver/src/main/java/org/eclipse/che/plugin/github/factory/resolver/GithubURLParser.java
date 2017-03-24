@@ -32,25 +32,13 @@ public class GithubURLParser implements URLParser<GithubUrl> {
             "^(?:http)(?:s)?(?:\\:\\/\\/)github.com/(?<repoUser>[^/]++)/(?<repoName>[^/]++)(?:/tree/(?<branchName>[^/]++)(?:/(?<subFolder>.*))?)?$");
 
 
-    /**
-     * Check if the provided URL is a valid Github url or not
-     *
-     * @param url
-     *         a not null string representation of URL
-     * @return true if the given URL is a github URL
-     */
+
     @Override
     public boolean isValid(@NotNull String url) {
         return GITHUB_PATTERN.matcher(url).matches();
     }
 
-    /**
-     * Provides a github URL object allowing to extract some part of the URL.
-     *
-     * @param url
-     *         URL to transform into a managed object
-     * @return managed github url {@link GithubUrl}.
-     */
+
     @Override
     public GithubUrl parse(String url) {
         // Apply github url to the regexp

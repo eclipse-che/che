@@ -11,12 +11,27 @@
 package org.eclipse.che.plugin.urlfactory;
 
 /**
- * @author Max Shaposhnik
+ * Interface for Git repository URL parsers.
  *
+ * @author Max Shaposhnik
  */
 public interface URLParser<T> {
 
+    /**
+     * Check if the URL is a valid url for the given provider.
+     *
+     * @param url
+     *         a not null string representation of URL
+     * @return {@code true} if the URL is a valid url for the given provider.
+     */
     boolean isValid(String url);
 
+    /**
+     * Provides a parsed URL object of the given provider type.
+     *
+     * @param url
+     *         URL to transform into a managed object
+     * @return managed url object
+     */
     T parse(String url);
 }
