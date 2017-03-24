@@ -10,11 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
-import io.typefox.lsapi.ServerCapabilities;
-
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
+import io.typefox.lsapi.ServerCapabilities;
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionListDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
@@ -26,9 +24,9 @@ import org.eclipse.che.ide.api.editor.codeassist.CodeAssistCallback;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.filters.FuzzyMatches;
+import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
-import org.eclipse.che.plugin.languageserver.ide.filters.FuzzyMatches;
-import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 

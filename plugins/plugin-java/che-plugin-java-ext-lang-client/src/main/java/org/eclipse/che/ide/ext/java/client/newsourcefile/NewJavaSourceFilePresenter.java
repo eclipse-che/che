@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
@@ -48,13 +48,16 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
     private final NewJavaSourceFileView    view;
     private final List<JavaSourceFileType> sourceFileTypes;
     private final JavaLocalizationConstant locale;
-    private final EventBus eventBus;
+    private final EventBus                 eventBus;
+    private final EditorAgent              editorAgent;
     private       Container                parent;
 
     @Inject
-    public NewJavaSourceFilePresenter(NewJavaSourceFileView view, JavaLocalizationConstant locale, EventBus eventBus) {
+    public NewJavaSourceFilePresenter(NewJavaSourceFileView view, JavaLocalizationConstant locale, EventBus eventBus,
+                                      EditorAgent editorAgent) {
         this.locale = locale;
         this.eventBus = eventBus;
+        this.editorAgent = editorAgent;
         sourceFileTypes = Arrays.asList(CLASS, INTERFACE, ENUM, ANNOTATION);
         this.view = view;
         this.view.setDelegate(this);
@@ -189,13 +192,13 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
         if (!isNullOrEmpty(packageFragment)) {
             parent.newFolder(packageFragment.replace('.', '/')).then(pkg -> {
                 pkg.newFile(nameWithoutExtension + ".java", content).then(file -> {
-                    eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
+                    editorAgent.openEditor(file);
                     eventBus.fireEvent(new RevealResourceEvent(file));
                 });
             });
         } else {
             parent.newFile(nameWithoutExtension + ".java", content).then(file -> {
-                eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
+                editorAgent.openEditor(file);
                 eventBus.fireEvent(new RevealResourceEvent(file));
             });
         }

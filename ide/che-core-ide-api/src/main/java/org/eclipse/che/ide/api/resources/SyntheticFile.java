@@ -22,8 +22,7 @@ import org.eclipse.che.ide.resource.Path;
  * Implementation for {@link VirtualFile} which describe resource which doesn't exist on file system and is auto generated.
  * For example it may be effective version of such resource.
  * <p/>
- * This file is read only and doesn't have link to the content url.
- * Calling {@link #updateContent(String)} will cause {@link UnsupportedOperationException}.
+ * This file doesn't have link to the content url.
  *
  * @author Vlad Zhukovskiy
  * @see VirtualFile
@@ -77,7 +76,9 @@ public class SyntheticFile implements VirtualFile {
 
     @Override
     public Promise<Void> updateContent(String content) {
-        throw new UnsupportedOperationException("Synthetic file is read only");
+        this.content = content;
+
+        return Promises.resolve(null);
     }
 
     @Override

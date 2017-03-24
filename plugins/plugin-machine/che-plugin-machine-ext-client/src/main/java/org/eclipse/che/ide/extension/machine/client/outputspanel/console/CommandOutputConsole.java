@@ -33,6 +33,9 @@ public interface CommandOutputConsole extends OutputConsole {
      */
     CommandImpl getCommand();
 
+    /** Returns PID of the associated process or 0 if none was associated. */
+    int getPid();
+
     /**
      * Start listening to the output on the given WebSocket channel.
      */

@@ -10,6 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.ide.editor.orion.client;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import elemental.dom.Element;
 import elemental.dom.Node;
 import elemental.events.CustomEvent;
@@ -21,18 +31,6 @@ import elemental.events.MouseEvent;
 import elemental.html.HTMLCollection;
 import elemental.html.SpanElement;
 import elemental.html.Window;
-
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
-
 import org.eclipse.che.ide.api.editor.codeassist.Completion;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposalExtension;
@@ -665,13 +663,15 @@ public class ContentAssistWidget implements EventListener {
     private void applyProposal(CompletionProposal proposal) {
         CompletionProposal.CompletionCallback callback = this::applyCompletion;
 
+        hide();
+
         if (proposal instanceof CompletionProposalExtension) {
             ((CompletionProposalExtension)proposal).getCompletion(insert, callback);
         } else {
             proposal.getCompletion(callback);
         }
 
-        hide();
+
     }
 
     private void applyCompletion(Completion completion) {
