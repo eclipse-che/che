@@ -10,7 +10,7 @@
 --
 
 INSERT INTO externalmachine_agents
-SELECT externalmachine_id, 'org.eclipse.che.exec'
+(externalmachine_id, agents)
+    SELECT externalmachine_id, 'org.eclipse.che.exec'
     FROM externalmachine_agents
     WHERE agents = 'org.eclipse.che.terminal'
-    GROUP BY externalmachine_id
