@@ -53,7 +53,7 @@ public class GithubUrlTest {
      */
     @Test
     public void checkDockerfileLocation() {
-        assertEquals(githubUrl.dockerFileLocation(), "https://raw.githubusercontent.com/eclipse/che/master/.runtime.dockerfile");
+        assertEquals(githubUrl.dockerFileLocation(), "https://raw.githubusercontent.com/eclipse/che/master/.factory.dockerfile");
     }
 
     /**

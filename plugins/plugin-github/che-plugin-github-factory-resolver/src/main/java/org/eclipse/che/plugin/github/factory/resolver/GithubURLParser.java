@@ -65,7 +65,7 @@ public class GithubURLParser implements URLParser<GithubUrl> {
                               .withRepository(matcher.group("repoName"))
                               .withBranch(matcher.group("branchName"))
                               .withSubfolder(matcher.group("subFolder"))
-                              .withDockerfileFilename(".runtime.dockerfile")
+                              .withDockerfileFilename(".factory.dockerfile")
                               .withFactoryFilename(".factory.json");
     }
 }

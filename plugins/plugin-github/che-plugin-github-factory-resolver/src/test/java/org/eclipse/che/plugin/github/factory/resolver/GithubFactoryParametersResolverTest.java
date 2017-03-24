@@ -144,7 +144,7 @@ public class GithubFactoryParametersResolverTest {
 
 
         // check we provide dockerfile and correct env
-        verify(urlFactoryBuilder).buildWorkspaceConfig(eq("che"), eq("eclipse"), eq("https://raw.githubusercontent.com/eclipse/che/master/.runtime.dockerfile"));
+        verify(urlFactoryBuilder).buildWorkspaceConfig(eq("che"), eq("eclipse"), eq("https://raw.githubusercontent.com/eclipse/che/master/.factory.dockerfile"));
 
         // check project config built
         verify(projectConfigDtoMerger).merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
@@ -180,7 +180,7 @@ public class GithubFactoryParametersResolverTest {
         assertEquals(jsonFileLocationArgumentCaptor.getValue(), "https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.json");
 
         // check we provide dockerfile and correct env
-        verify(urlFactoryBuilder).buildWorkspaceConfig(eq("che"), eq("eclipse"), eq("https://raw.githubusercontent.com/eclipse/che/4.2.x/.runtime.dockerfile"));
+        verify(urlFactoryBuilder).buildWorkspaceConfig(eq("che"), eq("eclipse"), eq("https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.dockerfile"));
 
         // check project config built
         verify(projectConfigDtoMerger).merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
@@ -217,7 +217,7 @@ public class GithubFactoryParametersResolverTest {
         assertEquals(jsonFileLocationArgumentCaptor.getValue(), "https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.json");
 
         // check we provide dockerfile and correct env
-        verify(urlFactoryBuilder).buildWorkspaceConfig(eq("che"), eq("eclipse"), eq("https://raw.githubusercontent.com/eclipse/che/4.2.x/.runtime.dockerfile"));
+        verify(urlFactoryBuilder).buildWorkspaceConfig(eq("che"), eq("eclipse"), eq("https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.dockerfile"));
 
         // check project config built
         verify(projectConfigDtoMerger).merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
