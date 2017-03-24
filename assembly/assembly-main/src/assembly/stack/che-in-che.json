@@ -3,7 +3,7 @@
   "creator": "ide",
   "name": "Eclipse Che",
   "description": "Utilities to build Che in Che with Docker, JDK 8, and Maven.",
-  "scope": "general",
+  "scope": "advanced",
   "tags": [
     "Docker",
     "Java",

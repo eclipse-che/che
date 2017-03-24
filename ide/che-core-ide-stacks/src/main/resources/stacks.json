@@ -2134,5 +2134,249 @@
         "name": "type-vertx.svg",
         "mediaType": "image/svg+xml"
     }
+  },
+  {
+    "id": "spring-boot",
+    "creator": "Gytis Trikleris",
+    "name": "Spring Boot",
+    "description": "Spring Boot Stack on CentOS.",
+    "scope": "general",
+    "tags": [
+      "Java",
+      "JDK",
+      "Maven",
+      "Spring Boot",
+      "CentOS",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "CentOS",
+        "version": "---"
+      },
+      {
+        "name": "JDK",
+        "version": "1.8.0"
+      },
+      {
+        "name": "Maven",
+        "version": "3.3"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "rhche/spring-boot"
+    },
+    "workspaceConfig": {
+      "name": "default",
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "recipe": {
+            "location": "rhche/spring-boot",
+            "type": "dockerimage"
+          },
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal",
+                "org.eclipse.che.ws-agent"
+              ],
+              "attributes": {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          }
+        }
+      },
+      "commands": [
+        {
+          "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
+          "name": "build",
+          "type": "custom",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          }
+        },
+        {
+          "commandLine": "java -jar ${current.project.path}/target/*.jar",
+          "name": "run",
+          "type": "custom",
+          "attributes": {
+            "previewUrl": "http://${server.port.8080}",
+            "goal": "Run"
+          }
+        }
+      ]
+    },
+    "stackIcon": {
+      "name": "type-spring-boot.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+  "name": "CentOS WildFly Swarm",
+  "id": "WildFly Swarm",
+  "creator": "Dharmit Shah",
+  "description": "Eclipse WildFly Swarm Stack on CentOS.",
+  "scope": "general",
+  "source": {
+    "type": "image",
+    "origin": "rhche/wildfly-swarm"
+  },
+  "tags": [
+    "Java",
+    "JDK",
+    "Maven",
+    "WildFly Swarm",
+    "CentOS",
+    "Git"
+  ],
+  "workspaceConfig": {
+    "name": "default",
+    "environments": {
+      "default": {
+        "recipe": {
+          "location": "rhche/wildfly-swarm",
+          "type": "dockerimage"
+        },
+        "machines": {
+          "dev-machine": {
+            "attributes": {
+              "memoryLimitBytes": "2147483648"
+            },
+            "agents": [
+              "org.eclipse.che.terminal",
+              "org.eclipse.che.ws-agent"
+            ],
+            "servers": {}
+          }
+        }
+      }
+    },
+    "commands": [
+      {
+        "name": "build",
+        "type": "mvn",
+        "attributes": {},
+        "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'"
+      },
+      {
+        "name": "run",
+        "type": "custom",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        },
+        "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-swarm.jar'"
+      }
+    ],
+    "projects": [],
+    "defaultEnv": "default",
+    "links": []
+  },
+  "components": [
+    {
+      "name": "CentOS",
+      "version": "---"
+    },
+    {
+      "name": "JDK",
+      "version": "1.8.0_45"
+    },
+    {
+      "name": "Maven",
+      "version": "3.3.9"
+    }
+  ]
+  },
+  {
+    "id": "CentOS nodejs",
+    "creator": "Dharmit Shah",
+    "name": "CentOS nodejs",
+    "description": "CentOS Node Stack",
+    "scope": "general",
+    "tags": [
+      "CentOS",
+      "Git",
+      "Node.JS",
+      "NPM",
+      "Gulp",
+      "Bower",
+      "Grunt",
+      "Yeoman",
+      "Angular",
+      "Karma"
+    ],
+    "components": [
+      {
+        "name": "Node.JS",
+        "version": "---"
+      },
+      {
+        "name": "NPM",
+        "version": "---"
+      },
+      {
+        "name": "Gulp",
+        "version": "---"
+      },
+      {
+        "name": "Bower",
+        "version": "---"
+      },
+      {
+        "name": "Grunt",
+        "version": "---"
+      },
+      {
+        "name": "Yeoman",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "rhche/centos-nodejs"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal",
+                "org.eclipse.che.ws-agent"
+              ],
+              "servers": {},
+              "attributes": {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "rhche/centos-nodejs",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "cd ${current.project.path} && scl enable rh-nodejs4 'node app/app.js'",
+          "name": "run",
+          "type": "custom",
+          "attributes": {
+            "previewUrl": "http://${server.port.8080}",
+            "goal": "Run"
+          }
+        }
+      ]
+    },
+    "stackIcon": {
+      "name": "type-node.svg",
+      "mediaType": "image/svg+xml"
+    }
   }
 ]
