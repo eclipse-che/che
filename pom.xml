@@ -31,7 +31,7 @@
         <module>agents</module>
         <module>plugins</module>
         <module>samples</module>
-        <module>dashboard</module>
+        <!--<module>dashboard</module>-->
         <module>assembly</module>
     </modules>
     <scm>
@@ -467,7 +467,7 @@
             <dependency>
                 <groupId>org.eclipse.che.dashboard</groupId>
                 <artifactId>che-dashboard-war</artifactId>
-                <version>${che.version}</version>
+                <version>5.0.0</version>
                 <type>war</type>
             </dependency>
             <dependency>
