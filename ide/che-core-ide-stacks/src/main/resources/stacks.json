@@ -590,7 +590,7 @@
     "id": "php-default",
     "creator": "ide",
     "name": "PHP",
-    "description": "Default PHP Stack with PHP 5.6, most popular extensions and dockerimager.",
+    "description": "Default PHP Stack with PHP 7.0, most popular extensions.",
     "scope": "general",
     "tags": [
       "Ubuntu",
