@@ -143,7 +143,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
          * New terminal button
          *
          ***************************************************************************/
-        if (node.isShowAddTerminalBtn()) {
+        if (node.isShowAddTerminalBtn() && node.hasTerminalAgent()) {
             SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().newTerminalButton());
             newTerminalButton.appendChild((Node)new SVGImage(resources.addTerminalIcon()).getElement());
             root.appendChild(newTerminalButton);
