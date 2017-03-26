@@ -18,6 +18,7 @@ import elemental.html.DivElement;
 import elemental.html.SpanElement;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.ide.api.machine.MachineEntity;
@@ -44,6 +45,7 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
  * @author Anna Shumilova
  * @author Roman Nikitenko
  */
+@Singleton
 public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
     public static final Map<String, String> LABELS = new HashMap<String, String>() {
@@ -141,7 +143,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
          * New terminal button
          *
          ***************************************************************************/
-        if (node.isRunning() && node.hasTerminalAgent()) {
+        if (node.isShowAddTerminalBtn()) {
             SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().newTerminalButton());
             newTerminalButton.appendChild((Node)new SVGImage(resources.addTerminalIcon()).getElement());
             root.appendChild(newTerminalButton);

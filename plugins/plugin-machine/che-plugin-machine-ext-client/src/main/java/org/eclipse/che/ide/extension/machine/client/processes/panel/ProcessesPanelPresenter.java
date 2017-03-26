@@ -19,6 +19,7 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
@@ -866,7 +867,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     /**
-     * Provides machine node:
+     * Provides machine node without "Add Terminal" button:
      * <li>creates new machine node when this one not exist or {@code replace} is {@code true}</li>
      * <li>returns old machine node when this one exist and {@code replace} is {@code false}</li>
      *
@@ -877,6 +878,22 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      * @return machine node
      */
     private ProcessTreeNode provideMachineNode(@NotNull MachineEntity machine, boolean replace) {
+        return provideMachineNode(machine, replace, false);
+    }
+
+    /**
+     * Provides machine node:
+     * <li>creates new machine node when this one not exist or {@code replace} is {@code true}</li>
+     * <li>returns old machine node when this one exist and {@code replace} is {@code false}</li>
+     * <li>displays "Add terminal" button if {@param showAddTerminalBtn} is true, and hide this button otherwise.</li>
+     *
+     * @param machine
+     *         machine to creating node
+     * @param replace
+     *         existed node will be replaced when {@code replace} is {@code true}
+     * @return machine node
+     */
+    private ProcessTreeNode provideMachineNode(@NotNull MachineEntity machine, boolean replace, boolean showAddTerminalBtn) {
         final String machineId = machine.getId();
         final ProcessTreeNode existedMachineNode = findTreeNodeById(machineId);
         if (!replace && existedMachineNode != null) {
@@ -899,7 +916,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         // create new node
         final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, children);
-        newMachineNode.setRunning(true);
+        newMachineNode.setRunning(MachineStatus.RUNNING == machine.getStatus());
+        newMachineNode.setShowAddTerminalBtn(showAddTerminalBtn);
         newMachineNode.setHasTerminalAgent(hasAgent(machine.getDisplayName(), TERMINAL_AGENT) || hasTerminal(machineId));
         newMachineNode.setHasSSHAgent(hasAgent(machine.getDisplayName(), SSH_AGENT));
         if (removedNodeChildrens != null) {
@@ -1007,6 +1025,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             for (ProcessTreeNode node : rootNode.getChildren()) {
                 if (MACHINE_NODE == node.getType()) {
                     node.setRunning(false);
+                    node.setShowAddTerminalBtn(false);
 
                     ArrayList<ProcessTreeNode> children = new ArrayList<>();
                     children.addAll(node.getChildren());
@@ -1053,6 +1072,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         for (MachineEntity machine : machines) {
+            provideMachineNode(machine, true, true);
             restoreState(machine);
         }
 

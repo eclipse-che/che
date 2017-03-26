@@ -39,6 +39,7 @@ public class ProcessTreeNode {
     private boolean hasTerminalAgent;
     private boolean hasSSHAgent;
     private boolean running;
+    private boolean showAddTerminalBtn;
 
     public ProcessTreeNode(ProcessNodeType type,
                            ProcessTreeNode parent,
@@ -154,6 +155,14 @@ public class ProcessTreeNode {
 
     public void setRunning(boolean running) {
         this.running = running;
+    }
+
+    public boolean isShowAddTerminalBtn() {
+        return showAddTerminalBtn;
+    }
+
+    public void setShowAddTerminalBtn(boolean showAddTerminalBtn) {
+        this.showAddTerminalBtn = showAddTerminalBtn;
     }
 
     @Override
