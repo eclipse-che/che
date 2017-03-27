@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -187,7 +186,6 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
                 if (cheNetworkMatcher.matches() && network.getContainers().isEmpty() && !additionalNetworks.contains(network.getName()) &&
                     !runtimes.hasRuntime(cheNetworkMatcher.group(WORKSPACE_ID_REGEX_GROUP))) {
                     try {
-                        
                         dockerConnector.removeNetwork(network.getId());
                     } catch (IOException e) {
                         LOG.warn("Failed to remove abandoned network: " + network.getName(), e);

@@ -16,13 +16,12 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
-import org.testng.ITestResult;
-import org.testng.TestListenerAdapter;
 
 import java.util.Optional;
 
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
 
 /**
  * Test for {@link DockerContainerNameGenerator}
@@ -30,7 +29,7 @@ import static org.testng.AssertJUnit.assertEquals;
  * @author Alexander Andrienko
  */
 @Listeners(MockitoTestNGListener.class)
-public class DockerContainerNameGeneratorTest extends TestListenerAdapter {
+public class DockerContainerNameGeneratorTest {
     private static final String WORKSPACE_ID = "workspacebbbx2ree3iykn8gc";
     private static final String MACHINE_NAME = "ws-machine";
     private static final String MACHINE_ID   = "machineic131ppamujngv6y";
@@ -102,7 +101,7 @@ public class DockerContainerNameGeneratorTest extends TestListenerAdapter {
                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"__o_",
                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_tfdfdklk_"+CHE_SERVER_CONTAINER_ID+"____",
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"tfdfdklk_"+"____",
                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
                               {"/workspacep_machiner_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name",
@@ -140,8 +139,8 @@ public class DockerContainerNameGeneratorTest extends TestListenerAdapter {
     public void testValidContainerNames(String containerName, Pair<String, String> expectedResult) {
         Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(containerName);
 
-        //assertEquals(containerNameInfoParser.get().getMachineId(), expectedResult.first);
-        //assertEquals(containerNameInfoParser.get().getWorkspaceId(), expectedResult.second);
+        assertEquals(containerNameInfoParser.get().getMachineId(), expectedResult.first);
+        assertEquals(containerNameInfoParser.get().getWorkspaceId(), expectedResult.second);
     }
 
     @DataProvider(name = "invalidContainerNames")
