@@ -113,7 +113,7 @@ public class InitializeWorkflowContextStep implements Step {
                           .then(
                           (String branchName) -> {
                               context.setContributeToBranchName(branchName);
-                              context.getProject().getSource().getParameters().put("branch", branchName);
+                              setBranchToProjectMetadata(context.getProject(), branchName);
                           });
     }
 
@@ -129,6 +129,10 @@ public class InitializeWorkflowContextStep implements Step {
             }
         }
         return null;
+    }
+
+    private void setBranchToProjectMetadata(final ProjectConfig project, String branchName) {
+        project.getSource().getParameters().put("branch", branchName);
     }
 
     private Operation<PromiseError> errorSettingUpOriginRepoOp(final WorkflowExecutor executor, final Context context) {
