@@ -113,6 +113,10 @@ public class GoalPageTest {
         InputDialog inputDialog = mock(InputDialog.class);
         when(dialogFactory.createInputDialog(anyString(),
                                              anyString(),
+                                             anyString(),
+                                             eq(0),
+                                             eq(0),
+                                             anyString(),
                                              any(InputCallback.class),
                                              any(CancelCallback.class))).thenReturn(inputDialog);
         String newGoalId = "new goal";
@@ -120,9 +124,16 @@ public class GoalPageTest {
         page.onCreateGoal();
 
         ArgumentCaptor<InputCallback> inputCaptor = ArgumentCaptor.forClass(InputCallback.class);
-        verify(dialogFactory).createInputDialog(anyString(), anyString(), inputCaptor.capture(), isNull(CancelCallback.class));
-        inputCaptor.getValue().accepted(newGoalId);
+        verify(dialogFactory).createInputDialog(anyString(),
+                                                anyString(),
+                                                anyString(),
+                                                eq(0),
+                                                eq(0),
+                                                anyString(),
+                                                inputCaptor.capture(),
+                                                isNull(CancelCallback.class));
         verify(inputDialog).show();
+        inputCaptor.getValue().accepted(newGoalId);
         verify(view).setGoal(eq(newGoalId));
         verify(editedCommand).setGoal(eq(newGoalId));
         verify(dirtyStateListener, times(2)).onDirtyStateChanged();
