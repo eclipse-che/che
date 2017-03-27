@@ -13,6 +13,8 @@ package org.eclipse.che.plugin.docker.machine;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.environment.server.ContainerNameGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -28,14 +30,15 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
     private static final String NODE_HOST_GROUP    = "(/|(/[0-9a-z.-]+/))?";
     private static final String WORKSPACE_ID_GROUP = "(?<workspaceId>workspace[0-9a-z]+)";
     private static final String MACHINE_ID_GROUP   = "(?<machineId>machine[0-9a-z]+)";
-    private static final String SERVER_ID_GROUP   = "(?<serverId>server[0-9a-z]+)";
+    private static final String SERVER_ID_GROUP   = "(?<serverId>serverid-[0-9a-z]+)";
 
-    private static final String  CONTAINER_NAME_REGEX   = "^" + NODE_HOST_GROUP + WORKSPACE_ID_GROUP + SERVER_ID_GROUP + "_" + MACHINE_ID_GROUP + "_.+$";
+    private static final String  CONTAINER_NAME_REGEX   = "^" + NODE_HOST_GROUP + WORKSPACE_ID_GROUP + "_" + MACHINE_ID_GROUP + "_" + SERVER_ID_GROUP + "_.+$";
     private static final Pattern CONTAINER_NAME_PATTERN = Pattern.compile(CONTAINER_NAME_REGEX);
+    private static final Logger LOG = LoggerFactory.getLogger(DockerContainerNameGenerator.class);
 
     /**
      * Return generated name for docker container. Method generate name for docker container in format:
-     * <br><p>workspaceId + "_" + machineId + "_" + userName +"_" + machineName</p>
+     * <br><p>workspaceId + "_" + machineId + "_"  + serverId + "_" + userName +"_" + machineName</p>
      * <b>Notice: if generated container name contains incorrect symbols for creation docker container, then we skip this symbols</b>
      *
      * @param workspaceId
@@ -66,6 +69,8 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
      * @return information about container
      */
     public Optional<ContainerNameInfo> parse(String containerName) {
+        
+    
         Matcher matcher = CONTAINER_NAME_PATTERN.matcher(containerName);
         ContainerNameInfo containerNameInfo = null;
         if (matcher.matches()) {

@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +55,7 @@ import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator
  */
 @Singleton
 public class DockerAbandonedResourcesCleaner implements Runnable {
-    private static final String            CHE_SERVER_CONTAINER_ID = getenv("HOSTNAME");
+    private final String            CHE_SERVER_CONTAINER_ID ;
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerAbandonedResourcesCleaner.class);
 
@@ -84,6 +85,12 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
         this.additionalNetworks = additionalNetworks.stream()
                                                     .flatMap(Set::stream)
                                                     .collect(toSet());
+        if(getenv("HOSTNAME")==null){
+            CHE_SERVER_CONTAINER_ID= "cheId";
+        }
+        else{
+            CHE_SERVER_CONTAINER_ID= getenv("HOSTNAME");
+        }
         
     }
 
@@ -180,6 +187,7 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
                 if (cheNetworkMatcher.matches() && network.getContainers().isEmpty() && !additionalNetworks.contains(network.getName()) &&
                     !runtimes.hasRuntime(cheNetworkMatcher.group(WORKSPACE_ID_REGEX_GROUP))) {
                     try {
+                        
                         dockerConnector.removeNetwork(network.getId());
                     } catch (IOException e) {
                         LOG.warn("Failed to remove abandoned network: " + network.getName(), e);
