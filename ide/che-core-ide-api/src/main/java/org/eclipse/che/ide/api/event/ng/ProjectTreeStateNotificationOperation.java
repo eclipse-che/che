@@ -96,17 +96,5 @@ public class ProjectTreeStateNotificationOperation implements JsonRpcRequestBiOp
         } else {
             appContext.getWorkspaceRoot().synchronize(new ExternalResourceDelta(Path.valueOf(path), Path.valueOf(path), status));
         }
-
-        if (status == ADDED) {
-            appContext.getWorkspaceRoot().getFile(Path.valueOf(path)).then(new Operation<Optional<File>>() {
-                @Override
-                public void apply(Optional<File> arg) throws OperationException {
-                    if (arg.isPresent()) {
-                        appContext.getWorkspaceRoot()
-                                  .synchronize(new ExternalResourceDelta(Path.valueOf(path), Path.valueOf(path), UPDATED));
-                    }
-                }
-            });
-        }
     }
 }
