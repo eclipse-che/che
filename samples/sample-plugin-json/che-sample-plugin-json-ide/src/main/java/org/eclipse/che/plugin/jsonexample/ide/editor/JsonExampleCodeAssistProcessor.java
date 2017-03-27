@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.jsonexample.ide.editor;
 
 
 import com.google.inject.Inject;
-
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistCallback;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
@@ -77,5 +76,10 @@ public class JsonExampleCodeAssistProcessor implements CodeAssistProcessor {
     @Override
     public String getErrorMessage() {
         return errorMessage;
+    }
+
+    @Override
+    public List<String> getTriggerCharacters() {
+        return null;
     }
 }
