@@ -13,8 +13,6 @@ package org.eclipse.che.plugin.docker.machine;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.environment.server.ContainerNameGenerator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -34,7 +32,6 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
 
     private static final String  CONTAINER_NAME_REGEX   = "^" + NODE_HOST_GROUP + WORKSPACE_ID_GROUP + "_" + MACHINE_ID_GROUP + "_" + SERVER_ID_GROUP + "_.+$";
     private static final Pattern CONTAINER_NAME_PATTERN = Pattern.compile(CONTAINER_NAME_REGEX);
-    private static final Logger LOG = LoggerFactory.getLogger(DockerContainerNameGenerator.class);
 
     /**
      * Return generated name for docker container. Method generate name for docker container in format:
@@ -68,9 +65,7 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
      *         name of the container
      * @return information about container
      */
-    public Optional<ContainerNameInfo> parse(String containerName) {
-        
-    
+    public Optional<ContainerNameInfo> parse(String containerName) {    
         Matcher matcher = CONTAINER_NAME_PATTERN.matcher(containerName);
         ContainerNameInfo containerNameInfo = null;
         if (matcher.matches()) {
