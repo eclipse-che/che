@@ -14,7 +14,7 @@ package exec
 import (
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rpc"
+	"github.com/eclipse/che/agents/go-agents/core/rpc"
 )
 
 // Types of process events

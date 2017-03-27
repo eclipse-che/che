@@ -19,10 +19,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/auth"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rest"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rpc"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/exec-agent/exec"
+	"github.com/eclipse/che/agents/go-agents/core/auth"
+	"github.com/eclipse/che/agents/go-agents/core/rest"
+	"github.com/eclipse/che/agents/go-agents/core/rpc"
+	"github.com/eclipse/che/agents/go-agents/exec-agent/exec"
 )
 
 var (

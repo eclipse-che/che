@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/eclipse/che-lib/websocket"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/common"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rest"
+	"github.com/eclipse/che/agents/go-agents/core/common"
+	"github.com/eclipse/che/agents/go-agents/core/rest"
 )
 
 // WebSocketMessage represents message sent over websocket connection

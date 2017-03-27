@@ -22,10 +22,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/process"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rest"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rest/restutil"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rpc"
+	"github.com/eclipse/che/agents/go-agents/core/process"
+	"github.com/eclipse/che/agents/go-agents/core/rest"
+	"github.com/eclipse/che/agents/go-agents/core/rest/restutil"
+	"github.com/eclipse/che/agents/go-agents/core/rpc"
 )
 
 // HTTPRoutes provides all routes that should be handled by the process API

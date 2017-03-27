@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rest"
+	"github.com/eclipse/che/agents/go-agents/core/rest"
 )
 
 // TokenCache represents authentication tokens cache

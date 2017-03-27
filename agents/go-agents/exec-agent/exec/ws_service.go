@@ -17,8 +17,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/process"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rpc"
+	"github.com/eclipse/che/agents/go-agents/core/process"
+	"github.com/eclipse/che/agents/go-agents/core/rpc"
 )
 
 // Constants that represent RPC methods identifiers

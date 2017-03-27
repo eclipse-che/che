@@ -22,8 +22,8 @@ import (
 	"syscall"
 	"time"
 
-	proc "github.com/eclipse/che/agents/go-agents/src/main/go/core/process"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rpc"
+	proc "github.com/eclipse/che/agents/go-agents/core/process"
+	"github.com/eclipse/che/agents/go-agents/core/rpc"
 )
 
 const (

@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/process"
+	"github.com/eclipse/che/agents/go-agents/core/process"
 )
 
 func TestReadLogs(t *testing.T) {
