@@ -124,6 +124,7 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
 import io.fabric8.kubernetes.client.utils.InputStreamPumper;
+import io.fabric8.openshift.api.model.Image;
 import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.ImageStreamTag;
 import io.fabric8.openshift.api.model.Route;
@@ -896,12 +897,21 @@ public class OpenShiftConnector extends DockerConnector {
         // except that the capitalization is inconsistent, breaking deserialization. Top level elements
         // are lowercased with underscores, while nested elements conform to FieldNamingPolicy.UPPER_CAMEL_CASE.
         // We're only converting the config fields for brevity; this means that other fields are null.
-        String dockerImageConfig = imageStreamTag.getImage().getDockerImageConfig();
-        ImageInfo info = GSON.fromJson(dockerImageConfig.replaceFirst("config", "Config")
-                                                        .replaceFirst("container_config", "ContainerConfig"),
-                                       ImageInfo.class);
+        Image tagImage = imageStreamTag.getImage();
+        String dockerImageConfig = tagImage.getDockerImageConfig();
 
-        return info;
+        if (!isNullOrEmpty(dockerImageConfig)) {
+            LOG.info("imageStreamTag dockerImageConfig is not empty. Using it to get image info");
+            ImageInfo info = GSON.fromJson(dockerImageConfig.replaceFirst("config", "Config")
+                                                            .replaceFirst("container_config", "ContainerConfig"),
+                                           ImageInfo.class);
+            return info;
+        } else {
+            LOG.info("imageStreamTag dockerImageConfig empty. Using dockerImageMetadata to get image info");
+            String dockerImageMetadata = GSON.toJson(tagImage.getAdditionalProperties().get("dockerImageMetadata"));
+            ImageInfo info = GSON.fromJson(dockerImageMetadata, ImageInfo.class);
+            return info;
+        }
     }
 
     protected String getCheWorkspaceId(CreateContainerParams createContainerParams) {
