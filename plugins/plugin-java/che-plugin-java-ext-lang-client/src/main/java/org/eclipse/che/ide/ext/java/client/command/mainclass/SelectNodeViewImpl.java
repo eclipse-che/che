@@ -37,7 +37,6 @@ import org.eclipse.che.ide.ui.window.Window;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.resolveFQN;
 import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
@@ -49,9 +48,6 @@ import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
  */
 @Singleton
 public class SelectNodeViewImpl extends Window implements SelectNodeView {
-    private final ClassNodeInterceptor classNodeInterceptor;
-    private final JavaPackageConnector javaPackageConnector;
-    private final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor;
 
     private Tree                     tree;
     private ActionDelegate           delegate;
@@ -67,22 +63,20 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
 
     @Inject
     public SelectNodeViewImpl(CoreLocalizationConstant locale,
-                              ClassNodeInterceptor classNodeInterceptor,
+                              final ClassNodeInterceptor classNodeInterceptor,
                               SelectPathViewImplUiBinder uiBinder,
-                              JavaPackageConnector javaPackageConnector,
-                              SkipHiddenNodesInterceptor skipHiddenNodesInterceptor) {
-        this.classNodeInterceptor = classNodeInterceptor;
-        this.javaPackageConnector = javaPackageConnector;
-        this.skipHiddenNodesInterceptor = skipHiddenNodesInterceptor;
-
+                              final JavaPackageConnector javaPackageConnector,
+                              final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor) {
         setTitle(locale.selectPathWindowTitle());
 
         Widget widget = uiBinder.createAndBindUi(this);
         setWidget(widget);
 
-        Set<NodeInterceptor> interceptors = new HashSet<>();
-        interceptors.add(classNodeInterceptor);
-        NodeLoader loader = new NodeLoader(interceptors);
+        NodeLoader loader = new NodeLoader(new HashSet<NodeInterceptor>() {{
+            add(classNodeInterceptor);
+            add(javaPackageConnector);
+            add(skipHiddenNodesInterceptor);
+        }});
         NodeStorage nodeStorage = new NodeStorage();
 
         tree = new Tree(nodeStorage, loader);
@@ -166,13 +160,7 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
     @Override
     public void setStructure(List<Node> nodes) {
         tree.getNodeStorage().clear();
-        tree.getNodeLoader().getNodeInterceptors().clear();
-        tree.getNodeLoader().getNodeInterceptors().add(classNodeInterceptor);
-        tree.getNodeLoader().getNodeInterceptors().add(javaPackageConnector);
-        tree.getNodeLoader().getNodeInterceptors().add(skipHiddenNodesInterceptor);
-        for (Node node : nodes) {
-            tree.getNodeStorage().add(node);
-        }
+        tree.getNodeStorage().add(nodes);
     }
 
     private void acceptButtonClicked() {
