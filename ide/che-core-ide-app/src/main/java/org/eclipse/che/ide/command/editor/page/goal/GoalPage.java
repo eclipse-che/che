@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
@@ -87,8 +88,8 @@ public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.
 
     @Override
     public void onCreateGoal() {
-        dialogFactory.createInputDialog(messages.pageGoalNewGoalTitle(), messages.pageGoalNewGoalLabel(), value -> {
-            final Set<CommandGoal> goals = goalRegistry.getAllGoals();
+        InputCallback inputCallback = value -> {
+            Set<CommandGoal> goals = goalRegistry.getAllGoals();
             goals.add(goalRegistry.getGoalForId(value));
 
             view.setAvailableGoals(goals);
@@ -96,6 +97,15 @@ public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.
 
             editedCommand.setGoal(value);
             notifyDirtyStateChanged();
-        }, null).show();
+        };
+
+        dialogFactory.createInputDialog(messages.pageGoalNewGoalTitle(),
+                                        messages.pageGoalNewGoalLabel(),
+                                        "",
+                                        0,
+                                        0,
+                                        messages.pageGoalNewGoalButtonCreate(),
+                                        inputCallback,
+                                        null).show();
     }
 }

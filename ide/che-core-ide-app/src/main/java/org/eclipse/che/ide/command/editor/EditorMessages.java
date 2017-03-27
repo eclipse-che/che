@@ -49,6 +49,9 @@ public interface EditorMessages extends Messages {
     @Key("page.goal.new_goal.label")
     String pageGoalNewGoalLabel();
 
+    @Key("page.goal.new_goal.button.create")
+    String pageGoalNewGoalButtonCreate();
+
     @Key("page.projects.title")
     String pageProjectsTitle();
 
