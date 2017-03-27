@@ -27,6 +27,7 @@ import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
+import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,12 +72,15 @@ public class DockerInstanceProvider implements InstanceProvider {
     public static final String MACHINE_SNAPSHOT_PREFIX = "machine_snapshot_";
 
     private final DockerConnector                               docker;
+    private final DockerRegistryAuthResolver                    authResolver;
     private final boolean                                       snapshotUseRegistry;
 
     @Inject
     public DockerInstanceProvider(DockerConnectorProvider dockerProvider,
+                                  DockerRegistryAuthResolver authResolver,
                                   @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) throws IOException {
         this.docker = dockerProvider.get();
+        this.authResolver = authResolver;
         this.snapshotUseRegistry = snapshotUseRegistry;
     }
 
@@ -142,12 +146,12 @@ public class DockerInstanceProvider implements InstanceProvider {
             return;
         }
 
-        final String registry = dockerMachineSource.getRegistry();
         final String repository = dockerMachineSource.getRepository();
-        if (registry == null || repository == null) {
+        if (repository == null) {
             LOG.error("Failed to remove instance snapshot: invalid machine source: {}", dockerMachineSource);
             throw new SnapshotException("Snapshot removing failed. Snapshot attributes are not valid");
         }
+        final String registry = (dockerMachineSource.getRegistry() == null) ? "index.docker.io" : dockerMachineSource.getRegistry();
 
         try {
             URL url = UriBuilder.fromUri("http://" + registry) // TODO make possible to use https here
@@ -156,10 +160,10 @@ public class DockerInstanceProvider implements InstanceProvider {
                                 .toURL();
             final HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             try {
+                conn.setInstanceFollowRedirects(true);
                 conn.setConnectTimeout(30 * 1000);
                 conn.setRequestMethod("DELETE");
                 // TODO add auth header for secured registry
-                // conn.setRequestProperty("Authorization", authHeader);
                 final int responseCode = conn.getResponseCode();
                 if ((responseCode / 100) != 2) {
                     InputStream in = conn.getErrorStream();
