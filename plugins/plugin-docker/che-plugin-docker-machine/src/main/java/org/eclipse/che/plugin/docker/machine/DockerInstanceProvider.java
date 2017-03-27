@@ -27,7 +27,6 @@ import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
-import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,15 +71,12 @@ public class DockerInstanceProvider implements InstanceProvider {
     public static final String MACHINE_SNAPSHOT_PREFIX = "machine_snapshot_";
 
     private final DockerConnector                               docker;
-    private final DockerRegistryAuthResolver                    authResolver;
     private final boolean                                       snapshotUseRegistry;
 
     @Inject
     public DockerInstanceProvider(DockerConnectorProvider dockerProvider,
-                                  DockerRegistryAuthResolver authResolver,
                                   @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) throws IOException {
         this.docker = dockerProvider.get();
-        this.authResolver = authResolver;
         this.snapshotUseRegistry = snapshotUseRegistry;
     }
 
