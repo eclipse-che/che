@@ -96,7 +96,7 @@ public class MachineLinksInjector {
         if (machine.getRuntime() != null) {
             final Collection<ServerDto> servers = machine.getRuntime().getServers().values();
             servers.stream()
-                   .filter(server -> TERMINAL_REFERENCE.equals(server.getRef()))
+                   .filter(server -> EXEC_AGENT_REFERENCE.equals(server.getRef()))
                    .findAny()
                    .ifPresent(terminal ->
                                   links.add(createLink("GET",

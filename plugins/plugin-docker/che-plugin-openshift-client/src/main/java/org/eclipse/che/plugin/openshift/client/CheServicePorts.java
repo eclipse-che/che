@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.openshift.client;
 
-import java.util.Map;
 import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
 
 /**
  * Provides mapping between port and Che service name that is using it
@@ -22,6 +23,7 @@ public final class CheServicePorts {
             put(4401, "wsagent").
             put(4403, "wsagent-jpda").
             put(4411, "terminal").
+            put(4412, "exec-agent").
             put(8080, "tomcat").
             put(8000, "tomcat-jpda").
             put(9876, "codeserver").build();

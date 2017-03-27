@@ -998,11 +998,13 @@ public class WorkspaceRuntimesTest {
     private WorkspaceImpl newWorkspace(String workspaceId, String envName) {
         EnvironmentImpl environment = new EnvironmentImpl();
         Map<String, ExtendedMachineImpl> machines = environment.getMachines();
-        machines.put("dev", new ExtendedMachineImpl(Arrays.asList("org.eclipse.che.terminal",
+        machines.put("dev", new ExtendedMachineImpl(Arrays.asList("org.eclipse.che.exec",
+                                                                  "org.eclipse.che.terminal",
                                                                   "org.eclipse.che.ws-agent"),
                                                     Collections.emptyMap(),
                                                     Collections.emptyMap()));
-        machines.put("db", new ExtendedMachineImpl(singletonList("org.eclipse.che.terminal"),
+        machines.put("db", new ExtendedMachineImpl(Arrays.asList("org.eclipse.che.exec",
+                                                                 "org.eclipse.che.terminal"),
                                                    Collections.emptyMap(),
                                                    Collections.emptyMap()));
         return WorkspaceImpl.builder()

@@ -40,7 +40,7 @@ func TestCleansOnlyUnusedProcesses(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 
 	// use one of the processes, so it is used now
-	exec.Get(p1.Pid)
+	_, _ = exec.Get(p1.Pid)
 
 	// cleanup immediately
 	(&exec.Cleaner{CleanupPeriod: 0, CleanupThreshold: 500 * time.Millisecond}).CleanOnce()

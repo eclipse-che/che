@@ -95,22 +95,15 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
-                <artifactId>go-agents</artifactId>
+                <artifactId>exec-agent</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>exec-agent</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
                 <classifier>linux_amd64</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>go-agents</artifactId>
-                <version>${project.version}</version>
-                <type>tar.gz</type>
-                <classifier>linux_arm7</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>go-agents</artifactId>
-                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
@@ -141,6 +134,18 @@
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>ssh-agent</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>terminal-agent</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>terminal-agent</artifactId>
+                <version>${project.version}</version>
+                <type>tar.gz</type>
+                <classifier>linux_amd64</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>

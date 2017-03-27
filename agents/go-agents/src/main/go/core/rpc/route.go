@@ -69,20 +69,36 @@ func (routes *routesMap) get(method string) (Route, bool) {
 
 // Returns true if route is added and false if route for such method
 // already present(won't override it).
-func (or *routesMap) add(r Route) bool {
+func (routes *routesMap) add(route Route) bool {
 	routes.Lock()
 	defer routes.Unlock()
-	_, ok := routes.items[r.Method]
+	_, ok := routes.items[route.Method]
 	if ok {
 		return false
 	}
-	routes.items[r.Method] = r
+	routes.items[route.Method] = route
 	return true
 }
 
-// RegisterRoute adds a new route, panics if such route already exists.
-func RegisterRoute(route Route) {
-	if !routes.add(route) {
-		log.Fatalf("Couldn't register a new route, route for the operation '%s' already exists", route.Method)
+// RegisterRoutes adds provided routes groups into routes.
+// Panics if any of routes already exists or duplicated in a parameter.
+func RegisterRoutes(rg []RoutesGroup) {
+	for _, group := range rg {
+		for _, route := range group.Items {
+			if !routes.add(route) {
+				log.Panicf("Couldn't register a new route, route for the operation '%s' already exists", route.Method)
+			}
+		}
+	}
+}
+
+// PrintRoutes prints provided rpc routes by group
+func PrintRoutes(rg []RoutesGroup) {
+	log.Print("⇩ Registered RPCRoutes:\n\n")
+	for _, group := range rg {
+		log.Printf("%s:\n", group.Name)
+		for _, route := range group.Items {
+			log.Printf("✓ %s\n", route.Method)
+		}
 	}
 }

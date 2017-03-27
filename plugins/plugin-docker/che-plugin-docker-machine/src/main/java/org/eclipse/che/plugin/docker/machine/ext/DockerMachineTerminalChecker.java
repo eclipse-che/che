@@ -27,6 +27,7 @@ import static java.nio.file.Files.notExists;
  */
 public class DockerMachineTerminalChecker {
 
+    // TODO check exec agent binaries if needed
     public static final String TERMINAL_ARCHIVE_LOCATION = "che.workspace.terminal_linux_amd64";
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerMachineTerminalChecker.class);

@@ -14,8 +14,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.agent.ExecAgent;
-import org.eclipse.che.api.agent.ExecAgentLauncher;
 import org.eclipse.che.api.agent.LSCSharpAgent;
 import org.eclipse.che.api.agent.LSJsonAgent;
 import org.eclipse.che.api.agent.LSPhpAgent;
@@ -124,7 +122,8 @@ public class WsMasterModule extends AbstractModule {
         Multibinder<Agent> agents = Multibinder.newSetBinder(binder(), Agent.class);
         agents.addBinding().to(SshAgent.class);
         agents.addBinding().to(UnisonAgent.class);
-        agents.addBinding().to(ExecAgent.class);
+        agents.addBinding().to(org.eclipse.che.api.agent.ExecAgent.class);
+        agents.addBinding().to(org.eclipse.che.api.agent.TerminalAgent.class);
         agents.addBinding().to(WsAgent.class);
         agents.addBinding().to(LSPhpAgent.class);
         agents.addBinding().to(LSPythonAgent.class);
@@ -134,7 +133,8 @@ public class WsMasterModule extends AbstractModule {
 
         Multibinder<AgentLauncher> launchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
         launchers.addBinding().to(WsAgentLauncher.class);
-        launchers.addBinding().to(ExecAgentLauncher.class);
+        launchers.addBinding().to(org.eclipse.che.api.agent.ExecAgentLauncher.class);
+        launchers.addBinding().to(org.eclipse.che.api.agent.TerminalAgentLauncher.class);
         launchers.addBinding().to(SshAgentLauncher.class);
 
         bindConstant().annotatedWith(Names.named("machine.ws_agent.run_command"))
@@ -142,8 +142,11 @@ public class WsMasterModule extends AbstractModule {
         bindConstant().annotatedWith(Names.named("machine.terminal_agent.run_command"))
                       .to("$HOME/che/terminal/che-websocket-terminal " +
                           "-addr :4411 " +
+                          "-cmd ${SHELL_INTERPRETER}");
+        bindConstant().annotatedWith(Names.named("machine.exec_agent.run_command"))
+                      .to("$HOME/che/exec-agent/che-exec-agent " +
+                          "-addr :4412 " +
                           "-cmd ${SHELL_INTERPRETER} " +
-                          "-static $HOME/che/terminal/ " +
                           "-logs-dir $HOME/che/exec-agent/logs");
 
         bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);

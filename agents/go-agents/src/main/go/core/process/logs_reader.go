@@ -54,7 +54,7 @@ func (lr *LogsReader) ReadLogs() ([]*LogMessage, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer logsFile.Close()
+	defer closeFile(logsFile)
 
 	from := time.Time{}
 	if lr.readFrom != nil {

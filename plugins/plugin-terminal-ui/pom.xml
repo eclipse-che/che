@@ -47,15 +47,15 @@
                 <configuration>
                     <useDefaultExcludes>false</useDefaultExcludes>
                     <excludes>
-                      <exclude>**/src/addons/**</exclude>
-                      <exclude>**/src/handlers/**</exclude>
-                      <exclude>**/src/main/resources/org/eclipse/che/ide/terminal/client/xterm.css</exclude>
-                      <exclude>**/utils/**</exclude>
-                      <exclude>**/src/Viewport.ts</exclude>
-                      <exclude>**/src/CompositionHelper.ts</exclude>
-                      <exclude>**/src/EventEmitter.js</exclude>
-                      <exclude>**/src/xterm.js</exclude>
-                      <exclude>**/src/Interfaces.ts</exclude>
+                        <exclude>**/src/addons/**</exclude>
+                        <exclude>**/src/handlers/**</exclude>
+                        <exclude>**/src/main/resources/org/eclipse/che/ide/terminal/client/xterm.css</exclude>
+                        <exclude>**/utils/**</exclude>
+                        <exclude>**/src/Viewport.ts</exclude>
+                        <exclude>**/src/CompositionHelper.ts</exclude>
+                        <exclude>**/src/EventEmitter.js</exclude>
+                        <exclude>**/src/xterm.js</exclude>
+                        <exclude>**/src/Interfaces.ts</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -97,19 +97,19 @@
                         </configuration>
                     </execution>
                     <execution>
-                      <!--copy compiled terminal script to output directory-->
-                      <id>copy-xterm.js</id>
-                      <phase>process-classes</phase>
-                      <goals>
-                          <goal>run</goal>
-                      </goals>
-                      <configuration>
-                        <target name="copy xterm.js">
-                          <copy todir="${project.build.outputDirectory}">
-                              <fileset dir="${basedir}/build" />
-                          </copy>
-                        </target>
-                      </configuration>
+                        <!--copy compiled terminal script to output directory-->
+                        <id>copy-xterm.js</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target name="copy xterm.js">
+                                <copy todir="${project.build.outputDirectory}">
+                                    <fileset dir="${basedir}/build" />
+                                </copy>
+                            </target>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

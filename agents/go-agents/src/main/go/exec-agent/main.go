@@ -13,37 +13,20 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
 
-	"regexp"
-
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/activity"
 	"github.com/eclipse/che/agents/go-agents/src/main/go/core/auth"
 	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rest"
 	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rpc"
 	"github.com/eclipse/che/agents/go-agents/src/main/go/exec-agent/exec"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/exec-agent/term"
-	"github.com/julienschmidt/httprouter"
 )
 
 var (
-	AppHTTPRoutes = []rest.RoutesGroup{
-		exec.HTTPRoutes,
-		rpc.HTTPRoutes,
-		term.HTTPRoutes,
-	}
-
-	AppOpRoutes = []rpc.RoutesGroup{
-		exec.RPCRoutes,
-	}
-
 	serverAddress string
-	staticDir     string
 	basePath      string
 	apiEndpoint   string
 
@@ -63,12 +46,6 @@ func init() {
 		"IP:PORT or :PORT the address to start the server on",
 	)
 	flag.StringVar(
-		&staticDir,
-		"static",
-		"./static/",
-		"path to the directory where static content is located",
-	)
-	flag.StringVar(
 		&basePath,
 		"path",
 		"",
@@ -80,20 +57,12 @@ func init() {
 	Regexp syntax is supported`,
 	)
 
-	// terminal configuration
-	flag.StringVar(
-		&term.Cmd,
-		"cmd",
-		"/bin/bash",
-		"shell interpreter and command to execute on slave side of the pty",
-	)
-
 	// workspace master server configuration
 	flag.StringVar(
 		&apiEndpoint,
 		"api-endpoint",
 		os.Getenv("CHE_API"),
-		`api-endpoint used by exec-agent modules(such as activity checker or authentication)
+		`api-endpoint used by exec-agent modules(such as authentication)
 	to request workspace master. By default the value from 'CHE_API' environment variable is used`,
 	)
 
@@ -111,15 +80,13 @@ func init() {
 		"how much time machine tokens stay in cache(if auth is enabled)",
 	)
 
-	// terminal configuration
-	flag.BoolVar(
-		&activity.ActivityTrackingEnabled,
-		"enable-activity-tracking",
-		false,
-		"whether workspace master will be notified about workspace activity",
-	)
-
 	// process executor configuration
+	flag.StringVar(
+		&exec.ShellInterpreter,
+		"cmd",
+		"/bin/bash",
+		"shell interpreter",
+	)
 	flag.IntVar(
 		&processCleanupPeriodInMinutes,
 		"process-cleanup-period",
@@ -133,7 +100,10 @@ func init() {
 	if -1 passed then processes won't be cleaned at all. Please note that the time
 	of real cleanup is between configured threshold and threshold + process-cleanup-period.`,
 	)
-	curDir, _ := os.Getwd()
+	curDir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
 	curDir += string(os.PathSeparator) + "logs"
 	flag.StringVar(
 		&exec.LogsDir,
@@ -148,101 +118,38 @@ func main() {
 
 	log.SetOutput(os.Stdout)
 
-	// print configuration
-	fmt.Println("Exec-agent configuration")
-	fmt.Println("  Server")
-	fmt.Printf("    - Address: %s\n", serverAddress)
-	fmt.Printf("    - Static content: %s\n", staticDir)
-	fmt.Printf("    - Base path: '%s'\n", basePath)
-	fmt.Println("  Terminal")
-	fmt.Printf("    - Slave command: '%s'\n", term.Cmd)
-	fmt.Printf("    - Activity tracking enabled: %t\n", activity.ActivityTrackingEnabled)
-	if authEnabled {
-		fmt.Println("  Authentication")
-		fmt.Printf("    - Enabled: %t\n", authEnabled)
-		fmt.Printf("    - Tokens expiration timeout: %dm\n", tokensExpirationTimeoutInMinutes)
-	}
-	fmt.Println("  Process executor")
-	fmt.Printf("    - Logs dir: %s\n", exec.LogsDir)
-	if processCleanupPeriodInMinutes > 0 {
-		fmt.Printf("    - Cleanup job period: %dm\n", processCleanupPeriodInMinutes)
-		fmt.Printf("    - Not used & dead processes stay for: %dm\n", processCleanupThresholdInMinutes)
-	}
-	if authEnabled || activity.ActivityTrackingEnabled {
-		fmt.Println("  Workspace master server")
-		fmt.Printf("    - API endpoint: %s\n", apiEndpoint)
-	}
-	fmt.Println()
+	printConfiguration()
 
-	activity.APIEndpoint = apiEndpoint
-
-	// process configuration
+	// remove old logs
 	if err := os.RemoveAll(exec.LogsDir); err != nil {
 		log.Fatal(err)
 	}
 
+	// start cleaner routine
 	if processCleanupPeriodInMinutes > 0 {
 		if processCleanupThresholdInMinutes < 0 {
 			log.Fatal("Expected process cleanup threshold to be non negative value")
 		}
 		cleaner := exec.NewCleaner(processCleanupPeriodInMinutes, processCleanupThresholdInMinutes)
-		cleaner.CleanPeriodically()
+		go cleaner.CleanPeriodically()
 	}
-	exec.ShellInterpreter = term.Cmd
 
-	// terminal configuration
-	if activity.ActivityTrackingEnabled {
-		go activity.Tracker.StartTracking()
+	appHTTPRoutes := []rest.RoutesGroup{
+		exec.HTTPRoutes,
+		rpc.HTTPRoutes,
+	}
+
+	appOpRoutes := []rpc.RoutesGroup{
+		exec.RPCRoutes,
 	}
 
 	// register routes and http handlers
-	router := httprouter.New()
-	router.NotFound = http.FileServer(http.Dir(staticDir))
+	r := rest.NewDefaultRouter(basePath, appHTTPRoutes)
+	rest.PrintRoutes(appHTTPRoutes)
+	rpc.RegisterRoutes(appOpRoutes)
+	rpc.PrintRoutes(appOpRoutes)
 
-	fmt.Print("⇩ Registered HTTPRoutes:\n\n")
-	for _, routesGroup := range AppHTTPRoutes {
-		fmt.Printf("%s:\n", routesGroup.Name)
-		for _, route := range routesGroup.Items {
-			router.Handle(
-				route.Method,
-				route.Path,
-				toHandle(route.HandleFunc),
-			)
-			fmt.Printf("✓ %s\n", &route)
-		}
-		fmt.Println()
-	}
-
-	fmt.Print("\n⇩ Registered RPCRoutes:\n\n")
-	for _, routesGroup := range AppOpRoutes {
-		fmt.Printf("%s:\n", routesGroup.Name)
-		for _, route := range routesGroup.Items {
-			fmt.Printf("✓ %s\n", route.Method)
-			rpc.RegisterRoute(route)
-		}
-	}
-
-	var handler http.Handler = router
-
-	// required authentication for all the requests, if it is configured
-	if authEnabled {
-		cache := auth.NewCache(time.Minute*time.Duration(tokensExpirationTimeoutInMinutes), time.Minute*5)
-
-		handler = auth.NewCachingHandler(handler, apiEndpoint, func(w http.ResponseWriter, req *http.Request, err error) {
-			dropChannelsWithExpiredToken(req.URL.Query().Get("token"))
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-		}, cache)
-	}
-
-	// cut base path on requests, if it is configured
-	if basePath != "" {
-		if rx, err := regexp.Compile(basePath); err == nil {
-			handler = basePathChopper{rx, handler}
-		} else {
-			log.Fatal(err)
-		}
-	}
-
+	var handler = getHandler(r)
 	http.Handle("/", handler)
 
 	server := &http.Server{
@@ -254,44 +161,48 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func dropChannelsWithExpiredToken(token string) {
+func getHandler(h http.Handler) http.Handler {
+	// required authentication for all the requests, if it is configured
+	if authEnabled {
+		cache := auth.NewCache(time.Minute*time.Duration(tokensExpirationTimeoutInMinutes), time.Minute*5)
+		return auth.NewCachingHandler(h, apiEndpoint, droppingRPCChannelsUnauthorizedHandler, cache)
+	}
+
+	return h
+}
+
+func droppingRPCChannelsUnauthorizedHandler(w http.ResponseWriter, req *http.Request, err error) {
+	token := req.URL.Query().Get("token")
 	for _, c := range rpc.GetChannels() {
-		u, err := url.ParseRequestURI(c.RequestURI)
-		if err != nil {
+		if u, err1 := url.ParseRequestURI(c.RequestURI); err1 != nil {
 			log.Printf("Couldn't parse the RequestURI '%s' of channel '%s'", c.RequestURI, c.ID)
 		} else if u.Query().Get("token") == token {
 			log.Printf("Token for channel '%s' is expired, trying to drop the channel", c.ID)
 			rpc.DropChannel(c.ID)
 		}
 	}
+	http.Error(w, err.Error(), http.StatusUnauthorized)
 }
 
-type routerParamsAdapter struct {
-	params httprouter.Params
-}
-
-func (pa routerParamsAdapter) Get(param string) string {
-	return pa.params.ByName(param)
-}
-
-func toHandle(f rest.HTTPRouteHandlerFunc) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		if err := f(w, r, routerParamsAdapter{params: p}); err != nil {
-			rest.WriteError(w, err)
-		}
+func printConfiguration() {
+	log.Println("Exec-agent configuration")
+	log.Println("  Server")
+	log.Printf("    - Address: %s\n", serverAddress)
+	log.Printf("    - Base path: '%s'\n", basePath)
+	if authEnabled {
+		log.Println("  Authentication")
+		log.Printf("    - Enabled: %t\n", authEnabled)
+		log.Printf("    - Tokens expiration timeout: %dm\n", tokensExpirationTimeoutInMinutes)
 	}
-}
-
-type basePathChopper struct {
-	pattern  *regexp.Regexp
-	delegate http.Handler
-}
-
-func (c basePathChopper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// if request path starts with given base path
-	if idx := c.pattern.FindStringSubmatchIndex(r.URL.Path); len(idx) != 0 && idx[0] == 0 {
-		r.URL.Path = r.URL.Path[idx[1]:]
-		r.RequestURI = r.RequestURI[idx[1]:]
+	log.Println("  Process executor")
+	log.Printf("    - Logs dir: %s\n", exec.LogsDir)
+	if processCleanupPeriodInMinutes > 0 {
+		log.Printf("    - Cleanup job period: %dm\n", processCleanupPeriodInMinutes)
+		log.Printf("    - Not used & dead processes stay for: %dm\n", processCleanupThresholdInMinutes)
 	}
-	c.delegate.ServeHTTP(w, r)
+	if authEnabled {
+		log.Println("  Workspace master server")
+		log.Printf("    - API endpoint: %s\n", apiEndpoint)
+	}
+	log.Println()
 }

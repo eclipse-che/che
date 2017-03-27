@@ -21,7 +21,7 @@ import (
 
 func TestReadLogs(t *testing.T) {
 	filename := os.TempDir() + string(os.PathSeparator) + randomName(10)
-	defer os.Remove(filename)
+	defer removeFile(filename)
 
 	fl, err := process.NewLogger(filename)
 	if err != nil {
