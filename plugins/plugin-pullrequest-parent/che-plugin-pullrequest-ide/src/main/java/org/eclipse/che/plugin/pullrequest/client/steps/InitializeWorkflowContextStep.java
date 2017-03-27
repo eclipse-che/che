@@ -108,9 +108,9 @@ public class InitializeWorkflowContextStep implements Step {
             return;
         }
 
-        vcsServiceProvider.getVcsService(context.getProject()) //
-                          .getBranchName(context.getProject()) //
-                          .then( //
+        vcsServiceProvider.getVcsService(context.getProject())
+                          .getBranchName(context.getProject())
+                          .then(
                           (String branchName) -> {
                               context.setContributeToBranchName(branchName);
                               context.getProject().getSource().getParameters().put("branch", branchName);
