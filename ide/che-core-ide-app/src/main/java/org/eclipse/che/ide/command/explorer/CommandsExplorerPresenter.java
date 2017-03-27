@@ -291,8 +291,8 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         private void refreshView() {
             final Map<CommandGoal, List<CommandImpl>> commandsByGoals = new HashMap<>();
 
-            // all predefined commandToSelect goals must be shown in the view
-            // so populate map by all registered commandToSelect goals
+            // all predefined command goals must be shown in the view
+            // so populate map by all registered command goals
             for (CommandGoal goal : goalRegistry.getAllPredefinedGoals()) {
                 commandsByGoals.put(goal, new ArrayList<>());
             }

@@ -10,30 +10,43 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor.page.project;
 
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
+import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /** Tests for {@link ProjectsPage}. */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(GwtMockitoTestRunner.class)
 public class ProjectsPageTest {
+
+    private static final String PROJECT_PATH = "/projects/p1";
 
     @Mock
     private ProjectsPageView view;
@@ -48,17 +61,21 @@ public class ProjectsPageTest {
     private ProjectsPage page;
 
     @Mock
-    private DirtyStateListener dirtyStateListener;
+    private DirtyStateListener                    dirtyStateListener;
     @Mock
-    private CommandImpl        editedCommand;
+    private CommandImpl                           editedCommand;
     @Mock
-    private ApplicableContext  editedCommandApplicableContext;
+    private ApplicableContext                     applicableContext;
+    @Mock
+    private Project                               project;
+    @Captor
+    private ArgumentCaptor<Map<Project, Boolean>> projectsStatesCaptor;
 
     @Before
     public void setUp() throws Exception {
-        when(appContext.getProjects()).thenReturn(new Project[0]);
-
-        when(editedCommand.getApplicableContext()).thenReturn(editedCommandApplicableContext);
+        when(project.getPath()).thenReturn(PROJECT_PATH);
+        when(appContext.getProjects()).thenReturn(new Project[]{project});
+        when(editedCommand.getApplicableContext()).thenReturn(applicableContext);
 
         page.setDirtyStateListener(dirtyStateListener);
         page.edit(editedCommand);
@@ -75,9 +92,71 @@ public class ProjectsPageTest {
     }
 
     @Test
+    public void shouldSetProjects() throws Exception {
+        setUpApplicableProjectToContext();
+
+        verifySettingProjects();
+    }
+
+    @Test
     public void shouldNotifyListenerWhenApplicableProjectChanged() throws Exception {
         page.onApplicableProjectChanged(mock(Project.class), true);
 
         verify(dirtyStateListener, times(2)).onDirtyStateChanged();
+    }
+
+    @Test
+    public void shouldAddApplicableProjectInContext() throws Exception {
+        page.onApplicableProjectChanged(project, true);
+
+        verify(applicableContext).addProject(eq(PROJECT_PATH));
+    }
+
+    @Test
+    public void shouldRemoveApplicableProjectFromContext() throws Exception {
+        page.onApplicableProjectChanged(project, false);
+
+        verify(applicableContext).removeProject(eq(PROJECT_PATH));
+    }
+
+    @Test
+    public void shouldUnsetWorkspaceApplicableWhenAnyApplicableProject() throws Exception {
+        page.onApplicableProjectChanged(project, true);
+
+        verify(applicableContext).setWorkspaceApplicable(eq(Boolean.FALSE));
+    }
+
+    @Test
+    public void shouldSetWorkspaceApplicableWhenNoApplicableProject() throws Exception {
+        page.onApplicableProjectChanged(project, false);
+
+        verify(applicableContext).setWorkspaceApplicable(eq(Boolean.TRUE));
+    }
+
+    @Test
+    public void shouldSetProjectsOnResourceChanged() throws Exception {
+        setUpApplicableProjectToContext();
+
+        ResourceDelta resourceDelta = mock(ResourceDelta.class);
+        Resource resource = mock(Resource.class);
+        when(resourceDelta.getResource()).thenReturn(resource);
+        when(resource.isProject()).thenReturn(true);
+
+        page.onResourceChanged(new ResourceChangedEvent(resourceDelta));
+
+        verifySettingProjects();
+    }
+
+    private void setUpApplicableProjectToContext() {
+        List<String> applicableProjects = new ArrayList<>();
+        applicableProjects.add(PROJECT_PATH);
+        when(applicableContext.getApplicableProjects()).thenReturn(applicableProjects);
+    }
+
+    private void verifySettingProjects() throws Exception {
+        verify(view).setProjects(projectsStatesCaptor.capture());
+
+        Map<Project, Boolean> map = projectsStatesCaptor.getValue();
+        assertTrue(map.containsKey(project));
     }
 }

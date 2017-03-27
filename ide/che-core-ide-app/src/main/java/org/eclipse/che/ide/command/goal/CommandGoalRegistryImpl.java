@@ -18,18 +18,18 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.BaseCommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
+import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.util.loging.Log;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.Collections.unmodifiableList;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Implementation of {@link CommandGoalRegistry}.
@@ -40,33 +40,47 @@ import static java.util.Optional.ofNullable;
 public class CommandGoalRegistryImpl implements CommandGoalRegistry {
 
     private final CommandGoal              defaultGoal;
+    private final CommandManager           commandManager;
     private final GoalMessages             messages;
-    private final Map<String, CommandGoal> commandGoals;
+    private final Map<String, CommandGoal> predefinedGoals;
 
     @Inject
-    public CommandGoalRegistryImpl(@Named("default") CommandGoal defaultCommandGoal, GoalMessages messages) {
+    public CommandGoalRegistryImpl(@Named("default") CommandGoal defaultCommandGoal,
+                                   CommandManager commandManager,
+                                   GoalMessages messages) {
         defaultGoal = defaultCommandGoal;
+        this.commandManager = commandManager;
         this.messages = messages;
 
-        commandGoals = new HashMap<>();
+        predefinedGoals = new HashMap<>();
     }
 
     @Inject(optional = true)
     private void register(Set<CommandGoal> goals) {
-        for (CommandGoal type : goals) {
-            final String id = type.getId();
+        for (CommandGoal goal : goals) {
+            final String id = goal.getId();
 
-            if (commandGoals.containsKey(id)) {
-                Log.warn(getClass(), messages.messageGoalAlreadyRegistered(id));
+            if (!predefinedGoals.containsKey(id)) {
+                predefinedGoals.put(id, goal);
             } else {
-                commandGoals.put(id, type);
+                Log.warn(getClass(), messages.messageGoalAlreadyRegistered(id));
             }
         }
     }
 
     @Override
-    public List<CommandGoal> getAllPredefinedGoals() {
-        return unmodifiableList(new ArrayList<>(commandGoals.values()));
+    public Set<CommandGoal> getAllGoals() {
+        Set<CommandGoal> goals = getAllPredefinedGoals();
+        goals.addAll(commandManager.getCommands()
+                                   .stream()
+                                   .map(command -> getGoalForId(command.getGoal()))
+                                   .collect(toSet()));
+        return goals;
+    }
+
+    @Override
+    public Set<CommandGoal> getAllPredefinedGoals() {
+        return new HashSet<>(predefinedGoals.values());
     }
 
     @Override
@@ -76,7 +90,7 @@ public class CommandGoalRegistryImpl implements CommandGoalRegistry {
 
     @Override
     public Optional<CommandGoal> getPredefinedGoalById(String id) {
-        return ofNullable(commandGoals.get(id));
+        return ofNullable(predefinedGoals.get(id));
     }
 
     @Override
