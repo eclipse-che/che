@@ -25,13 +25,13 @@ import static org.testng.Assert.assertTrue;
  * @author Florent Benoit
  */
 @Listeners(MockitoTestNGListener.class)
-public class GithubUrlParserTest {
+public class GithubURLParserTest {
 
     /**
      * Instance of component that will be tested.
      */
     @InjectMocks
-    private GithubUrlParser githubUrlParser;
+    private GithubURLParser githubUrlParser;
 
     /**
      * Check invalid url (not a github one)
@@ -56,10 +56,10 @@ public class GithubUrlParserTest {
     public void checkParsing(String url, String username, String repository, String branch, String subfolder) {
         GithubUrl githubUrl = githubUrlParser.parse(url);
 
-        assertEquals(githubUrl.username(), username);
-        assertEquals(githubUrl.repository(), repository);
-        assertEquals(githubUrl.branch(), branch);
-        assertEquals(githubUrl.subfolder(), subfolder);
+        assertEquals(githubUrl.getUsername(), username);
+        assertEquals(githubUrl.getRepository(), repository);
+        assertEquals(githubUrl.getBranch(), branch);
+        assertEquals(githubUrl.getSubfolder(), subfolder);
     }
 
     @DataProvider(name = "UrlsProvider")

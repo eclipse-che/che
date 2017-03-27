@@ -14,7 +14,6 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.plugin.urlfactory.CreateFactoryParams;
 import org.eclipse.che.plugin.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.plugin.urlfactory.URLFactoryBuilder;
 
@@ -40,7 +39,7 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
      * Parser which will allow to check validity of URLs and create objects.
      */
     @Inject
-    private GithubUrlParser githubUrlParser;
+    private GithubURLParser githubUrlParser;
 
     /**
      * Builder allowing to build objects from github URL.
@@ -87,21 +86,20 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
         final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get("url"));
 
         // create factory from the following location if location exists, else create default factory
-        FactoryDto factory = urlFactoryBuilder.createFactory(
-                CreateFactoryParams.create().jsonFileLocation(githubUrl.factoryJsonFileLocation()));
+        FactoryDto factory = urlFactoryBuilder.createFactory(githubUrl.factoryJsonFileLocation());
 
         // add workspace configuration if not defined
         if (factory.getWorkspace() == null) {
-            factory.setWorkspace(urlFactoryBuilder.buildWorkspaceConfig(githubUrl.repository(),
-                                                                        githubUrl.username(),
+            factory.setWorkspace(urlFactoryBuilder.buildWorkspaceConfig(githubUrl.getRepository(),
+                                                                        githubUrl.getUsername(),
                                                                         githubUrl.dockerFileLocation()));
         }
 
         // Compute project configuration
         ProjectConfigDto projectConfigDto = newDto(ProjectConfigDto.class).withSource(githubSourceStorageBuilder.build(githubUrl))
-                                                                          .withName(githubUrl.repository())
+                                                                          .withName(githubUrl.getRepository())
                                                                           .withType("blank")
-                                                                          .withPath("/".concat(githubUrl.repository()));
+                                                                          .withPath("/".concat(githubUrl.getRepository()));
 
         // apply merging operation from existing and computed settings
         return projectConfigDtoMerger.merge(factory, projectConfigDto);

@@ -32,7 +32,7 @@ public class GithubUrlTest {
      * Parser used to create the url.
      */
     @InjectMocks
-    private GithubUrlParser githubUrlParser;
+    private GithubURLParser githubUrlParser;
 
     /**
      * Instance of the url created
@@ -53,7 +53,7 @@ public class GithubUrlTest {
      */
     @Test
     public void checkDockerfileLocation() {
-        assertEquals(githubUrl.dockerFileLocation(), "https://raw.githubusercontent.com/eclipse/che/master/.codenvy.dockerfile");
+        assertEquals(githubUrl.dockerFileLocation(), "https://raw.githubusercontent.com/eclipse/che/master/.factory.dockerfile");
     }
 
     /**
@@ -61,7 +61,7 @@ public class GithubUrlTest {
      */
     @Test
     public void checkCodenvyFactoryJsonFileLocation() {
-        assertEquals(githubUrl.factoryJsonFileLocation(), "https://raw.githubusercontent.com/eclipse/che/master/.codenvy.json");
+        assertEquals(githubUrl.factoryJsonFileLocation(), "https://raw.githubusercontent.com/eclipse/che/master/.factory.json");
     }
 
     /**

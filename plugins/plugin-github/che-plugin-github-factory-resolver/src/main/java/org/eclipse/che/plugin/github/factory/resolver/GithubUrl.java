@@ -12,6 +12,8 @@ package org.eclipse.che.plugin.github.factory.resolver;
 
 import com.google.common.base.Strings;
 
+import java.util.StringJoiner;
+
 /**
  * Representation of a github URL, allowing to get details from it.
  * <p> like
@@ -43,9 +45,21 @@ public class GithubUrl {
     private String branch = DEFAULT_BRANCH_NAME;
 
     /**
-     * subfolder if any
+     * Subfolder if any
      */
     private String subfolder;
+
+
+    /**
+     * Dockerfile filename
+     */
+    private String dockerfileFilename;
+
+    /**
+     * Factory json filename
+     */
+    private String factoryFilename;
+
 
     /**
      * Creation of this instance is made by the parser so user may not need to create a new instance directly
@@ -59,11 +73,11 @@ public class GithubUrl {
      *
      * @return the username part
      */
-    public String username() {
+    public String getUsername() {
         return this.username;
     }
 
-    public GithubUrl username(String userName) {
+    public GithubUrl withUsername(String userName) {
         this.username = userName;
         return this;
     }
@@ -73,12 +87,40 @@ public class GithubUrl {
      *
      * @return the repository part
      */
-    public String repository() {
+    public String getRepository() {
         return this.repository;
     }
 
-    protected GithubUrl repository(String repository) {
+    protected GithubUrl withRepository(String repository) {
         this.repository = repository;
+        return this;
+    }
+
+    /**
+     * Gets dockerfile file name of this github url
+     *
+     * @return the dockerfile file name
+     */
+    public String getDockerfileFilename() {
+        return this.dockerfileFilename;
+    }
+
+    protected GithubUrl withDockerfileFilename(String dockerfileFilename) {
+        this.dockerfileFilename = dockerfileFilename;
+        return this;
+    }
+
+    /**
+     * Gets factory file name of this github url
+     *
+     * @return the factory file name
+     */
+    public String getFactoryFilename() {
+        return this.factoryFilename;
+    }
+
+    protected GithubUrl withFactoryFilename(String factoryFilename) {
+        this.factoryFilename = factoryFilename;
         return this;
     }
 
@@ -87,11 +129,11 @@ public class GithubUrl {
      *
      * @return the branch part
      */
-    public String branch() {
+    public String getBranch() {
         return this.branch;
     }
 
-    protected GithubUrl branch(String branch) {
+    protected GithubUrl withBranch(String branch) {
         if (!Strings.isNullOrEmpty(branch)) {
             this.branch = branch;
         }
@@ -103,7 +145,7 @@ public class GithubUrl {
      *
      * @return the subfolder part
      */
-    public String subfolder() {
+    public String getSubfolder() {
         return this.subfolder;
     }
 
@@ -114,7 +156,7 @@ public class GithubUrl {
      *         path inside the repository
      * @return current github instance
      */
-    protected GithubUrl subfolder(String subfolder) {
+    protected GithubUrl withSubfolder(String subfolder) {
         this.subfolder = subfolder;
         return this;
     }
@@ -125,7 +167,12 @@ public class GithubUrl {
      * @return location of dockerfile in a repository
      */
     protected String dockerFileLocation() {
-        return "https://raw.githubusercontent.com/" + this.username + "/" + this.repository + "/" + this.branch() + "/.codenvy.dockerfile";
+        return new StringJoiner("/").add("https://raw.githubusercontent.com")
+                                    .add(username)
+                                    .add(repository)
+                                    .add(branch)
+                                    .add(dockerfileFilename)
+                                    .toString();
     }
 
     /**
@@ -134,7 +181,12 @@ public class GithubUrl {
      * @return location of factory json file in a repository
      */
     protected String factoryJsonFileLocation() {
-        return "https://raw.githubusercontent.com/" + this.username + "/" + this.repository + "/" + this.branch() + "/.codenvy.json";
+        return new StringJoiner("/").add("https://raw.githubusercontent.com")
+                                    .add(username)
+                                    .add(repository)
+                                    .add(branch)
+                                    .add(factoryFilename)
+                                    .toString();
     }
 
     /**

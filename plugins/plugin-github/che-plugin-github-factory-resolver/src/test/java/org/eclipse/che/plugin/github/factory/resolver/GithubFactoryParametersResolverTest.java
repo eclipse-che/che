@@ -14,7 +14,6 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
-import org.eclipse.che.plugin.urlfactory.CreateFactoryParams;
 import org.eclipse.che.plugin.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.plugin.urlfactory.URLFactoryBuilder;
 import org.mockito.ArgumentCaptor;
@@ -32,6 +31,7 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver.URL_PARAMETER_NAME;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,7 +52,7 @@ public class GithubFactoryParametersResolverTest {
      * Parser which will allow to check validity of URLs and create objects.
      */
     @Spy
-    private GithubUrlParser githubUrlParser = new GithubUrlParser();
+    private GithubURLParser githubUrlParser = new GithubURLParser();
 
     /**
      * Converter allowing to convert github URL to other objects.
@@ -79,10 +79,10 @@ public class GithubFactoryParametersResolverTest {
     private ArgumentCaptor<ProjectConfigDto> projectConfigDtoArgumentCaptor;
 
     /**
-     * Capturing the parameter when calling {@link URLFactoryBuilder#createFactory(CreateFactoryParams)}
+     * Capturing the parameter when calling {@link URLFactoryBuilder#createFactory(String)}
      */
     @Captor
-    private ArgumentCaptor<CreateFactoryParams> createFactoryParamsArgumentCaptor;
+    private ArgumentCaptor<String> jsonFileLocationArgumentCaptor;
 
     /**
      * Instance of resolver that will be tested.
@@ -134,17 +134,17 @@ public class GithubFactoryParametersResolverTest {
         String githubUrl = "https://github.com/eclipse/che";
 
         FactoryDto computedFactory = newDto(FactoryDto.class).withV("4.0");
-        when(urlFactoryBuilder.createFactory(any(CreateFactoryParams.class))).thenReturn(computedFactory);
+        when(urlFactoryBuilder.createFactory(anyString())).thenReturn(computedFactory);
 
         githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 
         // check we called the builder with the following codenvy json file
-        verify(urlFactoryBuilder).createFactory(createFactoryParamsArgumentCaptor.capture());
-        assertEquals(createFactoryParamsArgumentCaptor.getValue().jsonFileLocation(), "https://raw.githubusercontent.com/eclipse/che/master/.codenvy.json");
+        verify(urlFactoryBuilder).createFactory(jsonFileLocationArgumentCaptor.capture());
+        assertEquals(jsonFileLocationArgumentCaptor.getValue(), "https://raw.githubusercontent.com/eclipse/che/master/.factory.json");
 
 
         // check we provide dockerfile and correct env
-        verify(urlFactoryBuilder).buildWorkspaceConfig(eq("che"), eq("eclipse"), eq("https://raw.githubusercontent.com/eclipse/che/master/.codenvy.dockerfile"));
+        verify(urlFactoryBuilder).buildWorkspaceConfig(eq("che"), eq("eclipse"), eq("https://raw.githubusercontent.com/eclipse/che/master/.factory.dockerfile"));
 
         // check project config built
         verify(projectConfigDtoMerger).merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
@@ -171,16 +171,16 @@ public class GithubFactoryParametersResolverTest {
         String githubBranch = "4.2.x";
 
         FactoryDto computedFactory = newDto(FactoryDto.class).withV("4.0");
-        when(urlFactoryBuilder.createFactory(any(CreateFactoryParams.class))).thenReturn(computedFactory);
+        when(urlFactoryBuilder.createFactory(anyString())).thenReturn(computedFactory);
 
         githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 
         // check we called the builder with the following codenvy json file
-        verify(urlFactoryBuilder).createFactory(createFactoryParamsArgumentCaptor.capture());
-        assertEquals(createFactoryParamsArgumentCaptor.getValue().jsonFileLocation(), "https://raw.githubusercontent.com/eclipse/che/4.2.x/.codenvy.json");
+        verify(urlFactoryBuilder).createFactory(jsonFileLocationArgumentCaptor.capture());
+        assertEquals(jsonFileLocationArgumentCaptor.getValue(), "https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.json");
 
         // check we provide dockerfile and correct env
-        verify(urlFactoryBuilder).buildWorkspaceConfig(eq("che"), eq("eclipse"), eq("https://raw.githubusercontent.com/eclipse/che/4.2.x/.codenvy.dockerfile"));
+        verify(urlFactoryBuilder).buildWorkspaceConfig(eq("che"), eq("eclipse"), eq("https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.dockerfile"));
 
         // check project config built
         verify(projectConfigDtoMerger).merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
@@ -208,16 +208,16 @@ public class GithubFactoryParametersResolverTest {
         String githubKeepdir = "dashboard";
 
         FactoryDto computedFactory = newDto(FactoryDto.class).withV("4.0");
-        when(urlFactoryBuilder.createFactory(any(CreateFactoryParams.class))).thenReturn(computedFactory);
+        when(urlFactoryBuilder.createFactory(anyString())).thenReturn(computedFactory);
 
         githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 
         // check we called the builder with the following codenvy json file
-        verify(urlFactoryBuilder).createFactory(createFactoryParamsArgumentCaptor.capture());
-        assertEquals(createFactoryParamsArgumentCaptor.getValue().jsonFileLocation(), "https://raw.githubusercontent.com/eclipse/che/4.2.x/.codenvy.json");
+        verify(urlFactoryBuilder).createFactory(jsonFileLocationArgumentCaptor.capture());
+        assertEquals(jsonFileLocationArgumentCaptor.getValue(), "https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.json");
 
         // check we provide dockerfile and correct env
-        verify(urlFactoryBuilder).buildWorkspaceConfig(eq("che"), eq("eclipse"), eq("https://raw.githubusercontent.com/eclipse/che/4.2.x/.codenvy.dockerfile"));
+        verify(urlFactoryBuilder).buildWorkspaceConfig(eq("che"), eq("eclipse"), eq("https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.dockerfile"));
 
         // check project config built
         verify(projectConfigDtoMerger).merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
