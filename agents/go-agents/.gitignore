@@ -1,2 +1,3 @@
 src/main/go/exec-agent/exec-agent
 src/main/go/exec-agent/logs
+src/main/go/terminal-agent/terminal-agent

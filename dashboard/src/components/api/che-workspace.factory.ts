@@ -322,7 +322,7 @@ export class CheWorkspace {
         'machines': {
           'dev-machine': {
             'attributes': {'memoryLimitBytes': ram},
-            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }
         }
       };
@@ -355,7 +355,7 @@ export class CheWorkspace {
         'name': 'ws-machine',
         'attributes': {'memoryLimitBytes': ram},
         'type': 'docker',
-        'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+        'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
       };
       defaultEnvironment.machines[devMachine.name] = devMachine;
     } else {

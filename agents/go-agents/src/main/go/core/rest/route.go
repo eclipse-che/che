@@ -73,7 +73,7 @@ func (r *Route) String() string {
 
 // WriteError writes error into response
 func WriteError(w http.ResponseWriter, err error) {
-	if apiErr, ok := err.(ApiError); ok {
+	if apiErr, ok := err.(APIError); ok {
 		http.Error(w, apiErr.Error(), apiErr.Code)
 	} else {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

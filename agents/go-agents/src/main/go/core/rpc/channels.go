@@ -45,6 +45,9 @@ var (
 
 	channels = channelsMap{items: make(map[string]Channel)}
 
+	// PingPeriod defines period of WS pings
+	PingPeriod = 60 * time.Second
+
 	// HTTPRoutes for this package that should be registered
 	HTTPRoutes = rest.RoutesGroup{
 		Name: "Channel Routes",
@@ -187,6 +190,8 @@ func registerChannel(w http.ResponseWriter, r *http.Request, _ rest.Params) erro
 
 	log.Printf("A new channel with id '%s' successfully opened", channel.ID)
 
+	// send ping messages
+	go setupWSPinging(conn)
 	go transferAsJSON(conn, channel.output)
 	go redirectEventsToOutput(channel)
 	go handleMessages(readMessages(conn), channel)
@@ -267,6 +272,18 @@ func transferAsJSON(conn *websocket.Conn, c chan interface{}) {
 		err := conn.WriteJSON(message)
 		if err != nil {
 			log.Printf("Couldn't write message to the channel. Message: %T, %v", message, message)
+		}
+	}
+}
+
+func setupWSPinging(conn *websocket.Conn) {
+	ticker := time.NewTicker(PingPeriod)
+	defer ticker.Stop()
+	// send ping messages by sheduler
+	for range ticker.C {
+		if err := conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+			log.Printf("Error occurs on sending ping message to websocket. %v", err)
+			return
 		}
 	}
 }

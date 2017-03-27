@@ -15,27 +15,33 @@ import (
 	"net/http"
 )
 
-type ApiError struct {
+// APIError represents http error
+type APIError struct {
 	error
 	Code int
 }
 
+// BadRequest represents http error with 400 code
 func BadRequest(err error) error {
-	return ApiError{err, http.StatusBadRequest}
+	return APIError{err, http.StatusBadRequest}
 }
 
+// NotFound represents http error with code 404
 func NotFound(err error) error {
-	return ApiError{err, http.StatusNotFound}
+	return APIError{err, http.StatusNotFound}
 }
 
+// Conflict represents http error with 409 code
 func Conflict(err error) error {
-	return ApiError{err, http.StatusConflict}
+	return APIError{err, http.StatusConflict}
 }
 
+// Forbidden represents http error with 403 code
 func Forbidden(err error) error {
-	return ApiError{err, http.StatusForbidden}
+	return APIError{err, http.StatusForbidden}
 }
 
+// Unauthorized represents http error with 401 code
 func Unauthorized(err error) error {
-	return ApiError{err, http.StatusUnauthorized}
+	return APIError{err, http.StatusUnauthorized}
 }

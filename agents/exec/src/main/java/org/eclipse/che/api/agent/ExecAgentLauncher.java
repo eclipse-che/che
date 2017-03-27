@@ -33,8 +33,8 @@ public class ExecAgentLauncher extends AbstractAgentLauncher {
     @Inject
     public ExecAgentLauncher(@Named("che.agent.dev.max_start_time_ms") long agentMaxStartTimeMs,
                              @Named("che.agent.dev.ping_delay_ms") long agentPingDelayMs,
-                             @Named("machine.terminal_agent.run_command") String runCommand) {
-        super(agentMaxStartTimeMs, agentPingDelayMs, new ProcessIsLaunchedChecker("che-websocket-terminal"));
+                             @Named("machine.exec_agent.run_command") String runCommand) {
+        super(agentMaxStartTimeMs, agentPingDelayMs, new ProcessIsLaunchedChecker("che-exec-agent"));
         this.runCommand = runCommand;
     }
 
@@ -52,6 +52,6 @@ public class ExecAgentLauncher extends AbstractAgentLauncher {
 
     @Override
     public String getAgentId() {
-        return "org.eclipse.che.terminal";
+        return "org.eclipse.che.exec";
     }
 }

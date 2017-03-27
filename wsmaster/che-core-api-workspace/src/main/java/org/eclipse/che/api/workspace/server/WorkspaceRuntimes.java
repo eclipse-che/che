@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -424,7 +425,7 @@ public class WorkspaceRuntimes {
         // which means that original values won't affect the values in used further in this class
         MachineConfigImpl machineConfigCopy = new MachineConfigImpl(machineConfig);
 
-        List<String> agents = Collections.singletonList("org.eclipse.che.terminal");
+        List<String> agents = Arrays.asList("org.eclipse.che.exec", "org.eclipse.che.terminal");
 
         Instance instance = envEngine.startMachine(workspaceId, machineConfigCopy, agents);
         launchAgents(instance, agents);
