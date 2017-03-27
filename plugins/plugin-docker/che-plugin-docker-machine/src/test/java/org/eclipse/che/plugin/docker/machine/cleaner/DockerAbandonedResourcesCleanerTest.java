@@ -28,8 +28,6 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,7 +61,6 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(MockitoTestNGListener.class)
 public class DockerAbandonedResourcesCleanerTest {
-    private static final String CHE_SERVER_CONTAINER_ID = "serverid-cheId";
 
     private static final String machineId1   = "machineid1";
     private static final String workspaceId1 = "workspaceid1";
@@ -90,7 +87,6 @@ public class DockerAbandonedResourcesCleanerTest {
     private static final String abandonedNetworkName  = "workspace1234567890abcdef_1234567890abcdef";
     private static final String usedNetworkName       = "workspace0987654321zyxwvu_0987654321zyxwvu";
     private static final String additionalNetworkName = "CheAdditionalNetwork";
-    private static final Logger LOG = LoggerFactory.getLogger(DockerAbandonedResourcesCleanerTest.class);
 
     @Mock
     private CheEnvironmentEngine         environmentEngine;

@@ -18,16 +18,11 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.ITestResult;
 import org.testng.TestListenerAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import static java.lang.System.getenv;
 import java.util.Optional;
 
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
 import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertFalse;
-import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * Test for {@link DockerContainerNameGenerator}
@@ -40,28 +35,22 @@ public class DockerContainerNameGeneratorTest extends TestListenerAdapter {
     private static final String MACHINE_NAME = "ws-machine";
     private static final String MACHINE_ID   = "machineic131ppamujngv6y";
     private static final String USER_NAME    = "some-user";
-    private static final String CHE_SERVER_CONTAINER_ID = "serverid-cheId";
-    
-    private static final Logger LOG = LoggerFactory.getLogger(DockerContainerNameGeneratorTest.class);
+    private static final String CHE_SERVER_CONTAINER_ID = "serverid-cheid";
     
     @InjectMocks
     private DockerContainerNameGenerator nameGenerator;
 
     @Test
     public void containerNameShouldBeGenerated() {
-        
         String expectedResult = "workspacebbbx2ree3iykn8gc_machineic131ppamujngv6y_"+CHE_SERVER_CONTAINER_ID+"_some-user_ws-machine";
         String actualResult = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID,CHE_SERVER_CONTAINER_ID, USER_NAME, MACHINE_NAME);
-        //assertEquals(expectedResult, actualResult);
+        assertEquals(expectedResult, actualResult);
     }
 
     @Test
     public void machineNameShouldBeReturnedByGeneratedContainerName() {
         String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID,CHE_SERVER_CONTAINER_ID, USER_NAME, MACHINE_NAME);
-        //assertFalse("generatedName: "+generatedName,true);
         Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(generatedName);
-        LOG.info("generatedName: "+generatedName);
-        LOG.info("containerNameInfoParser: "+containerNameInfoParser.get().toString());
         assertEquals(containerNameInfoParser.get().getMachineId(), MACHINE_ID);
         assertEquals(containerNameInfoParser.get().getWorkspaceId(), WORKSPACE_ID);
     }
