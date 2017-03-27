@@ -322,8 +322,11 @@ public class OrionTextViewOverlay extends JavaScriptObject {
     }-*/;
 
     public final native <T extends OrionEventOverlay> void removeEventListener(String eventType, EventHandler<T> handler,
+
                                                                                boolean useCapture) /*-{
-        this.removeEventListener(eventType, $wnd.che_handels[handler], useCapture)
+        if ($wnd.che_handels) {
+            this.removeEventListener(eventType, $wnd.che_handels[handler], useCapture);
+        }
     }-*/;
 
     /**
