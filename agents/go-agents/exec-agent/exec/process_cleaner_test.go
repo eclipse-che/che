@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/src/main/go/exec-agent/exec"
+	"github.com/eclipse/che/agents/go-agents/exec-agent/exec"
 )
 
 func TestCleanWithZeroThreshold(t *testing.T) {

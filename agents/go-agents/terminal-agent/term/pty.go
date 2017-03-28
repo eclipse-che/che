@@ -24,7 +24,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/eclipse/che-lib/pty"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/activity"
+	"github.com/eclipse/che/agents/go-agents/core/activity"
 )
 
 type wsPty struct {

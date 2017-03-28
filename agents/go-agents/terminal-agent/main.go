@@ -28,10 +28,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/activity"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/auth"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/rest"
-	"github.com/eclipse/che/agents/go-agents/src/main/go/terminal-agent/term"
+	"github.com/eclipse/che/agents/go-agents/core/activity"
+	"github.com/eclipse/che/agents/go-agents/core/auth"
+	"github.com/eclipse/che/agents/go-agents/core/rest"
+	"github.com/eclipse/che/agents/go-agents/terminal-agent/term"
 )
 
 var (

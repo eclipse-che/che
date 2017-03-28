@@ -28,9 +28,9 @@
                 <configuration>
                     <excludes>
                         <exclude>/docs/**</exclude>
-                        <exclude>src/main/go/terminal-agent/term/server.go</exclude>
-                        <exclude>src/main/go/vendor/**</exclude>
-                        <exclude>src/main/go/Godeps/**</exclude>
+                        <exclude>terminal-agent/term/server.go</exclude>
+                        <exclude>vendor/**</exclude>
+                        <exclude>Godeps/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -49,10 +49,14 @@
                                 <!--To not use godep tool vendored dependencies are copied into correct place of GOPATH
                                 by maven-->
                                 <copy todir="${project.build.directory}/go-workspace/src">
-                                    <fileset dir="src/main/go/vendor/" includes="**/*" />
+                                    <fileset dir="vendor/" includes="**/*" />
                                 </copy>
-                                <copy todir="${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents/src/main/go">
-                                    <fileset dir="src/main/go/" excludes="vendor/" includes="**/*.*go" />
+                                <copy todir="${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents">
+                                    <fileset dir="${project.basedir}/">
+                                        <exclude name="vendor/"/>
+                                        <exclude name="target/"/>
+                                        <include name="**/*.*go"/>
+                                    </fileset>
                                 </copy>
                             </target>
                         </configuration>
@@ -71,7 +75,7 @@
                         </goals>
                         <configuration>
                             <executable>go</executable>
-                            <workingDirectory>${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents/src/main/go</workingDirectory>
+                            <workingDirectory>${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents</workingDirectory>
                             <arguments>
                                 <argument>build</argument>
                                 <argument>-a</argument>
@@ -107,7 +111,7 @@
                                 </goals>
                                 <configuration>
                                     <target unless="skipTests">
-                                        <exec dir="${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents/src/main/go" executable="go" failonerror="true">
+                                        <exec dir="${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents" executable="go" failonerror="true">
                                             <env key="GOPATH" value="${project.build.directory}/go-workspace" />
                                             <arg value="test" />
                                             <arg value="-v" />
