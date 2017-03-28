@@ -22,6 +22,7 @@ import java.util.Set;
  * Also macro can be registered in 'runtime' with {@link MacroRegistry#register(Set)}.
  *
  * @author Artem Zatsarynnyi
+ * @see BaseMacro
  * @see MacroProcessor#expandMacros(String)
  * @see MacroRegistry
  */

@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
@@ -29,30 +26,19 @@ import java.util.Collection;
  */
 public class ProcessTreeNode {
 
-    /** The set of nodes. */
-    public enum ProcessNodeType {
-        ROOT_NODE,
-        MACHINE_NODE,
-        COMMAND_NODE,
-        TERMINAL_NODE
-    }
-
     public final static String ROOT = "root";
-
-    private final ProcessNodeType                  type;
-    private final String                           id;
-    private final String                           displayName;
-    private final ProcessTreeNode                  parent;
-    private final Object                           data;
-    private final SVGResource                      icon;
-    private final Collection<ProcessTreeNode>      children;
-    private       TreeNodeElement<ProcessTreeNode> treeNodeElement;
-
-    private boolean                                hasUnreadContent;
-    private boolean                                hasTerminalAgent;
-    private boolean                                hasSSHAgent;
-
-    private boolean                                running;
+    private final ProcessNodeType type;
+    private final String id;
+    private final String displayName;
+    private final Object data;
+    private final SVGResource icon;
+    private final Collection<ProcessTreeNode> children;
+    private ProcessTreeNode parent;
+    private TreeNodeElement<ProcessTreeNode> treeNodeElement;
+    private boolean hasUnreadContent;
+    private boolean hasTerminalAgent;
+    private boolean hasSSHAgent;
+    private boolean running;
 
     public ProcessTreeNode(ProcessNodeType type,
                            ProcessTreeNode parent,
@@ -68,7 +54,7 @@ public class ProcessTreeNode {
         switch (type) {
             case MACHINE_NODE:
                 if (data instanceof MachineEntity) {
-                    MachineEntity machine = (MachineEntity)data;
+                    MachineEntity machine = (MachineEntity) data;
                     id = machine.getId();
                     displayName = machine.getDisplayName();
                 } else {
@@ -78,11 +64,11 @@ public class ProcessTreeNode {
                 break;
             case COMMAND_NODE:
                 id = data + UUID.uuid();
-                displayName = (String)data;
+                displayName = (String) data;
                 break;
             case TERMINAL_NODE:
                 id = data + UUID.uuid();
-                displayName = (String)data;
+                displayName = (String) data;
                 break;
             default:
                 id = ROOT;
@@ -108,6 +94,10 @@ public class ProcessTreeNode {
     @NotNull
     public ProcessTreeNode getParent() {
         return parent;
+    }
+
+    public void setParent(ProcessTreeNode parent) {
+        this.parent = parent;
     }
 
     @NotNull
@@ -171,7 +161,7 @@ public class ProcessTreeNode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ProcessTreeNode that = (ProcessTreeNode)o;
+        ProcessTreeNode that = (ProcessTreeNode) o;
 
         return id.equals(that.id);
     }
@@ -179,6 +169,16 @@ public class ProcessTreeNode {
     @Override
     public int hashCode() {
         return id.hashCode();
+    }
+
+    /**
+     * The set of nodes.
+     */
+    public enum ProcessNodeType {
+        ROOT_NODE,
+        MACHINE_NODE,
+        COMMAND_NODE,
+        TERMINAL_NODE
     }
 
 }

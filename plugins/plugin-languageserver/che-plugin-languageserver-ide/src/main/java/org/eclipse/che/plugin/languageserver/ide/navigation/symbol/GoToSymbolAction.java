@@ -10,11 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.symbol;
 
-import io.typefox.lsapi.ServerCapabilities;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import io.typefox.lsapi.ServerCapabilities;
 import org.eclipse.che.api.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.SymbolInformationDTO;
@@ -36,10 +34,10 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.filters.FuzzyMatches;
+import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
-import org.eclipse.che.plugin.languageserver.ide.filters.FuzzyMatches;
-import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
@@ -68,7 +66,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
     private final EditorAgent                editorAgent;
     private final DtoFactory                 dtoFactory;
     private final NotificationManager        notificationManager;
-    private final FuzzyMatches               fuzzyMatches;
+    private final FuzzyMatches fuzzyMatches;
     private final SymbolKindHelper           symbolKindHelper;
     private       QuickOpenPresenter         presenter;
     private       List<SymbolInformationDTO> cachedItems;

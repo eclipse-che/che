@@ -14,7 +14,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.SymbolInformationDTO;
@@ -31,9 +30,9 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.filters.FuzzyMatches;
+import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
-import org.eclipse.che.plugin.languageserver.ide.filters.FuzzyMatches;
-import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.SymbolKindHelper;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
@@ -64,7 +63,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
     private final DtoFactory             dtoFactory;
     private final EditorAgent            editorAgent;
     private final SymbolKindHelper       symbolKindHelper;
-    private final FuzzyMatches           fuzzyMatches;
+    private final FuzzyMatches fuzzyMatches;
     private final ThrottledDelayer<List<SymbolEntry>> delayer;
 
     @Inject

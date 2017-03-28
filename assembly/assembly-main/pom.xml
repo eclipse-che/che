@@ -39,15 +39,15 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>go-agents</artifactId>
+            <artifactId>exec-agent</artifactId>
             <type>tar.gz</type>
             <classifier>linux_amd64</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>go-agents</artifactId>
+            <artifactId>terminal-agent</artifactId>
             <type>tar.gz</type>
-            <classifier>linux_arm7</classifier>
+            <classifier>linux_amd64</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

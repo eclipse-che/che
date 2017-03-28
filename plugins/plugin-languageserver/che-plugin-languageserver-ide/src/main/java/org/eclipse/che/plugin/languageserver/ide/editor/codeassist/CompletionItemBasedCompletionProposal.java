@@ -10,15 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
-import io.typefox.lsapi.ServerCapabilities;
-
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
-
+import io.typefox.lsapi.ServerCapabilities;
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
@@ -32,8 +30,8 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.icon.Icon;
+import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
-import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 
 import java.util.List;

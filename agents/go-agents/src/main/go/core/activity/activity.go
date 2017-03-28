@@ -14,7 +14,6 @@ package activity
 import (
 	"log"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -24,46 +23,59 @@ const threshold int64 = 60
 var (
 	// ActivityTrackingEnabled defines whether activity tracking should be used
 	ActivityTrackingEnabled = false
-	// Tracker provides activity notification API
-	Tracker     = &WorkspaceActivityTracker{}
-	workspaceID = os.Getenv("CHE_WORKSPACE_ID")
-	// APIEndpoint points to url of workspace master server
-	APIEndpoint string
+	// Tracker provides workspace activity notification client
+	Tracker WorkspaceActivityTracker = &NoOpActivityTracker{}
 )
 
 // WorkspaceActivityTracker provides workspace activity notification API
-type WorkspaceActivityTracker struct {
+type WorkspaceActivityTracker interface {
+	Notify()
+	StartTracking()
+}
+
+// Default impl of WorkspaceActivityTracker
+type tracker struct {
+	WorkspaceActivityTracker
+
 	active         bool
 	lastUpdateTime int64
+	activityAPI    string
+}
+
+// NewTracker creates default implementation of activity tracker
+func NewTracker(wsID string, apiEndpoint string) WorkspaceActivityTracker {
+	return &tracker{
+		activityAPI: apiEndpoint + "/activity/" + wsID,
+	}
 }
 
 // Notify ensures that workspace master knows about recent activity of a workspace
-func (wa *WorkspaceActivityTracker) Notify() {
+func (tr *tracker) Notify() {
 	t := time.Now().Unix()
-	if t < (wa.lastUpdateTime + threshold) {
-		wa.active = true
+	if t < (tr.lastUpdateTime + threshold) {
+		tr.active = true
 	} else {
-		go makeActivityRequest()
-		wa.lastUpdateTime = t
+		go tr.makeActivityRequest()
+		tr.lastUpdateTime = t
 	}
 }
 
 // StartTracking runs scheduler that continiously notifies workspace master
 // if workspace activity was submitted with function Notify.
 // Since it is synchronious function it should be started at separate thread.
-func (wa *WorkspaceActivityTracker) StartTracking() {
+func (tr *tracker) StartTracking() {
 	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
 	for range ticker.C {
-		if wa.active {
-			go makeActivityRequest()
-			wa.active = false
+		if tr.active {
+			go tr.makeActivityRequest()
+			tr.active = false
 		}
 	}
 }
 
-func makeActivityRequest() {
-	req, err := http.NewRequest(http.MethodPut, APIEndpoint+"/activity/"+workspaceID, nil)
+func (tr *tracker) makeActivityRequest() {
+	req, err := http.NewRequest(http.MethodPut, tr.activityAPI, nil)
 	if err != nil {
 		panic(err)
 	}

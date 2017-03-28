@@ -266,6 +266,7 @@ init() {
   sed -i "/che.workspace.agent.dev=/c\che.workspace.agent.dev=${CHE_DATA_HOST}/lib/ws-agent.tar.gz" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.workspace.terminal_linux_amd64=/c\che.workspace.terminal_linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/terminal" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.workspace.terminal_linux_arm7=/c\che.workspace.terminal_linux_arm7=${CHE_DATA_HOST}/lib/linux_arm7/terminal" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.workspace.exec_linux_amd64=/c\che.workspace.exec_linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/exec" $CHE_LOCAL_CONF_DIR/che.properties
 
   # CHE_DOCKER_IP_EXTERNAL must be set if you are in a VM.
   HOSTNAME=${CHE_DOCKER_IP_EXTERNAL:-$(get_docker_external_hostname)}

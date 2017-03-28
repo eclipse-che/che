@@ -14,6 +14,7 @@ package process_test
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"testing"
@@ -26,7 +27,7 @@ var alphabet = []byte("abcdefgh123456789")
 
 func TestFileLoggerCreatesFileWhenFileDoesNotExist(t *testing.T) {
 	filename := os.TempDir() + string(os.PathSeparator) + randomName(10)
-	defer os.Remove(filename)
+	defer removeFile(filename)
 
 	if _, err := os.Stat(filename); err == nil {
 		t.Fatalf("File '%s' already exists", filename)
@@ -43,7 +44,7 @@ func TestFileLoggerCreatesFileWhenFileDoesNotExist(t *testing.T) {
 
 func TestFileLoggerTruncatesFileIfFileExistsOnCreate(t *testing.T) {
 	filename := os.TempDir() + string(os.PathSeparator) + randomName(10)
-	defer os.Remove(filename)
+	defer removeFile(filename)
 
 	if _, err := os.Create(filename); err != nil {
 		t.Fatal(err)
@@ -67,7 +68,7 @@ func TestFileLoggerTruncatesFileIfFileExistsOnCreate(t *testing.T) {
 
 func TestLogsAreFlushedOnClose(t *testing.T) {
 	filename := os.TempDir() + string(os.PathSeparator) + randomName(10)
-	defer os.Remove(filename)
+	defer removeFile(filename)
 
 	fl, err := process.NewLogger(filename)
 	if err != nil {
@@ -119,4 +120,10 @@ func randomName(length int) string {
 		bytes[i] = alphabet[rand.Intn(len(alphabet))]
 	}
 	return string(bytes)
+}
+
+func removeFile(path string) {
+	if err := os.Remove(path); err != nil {
+		log.Printf("Can't remove file %s. Error: %s", path, err)
+	}
 }

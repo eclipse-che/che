@@ -76,7 +76,7 @@ public class DocumentStorageImpl implements DocumentStorage {
             @Override
             public void apply(Void arg) throws OperationException {
                 Log.debug(DocumentStorageImpl.class, "Document saved (" + file.getLocation() + ").");
-                DocumentStorageImpl.this.eventBus.fireEvent(FileEvent.createSaveFileEvent(file));
+                DocumentStorageImpl.this.eventBus.fireEvent(FileEvent.createFileSavedEvent(file));
                 try {
                     callback.onSuccess(editorInput);
                 } catch (final Exception e) {

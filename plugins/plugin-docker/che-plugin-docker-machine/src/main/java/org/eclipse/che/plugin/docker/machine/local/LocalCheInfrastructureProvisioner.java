@@ -24,6 +24,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.inject.CheBootstrap;
 import org.eclipse.che.plugin.docker.machine.ext.provider.DockerExtConfBindingProvider;
+import org.eclipse.che.plugin.docker.machine.ext.provider.ExecAgentVolumeProvider;
 import org.eclipse.che.plugin.docker.machine.ext.provider.TerminalVolumeProvider;
 import org.eclipse.che.plugin.docker.machine.ext.provider.WsAgentVolumeProvider;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
@@ -50,6 +51,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
     private final WsAgentVolumeProvider        wsAgentVolumeProvider;
     private final DockerExtConfBindingProvider dockerExtConfBindingProvider;
     private final TerminalVolumeProvider       terminalVolumeProvider;
+    private final ExecAgentVolumeProvider      execVolumeProvider;
     private final String                       projectsVolumeOptions;
 
     @Inject
@@ -60,7 +62,8 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
                                              @Nullable @Named("che.docker.volumes_projects_options") String projectsVolumeOptions,
                                              WsAgentVolumeProvider wsAgentVolumeProvider,
                                              DockerExtConfBindingProvider dockerExtConfBindingProvider,
-                                             TerminalVolumeProvider terminalVolumeProvider) {
+                                             TerminalVolumeProvider terminalVolumeProvider,
+                                             ExecAgentVolumeProvider execAgentVolumeProvider) {
         super(agentConfigApplier);
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.pathEscaper = pathEscaper;
@@ -68,6 +71,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         this.wsAgentVolumeProvider = wsAgentVolumeProvider;
         this.dockerExtConfBindingProvider = dockerExtConfBindingProvider;
         this.terminalVolumeProvider = terminalVolumeProvider;
+        this.execVolumeProvider = execAgentVolumeProvider;
         if (!Strings.isNullOrEmpty(projectsVolumeOptions)) {
             this.projectsVolumeOptions = ":" + projectsVolumeOptions;
         } else {
@@ -88,6 +92,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         for (CheServiceImpl machine : internalEnv.getServices().values()) {
             ArrayList<String> volumes = new ArrayList<>(machine.getVolumes());
             volumes.add(terminalVolumeProvider.get());
+            volumes.add(execVolumeProvider.get());
             machine.setVolumes(volumes);
         }
 
@@ -122,7 +127,9 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
     @Override
     public void provision(ExtendedMachineImpl machineConfig, CheServiceImpl internalMachine)
             throws EnvironmentException {
-        internalMachine.getVolumes().add(terminalVolumeProvider.get());
+        List<String> volumes = internalMachine.getVolumes();
+        volumes.add(terminalVolumeProvider.get());
+        volumes.add(execVolumeProvider.get());
 
         super.provision(machineConfig, internalMachine);
     }

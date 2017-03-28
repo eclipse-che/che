@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.java.client.action;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -23,6 +24,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Folder;
@@ -61,10 +63,11 @@ public class NewPackageAction extends AbstractNewResourceAction {
                             CoreLocalizationConstant coreLocalizationConstant,
                             EventBus eventBus,
                             AppContext appContext,
-                            NotificationManager notificationManager) {
+                            NotificationManager notificationManager,
+                            Provider<EditorAgent> editorAgentProvider) {
         super(localizationConstant.actionNewPackageTitle(),
               localizationConstant.actionNewPackageDescription(),
-              javaResources.packageItem(), dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager);
+              javaResources.packageItem(), dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager, editorAgentProvider);
     }
 
     @Override

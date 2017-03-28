@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -53,7 +54,7 @@ import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFac
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
-import org.eclipse.che.ide.extension.machine.client.processes.ProcessFinishedEvent;
+import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
 import org.junit.Before;
@@ -203,7 +204,7 @@ public class ProcessesPanelPresenterTest {
 
         MachineStateEvent machineStateEvent = mock(MachineStateEvent.class);
         when(machineStateEvent.getMachine()).thenReturn(machine);
-        verify(eventBus, times(8)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
+        verify(eventBus, times(9)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
         MachineStateEvent.Handler machineStateHandler = machineStateHandlerCaptor.getAllValues().get(0);
         machineStateHandler.onMachineCreating(machineStateEvent);
 
@@ -468,7 +469,7 @@ public class ProcessesPanelPresenterTest {
         when(outputConsole.isFinished()).thenReturn(true);
         presenter.consoles.put(PROCESS_ID, outputConsole);
 
-        presenter.onProcessFinished(new ProcessFinishedEvent(PID));
+        presenter.onProcessFinished(new ProcessFinishedEvent(PID, mock(Machine.class)));
 
         verify(view).setStopButtonVisibility(PROCESS_ID, false);
     }

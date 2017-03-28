@@ -11,12 +11,14 @@
 package org.eclipse.che.plugin.python.ide.action;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
 import org.eclipse.che.plugin.python.ide.PythonLocalizationConstant;
@@ -39,10 +41,11 @@ public class CreatePythonFileAction extends AbstractNewResourceAction {
                                   CoreLocalizationConstant coreLocalizationConstant,
                                   EventBus eventBus,
                                   AppContext appContext,
-                                  NotificationManager notificationManager) {
+                                  NotificationManager notificationManager,
+                                  Provider<EditorAgent> editorAgentProvider) {
         super(localizationConstant.createPythonFileActionTitle(),
               localizationConstant.createPythonFileActionDescription(),
-              pythonResources.pythonFile(), dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager);
+              pythonResources.pythonFile(), dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager, editorAgentProvider);
     }
 
     @Override

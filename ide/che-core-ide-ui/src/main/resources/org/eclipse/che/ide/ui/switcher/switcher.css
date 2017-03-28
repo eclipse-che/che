@@ -8,6 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
+@eval primaryButtonBackground org.eclipse.che.ide.api.theme.Style.theme.getPrimaryButtonBackground();
+@eval buttonBackground org.eclipse.che.ide.api.theme.Style.theme.getButtonBackground();
+@eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
+@eval outputBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.outputBackgroundColor();
+
 .onoffswitch {
     position: relative;
     width: 50px;
@@ -24,17 +29,15 @@
     display: block;
     overflow: hidden;
     cursor: pointer;
-    border: 2px solid #5E5E5E;
-    border-radius: 13px;
+    width: 55px;
+    height: 18px;
+    background-color: outputBackgroundColor;
 }
 
 .onoffswitchInner {
     width: 200%;
     margin-left: -100%;
-    -moz-transition: margin 0.3s ease-in 0s;
-    -webkit-transition: margin 0.3s ease-in 0s;
-    -o-transition: margin 0.3s ease-in 0s;
-    transition: margin 0.3s ease-in 0s;
+    transition: margin 0.2s ease-in;
 }
 
 .onoffswitchInner:before, .onoffswitchInner:after {
@@ -53,34 +56,27 @@
 }
 
 .onoffswitchInner:before {
-    content: "ON";
+    content: "YES";
     padding-left: 5px;
-    background-color: #3E6CA5;
-    color: #FFFFFF;
+    color: primaryButtonBackground;
 }
 
 .onoffswitchInner:after {
-    content: "OFF";
-    padding-right: 3px;
-    background-color: #EEEEEE;
+    content: "NO";
+    padding-right: 8px;
     color: #999999;
     text-align: right;
 }
 
 .onoffswitchSwitch {
     width: 21px;
+    height: 12px;
     margin: -0.5px;
-    background: #DDDDDD;
-    border: 2px solid #5E5E5E;
-    border-radius: 13px;
+    background: buttonBackground;
     position: absolute;
-    top: 0;
-    bottom: 0;
+    top: 3px;
     right: 26px;
-    -moz-transition: all 0.3s ease-in 0s;
-    -webkit-transition: all 0.3s ease-in 0s;
-    -o-transition: all 0.3s ease-in 0s;
-    transition: all 0.3s ease-in 0s;
+    transition: all 0.2s ease-in;
 }
 
 .onoffswitchCheckbox:checked + .onoffswitchLabel .onoffswitchInner {
@@ -89,4 +85,5 @@
 
 .onoffswitchCheckbox:checked + .onoffswitchLabel .onoffswitchSwitch {
     right: 0px;
+    background: primaryButtonBackground;
 }

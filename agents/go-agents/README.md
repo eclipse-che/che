@@ -40,6 +40,12 @@ cd $GOPATH/src/github.com/eclipse/che/agents/go-agents/src/main/go && go build .
 cd $GOPATH/src/github.com/eclipse/che/agents/go-agents/src/main/go/exec-agent && go build
 ```
 
+#### Building terminal agent executable
+
+```bash
+cd $GOPATH/src/github.com/eclipse/che/agents/go-agents/src/main/go/terminal-agent && go build
+```
+
 ##### Running linked project tests
 
 ```bash
