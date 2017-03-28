@@ -10,50 +10,28 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.github.factory.resolver;
 
-import org.eclipse.che.plugin.urlfactory.URLParser;
-
-import javax.validation.constraints.NotNull;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
- * Parser of String Github URLs and provide {@link GithubUrl} objects.
+ * Interface for Gitlab repository URL parsers.
  *
- * @author Florent Benoit
+ * @author Max Shaposhnik
  */
-public class GithubURLParser implements URLParser<GithubUrl> {
+public interface GithubURLParser {
 
     /**
-     * Regexp to find repository details (repository name, project name and branch and subfolder)
-     * Examples of valid URLs are in the test class.
+     * Check if the URL is a valid Github url for the given provider.
+     *
+     * @param url
+     *         a not null string representation of URL
+     * @return {@code true} if the URL is a valid url for the given provider.
      */
-    protected static final Pattern
-            GITHUB_PATTERN = Pattern.compile(
-            "^(?:http)(?:s)?(?:\\:\\/\\/)github.com/(?<repoUser>[^/]++)/(?<repoName>[^/]++)(?:/tree/(?<branchName>[^/]++)(?:/(?<subFolder>.*))?)?$");
+    boolean isValid(String url);
 
-
-
-    @Override
-    public boolean isValid(@NotNull String url) {
-        return GITHUB_PATTERN.matcher(url).matches();
-    }
-
-
-    @Override
-    public GithubUrl parse(String url) {
-        // Apply github url to the regexp
-        Matcher matcher = GITHUB_PATTERN.matcher(url);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException(String.format(
-                    "The given github url %s is not a valid URL github url. It should start with https://github.com/<user>/<repo>",
-                    url));
-        }
-
-        return new GithubUrl().withUsername(matcher.group("repoUser"))
-                              .withRepository(matcher.group("repoName"))
-                              .withBranch(matcher.group("branchName"))
-                              .withSubfolder(matcher.group("subFolder"))
-                              .withDockerfileFilename(".factory.dockerfile")
-                              .withFactoryFilename(".factory.json");
-    }
+    /**
+     * Provides a parsed URL object of the given provider type.
+     *
+     * @param url
+     *         URL to transform into a managed object
+     * @return managed url object
+     */
+    GithubUrl parse(String url);
 }

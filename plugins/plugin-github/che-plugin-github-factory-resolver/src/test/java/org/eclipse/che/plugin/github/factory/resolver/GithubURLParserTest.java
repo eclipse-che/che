@@ -31,7 +31,7 @@ public class GithubURLParserTest {
      * Instance of component that will be tested.
      */
     @InjectMocks
-    private GithubURLParser githubUrlParser;
+    private GithubURLParserImpl githubUrlParser;
 
     /**
      * Check invalid url (not a github one)

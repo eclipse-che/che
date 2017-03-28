@@ -19,7 +19,7 @@ import javax.inject.Inject;
  *
  * @author Max Shaposhnik
  */
-public class LegacyGithubURLParser extends GithubURLParser {
+public class LegacyGithubURLParser extends GithubURLParserImpl {
 
     private URLChecker urlChecker;
 
