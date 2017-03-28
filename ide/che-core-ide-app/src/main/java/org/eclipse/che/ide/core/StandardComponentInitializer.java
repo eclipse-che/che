@@ -48,6 +48,7 @@ import org.eclipse.che.ide.actions.SignatureHelpAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;
+import org.eclipse.che.ide.actions.WordWrapAction;
 import org.eclipse.che.ide.actions.common.MaximizePartAction;
 import org.eclipse.che.ide.actions.common.MinimizePartAction;
 import org.eclipse.che.ide.actions.common.RestorePartAction;
@@ -371,6 +372,9 @@ public class StandardComponentInitializer {
     private ShowCommandsPaletteAction showCommandsPaletteAction;
 
     @Inject
+    private WordWrapAction wordWrapAction;
+
+    @Inject
     private PerspectiveManager perspectiveManager;
 
     @Inject
@@ -578,6 +582,9 @@ public class StandardComponentInitializer {
         actionManager.registerAction("redo", redoAction);
         editGroup.add(redoAction);
 
+        actionManager.registerAction("wordWrap", wordWrapAction);
+        editGroup.add(wordWrapAction);
+
         actionManager.registerAction(CUT, cutResourceAction);
         editGroup.add(cutResourceAction);
 
@@ -741,6 +748,7 @@ public class StandardComponentInitializer {
         editorContextMenuGroup.add(redoAction);
         editorContextMenuGroup.addSeparator();
         editorContextMenuGroup.add(formatterAction);
+        editorContextMenuGroup.add(wordWrapAction);
 
         editorContextMenuGroup.addSeparator();
         editorContextMenuGroup.add(fullTextSearchAction);
