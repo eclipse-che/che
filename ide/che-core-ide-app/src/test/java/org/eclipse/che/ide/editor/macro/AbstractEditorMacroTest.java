@@ -30,11 +30,12 @@ import static org.mockito.Mockito.when;
  */
 public abstract class AbstractEditorMacroTest {
 
-    public static final String FILE_NAME     = "name";
-    public static final String FILE_PATH     = "/project/name";
-    public static final String PROJECTS_ROOT = "/projects";
-    public static final String PROJECT_NAME  = "project-name";
-    public static final String PROJECT_TYPE  = "type";
+    public static final String FILE_NAME             = "name.ext";
+    public static final String FILE_NAME_WITHOUT_EXT = "name";
+    public static final String FILE_PATH             = "/project/name.ext";
+    public static final String PROJECTS_ROOT         = "/projects";
+    public static final String PROJECT_NAME          = "project-name";
+    public static final String PROJECT_TYPE          = "type";
 
     @Mock
     protected EditorAgent editorAgent;
@@ -67,6 +68,7 @@ public abstract class AbstractEditorMacroTest {
         when(activeEditor.getEditorInput()).thenReturn(activeEditorInput);
         when(activeEditorInput.getFile()).thenReturn(activeFile);
         when(activeFile.getName()).thenReturn(FILE_NAME);
+        when(activeFile.getNameWithoutExtension()).thenReturn(FILE_NAME_WITHOUT_EXT);
         when(activeFile.getLocation()).thenReturn(Path.valueOf(FILE_PATH));
         when(appContext.getProjectsRoot()).thenReturn(Path.valueOf(PROJECTS_ROOT));
         when(activeFile.getRelatedProject()).thenReturn(Optional.of(project));
