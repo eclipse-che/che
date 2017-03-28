@@ -26,7 +26,7 @@ exports.listStacksTheeEntries = function () {
                 'machines': {
                   'dev-machine': {
                     'servers': {},
-                    'agents': ['org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'],
+                    'agents': ['org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'],
                     'attributes': {'memoryLimitBytes': '2147483648'}
                   }
                 }, 'recipe': {'location': 'codenvy/node', 'type': 'dockerimage'}

@@ -12,6 +12,7 @@
 package exec_test
 
 import (
+	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -143,10 +144,10 @@ func TestRestoreSubscriberForDeadProcess(t *testing.T) {
 		done <- true
 	}()
 
-	exec.RestoreSubscriber(p.Pid, exec.Subscriber{
-		"test",
-		exec.DefaultMask,
-		channel,
+	_ = exec.RestoreSubscriber(p.Pid, exec.Subscriber{
+		ID:      "test",
+		Mask:    exec.DefaultMask,
+		Channel: channel,
 	}, beforeStart)
 
 	<-done
@@ -201,7 +202,7 @@ func TestReadProcessLogs(t *testing.T) {
 	}
 }
 
-func startAndWaitTestProcess(cmd string, t *testing.T) exec.MachineProcess {
+func startAndWaitTestProcess(cmd string, t *testing.T) *exec.MachineProcess {
 	exec.LogsDir = TmpFile()
 	events := make(chan *rpc.Event)
 	done := make(chan bool)
@@ -248,7 +249,7 @@ func startAndWaitTestProcess(cmd string, t *testing.T) exec.MachineProcess {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return result
+	return &result
 }
 
 func TmpFile() string {
@@ -256,7 +257,9 @@ func TmpFile() string {
 }
 
 func cleanupLogsDir() {
-	os.RemoveAll(exec.LogsDir)
+	if err := os.RemoveAll(exec.LogsDir); err != nil {
+		log.Printf("Can't remove folder %s. Error: %s", exec.LogsDir, err)
+	}
 }
 
 func randomName(length int) string {

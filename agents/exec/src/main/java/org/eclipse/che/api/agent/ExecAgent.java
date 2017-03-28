@@ -27,8 +27,8 @@ import java.io.IOException;
  */
 @Singleton
 public class ExecAgent extends BasicAgent {
-    private static final String AGENT_DESCRIPTOR = "org.eclipse.che.terminal.json";
-    private static final String AGENT_SCRIPT     = "org.eclipse.che.terminal.script.sh";
+    private static final String AGENT_DESCRIPTOR = "org.eclipse.che.exec.json";
+    private static final String AGENT_SCRIPT     = "org.eclipse.che.exec.script.sh";
 
     @Inject
     public ExecAgent() throws IOException {

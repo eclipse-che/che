@@ -105,12 +105,17 @@ public class EditorFileTracker {
 
             switch (type) {
                 case START: {
-                    LOG.debug("Received file tracking operation START trigger.");
+                    String key = path + endpointId;
+                    LOG.debug("Received file tracking operation START trigger key : {}", key);
+                    if (watchIdRegistry.containsKey(key)) {
+                        LOG.debug("Already registered {}", key);
+                        return;
+                    }
                     int id = fileWatcherManager.registerByPath(path,
                                                                getCreateConsumer(endpointId, path),
                                                                getModifyConsumer(endpointId, path),
                                                                getDeleteConsumer(endpointId, path));
-                    watchIdRegistry.put(path + endpointId, id);
+                    watchIdRegistry.put(key, id);
                     break;
                 }
                 case STOP: {

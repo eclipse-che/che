@@ -14,6 +14,7 @@ package exec
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"sync"
@@ -26,29 +27,39 @@ import (
 )
 
 const (
-	StdoutBit        = 1 << iota
-	StderrBit        = 1 << iota
+	// StdoutBit is set when subscriber is interested in stdout logs
+	StdoutBit = 1 << iota
+	// StderrBit is set when subscriber is interested in stdout logs
+	StderrBit = 1 << iota
+	// ProcessStatusBit is set when subscriber is interested in a process events
 	ProcessStatusBit = 1 << iota
-	DefaultMask      = StderrBit | StdoutBit | ProcessStatusBit
+	// DefaultMask is set by default and identifies receiving of both logs and events of a process
+	DefaultMask = StderrBit | StdoutBit | ProcessStatusBit
 
+	// DefaultShellInterpreter is default shell that executes commands
+	// unless another one is configured
 	DefaultShellInterpreter = "/bin/bash"
 )
 
 var (
-	prevPid          uint64 = 0
-	processes               = &processesMap{items: make(map[uint64]*MachineProcess)}
-	logsDist                = NewLogsDistributor()
-	LogsDir          string
-	ShellInterpreter string = DefaultShellInterpreter
+	prevPid uint64
+	// LogsDir directory where logs of processes should be stored
+	LogsDir string
+
+	processes = &processesMap{items: make(map[uint64]*MachineProcess)}
+	logsDist  = NewLogsDistributor()
+	// ShellInterpreter is shell that executes commands
+	ShellInterpreter = DefaultShellInterpreter
 )
 
+// Command represents command that is used in command execution API
 type Command struct {
 	Name        string `json:"name"`
 	CommandLine string `json:"commandLine"`
 	Type        string `json:"type"`
 }
 
-// Defines machine process model
+// MachineProcess defines machine process model
 type MachineProcess struct {
 
 	// The virtual id of the process, it is guaranteed that pid
@@ -107,17 +118,20 @@ type MachineProcess struct {
 	beforeEventsHook func(process MachineProcess)
 }
 
+// Subscriber receives process logs
 type Subscriber struct {
 	ID      string
 	Mask    uint64
 	Channel chan *rpc.Event
 }
 
+// NoProcessError is returned when requested process doesn't exist
 type NoProcessError struct {
 	error
 	Pid uint64
 }
 
+// NotAliveError is returned when process that is target of an action is not alive anymore
 type NotAliveError struct {
 	error
 	Pid uint64
@@ -129,6 +143,7 @@ type processesMap struct {
 	items map[uint64]*MachineProcess
 }
 
+// Start starts MachineProcess
 func Start(process MachineProcess) (MachineProcess, error) {
 	// wrap command to be able to kill child processes see https://github.com/golang/go/issues/8854
 	cmd := exec.Command("setsid", ShellInterpreter, "-c", process.CommandLine)
@@ -205,7 +220,7 @@ func Start(process MachineProcess) (MachineProcess, error) {
 	return process, nil
 }
 
-// Gets process by pid.
+// Get retrieves process by pid.
 // If process doesn't exist then error of type NoProcessError is returned.
 func Get(pid uint64) (MachineProcess, error) {
 	p, ok := directGet(pid)
@@ -215,6 +230,9 @@ func Get(pid uint64) (MachineProcess, error) {
 	return MachineProcess{}, noProcess(pid)
 }
 
+// GetProcesses retrieves list of processes.
+// If parameter all is true then returns all processes,
+// otherwice returns only live processes
 func GetProcesses(all bool) []MachineProcess {
 	processes.RLock()
 	defer processes.RUnlock()
@@ -234,7 +252,7 @@ func GetProcesses(all bool) []MachineProcess {
 	return pArr
 }
 
-// Kills process by given pid.
+// Kill kills process by given pid.
 // Returns an error when any error occurs during process kill.
 // If process doesn't exist error of type NoProcessError is returned.
 func Kill(pid uint64) error {
@@ -249,7 +267,7 @@ func Kill(pid uint64) error {
 	return syscall.Kill(-p.NativePid, syscall.SIGKILL)
 }
 
-// Reads process logs between [from, till] inclusive.
+// ReadLogs reads process logs between [from, till] inclusive.
 // Returns an error if any error occurs during logs reading.
 // If process doesn't exist error of type NoProcessError is returned.
 func ReadLogs(pid uint64, from time.Time, till time.Time) ([]*proc.LogMessage, error) {
@@ -264,14 +282,14 @@ func ReadLogs(pid uint64, from time.Time, till time.Time) ([]*proc.LogMessage, e
 	return proc.NewLogsReader(p.logfileName).From(from).Till(till).ReadLogs()
 }
 
-// Reads all process logs.
+// ReadAllLogs reads all process logs.
 // Returns an error if any error occurs during logs reading.
 // If process doesn't exist error of type NoProcessError is returned.
 func ReadAllLogs(pid uint64) ([]*proc.LogMessage, error) {
 	return ReadLogs(pid, time.Time{}, time.Now())
 }
 
-// Unsubscribe subscriber with given id from process events.
+// RemoveSubscriber unsubscribes subscriber with given id from process events.
 // If process doesn't exist then error of type NoProcessError is returned.
 func RemoveSubscriber(pid uint64, id string) error {
 	p, ok := directGet(pid)
@@ -292,7 +310,7 @@ func RemoveSubscriber(pid uint64, id string) error {
 	return nil
 }
 
-// Subscribe to the process output.
+// AddSubscriber subscribes provided subscriber to the process output.
 // An error of type NoProcessError is returned when process
 // with given pid doesn't exist, a regular error is returned
 // if the process is dead or subscriber with such id already subscribed
@@ -316,7 +334,7 @@ func AddSubscriber(pid uint64, subscriber Subscriber) error {
 	return nil
 }
 
-// Adds a new process subscriber by reading all the logs between
+// RestoreSubscriber adds a new process subscriber by reading all the logs between
 // given 'after' and now and publishing them to the channel.
 // Returns an error of type NoProcessError if process with given id doesn't exist,
 // returns a regular error if process is alive an subscriber with such id
@@ -368,7 +386,7 @@ func RestoreSubscriber(pid uint64, subscriber Subscriber, after time.Time) error
 	return nil
 }
 
-// Updates subscriber with given id.
+// UpdateSubscriber updates subscriber with given id.
 // An error of type NoProcessError is returned when process
 // with given pid doesn't exist, a regular error is returned
 // if the process is dead.
@@ -388,54 +406,61 @@ func UpdateSubscriber(pid uint64, id string, newMask uint64) error {
 			return nil
 		}
 	}
-	return errors.New(fmt.Sprintf("No subscriber with id '%s'", id))
+	return fmt.Errorf("No subscriber with id '%s'", id)
 }
 
+// OnStdout notifies subscribers about new output in stdout
 func (process *MachineProcess) OnStdout(line string, time time.Time) {
 	process.notifySubs(newStdoutEvent(process.Pid, line, time), StdoutBit)
 }
 
+// OnStderr notifies subscribers about new output in stderr
 func (process *MachineProcess) OnStderr(line string, time time.Time) {
 	process.notifySubs(newStderrEvent(process.Pid, line, time), StderrBit)
 }
 
-func (mp *MachineProcess) Close() {
+// Close cleanups process resources and notifies subscribers about process death
+func (process *MachineProcess) Close() {
 	// Cleanup command resources
-	mp.command.Wait()
+	if err := process.command.Wait(); err != nil {
+		if _, ok := err.(*exec.ExitError); !ok {
+			log.Printf("Error occurs on process cleanup. %s", err)
+		}
+	}
 	// Cleanup machine process resources before dead event is sent
-	mp.mutex.Lock()
-	mp.Alive = false
-	mp.command = nil
-	mp.pumper = nil
-	mp.mutex.Unlock()
+	process.mutex.Lock()
+	process.Alive = false
+	process.command = nil
+	process.pumper = nil
+	process.mutex.Unlock()
 
-	mp.notifySubs(newDiedEvent(*mp), ProcessStatusBit)
+	process.notifySubs(newDiedEvent(*process), ProcessStatusBit)
 
-	mp.mutex.Lock()
-	mp.subs = nil
-	mp.mutex.Unlock()
+	process.mutex.Lock()
+	process.subs = nil
+	process.mutex.Unlock()
 
-	mp.updateLastUsedTime()
+	process.updateLastUsedTime()
 }
 
-func (p *MachineProcess) notifySubs(event *rpc.Event, typeBit uint64) {
-	p.mutex.RLock()
-	subs := p.subs
+func (process *MachineProcess) notifySubs(event *rpc.Event, typeBit uint64) {
+	process.mutex.RLock()
+	subs := process.subs
 	for _, subscriber := range subs {
 		// Check whether subscriber needs such kind of event and then try to notify it
 		if subscriber.Mask&typeBit == typeBit && !tryWrite(subscriber.Channel, event) {
 			// Impossible to write to the channel, remove the channel from the subscribers list.
 			// It may happen when writing to the closed channel
-			defer RemoveSubscriber(p.Pid, subscriber.ID)
+			defer RemoveSubscriber(process.Pid, subscriber.ID)
 		}
 	}
-	p.mutex.RUnlock()
+	process.mutex.RUnlock()
 }
 
-func (mp *MachineProcess) updateLastUsedTime() {
-	mp.lastUsedLock.Lock()
-	mp.lastUsed = time.Now()
-	mp.lastUsedLock.Unlock()
+func (process *MachineProcess) updateLastUsedTime() {
+	process.lastUsedLock.Lock()
+	process.lastUsed = time.Now()
+	process.lastUsedLock.Unlock()
 }
 
 // Writes to a channel and returns true if write is successful,
@@ -463,7 +488,7 @@ func directGet(pid uint64) (*MachineProcess, bool) {
 // Returns an error indicating that process with given pid doesn't exist
 func noProcess(pid uint64) *NoProcessError {
 	return &NoProcessError{
-		error: errors.New(fmt.Sprintf("Process with id '%d' does not exist", pid)),
+		error: fmt.Errorf("Process with id '%d' does not exist", pid),
 		Pid:   pid,
 	}
 }
@@ -471,7 +496,7 @@ func noProcess(pid uint64) *NoProcessError {
 // Returns an error indicating that process with given pid is not alive
 func notAlive(pid uint64) *NotAliveError {
 	return &NotAliveError{
-		error: errors.New(fmt.Sprintf("Process with id '%d' is not alive", pid)),
+		error: fmt.Errorf("Process with id '%d' is not alive", pid),
 		Pid:   pid,
 	}
 }

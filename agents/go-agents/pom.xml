@@ -20,35 +20,6 @@
     </parent>
     <artifactId>go-agents</artifactId>
     <name>Agent :: Golang agents</name>
-    <properties>
-        <go.workspace.name>go-workspace</go.workspace.name>
-    </properties>
-    <dependencies>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-agent</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-agent-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-machine</artifactId>
-        </dependency>
-    </dependencies>
     <build>
         <plugins>
             <plugin>
@@ -57,7 +28,7 @@
                 <configuration>
                     <excludes>
                         <exclude>/docs/**</exclude>
-                        <exclude>src/main/go/exec-agent/term/server.go</exclude>
+                        <exclude>src/main/go/terminal-agent/term/server.go</exclude>
                         <exclude>src/main/go/vendor/**</exclude>
                         <exclude>src/main/go/Godeps/**</exclude>
                     </excludes>
@@ -77,11 +48,11 @@
                             <target>
                                 <!--To not use godep tool vendored dependencies are copied into correct place of GOPATH
                                 by maven-->
-                                <copy todir="${project.build.directory}/${go.workspace.name}/src">
+                                <copy todir="${project.build.directory}/go-workspace/src">
                                     <fileset dir="src/main/go/vendor/" includes="**/*" />
                                 </copy>
-                                <copy todir="${project.build.directory}/${go.workspace.name}/src/github.com/eclipse/che/agents/go-agents/src/main/go">
-                                    <fileset dir="src/main/go/" excludes="vendor/" includes="**/*.*go **/static/*" />
+                                <copy todir="${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents/src/main/go">
+                                    <fileset dir="src/main/go/" excludes="vendor/" includes="**/*.*go" />
                                 </copy>
                             </target>
                         </configuration>
@@ -89,115 +60,27 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.soebes.maven.plugins</groupId>
-                <artifactId>iterator-maven-plugin</artifactId>
-                <version>0.5.0</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>compile-go-agents</id>
+                        <id>build-go-sources</id>
                         <phase>compile</phase>
                         <goals>
-                            <goal>iterator</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <itemsWithProperties>
-                                <itemWithProperty>
-                                    <name>linux_arm5</name>
-                                    <properties>
-                                        <terminal.target.os>linux</terminal.target.os>
-                                        <terminal.target.architecture>arm</terminal.target.architecture>
-                                        <terminal.target.arm.version>5</terminal.target.arm.version>
-                                    </properties>
-                                </itemWithProperty>
-                                <itemWithProperty>
-                                    <name>linux_arm6</name>
-                                    <properties>
-                                        <terminal.target.os>linux</terminal.target.os>
-                                        <terminal.target.architecture>arm</terminal.target.architecture>
-                                        <terminal.target.arm.version>6</terminal.target.arm.version>
-                                    </properties>
-                                </itemWithProperty>
-                                <itemWithProperty>
-                                    <name>linux_arm7</name>
-                                    <properties>
-                                        <terminal.target.os>linux</terminal.target.os>
-                                        <terminal.target.architecture>arm</terminal.target.architecture>
-                                        <terminal.target.arm.version>7</terminal.target.arm.version>
-                                    </properties>
-                                </itemWithProperty>
-                                <itemWithProperty>
-                                    <name>linux_amd64</name>
-                                    <properties>
-                                        <terminal.target.os>linux</terminal.target.os>
-                                        <terminal.target.architecture>amd64</terminal.target.architecture>
-                                    </properties>
-                                </itemWithProperty>
-                                <itemWithProperty>
-                                    <name>linux_i386</name>
-                                    <properties>
-                                        <terminal.target.os>linux</terminal.target.os>
-                                        <terminal.target.architecture>386</terminal.target.architecture>
-                                    </properties>
-                                </itemWithProperty>
-                            </itemsWithProperties>
-                            <pluginExecutors>
-                                <pluginExecutor>
-                                    <plugin>
-                                        <groupId>org.codehaus.mojo</groupId>
-                                        <artifactId>exec-maven-plugin</artifactId>
-                                    </plugin>
-                                    <goal>exec</goal>
-                                    <configuration>
-                                        <executable>go</executable>
-                                        <workingDirectory>${project.build.directory}/${go.workspace.name}/src/github.com/eclipse/che/agents/go-agents/src/main/go/exec-agent</workingDirectory>
-                                        <arguments>
-                                            <argument>build</argument>
-                                            <argument>-a</argument>
-                                            <argument>-installsuffix</argument>
-                                            <argument>cgo</argument>
-                                            <argument>-o</argument>
-                                            <argument>${project.build.directory}/${item}/che-websocket-terminal</argument>
-                                        </arguments>
-                                        <environmentVariables>
-                                            <CGO_ENABLED>0</CGO_ENABLED>
-                                            <GOPATH>${project.build.directory}/${go.workspace.name}</GOPATH>
-                                            <GOOS>${terminal.target.os}</GOOS>
-                                            <GOARCH>${terminal.target.architecture}</GOARCH>
-                                            <GOARM>${terminal.target.arm.version}</GOARM>
-                                        </environmentVariables>
-                                    </configuration>
-                                </pluginExecutor>
-                            </pluginExecutors>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>iterator</goal>
-                        </goals>
-                        <configuration>
-                            <items>
-                                <item>linux_arm5</item>
-                                <item>linux_arm6</item>
-                                <item>linux_arm7</item>
-                                <item>linux_amd64</item>
-                                <item>linux_i386</item>
-                            </items>
-                            <pluginExecutors>
-                                <pluginExecutor>
-                                    <plugin>
-                                        <artifactId>maven-assembly-plugin</artifactId>
-                                    </plugin>
-                                    <goal>single</goal>
-                                    <configuration>
-                                        <tarLongFileMode>posix</tarLongFileMode>
-                                        <descriptors>
-                                            <descriptor>${basedir}/src/assembly/assembly.xml</descriptor>
-                                        </descriptors>
-                                    </configuration>
-                                </pluginExecutor>
-                            </pluginExecutors>
+                            <executable>go</executable>
+                            <workingDirectory>${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents/src/main/go</workingDirectory>
+                            <arguments>
+                                <argument>build</argument>
+                                <argument>-a</argument>
+                                <argument>./...</argument>
+                            </arguments>
+                            <environmentVariables>
+                                <CGO_ENABLED>0</CGO_ENABLED>
+                                <GOPATH>${project.build.directory}/go-workspace</GOPATH>
+                            </environmentVariables>
                         </configuration>
                     </execution>
                 </executions>
@@ -224,8 +107,8 @@
                                 </goals>
                                 <configuration>
                                     <target unless="skipTests">
-                                        <exec dir="${project.build.directory}/${go.workspace.name}/src/github.com/eclipse/che/agents/go-agents/src/main/go" executable="go" failonerror="true">
-                                            <env key="GOPATH" value="${project.build.directory}/${go.workspace.name}" />
+                                        <exec dir="${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents/src/main/go" executable="go" failonerror="true">
+                                            <env key="GOPATH" value="${project.build.directory}/go-workspace" />
                                             <arg value="test" />
                                             <arg value="-v" />
                                             <arg value="./..." />

@@ -530,7 +530,9 @@ public class ContentAssistWidget implements EventListener {
             @Override
             public void run() {
                 // detach assist popup
-                popupElement.getParentNode().removeChild(popupElement);
+                if (popupElement.getParentNode() != null) {
+                    popupElement.getParentNode().removeChild(popupElement);
+                }
                 // remove all items from popup element
                 listElement.setInnerHTML("");
             }
