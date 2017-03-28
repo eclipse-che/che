@@ -457,7 +457,6 @@
             "previewUrl": "http://${server.port.8080}",
             "goal": "Run"
           }
-          }
         }
       ]
     },
