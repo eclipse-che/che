@@ -19,16 +19,16 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.CanWrapLines;
 
 /**
- * Toggle word wrap action
+ * Toggle wrapping long lines action
  */
-public class WordWrapAction extends ToggleAction {
+public class SoftWrapAction extends ToggleAction {
 
     private       EditorAgent          editorAgent;
 
     @Inject
-    public WordWrapAction(EditorAgent editorAgent,
+    public SoftWrapAction(EditorAgent editorAgent,
                           CoreLocalizationConstant localization) {
-        super(localization.wordWrap());
+        super(localization.softWrap());
         this.editorAgent = editorAgent;
     }
 

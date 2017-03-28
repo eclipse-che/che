@@ -13,7 +13,7 @@ package org.eclipse.che.ide.editor.preferences.editorproperties.sections;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.editor.EditorLocalizationConstants;
-import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties.WORD_WRAP;
+import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties.SOFT_WRAP;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +30,7 @@ public class EditPropertiesSection implements EditorPropertiesSection {
     public EditPropertiesSection(EditorLocalizationConstants locale) {
         this.locale = locale;
         properties = Arrays.asList(
-                                   WORD_WRAP.toString()
+                                   SOFT_WRAP.toString()
         );
     }
 

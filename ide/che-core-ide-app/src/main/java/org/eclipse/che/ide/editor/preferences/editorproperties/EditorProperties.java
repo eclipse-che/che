@@ -35,8 +35,8 @@ public enum EditorProperties {
     //White spaces section
     SHOW_WHITESPACES("showWhitespaces"),
 
-    //Word wrap
-    WORD_WRAP("wordWrap"),
+    //Soft wrap
+    SOFT_WRAP("wordWrap"),
 
     //Rulers section
     SHOW_ANNOTATION_RULER("annotationRuler"),
