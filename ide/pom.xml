@@ -32,6 +32,7 @@
         <module>che-core-ide-app</module>
         <module>che-core-ide-templates</module>
         <module>che-core-ide-stacks</module>
+        <module>che-core-orion-editor</module>
     </modules>
     <build>
         <pluginManagement>
