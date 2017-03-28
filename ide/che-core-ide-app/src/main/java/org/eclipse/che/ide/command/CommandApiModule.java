@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.command.editor.CommandEditorView;
 import org.eclipse.che.ide.command.editor.CommandEditorViewImpl;
@@ -98,10 +99,14 @@ public class CommandApiModule extends AbstractGinModule {
 
         // start-up components
         GinMapBinder<String, Component> componentBinder = GinMapBinder.newMapBinder(binder(), String.class, Component.class);
-        componentBinder.addBinding("CommandManagerImpl").to(CommandManagerImpl.class);
-        componentBinder.addBinding("CommandsExplorerPresenter").to(CommandsExplorerPresenter.class);
         componentBinder.addBinding("CommandProducerActionManager").to(CommandProducerActionManager.class);
-        componentBinder.addBinding("ExecuteCommandActionManager").to(ExecuteCommandActionManager.class);
+
+        GinMapBinder<String, WsAgentComponent> wsAgentComponentBinder = GinMapBinder.newMapBinder(binder(),
+                                                                                                  String.class,
+                                                                                                  WsAgentComponent.class);
+        wsAgentComponentBinder.addBinding("CommandManagerImpl").to(CommandManagerImpl.class);
+        wsAgentComponentBinder.addBinding("CommandsExplorerPresenter").to(CommandsExplorerPresenter.class);
+        wsAgentComponentBinder.addBinding("ExecuteCommandActionManager").to(ExecuteCommandActionManager.class);
 
         install(new GinFactoryModuleBuilder().build(ExecuteCommandActionFactory.class));
         install(new GinFactoryModuleBuilder().build(GoalPopUpGroupFactory.class));

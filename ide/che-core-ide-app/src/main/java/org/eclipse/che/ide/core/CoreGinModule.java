@@ -101,12 +101,12 @@ public class CoreGinModule extends AbstractGinModule {
         install(new DebugApiModule());
         install(new ThemeApiModule());
         install(new PreferencesApiModule());
+        install(new CommandApiModule());
         install(new PersistenceApiModule());
         install(new MacroApiModule());
         install(new UserApiModule());
         install(new WorkspaceApiModule());
         install(new MachineApiModule());
-        install(new CommandApiModule());
         install(new ProjectApiModule());
         install(new ProjectImportModule());
         install(new OAuthApiModule());

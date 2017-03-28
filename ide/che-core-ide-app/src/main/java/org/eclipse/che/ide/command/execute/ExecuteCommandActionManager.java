@@ -21,8 +21,7 @@ import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
-import org.eclipse.che.ide.api.command.CommandManager.CommandLoadedListener;
-import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.component.WsAgentComponent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +36,7 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
  * related {@link ExecuteCommandAction}s in the context menus.
  */
 @Singleton
-public class ExecuteCommandActionManager implements Component, CommandLoadedListener, CommandChangedListener {
+public class ExecuteCommandActionManager implements WsAgentComponent, CommandChangedListener {
 
     private static final String COMMANDS_ACTION_GROUP_ID_PREFIX = "commandsActionGroup";
     private static final String COMMAND_ACTION_ID_PREFIX        = "command_";
@@ -74,10 +73,9 @@ public class ExecuteCommandActionManager implements Component, CommandLoadedList
     }
 
     @Override
-    public void start(Callback<Component, Exception> callback) {
+    public void start(Callback<WsAgentComponent, Exception> callback) {
         callback.onSuccess(this);
 
-        commandManager.addCommandLoadedListener(this);
         commandManager.addCommandChangedListener(this);
 
         actionManager.registerAction(COMMANDS_ACTION_GROUP_ID_PREFIX, commandsActionGroup);
@@ -86,10 +84,7 @@ public class ExecuteCommandActionManager implements Component, CommandLoadedList
         ((DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU)).add(commandsActionGroup);
         ((DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU)).add(commandsActionGroup);
         ((DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU)).add(commandsActionGroup);
-    }
 
-    @Override
-    public void onCommandsLoaded() {
         commandManager.getCommands().forEach(this::addAction);
     }
 
