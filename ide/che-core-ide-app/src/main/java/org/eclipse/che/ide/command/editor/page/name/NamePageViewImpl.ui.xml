@@ -16,6 +16,10 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
     <ui:style>
+        .text-field {
+            width: literal("calc(100% - 80px)");
+        }
+
         .button {
             float: right;
             margin-top: 1px;
@@ -33,6 +37,6 @@
                   text="{messages.buttonRunText}"
                   addStyleNames="{style.button}"
                   debugId="command-editor-button-run"/>
-        <g:TextBox ui:field="commandName" width="88%"/>
+        <g:TextBox ui:field="commandName" addStyleNames="{style.text-field}"/>
     </g:FlowPanel>
 </ui:UiBinder>

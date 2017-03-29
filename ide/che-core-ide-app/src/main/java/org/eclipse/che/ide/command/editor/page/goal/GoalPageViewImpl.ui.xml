@@ -19,5 +19,5 @@
             display: block;
         }
     </ui:style>
-    <che:CustomComboBox ui:field="goalComboBox" width="100%" addStyleNames="{style.combo-box}" debugId="command_editor-goal"/>
+    <che:CustomListBox ui:field="goalsList" width="100%" addStyleNames="{style.combo-box}" debugId="command_editor-goal"/>
 </ui:UiBinder>

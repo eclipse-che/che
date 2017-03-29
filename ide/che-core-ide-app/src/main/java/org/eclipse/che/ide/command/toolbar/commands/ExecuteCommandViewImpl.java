@@ -15,14 +15,17 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.command.goal.DebugGoal;
 import org.eclipse.che.ide.command.goal.RunGoal;
 import org.eclipse.che.ide.command.toolbar.commands.button.GoalButton;
-import org.eclipse.che.ide.command.toolbar.commands.button.GoalButtonDataProvider;
 import org.eclipse.che.ide.command.toolbar.commands.button.GoalButtonFactory;
-import org.eclipse.che.ide.ui.menubutton.MenuPopupButton;
+import org.eclipse.che.ide.command.toolbar.commands.button.GoalButtonItemsProvider;
+import org.eclipse.che.ide.ui.menubutton.MenuButton;
+import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +35,7 @@ import java.util.Map;
 import static java.util.Collections.emptyList;
 
 /**
- * Implementation of {@link ExecuteCommandView} uses {@link MenuPopupButton}s
+ * Implementation of {@link ExecuteCommandView} uses {@link MenuButton}s
  * for displaying commands grouped by goal.
  * Allows to execute command by choosing one from the button's dropdown menu.
  */
@@ -46,15 +49,15 @@ public class ExecuteCommandViewImpl implements ExecuteCommandView {
     private final FlowPanel         buttonsPanel;
     private final RunGoal           runGoal;
     private final DebugGoal         debugGoal;
-    private final GoalButtonFactory goalButtonFactory;
+    private final GoalButtonFactory buttonFactory;
 
     private ActionDelegate delegate;
 
     @Inject
-    public ExecuteCommandViewImpl(RunGoal runGoal, DebugGoal debugGoal, GoalButtonFactory goalButtonFactory) {
+    public ExecuteCommandViewImpl(RunGoal runGoal, DebugGoal debugGoal, GoalButtonFactory buttonFactory) {
         this.runGoal = runGoal;
         this.debugGoal = debugGoal;
-        this.goalButtonFactory = goalButtonFactory;
+        this.buttonFactory = buttonFactory;
 
         commands = new HashMap<>();
         buttonsCache = new HashMap<>();
@@ -76,15 +79,13 @@ public class ExecuteCommandViewImpl implements ExecuteCommandView {
         this.commands.clear();
         this.commands.putAll(commands);
 
-        buttonsCache.clear();
         buttonsPanel.clear();
 
         createOrUpdateButtons();
     }
 
-    /** Add buttons with commands to panel. */
+    /** Adds buttons with commands to panel. */
     private void createOrUpdateButtons() {
-        // for now, display commands of Run and Debug goals only
         List<CommandGoal> goals = new ArrayList<>();
         goals.add(runGoal);
         goals.add(debugGoal);
@@ -92,18 +93,34 @@ public class ExecuteCommandViewImpl implements ExecuteCommandView {
         goals.forEach(this::createOrUpdateButton);
     }
 
-    /** Add button with commands of the given goal to panel. */
+    /** Adds button with the commands of the given goal to panel. */
     private void createOrUpdateButton(CommandGoal goal) {
-        final GoalButton button = buttonsCache.getOrDefault(goal, goalButtonFactory.newButton(goal, delegate));
+        GoalButton button = buttonsCache.get(goal);
+
+        if (button == null) {
+            button = buttonFactory.newButton(goal, delegate, getKeyBinding(goal));
+        }
+
         buttonsCache.put(goal, button);
 
         final List<CommandImpl> commandsOfGoal = commands.getOrDefault(goal, emptyList());
-        final GoalButtonDataProvider dataProvider = button.getPopupItemDataProvider();
+        final GoalButtonItemsProvider itemsProvider = button.getItemProvider();
 
-        dataProvider.setCommands(commandsOfGoal);
+        itemsProvider.setCommands(commandsOfGoal);
 
         button.updateTooltip();
 
         buttonsPanel.add(button);
+    }
+
+    @Nullable
+    private CharCodeWithModifiers getKeyBinding(CommandGoal goal) {
+        if (goal.equals(runGoal)) {
+            return new KeyBuilder().alt().charCode('r').build();
+        } else if (goal.equals(debugGoal)) {
+            return new KeyBuilder().alt().charCode('d').build();
+        }
+
+        return null;
     }
 }

@@ -30,9 +30,8 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
-import org.eclipse.che.ide.api.command.CommandManager.CommandLoadedListener;
 import org.eclipse.che.ide.api.command.CommandType;
-import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -58,9 +57,8 @@ import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 /** Presenter for Commands Explorer. */
 @Singleton
 public class CommandsExplorerPresenter extends BasePresenter implements CommandsExplorerView.ActionDelegate,
-                                                                        Component,
-                                                                        CommandChangedListener,
-                                                                        CommandLoadedListener {
+                                                                        WsAgentComponent,
+                                                                        CommandChangedListener {
 
     private final CommandsExplorerView view;
     private final CommandResources     resources;
@@ -105,13 +103,13 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void start(Callback<Component, Exception> callback) {
+    public void start(Callback<WsAgentComponent, Exception> callback) {
+        callback.onSuccess(this);
+
         workspaceAgent.openPart(this, NAVIGATION, Constraints.LAST);
 
-        commandManager.addCommandLoadedListener(this);
+        refreshView();
         commandManager.addCommandChangedListener(this);
-
-        callback.onSuccess(this);
     }
 
     @Override
@@ -205,11 +203,6 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void onCommandsLoaded() {
-        refreshView();
-    }
-
-    @Override
     public void onCommandAdded(CommandImpl command) {
         refreshView();
     }
@@ -291,8 +284,8 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         private void refreshView() {
             final Map<CommandGoal, List<CommandImpl>> commandsByGoals = new HashMap<>();
 
-            // all predefined commandToSelect goals must be shown in the view
-            // so populate map by all registered commandToSelect goals
+            // all predefined command goals must be shown in the view
+            // so populate map by all registered command goals
             for (CommandGoal goal : goalRegistry.getAllPredefinedGoals()) {
                 commandsByGoals.put(goal, new ArrayList<>());
             }
