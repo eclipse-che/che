@@ -11,6 +11,8 @@
 package org.eclipse.che.ide.command.toolbar.commands.button;
 
 import elemental.dom.Element;
+import elemental.html.DivElement;
+import elemental.html.SpanElement;
 
 import com.google.gwt.safehtml.shared.SafeHtml;
 
@@ -25,6 +27,7 @@ import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.menubutton.ItemsProvider;
 import org.eclipse.che.ide.ui.menubutton.MenuButton;
 import org.eclipse.che.ide.ui.menubutton.MenuItem;
+import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 
 import java.util.Optional;
@@ -73,19 +76,15 @@ public class GoalButton extends MenuButton {
         final Optional<MenuItem> defaultItem = itemsProvider.getDefaultItem();
 
         if (defaultItem.isPresent()) {
-            String keyBindingString = "";
-            if (keyBinding != null) {
-                keyBindingString = " [" + getShortcutText(keyBinding) + ']';
-            }
-            setTooltip(messages.goalButtonTooltipExecute(defaultItem.get().getName(), keyBindingString));
+            setTooltip(messages.goalButtonTooltipExecute(defaultItem.get().getName()), keyBinding);
         } else if (getItemProvider().hasGuideOnly()) {
-            setTooltip(messages.goalButtonTooltipNoCommand(goal.getId()));
+            setTooltip(messages.goalButtonTooltipNoCommand(goal.getId()), null);
         } else {
-            setTooltip(messages.goalButtonTooltipChooseCommand(goal.getId()));
+            setTooltip(messages.goalButtonTooltipChooseCommand(goal.getId()), null);
         }
     }
 
-    private void setTooltip(String newTooltipText) {
+    private void setTooltip(String newTooltipText, @Nullable CharCodeWithModifiers keyBinding) {
         if (newTooltipText.equals(tooltipText)) {
             return;
         }
@@ -96,7 +95,22 @@ public class GoalButton extends MenuButton {
             tooltip.destroy();
         }
 
-        tooltip = Tooltip.create((Element)getElement(), BOTTOM, MIDDLE, newTooltipText);
+        final DivElement divElement = Elements.createDivElement();
+        divElement.setInnerText(newTooltipText);
+
+        if (keyBinding != null) {
+            final String hotKey = getShortcutText(keyBinding);
+            if (hotKey != null) {
+                SpanElement spanElement = Elements.createSpanElement();
+                spanElement.getStyle().setMarginLeft("5px");
+                spanElement.getStyle().setColor("#aaaaaa");
+                spanElement.setInnerText("[" + hotKey + "]");
+
+                divElement.appendChild(spanElement);
+            }
+        }
+
+        tooltip = Tooltip.create((Element)getElement(), BOTTOM, MIDDLE, divElement);
     }
 
     private class ExecuteDefaultCommandAction extends Action {
