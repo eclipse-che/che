@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/eclipse/che/agents/go-agents/src/main/go",
+	"ImportPath": "github.com/eclipse/che/agents/go-agents",
 	"GoVersion": "go1.6",
 	"GodepVersion": "v74",
 	"Deps": [

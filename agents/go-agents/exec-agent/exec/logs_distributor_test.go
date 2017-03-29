@@ -18,7 +18,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/eclipse/che/agents/go-agents/src/main/go/exec-agent/exec"
+	"github.com/eclipse/che/agents/go-agents/exec-agent/exec"
 )
 
 func TestLogsDistributorCreatesSubdirectories(t *testing.T) {

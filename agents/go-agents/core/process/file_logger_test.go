@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/src/main/go/core/process"
+	"github.com/eclipse/che/agents/go-agents/core/process"
 )
 
 var alphabet = []byte("abcdefgh123456789")
