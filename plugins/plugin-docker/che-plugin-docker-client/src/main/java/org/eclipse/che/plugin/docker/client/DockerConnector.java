@@ -29,6 +29,7 @@ import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.connection.DockerResponse;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.DockerException;
+import org.eclipse.che.plugin.docker.client.exception.ExecNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
@@ -109,6 +110,7 @@ import java.util.concurrent.Future;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
 import static javax.ws.rs.core.Response.Status.CREATED;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -476,7 +478,7 @@ public class DockerConnector {
 
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
-            if (status == 404) {
+            if (status == NOT_FOUND.getStatusCode()) {
                 throw new ContainerNotFoundException(readAndCloseQuietly(response.getInputStream()));
             }
             if (status != OK.getStatusCode()) {
@@ -521,6 +523,8 @@ public class DockerConnector {
      *
      * @param execOutputProcessor
      *         processor for exec output
+     * @throws ExecNotFoundException
+     *         when exec not found by docker (docker api returns 404)
      * @throws IOException
      *          when a problem occurs with docker api calls
      */
@@ -537,6 +541,9 @@ public class DockerConnector {
                                                             .entity(entityBytesArray)) {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
+            if (status == NOT_FOUND.getStatusCode()) {
+                throw new ExecNotFoundException(readAndCloseQuietly(response.getInputStream()));
+            }
             // According to last doc (https://docs.docker.com/reference/api/docker_remote_api_v1.15/#exec-start) status must be 201 but
             // in fact docker API returns 200 or 204 status.
             if (status / 100 != 2) {
@@ -884,7 +891,7 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "tag", params.getTag());
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
-            if (status == 404) {
+            if (status == NOT_FOUND.getStatusCode()) {
                 throw new ImageNotFoundException(readAndCloseQuietly(response.getInputStream()));
             }
             if (status / 100 != 2) {
@@ -1284,7 +1291,7 @@ public class DockerConnector {
                                                             .path(apiVersionPathPrefix + "/networks/" + params.getNetworkId())) {
             final DockerResponse response = connection.request();
             int status = response.getStatus();
-            if (status == 404) {
+            if (status == NOT_FOUND.getStatusCode()) {
                 throw new NetworkNotFoundException(readAndCloseQuietly(response.getInputStream()));
             }
             if (status / 100 != 2) {
