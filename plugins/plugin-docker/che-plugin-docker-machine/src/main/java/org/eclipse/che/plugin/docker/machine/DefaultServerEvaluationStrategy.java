@@ -70,4 +70,9 @@ public class DefaultServerEvaluationStrategy extends ServerEvaluationStrategy {
 
         return super.getExposedPortsToAddressPorts(externalAddress, containerInfo.getNetworkSettings().getPorts());
     }
+
+    @Override
+    protected boolean useHttpsForExternalUrls() {
+        return false;
+    }
 }

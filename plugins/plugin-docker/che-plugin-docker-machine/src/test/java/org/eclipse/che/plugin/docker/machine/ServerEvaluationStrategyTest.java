@@ -396,5 +396,10 @@ public class ServerEvaluationStrategyTest {
                                                                    String internalAddress) {
             return null;
         }
+
+        @Override
+        protected boolean useHttpsForExternalUrls() {
+            return false;
+        }
     }
 }
