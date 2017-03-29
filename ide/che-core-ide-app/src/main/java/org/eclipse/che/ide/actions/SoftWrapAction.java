@@ -50,4 +50,15 @@ public class SoftWrapAction extends ToggleAction {
         }
     }
 
+    @Override
+    public void update(ActionEvent e) {
+        EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+
+        if (activeEditor != null && activeEditor instanceof CanWrapLines) {
+            e.getPresentation().setEnabled(true);
+        } else {
+            e.getPresentation().setEnabled(false);
+        }
+    }
+
 }

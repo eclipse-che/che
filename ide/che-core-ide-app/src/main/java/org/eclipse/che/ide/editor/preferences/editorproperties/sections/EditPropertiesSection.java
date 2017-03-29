@@ -29,9 +29,7 @@ public class EditPropertiesSection implements EditorPropertiesSection {
     @Inject
     public EditPropertiesSection(EditorLocalizationConstants locale) {
         this.locale = locale;
-        properties = Arrays.asList(
-                                   SOFT_WRAP.toString()
-        );
+        properties = Arrays.asList(SOFT_WRAP.toString());
     }
 
     @Override
