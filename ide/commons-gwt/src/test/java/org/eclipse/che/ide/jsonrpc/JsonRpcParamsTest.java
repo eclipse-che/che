@@ -222,7 +222,7 @@ public class JsonRpcParamsTest {
     public void shouldGetAsListForParsedListDoubleParams() throws Exception {
         Double expected = 0D;
 
-        JsonRpcParams jsonRpcParams = new JsonRpcParams("[\"" + expected + "\"]", jsonFactory, dtoFactory);
+        JsonRpcParams jsonRpcParams = new JsonRpcParams("[" + expected + "]", jsonFactory, dtoFactory);
         List<Double> actual = jsonRpcParams.getAsListOf(Double.class);
 
         assertEquals(singletonList(expected), actual);
