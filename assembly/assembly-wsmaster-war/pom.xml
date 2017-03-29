@@ -60,7 +60,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>go-agents</artifactId>
+            <artifactId>exec-agent</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
@@ -85,6 +85,10 @@
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>ssh-agent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>terminal-agent</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>

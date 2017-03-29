@@ -20,8 +20,8 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.subversion.Credentials;
-import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
+import org.eclipse.che.ide.api.user.Credentials;
+import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
@@ -53,7 +53,7 @@ public class UpdatePresenter extends SubversionActionPresenter {
     public UpdatePresenter(AppContext appContext,
                            SubversionOutputConsoleFactory consoleFactory,
                            SubversionClientService service,
-                           SubversionCredentialsDialog subversionCredentialsDialog,
+                           AskCredentialsDialog subversionCredentialsDialog,
                            ProcessesPanelPresenter processesPanelPresenter,
                            SubversionExtensionLocalizationConstants constants,
                            NotificationManager notificationManager,

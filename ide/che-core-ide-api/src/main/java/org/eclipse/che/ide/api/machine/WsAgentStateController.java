@@ -26,6 +26,7 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.commons.exception.ServerDisconnectedException;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.browser.BrowserUtils;
@@ -234,6 +235,11 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
+                if (arg.getCause() instanceof ServerDisconnectedException) {
+                    dialogFactory.createMessageDialog("Server Unavailable",
+                                                      "Server is not responding. Your admin must restart it.",
+                                                      null).show();
+                }
                 Log.error(getClass(), arg.getMessage());
             }
         });

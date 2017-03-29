@@ -10,19 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.ide.projecttype.wizard;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
@@ -52,7 +49,7 @@ import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
  * @author Valeriy Svydenko
  */
 public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
-    
+
     private final static String PROJECT_PATH_MACRO_REGEX = "\\$\\{current.project.path\\}";
 
     private final ProjectWizardMode mode;
@@ -73,7 +70,6 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
         context.put(PROJECT_NAME_KEY, dataObject.getName());
     }
 
-    /** {@inheritDoc} */
     @Override
     public void complete(@NotNull final CompleteCallback callback) {
         if (mode == CREATE) {
@@ -84,97 +80,77 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
                       .then(onComplete(callback))
                       .catchError(onFailure(callback));
         } else if (mode == UPDATE) {
-            appContext.getWorkspaceRoot().getContainer(Path.valueOf(dataObject.getPath())).then(new Operation<Optional<Container>>() {
-                @Override
-                public void apply(Optional<Container> optContainer) throws OperationException {
-                    checkState(optContainer.isPresent(), "Failed to update non existed path");
+            appContext.getWorkspaceRoot()
+                      .getContainer(Path.valueOf(dataObject.getPath()))
+                      .then(optContainer -> {
+                          checkState(optContainer.isPresent(), "Failed to update non existed path");
 
-                    final Container container = optContainer.get();
-                    if (container.getResourceType() == PROJECT) {
-                        ((Project)container).update()
-                                            .withBody(dataObject)
-                                            .send()
-                                            .then(onComplete(callback))
-                                            .catchError(onFailure(callback));
-                    } else if (container.getResourceType() == FOLDER) {
-                        ((Folder)container).toProject()
-                                           .withBody(dataObject)
-                                           .send()
-                                           .then(onComplete(callback))
-                                           .catchError(onFailure(callback));
-                    }
-                }
-            });
+                          final Container container = optContainer.get();
+                          if (container.getResourceType() == PROJECT) {
+                              ((Project)container).update()
+                                                  .withBody(dataObject)
+                                                  .send()
+                                                  .then(onComplete(callback))
+                                                  .catchError(onFailure(callback));
+                          } else if (container.getResourceType() == FOLDER) {
+                              ((Folder)container).toProject()
+                                                 .withBody(dataObject)
+                                                 .send()
+                                                 .then(onComplete(callback))
+                                                 .catchError(onFailure(callback));
+                          }
+                      });
         } else if (mode == IMPORT) {
             appContext.getWorkspaceRoot()
                       .newProject()
                       .withBody(dataObject)
                       .send()
-                      .thenPromise(new Function<Project, Promise<Project>>() {
-                          @Override
-                          public Promise<Project> apply(Project project) throws FunctionException {
-                              return project.update().withBody(dataObject).send();
-                          }
-                      })
+                      .thenPromise(project -> project.update().withBody(dataObject).send())
                       .then(addCommands(callback))
                       .catchError(onFailure(callback));
         }
     }
 
-    private Operation<Project> addCommands(final CompleteCallback callback) {
-        return new Operation<Project>() {
-            @Override
-            public void apply(final Project project) throws OperationException {
-                Promise<CommandImpl> chain = null;
-                for (final CommandDto command : dataObject.getCommands()) {
-                    if (chain == null) {
-                        chain = addCommand(project, command);
-                    } else {
-                        chain = chain.thenPromise(new Function<CommandImpl, Promise<CommandImpl>>() {
-                            @Override
-                            public Promise<CommandImpl> apply(CommandImpl ignored) throws FunctionException {
-                                return addCommand(project, command);
-                            }
-                        });
-                    }
-                }
-                
+    private Operation<Project> addCommands(CompleteCallback callback) {
+        return project -> {
+            Promise<CommandImpl> chain = null;
+            for (final CommandDto command : dataObject.getCommands()) {
                 if (chain == null) {
-                    callback.onCompleted();
+                    chain = addCommand(project, command);
                 } else {
-                    chain.then(new Operation<CommandImpl>() {
-                        @Override
-                        public void apply(CommandImpl ignored) throws OperationException {
-                            callback.onCompleted();
-                        }
-                    }).catchError(onFailure(callback));
+                    chain = chain.thenPromise(ignored -> addCommand(project, command));
                 }
+            }
+
+            if (chain == null) {
+                callback.onCompleted();
+            } else {
+                chain.then(ignored -> {
+                    callback.onCompleted();
+                }).catchError(onFailure(callback));
             }
         };
     }
 
-    private Promise<CommandImpl> addCommand(Project project, CommandDto command) {
-        String name = project.getName() + ": " + command.getName();
-        String projectPath = appContext.getProjectsRoot().append(project.getPath()).toString();
-        String commandLine = command.getCommandLine().replaceAll(PROJECT_PATH_MACRO_REGEX, projectPath);
-        return commandManager.create(name, commandLine, command.getType(), command.getAttributes());
+    private Promise<CommandImpl> addCommand(Project project, CommandDto commandDto) {
+        final String name = project.getName() + ": " + commandDto.getName();
+        final String absoluteProjectPath = appContext.getProjectsRoot().append(project.getPath()).toString();
+        final String commandLine = commandDto.getCommandLine().replaceAll(PROJECT_PATH_MACRO_REGEX, absoluteProjectPath);
+
+        final CommandImpl command = new CommandImpl(name,
+                                                    commandLine,
+                                                    commandDto.getType(),
+                                                    commandDto.getAttributes(),
+                                                    new ApplicableContext(project.getPath()));
+
+        return commandManager.createCommand(command);
     }
 
     private Operation<Project> onComplete(final CompleteCallback callback) {
-        return new Operation<Project>() {
-            @Override
-            public void apply(Project ignored) throws OperationException {
-                callback.onCompleted();
-            }
-        };
+        return ignored -> callback.onCompleted();
     }
 
     private Operation<PromiseError> onFailure(final CompleteCallback callback) {
-        return new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                callback.onFailure(error.getCause());
-            }
-        };
+        return error -> callback.onFailure(error.getCause());
     }
 }
