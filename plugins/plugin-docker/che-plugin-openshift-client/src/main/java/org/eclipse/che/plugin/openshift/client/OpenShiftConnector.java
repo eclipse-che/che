@@ -142,9 +142,11 @@ import io.fabric8.openshift.client.OpenShiftClient;
 @Singleton
 public class OpenShiftConnector extends DockerConnector {
     private static final Logger LOG                                      = LoggerFactory.getLogger(OpenShiftConnector.class);
+    public static final String CHE_OPENSHIFT_RESOURCES_PREFIX           = "che-ws-";
+    public static final String OPENSHIFT_DEPLOYMENT_LABEL               = "deployment";
+
     private static final String CHE_CONTAINER_IDENTIFIER_LABEL_KEY       = "cheContainerIdentifier";
     private static final String CHE_DEFAULT_EXTERNAL_ADDRESS             = "172.17.0.1";
-    private static final String CHE_OPENSHIFT_RESOURCES_PREFIX           = "che-ws-";
     private static final String CHE_WORKSPACE_ID_ENV_VAR                 = "CHE_WORKSPACE_ID";
     private static final int CHE_WORKSPACE_AGENT_PORT                    = 4401;
     private static final int CHE_TERMINAL_AGENT_PORT                     = 4411;
@@ -154,7 +156,6 @@ public class OpenShiftConnector extends DockerConnector {
     private static final int OPENSHIFT_IMAGESTREAM_WAIT_DELAY            = 2000;
     private static final int OPENSHIFT_IMAGESTREAM_MAX_WAIT_COUNT        = 30;
     private static final String OPENSHIFT_POD_STATUS_RUNNING             = "Running";
-    private static final String OPENSHIFT_DEPLOYMENT_LABEL               = "deployment";
     private static final String OPENSHIFT_VOLUME_STORAGE_CLASS           = "volume.beta.kubernetes.io/storage-class";
     private static final String OPENSHIFT_VOLUME_STORAGE_CLASS_NAME      = "che-workspace";
     private static final String OPENSHIFT_IMAGE_PULL_POLICY_IFNOTPRESENT = "IfNotPresent";
@@ -172,6 +173,7 @@ public class OpenShiftConnector extends DockerConnector {
     private final String          cheServerExternalAddress;
     private final String          cheWorkspaceMemoryLimit;
     private final String          cheWorkspaceMemoryRequest;
+    private final boolean         secureRoutes;
 
     @Inject
     public OpenShiftConnector(DockerConnectorConfiguration connectorConfiguration,
@@ -187,8 +189,8 @@ public class OpenShiftConnector extends DockerConnector {
                               @Named("che.workspace.storage") String cheWorkspaceStorage,
                               @Named("che.workspace.projects.storage") String cheWorkspaceProjectsStorage,
                               @Nullable @Named("che.openshift.workspace.memory.request") String cheWorkspaceMemoryRequest,
-                              @Nullable @Named("che.openshift.workspace.memory.override") String cheWorkspaceMemoryLimit) {
-
+                              @Nullable @Named("che.openshift.workspace.memory.override") String cheWorkspaceMemoryLimit,
+                              @Named("che.openshift.secure.routes") boolean secureRoutes) {
 
         super(connectorConfiguration, connectionFactory, authResolver, dockerApiVersionPathPrefixProvider);
         this.cheServerExternalAddress = cheServerExternalAddress;
@@ -201,6 +203,7 @@ public class OpenShiftConnector extends DockerConnector {
         this.cheWorkspaceProjectsStorage = cheWorkspaceProjectsStorage;
         this.cheWorkspaceMemoryRequest = cheWorkspaceMemoryRequest;
         this.cheWorkspaceMemoryLimit = cheWorkspaceMemoryLimit;
+        this.secureRoutes = secureRoutes;
 
         this.openShiftClient = new DefaultOpenShiftClient();
     }
@@ -985,35 +988,7 @@ public class OpenShiftConnector extends DockerConnector {
                                       String serverRef,
                                       String workspaceName) {
 
-        String routeName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceName + "." + serverRef;
-        if (cheServerExternalAddress == null) {
-            throw new IllegalArgumentException("Property che.docker.ip.external must be set when using openshift.");
-        }
-        String serviceHost = serverRef + "." + workspaceName + "." + this.cheServerExternalAddress;
-
-        Route route = openShiftClient
-                .routes()
-                .inNamespace(this.openShiftCheProjectName)
-                .createNew()
-                .withNewMetadata()
-                .withName(routeName)
-                .addToLabels(OPENSHIFT_DEPLOYMENT_LABEL,serviceName)
-                .endMetadata()
-                .withNewSpec()
-                .withHost(serviceHost)
-                .withNewTo()
-                    .withKind("Service")
-                    .withName(serviceName)
-                .endTo()
-                .withNewPort()
-                    .withNewTargetPort()
-                        .withStrVal(serverRef)
-                    .endTargetPort()
-                .endPort()
-                .endSpec()
-                .done();
-
-        LOG.info("OpenShift route {} created", route.getMetadata().getName());
+        OpenShiftRouteCreator.createRoute(openShiftClient, openShiftCheProjectName, workspaceName, cheServerExternalAddress, serverRef, serviceName, secureRoutes);
     }
 
     private String createOpenShiftDeployment(String workspaceID,

@@ -10,18 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.che.api.core.model.machine.ServerProperties;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Represents a strategy for resolving Servers associated with workspace containers.
@@ -30,13 +30,22 @@ import java.util.Map;
  *
  * @author Angel Misevski <amisevsk@redhat.com>
  * @author Alexander Garagatyi
+ * @author Ilya Buziuk
  * @see ServerEvaluationStrategyProvider
  */
 public abstract class ServerEvaluationStrategy {
+    private static final String HTTP = "http";
+    private static final String HTTPS = "https";
 
     protected static final String SERVER_CONF_LABEL_REF_KEY      = "che:server:%s:ref";
     protected static final String SERVER_CONF_LABEL_PROTOCOL_KEY = "che:server:%s:protocol";
     protected static final String SERVER_CONF_LABEL_PATH_KEY     = "che:server:%s:path";
+
+    
+    /**
+     * @return true if <strong>external</strong> addresses need to be exposed against https, false otherwise
+     */
+    protected abstract boolean useHttpsForExternalUrls();
 
     /**
      * Gets a map of all <strong>internal</strong> addresses exposed by the container in the form of
@@ -112,7 +121,11 @@ public abstract class ServerEvaluationStrategy {
             // Add protocol and path to internal/external address, if applicable
             String internalUrl = null;
             String externalUrl = null;
-            if (serverConf.getProtocol() != null) {
+
+            String internalProtocol = serverConf.getProtocol();
+            String externalProtocol = getProtocolForExternalUrl(internalProtocol);
+
+            if (internalProtocol != null) {
                 String pathSuffix = serverConf.getPath();
                 if (pathSuffix != null && !pathSuffix.isEmpty()) {
                     if (pathSuffix.charAt(0) != '/') {
@@ -121,8 +134,9 @@ public abstract class ServerEvaluationStrategy {
                 } else {
                     pathSuffix = "";
                 }
-                internalUrl = serverConf.getProtocol() + "://" + internalAddressAndPort + pathSuffix;
-                externalUrl = serverConf.getProtocol() + "://" + externalAddressAndPort + pathSuffix;
+
+                internalUrl = internalProtocol + "://" + internalAddressAndPort + pathSuffix;
+                externalUrl = externalProtocol + "://" + externalAddressAndPort + pathSuffix;
             }
 
             ServerProperties properties = new ServerPropertiesImpl(serverConf.getPath(),
@@ -130,7 +144,7 @@ public abstract class ServerEvaluationStrategy {
                                                                    internalUrl);
 
             servers.put(portProtocol, new ServerImpl(serverConf.getRef(),
-                                                     serverConf.getProtocol(),
+                                                     externalProtocol,
                                                      externalAddressAndPort,
                                                      externalUrl,
                                                      properties));
@@ -236,4 +250,16 @@ public abstract class ServerEvaluationStrategy {
         }
         return addressesAndPorts;
     }
+
+    /**
+     * @param protocolForInternalUrl
+     * @return https, if {@link #useHttpsForExternalUrls()} method in sub-class returns true and protocol for internal Url is http
+     */
+    private String getProtocolForExternalUrl(final String protocolForInternalUrl) {
+        if (useHttpsForExternalUrls() && HTTP.equals(protocolForInternalUrl)) {
+            return HTTPS;
+        }
+        return protocolForInternalUrl;
+    }
+
 }
