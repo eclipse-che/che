@@ -31,7 +31,7 @@ import java.util.stream.Stream;
  * containers are running on the same Docker network and are exposed through the same single port.
  *
  * This server evaluation strategy will return a completed {@link ServerImpl} with internal addresses set
- * as {@link LocalDockerServerEvaluationStrategy} does. Contrarily external addresses will have the following format:
+ * as {@link LocalDockerServerEvaluationStrategy} does. Contrary external addresses will have the following format:
  *
  *       serverName.workspaceID.cheExternalAddress (e.g. terminal.79rfwhqaztq2ru2k.che.local)
  *
@@ -45,10 +45,19 @@ public class LocalDockerSinglePortServerEvaluationStrategy extends LocalDockerSe
 
     private static final String CHE_WORKSPACE_ID_ENV_VAR = "CHE_WORKSPACE_ID";
 
+    private boolean secureExternalUrls;
+
     @Inject
     public LocalDockerSinglePortServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String internalAddress,
-                                                         @Nullable @Named("che.docker.ip.external") String externalAddress) {
+                                                         @Nullable @Named("che.docker.ip.external") String externalAddress,
+                                                         @Named("che.docker.server_evaluation_strategy.secure.external.urls") boolean secureExternalUrls) {
         super(internalAddress, externalAddress);
+        this.secureExternalUrls = secureExternalUrls;
+    }
+
+    @Override
+    protected boolean useHttpsForExternalUrls() {
+        return this.secureExternalUrls;
     }
 
     @Override
