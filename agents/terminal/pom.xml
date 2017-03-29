@@ -63,10 +63,14 @@
                                 <!--To not use godep tool vendored dependencies are copied into correct place of GOPATH
                                 by maven-->
                                 <copy todir="${project.build.directory}/go-workspace/src">
-                                    <fileset dir="${basedir}/../go-agents/src/main/go/vendor/" includes="**/*" />
+                                    <fileset dir="${basedir}/../go-agents/vendor/" includes="**/*" />
                                 </copy>
-                                <copy todir="${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents/src/main/go">
-                                    <fileset dir="${basedir}/../go-agents/src/main/go/" excludes="vendor/" includes="**/*.*go" />
+                                <copy todir="${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents">
+                                    <fileset dir="${basedir}/../go-agents/">
+                                        <exclude name="vendor/"/>
+                                        <exclude name="target/"/>
+                                        <include name="**/*.*go"/>
+                                    </fileset>
                                 </copy>
                             </target>
                         </configuration>
@@ -134,7 +138,7 @@
                                     <goal>exec</goal>
                                     <configuration>
                                         <executable>go</executable>
-                                        <workingDirectory>${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents/src/main/go/terminal-agent</workingDirectory>
+                                        <workingDirectory>${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents/terminal-agent</workingDirectory>
                                         <arguments>
                                             <argument>build</argument>
                                             <argument>-a</argument>

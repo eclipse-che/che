@@ -325,11 +325,16 @@ public final class ResourceManager {
         final Path path = Path.valueOf(name);
 
         return findResource(parent.getLocation().append(path), true).thenPromise(resource -> {
-            checkState(!resource.isPresent(), "Resource already exists");
-            checkArgument(!parent.getLocation().isRoot(), "Failed to create folder in workspace root");
+            if (resource.isPresent()) {
+                return promises.reject(new IllegalStateException("Resource already exists"));
+            }
 
-            if (path.segmentCount() == 1) {
-                checkArgument(checkFolderName(name), "Invalid folder name");
+            if (parent.getLocation().isRoot()) {
+                return promises.reject(new IllegalArgumentException("Failed to create folder in workspace root"));
+            }
+
+            if (path.segmentCount() == 1 && checkFolderName(name)) {
+                return promises.reject(new IllegalArgumentException("Invalid folder name"));
             }
 
             return ps.createFolder(parent.getLocation().append(name)).thenPromise(reference -> {
@@ -342,11 +347,18 @@ public final class ResourceManager {
     }
 
     Promise<File> createFile(final Container parent, final String name, final String content) {
-        checkArgument(checkFileName(name), "Invalid file name");
+        if (!checkFileName(name)) {
+            return promises.reject(new IllegalArgumentException("Invalid file name"));
+        }
 
         return findResource(parent.getLocation().append(name), true).thenPromise(resource -> {
-            checkState(!resource.isPresent(), "Resource already exists");
-            checkArgument(!parent.getLocation().isRoot(), "Failed to create file in workspace root");
+            if (resource.isPresent()) {
+                return promises.reject(new IllegalStateException("Resource already exists"));
+            }
+
+            if (parent.getLocation().isRoot()) {
+                return promises.reject(new IllegalArgumentException("Failed to create file in workspace root"));
+            }
 
             return ps.createFile(parent.getLocation().append(name), content).thenPromise(reference -> {
                 final Resource createdFile = newResourceFrom(reference);

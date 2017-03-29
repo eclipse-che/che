@@ -832,6 +832,7 @@ export class CreateProjectController {
    * Call the create operation that may create or import a project
    */
   create(): void {
+    this.importProjectData = this.getDefaultProjectJson();
     this.importProjectData.project.description = this.projectDescription;
     this.importProjectData.project.name = this.projectName;
     this.createProjectSvc.setProject(this.projectName);

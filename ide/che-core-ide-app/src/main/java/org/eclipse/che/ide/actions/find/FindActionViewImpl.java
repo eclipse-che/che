@@ -19,10 +19,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -183,18 +179,11 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
         layoutPanel.setWidgetHidden(actionsPanel, true);
         layoutPanel.setHeight("60px");
 
-        addCloseHandler(new CloseHandler<PopupPanel>() {
-            @Override
-            public void onClose(CloseEvent<PopupPanel> event) {
-                delegate.onClose();
-            }
-        });
+        addCloseHandler(event -> delegate.onClose());
 
-        includeNonMenu.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                delegate.nameChanged(nameField.getText(), event.getValue());
-            }
+        includeNonMenu.addValueChangeHandler(event -> {
+            includeNonMenu.getElement().setAttribute("checked", Boolean.toString(event.getValue()));
+            delegate.nameChanged(nameField.getText(), event.getValue());
         });
     }
 
@@ -216,12 +205,7 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
             hideActions();
         }
 
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                center();
-            }
-        });
+        Scheduler.get().scheduleDeferred(() -> center());
     }
 
     @Override
@@ -252,12 +236,7 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
         layoutPanel.setHeight("250px");
 
         if (isVisible()) {
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                @Override
-                public void execute() {
-                    center();
-                }
-            });
+            Scheduler.get().scheduleDeferred(() -> center());
         }
     }
 
@@ -270,12 +249,7 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
         layoutPanel.setHeight("60px");
 
         if (isVisible()) {
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                @Override
-                public void execute() {
-                    center();
-                }
-            });
+            Scheduler.get().scheduleDeferred(() -> center());
         }
     }
 
@@ -324,12 +298,7 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
                 return;
         }
 
-        Scheduler.get().scheduleDeferred(new Command() {
-            @Override
-            public void execute() {
-                delegate.nameChanged(nameField.getText(), includeNonMenu.getValue());
-            }
-        });
+        Scheduler.get().scheduleDeferred((Command)() -> delegate.nameChanged(nameField.getText(), includeNonMenu.getValue()));
     }
 
 }
