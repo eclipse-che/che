@@ -99,4 +99,9 @@ public class LocalDockerServerEvaluationStrategy extends ServerEvaluationStrateg
                         internalHost;
     }
 
+    @Override
+    protected boolean useHttpsForExternalUrls() {
+        return false;
+    }
+
 }

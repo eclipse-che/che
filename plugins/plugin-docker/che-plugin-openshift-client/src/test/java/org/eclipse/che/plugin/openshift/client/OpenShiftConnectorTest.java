@@ -39,6 +39,8 @@ public class OpenShiftConnectorTest {
     private static final String   OPENSHIFT_DEFAULT_WORKSPACE_PROJECTS_STORAGE = "/projects";
     private static final String   CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS = "che.openshift.mini";
     private static final String   CHE_WORKSPACE_CPU_LIMIT = "1";
+    private static final boolean  SECURE_ROUTES = false;
+
 
     @Mock
     private DockerConnectorConfiguration       dockerConnectorConfiguration;
@@ -76,7 +78,8 @@ public class OpenShiftConnectorTest {
                                                     OPENSHIFT_DEFAULT_WORKSPACE_STORAGE,
                                                     OPENSHIFT_DEFAULT_WORKSPACE_PROJECTS_STORAGE,
                                                     CHE_WORKSPACE_CPU_LIMIT,
-                                                    null);
+                                                    null,
+                                                    SECURE_ROUTES);
         String workspaceID = openShiftConnector.getCheWorkspaceId(createContainerParams);
 
         //Then

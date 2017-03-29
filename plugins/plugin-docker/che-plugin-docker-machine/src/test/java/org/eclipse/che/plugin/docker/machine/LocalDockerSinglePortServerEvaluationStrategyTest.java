@@ -93,7 +93,7 @@ public class LocalDockerSinglePortServerEvaluationStrategyTest {
     @Test
     public void shouldUseServerRefToBuildAddressWhenAvailable() throws Exception {
         // given
-        strategy = new LocalDockerSinglePortServerEvaluationStrategy(null, null);
+        strategy = new LocalDockerSinglePortServerEvaluationStrategy(null, null, false);
 
         final Map<String, ServerImpl> expectedServers = getExpectedServers(CHE_DOCKER_IP_EXTERNAL,
                                                                            CONTAINERCONFIG_HOSTNAME,
