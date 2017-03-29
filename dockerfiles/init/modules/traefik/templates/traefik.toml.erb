@@ -83,7 +83,7 @@ checkNewVersion = false
 
 [entryPoints]
   [entryPoints.http]
-  address = ":8080"
+  address = ":<%= scope.lookupvar('che::che_port') -%>"
 
 [docker]
 watch = true

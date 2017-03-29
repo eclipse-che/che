@@ -36,7 +36,7 @@ che:
   labels:
     traefik.che.frontend.backend: "che-server"
     traefik.che.frontend.entryPoints: "http"
-    traefik.che.port: "8080"
+    traefik.che.port: "<%= scope.lookupvar('che::che_port') -%>"
     traefik.che.frontend.rule: "PathPrefix:/"
   container_name: <%= ENV["CHE_CONTAINER_NAME"] %>
 <% if scope.lookupvar('che::che_user') != 'root' -%>
