@@ -36,10 +36,10 @@ import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.context.QueryParameters;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
@@ -73,14 +73,14 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
                                      EventBus eventBus,
                                      AppContext appContext,
                                      NotificationManager notificationManager,
-                                     MessageBusProvider messageBusProvider,
                                      BrowserAddress browserAddress,
                                      DialogFactory dialogFactory,
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
-                                     WorkspaceEventsHandler workspaceEventsHandler,
                                      LoaderPresenter loader,
-                                     QueryParameters queryParameters) {
+                                     QueryParameters queryParameters,
+                                     MachineLogsRestorer machineLogsRestorer,
+                                     RequestTransmitter requestTransmitter) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
               startWorkspacePresenter,
@@ -89,13 +89,13 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
               eventBus,
               appContext,
               notificationManager,
-              messageBusProvider,
               browserAddress,
               dialogFactory,
               preferencesManager,
               dtoFactory,
-              workspaceEventsHandler,
-              loader);
+              loader,
+              machineLogsRestorer,
+              requestTransmitter);
         this.factoryServiceClient = factoryServiceClient;
         this.queryParameters = queryParameters;
     }

@@ -112,6 +112,34 @@ public class RequestTransmitter {
     }
 
     /**
+     * Transmit a notification with params as a string object
+     *
+     * @param endpointId
+     *         endpoint to address a transmission
+     * @param method
+     *         method name to address a transmission
+     * @param pValue
+     *         params value
+     */
+    public void transmitStringToNone(String endpointId, String method, String pValue) {
+        checkEndpointId(endpointId);
+        checkMethodName(method);
+        checkParamsValue(pValue);
+
+        Log.debug(getClass(), "Initiating a transmission of a notification: " +
+                              "endpoint ID: " + endpointId + ", " +
+                              "method: " + method + ", " +
+                              "string value: " + pValue);
+
+        transmitter.newRequest()
+                   .endpointId(endpointId)
+                   .methodName(method)
+                   .paramsAsString(pValue)
+                   .sendAndSkipResult();
+
+    }
+
+    /**
      * Transmit a notification with params as a list of objects
      *
      * @param endpointId

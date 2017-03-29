@@ -13,11 +13,18 @@ package org.eclipse.che.plugin.docker.machine;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.model.machine.MachineLogMessage;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.core.util.AbstractLineConsumer;
+import org.eclipse.che.api.core.util.CompositeLineConsumer;
 import org.eclipse.che.api.core.util.FileCleaner;
+import org.eclipse.che.api.core.util.JsonRpcEndpointIdsHolder;
+import org.eclipse.che.api.core.util.JsonRpcMessageConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.environment.server.MachineInstanceProvider;
@@ -27,6 +34,7 @@ import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLogMessageImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -110,6 +118,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
     private final ExecutorService                               executor;
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
+    private final RequestTransmitter                            transmitter;
+    private final JsonRpcEndpointIdsHolder                      endpointIdsHolder;
     private final boolean                                       doForcePullOnBuild;
     private final boolean                                       privilegedMode;
     private final int                                           pidsLimit;
@@ -137,6 +147,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                                DockerMachineFactory dockerMachineFactory,
                                DockerInstanceStopDetector dockerInstanceStopDetector,
+                               RequestTransmitter transmitter,
+                               JsonRpcEndpointIdsHolder endpointIdsHolder,
                                @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
                                @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
                                @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
@@ -162,6 +174,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
+        this.transmitter = transmitter;
+        this.endpointIdsHolder = endpointIdsHolder;
         this.doForcePullOnBuild = doForcePullOnBuild;
         this.privilegedMode = privilegedMode;
         this.snapshotUseRegistry = snapshotUseRegistry;
@@ -262,10 +276,20 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         // copy to not affect/be affected by changes in origin
         service = new CheServiceImpl(service);
 
+        JsonRpcMessageConsumer<MachineLogMessage> messageConsumer =
+                new JsonRpcMessageConsumer<>("event:environment-output:message", transmitter, endpointIdsHolder.getEndpointIds());
+
+        LineConsumer logger = new CompositeLineConsumer(machineLogger, new AbstractLineConsumer() {
+            @Override
+            public void writeLine(String line) throws IOException {
+                messageConsumer.consume(new MachineLogMessageImpl(machineName, line));
+            }
+        });
+
         ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
         ProgressMonitor progressMonitor = currentProgressStatus -> {
             try {
-                machineLogger.writeLine(progressLineFormatter.format(currentProgressStatus));
+                logger.writeLine(progressLineFormatter.format(currentProgressStatus));
             } catch (IOException e) {
                 LOG.error(e.getLocalizedMessage(), e);
             }
@@ -292,7 +316,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
             readContainerLogsInSeparateThread(container,
                                               workspaceId,
                                               service.getId(),
-                                              machineLogger);
+                                              logger);
 
             DockerNode node = dockerMachineFactory.createNode(workspaceId, container);
 
@@ -327,7 +351,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                        container,
                                                        image,
                                                        node,
-                                                       machineLogger);
+                                                       logger);
         } catch (SourceNotFoundException e) {
             throw e;
         } catch (RuntimeException | ServerException | NotFoundException | IOException e) {
