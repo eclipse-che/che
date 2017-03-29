@@ -104,9 +104,9 @@ public class CommandApiModule extends AbstractGinModule {
         GinMapBinder<String, WsAgentComponent> wsAgentComponentBinder = GinMapBinder.newMapBinder(binder(),
                                                                                                   String.class,
                                                                                                   WsAgentComponent.class);
-        wsAgentComponentBinder.addBinding("CommandManagerImpl").to(CommandManagerImpl.class);
-        wsAgentComponentBinder.addBinding("CommandsExplorerPresenter").to(CommandsExplorerPresenter.class);
-        wsAgentComponentBinder.addBinding("ExecuteCommandActionManager").to(ExecuteCommandActionManager.class);
+        wsAgentComponentBinder.addBinding("Z CommandManagerImpl").to(CommandManagerImpl.class);
+        wsAgentComponentBinder.addBinding("Z CommandsExplorerPresenter").to(CommandsExplorerPresenter.class);
+        wsAgentComponentBinder.addBinding("Z ExecuteCommandActionManager").to(ExecuteCommandActionManager.class);
 
         install(new GinFactoryModuleBuilder().build(ExecuteCommandActionFactory.class));
         install(new GinFactoryModuleBuilder().build(GoalPopUpGroupFactory.class));

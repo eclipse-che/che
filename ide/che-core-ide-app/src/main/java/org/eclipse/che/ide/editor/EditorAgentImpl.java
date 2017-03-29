@@ -15,7 +15,6 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.util.ArrayOf;
 
-import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -30,7 +29,6 @@ import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.LinkWithEditorAction;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.constraints.Direction;
@@ -63,7 +61,6 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
@@ -108,8 +105,8 @@ public class EditorAgentImpl implements EditorAgent,
     private final List<EditorPartPresenter>           openedEditors;
     private final Map<EditorPartPresenter, String>    openedEditorsToProviders;
     private final Provider<EditorContentSynchronizer> editorContentSynchronizerProvider;
-    private final AppContext                          appContext;
     private final PromiseProvider                     promiseProvider;
+    private final ResourceProvider                    resourceProvider;
     private       List<EditorPartPresenter>           dirtyEditors;
     private       EditorPartPresenter                 activeEditor;
     private       PartPresenter                       activePart;
@@ -123,8 +120,8 @@ public class EditorAgentImpl implements EditorAgent,
                            CoreLocalizationConstant coreLocalizationConstant,
                            EditorMultiPartStackPresenter editorMultiPartStack,
                            Provider<EditorContentSynchronizer> editorContentSynchronizerProvider,
-                           AppContext appContext,
-                           PromiseProvider promiseProvider) {
+                           PromiseProvider promiseProvider,
+                           ResourceProvider resourceProvider) {
         this.eventBus = eventBus;
         this.fileTypeRegistry = fileTypeRegistry;
         this.preferencesManager = preferencesManager;
@@ -133,8 +130,8 @@ public class EditorAgentImpl implements EditorAgent,
         this.coreLocalizationConstant = coreLocalizationConstant;
         this.editorMultiPartStack = editorMultiPartStack;
         this.editorContentSynchronizerProvider = editorContentSynchronizerProvider;
-        this.appContext = appContext;
         this.promiseProvider = promiseProvider;
+        this.resourceProvider = resourceProvider;
         this.openedEditors = newArrayList();
         this.openedEditorsToProviders = new HashMap<>();
 
@@ -515,9 +512,9 @@ public class EditorAgentImpl implements EditorAgent,
             @Override
             public void makeCall(final AsyncCallback<Void> callback) {
                 String path = file.getString("PATH");
-                appContext.getWorkspaceRoot().getFile(path).then(new Operation<Optional<File>>() {
+                resourceProvider.getResource(path).then(new Operation<java.util.Optional<VirtualFile>>() {
                     @Override
-                    public void apply(final Optional<File> optionalFile) throws OperationException {
+                    public void apply(java.util.Optional<VirtualFile> optionalFile) throws OperationException {
                         if (optionalFile.isPresent()) {
                             restoreCreateEditor(optionalFile.get(), file, editorPartStack, callback, activeEditors);
                         } else {
@@ -531,7 +528,7 @@ public class EditorAgentImpl implements EditorAgent,
 
     }
 
-    private void restoreCreateEditor(final File resourceFile, JsonObject file, final EditorPartStack editorPartStack,
+    private void restoreCreateEditor(final VirtualFile resourceFile, JsonObject file, final EditorPartStack editorPartStack,
                                      final AsyncCallback<Void> openCallback,
                                      final Map<EditorPartPresenter, EditorPartStack> activeEditors) {
         String providerId = file.getString("EDITOR_PROVIDER");
