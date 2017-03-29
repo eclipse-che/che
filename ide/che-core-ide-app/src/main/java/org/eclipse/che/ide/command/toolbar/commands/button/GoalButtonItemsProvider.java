@@ -101,6 +101,8 @@ public class GoalButtonItemsProvider implements ItemsProvider {
         this.commands.clear();
         this.commands.addAll(commands);
 
+        defaultItem = null;
+
         dataChangedHandler.onDataChanged();
     }
 

@@ -79,7 +79,6 @@ public class ExecuteCommandViewImpl implements ExecuteCommandView {
         this.commands.clear();
         this.commands.putAll(commands);
 
-        buttonsCache.clear();
         buttonsPanel.clear();
 
         createOrUpdateButtons();
@@ -96,9 +95,12 @@ public class ExecuteCommandViewImpl implements ExecuteCommandView {
 
     /** Adds button with the commands of the given goal to panel. */
     private void createOrUpdateButton(CommandGoal goal) {
-        final GoalButton button = buttonsCache.getOrDefault(goal, buttonFactory.newButton(goal,
-                                                                                          delegate,
-                                                                                          getKeyBinding(goal)));
+        GoalButton button = buttonsCache.get(goal);
+
+        if (button == null) {
+            button = buttonFactory.newButton(goal, delegate, getKeyBinding(goal));
+        }
+
         buttonsCache.put(goal, button);
 
         final List<CommandImpl> commandsOfGoal = commands.getOrDefault(goal, emptyList());
