@@ -333,7 +333,7 @@ public final class ResourceManager {
                 return promises.reject(new IllegalArgumentException("Failed to create folder in workspace root"));
             }
 
-            if (path.segmentCount() == 1 && checkFolderName(name)) {
+            if (path.segmentCount() == 1 && !checkFolderName(name)) {
                 return promises.reject(new IllegalArgumentException("Invalid folder name"));
             }
 
