@@ -20,5 +20,4 @@ public class ExecNotFoundException extends DockerException {
     public ExecNotFoundException(String message) {
         super(message, 404);
     }
-
 }
