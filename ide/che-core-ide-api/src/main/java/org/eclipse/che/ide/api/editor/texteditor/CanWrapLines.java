@@ -12,6 +12,8 @@ package org.eclipse.che.ide.api.editor.texteditor;
 
 /**
  * Determined whether the editor implementing this interface can wrap lines.
+ *
+ * @author Vitaliy Guliy
  */
 public interface CanWrapLines {
 

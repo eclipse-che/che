@@ -20,6 +20,8 @@ import org.eclipse.che.ide.api.editor.texteditor.CanWrapLines;
 
 /**
  * Toggle wrapping long lines action
+ *
+ * @author Vitaliy Guliy
  */
 public class SoftWrapAction extends ToggleAction {
 
