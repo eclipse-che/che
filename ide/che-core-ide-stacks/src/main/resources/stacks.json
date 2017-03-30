@@ -662,6 +662,59 @@
           }
         }
       },
+  {
+    "id": "php5.6-default",
+    "creator": "ide",
+    "name": "PHP",
+    "description": "Default PHP Stack with PHP 5.6, most popular extensions.",
+    "scope": "general",
+    "tags": [
+      "Ubuntu",
+      "Git",
+      "PHP",
+      "mysql",
+      "sqlite",
+      "Apache",
+      "dockerimager"
+    ],
+    "components": [
+      {
+        "name": "PHP",
+        "version": "5.6"
+      },
+      {
+        "name": "Apache",
+        "version": "2"
+      },
+      {
+        "name": "MySQL",
+        "version": "5.6"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "eclipse/php:5.6"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "eclipse/php:5.6",
+            "type": "dockerimage"
+          }
+        }
+      },
       "name": "default",
       "defaultEnv": "default",
       "description": null,
