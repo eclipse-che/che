@@ -32,7 +32,6 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
-import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -50,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
@@ -106,7 +106,9 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     public void start(Callback<WsAgentComponent, Exception> callback) {
         callback.onSuccess(this);
 
-        workspaceAgent.openPart(this, NAVIGATION, Constraints.LAST);
+        if (partStack == null || !partStack.containsPart(this)) {
+            workspaceAgent.openPart(this, NAVIGATION, LAST);
+        }
 
         refreshView();
         commandManager.addCommandChangedListener(this);
