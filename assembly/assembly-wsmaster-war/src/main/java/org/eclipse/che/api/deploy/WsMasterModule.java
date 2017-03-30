@@ -112,6 +112,7 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.auth.oauth.OAuthTokenProvider.class)
                 .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
         bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
+        bind(org.eclipse.che.plugin.pullrequest.server.PullRequestWorkflowService.class);
 
         bind(org.eclipse.che.api.core.notification.WSocketEventBusServer.class);
         // additional ports for development of extensions

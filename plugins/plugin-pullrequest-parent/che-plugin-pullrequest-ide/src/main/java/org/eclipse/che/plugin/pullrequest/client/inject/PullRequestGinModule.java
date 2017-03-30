@@ -14,11 +14,14 @@ import org.eclipse.che.plugin.pullrequest.client.dialogs.commit.CommitView;
 import org.eclipse.che.plugin.pullrequest.client.dialogs.commit.CommitViewImpl;
 import org.eclipse.che.plugin.pullrequest.client.parts.contribute.ContributePartView;
 import org.eclipse.che.plugin.pullrequest.client.parts.contribute.ContributePartViewImpl;
+import org.eclipse.che.plugin.pullrequest.client.rest.PullRequestWorkflowServiceClient;
+import org.eclipse.che.plugin.pullrequest.client.rest.PullRequestWorkflowServiceClientImpl;
 import org.eclipse.che.plugin.pullrequest.client.steps.AddForkRemoteStepFactory;
 import org.eclipse.che.plugin.pullrequest.client.steps.PushBranchOnForkStep;
 import org.eclipse.che.plugin.pullrequest.client.steps.PushBranchStepFactory;
 import org.eclipse.che.plugin.pullrequest.client.steps.WaitForkOnRemoteStepFactory;
 import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowExecutor;
+
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 
@@ -40,6 +43,9 @@ public class PullRequestGinModule extends AbstractGinModule {
 
         // bind the part view
         bind(ContributePartView.class).to(ContributePartViewImpl.class);
+
+        // bind pullrequest wf service
+        bind(PullRequestWorkflowServiceClient.class).to(PullRequestWorkflowServiceClientImpl.class);
 
         // the steps
         bind(WorkflowExecutor.class).in(Singleton.class);
