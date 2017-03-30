@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor.page.goal;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.command.CommandGoal;
-import org.eclipse.che.ide.ui.listbox.CustomComboBox;
+import org.eclipse.che.ide.ui.listbox.CustomListBox;
 
 import java.util.Set;
 
@@ -32,12 +32,16 @@ import java.util.Set;
  */
 public class GoalPageViewImpl extends Composite implements GoalPageView {
 
+    @VisibleForTesting
+    static final String CREATE_GOAL_ITEM = "New Command Goal...";
+
     private static final GoalPageViewImplUiBinder UI_BINDER = GWT.create(GoalPageViewImplUiBinder.class);
 
     @UiField
-    CustomComboBox goalComboBox;
+    CustomListBox goalsList;
 
     private ActionDelegate delegate;
+    private String         lastValue;
 
     @Inject
     public GoalPageViewImpl() {
@@ -45,29 +49,35 @@ public class GoalPageViewImpl extends Composite implements GoalPageView {
     }
 
     @Override
-    public void setAvailableGoals(Set<CommandGoal> goals) {
-        goalComboBox.clear();
-        goals.forEach(g -> goalComboBox.addItem(g.getId()));
-    }
-
-    @Override
-    public void setGoal(String goalId) {
-        goalComboBox.setValue(goalId);
-    }
-
-    @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
     }
 
-    @UiHandler({"goalComboBox"})
-    void onGoalKeyUp(KeyUpEvent event) {
-        delegate.onGoalChanged(goalComboBox.getValue());
+    @Override
+    public void setAvailableGoals(Set<CommandGoal> goals) {
+        goalsList.clear();
+        goals.forEach(g -> goalsList.addItem(g.getId()));
+
+        goalsList.addItem(CREATE_GOAL_ITEM);
     }
 
-    @UiHandler({"goalComboBox"})
+    @Override
+    public void setGoal(String goalId) {
+        goalsList.select(goalId);
+        lastValue = goalId;
+    }
+
+    @UiHandler({"goalsList"})
     void onGoalChanged(ChangeEvent event) {
-        delegate.onGoalChanged(goalComboBox.getValue());
+        String chosenValue = goalsList.getValue();
+
+        if (chosenValue.equals(CREATE_GOAL_ITEM)) {
+            goalsList.select(lastValue);
+            delegate.onCreateGoal();
+        } else {
+            lastValue = chosenValue;
+            delegate.onGoalChanged(lastValue);
+        }
     }
 
     interface GoalPageViewImplUiBinder extends UiBinder<Widget, GoalPageViewImpl> {

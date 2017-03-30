@@ -15,27 +15,29 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.FontAwesome;
+import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.command.goal.DebugGoal;
 import org.eclipse.che.ide.command.goal.RunGoal;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandView.ActionDelegate;
+import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 
-/**
- * Factory for {@link GoalButton}s.
- *
- * @see GoalButton
- */
+/** Factory for {@link GoalButton}s. */
 @Singleton
 public class GoalButtonFactory {
 
     private final CommandResources resources;
     private final AppContext       appContext;
-    private final PopupItemFactory popupItemFactory;
+    private final MenuItemsFactory menuItemsFactory;
+    private final ActionManager    actionManager;
+    private final KeyBindingAgent  keyBindingAgent;
     private final ToolbarMessages  messages;
     private final RunGoal          runGoal;
     private final DebugGoal        debugGoal;
@@ -43,16 +45,20 @@ public class GoalButtonFactory {
     @Inject
     public GoalButtonFactory(CommandResources resources,
                              AppContext appContext,
-                             PopupItemFactory popupItemFactory,
+                             MenuItemsFactory menuItemsFactory,
                              ToolbarMessages messages,
                              RunGoal runGoal,
-                             DebugGoal debugGoal) {
+                             DebugGoal debugGoal,
+                             ActionManager actionManager,
+                             KeyBindingAgent keyBindingAgent) {
         this.resources = resources;
         this.appContext = appContext;
-        this.popupItemFactory = popupItemFactory;
+        this.menuItemsFactory = menuItemsFactory;
         this.messages = messages;
         this.runGoal = runGoal;
         this.debugGoal = debugGoal;
+        this.actionManager = actionManager;
+        this.keyBindingAgent = keyBindingAgent;
     }
 
     /**
@@ -62,26 +68,34 @@ public class GoalButtonFactory {
      *         {@link CommandGoal} for displaying commands
      * @param delegate
      *         delegate for receiving events
+     * @param keyBinding
+     *         key binding for the button
      * @return {@link GoalButton}
      */
-    public GoalButton newButton(CommandGoal goal, ActionDelegate delegate) {
-        final GoalButtonDataProvider dataProvider = new GoalButtonDataProvider(appContext, popupItemFactory);
-        final GoalButton button = new GoalButton(goal, getIconForGoal(goal), dataProvider, messages);
+    public GoalButton newButton(CommandGoal goal, ActionDelegate delegate, @Nullable CharCodeWithModifiers keyBinding) {
+        final GoalButtonItemsProvider itemsProvider = new GoalButtonItemsProvider(appContext, menuItemsFactory);
+        final GoalButton button = new GoalButton(goal,
+                                                 getIconForGoal(goal),
+                                                 itemsProvider,
+                                                 messages,
+                                                 actionManager,
+                                                 keyBindingAgent,
+                                                 keyBinding);
 
         button.setActionHandler(item -> {
-            if (item instanceof CommandPopupItem) {
-                final CommandImpl command = ((CommandPopupItem)item).getCommand();
+            if (item instanceof CommandItem) {
+                final CommandImpl command = ((CommandItem)item).getCommand();
 
                 delegate.onCommandExecute(command, null);
-                dataProvider.setDefaultItem(item);
+                itemsProvider.setDefaultItem(item);
                 button.updateTooltip();
-            } else if (item instanceof MachinePopupItem) {
-                final MachinePopupItem machinePopupItem = (MachinePopupItem)item;
+            } else if (item instanceof MachineItem) {
+                final MachineItem machinePopupItem = (MachineItem)item;
 
                 delegate.onCommandExecute(machinePopupItem.getCommand(), machinePopupItem.getMachine());
-                dataProvider.setDefaultItem(item);
+                itemsProvider.setDefaultItem(item);
                 button.updateTooltip();
-            } else if (item instanceof GuidePopupItem) {
+            } else if (item instanceof GuideItem) {
                 delegate.onGuide(goal);
             }
         });

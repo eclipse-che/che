@@ -13,15 +13,15 @@ package org.eclipse.che.ide.command.toolbar.commands.button;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
-import org.eclipse.che.ide.ui.menubutton.PopupItem;
+import org.eclipse.che.ide.ui.menubutton.MenuItem;
 
-/** A {@link PopupItem} represents a hint which guides the user into the flow of creating a command. */
-public class GuidePopupItem implements PopupItem {
+/** A {@link MenuItem} represents a hint which guides the user into the flow of creating a command. */
+public class GuideItem implements MenuItem {
 
     private final ToolbarMessages messages;
 
     @Inject
-    public GuidePopupItem(ToolbarMessages messages) {
+    public GuideItem(ToolbarMessages messages) {
         this.messages = messages;
     }
 

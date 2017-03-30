@@ -17,7 +17,6 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.promises.client.Function;
@@ -30,13 +29,11 @@ import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
-import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
-import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
-import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent.WorkspaceReadyHandler;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.Arrays;
@@ -53,14 +50,13 @@ import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL
 
 /** Implementation of {@link CommandManager}. */
 @Singleton
-public class CommandManagerImpl implements CommandManager, Component, WorkspaceReadyHandler {
+public class CommandManagerImpl implements CommandManager, WsAgentComponent {
 
     private final AppContext                      appContext;
     private final PromiseProvider                 promiseProvider;
     private final CommandTypeRegistry             commandTypeRegistry;
     private final ProjectCommandManagerDelegate   projectCommandManager;
     private final WorkspaceCommandManagerDelegate workspaceCommandManager;
-    private final EventBus                        eventBus;
     private final SelectionAgent                  selectionAgent;
 
     /** Map of the commands' names to the commands. */
@@ -74,14 +70,12 @@ public class CommandManagerImpl implements CommandManager, Component, WorkspaceR
                               CommandTypeRegistry commandTypeRegistry,
                               ProjectCommandManagerDelegate projectCommandManagerDelegate,
                               WorkspaceCommandManagerDelegate workspaceCommandManagerDelegate,
-                              EventBus eventBus,
                               SelectionAgent selectionAgent) {
         this.appContext = appContext;
         this.promiseProvider = promiseProvider;
         this.commandTypeRegistry = commandTypeRegistry;
         this.projectCommandManager = projectCommandManagerDelegate;
         this.workspaceCommandManager = workspaceCommandManagerDelegate;
-        this.eventBus = eventBus;
         this.selectionAgent = selectionAgent;
 
         commands = new HashMap<>();
@@ -90,18 +84,11 @@ public class CommandManagerImpl implements CommandManager, Component, WorkspaceR
     }
 
     @Override
-    public void start(Callback<Component, Exception> callback) {
-        eventBus.addHandler(WorkspaceReadyEvent.getType(), this);
-
-        callback.onSuccess(this);
+    public void start(Callback<WsAgentComponent, Exception> callback) {
+        fetchCommands(callback);
     }
 
-    @Override
-    public void onWorkspaceReady(WorkspaceReadyEvent event) {
-        fetchCommands();
-    }
-
-    private void fetchCommands() {
+    private void fetchCommands(Callback<WsAgentComponent, Exception> callback) {
         // get all commands related to the workspace
         workspaceCommandManager.getCommands(appContext.getWorkspaceId()).then(workspaceCommands -> {
             workspaceCommands.forEach(workspaceCommand -> commands.put(workspaceCommand.getName(),
@@ -124,6 +111,8 @@ public class CommandManagerImpl implements CommandManager, Component, WorkspaceR
                           }
                       }
                   }));
+
+            callback.onSuccess(this);
 
             notifyCommandsLoaded();
         });

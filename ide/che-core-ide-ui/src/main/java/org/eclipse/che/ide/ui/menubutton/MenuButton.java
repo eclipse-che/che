@@ -27,23 +27,23 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.Optional;
 
-/** Button with popup menu opened by long click. */
-public class MenuPopupButton extends ButtonBase {
+/** Button with popup menu. */
+public class MenuButton extends ButtonBase {
 
     private static final Resources RESOURCES;
 
-    protected final MenuPopupItemDataProvider dataProvider;
-    private final   Timer                     showMenuTimer;
+    protected final ItemsProvider itemsProvider;
+    private final   Timer         showMenuTimer;
 
     private ActionHandler actionHandler;
 
     private FlowPanel marker = new FlowPanel();
-    private PopupItemList popupItemList;
+    private ItemsList menu;
 
-    public MenuPopupButton(SafeHtml content, MenuPopupItemDataProvider dataProvider) {
+    public MenuButton(SafeHtml content, ItemsProvider itemsProvider) {
         super(Document.get().createDivElement());
 
-        this.dataProvider = dataProvider;
+        this.itemsProvider = itemsProvider;
 
         getElement().setInnerSafeHtml(content);
 
@@ -57,7 +57,7 @@ public class MenuPopupButton extends ButtonBase {
         addStyleName(RESOURCES.css().button());
         attachEventHandlers();
 
-        dataProvider.setItemDataChangedHandler(this::updateButton);
+        itemsProvider.setDataChangedHandler(this::updateButton);
     }
 
     private void attachEventHandlers() {
@@ -74,14 +74,14 @@ public class MenuPopupButton extends ButtonBase {
         addDomHandler(event -> showMenuTimer.cancel(), MouseUpEvent.getType());
 
         addClickHandler(event -> {
-            if (popupItemList != null && popupItemList.isShowing()) {
+            if (menu != null && menu.isShowing()) {
                 return;
             }
 
-            final PopupItem defaultItem = dataProvider.getDefaultItem();
+            final Optional<MenuItem> defaultItem = itemsProvider.getDefaultItem();
 
-            if (defaultItem != null) {
-                getActionHandler().ifPresent(actionHandler -> actionHandler.onAction(defaultItem));
+            if (defaultItem.isPresent()) {
+                getActionHandler().ifPresent(actionHandler -> actionHandler.onAction(defaultItem.get()));
             } else {
                 showMenu();
             }
@@ -92,33 +92,34 @@ public class MenuPopupButton extends ButtonBase {
         return Optional.ofNullable(actionHandler);
     }
 
+    /** Set {@link ActionHandler} to handle {@link MenuItem}s selection. */
     public void setActionHandler(ActionHandler actionHandler) {
         this.actionHandler = actionHandler;
     }
 
     /** Shows or hides 'Open Menu' button. */
     private void updateButton() {
-        if (dataProvider.getItems().isEmpty()) {
+        if (itemsProvider.getItems().isEmpty()) {
             marker.removeFromParent();
         } else {
             marker = new FlowPanel();
-            marker.getElement().appendChild(RESOURCES.expansionImage().getSvg().getElement());
+            marker.getElement().appendChild(RESOURCES.menuArrow().getSvg().getElement());
             marker.addStyleName(RESOURCES.css().expandedImage());
             getElement().appendChild(marker.getElement());
         }
     }
 
     private void showMenu() {
-        popupItemList = new PopupItemList(dataProvider.getItems(), dataProvider, RESOURCES, null);
-        getActionHandler().ifPresent(actionHandler -> popupItemList.setActionHandler(actionHandler));
-        popupItemList.setPopupPosition(getAbsoluteLeft(), getAbsoluteTop() + getOffsetHeight());
-        popupItemList.show();
+        menu = new ItemsList(itemsProvider.getItems(), itemsProvider, RESOURCES, null);
+        getActionHandler().ifPresent(actionHandler -> menu.setActionHandler(actionHandler));
+        menu.setPopupPosition(getAbsoluteLeft(), getAbsoluteTop() + getOffsetHeight());
+        menu.show();
     }
 
     public interface Resources extends ClientBundle {
 
-        @Source("expansionIcon.svg")
-        SVGResource expansionImage();
+        @Source("rightArrowIcon.svg")
+        SVGResource menuArrow();
 
         @Source({"button.css", "org/eclipse/che/ide/api/ui/style.css"})
         Css css();

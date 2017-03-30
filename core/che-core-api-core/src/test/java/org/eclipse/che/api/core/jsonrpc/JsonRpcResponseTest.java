@@ -14,7 +14,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -193,5 +192,15 @@ public class JsonRpcResponseTest {
         JsonElement actual = jsonParser.parse(jsonRpcResponse.toString());
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void shouldHaveErrorWhenPassingParametersWithError2() throws Exception {
+        response.remove("result");
+
+        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(null, error);
+
+        assertTrue(jsonRpcResponse.hasError());
+        assertFalse(jsonRpcResponse.hasResult());
     }
 }
