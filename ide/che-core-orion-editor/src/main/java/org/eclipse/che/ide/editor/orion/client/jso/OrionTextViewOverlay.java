@@ -33,6 +33,10 @@ public class OrionTextViewOverlay extends JavaScriptObject {
         this.setOptions(newValue);
     }-*/;
 
+    public final native void toggleWrapMode() /*-{
+        this.setOptions({wrapMode: !this.getOptions("wrapMode")});
+    }-*/;
+
     public final native void focus() /*-{
         this.focus();
     }-*/;

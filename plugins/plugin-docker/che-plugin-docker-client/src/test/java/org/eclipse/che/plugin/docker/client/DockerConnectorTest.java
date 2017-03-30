@@ -28,6 +28,7 @@ import org.eclipse.che.plugin.docker.client.dto.AuthConfig;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.DockerException;
+import org.eclipse.che.plugin.docker.client.exception.ExecNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
@@ -749,6 +750,17 @@ public class DockerConnectorTest {
         verify(dockerConnection).request();
         verify(dockerResponse).getStatus();
         verify(dockerResponse).getInputStream();
+    }
+
+    @Test(expectedExceptions = ExecNotFoundException.class,
+          expectedExceptionsMessageRegExp = EXCEPTION_ERROR_MESSAGE)
+    public void execStartShouldThrowExecNotFoundIf404Received() throws IOException {
+        StartExecParams startExecParams = StartExecParams.create(EXEC_ID);
+
+        doReturn(new ByteArrayInputStream(EXCEPTION_ERROR_MESSAGE.getBytes())).when(dockerResponse).getInputStream();
+        when(dockerResponse.getStatus()).thenReturn(RESPONSE_NOT_FOUND_CODE);
+
+        dockerConnector.startExec(startExecParams, logMessageProcessor);
     }
 
     @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = EXCEPTION_ERROR_MESSAGE)

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.6.0-SNAPSHOT</version>
+        <version>5.7.0-SNAPSHOT</version>
     </parent>
     <artifactId>terminal-agent</artifactId>
     <name>Agent :: Terminal</name>
@@ -67,9 +67,9 @@
                                 </copy>
                                 <copy todir="${project.build.directory}/go-workspace/src/github.com/eclipse/che/agents/go-agents">
                                     <fileset dir="${basedir}/../go-agents/">
-                                        <exclude name="vendor/"/>
-                                        <exclude name="target/"/>
-                                        <include name="**/*.*go"/>
+                                        <exclude name="vendor/" />
+                                        <exclude name="target/" />
+                                        <include name="**/*.*go" />
                                     </fileset>
                                 </copy>
                             </target>
