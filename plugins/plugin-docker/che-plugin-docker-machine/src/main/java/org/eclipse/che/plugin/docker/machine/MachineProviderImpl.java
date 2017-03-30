@@ -491,6 +491,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                  (long)(service.getMemLimit() * memorySwapMultiplier);
 
         addSystemWideContainerSettings(workspaceId,
+                                       machineName,
                                        isDev,
                                        service);
 
@@ -563,6 +564,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     }
 
     private void addSystemWideContainerSettings(String workspaceId,
+                                                String machineName,
                                                 boolean isDev,
                                                 CheServiceImpl composeService) throws IOException {
         List<String> portsToExpose;
@@ -573,13 +575,16 @@ public class MachineProviderImpl implements MachineInstanceProvider {
             volumes = devMachineSystemVolumes;
 
             env = new HashMap<>(devMachineEnvVariables);
-            env.put(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID, workspaceId);
             env.put(DockerInstanceRuntimeInfo.USER_TOKEN, getUserToken(workspaceId));
         } else {
             portsToExpose = commonMachinePortsToExpose;
-            env = commonMachineEnvVariables;
+            env = new HashMap<>(commonMachineEnvVariables);
             volumes = commonMachineSystemVolumes;
         }
+        // register workspace ID and Machine Name
+        env.put(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID, workspaceId);
+        env.put(DockerInstanceRuntimeInfo.CHE_MACHINE_NAME, machineName);
+
         composeService.getExpose().addAll(portsToExpose);
         composeService.getEnvironment().putAll(env);
         composeService.getVolumes().addAll(volumes);
