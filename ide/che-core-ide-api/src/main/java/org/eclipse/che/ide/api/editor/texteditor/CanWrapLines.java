@@ -8,26 +8,25 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.editor.preferences;
-
-import com.google.gwt.i18n.client.Messages;
+package org.eclipse.che.ide.api.editor.texteditor;
 
 /**
- * I18n Constants for the preference window.
+ * Determined whether the editor implementing this interface can wrap lines.
  *
- * @author "Mickaël Leduque"
+ * @author Vitaliy Guliy
  */
-public interface EditorPrefLocalizationConstant extends Messages {
+public interface CanWrapLines {
 
-    @Key("editortype.title")
-    String editorTypeTitle();
+    /**
+     * Determines whether line wrapping is active.
+     *
+     * @return <b>true</b> when line wrapping is active
+     */
+    boolean isWrapLines();
 
-    @Key("editortype.category")
-    String editorTypeCategory();
+    /**
+     * Toggles line wrapping mode.
+     */
+    void toggleWrapLines();
 
-    @DefaultMessage("Keys")
-    String keysSectionLabel();
-
-    @DefaultMessage("Key Bindings")
-    String keybindingsLabel();
 }

@@ -883,30 +883,25 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             return existedMachineNode;
         }
 
-        Collection<ProcessTreeNode> removedNodeChildrens = null;
+        //we need to keep old machine node children
+        ArrayList<ProcessTreeNode> children = new ArrayList<>();
 
         // remove existed node
         for (ProcessTreeNode node : rootNode.getChildren()) {
             if (machine.getConfig().getName().equals(node.getName())) {
+                children.addAll(node.getChildren());
                 rootNode.getChildren().remove(node);
-                removedNodeChildrens = node.getChildren();
                 break;
             }
         }
-
-        //we need to keep old machine node children
-        ArrayList<ProcessTreeNode> children = new ArrayList<>();
 
         // create new node
         final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, children);
         newMachineNode.setRunning(true);
         newMachineNode.setHasTerminalAgent(hasAgent(machine.getDisplayName(), TERMINAL_AGENT) || hasTerminal(machineId));
         newMachineNode.setHasSSHAgent(hasAgent(machine.getDisplayName(), SSH_AGENT));
-        if (removedNodeChildrens != null) {
-            for (ProcessTreeNode nodeChildren : removedNodeChildrens) {
-                nodeChildren.setParent(newMachineNode);
-                children.add(nodeChildren);
-            }
+        for (ProcessTreeNode child : children) {
+            child.setParent(newMachineNode);
         }
 
         machineNodes.put(machineId, newMachineNode);

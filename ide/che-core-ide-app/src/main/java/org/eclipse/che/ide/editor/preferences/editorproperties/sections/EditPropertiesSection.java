@@ -12,31 +12,24 @@ package org.eclipse.che.ide.editor.preferences.editorproperties.sections;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.editor.EditorLocalizationConstants;
+import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties.SOFT_WRAP;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties.EXPAND_TAB;
-import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties.TAB_SIZE;
-
 /**
- * The class provides info about 'Tabs' editor's section.
- *
- * @author Roman Nikitenko
+ * Provides a set of 'Editing' properties.
  */
 @Singleton
-public class TabsPropertiesSection implements EditorPropertiesSection {
+public class EditPropertiesSection implements EditorPropertiesSection {
     private final List<String>                properties;
     private final EditorLocalizationConstants locale;
 
     @Inject
-    public TabsPropertiesSection(EditorLocalizationConstants locale) {
+    public EditPropertiesSection(EditorLocalizationConstants locale) {
         this.locale = locale;
-        properties = Arrays.asList(TAB_SIZE.toString(),
-                                   EXPAND_TAB.toString()
-        );
+        properties = Arrays.asList(SOFT_WRAP.toString());
     }
 
     @Override
@@ -46,6 +39,6 @@ public class TabsPropertiesSection implements EditorPropertiesSection {
 
     @Override
     public String getSectionTitle() {
-        return locale.tabsPropertiesSection();
+        return locale.tabsEditSection();
     }
 }

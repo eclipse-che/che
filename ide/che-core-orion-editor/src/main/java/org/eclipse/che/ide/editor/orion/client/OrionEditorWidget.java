@@ -610,7 +610,6 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
         annotation.setRangeStyle(styleOverlay);
         annotation.setType("che-marker");
 
-
         editorOverlay.getAnnotationModel().addAnnotation(annotation);
         return new MarkerRegistration() {
             @Override
