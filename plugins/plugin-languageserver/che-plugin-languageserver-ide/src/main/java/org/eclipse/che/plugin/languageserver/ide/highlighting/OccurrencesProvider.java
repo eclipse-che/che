@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.highlighting;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.che.api.languageserver.shared.lsapi.DocumentHighlightDTO;

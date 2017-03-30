@@ -22,8 +22,8 @@ Development
 
 ```bash
 export CHE_PATH=~/code/che
-mkdir $GOPATH/src/github.com/eclipse/che/agents/go-agents/src/main -p
-ln -s $CHE_PATH/agents/go-agents/src/main/go $GOPATH/src/github.com/eclipse/che/agents/go-agents/src/main/go
+mkdir $GOPATH/src/github.com/eclipse/che/agents -p
+ln -s $CHE_PATH/agents/go-agents $GOPATH/src/github.com/eclipse/che/agents/go-agents
 ```
 
 That's it, `$GOPATH/src/github.com/eclipse/che/agents/go-agents` project is ready.
@@ -31,29 +31,29 @@ That's it, `$GOPATH/src/github.com/eclipse/che/agents/go-agents` project is read
 ##### Building linked project
 
 ```bash
-cd $GOPATH/src/github.com/eclipse/che/agents/go-agents/src/main/go && go build ./...
+cd $GOPATH/src/github.com/eclipse/che/agents/go-agents && go build ./...
 ```
 
 #### Building exec agent executable
 
 ```bash
-cd $GOPATH/src/github.com/eclipse/che/agents/go-agents/src/main/go/exec-agent && go build
+cd $GOPATH/src/github.com/eclipse/che/agents/go-agents/exec-agent && go build
 ```
 
 #### Building terminal agent executable
 
 ```bash
-cd $GOPATH/src/github.com/eclipse/che/agents/go-agents/src/main/go/terminal-agent && go build
+cd $GOPATH/src/github.com/eclipse/che/agents/go-agents/terminal-agent && go build
 ```
 
 ##### Running linked project tests
 
 ```bash
-cd $GOPATH/src/github.com/eclipse/che/agents/go-agents/src/main/go && go test ./...
+cd $GOPATH/src/github.com/eclipse/che/agents/go-agents && go test ./...
 ```
 
 ##### Formatting linked project sources
 
 ```bash
-cd $GOPATH/src/github.com/eclipse/che/agents/go-agents/src/main/go && go fmt ./...
+cd $GOPATH/src/github.com/eclipse/che/agents/go-agents && go fmt ./...
 ```
