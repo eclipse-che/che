@@ -19,7 +19,7 @@ command -v wget >/dev/null 2>&1 && WGET_INSTALLED=true
 
 # no curl, no wget, install curl
 if [ ${CURL_INSTALLED} = false ] && [ ${WGET_INSTALLED} = false ]; then
-  { PACKAGES=${PACKAGES}" curl"; }
+  PACKAGES=${PACKAGES}" curl";
 fi
 
 test "$(id -u)" = 0 || SUDO="sudo -E"
@@ -169,8 +169,6 @@ else
     AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}
 fi
 
-AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}
-
 # If file is already on the filesystem, use it
 if [ ! -z ${LOCAL_AGENT_PATH} ]; then
   tar zxf ${LOCAL_AGENT_PATH} -C ${CHE_DIR}
@@ -185,6 +183,9 @@ else
     fi
     curl -s $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g') | tar  xzf - -C ${CHE_DIR}
   else
+    # replace https by http as wget may not be able to handle ssl
+    AGENT_BINARIES_URI=$(echo ${AGENT_BINARIES_URI} | sed 's/https/http/g')
+
     # use wget
     WGET_SPIDER="wget --spider"
     if wget  2>&1 | grep -q BusyBox; then

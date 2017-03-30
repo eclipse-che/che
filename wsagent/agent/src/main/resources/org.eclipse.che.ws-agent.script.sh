@@ -19,7 +19,7 @@ command -v wget >/dev/null 2>&1 && WGET_INSTALLED=true
 
 # no curl, no wget, install curl
 if [ ${CURL_INSTALLED} = false ] && [ ${WGET_INSTALLED} = false ]; then
-  { PACKAGES=${PACKAGES}" curl"; }
+  PACKAGES=${PACKAGES}" curl";
 fi
 
 test "$(id -u)" = 0 || SUDO="sudo -E"
@@ -249,6 +249,9 @@ else
     if [ ${CURL_INSTALLED} = true ]; then
       curl -s  ${AGENT_BINARIES_URI} | tar  xzf - -C ${CHE_DIR}/ws-agent
     else
+      # replace https by http as wget may not be able to handle ssl
+      AGENT_BINARIES_URI=$(echo ${AGENT_BINARIES_URI} | sed 's/https/http/g')
+
       # use wget
       wget -qO- ${AGENT_BINARIES_URI} | tar xzf - -C ${CHE_DIR}/ws-agent
     fi
