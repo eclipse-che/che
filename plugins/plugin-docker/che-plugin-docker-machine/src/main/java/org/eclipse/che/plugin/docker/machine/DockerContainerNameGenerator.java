@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
+import com.google.inject.Inject;
+
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.environment.server.ContainerNameGenerator;
+import org.eclipse.che.commons.annotation.Nullable;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Objects;
@@ -41,17 +43,22 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
                                                           NODE_HOST_GROUP +
                                                           WORKSPACE_ID_GROUP + "_" +
                                                           MACHINE_ID_GROUP + "_" +
-                                                          "%s_" +
+                                                          "%s" + // che server ID group
                                                           ".+$";
 
     private final Pattern containerNamePattern;
-    private final String  cheServerId;
+    private final String  cheServerIdGroup;
 
-    @Inject
-    public DockerContainerNameGenerator(@Named("che.server_id") String cheServerId) {
-        // optimize normalizing at runtime
-        this.cheServerId = "server" + normalizeContainerName(cheServerId);
-        this.containerNamePattern = Pattern.compile(format(CONTAINER_NAME_REGEX, this.cheServerId));
+    @Inject(optional = true)
+    public DockerContainerNameGenerator(@Nullable @Named("che.server_id") String cheServerId) {
+        if (cheServerId != null) {
+            // optimize normalizing at runtime
+            this.cheServerIdGroup = "server" + normalizeContainerName(cheServerId) + "_";
+        } else {
+            this.cheServerIdGroup = "";
+        }
+
+        this.containerNamePattern = Pattern.compile(format(CONTAINER_NAME_REGEX, this.cheServerIdGroup));
     }
 
     /**
@@ -72,7 +79,7 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
      */
     @Override
     public String generateContainerName(String workspaceId, String machineId, String userName, String machineName) {
-        String containerName = workspaceId + '_' + machineId + '_' + cheServerId + '_' + userName + '_' + machineName;
+        String containerName = workspaceId + '_' + machineId + '_' + cheServerIdGroup + userName + '_' + machineName;
         return normalizeContainerName(containerName);
     }
 

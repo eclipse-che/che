@@ -53,12 +53,40 @@ public class DockerContainerNameGeneratorTest {
                                 SERVER_ID + "_" +
                                 USER_NAME + "_" +
                                 MACHINE_NAME;
+
         String actualResult = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
+
         assertEquals(expectedResult, actualResult);
     }
 
     @Test
-    public void machineNameShouldBeReturnedByGeneratedContainerName() {
+    public void generateShouldNotUseServerIfItIsNull() {
+        nameGenerator = new DockerContainerNameGenerator(null);
+        String expectedResult = WORKSPACE_ID + "_" +
+                                MACHINE_ID + "_" +
+                                USER_NAME + "_" +
+                                MACHINE_NAME;
+
+        String actualResult = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
+
+        assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    public void shouldParseMachineNameReturnedByGeneratedContainerName() {
+        String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
+
+        Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(generatedName);
+
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        ContainerNameInfo containerNameInfo = containerNameInfoParser.get();
+        assertEquals(containerNameInfo.getMachineId(), MACHINE_ID);
+        assertEquals(containerNameInfo.getWorkspaceId(), WORKSPACE_ID);
+    }
+
+    @Test
+    public void shouldParseMachineNameReturnedByGeneratedContainerNameIfServerIdIsNull() {
+        nameGenerator = new DockerContainerNameGenerator(null);
         String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
 
         Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(generatedName);
@@ -158,6 +186,7 @@ public class DockerContainerNameGeneratorTest {
 
         @SuppressWarnings("OptionalGetWithoutIsPresent")
         ContainerNameInfo containerNameInfo = containerNameInfoParser.get();
+
         assertEquals(containerNameInfo.getWorkspaceId(), expectedResult.first);
         assertEquals(containerNameInfo.getMachineId(), expectedResult.second);
     }
