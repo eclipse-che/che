@@ -723,7 +723,7 @@
     "creator": "ide",
     "name": "PHP",
     "description": "Default PHP Stack with PHP 5.6, most popular extensions.",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "Ubuntu",
       "Git",
