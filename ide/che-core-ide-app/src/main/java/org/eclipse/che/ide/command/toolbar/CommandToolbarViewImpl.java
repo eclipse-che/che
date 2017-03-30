@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import org.eclipse.che.ide.ui.menubutton.MenuPopupButton;
+import org.eclipse.che.ide.ui.menubutton.MenuButton;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -73,7 +73,7 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
     }
 
     @Override
-    public void addButton(MenuPopupButton button) {
+    public void addButton(MenuButton button) {
         buttonsPanel.add(button);
     }
 

@@ -19,11 +19,15 @@
         @eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
         @eval tabsPanelBackground org.eclipse.che.ide.api.theme.Style.theme.tabsPanelBackground();
 
-        .mainPanel {
+        .main-panel {
             background-color: partBackground;
         }
 
-        .header {
+        .pages-panel {
+            width: literal("calc(100% - 40px)");
+        }
+
+        .buttons-panel {
             height: 38px;
             padding-top: 5px;
             background-color: tabsPanelBackground;
@@ -36,14 +40,14 @@
         }
     </ui:style>
 
-    <g:DockLayoutPanel addStyleNames="{style.mainPanel}">
+    <g:DockLayoutPanel addStyleNames="{style.main-panel}">
         <g:center>
             <g:ScrollPanel ui:field="scrollPanel">
-                <g:FlowPanel width="700px" ui:field="pagesPanel"/>
+                <g:FlowPanel ui:field="pagesPanel" addStyleNames="{style.pages-panel}"/>
             </g:ScrollPanel>
         </g:center>
         <g:south size="44">
-            <g:FlowPanel addStyleNames="{style.header}">
+            <g:FlowPanel addStyleNames="{style.buttons-panel}">
                 <g:Button ui:field="cancelButton"
                           text="{messages.buttonCancelText}"
                           addStyleNames="{style.button}"

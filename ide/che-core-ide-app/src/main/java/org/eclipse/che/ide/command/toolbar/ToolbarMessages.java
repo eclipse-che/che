@@ -28,8 +28,8 @@ public interface ToolbarMessages extends Messages {
     @Key("goal_button.tooltip.choose_command")
     String goalButtonTooltipChooseCommand(String goalId);
 
-    @Key("goal_button.tooltip.execute_prompt")
-    String goalButtonTooltipExecutePrompt(String commandName);
+    @Key("goal_button.tooltip.execute")
+    String goalButtonTooltipExecute(String commandName);
 
     @Key("previews.tooltip")
     String previewsTooltip();

@@ -1358,7 +1358,7 @@ export class CreateProjectController {
     this.importProjectData.project.commands = template.commands;
     this.importProjectData.project.attributes = template.attributes;
     this.importProjectData.project.options = template.options;
-    this.importProjectData.projects = template.projects;
+    this.importProjectData.projects = angular.copy(template.projects);
 
     let name: string = template.displayName;
     // strip space

@@ -12,8 +12,8 @@ package org.eclipse.che.ide.api.command;
 
 import org.eclipse.che.commons.annotation.Nullable;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Registry of command goals.
@@ -22,14 +22,17 @@ import java.util.Optional;
  */
 public interface CommandGoalRegistry {
 
-    /** Returns all registered predefined {@link CommandGoal}s. */
-    List<CommandGoal> getAllPredefinedGoals();
+    /** Returns all (predefined and created by user) {@link CommandGoal}s. */
+    Set<CommandGoal> getAllGoals();
 
-    /** Returns the default command goal which is used for grouping commands which doesn't belong to any goal. */
+    /** Returns all registered predefined {@link CommandGoal}s. */
+    Set<CommandGoal> getAllPredefinedGoals();
+
+    /** Returns the default command goal which is used for commands which actually doesn't belong to any goal. */
     CommandGoal getDefaultGoal();
 
     /**
-     * Returns an optional {@link CommandGoal} by the given ID
+     * Returns an {@code Optional} {@link CommandGoal} by the given ID
      * or {@code Optional.absent()} if none was registered.
      *
      * @param id
