@@ -48,7 +48,6 @@ import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.debug.DebugApiModule;
 import org.eclipse.che.ide.editor.EditorApiModule;
 import org.eclipse.che.ide.editor.preferences.EditorPreferencesModule;
-import org.eclipse.che.ide.factory.FactoryApiModule;
 import org.eclipse.che.ide.filetypes.FileTypeApiModule;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
 import org.eclipse.che.ide.machine.MachineApiModule;

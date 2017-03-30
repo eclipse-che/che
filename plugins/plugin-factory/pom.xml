@@ -23,8 +23,6 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Factory :: Parent</name>
     <modules>
-        <module>che-plugin-factory-shared</module>
-        <module>che-plugin-factory-server</module>
         <module>che-plugin-factory-ide</module>
     </modules>
 </project>
