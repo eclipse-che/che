@@ -102,7 +102,10 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
             String workspaceId = matcher.group("workspaceId");
             String machineId = matcher.group("machineId");
             String serverId = matcher.group("serverId");
-            containerNameInfo = new ContainerNameInfo(workspaceId, machineId);
+            if(serverId==null){
+                serverId="";
+            }
+            containerNameInfo = new ContainerNameInfo(workspaceId, machineId, serverId);
         }
         return Optional.ofNullable(containerNameInfo);
     }
