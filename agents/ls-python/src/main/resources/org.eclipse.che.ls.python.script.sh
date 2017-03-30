@@ -11,8 +11,12 @@
 
 unset PACKAGES
 unset SUDO
+unset PYTHON_DEPS
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
+command -v python3.5 >/dev/null 2>&1 || { PYTHON_DEPS=${PYTHON_DEPS}" python3.5"; }
+command -v pip3 >/dev/null 2>&1 || { PYTHON_DEPS=${PYTHON_DEPS}" pip3"; }
+
 test "$(id -u)" = 0 || SUDO="sudo -E"
 
 AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.python.binaries
@@ -64,7 +68,7 @@ elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
         ${SUDO} yum install ${PACKAGES};
     }
 
-    command -v python3.5 >/dev/null 2>&1 || {
+    test "${PYTHON_DEPS}" = "" || {
         ${SUDO} yum-config-manager --enable rhel-server-rhscl-7-rpms;
         ${SUDO} yum -y install rh-python35 bzip2;
         export LD_LIBRARY_PATH="/opt/rh/rh-python35/root/usr/lib64"
@@ -82,7 +86,7 @@ elif echo ${LINUX_TYPE} | grep -qi "ubuntu"; then
         ${SUDO} apt-get -y install ${PACKAGES};
     }
 
-    command -v python3.5 >/dev/null 2>&1 || {
+    test "${PYTHON_DEPS}" = "" || {
         if echo ${LINUX_VERSION} | grep -qi "14.04"; then
             DEADSNAKES="/etc/apt/sources.list.d/deadsnakes.list";
             ${SUDO} touch ${DEADSNAKES};
@@ -111,7 +115,7 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
         ${SUDO} apt-get -y install ${PACKAGES};
     }
 
-    command -v python3.5 >/dev/null 2>&1 || {
+    test "${PYTHON_DEPS}" = "" || {
         DEADSNAKES="/etc/apt/sources.list.d/deadsnakes.list";
         ${SUDO} touch ${DEADSNAKES};
         echo "deb http://ppa.launchpad.net/fkrull/deadsnakes/ubuntu trusty main" | ${SUDO} tee --append ${DEADSNAKES};
@@ -133,7 +137,7 @@ elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
         ${SUDO} dnf -y install ${PACKAGES};
     }
 
-    command -v  python3.5 >/dev/null 2>&1 || {
+    test "${PYTHON_DEPS}" = "" || {
         ${SUDO} dnf -y install python35 bzip2;
         ${SUDO} curl https://bootstrap.pypa.io/ez_setup.py -o - | ${SUDO} python3.5
         ${SUDO} easy_install pip
@@ -147,7 +151,7 @@ elif echo ${LINUX_TYPE} | grep -qi "centos"; then
         ${SUDO} yum -y install ${PACKAGES};
     }
 
-    command -v python3.5 >/dev/null 2>&1 || {
+    test "${PYTHON_DEPS}" = "" || {
 
         ${SUDO} yum -y install centos-release-scl;
         ${SUDO} yum -y install rh-python35 bzip2;
@@ -164,7 +168,7 @@ elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
         ${SUDO} zypper install -y ${PACKAGES};
     }
 
-    command -v python3.5 >/dev/null 2>&1 || {
+    test "${PYTHON_DEPS}" = "" || {
         ${SUDO} zypper ar -f http://download.opensuse.org/repositories/home:/Ledest:/bashisms/openSUSE_13.2/ home:Ledest:bashisms
         ${SUDO} zypper --no-gpg-checks ref
         ${SUDO} zypper install -y python3
