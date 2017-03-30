@@ -40,15 +40,15 @@ public interface FactoryResources extends ClientBundle {
     @Source({"Factory.css", "org/eclipse/che/ide/api/ui/style.css", "org/eclipse/che/ide/ui/Styles.css"})
     FactoryCSS factoryCSS();
 
-    @Source("svg/export-config.svg")
+    @Source("export-config.svg")
     SVGResource exportConfig();
 
-    @Source("svg/import-config.svg")
+    @Source("import-config.svg")
     SVGResource importConfig();
 
-    @Source("svg/execute.svg")
+    @Source("execute.svg")
     SVGResource execute();
 
-    @Source("svg/cog-icon.svg")
+    @Source("cog-icon.svg")
     SVGResource configure();
 }

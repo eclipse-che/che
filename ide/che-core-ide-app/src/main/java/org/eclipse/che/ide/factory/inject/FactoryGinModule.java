@@ -13,7 +13,6 @@ package org.eclipse.che.ide.factory.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 
-import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.factory.FactoryServiceClient;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.factory.FactoryServiceClientImpl;
@@ -30,7 +29,6 @@ import javax.inject.Singleton;
 /**
  * @author Vladyslav Zhukovskii
  */
-@ExtensionGinModule
 public class FactoryGinModule extends AbstractGinModule {
 
     @Override

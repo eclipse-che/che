@@ -39,7 +39,6 @@
         <module>plugin-sdk</module>
         <module>plugin-orion</module>
         <module>plugin-git</module>
-        <module>plugin-factory</module>
         <module>plugin-github</module>
         <module>plugin-dashboard</module>
         <module>plugin-gwt</module>
