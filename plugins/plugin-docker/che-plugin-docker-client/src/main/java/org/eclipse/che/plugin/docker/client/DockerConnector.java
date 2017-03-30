@@ -230,6 +230,7 @@ public class DockerConnector {
      */
     public List<ContainerListEntry> listContainers(ListContainersParams params) throws IOException {
         final Filters filters = params.getFilters();
+
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path(apiVersionPathPrefix + "/containers/json")) {
@@ -242,7 +243,6 @@ public class DockerConnector {
                 connection.query("filters", urlPathSegmentEscaper().escape(toJson(filters.getFilters())));
             }
             DockerResponse response = connection.request();
-            
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
                 throw getDockerException(response);

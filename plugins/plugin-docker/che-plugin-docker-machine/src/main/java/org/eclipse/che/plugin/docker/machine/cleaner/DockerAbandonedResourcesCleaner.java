@@ -38,8 +38,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-import static java.lang.System.getenv;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.plugin.docker.client.params.RemoveContainerParams.create;
@@ -54,7 +52,6 @@ import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator
  */
 @Singleton
 public class DockerAbandonedResourcesCleaner implements Runnable {
-    private final String            CHE_SERVER_CONTAINER_ID ;
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerAbandonedResourcesCleaner.class);
 
@@ -84,13 +81,6 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
         this.additionalNetworks = additionalNetworks.stream()
                                                     .flatMap(Set::stream)
                                                     .collect(toSet());
-        if(getenv("HOSTNAME")==null){
-            CHE_SERVER_CONTAINER_ID= "cheId";
-        }
-        else{
-            CHE_SERVER_CONTAINER_ID= getenv("HOSTNAME");
-        }
-        
     }
 
     @ScheduleRate(periodParameterName = "che.docker.cleanup_period_min",
@@ -115,11 +105,9 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
                 if (optional.isPresent()) {
                     try {
                         // container is orphaned if not found exception is thrown
-                        if(CHE_SERVER_CONTAINER_ID.equals(optional.get().getServerId())){
-                            environmentEngine.getMachine(optional.get().getWorkspaceId(),
-                                                         optional.get().getMachineId());
-                            activeContainers.add(containerName);
-                        }
+                        environmentEngine.getMachine(optional.get().getWorkspaceId(),
+                                                     optional.get().getMachineId());
+                        activeContainers.add(containerName);
                     } catch (NotFoundException e) {
                         cleanUpContainer(container);
                     } catch (Exception e) {

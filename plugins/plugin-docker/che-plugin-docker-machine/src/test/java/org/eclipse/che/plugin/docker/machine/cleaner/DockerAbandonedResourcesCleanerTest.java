@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.lang.System.getenv;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
@@ -230,10 +229,10 @@ public class DockerAbandonedResourcesCleanerTest {
         verify(dockerConnector).listContainers();
 
         verify(nameGenerator, times(3)).parse(anyString());
-        //verify(environmentEngine, times(3)).getMachine(anyString(), anyString());
+        verify(environmentEngine, times(3)).getMachine(anyString(), anyString());
 
-        //verify(dockerConnector, times(2)).killContainer(anyString());
-        //verify(dockerConnector, times(2)).removeContainer(Matchers.anyObject());
+        verify(dockerConnector, times(2)).killContainer(anyString());
+        verify(dockerConnector, times(2)).removeContainer(Matchers.anyObject());
 
         verify(dockerConnector, never()).killContainer(containerId1);
         verify(dockerConnector, never()).removeContainer(RemoveContainerParams.create(containerId1).withForce(true).withRemoveVolumes(true));
@@ -245,7 +244,7 @@ public class DockerAbandonedResourcesCleanerTest {
         cleaner.cleanContainers();
 
         verify(dockerConnector, never()).killContainer(containerId2);
-        //verify(dockerConnector).removeContainer(RemoveContainerParams.create(containerId2).withForce(true).withRemoveVolumes(true));
+        verify(dockerConnector).removeContainer(RemoveContainerParams.create(containerId2).withForce(true).withRemoveVolumes(true));
     }
 
     @Test

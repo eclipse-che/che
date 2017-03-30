@@ -11,182 +11,222 @@
 package org.eclipse.che.plugin.docker.machine;
 
 import org.eclipse.che.commons.lang.Pair;
-import org.mockito.InjectMocks;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.Optional;
 
+import static java.lang.String.format;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
+import static org.testng.Assert.assertFalse;
 import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertFalse;
 
 /**
  * Test for {@link DockerContainerNameGenerator}
  *
  * @author Alexander Andrienko
+ * @author Alexander Garagatyi
  */
 @Listeners(MockitoTestNGListener.class)
 public class DockerContainerNameGeneratorTest {
-    private static final String WORKSPACE_ID = "workspacebbbx2ree3iykn8gc";
-    private static final String MACHINE_NAME = "ws-machine";
-    private static final String MACHINE_ID   = "machineic131ppamujngv6y";
-    private static final String USER_NAME    = "some-user";
-    private static final String CHE_SERVER_CONTAINER_ID = "serverid-cheid";
-    
-    @InjectMocks
+    private static final String WORKSPACE_ID            = "workspacebbbx2ree3iykn8gc";
+    private static final String MACHINE_NAME            = "ws-machine";
+    private static final String MACHINE_ID              = "machineic131ppamujngv6y";
+    private static final String USER_NAME               = "some_user";
+    private static final String SERVER_ID               = "serversomehostcom";
+    private static final String NON_NORMALIZED_HOSTNAME = "somehost.com";
+
     private DockerContainerNameGenerator nameGenerator;
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        nameGenerator = new DockerContainerNameGenerator(NON_NORMALIZED_HOSTNAME);
+    }
 
     @Test
     public void containerNameShouldBeGenerated() {
-        String expectedResult = "workspacebbbx2ree3iykn8gc_machineic131ppamujngv6y_"+CHE_SERVER_CONTAINER_ID+"_some-user_ws-machine";
-        String actualResult = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID,CHE_SERVER_CONTAINER_ID, USER_NAME, MACHINE_NAME);
+        String expectedResult = WORKSPACE_ID + "_" +
+                                MACHINE_ID + "_" +
+                                SERVER_ID + "_" +
+                                USER_NAME + "_" +
+                                MACHINE_NAME;
+        String actualResult = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
         assertEquals(expectedResult, actualResult);
     }
 
     @Test
     public void machineNameShouldBeReturnedByGeneratedContainerName() {
-        String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID,CHE_SERVER_CONTAINER_ID, USER_NAME, MACHINE_NAME);
+        String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
+
         Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(generatedName);
-        assertEquals(containerNameInfoParser.get().getMachineId(), MACHINE_ID);
-        assertEquals(containerNameInfoParser.get().getWorkspaceId(), WORKSPACE_ID);
+
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        ContainerNameInfo containerNameInfo = containerNameInfoParser.get();
+        assertEquals(containerNameInfo.getMachineId(), MACHINE_ID);
+        assertEquals(containerNameInfo.getWorkspaceId(), WORKSPACE_ID);
     }
 
     @DataProvider(name = "validContainerNames")
     public static Object[][] validContainerNames() {
-        return new Object[][]{{"/host.node.com/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_art",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+        return new Object[][] {
+                {format("/host.node.com/%s_%s_%s_art", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/nod/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_art",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/nod/%s_%s_%s_art", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s_user-name_ws-machine-name", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s_user-name_ws-machine-name", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s_user-name_ws-machine-name", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s_user-name_ws-machine-name", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machineri6bxnoj5jq7ll98",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s_user-name_ws-machineri6bxnoj5jq7ll98", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_u_a",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s_u_a", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_-_-",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s_-_-", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"____",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s____", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"__tfdfd_klk",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s__tfdfd_klk", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"__",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s__", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_tfdf_dKlk",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s_tfdf_dKlk", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_a_",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s_a_", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"__o_",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s__o_", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"tfdfdklk_"+"____",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s_tfdfdklk____", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep_machiner_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name",
-                               new Pair<>("machiner", "workspacep")},
+                {format("/workspacep_machiner_%s_user-name_ws-machine-name", SERVER_ID),
+                 new Pair<>("workspacep", "machiner")},
 
-                              {"/workspace1_machine2_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name",
-                               new Pair<>("machine2", "workspace1")},
+                {format("/workspace1_machine2_%s_user-name_ws-machine-name", SERVER_ID),
+                 new Pair<>("workspace1", "machine2")},
 
-                              {"/workspace1_machinea_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name",
-                               new Pair<>("machinea", "workspace1")},
+                {format("/workspace1_machinea_%s_user-name_ws-machine-name", SERVER_ID),
+                 new Pair<>("workspace1", "machinea")},
 
-                              {"/workspacea_machine1_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name",
-                               new Pair<>("machine1", "workspacea")},
+                {format("/workspacea_machine1_%s_user-name_ws-machine-name", SERVER_ID),
+                 new Pair<>("workspacea", "machine1")},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_a",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s_a", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_art",
-                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                {format("/%s_%s_%s_art", WORKSPACE_ID, MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"workspace1_machinea_"+CHE_SERVER_CONTAINER_ID+"_USER_ws-machine-name",
-                               new Pair<>("machinea", "workspace1")},
+                {format("workspace1_machinea_%s_USER_ws-machine-name", SERVER_ID),
+                 new Pair<>("workspace1", "machinea")},
 
-                              {"/nodes1.night-build.che-build.com/workspacep80at4r4hpvoztve_machinerup047b5xlv5zv20_"+CHE_SERVER_CONTAINER_ID+"_iedexmain_ws-machine",
-                               new Pair<>("machinerup047b5xlv5zv20", "workspacep80at4r4hpvoztve")},
+                {format("/nodes1.night-build.che-build.com/%s_%s_%s_iedexmain_ws-machine", WORKSPACE_ID,
+                        MACHINE_ID, SERVER_ID),
+                 new Pair<>(WORKSPACE_ID, MACHINE_ID)},
 
-                              {"workspace1_machinea_"+CHE_SERVER_CONTAINER_ID+"_user%100%_ws-machine-name",
-                               new Pair<>("machinea", "workspace1")},
+                {format("workspace1_machinea_%s_user%100%_ws-machine-name", SERVER_ID),
+                 new Pair<>("workspace1", "machinea")},
 
-                              {"workspace1_machinea_"+CHE_SERVER_CONTAINER_ID+"_user_ws-machine-name$workspace1_machinea_user_ws-machine-name",
-                               new Pair<>("machinea", "workspace1")}};
+                {format("workspace1_machinea_%s_user_ws-machine-name$workspace1_machinea_user_ws-machine-name", SERVER_ID),
+                 new Pair<>("workspace1", "machinea")}};
     }
 
     @Test(dataProvider = "validContainerNames")
     public void testValidContainerNames(String containerName, Pair<String, String> expectedResult) {
         Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(containerName);
 
-        assertEquals(containerNameInfoParser.get().getMachineId(), expectedResult.first);
-        assertEquals(containerNameInfoParser.get().getWorkspaceId(), expectedResult.second);
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        ContainerNameInfo containerNameInfo = containerNameInfoParser.get();
+        assertEquals(containerNameInfo.getWorkspaceId(), expectedResult.first);
+        assertEquals(containerNameInfo.getMachineId(), expectedResult.second);
     }
 
     @DataProvider(name = "invalidContainerNames")
     public static Object[][] inValidContainerNames() {
-        return new Object[][]{{"/host.node.com/Workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"//workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_art"},
-                              {"//fgfgf/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_art"},
-                              {"nodehost/workspacep2bivvctac5ciwohmachineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"/host.node.Com/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_art"},
-                              {"/host.no%%%de.com/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_art"},
-                              {"/workspacep2bivvctac5ciwohmachineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"user-name_ws-machine-name"},
-                              {"/workspacep2bivvctac5ciwoh__machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"/1orkspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"/workspacep2bivvctac%ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"/workspacep2bivvctackciwoh_machineri6%xnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"workspacep2bivvctackciwoh_machineri6o*noj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"workspacep2bivvctac5ciWoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_WS-maChineName"},
-                              {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-mac%ine-name"},
-                              {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_workspACEMachineName"},
-                              {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_user-name_workspace"},
-                              {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID},
-                              {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_"},
-                              {"/FF/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"+CHE_SERVER_CONTAINER_ID+"_art"},
-                              {"workspacep2bivvctac5ciwoh_"},
-                              {"pong"},
-                              {"workspace"},
-                              {"machine"},
-                              {"workspace"},
-                              {"machine"},
-                              {"workspace_machine"},
-                              {"workspace_machine_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"workspace5r_workspace5r_"+CHE_SERVER_CONTAINER_ID+"_machine_user-name_ws-machine-name"},
-                              {"workspace_workspace_machine_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"work_machinetyy_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"workspacedfdf_machin_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"},
-                              {"workspaceid"},
-                              {"machineid"},
-                              {"workspacerere_machinedfdf"},
-                              {"workspacerere_machinedfdf"},
-                              {"someusercontainer"},
-                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                              {"machineri6bxnoj5jq7ll9j_workspacep2bivvctac5ciwoh_"+CHE_SERVER_CONTAINER_ID+"_user-name_ws-machine-name"}};
+        return new Object[][] {
+                {"/host.node.com/Workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_serversomehostcom_user-name_ws-machine-name"},
+                {format("//%s_%s_art", WORKSPACE_ID, MACHINE_ID)},
+                {format("//fgfgf/%s_%s_art", WORKSPACE_ID, MACHINE_ID)},
+                {format("nodehost/%s%s_user-name_ws-machine-name", WORKSPACE_ID, MACHINE_ID)},
+                {format("/host.node.Com/%s_%s_art", WORKSPACE_ID, MACHINE_ID)},
+                {"/host.no%%%de.com/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_serversomehostcom_art"},
+                {format("/%s%s_user-name_ws-machine-name", WORKSPACE_ID, MACHINE_ID)},
+                {format("/%s_%suser-name_ws-machine-name", WORKSPACE_ID, MACHINE_ID)},
+                {format("/%s__%s_user-name_ws-machine-name", WORKSPACE_ID, MACHINE_ID)},
+                {"/1orkspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_serversomehostcom_user-name_ws-machine-name"},
+                {"/workspacep2bivvctac%ciwoh_machineri6bxnoj5jq7ll9j_serversomehostcom_user-name_ws-machine-name"},
+                {"/workspacep2bivvctackciwoh_machineri6%xnoj5jq7ll9j_serversomehostcom_user-name_ws-machine-name"},
+                {"workspacep2bivvctackciwoh_machineri6o*noj5jq7ll9j_serversomehostcom_user-name_ws-machine-name"},
+                {"workspacep2bivvctac5ciWoh_machineri6bxnoj5jq7ll9j_serversomehostcom_user-name_ws-machine-name"},
+                {format("%s_machineri6bXnoj5jq7ll9j_user-name_ws-machine-name", WORKSPACE_ID)},
+                {format("%s_machineri6bXnoj5jq7ll9j_user-name_WS-maChineName", WORKSPACE_ID)},
+                {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_serversomehostcom_user-name_ws-mac%ine-name"},
+                {format("%s_machineri6bXnoj5jq7ll9j_user-name_workspACEMachineName", WORKSPACE_ID)},
+                {format("%s_machineri6bXnoj5jq7ll9j_user-name_workspace", WORKSPACE_ID)},
+                {format("%s_%s", WORKSPACE_ID, MACHINE_ID)},
+                {format("%s_%s_", WORKSPACE_ID, MACHINE_ID)},
+                {format("%s_%s_%s_", WORKSPACE_ID, MACHINE_ID, SERVER_ID)},
+                {format("/FF/%s_%s_art", WORKSPACE_ID, MACHINE_ID)},
+                {format("/FF/%s_%s_%s_art", WORKSPACE_ID, MACHINE_ID, SERVER_ID)},
+                {format("%s_", WORKSPACE_ID)},
+                {"pong"},
+                {"workspace"},
+                {"machine"},
+                {"workspace"},
+                {"machine"},
+                {"workspace_machine"},
+                {"workspace_machine_serversomehostcom"},
+                {"workspace_machine_serversomehostcom_user-name_ws-machine-name"},
+                {"workspace5r_workspace5r_machine_serversomehostcom_user-name_ws-machine-name"},
+                {"workspace_workspace_machine_serversomehostcom_user-name_ws-machine-name"},
+                {"work_machinetyy_serversomehostcom_user-name_ws-machine-name"},
+                {"workspacedfdf_machin_serversomehostcom_user-name_ws-machine-name"},
+                {"workspaceid"},
+                {"machineid"},
+                {"workspacerere_machinedfdf"},
+                {"workspacerere_machinedfdf_serversomehostcom"},
+                {"someusercontainer"},
+                // no server id
+                {format("%s_%s_user-name_ws-machine-name", WORKSPACE_ID, MACHINE_ID)},
+                // no server id
+                {format("/%s_%s_user-name_ws-machine-name", WORKSPACE_ID, MACHINE_ID)},
+                // no server id
+                {format("/host.node.com/%s_%s_art", WORKSPACE_ID, MACHINE_ID)},
+                // server id differs
+                {format("%s_%s_%s_user-name_ws-machine-name", WORKSPACE_ID, MACHINE_ID, SERVER_ID + "other")},
+                // server id differs
+                {format("/%s_%s_%s_user-name_ws-machine-name", WORKSPACE_ID, MACHINE_ID, SERVER_ID + "other")},
+                // server id differs
+                {format("/host.node.com/%s_%s_%s_art", WORKSPACE_ID, MACHINE_ID, SERVER_ID + "other")}
+        };
     }
 
+    @Test(dataProvider = "invalidContainerNames")
+    public void testInvalidContainerNames(String containerName) {
+        Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(containerName);
+
+        assertFalse(containerNameInfoParser.isPresent());
+    }
 }
 

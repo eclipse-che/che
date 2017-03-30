@@ -87,7 +87,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
-import static java.lang.System.getenv;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
@@ -106,7 +105,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Singleton
 public class CheEnvironmentEngine {
 
-    
     private static final NoOpStartedHandler NO_OP_HANDLER = new NoOpStartedHandler();
     private static final Logger             LOG           = getLogger(CheEnvironmentEngine.class);
 
@@ -126,7 +124,6 @@ public class CheEnvironmentEngine {
     private final ContainerNameGenerator         containerNameGenerator;
     private final AgentRegistry                  agentRegistry;
     private final WorkspaceSharedPool            sharedPool;
-    private final String                         CHE_SERVER_CONTAINER_ID;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -164,13 +161,6 @@ public class CheEnvironmentEngine {
                                                 apiEndpoint.substring(apiEndpoint.indexOf(":")) +
                                                 "/recipe/.*$)|(^/recipe/.*$)");
         this.containerNameGenerator = containerNameGenerator;
-        
-        if(getenv("HOSTNAME")==null){
-            CHE_SERVER_CONTAINER_ID= "cheId";
-        }
-        else{
-            CHE_SERVER_CONTAINER_ID= getenv("HOSTNAME");
-        }
     }
 
     /**
@@ -726,7 +716,6 @@ public class CheEnvironmentEngine {
 
         service.setContainerName(containerNameGenerator.generateContainerName(workspaceId,
                                                                               service.getId(),
-                                                                              "serverid-"+CHE_SERVER_CONTAINER_ID,
                                                                               namespace,
                                                                               machineName));
     }
