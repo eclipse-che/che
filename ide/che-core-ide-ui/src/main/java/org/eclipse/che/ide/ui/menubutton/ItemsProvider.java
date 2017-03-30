@@ -14,32 +14,37 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.util.Pair;
 
 import java.util.List;
+import java.util.Optional;
 
-/** Data provider for {@link MenuPopupButton}. */
-public interface MenuPopupItemDataProvider {
+/** Provides {@link MenuItem}s for {@link MenuButton}. */
+public interface ItemsProvider {
 
-    /** Returns the default item, used when user click on button. */
-    @Nullable
-    PopupItem getDefaultItem();
+    /**
+     * Returns an {@code Optional} with a default {@link MenuItem} which should be passed
+     * to {@link ActionHandler#onAction(MenuItem)}
+     * when user makes a short click on a {@link MenuButton}.
+     * <p>Returns an empty {@code Optional} if no default {@link MenuItem}.
+     */
+    Optional<MenuItem> getDefaultItem();
 
     /** Returns top level items. */
-    List<PopupItem> getItems();
+    List<MenuItem> getItems();
 
     /**
      * Checks whether the given {@code item} is a group.
      * Group item cannot be selected.
      */
-    boolean isGroup(PopupItem item);
+    boolean isGroup(MenuItem item);
 
     /** Returns the pair of the given {@code parent} children and their labels. */
     @Nullable
-    Pair<List<PopupItem>, String> getChildren(PopupItem parent);
+    Pair<List<MenuItem>, String> getChildren(MenuItem parent);
 
-    /** Sets the {@link ItemDataChangeHandler}. */
-    void setItemDataChangedHandler(ItemDataChangeHandler handler);
+    /** Sets the {@link DataChangedHandler}. */
+    void setDataChangedHandler(DataChangedHandler handler);
 
-    interface ItemDataChangeHandler {
-        /** Should be called when {@link MenuPopupItemDataProvider}'s data has been changed. */
-        void onItemDataChanged();
+    interface DataChangedHandler {
+        /** Should be called when provided by {@link ItemsProvider} data has been changed. */
+        void onDataChanged();
     }
 }

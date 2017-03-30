@@ -15,24 +15,24 @@ import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.ui.menubutton.PopupItem;
+import org.eclipse.che.ide.ui.menubutton.MenuItem;
 
 /** Item contains {@link CommandImpl} and {@link Machine}. */
-public class MachinePopupItem implements PopupItem {
+public class MachineItem implements MenuItem {
 
     private final CommandImpl command;
     private final Machine     machine;
     private final String      name;
 
     @AssistedInject
-    public MachinePopupItem(@Assisted CommandImpl command, @Assisted Machine machine) {
+    public MachineItem(@Assisted CommandImpl command, @Assisted Machine machine) {
         this.command = command;
         this.machine = machine;
         this.name = machine.getConfig().getName();
     }
 
     @AssistedInject
-    public MachinePopupItem(@Assisted MachinePopupItem item) {
+    public MachineItem(@Assisted MachineItem item) {
         this.command = item.command;
         this.machine = item.machine;
         this.name = command.getName() + " on " + machine.getConfig().getName();

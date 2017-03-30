@@ -14,12 +14,16 @@ import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
-import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.dialogs.InputCallback;
+import org.eclipse.che.ide.api.dialogs.InputDialog;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -30,8 +34,10 @@ import java.util.Map;
 
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,9 +54,9 @@ public class GoalPageTest {
     @Mock
     private CommandGoalRegistry goalRegistry;
     @Mock
-    private CommandManager      commandManager;
-    @Mock
     private EditorMessages      messages;
+    @Mock
+    private DialogFactory       dialogFactory;
 
     @InjectMocks
     private GoalPage page;
@@ -64,9 +70,9 @@ public class GoalPageTest {
 
     @Before
     public void setUp() throws Exception {
-        CommandGoal commandGoal = mock(CommandGoal.class);
-        when(commandGoal.getId()).thenReturn(COMMAND_GOAL_ID);
-        when(goalRegistry.getGoalForId(anyString())).thenReturn(commandGoal);
+        CommandGoal goal = mock(CommandGoal.class);
+        when(goal.getId()).thenReturn(COMMAND_GOAL_ID);
+        when(goalRegistry.getGoalForId(anyString())).thenReturn(goal);
 
         when(editedCommand.getApplicableContext()).thenReturn(editedCommandApplicableContext);
 
@@ -85,7 +91,7 @@ public class GoalPageTest {
 
     @Test
     public void shouldInitializeView() throws Exception {
-        verify(goalRegistry).getAllPredefinedGoals();
+        verify(goalRegistry).getAllGoals();
         verify(view).setAvailableGoals(Matchers.<CommandGoal>anySet());
         verify(view).setGoal(eq(COMMAND_GOAL_ID));
     }
@@ -99,6 +105,37 @@ public class GoalPageTest {
     public void shouldNotifyListenerWhenGoalChanged() throws Exception {
         page.onGoalChanged("test");
 
+        verify(dirtyStateListener, times(2)).onDirtyStateChanged();
+    }
+
+    @Test
+    public void shouldCreateGoal() throws Exception {
+        InputDialog inputDialog = mock(InputDialog.class);
+        when(dialogFactory.createInputDialog(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(0),
+                                             eq(0),
+                                             anyString(),
+                                             any(InputCallback.class),
+                                             any(CancelCallback.class))).thenReturn(inputDialog);
+        String newGoalId = "new goal";
+
+        page.onCreateGoal();
+
+        ArgumentCaptor<InputCallback> inputCaptor = ArgumentCaptor.forClass(InputCallback.class);
+        verify(dialogFactory).createInputDialog(anyString(),
+                                                anyString(),
+                                                anyString(),
+                                                eq(0),
+                                                eq(0),
+                                                anyString(),
+                                                inputCaptor.capture(),
+                                                isNull(CancelCallback.class));
+        verify(inputDialog).show();
+        inputCaptor.getValue().accepted(newGoalId);
+        verify(view).setGoal(eq(newGoalId));
+        verify(editedCommand).setGoal(eq(newGoalId));
         verify(dirtyStateListener, times(2)).onDirtyStateChanged();
     }
 }

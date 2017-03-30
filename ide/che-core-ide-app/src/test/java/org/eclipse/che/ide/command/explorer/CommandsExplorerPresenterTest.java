@@ -115,8 +115,8 @@ public class CommandsExplorerPresenterTest {
         presenter.start(callback);
 
         verify(workspaceAgent).openPart(presenter, PartStackType.NAVIGATION, Constraints.LAST);
+        verifyViewRefreshed();
         verify(commandManager).addCommandChangedListener(presenter);
-        verify(commandManager).addCommandLoadedListener(presenter);
         verify(callback).onSuccess(presenter);
     }
 
@@ -325,32 +325,29 @@ public class CommandsExplorerPresenterTest {
     }
 
     @Test
-    public void shouldRefreshViewWhenCommandsAreLoaded() throws Exception {
-        presenter.onCommandsLoaded();
-
-        verify(refreshViewTask).delayAndSelectCommand(isNull(CommandImpl.class));
-    }
-
-    @Test
     public void shouldRefreshViewWhenCommandAdded() throws Exception {
         CommandImpl command = mock(CommandImpl.class);
 
         presenter.onCommandAdded(command);
 
-        verify(refreshViewTask).delayAndSelectCommand(isNull(CommandImpl.class));
+        verifyViewRefreshed();
     }
 
     @Test
     public void shouldRefreshViewWhenCommandUpdated() throws Exception {
         presenter.onCommandUpdated(mock(CommandImpl.class), mock(CommandImpl.class));
 
-        verify(refreshViewTask).delayAndSelectCommand(isNull(CommandImpl.class));
+        verifyViewRefreshed();
     }
 
     @Test
     public void shouldRefreshViewWhenCommandRemoved() throws Exception {
         presenter.onCommandRemoved(mock(CommandImpl.class));
 
+        verifyViewRefreshed();
+    }
+
+    private void verifyViewRefreshed() throws Exception {
         verify(refreshViewTask).delayAndSelectCommand(isNull(CommandImpl.class));
     }
 }

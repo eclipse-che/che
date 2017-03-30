@@ -72,16 +72,16 @@ public class ProjectsPage extends AbstractCommandEditorPage implements ProjectsP
 
     /** Refresh 'Projects' section in the view. */
     private void refreshProjects() {
-        final Map<Project, Boolean> projectsState = new HashMap<>();
+        final Map<Project, Boolean> projectsStates = new HashMap<>();
 
         for (Project project : appContext.getProjects()) {
             ApplicableContext context = editedCommand.getApplicableContext();
             boolean applicable = context.getApplicableProjects().contains(project.getPath());
 
-            projectsState.put(project, applicable);
+            projectsStates.put(project, applicable);
         }
 
-        view.setProjects(projectsState);
+        view.setProjects(projectsStates);
     }
 
     @Override
