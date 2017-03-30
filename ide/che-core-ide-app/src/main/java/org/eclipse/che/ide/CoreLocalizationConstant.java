@@ -889,6 +889,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("macro.editor.current.file.name.description")
     String macroEditorCurrentFileNameDescription();
 
+    @Key("macro.editor.current.file.base.name.description")
+    String macroEditorCurrentFileBaseNameDescription();
+
     @Key("macro.editor.current.file.path.description")
     String macroEditorCurrentFilePathDescription();
 
@@ -897,6 +900,9 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("macro.explorer.current.file.name.description")
     String macroExplorerCurrentFileNameDescription();
+
+    @Key("macro.explorer.current.file.base.name.description")
+    String macroExplorerCurrentFileBaseNameDescription();
 
     @Key("macro.explorer.current.project.name.description")
     String macroExplorerCurrentProjectNameDescription();
@@ -918,4 +924,20 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("empty.state.no.files")
     String emptyStateNoFiles();
+
+    @Key("authentication.dialog.title")
+    String authenticationDialogTitle();
+
+    @Key("authentication.dialog.username")
+    String authenticationDialogUsername();
+
+    @Key("authentication.dialog.password")
+    String authenticationDialogPassword();
+
+    @Key("authentication.dialog.authenticate.button")
+    String authenticationDialogAuthenticate();
+
+    @Key("authentication.dialog.rejected.by.user")
+    String authenticationDialogRejectedByUser();
+
 }

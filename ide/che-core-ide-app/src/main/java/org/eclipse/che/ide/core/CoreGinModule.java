@@ -41,6 +41,7 @@ import org.eclipse.che.ide.api.reference.FqnProvider;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.ssh.SshServiceClientImpl;
+import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.clipboard.ClipboardModule;
 import org.eclipse.che.ide.command.CommandApiModule;
 import org.eclipse.che.ide.context.AppContextImpl;
@@ -50,6 +51,7 @@ import org.eclipse.che.ide.editor.preferences.EditorPreferencesModule;
 import org.eclipse.che.ide.factory.FactoryApiModule;
 import org.eclipse.che.ide.filetypes.FileTypeApiModule;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
+import org.eclipse.che.ide.machine.MachineApiModule;
 import org.eclipse.che.ide.macro.MacroApiModule;
 import org.eclipse.che.ide.notification.NotificationApiModule;
 import org.eclipse.che.ide.oauth.OAuthApiModule;
@@ -66,6 +68,7 @@ import org.eclipse.che.ide.statepersistance.PersistenceApiModule;
 import org.eclipse.che.ide.theme.ThemeApiModule;
 import org.eclipse.che.ide.ui.loaders.PopupLoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
+import org.eclipse.che.ide.user.AskCredentialsDialogImpl;
 import org.eclipse.che.ide.user.UserApiModule;
 import org.eclipse.che.ide.workspace.WorkspaceApiModule;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
@@ -102,6 +105,7 @@ public class CoreGinModule extends AbstractGinModule {
         install(new MacroApiModule());
         install(new UserApiModule());
         install(new WorkspaceApiModule());
+        install(new MachineApiModule());
         install(new CommandApiModule());
         install(new ProjectApiModule());
         install(new ProjectImportModule());
@@ -146,6 +150,7 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ExecAgentCommandManager.class).to(JsonRpcExecAgentCommandManager.class);
         bind(ExecAgentEventManager.class).to(JsonRpcExecAgentEventManager.class);
         bind(ConnectedEventHandler.class).asEagerSingleton();
+        bind(AskCredentialsDialog.class).to(AskCredentialsDialogImpl.class);
     }
 
     @Provides

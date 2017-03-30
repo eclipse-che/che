@@ -19,6 +19,7 @@ import javax.inject.Singleton;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Transmits an instance of {@link JsonRpcException} to specific endpoint
@@ -43,7 +44,10 @@ public class JsonRpcErrorTransmitter {
         LOG.debug("Transmitting a JSON RPC error out of: " + e.getMessage());
 
         JsonRpcError error = jsonRpcFactory.createError(e.getCode(), e.getMessage());
-        JsonRpcResponse response = jsonRpcFactory.createResponse(e.getId(), null, error);
+        final String id = e.getId();
+        JsonRpcResponse response = isNullOrEmpty(id) ?
+                                   jsonRpcFactory.createResponse(null, error) :
+                                   jsonRpcFactory.createResponse(id, null, error);
         transmitter.transmit(endpointId, response.toString());
     }
 }

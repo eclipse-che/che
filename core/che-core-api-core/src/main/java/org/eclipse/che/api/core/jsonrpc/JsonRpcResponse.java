@@ -15,8 +15,6 @@ import com.google.gson.JsonParser;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-import org.eclipse.che.dto.server.DtoFactory;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -61,6 +59,15 @@ public class JsonRpcResponse {
         this.id = id;
         this.result = result;
         this.error = error;
+    }
+
+    @AssistedInject
+    public JsonRpcResponse(@Assisted("result") JsonRpcResult result, @Assisted("error") JsonRpcError error) {
+        checkArgument((result == null) != (error == null), "Must be either error or result");
+
+        this.result = result;
+        this.error = error;
+        this.id = null;
     }
 
     public boolean hasError() {

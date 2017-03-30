@@ -33,6 +33,7 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.command.goal.TestGoal;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
@@ -79,6 +80,7 @@ public class TestServiceClient {
     private final MacroProcessor          macroProcessor;
     private final CommandConsoleFactory   commandConsoleFactory;
     private final ProcessesPanelPresenter processesPanelPresenter;
+    private final TestGoal                testGoal;
 
 
     @Inject
@@ -91,7 +93,8 @@ public class TestServiceClient {
                              PromiseProvider promiseProvider,
                              MacroProcessor macroProcessor,
                              CommandConsoleFactory commandConsoleFactory,
-                             ProcessesPanelPresenter processesPanelPresenter) {
+                             ProcessesPanelPresenter processesPanelPresenter,
+                             TestGoal testGoal) {
         this.appContext = appContext;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
@@ -101,6 +104,7 @@ public class TestServiceClient {
         this.macroProcessor = macroProcessor;
         this.commandConsoleFactory = commandConsoleFactory;
         this.processesPanelPresenter = processesPanelPresenter;
+        this.testGoal = testGoal;
     }
 
     public Promise<CommandImpl> getOrCreateTestCompileCommand() {
@@ -116,7 +120,7 @@ public class TestServiceClient {
                 MatchResult result = mavenCleanBuildPattern.exec(commandLine);
                 if (result != null) {
                     String testCompileCommandLine = mavenCleanBuildPattern.replace(commandLine, "$1mvn test-compile $2");
-                    return commandManager.create("test-compile", testCompileCommandLine, "mvn", new HashMap<String, String>());
+                    return commandManager.createCommand(testGoal.getId(), "mvn", "test-compile", testCompileCommandLine, new HashMap<String, String>());
                 }
             }
         }

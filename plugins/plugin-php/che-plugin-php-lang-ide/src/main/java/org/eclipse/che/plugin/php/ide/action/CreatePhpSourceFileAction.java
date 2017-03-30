@@ -11,12 +11,14 @@
 package org.eclipse.che.plugin.php.ide.action;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.plugin.php.ide.PhpLocalizationConstant;
 import org.eclipse.che.plugin.php.ide.PhpResources;
@@ -41,7 +43,8 @@ public class CreatePhpSourceFileAction extends NewPhplikeResourceAction {
                                      CoreLocalizationConstant coreLocalizationConstant,
                                      EventBus eventBus,
                                      AppContext appContext,
-                                     NotificationManager notificationManager) {
+                                     NotificationManager notificationManager,
+                                     Provider<EditorAgent> editorAgentProvider) {
         super(localizationConstant.createPhpFileActionTitle(),
               localizationConstant.createPhpFileActionDescription(),
               resources.phpFile(),
@@ -49,7 +52,8 @@ public class CreatePhpSourceFileAction extends NewPhplikeResourceAction {
               coreLocalizationConstant,
               eventBus,
               appContext,
-              notificationManager);
+              notificationManager,
+              editorAgentProvider);
     }
 
     @Override

@@ -10,11 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.client;
 
-import com.google.gwt.dom.client.Document;
-
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Window;
@@ -97,7 +96,7 @@ public class BootstrapController {
 
     @Inject
     private void startComponents(Map<String, Provider<Component>> components) {
-        startComponents(components.entrySet().iterator());
+        startComponents(components.values().iterator());
     }
 
     @Inject
@@ -132,37 +131,23 @@ public class BootstrapController {
         });
     }
 
-    private void startComponents(final Iterator<Map.Entry<String,  Provider<Component>>> componentIterator) {
-        if (componentIterator.hasNext()) {
-            Map.Entry<String,  Provider<Component>> entry = componentIterator.next();
-            final String componentName = entry.getKey();
+    private void startComponents(final Iterator<Provider<Component>> componentProviderIterator) {
+        if (componentProviderIterator.hasNext()) {
+            Provider<Component> componentProvider = componentProviderIterator.next();
 
-            try {
-                Provider<Component> componentProvider = entry.getValue();
+            final Component component = componentProvider.get();
+            component.start(new Callback<Component, Exception>() {
+                @Override
+                public void onSuccess(Component result) {
+                    startComponents(componentProviderIterator);
+                }
 
-                final Component component = componentProvider.get();
-                component.start(new Callback<Component, Exception>() {
-                    @Override
-                    public void onSuccess(Component result) {
-                        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                            @Override
-                            public void execute() {
-                                startComponents(componentIterator);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(Exception reason) {
-                        Log.error(getClass(), "Unable to start " + componentName, reason);
-                        initializationFailed(reason.getMessage());
-                    }
-                });
-            } catch (Exception e) {
-                Log.error(getClass(), "Unable to start " + componentName, e);
-                initializationFailed(e.getMessage());
-            }
-
+                @Override
+                public void onFailure(Exception reason) {
+                    Log.error(component.getClass(), reason);
+                    initializationFailed(reason.getMessage());
+                }
+            });
         } else {
             startExtensionsAndDisplayUI();
         }

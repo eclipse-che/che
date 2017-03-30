@@ -16,10 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import static com.google.common.collect.Lists.newArrayList;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.che.api.languageserver.shared.lsapi.LanguageDescriptionDTO;
@@ -45,10 +42,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
-import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.JsArrayString;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * @author Evgen Vidolob

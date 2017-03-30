@@ -14,10 +14,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Image;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
-
-import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Icon.
@@ -128,5 +127,15 @@ public class Icon {
             return null;
         }
         return new SVGImage(svgResource);
+    }
+
+    /**
+     * Returns {@link SVGResource} widget.
+     *
+     * @return {@link SVGResource} widget
+     */
+    @Nullable
+    public SVGResource getSVGResource() {
+        return svgResource;
     }
 }

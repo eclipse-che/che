@@ -22,94 +22,23 @@
     <artifactId>che-plugin-orion-editor</artifactId>
     <packaging>jar</packaging>
     <name>Che Plugin :: Orion :: Editor</name>
-    <properties>
-        <findbugs.failonerror>false</findbugs.failonerror>
-        <patches.location>${basedir}/src/main/patches</patches.location>
-        <requirejs.upstream.url>http://requirejs.org/docs/release/${requirejs.upstream.version}/comments/</requirejs.upstream.url>
-        <requirejs.upstream.version>2.1.15</requirejs.upstream.version>
-    </properties>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <!-- required until api/core cleanup! -->
-                <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-ide-app</artifactId>
-                <version>${project.version}</version>
-                <scope>compile</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-elemental</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-assistedinject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-gwt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-ide-api</artifactId>
-        </dependency>
-        <dependency>
-            <!-- required until api/core cleanup! -->
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-ide-app</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-ide-ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-requirejs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.vectomatic</groupId>
-            <artifactId>lib-gwt-svg</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.gwt.inject</groupId>
-            <artifactId>gin</artifactId>
-            <scope>provided</scope>
+            <artifactId>che-core-orion-editor</artifactId>
         </dependency>
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>target/requirejs-${requirejs.upstream.version}</directory>
-            </resource>
-        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                    <ignoredDependencies>
+                    <ignoredDependency>org.eclipse.che.core:che-core-orion-editor</ignoredDependency>
+                </ignoredDependencies>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

@@ -14,26 +14,28 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.RequestCall;
-import org.eclipse.che.ide.api.subversion.Credentials;
-import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.user.AskCredentialsDialog;
+import org.eclipse.che.ide.api.user.Credentials;
+import org.eclipse.che.ide.user.AskCredentialsDialogImpl;
 
 import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 import static org.eclipse.che.ide.util.StringUtils.isNullOrEmpty;
 
 /**
- * Implementation of {@link SubversionCredentialsDialog}.
+ * Implementation of {@link AskCredentialsDialog}.
  *
  * @author Igor Vinokur
  */
-public class SubversionCredentialsDialogImpl implements SubversionCredentialsDialog, SubversionCredentialsDialogViewImpl.ActionDelegate {
+public class SubversionCredentialsDialogImpl extends AskCredentialsDialogImpl implements SubversionCredentialsDialogViewImpl.ActionDelegate {
 
     private final SubversionCredentialsDialogView view;
 
     private AsyncCallback<Credentials> callback;
 
     @Inject
-    public SubversionCredentialsDialogImpl(SubversionCredentialsDialogView view) {
+    public SubversionCredentialsDialogImpl(SubversionCredentialsDialogView view, CoreLocalizationConstant localizationConstant) {
+        super(localizationConstant);
         this.view = view;
         this.view.setDelegate(this);
     }
@@ -42,12 +44,7 @@ public class SubversionCredentialsDialogImpl implements SubversionCredentialsDia
     public Promise<Credentials> askCredentials() {
         view.cleanCredentials();
         view.showDialog();
-        return createFromAsyncRequest(new RequestCall<Credentials>() {
-            @Override
-            public void makeCall(final AsyncCallback<Credentials> callback) {
-                SubversionCredentialsDialogImpl.this.callback = callback;
-            }
-        });
+        return createFromAsyncRequest(callback1 -> SubversionCredentialsDialogImpl.this.callback = callback1);
     }
 
     @Override

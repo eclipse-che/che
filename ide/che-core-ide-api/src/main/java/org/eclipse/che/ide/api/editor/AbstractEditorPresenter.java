@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 
 import org.eclipse.che.ide.api.parts.AbstractPartPresenter;
@@ -88,5 +89,10 @@ public abstract class AbstractEditorPresenter extends AbstractPartPresenter impl
     @Override
     public void onFileChanged() {
         firePropertyChange(TITLE_PROPERTY);
+    }
+
+    @Override
+    public void onClosing(AsyncCallback<Void> callback) {
+        callback.onSuccess(null);
     }
 }

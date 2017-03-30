@@ -1,0 +1,94 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+.button {
+    width: 32px;
+    height: 22px;
+    color: #4990e2;
+    background-image: linear-gradient(to bottom, #444444, #343434 98%);
+    border: solid 0.6px #454545;
+    font-size: 17px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    text-align: center;
+    cursor: pointer;
+}
+
+.button:focus {
+    outline: none;
+}
+
+.button:hover {
+    color: #53a2ff;
+    background-image: linear-gradient(to bottom, #3d3d3d, #1d1d1d 98%);
+}
+
+.button:active {
+    color: #235c9e;
+    background-image: linear-gradient(to bottom, #3d3d3d, #1d1d1d);
+}
+
+.popupPanel {
+    background-color: #212325;
+    box-shadow: 0 1px 3px 0 #202020;
+    border: solid 1px #161819;
+    font-size: 10px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: 16px;;
+    color: #dddddd;
+    padding: 0;
+}
+
+.expandedImage {
+    transform: scaleY(0.6) rotate(90deg);
+    margin-left: 1px;
+    margin-top: 6px;
+    float: right;
+}
+
+.expandedImage svg {
+    width: 9px;
+    height: 9px;
+    fill: selectCommandActionColor;
+}
+
+.expandedImage:hover svg {
+    fill: selectCommandActionHoverColor;
+}
+
+.popupItem {
+    height: 20px;
+    line-height: 20px;
+    padding: 0 10px;
+    cursor: default;
+}
+
+.popupItemOver {
+    background-color: #2e3945;
+    color: #4eabff;
+}
+
+.arrow {
+    float: right;
+    margin-left: 10px;
+    color: #dddddd;
+}
+
+.label {
+    padding-left: 7px;
+    font-size: 10px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    color: #919191;
+}

@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
 import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectRelativePathMacro;
-import org.eclipse.che.ide.extension.machine.client.command.macros.ServerPortProvider;
+import org.eclipse.che.ide.extension.machine.client.command.macros.ServerAddressMacroRegistrar;
 import org.eclipse.che.plugin.maven.client.MavenResources;
 
 import java.util.LinkedList;
@@ -53,7 +53,7 @@ public class MavenCommandType implements CommandType {
         pages = new LinkedList<>();
         pages.add(page);
 
-        iconRegistry.registerIcon(new Icon(ID + ".commands.category.icon", resources.maven()));
+        iconRegistry.registerIcon(new Icon("command.type." + ID, resources.maven()));
     }
 
     @Override
@@ -84,7 +84,7 @@ public class MavenCommandType implements CommandType {
     @Override
     public String getPreviewUrlTemplate() {
         //TODO: hardcode http after switching WS Master to https
-        return "http://" + ServerPortProvider.KEY_TEMPLATE.replace("%", DEF_PORT) + "/" +
+        return "http://" + ServerAddressMacroRegistrar.MACRO_NAME_TEMPLATE.replace("%", DEF_PORT) + "/" +
                currentProjectRelativePathMacro.getName();
     }
 }

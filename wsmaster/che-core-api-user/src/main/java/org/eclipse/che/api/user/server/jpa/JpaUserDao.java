@@ -17,10 +17,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.eclipse.che.api.user.server.event.PostUserPersistedEvent;
-import org.eclipse.che.api.user.server.event.UserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
@@ -32,7 +28,6 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
@@ -53,8 +48,6 @@ public class JpaUserDao implements UserDao {
     protected Provider<EntityManager> managerProvider;
     @Inject
     private   PasswordEncryptor       encryptor;
-    @Inject
-    private   EventService            eventService;
 
     @Override
     @Transactional
@@ -110,8 +103,7 @@ public class JpaUserDao implements UserDao {
     public void remove(String id) throws ServerException {
         requireNonNull(id, "Required non-null id");
         try {
-            Optional<UserImpl> userOpt = doRemove(id);
-            userOpt.ifPresent(user -> eventService.publish(new UserRemovedEvent(user.getId())));
+            doRemove(id);
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
@@ -216,7 +208,6 @@ public class JpaUserDao implements UserDao {
         EntityManager manage = managerProvider.get();
         manage.persist(user);
         manage.flush();
-        eventService.publish(new PostUserPersistedEvent(new UserImpl(user))).propagateException();
     }
 
     @Transactional
@@ -237,16 +228,13 @@ public class JpaUserDao implements UserDao {
     }
 
     @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
-    protected Optional<UserImpl> doRemove(String id) throws ServerException {
+    protected void doRemove(String id) {
         final EntityManager manager = managerProvider.get();
         final UserImpl user = manager.find(UserImpl.class, id);
-        if (user == null) {
-            return Optional.empty();
+        if (user != null) {
+            manager.remove(user);
+            manager.flush();
         }
-        eventService.publish(new BeforeUserRemovedEvent(user)).propagateException();
-        manager.remove(user);
-        manager.flush();
-        return Optional.of(user);
     }
 
     // Returns user instance copy without password
