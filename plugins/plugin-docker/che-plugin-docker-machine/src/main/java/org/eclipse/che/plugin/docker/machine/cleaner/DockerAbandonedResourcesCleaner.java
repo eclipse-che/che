@@ -96,23 +96,27 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
      * Cleans up CHE docker containers which don't tracked by API any more.
      */
     @VisibleForTesting
-    void cleanContainers() {
+    void cleanContainers(@Nullable @Named("che.server_id") String cheServerId) {
         List<String> activeContainers = new ArrayList<>();
         try {
             for (ContainerListEntry container : dockerConnector.listContainers()) {
                 String containerName = container.getNames()[0];
                 Optional<ContainerNameInfo> optional = nameGenerator.parse(containerName);
-                if (optional.isPresent()) {
-                    try {
-                        // container is orphaned if not found exception is thrown
-                        environmentEngine.getMachine(optional.get().getWorkspaceId(),
-                                                     optional.get().getMachineId());
-                        activeContainers.add(containerName);
-                    } catch (NotFoundException e) {
-                        cleanUpContainer(container);
-                    } catch (Exception e) {
-                        LOG.error(format("Failed to check activity for container with name '%s'. Cause: %s",
-                                         containerName, e.getLocalizedMessage()), e);
+                if (optional.isPresent() ) {
+                    if(optional.get().getServerId().equals(cheServerId)){
+                        try {
+                            // container is orphaned if not found exception is thrown
+                            if(optional.get().getServerId().equals("") || ){
+                                environmentEngine.getMachine(optional.get().getWorkspaceId(),
+                                                             optional.get().getMachineId());
+                                activeContainers.add(containerName);
+                            }
+                        } catch (NotFoundException e) {
+                            cleanUpContainer(container);
+                        } catch (Exception e) {
+                            LOG.error(format("Failed to check activity for container with name '%s'. Cause: %s",
+                                             containerName, e.getLocalizedMessage()), e);
+                        }
                     }
                 }
             }
