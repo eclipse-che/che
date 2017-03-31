@@ -1085,6 +1085,20 @@ public class MachineProviderImplTest {
                    MACHINE_NAME +
                    ". Found " + Arrays.toString(argumentCaptor.getValue().getContainerConfig().getEnv()));
     }
+
+    @Test
+    public void shouldAddMachineNameEnvVariableOnNonDevInstanceCreationFromRecipe() throws Exception {
+        String wsId = "myWs";
+        createInstanceFromRecipe(false, wsId);
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
+                           .contains(DockerInstanceRuntimeInfo.CHE_MACHINE_NAME + "=" + MACHINE_NAME),
+                   "Machine Name variable is missing. Required " + DockerInstanceRuntimeInfo.CHE_MACHINE_NAME + "=" +
+                   MACHINE_NAME +
+                   ". Found " + Arrays.toString(argumentCaptor.getValue().getContainerConfig().getEnv()));
+    }
+
     @Test
     public void shouldAddWorkspaceIdEnvVariableOnDevInstanceCreationFromSnapshot() throws Exception {
         String wsId = "myWs";
