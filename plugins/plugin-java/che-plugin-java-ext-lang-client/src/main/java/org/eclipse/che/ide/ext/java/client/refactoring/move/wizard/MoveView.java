@@ -47,8 +47,10 @@ interface MoveView extends View<MoveView.ActionDelegate> {
      *
      * @param projects
      *         list of projects from current workspace
+     * @param refactorInfo
+     *         information about refactoring operation
      */
-    void setTreeOfDestinations(List<JavaProject> projects);
+    void setTreeOfDestinations(RefactorInfo refactorInfo, List<JavaProject> projects);
 
     /**
      * Show information message into bottom of view.
