@@ -36,7 +36,7 @@ public class FactoryGinModule extends AbstractGinModule {
         bind(GreetingPartView.class).to(GreetingPartViewImpl.class).in(Singleton.class);
         bind(ImportFromConfigView.class).to(ImportFromConfigViewImpl.class).in(Singleton.class);
         bind(ShowWelcomePreferencePageView.class).to(ShowWelcomePreferencePageViewImpl.class).in(Singleton.class);
-        bind(FactoryServiceClient.class).to(FactoryServiceClientImpl.class).in(com.google.inject.Singleton.class);
+        bind(FactoryServiceClient.class).to(FactoryServiceClientImpl.class).in(Singleton.class);
 
         final GinMultibinder<PreferencePagePresenter> prefBinder = GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class);
         prefBinder.addBinding().to(ShowWelcomePreferencePagePresenter.class);
