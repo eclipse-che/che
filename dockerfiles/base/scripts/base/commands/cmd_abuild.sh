@@ -31,6 +31,10 @@ cmd_abuild() {
     WRITE_PARAMETERS+="-v /etc/group:/etc/group:ro "
     WRITE_PARAMETERS+="-v /etc/passwd:/etc/passwd:ro "
     WRITE_PARAMETERS+="--user $CHE_USER "
+    IFS=$' '
+    for TMP_GROUP in ${CHE_USER_GROUPS}; do
+      WRITE_PARAMETERS+="--group-add ${TMP_GROUP}"
+    done
   fi
 
   GENERATE_COMMAND="docker run -it --rm --name build-che ${WRITE_PARAMETERS} \

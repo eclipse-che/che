@@ -395,6 +395,14 @@ init_check_user() {
   fi
 }
 
+# Extract groups of the docker run command
+init_check_groups() {
+  DOCKER_CHE_GROUPS=$(docker inspect --format='{{.HostConfig.GroupAdd}}' $(get_this_container_id) | cut -d '[' -f 2 | cut -d ']' -f 1 | xargs)
+  if [[ "${DOCKER_CHE_GROUPS}" != "" ]]; then
+    CHE_USER_GROUPS=${DOCKER_CHE_GROUPS}
+  fi
+}
+
 init_check_mounts() {
   DATA_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}")
   INSTANCE_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/instance")

@@ -167,6 +167,8 @@ init_global_vars() {
 
   DEFAULT_CHE_USER="root"
   CHE_USER="${CHE_USER:-${DEFAULT_CHE_USER}}"
+
+  CHE_USER_GROUPS=""
 }
 
 usage() {
@@ -286,6 +288,9 @@ start() {
 
   # Extract the value of --user from the docker command line
   init_check_user "$@"
+
+  # Extract the value of --group-add from the docker command line
+  init_check_groups "$@"
 
   # Only initialize after mounts have been established so we can write cli.log out to a mount folder
   init_logging "$@"
