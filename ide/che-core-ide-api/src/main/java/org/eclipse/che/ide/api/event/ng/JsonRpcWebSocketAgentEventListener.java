@@ -37,8 +37,6 @@ import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOp
  */
 @Singleton
 public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
-    private static final int ENDPOINT_ID = Random.nextInt(Integer.MAX_VALUE);
-
     private final JsonRpcInitializer initializer;
     private final AppContext         appContext;
     private final RequestTransmitter requestTransmitter;
@@ -82,7 +80,7 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
         String devMachineId = devMachine.getId();
         String wsAgentWebSocketUrl = devMachine.getWsAgentWebSocketUrl();
 
-        String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + ENDPOINT_ID);
+        String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + appContext.getAppId());
         String execAgentUrl = devMachine.getExecAgentUrl();
 
         initializer.initialize("ws-agent", singletonMap("url", wsAgentUrl));
