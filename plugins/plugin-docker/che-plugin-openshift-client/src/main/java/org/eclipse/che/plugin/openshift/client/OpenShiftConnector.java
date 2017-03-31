@@ -178,7 +178,7 @@ public class OpenShiftConnector extends DockerConnector {
                               DockerConnectionFactory connectionFactory,
                               DockerRegistryAuthResolver authResolver,
                               DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider,
-                              @Named("che.docker.ip.external") String cheServerExternalAddress,
+                              @Nullable @Named("che.docker.ip.external") String cheServerExternalAddress,
                               @Named("che.openshift.project") String openShiftCheProjectName,
                               @Named("che.openshift.liveness.probe.delay") int openShiftLivenessProbeDelay,
                               @Named("che.openshift.liveness.probe.timeout") int openShiftLivenessProbeTimeout,
@@ -982,6 +982,9 @@ public class OpenShiftConnector extends DockerConnector {
                                       String workspaceName) {
 
         String routeName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceName + "." + serverRef;
+        if (cheServerExternalAddress == null) {
+            throw new IllegalArgumentException("Property che.docker.ip.external must be set when using openshift.");
+        }
         String serviceHost = serverRef + "." + workspaceName + "." + this.cheServerExternalAddress;
 
         Route route = openShiftClient
