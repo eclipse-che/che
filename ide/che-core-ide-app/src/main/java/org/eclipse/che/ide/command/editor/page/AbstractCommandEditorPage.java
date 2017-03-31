@@ -44,7 +44,7 @@ public abstract class AbstractCommandEditorPage implements CommandEditorPage {
     }
 
     /**
-     * This method is called every time when command is opening in the editor.
+     * Called every time when command is opening in the editor.
      * Typically, implementor should do initial setup of the page with the {@link #editedCommand}.
      */
     protected abstract void initialize();

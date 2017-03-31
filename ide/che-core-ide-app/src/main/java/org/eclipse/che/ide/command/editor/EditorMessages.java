@@ -52,6 +52,9 @@ public interface EditorMessages extends Messages {
     @Key("page.goal.new_goal.button.create")
     String pageGoalNewGoalButtonCreate();
 
+    @Key("page.goal.new_goal.already_exists.message")
+    String pageGoalNewGoalAlreadyExistsMessage(String newGoalName);
+
     @Key("page.projects.title")
     String pageProjectsTitle();
 
