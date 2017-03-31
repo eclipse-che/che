@@ -14,19 +14,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 
 import java.io.IOException;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 
 /**
  * Launches agent and waits while it is finished.
@@ -42,32 +36,37 @@ public class DefaultAgentLauncher implements AgentLauncher {
     public DefaultAgentLauncher() { }
 
     @Override
-    public void launch(Instance machine, Agent agent) throws ServerException {
+    public void launch(Runtime machine, Agent agent) throws ServerException {
         if (isNullOrEmpty(agent.getScript())) {
             return;
         }
-        final Command command = new CommandImpl(agent.getId(), agent.getScript(), "agent");
-        final InstanceProcess process = machine.createProcess(command, null);
+        //final Command command = new CommandImpl(agent.getId(), agent.getScript(), "agent");
+        //final InstanceProcess process = machine.createProcess(command, null);
         final LineConsumer lineConsumer = new AbstractLineConsumer() {
             @Override
             public void writeLine(String line) throws IOException {
-                machine.getLogger().writeLine(line);
+//                machine.getLogger().writeLine(line);
             }
         };
 
-        try {
-            process.start(lineConsumer);
-        } catch (ConflictException e) {
-            try {
-                machine.getLogger().writeLine(format("[ERROR] %s", e.getMessage()));
-            } catch (IOException ignored) {
-            }
-        } finally {
-            try {
-                lineConsumer.close();
-            } catch (IOException ignored) {
-            }
-        }
+
+
+
+
+//        try {
+//            machine.runCommand(agent.getScript(), lineConsumer);
+//            //process.start(lineConsumer);
+//        } catch (Throwable e) {
+//            try {
+//                machine.getLogger().writeLine(format("[ERROR] %s", e.getMessage()));
+//            } catch (IOException ignored) {
+//            }
+//        } finally {
+//            try {
+//                lineConsumer.close();
+//            } catch (IOException ignored) {
+//            }
+//        }
     }
 
     @Override

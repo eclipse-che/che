@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.OldMachineConfig;
 
 import java.util.Set;
 
@@ -42,7 +42,7 @@ public class AgentLauncherFactory {
      * If the specific {@link AgentLauncher} isn't registered then the default one will be used.
      *
      * @see Agent#getId()
-     * @see MachineConfig#getType()
+     * @see OldMachineConfig#getType()
      *
      * @param agentName
      *      the agent name

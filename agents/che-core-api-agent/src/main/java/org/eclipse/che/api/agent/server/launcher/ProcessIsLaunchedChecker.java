@@ -12,7 +12,7 @@ package org.eclipse.che.api.agent.server.launcher;
 
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;

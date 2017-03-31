@@ -47,5 +47,5 @@ public interface AgentLauncher {
      * @throws ServerException
      *      if script execution failed
      */
-    void launch(Instance machine, Agent agent) throws ServerException;
+    void launch(Runtime machine, Agent agent) throws ServerException;
 }

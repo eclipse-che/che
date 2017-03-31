@@ -11,7 +11,7 @@
 package org.eclipse.che.api.agent.shared.model.impl;
 
 import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.core.model.workspace.ServerConf2;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,14 +23,14 @@ import java.util.Objects;
  * @author Anatoliy Bazko
  */
 public class AgentImpl implements Agent {
-    private String                             id;
-    private String                             name;
-    private String                             version;
-    private String                             description;
-    private List<String>                       dependencies;
-    private Map<String, String>                properties;
-    private String                             script;
-    private Map<String, ? extends ServerConf2> servers;
+    private String                              id;
+    private String                              name;
+    private String                              version;
+    private String                              description;
+    private List<String>                        dependencies;
+    private Map<String, String>                 properties;
+    private String                              script;
+    private Map<String, ? extends ServerConfig> servers;
 
     public AgentImpl(String id,
                      String name,
@@ -39,7 +39,7 @@ public class AgentImpl implements Agent {
                      List<String> dependencies,
                      Map<String, String> properties,
                      String script,
-                     Map<String, ? extends ServerConf2> servers) {
+                     Map<String, ? extends ServerConfig> servers) {
         this.id = id;
         this.name = name;
         this.version = version;
@@ -107,7 +107,7 @@ public class AgentImpl implements Agent {
     }
 
     @Override
-    public Map<String, ? extends ServerConf2> getServers() {
+    public Map<String, ? extends ServerConfig> getServers() {
         if (servers == null) {
             servers = new HashMap<>();
         }

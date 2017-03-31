@@ -12,7 +12,7 @@ package org.eclipse.che.api.agent.shared.model.impl;
 
 import org.eclipse.che.api.agent.shared.dto.AgentDto;
 import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.core.model.workspace.ServerConf2;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.dto.server.DtoFactory;
 
@@ -78,7 +78,7 @@ public abstract class BasicAgent implements Agent {
     }
 
     @Override
-    public Map<String, ? extends ServerConf2> getServers() {
+    public Map<String, ? extends ServerConfig> getServers() {
         return unmodifiableMap(internal.getServers());
     }
 
