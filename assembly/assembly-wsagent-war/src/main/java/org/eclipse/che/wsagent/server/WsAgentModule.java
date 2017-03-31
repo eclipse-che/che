@@ -88,14 +88,6 @@ public class WsAgentModule extends AbstractModule {
         configureWebSocket();
     }
 
-    //it's need for WSocketEventBusClient and in the future will be replaced with the property
-    @Named("notification.client.event_subscriptions")
-    @Provides
-    @SuppressWarnings("unchecked")
-    Pair<String, String>[] eventSubscriptionsProvider(@Named("event.bus.url") String eventBusURL) {
-        return new Pair[]{Pair.of(eventBusURL, "")};
-    }
-
     //it's need for EventOriginClientPropagationPolicy and in the future will be replaced with the property
     @Named("notification.client.propagate_events")
     @Provides
