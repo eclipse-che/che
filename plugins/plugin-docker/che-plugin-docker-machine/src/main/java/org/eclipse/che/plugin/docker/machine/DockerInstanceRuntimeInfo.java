@@ -68,7 +68,6 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
      */
     public static final String CHE_MACHINE_NAME = "CHE_MACHINE_NAME";
 
-
     /**
      * Default HOSTNAME that will be added in all docker containers that are started. This host will container the Docker host's ip
      * reachable inside the container.
