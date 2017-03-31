@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.deploy;
 
-import com.google.gson.JsonParser;
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
@@ -29,17 +26,9 @@ import org.eclipse.che.api.agent.WsAgent;
 import org.eclipse.che.api.agent.WsAgentLauncher;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
 import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.core.jsonrpc.BuildingRequestTransmitter;
-import org.eclipse.che.api.core.jsonrpc.JsonRpcFactory;
-import org.eclipse.che.api.core.jsonrpc.JsonRpcMessageReceiver;
-import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
-import org.eclipse.che.api.core.websocket.WebSocketMessageReceiver;
-import org.eclipse.che.api.core.websocket.WebSocketMessageTransmitter;
-import org.eclipse.che.api.core.websocket.impl.BasicWebSocketMessageTransmitter;
-import org.eclipse.che.api.core.websocket.impl.GuiceInjectorEndpointConfigurator;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
@@ -54,7 +43,6 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
-import javax.inject.Singleton;
 import javax.sql.DataSource;
 
 import static com.google.inject.matcher.Matchers.subclassesOf;
@@ -72,6 +60,8 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
         install(new org.eclipse.che.api.machine.server.jpa.MachineJpaModule());
         install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
+        install(new org.eclipse.che.api.core.jsonrpc.JsonRpcModule());
+        install(new org.eclipse.che.api.core.websocket.WebSocketModule());
 
         // db configuration
         bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);
@@ -219,27 +209,5 @@ public class WsMasterModule extends AbstractModule {
 
         bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
         bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);
-
-        configureJsonRpc();
-        configureWebSocket();
-    }
-
-
-    private void configureWebSocket() {
-        requestStaticInjection(GuiceInjectorEndpointConfigurator.class);
-        bind(WebSocketMessageTransmitter.class).to(BasicWebSocketMessageTransmitter.class);
-        bind(WebSocketMessageReceiver.class).to(JsonRpcMessageReceiver.class);
-    }
-
-    private void configureJsonRpc() {
-        install(new FactoryModuleBuilder().build(JsonRpcFactory.class));
-        install(new FactoryModuleBuilder().build(RequestHandlerConfigurator.class));
-        install(new FactoryModuleBuilder().build(BuildingRequestTransmitter.class));
-    }
-
-    @Provides
-    @Singleton
-    public JsonParser jsonParser() {
-        return new JsonParser();
     }
 }

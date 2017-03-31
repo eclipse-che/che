@@ -12,6 +12,7 @@ package org.eclipse.che.ide.context;
 
 import com.google.common.collect.Sets;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.user.client.Random;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -56,6 +57,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.gwt.user.client.Random.nextInt;
 import static java.util.Arrays.binarySearch;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.sort;
@@ -81,6 +83,7 @@ public class AppContextImpl implements AppContext,
                                        WorkspaceStartedEvent.Handler,
                                        WorkspaceStoppedEvent.Handler,
                                        ResourceManagerInitializer {
+    private static final String APP_ID =  String.valueOf(nextInt(Integer.MAX_VALUE));
 
     private static final Project[] NO_PROJECTS = {};
 
@@ -501,6 +504,11 @@ public class AppContextImpl implements AppContext,
             return runtime.getDevMachine().getWsAgentBaseUrl();
         else
             return fromUrl;
+    }
+
+    @Override
+    public String getAppId() {
+        return APP_ID;
     }
 
     @Override

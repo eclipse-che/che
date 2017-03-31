@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.jsonrpc;
 
-import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -28,13 +28,13 @@ import static java.util.Collections.singletonMap;
  */
 @Singleton
 public class WorkspaceMasterJsonRpcInitializer {
-    private static final int ENDPOINT_ID = Random.nextInt(Integer.MAX_VALUE);
-
     private final JsonRpcInitializer initializer;
+    private final AppContext         appContext;
 
     @Inject
-    public WorkspaceMasterJsonRpcInitializer(JsonRpcInitializer initializer) {
+    public WorkspaceMasterJsonRpcInitializer(JsonRpcInitializer initializer, AppContext appContext) {
         this.initializer = initializer;
+        this.appContext = appContext;
         internalInitialize();
     }
 
@@ -65,7 +65,7 @@ public class WorkspaceMasterJsonRpcInitializer {
         String protocol = "https:".equals(getProtocol()) ? "wss://" : "ws://";
         String host = getHost();
         String context = getRestContext().replace("/api", "") + "/websocket/";
-        String workspaceMasterUrl = protocol + host + context + ENDPOINT_ID;
+        String workspaceMasterUrl = protocol + host + context + appContext.getAppId();
 
         initializer.initialize("ws-master", singletonMap("url", workspaceMasterUrl));
     }
