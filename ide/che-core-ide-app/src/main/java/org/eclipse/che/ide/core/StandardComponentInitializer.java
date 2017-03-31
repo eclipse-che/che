@@ -48,6 +48,7 @@ import org.eclipse.che.ide.actions.SignatureHelpAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;
+import org.eclipse.che.ide.actions.SoftWrapAction;
 import org.eclipse.che.ide.actions.common.MaximizePartAction;
 import org.eclipse.che.ide.actions.common.MinimizePartAction;
 import org.eclipse.che.ide.actions.common.RestorePartAction;
@@ -162,6 +163,7 @@ public class StandardComponentInitializer {
     public static final String IMPORT_PROJECT        = "importProject";
     public static final String CLOSE_ACTIVE_EDITOR   = "closeActiveEditor";
     public static final String SIGNATURE_HELP        = "signatureHelp";
+    public static final String SOFT_WRAP             = "softWrap";
     public static final String RENAME                = "renameResource";
     public static final String SHOW_REFERENCE        = "showReference";
     public static final String SHOW_COMMANDS_PALETTE = "showCommandsPalette";
@@ -371,6 +373,9 @@ public class StandardComponentInitializer {
     private ShowCommandsPaletteAction showCommandsPaletteAction;
 
     @Inject
+    private SoftWrapAction softWrapAction;
+
+    @Inject
     private PerspectiveManager perspectiveManager;
 
     @Inject
@@ -578,6 +583,9 @@ public class StandardComponentInitializer {
         actionManager.registerAction("redo", redoAction);
         editGroup.add(redoAction);
 
+        actionManager.registerAction(SOFT_WRAP, softWrapAction);
+        editGroup.add(softWrapAction);
+
         actionManager.registerAction(CUT, cutResourceAction);
         editGroup.add(cutResourceAction);
 
@@ -741,6 +749,7 @@ public class StandardComponentInitializer {
         editorContextMenuGroup.add(redoAction);
         editorContextMenuGroup.addSeparator();
         editorContextMenuGroup.add(formatterAction);
+        editorContextMenuGroup.add(softWrapAction);
 
         editorContextMenuGroup.addSeparator();
         editorContextMenuGroup.add(fullTextSearchAction);
@@ -760,6 +769,7 @@ public class StandardComponentInitializer {
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.ARROW_RIGHT).build(), SWITCH_RIGHT_TAB);
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('e').build(), OPEN_RECENT_FILES);
         keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.DELETE).build(), DELETE_ITEM);
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('w').build(), SOFT_WRAP);
 
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('N').build(), NEW_FILE);
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('x').build(), CREATE_PROJECT);

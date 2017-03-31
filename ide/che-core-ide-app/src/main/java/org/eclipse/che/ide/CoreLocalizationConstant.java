@@ -172,6 +172,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("redo.description")
     String redoDescription();
 
+    @Key("softWrap")
+    String softWrap();
+
     @Key("uploadFile.name")
     String uploadFileName();
 
