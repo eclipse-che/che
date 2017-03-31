@@ -10,34 +10,36 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.pullrequest.client.rest;
 
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
-import org.eclipse.che.ide.rest.StringMapUnmarshaller;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.plugin.pullrequest.shared.dto.ShouldGenerateReviewUrl;
 
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
 public class PullRequestWorkflowServiceClientImpl implements PullRequestWorkflowServiceClient {
-    protected AsyncRequestFactory asyncRequestFactory;
-    protected String              baseHttpUrl;
+    private final AsyncRequestFactory    asyncRequestFactory;
+    private final String                 baseHttpUrl;
+    private final DtoUnmarshallerFactory unmarshallerFactory;
 
     @Inject
-    public PullRequestWorkflowServiceClientImpl(AppContext appContext, AsyncRequestFactory asyncRequestFactory) {
+    public PullRequestWorkflowServiceClientImpl(AppContext appContext,//
+                                                AsyncRequestFactory asyncRequestFactory,//
+                                                DtoUnmarshallerFactory unmarshallerFactory) {
         this.asyncRequestFactory = asyncRequestFactory;
         this.baseHttpUrl = appContext.getMasterEndpoint() + "/pullrequestwf";
+        this.unmarshallerFactory = unmarshallerFactory;
     }
 
     @Override
-    public Promise<Map<String, String>> getSettings() {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + "/settings") //
+    public Promise<Boolean> shouldGenerateReviewUrl() {
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + "/reviewurl") //
                                   .header(ACCEPT, APPLICATION_JSON) //
-                                  .header(CONTENT_TYPE, APPLICATION_JSON) //
-                                  .send(new StringMapUnmarshaller());
+                                  .send(unmarshallerFactory.newUnmarshaller(ShouldGenerateReviewUrl.class)) //
+                                  .then((ShouldGenerateReviewUrl generateReviewUrl) -> generateReviewUrl.isActive());
     }
 }

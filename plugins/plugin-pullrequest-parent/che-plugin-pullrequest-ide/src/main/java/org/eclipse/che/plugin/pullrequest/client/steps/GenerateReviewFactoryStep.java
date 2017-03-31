@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.pullrequest.client.steps;
 
-import java.util.Map;
 
 import org.eclipse.che.plugin.pullrequest.client.ContributeMessages;
 import org.eclipse.che.plugin.pullrequest.client.rest.PullRequestWorkflowServiceClient;
@@ -39,7 +38,6 @@ import javax.inject.Inject;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.plugin.pullrequest.shared.Constants.CHE_PULLREQUEST_GENERATE__REVIEW__FACTORY;
 
 /**
  * Generates a factory for the contribution reviewer.
@@ -67,9 +65,9 @@ public class GenerateReviewFactoryStep implements Step {
 
     @Override
     public void execute(final WorkflowExecutor executor, final Context context) {
-        pullRequestWorkflowService.getSettings() //
-                                  .then((Map<String, String> settings) -> {
-                                      if (!Boolean.parseBoolean(settings.getOrDefault(CHE_PULLREQUEST_GENERATE__REVIEW__FACTORY, "true"))) {
+        pullRequestWorkflowService.shouldGenerateReviewUrl() //
+                                  .then((Boolean shouldGenerateReviewUrl) -> {
+                                      if (!shouldGenerateReviewUrl) {
                                           executor.done(GenerateReviewFactoryStep.this, context);
                                           return;
                                       }

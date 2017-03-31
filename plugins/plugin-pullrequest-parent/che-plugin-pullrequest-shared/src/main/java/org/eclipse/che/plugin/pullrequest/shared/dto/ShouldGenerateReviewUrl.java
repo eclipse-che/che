@@ -8,17 +8,17 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.pullrequest.client.rest;
+package org.eclipse.che.plugin.pullrequest.shared.dto;
 
+import org.eclipse.che.dto.shared.DTO;
 
-import org.eclipse.che.api.promises.client.Promise;
+@DTO
+public interface ShouldGenerateReviewUrl {
 
-/**
- * Access to the server configuration related to the Pull Request workflow and panel in Che.
- */
-public interface PullRequestWorkflowServiceClient {
-    /**
-     * Ask the server master pullrequest workflow service if it should generate a review factory url after the creation of a PR.
-     */
-    Promise<Boolean> shouldGenerateReviewUrl();
+    boolean isActive();
+
+    ShouldGenerateReviewUrl withActive(boolean shouldGenerateReviewUrl);
+
+    void setActive(boolean shouldGenerateReviewUrl);
+
 }

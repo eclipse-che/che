@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.pullrequest.server;
 
-import java.util.Map;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,14 +22,18 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-import com.google.common.collect.ImmutableMap;
+import org.eclipse.che.plugin.pullrequest.shared.dto.ShouldGenerateReviewUrl;
 
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.plugin.pullrequest.shared.Constants.CHE_PULLREQUEST_GENERATE__REVIEW__FACTORY;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+/**
+ * Pull Request Workflow REST API. It provides server defined configuration of the Pull Request Workflow feature.
+ */
 @Path("/pullrequestwf")
 @Api(value = "/pullrequestwf", //
-     description = "Pull Request Workflow REST API")
+     description = "Pull Request Workflow REST API. It provides server defined configuration of the Pull Request Workflow feature")
 public class PullRequestWorkflowService {
 
     protected boolean generateReviewFactory;
@@ -41,11 +44,11 @@ public class PullRequestWorkflowService {
     }
 
     @GET
-    @Path("settings")
+    @Path("reviewurl")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Get pullrequest workflow server configuration values")
-    @ApiResponses({@ApiResponse(code = 200, message = "The response contains server settings")})
-    public Map<String, String> getSettings() {
-        return ImmutableMap.of(CHE_PULLREQUEST_GENERATE__REVIEW__FACTORY, Boolean.toString(generateReviewFactory));
+    @ApiOperation(value = "Enable generation of a review factory url of a Pull Request created with the Che PR panel")
+    @ApiResponses({@ApiResponse(code = 200, message = "Server contains configuration about generation of review factory URL")})
+    public ShouldGenerateReviewUrl shouldGenerateReviewFactory() {
+        return newDto(ShouldGenerateReviewUrl.class).withActive(generateReviewFactory);
     }
 }
