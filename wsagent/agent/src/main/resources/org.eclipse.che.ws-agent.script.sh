@@ -12,7 +12,16 @@
 unset PACKAGES
 unset SUDO
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
-command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
+CURL_INSTALLED=false
+WGET_INSTALLED=false
+command -v curl >/dev/null 2>&1 && CURL_INSTALLED=true
+command -v wget >/dev/null 2>&1 && WGET_INSTALLED=true
+
+# no curl, no wget, install curl
+if [ ${CURL_INSTALLED} = false ] && [ ${WGET_INSTALLED} = false ]; then
+  PACKAGES=${PACKAGES}" curl";
+fi
+
 test "$(id -u)" = 0 || SUDO="sudo -E"
 
 LOCAL_AGENT_BINARIES_URI="/mnt/che/ws-agent.tar.gz"
@@ -233,13 +242,23 @@ eval "DOWNLOAD_AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}"
 
 if [ -f "${LOCAL_AGENT_BINARIES_URI}" ] && [ -s "${LOCAL_AGENT_BINARIES_URI}" ]
 then
-    AGENT_BINARIES_URI="file://${LOCAL_AGENT_BINARIES_URI}"
+    tar zxf "${LOCAL_AGENT_BINARIES_URI}" -C ${CHE_DIR}/ws-agent
 else
     echo "Workspace Agent will be downloaded from Workspace Master"
     AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}
+    if [ ${CURL_INSTALLED} = true ]; then
+      curl -s  ${AGENT_BINARIES_URI} | tar  xzf - -C ${CHE_DIR}/ws-agent
+    else
+      # replace https by http as wget may not be able to handle ssl
+      AGENT_BINARIES_URI=$(echo ${AGENT_BINARIES_URI} | sed 's/https/http/g')
+
+      # use wget
+      wget -qO- ${AGENT_BINARIES_URI} | tar xzf - -C ${CHE_DIR}/ws-agent
+    fi
+
 fi
 
-curl -s  ${AGENT_BINARIES_URI} | tar  xzf - -C ${CHE_DIR}/ws-agent
+
 
 ###############################################
 ### ws-agent run command will be added here ###
