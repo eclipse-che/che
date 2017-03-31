@@ -12,7 +12,7 @@ package org.eclipse.che.api.machine.shared.dto;
 
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.machine.MachineProcess;
 import org.eclipse.che.dto.shared.DTO;
 

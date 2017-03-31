@@ -10,25 +10,27 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.OldMachine;
+import org.eclipse.che.api.core.model.machine.OldMachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineLimits;
 import org.eclipse.che.api.core.model.machine.MachineProcess;
-import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.model.machine.Server;
-import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.core.model.machine.OldServer;
+import org.eclipse.che.api.core.model.machine.OldServerConf;
 import org.eclipse.che.api.core.model.machine.ServerProperties;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.machine.Snapshot;
-import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.api.machine.shared.dto.OldMachineConfigDto;
+import org.eclipse.che.api.machine.shared.dto.OldMachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineLimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
-import org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
-import org.eclipse.che.api.machine.shared.dto.ServerConfDto;
-import org.eclipse.che.api.machine.shared.dto.ServerDto;
+import org.eclipse.che.api.machine.shared.dto.OldServerDto;
+import org.eclipse.che.api.machine.shared.dto.OldServerConfDto;
 import org.eclipse.che.api.machine.shared.dto.ServerPropertiesDto;
+import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 
 import java.util.Map;
@@ -44,19 +46,19 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  */
 public final class DtoConverter {
     /**
-     * Converts {@link MachineConfig} to {@link MachineConfigDto}.
+     * Converts {@link OldMachineConfig} to {@link OldMachineConfigDto}.
      */
-    public static MachineConfigDto asDto(MachineConfig config) {
-        return newDto(MachineConfigDto.class).withName(config.getName())
-                                             .withType(config.getType())
-                                             .withDev(config.isDev())
-                                             .withLimits(config.getLimits() == null ? null : asDto(config.getLimits()))
-                                             .withSource(config.getSource() == null ? null : asDto(config.getSource()))
-                                             .withServers(config.getServers()
+    public static OldMachineConfigDto asDto(OldMachineConfig config) {
+        return newDto(OldMachineConfigDto.class).withName(config.getName())
+                                                .withType(config.getType())
+                                                .withDev(config.isDev())
+                                                .withLimits(config.getLimits() == null ? null : asDto(config.getLimits()))
+                                                .withSource(config.getSource() == null ? null : asDto(config.getSource()))
+                                                .withServers(config.getServers()
                                                                 .stream()
                                                                 .map(DtoConverter::asDto)
                                                                 .collect(Collectors.toList()))
-                                             .withEnvVariables(config.getEnvVariables());
+                                                .withEnvVariables(config.getEnvVariables());
     }
 
     /**
@@ -74,15 +76,15 @@ public final class DtoConverter {
     }
 
     /**
-     * Converts {@link Machine} to {@link MachineDto}.
+     * Converts {@link OldMachine} to {@link OldMachineDto}.
      */
-    public static MachineDto asDto(Machine machine) {
-        final MachineDto machineDto = newDto(MachineDto.class).withConfig(asDto(machine.getConfig()))
-                                                              .withId(machine.getId())
-                                                              .withStatus(machine.getStatus())
-                                                              .withOwner(machine.getOwner())
-                                                              .withEnvName(machine.getEnvName())
-                                                              .withWorkspaceId(machine.getWorkspaceId());
+    public static OldMachineDto asDto(OldMachine machine) {
+        final OldMachineDto machineDto = newDto(OldMachineDto.class).withConfig(asDto(machine.getConfig()))
+                                                                    .withId(machine.getId())
+                                                                    .withStatus(machine.getStatus())
+                                                                    .withOwner(machine.getOwner())
+                                                                    .withEnvName(machine.getEnvName())
+                                                                    .withWorkspaceId(machine.getWorkspaceId());
         if (machine.getRuntime() != null) {
             machineDto.withRuntime(asDto(machine.getRuntime()));
         }
@@ -90,28 +92,29 @@ public final class DtoConverter {
     }
 
     /**
-     * Converts {@link MachineRuntimeInfo} to {@link MachineRuntimeInfoDto}.
+     * Converts {@link Machine} to {@link MachineDto}.
      */
-    private static MachineRuntimeInfoDto asDto(MachineRuntimeInfo runtime) {
-        final Map<String, ServerDto> servers = runtime.getServers()
-                                                      .entrySet()
-                                                      .stream()
-                                                      .collect(toMap(Map.Entry::getKey, entry -> asDto(entry.getValue())));
+    private static MachineDto asDto(Machine runtime) {
+        final Map<String, ServerDto>servers = runtime.getServers()
+                                                     .entrySet()
+                                                     .stream()
+                                                     .collect(toMap(Map.Entry::getKey, entry -> asDto(entry.getValue())));
 
-        return newDto(MachineRuntimeInfoDto.class).withEnvVariables(runtime.getEnvVariables())
-                                                  .withProperties(runtime.getProperties())
-                                                  .withServers(servers);
+        return newDto(MachineDto.class)//.withEnvVariables(runtime.getEnvVariables())
+                                       .withProperties(runtime.getProperties())
+                                       .withServers(servers);
     }
 
     /**
-     * Converts {@link Server} to {@link ServerDto}.
+     * Converts {@link OldServer} to {@link OldServerDto}.
      */
     public static ServerDto asDto(Server server) {
-        return newDto(ServerDto.class).withAddress(server.getAddress())
-                       .withRef(server.getRef())
-                       .withProtocol(server.getProtocol())
-                       .withUrl(server.getUrl())
-                       .withProperties(server.getProperties() == null ? null : asDto(server.getProperties()));
+        return newDto(ServerDto.class).withUrl(server.getUrl());
+                     //  .withAddress(server.getAddress())
+                     //  .withRef(server.getRef())
+                     //  .withProtocol(server.getProtocol())
+                     //  .withUrl(server.getUrl())
+                     //  .withProperties(server.getProperties() == null ? null : asDto(server.getProperties()));
     }
 
     /**
@@ -124,13 +127,13 @@ public final class DtoConverter {
     }
 
     /**
-     * Converts {@link ServerConf} to {@link ServerConfDto}.
+     * Converts {@link OldServerConf} to {@link OldServerConfDto}.
      */
-    public static ServerConfDto asDto(ServerConf serverConf) {
-        return newDto(ServerConfDto.class).withRef(serverConf.getRef())
-                                          .withPort(serverConf.getPort())
-                                          .withProtocol(serverConf.getProtocol())
-                                          .withPath(serverConf.getPath());
+    public static OldServerConfDto asDto(OldServerConf serverConf) {
+        return newDto(OldServerConfDto.class).withRef(serverConf.getRef())
+                                             .withPort(serverConf.getPort())
+                                             .withProtocol(serverConf.getProtocol())
+                                             .withPath(serverConf.getPath());
     }
 
     /**

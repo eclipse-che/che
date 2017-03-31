@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.model.impl;
 
-import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.OldMachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.Snapshot;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -276,7 +276,7 @@ public class SnapshotImpl implements Snapshot {
         private boolean       isDev;
         private long          creationDate;
 
-        public SnapshotBuilder fromConfig(MachineConfig machineConfig) {
+        public SnapshotBuilder fromConfig(OldMachineConfig machineConfig) {
             machineName = machineConfig.getName();
             type = machineConfig.getType();
             return this;

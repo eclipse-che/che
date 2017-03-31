@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.spi.impl;
 
-import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 
 import java.util.Map;

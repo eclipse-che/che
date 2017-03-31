@@ -11,7 +11,7 @@
 package org.eclipse.che.api.machine.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.Map;

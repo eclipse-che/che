@@ -19,7 +19,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
 import org.eclipse.che.api.machine.server.event.RecipePersistedEvent;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.machine.server.recipe.OldRecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
@@ -55,12 +55,12 @@ public class JpaRecipeDao implements RecipeDao {
     private EventService eventService;
 
     @Override
-    public void create(RecipeImpl recipe) throws ConflictException, ServerException {
+    public void create(OldRecipeImpl recipe) throws ConflictException, ServerException {
         requireNonNull(recipe);
         try {
             doCreate(recipe);
         } catch (DuplicateKeyException ex) {
-            throw new ConflictException(format("Recipe with id %s already exists", recipe.getId()));
+            throw new ConflictException(format("OldRecipe with id %s already exists", recipe.getId()));
         } catch (IntegrityConstraintViolationException ex) {
             throw new ConflictException("Could not create recipe with permissions for non-existent user");
         } catch (RuntimeException ex) {
@@ -69,7 +69,7 @@ public class JpaRecipeDao implements RecipeDao {
     }
 
     @Override
-    public RecipeImpl update(RecipeImpl update) throws NotFoundException, ServerException {
+    public OldRecipeImpl update(OldRecipeImpl update) throws NotFoundException, ServerException {
         requireNonNull(update);
         try {
             return doUpdate(update);
@@ -90,14 +90,14 @@ public class JpaRecipeDao implements RecipeDao {
 
     @Override
     @Transactional
-    public RecipeImpl getById(String id) throws NotFoundException, ServerException {
+    public OldRecipeImpl getById(String id) throws NotFoundException, ServerException {
         requireNonNull(id);
 
         try {
             final EntityManager manager = managerProvider.get();
-            final RecipeImpl recipe = manager.find(RecipeImpl.class, id);
+            final OldRecipeImpl recipe = manager.find(OldRecipeImpl.class, id);
             if (recipe == null) {
-                throw new NotFoundException(format("Recipe with id '%s' doesn't exist", id));
+                throw new NotFoundException(format("OldRecipe with id '%s' doesn't exist", id));
             }
             return recipe;
         } catch (RuntimeException ex) {
@@ -107,23 +107,23 @@ public class JpaRecipeDao implements RecipeDao {
 
     @Override
     @Transactional
-    public List<RecipeImpl> search(String user,
-                                   List<String> tags,
-                                   String type,
-                                   int skipCount,
-                                   int maxItems) throws ServerException {
+    public List<OldRecipeImpl> search(String user,
+                                      List<String> tags,
+                                      String type,
+                                      int skipCount,
+                                      int maxItems) throws ServerException {
         try {
             final EntityManager manager = managerProvider.get();
             final CriteriaBuilder cb = manager.getCriteriaBuilder();
-            final CriteriaQuery<RecipeImpl> query = cb.createQuery(RecipeImpl.class);
-            final Root<RecipeImpl> fromRecipe = query.from(RecipeImpl.class);
+            final CriteriaQuery<OldRecipeImpl> query = cb.createQuery(OldRecipeImpl.class);
+            final Root<OldRecipeImpl> fromRecipe = query.from(OldRecipeImpl.class);
             final ParameterExpression<String> typeParam = cb.parameter(String.class, "recipeType");
             final Predicate checkType = cb.or(cb.isNull(typeParam),
                                               cb.equal(fromRecipe.get("type"), typeParam));
-            final TypedQuery<RecipeImpl> typedQuery;
+            final TypedQuery<OldRecipeImpl> typedQuery;
             if (tags != null && !tags.isEmpty()) {
-                final Join<RecipeImpl, String> tag = fromRecipe.join("tags");
-                query.select(cb.construct(RecipeImpl.class, tag.getParent()))
+                final Join<OldRecipeImpl, String> tag = fromRecipe.join("tags");
+                query.select(cb.construct(OldRecipeImpl.class, tag.getParent()))
                      .where(cb.and(checkType, tag.in(tags)))
                      .groupBy(fromRecipe.get("id"))
                      .having(cb.equal(cb.count(tag), tags.size()));
@@ -144,27 +144,27 @@ public class JpaRecipeDao implements RecipeDao {
     @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
     protected void doRemove(String id) throws ServerException {
         final EntityManager manager = managerProvider.get();
-        final RecipeImpl recipe = manager.find(RecipeImpl.class, id);
+        final OldRecipeImpl recipe = manager.find(OldRecipeImpl.class, id);
         if (recipe != null) {
-            eventService.publish(new BeforeRecipeRemovedEvent(new RecipeImpl(recipe))).propagateException();
+            eventService.publish(new BeforeRecipeRemovedEvent(new OldRecipeImpl(recipe))).propagateException();
             manager.remove(recipe);
             manager.flush();
         }
     }
 
     @Transactional
-    protected RecipeImpl doUpdate(RecipeImpl update) throws NotFoundException {
+    protected OldRecipeImpl doUpdate(OldRecipeImpl update) throws NotFoundException {
         final EntityManager manager = managerProvider.get();
-        if (manager.find(RecipeImpl.class, update.getId()) == null) {
+        if (manager.find(OldRecipeImpl.class, update.getId()) == null) {
             throw new NotFoundException(format("Could not update recipe with id %s because it doesn't exist", update.getId()));
         }
-        RecipeImpl merged = manager.merge(update);
+        OldRecipeImpl merged = manager.merge(update);
         manager.flush();
         return merged;
     }
 
     @Transactional(rollbackOn = {RuntimeException.class, ApiException.class})
-    protected void doCreate(RecipeImpl recipe) throws ConflictException, ServerException {
+    protected void doCreate(OldRecipeImpl recipe) throws ConflictException, ServerException {
         EntityManager manage = managerProvider.get();
         manage.persist(recipe);
         manage.flush();

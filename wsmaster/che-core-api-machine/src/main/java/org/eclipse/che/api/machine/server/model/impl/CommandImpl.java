@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.model.impl;
 
-import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.recipe;
 
-import org.eclipse.che.api.core.model.machine.Recipe;
-import org.eclipse.che.api.machine.shared.ManagedRecipe;
+import org.eclipse.che.api.core.model.machine.OldRecipe;
+import org.eclipse.che.api.machine.shared.ManagedOldRecipe;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -25,14 +25,14 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Implementation of {@link ManagedRecipe}
+ * Implementation of {@link ManagedOldRecipe}
  *
  * @author Eugene Voevodin
  * @author Anton Korneta
  */
-@Entity(name = "Recipe")
+@Entity(name = "OldRecipe")
 @Table(name = "recipe")
-public class RecipeImpl implements ManagedRecipe {
+public class OldRecipeImpl implements ManagedOldRecipe {
 
     @Id
     @Column(name = "id")
@@ -58,15 +58,15 @@ public class RecipeImpl implements ManagedRecipe {
     @CollectionTable(name = "recipe_tags", joinColumns = @JoinColumn(name = "recipe_id"))
     private List<String> tags;
 
-    public RecipeImpl() {
+    public OldRecipeImpl() {
     }
 
-    public RecipeImpl(Recipe recipe) {
+    public OldRecipeImpl(OldRecipe recipe) {
         this.type = recipe.getType();
         this.script = recipe.getScript();
     }
 
-    public RecipeImpl(ManagedRecipe recipe) {
+    public OldRecipeImpl(ManagedOldRecipe recipe) {
         this(recipe.getId(),
              recipe.getName(),
              recipe.getCreator(),
@@ -76,7 +76,7 @@ public class RecipeImpl implements ManagedRecipe {
              recipe.getDescription());
     }
 
-    public RecipeImpl(RecipeImpl recipe) {
+    public OldRecipeImpl(OldRecipeImpl recipe) {
         this(recipe.getId(),
              recipe.getName(),
              recipe.getCreator(),
@@ -86,13 +86,13 @@ public class RecipeImpl implements ManagedRecipe {
              recipe.getDescription());
     }
 
-    public RecipeImpl(String id,
-                      String name,
-                      String creator,
-                      String type,
-                      String script,
-                      List<String> tags,
-                      String description) {
+    public OldRecipeImpl(String id,
+                         String name,
+                         String creator,
+                         String type,
+                         String script,
+                         List<String> tags,
+                         String description) {
         this.id = id;
         this.name = name;
         this.creator = creator;
@@ -111,7 +111,7 @@ public class RecipeImpl implements ManagedRecipe {
         this.id = id;
     }
 
-    public RecipeImpl withId(String id) {
+    public OldRecipeImpl withId(String id) {
         this.id = id;
         return this;
     }
@@ -125,7 +125,7 @@ public class RecipeImpl implements ManagedRecipe {
         this.name = name;
     }
 
-    public RecipeImpl withName(String name) {
+    public OldRecipeImpl withName(String name) {
         this.name = name;
         return this;
     }
@@ -139,7 +139,7 @@ public class RecipeImpl implements ManagedRecipe {
         this.type = type;
     }
 
-    public RecipeImpl withType(String type) {
+    public OldRecipeImpl withType(String type) {
         this.type = type;
         return this;
     }
@@ -153,7 +153,7 @@ public class RecipeImpl implements ManagedRecipe {
         this.script = script;
     }
 
-    public RecipeImpl withScript(String script) {
+    public OldRecipeImpl withScript(String script) {
         this.script = script;
         return this;
     }
@@ -167,7 +167,7 @@ public class RecipeImpl implements ManagedRecipe {
         this.creator = creator;
     }
 
-    public RecipeImpl withCreator(String creator) {
+    public OldRecipeImpl withCreator(String creator) {
         this.creator = creator;
         return this;
     }
@@ -184,7 +184,7 @@ public class RecipeImpl implements ManagedRecipe {
         this.tags = tags;
     }
 
-    public RecipeImpl withTags(List<String> tags) {
+    public OldRecipeImpl withTags(List<String> tags) {
         this.tags = tags;
         return this;
     }
@@ -198,7 +198,7 @@ public class RecipeImpl implements ManagedRecipe {
         this.description = description;
     }
 
-    public RecipeImpl withDescription(String description) {
+    public OldRecipeImpl withDescription(String description) {
         this.description = description;
         return this;
     }
@@ -208,10 +208,10 @@ public class RecipeImpl implements ManagedRecipe {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof RecipeImpl)) {
+        if (!(obj instanceof OldRecipeImpl)) {
             return false;
         }
-        final RecipeImpl other = (RecipeImpl)obj;
+        final OldRecipeImpl other = (OldRecipeImpl)obj;
         return Objects.equals(id, other.id) &&
                Objects.equals(name, other.name) &&
                Objects.equals(creator, other.creator) &&
@@ -236,7 +236,7 @@ public class RecipeImpl implements ManagedRecipe {
 
     @Override
     public String toString() {
-        return "RecipeImpl{" +
+        return "OldRecipeImpl{" +
                "id='" + id + '\'' +
                ", name='" + name + '\'' +
                ", creator='" + creator + '\'' +

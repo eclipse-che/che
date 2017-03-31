@@ -8,24 +8,29 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared.dto.recipe;
+package org.eclipse.che.api.machine.shared.dto;
 
-import org.eclipse.che.api.core.model.machine.Recipe;
+import org.eclipse.che.api.core.model.machine.OldServerConf;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Describes machine recipe.
- *
- * @author Valeriy Svydenko
+ * @author Alexander Garagatyi
  */
 @DTO
-public interface MachineRecipe extends Recipe {
+public interface OldServerConfDto extends OldServerConf {
+    void setRef(String ref);
 
-    void setType(String type);
+    OldServerConfDto withRef(String ref);
 
-    MachineRecipe withType(String type);
+    void setPort(String port);
 
-    void setScript(String script);
+    OldServerConfDto withPort(String port);
 
-    MachineRecipe withScript(String script);
+    void setProtocol(String protocol);
+
+    OldServerConfDto withProtocol(String protocol);
+
+    void setPath(String path);
+
+    OldServerConfDto withPath(String path);
 }

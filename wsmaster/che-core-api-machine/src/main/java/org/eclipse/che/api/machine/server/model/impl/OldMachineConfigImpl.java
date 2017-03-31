@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.model.impl;
 
-import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.OldMachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineLimits;
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.core.model.machine.OldServerConf;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,41 +23,41 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Data object for {@link MachineConfig}.
+ * Data object for {@link OldMachineConfig}.
  *
  * @author Eugene Voevodin
  */
-public class MachineConfigImpl implements MachineConfig {
+public class OldMachineConfigImpl implements OldMachineConfig {
 
     public static MachineConfigImplBuilder builder() {
         return new MachineConfigImplBuilder();
     }
 
-    private boolean              dev;
-    private String               name;
-    private String               type;
-    private MachineSourceImpl    source;
-    private MachineLimitsImpl    limits;
-    private List<ServerConfImpl> servers;
-    private Map<String, String>  envVariables;
+    private boolean                 dev;
+    private String                  name;
+    private String                  type;
+    private MachineSourceImpl       source;
+    private MachineLimitsImpl       limits;
+    private List<OldServerConfImpl> servers;
+    private Map<String, String>     envVariables;
 
-    public MachineConfigImpl() {
+    public OldMachineConfigImpl() {
     }
 
-    public MachineConfigImpl(boolean dev,
-                             String name,
-                             String type,
-                             MachineSource source,
-                             MachineLimits machineLimits,
-                             List<? extends ServerConf> servers,
-                             Map<String, String> envVariables) {
+    public OldMachineConfigImpl(boolean dev,
+                                String name,
+                                String type,
+                                MachineSource source,
+                                MachineLimits machineLimits,
+                                List<? extends OldServerConf> servers,
+                                Map<String, String> envVariables) {
         this.dev = dev;
         this.name = name;
         this.type = type;
         this.envVariables = envVariables;
         if (servers != null) {
             this.servers = servers.stream()
-                                  .map(ServerConfImpl::new)
+                                  .map(OldServerConfImpl::new)
                                   .collect(Collectors.toList());
         }
         if (source != null) {
@@ -67,7 +67,7 @@ public class MachineConfigImpl implements MachineConfig {
 
     }
 
-    public MachineConfigImpl(MachineConfig machineCfg) {
+    public OldMachineConfigImpl(OldMachineConfig machineCfg) {
         this(machineCfg.isDev(),
              machineCfg.getName(),
              machineCfg.getType(),
@@ -123,14 +123,14 @@ public class MachineConfigImpl implements MachineConfig {
     }
 
     @Override
-    public List<ServerConfImpl> getServers() {
+    public List<OldServerConfImpl> getServers() {
         if (servers == null) {
             servers = new ArrayList<>();
         }
         return servers;
     }
 
-    public void setServers(List<ServerConfImpl> servers) {
+    public void setServers(List<OldServerConfImpl> servers) {
         this.servers = servers;
     }
 
@@ -149,8 +149,8 @@ public class MachineConfigImpl implements MachineConfig {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof MachineConfigImpl)) return false;
-        final MachineConfigImpl other = (MachineConfigImpl)obj;
+        if (!(obj instanceof OldMachineConfigImpl)) return false;
+        final OldMachineConfigImpl other = (OldMachineConfigImpl)obj;
         return dev == other.dev &&
                Objects.equals(name, other.name) &&
                Objects.equals(source, other.source) &&
@@ -175,7 +175,7 @@ public class MachineConfigImpl implements MachineConfig {
 
     @Override
     public String toString() {
-        return "MachineConfigImpl{" +
+        return "OldMachineConfigImpl{" +
                "dev=" + dev +
                ", name='" + name + '\'' +
                ", type='" + type + '\'' +
@@ -187,31 +187,31 @@ public class MachineConfigImpl implements MachineConfig {
     }
 
     /**
-     * Helps to build complex {@link MachineConfigImpl machine config impl}.
+     * Helps to build complex {@link OldMachineConfigImpl machine config impl}.
      *
-     * @see MachineConfigImpl#builder()
+     * @see OldMachineConfigImpl#builder()
      */
     public static class MachineConfigImplBuilder {
 
-        private boolean                    dev;
-        private String                     name;
-        private String                     type;
-        private MachineSource              source;
-        private MachineLimits              machineLimits;
-        private List<? extends ServerConf> servers;
-        private Map<String, String>        envVariables;
+        private boolean                       dev;
+        private String                        name;
+        private String                        type;
+        private MachineSource                 source;
+        private MachineLimits                 machineLimits;
+        private List<? extends OldServerConf> servers;
+        private Map<String, String>           envVariables;
 
-        public MachineConfigImpl build() {
-            return new MachineConfigImpl(dev,
-                                         name,
-                                         type,
-                                         source,
-                                         machineLimits,
-                                         servers,
-                                         envVariables);
+        public OldMachineConfigImpl build() {
+            return new OldMachineConfigImpl(dev,
+                                            name,
+                                            type,
+                                            source,
+                                            machineLimits,
+                                            servers,
+                                            envVariables);
         }
 
-        public MachineConfigImplBuilder fromConfig(MachineConfig machineConfig) {
+        public MachineConfigImplBuilder fromConfig(OldMachineConfig machineConfig) {
             dev = machineConfig.isDev();
             name = machineConfig.getName();
             type = machineConfig.getType();
@@ -247,7 +247,7 @@ public class MachineConfigImpl implements MachineConfig {
             return this;
         }
 
-        public MachineConfigImplBuilder setServers(List<? extends ServerConf> servers) {
+        public MachineConfigImplBuilder setServers(List<? extends OldServerConf> servers) {
             this.servers = servers;
             return this;
         }

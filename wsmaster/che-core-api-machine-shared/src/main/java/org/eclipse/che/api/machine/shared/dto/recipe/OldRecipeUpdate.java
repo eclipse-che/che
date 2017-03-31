@@ -10,45 +10,40 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.shared.dto.recipe;
 
-import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
-import org.eclipse.che.api.machine.shared.ManagedRecipe;
+import org.eclipse.che.api.machine.shared.ManagedOldRecipe;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
 
 /**
- * Describes recipe
+ * Describes recipe update.
  *
  * @author Eugene Voevodin
  */
 @DTO
-public interface RecipeDescriptor extends Hyperlinks, ManagedRecipe {
+public interface OldRecipeUpdate extends ManagedOldRecipe {
 
     void setId(String id);
 
-    RecipeDescriptor withId(String id);
+    OldRecipeUpdate withId(String id);
 
     void setName(String name);
 
-    RecipeDescriptor withName(String name);
+    OldRecipeUpdate withName(String name);
 
     void setType(String type);
 
-    RecipeDescriptor withType(String type);
+    OldRecipeUpdate withType(String type);
 
     void setScript(String script);
 
-    RecipeDescriptor withScript(String script);
-
-    void setCreator(String creator);
-
-    RecipeDescriptor withCreator(String creator);
+    OldRecipeUpdate withScript(String script);
 
     void setTags(List<String> tags);
 
-    RecipeDescriptor withTags(List<String> tags);
+    OldRecipeUpdate withTags(List<String> tags);
 
     void setDescription(String description);
 
-    RecipeDescriptor withDescription(String description);
+    OldRecipeUpdate withDescription(String description);
 }

@@ -19,7 +19,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
 import org.eclipse.che.api.machine.server.event.RecipePersistedEvent;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.machine.server.recipe.OldRecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.test.tck.TckListener;
@@ -58,13 +58,13 @@ public class RecipeDaoTest {
 
     private static final int ENTRY_COUNT = 5;
 
-    private List<RecipeImpl> recipes;
+    private List<OldRecipeImpl> recipes;
 
     @Inject
     private RecipeDao recipeDao;
 
     @Inject
-    private TckRepository<RecipeImpl> tckRepository;
+    private TckRepository<OldRecipeImpl> tckRepository;
 
     @Inject
     private EventService eventService;
@@ -85,7 +85,7 @@ public class RecipeDaoTest {
 
     @Test(dependsOnMethods = "shouldGetRecipeById")
     public void shouldCreateRecipe() throws Exception {
-        final RecipeImpl recipe = createRecipe(0);
+        final OldRecipeImpl recipe = createRecipe(0);
         recipeDao.create(recipe);
 
         assertEquals(recipeDao.getById(recipe.getId()), recipe);
@@ -94,7 +94,7 @@ public class RecipeDaoTest {
     @Test(dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingRecipe",
           expectedExceptions = NotFoundException.class)
     public void shouldNotCreateRecipeWhenSubscriberThrowsExceptionOnRecipeStoring() throws Exception {
-        final RecipeImpl recipe = createRecipe(0);
+        final OldRecipeImpl recipe = createRecipe(0);
 
         CascadeEventSubscriber<RecipePersistedEvent> subscriber = mockCascadeEventSubscriber();
         doThrow(new ConflictException("error")).when(subscriber).onCascadeEvent(any());
@@ -122,14 +122,14 @@ public class RecipeDaoTest {
 
     @Test
     public void shouldUpdateRecipe() throws Exception {
-        final RecipeImpl update = recipes.get(0).withName("updatedName");
+        final OldRecipeImpl update = recipes.get(0).withName("updatedName");
 
         assertEquals(recipeDao.update(update), update);
     }
 
     @Test
     public void shouldUpdateRecipeWithAllRelatedAttributes() throws Exception {
-        final RecipeImpl update = recipes.get(0);
+        final OldRecipeImpl update = recipes.get(0);
         update.withName("debian")
               .withCreator("userid_9")
               .withDescription("description")
@@ -161,7 +161,7 @@ public class RecipeDaoTest {
 
     @Test(dependsOnMethods = "shouldGetRecipeById")
     public void shouldNotRemoveRecipeWhenSubscriberThrowsExceptionOnRecipeRemoving() throws Exception {
-        final RecipeImpl recipe = recipes.get(0);
+        final OldRecipeImpl recipe = recipes.get(0);
         CascadeEventSubscriber<BeforeRecipeRemovedEvent> subscriber = mockCascadeEventSubscriber();
         doThrow(new ServerException("error")).when(subscriber).onCascadeEvent(any());
         eventService.subscribe(subscriber, BeforeRecipeRemovedEvent.class);
@@ -183,7 +183,7 @@ public class RecipeDaoTest {
 
     @Test
     public void shouldGetRecipeById() throws Exception {
-        final RecipeImpl recipe = recipes.get(0);
+        final OldRecipeImpl recipe = recipes.get(0);
 
         assertEquals(recipeDao.getById(recipe.getId()), recipe);
     }
@@ -200,11 +200,11 @@ public class RecipeDaoTest {
 
     @Test
     public void shouldFindRecipeByUser() throws Exception {
-        final List<RecipeImpl> result = recipeDao.search(null,
-                                                         null,
-                                                         null,
-                                                         0,
-                                                         recipes.size());
+        final List<OldRecipeImpl> result = recipeDao.search(null,
+                                                            null,
+                                                            null,
+                                                            0,
+                                                            recipes.size());
 
         assertTrue(result.contains(recipes.get(0)));
     }
@@ -218,44 +218,44 @@ public class RecipeDaoTest {
         recipes.get(4).getTags().clear();
         updateAll();
 
-        final List<RecipeImpl> result = recipeDao.search(null, tags, null, 0, recipes.size());
+        final List<OldRecipeImpl> result = recipeDao.search(null, tags, null, 0, recipes.size());
 
         assertEquals(new HashSet<>(result), ImmutableSet.of(recipes.get(0)));
     }
 
     @Test(dependsOnMethods = "shouldFindRecipeByUser")
     public void shouldFindRecipeByType() throws Exception {
-        final RecipeImpl recipe = recipes.get(0);
-        final List<RecipeImpl> result = recipeDao.search(null, null, recipe.getType(), 0, recipes.size());
+        final OldRecipeImpl recipe = recipes.get(0);
+        final List<OldRecipeImpl> result = recipeDao.search(null, null, recipe.getType(), 0, recipes.size());
 
         assertTrue(result.contains(recipe));
     }
 
     @Test(dependsOnMethods = {"shouldFindRecipeByUser", "shouldFindingRecipesByTags", "shouldFindRecipeByType"})
     public void shouldFindRecipeByUserTagsAndType() throws Exception {
-        final RecipeImpl recipe = recipes.get(0);
-        final List<RecipeImpl> result = recipeDao.search(null,
-                                                         recipe.getTags(),
-                                                         recipe.getType(),
-                                                         0,
-                                                         1);
+        final OldRecipeImpl recipe = recipes.get(0);
+        final List<OldRecipeImpl> result = recipeDao.search(null,
+                                                            recipe.getTags(),
+                                                            recipe.getType(),
+                                                            0,
+                                                            1);
 
         assertTrue(result.contains(recipe));
     }
 
-    private static RecipeImpl createRecipe(int index) {
+    private static OldRecipeImpl createRecipe(int index) {
         final String recipeId = NameGenerator.generate("recipeId", 5);
-        return new RecipeImpl(recipeId,
+        return new OldRecipeImpl(recipeId,
                               "recipeName" + index,
                               "creator" + index,
                               "dockerfile" + index,
-                              "script",
-                              new ArrayList<>(asList("tag1" + index, "tag2" + index)),
-                              "recipe description");
+                                 "script",
+                                 new ArrayList<>(asList("tag1" + index, "tag2" + index)),
+                                 "recipe description");
     }
 
     private void updateAll() throws Exception {
-        for (RecipeImpl recipe : recipes) {
+        for (OldRecipeImpl recipe : recipes) {
             recipeDao.update(recipe);
         }
     }

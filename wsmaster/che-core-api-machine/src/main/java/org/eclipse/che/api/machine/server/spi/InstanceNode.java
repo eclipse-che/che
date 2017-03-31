@@ -14,6 +14,8 @@ package org.eclipse.che.api.machine.server.spi;
  * Represents server where machine is launched
  *
  * @author Alexander Garagatyi
+ *
+ * @deprecated
  */
 public interface InstanceNode {
     /**

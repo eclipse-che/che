@@ -82,7 +82,7 @@ public class ServerPropertiesImpl implements ServerProperties {
 
     @Override
     public String toString() {
-        return "ServerImpl{" +
+        return "OldServerImpl{" +
                        "path='" + path + '\'' +
                        ", internalAddress='" + internalAddress + '\'' +
                        ", internalUrl='" + internalUrl + '\'' +

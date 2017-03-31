@@ -13,13 +13,13 @@ package org.eclipse.che.api.machine.server.spi;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.shared.ManagedRecipe;
+import org.eclipse.che.api.machine.server.recipe.OldRecipeImpl;
+import org.eclipse.che.api.machine.shared.ManagedOldRecipe;
 
 import java.util.List;
 
 /**
- * Data access object for {@link ManagedRecipe}.
+ * Data access object for {@link ManagedOldRecipe}.
  *
  * @author Eugene Voevodin
  */
@@ -37,7 +37,7 @@ public interface RecipeDao {
      * @throws ServerException
      *         when any other error occurs
      */
-    void create(RecipeImpl recipe) throws ConflictException, ServerException;
+    void create(OldRecipeImpl recipe) throws ConflictException, ServerException;
 
     /**
      * Updates existing recipe
@@ -54,7 +54,7 @@ public interface RecipeDao {
      * @throws ServerException
      *         when any other error occurs
      */
-    RecipeImpl update(RecipeImpl recipe) throws NotFoundException, ServerException;
+    OldRecipeImpl update(OldRecipeImpl recipe) throws NotFoundException, ServerException;
 
     /**
      * Removes existing recipe
@@ -84,7 +84,7 @@ public interface RecipeDao {
      * @throws ServerException
      *         when any error occurs
      */
-    RecipeImpl getById(String id) throws NotFoundException, ServerException;
+    OldRecipeImpl getById(String id) throws NotFoundException, ServerException;
 
     /**
      * Searches for recipes which have read permissions for specified user and type is equal to specified {@code type}
@@ -115,5 +115,5 @@ public interface RecipeDao {
      * @throws ServerException
      *         when any error occurs
      */
-    List<RecipeImpl> search(String user, List<String> tags, String type, int skipCount, int maxItems) throws ServerException;
+    List<OldRecipeImpl> search(String user, List<String> tags, String type, int skipCount, int maxItems) throws ServerException;
 }

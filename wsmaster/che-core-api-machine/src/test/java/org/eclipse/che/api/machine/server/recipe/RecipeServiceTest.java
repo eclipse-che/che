@@ -16,9 +16,9 @@ import com.jayway.restassured.response.Response;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
-import org.eclipse.che.api.machine.shared.dto.recipe.NewRecipe;
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
+import org.eclipse.che.api.machine.shared.dto.recipe.NewOldRecipe;
+import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeDescriptor;
+import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeUpdate;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -90,12 +90,12 @@ public class RecipeServiceTest {
                                          .post(SECURE_PATH + "/recipe");
 
         assertEquals(response.getStatusCode(), 400);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Recipe required");
+        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "OldRecipe required");
     }
 
     @Test
     public void shouldThrowBadRequestExceptionOnCreateRecipeWithNewRecipeWhichDoesNotHaveType() {
-        final NewRecipe newRecipe = newDto(NewRecipe.class).withScript("FROM ubuntu\n");
+        final NewOldRecipe newRecipe = newDto(NewOldRecipe.class).withScript("FROM ubuntu\n");
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -105,12 +105,12 @@ public class RecipeServiceTest {
                                          .post(SECURE_PATH + "/recipe");
 
         assertEquals(response.getStatusCode(), 400);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Recipe type required");
+        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "OldRecipe type required");
     }
 
     @Test
     public void shouldThrowBadRequestExceptionOnCreateRecipeWithNewRecipeWhichDoesNotHaveScript() {
-        final NewRecipe newRecipe = newDto(NewRecipe.class).withType("docker");
+        final NewOldRecipe newRecipe = newDto(NewOldRecipe.class).withType("docker");
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -120,12 +120,12 @@ public class RecipeServiceTest {
                                          .post(SECURE_PATH + "/recipe");
 
         assertEquals(response.getStatusCode(), 400);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Recipe script required");
+        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "OldRecipe script required");
     }
 
     @Test
     public void shouldThrowBadRequestExceptionWhenCreatingRecipeWithoutName() {
-        final NewRecipe newRecipe = newDto(NewRecipe.class).withType("docker").withScript("script");
+        final NewOldRecipe newRecipe = newDto(NewOldRecipe.class).withType("docker").withScript("script");
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -135,15 +135,15 @@ public class RecipeServiceTest {
                                          .post(SECURE_PATH + "/recipe");
 
         assertEquals(response.getStatusCode(), 400);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Recipe name required");
+        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "OldRecipe name required");
     }
 
     @Test
     public void shouldCreateNewRecipe() throws Exception {
-        final NewRecipe newRecipe = newDto(NewRecipe.class).withType("docker")
-                                                           .withName("name")
-                                                           .withScript("FROM ubuntu\n")
-                                                           .withTags(asList("java", "mongo"));
+        final NewOldRecipe newRecipe = newDto(NewOldRecipe.class).withType("docker")
+                                                                 .withName("name")
+                                                                 .withScript("FROM ubuntu\n")
+                                                                 .withTags(asList("java", "mongo"));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -153,8 +153,8 @@ public class RecipeServiceTest {
                                          .post(SECURE_PATH + "/recipe");
 
         assertEquals(response.getStatusCode(), 201);
-        verify(recipeDao).create(any(RecipeImpl.class));
-        final RecipeDescriptor descriptor = unwrapDto(response, RecipeDescriptor.class);
+        verify(recipeDao).create(any(OldRecipeImpl.class));
+        final OldRecipeDescriptor descriptor = unwrapDto(response, OldRecipeDescriptor.class);
         assertNotNull(descriptor.getId());
         assertEquals(descriptor.getName(), newRecipe.getName());
         assertEquals(descriptor.getCreator(), USER_ID);
@@ -164,9 +164,9 @@ public class RecipeServiceTest {
 
     @Test
     public void shouldBeAbleToGetRecipeScript() throws Exception {
-        final RecipeImpl recipe = new RecipeImpl().withCreator("other-user")
-                                                  .withId("recipe123")
-                                                  .withScript("FROM ubuntu\n");
+        final OldRecipeImpl recipe = new OldRecipeImpl().withCreator("other-user")
+                                                        .withId("recipe123")
+                                                        .withScript("FROM ubuntu\n");
         when(recipeDao.getById(recipe.getId())).thenReturn(recipe);
 
         final Response response = given().auth()
@@ -180,12 +180,12 @@ public class RecipeServiceTest {
 
     @Test
     public void shouldBeAbleToGetRecipe() throws Exception {
-        final RecipeImpl recipe = new RecipeImpl().withCreator("someone2")
-                                                  .withId("recipe123")
-                                                  .withName("name")
-                                                  .withType("docker")
-                                                  .withScript("FROM ubuntu\n")
-                                                  .withTags(asList("java", "mognodb"));
+        final OldRecipeImpl recipe = new OldRecipeImpl().withCreator("someone2")
+                                                        .withId("recipe123")
+                                                        .withName("name")
+                                                        .withType("docker")
+                                                        .withScript("FROM ubuntu\n")
+                                                        .withTags(asList("java", "mognodb"));
         when(recipeDao.getById(recipe.getId())).thenReturn(recipe);
 
         final Response response = given().auth()
@@ -194,7 +194,7 @@ public class RecipeServiceTest {
                                          .get(SECURE_PATH + "/recipe/" + recipe.getId());
 
         assertEquals(response.getStatusCode(), 200);
-        final RecipeDescriptor descriptor = unwrapDto(response, RecipeDescriptor.class);
+        final OldRecipeDescriptor descriptor = unwrapDto(response, OldRecipeDescriptor.class);
         assertEquals(descriptor.getId(), recipe.getId());
         assertEquals(descriptor.getName(), recipe.getName());
         assertEquals(descriptor.getType(), recipe.getType());
@@ -205,16 +205,16 @@ public class RecipeServiceTest {
 
     @Test
     public void shouldBeAbleToSearchRecipes() throws Exception {
-        final RecipeImpl recipe1 = new RecipeImpl().withId("id1")
-                                                   .withCreator(USER_ID)
-                                                   .withType("docker")
-                                                   .withScript("script1 content")
-                                                   .withTags(asList("java"));
-        final RecipeImpl recipe2 = new RecipeImpl().withId("id2")
-                                                   .withCreator(USER_ID)
-                                                   .withType("docker")
-                                                   .withScript("script2 content")
-                                                   .withTags(asList("java", "mongodb"));
+        final OldRecipeImpl recipe1 = new OldRecipeImpl().withId("id1")
+                                                         .withCreator(USER_ID)
+                                                         .withType("docker")
+                                                         .withScript("script1 content")
+                                                         .withTags(asList("java"));
+        final OldRecipeImpl recipe2 = new OldRecipeImpl().withId("id2")
+                                                         .withCreator(USER_ID)
+                                                         .withType("docker")
+                                                         .withScript("script2 content")
+                                                         .withTags(asList("java", "mongodb"));
         when(recipeDao.search(eq("user123"),
                               eq(asList("java", "mongodb")),
                               eq("docker"),
@@ -229,16 +229,16 @@ public class RecipeServiceTest {
                                          .get(SECURE_PATH + "/recipe");
 
         assertEquals(response.getStatusCode(), 200);
-        assertEquals(unwrapDtoList(response, RecipeDescriptor.class).size(), 2);
+        assertEquals(unwrapDtoList(response, OldRecipeDescriptor.class).size(), 2);
     }
 
     @Test
     public void shouldBeAbleToRemoveRecipe() throws Exception {
-        final RecipeImpl recipe = new RecipeImpl().withId("id")
-                                                  .withCreator(USER_ID)
-                                                  .withType("docker")
-                                                  .withScript("script1 content")
-                                                  .withTags(asList("java"));
+        final OldRecipeImpl recipe = new OldRecipeImpl().withId("id")
+                                                        .withCreator(USER_ID)
+                                                        .withType("docker")
+                                                        .withScript("script1 content")
+                                                        .withTags(asList("java"));
         when(recipeDao.getById(recipe.getId())).thenReturn(recipe);
 
         final Response response = given().auth()
@@ -252,20 +252,20 @@ public class RecipeServiceTest {
 
     @Test
     public void shouldBeAbleToUpdateRecipe() throws Exception {
-        final RecipeImpl recipe = new RecipeImpl().withId("id")
-                                                  .withCreator(USER_ID)
-                                                  .withType("docker")
-                                                  .withScript("script1 content")
-                                                  .withTags(asList("java"));
-        final RecipeImpl updatedRecipe = new RecipeImpl(recipe).withType("new-type")
-                                                               .withScript("new script content")
-                                                               .withTags(asList("java", "mongodb"));
+        final OldRecipeImpl recipe = new OldRecipeImpl().withId("id")
+                                                        .withCreator(USER_ID)
+                                                        .withType("docker")
+                                                        .withScript("script1 content")
+                                                        .withTags(asList("java"));
+        final OldRecipeImpl updatedRecipe = new OldRecipeImpl(recipe).withType("new-type")
+                                                                     .withScript("new script content")
+                                                                     .withTags(asList("java", "mongodb"));
         when(recipeDao.update(any())).thenReturn(updatedRecipe);
 
-        RecipeUpdate update = newDto(RecipeUpdate.class).withId(recipe.getId())
-                                                        .withType("new-type")
-                                                        .withScript("new script content")
-                                                        .withTags(asList("java", "mongodb"));
+        OldRecipeUpdate update = newDto(OldRecipeUpdate.class).withId(recipe.getId())
+                                                              .withType("new-type")
+                                                              .withScript("new script content")
+                                                              .withTags(asList("java", "mongodb"));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -275,7 +275,7 @@ public class RecipeServiceTest {
                                          .put(SECURE_PATH + "/recipe");
 
         assertEquals(response.getStatusCode(), 200);
-        verify(recipeDao).update(any(RecipeImpl.class));
+        verify(recipeDao).update(any(OldRecipeImpl.class));
     }
 
     @Test
@@ -294,7 +294,7 @@ public class RecipeServiceTest {
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
-                                         .body(newDto(RecipeUpdate.class))
+                                         .body(newDto(OldRecipeUpdate.class))
                                          .when()
                                          .put(SECURE_PATH + "/recipe");
 

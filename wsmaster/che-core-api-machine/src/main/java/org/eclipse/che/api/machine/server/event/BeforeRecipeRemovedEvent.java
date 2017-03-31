@@ -10,22 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.event;
 
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.machine.server.recipe.OldRecipeImpl;
 import org.eclipse.che.core.db.cascade.event.RemoveEvent;
 
 /**
- * Pre-removal event of {@link RecipeImpl}.
+ * Pre-removal event of {@link OldRecipeImpl}.
  *
  * @author Max Shaposhnik
  */
 public class BeforeRecipeRemovedEvent extends RemoveEvent {
-    private final RecipeImpl recipe;
+    private final OldRecipeImpl recipe;
 
-    public BeforeRecipeRemovedEvent(RecipeImpl recipe) {
+    public BeforeRecipeRemovedEvent(OldRecipeImpl recipe) {
         this.recipe = recipe;
     }
 
-    public RecipeImpl getRecipe() {
+    public OldRecipeImpl getRecipe() {
         return recipe;
     }
 }

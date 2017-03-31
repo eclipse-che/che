@@ -11,10 +11,10 @@
 package org.eclipse.che.api.machine.server.util;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.OldMachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.machine.server.recipe.OldRecipeImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.slf4j.Logger;
@@ -58,7 +58,7 @@ public class RecipeDownloader {
      * @throws MachineException
      *         if any error occurs
      */
-    public RecipeImpl getRecipe(MachineConfig machineConfig) throws MachineException {
+    public OldRecipeImpl getRecipe(OldMachineConfig machineConfig) throws MachineException {
         URL recipeUrl;
         File file = null;
         final String location = machineConfig.getSource().getLocation();
@@ -78,10 +78,10 @@ public class RecipeDownloader {
             recipeUrl = targetUriBuilder.build().toURL();
             file = IoUtil.downloadFileWithRedirect(null, "recipe", null, recipeUrl);
 
-            return new RecipeImpl().withType(machineConfig.getSource().getType())
-                                   .withScript(IoUtil.readAndCloseQuietly(new FileInputStream(file)));
+            return new OldRecipeImpl().withType(machineConfig.getSource().getType())
+                                      .withScript(IoUtil.readAndCloseQuietly(new FileInputStream(file)));
         } catch (IOException | IllegalArgumentException e) {
-            throw new MachineException(format("Failed to download recipe for machine %s. Recipe url %s. Error: %s",
+            throw new MachineException(format("Failed to download recipe for machine %s. OldRecipe url %s. Error: %s",
                                               machineConfig.getName(),
                                               location,
                                               e.getLocalizedMessage()));

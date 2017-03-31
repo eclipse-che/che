@@ -11,8 +11,8 @@
 package org.eclipse.che.api.machine.server.spi;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.config.Command;
+import org.eclipse.che.api.core.model.machine.OldMachine;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -25,8 +25,10 @@ import java.util.List;
  *
  * @author gazarenkov
  * @author Alexander Garagatyi
+ *
+ * @deprecated
  */
-public interface Instance extends Machine {
+public interface Instance extends OldMachine {
 
     void setStatus(MachineStatus status);
 

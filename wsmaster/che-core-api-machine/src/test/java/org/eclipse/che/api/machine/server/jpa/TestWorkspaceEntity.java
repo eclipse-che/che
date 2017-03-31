@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.jpa;
 
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 
 import javax.persistence.Column;
@@ -81,7 +81,7 @@ public class TestWorkspaceEntity implements Workspace {
     }
 
     @Override
-    public WorkspaceRuntime getRuntime() {
+    public Runtime getRuntime() {
         return null;
     }
 

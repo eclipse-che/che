@@ -21,6 +21,8 @@ import org.eclipse.che.api.core.model.machine.MachineProcess;
  *
  * @author andrew00x
  * @author Alexander Garagatyi
+ *
+ * @deprecated
  */
 public interface InstanceProcess extends MachineProcess {
     /**

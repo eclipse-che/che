@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.model.impl;
 
-import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.core.model.machine.OldServerConf;
 
 import javax.persistence.Basic;
 import javax.persistence.Embeddable;
@@ -21,7 +21,7 @@ import java.util.Objects;
  * @author Yevhenii Voevodin
  */
 @Embeddable
-public class ServerConfImpl implements ServerConf {
+public class OldServerConfImpl implements OldServerConf {
 
     @Basic
     private String ref;
@@ -35,16 +35,16 @@ public class ServerConfImpl implements ServerConf {
     @Basic
     private String path;
 
-    public ServerConfImpl() {}
+    public OldServerConfImpl() {}
 
-    public ServerConfImpl(String ref, String port, String protocol, String path) {
+    public OldServerConfImpl(String ref, String port, String protocol, String path) {
         this.ref = ref;
         this.port = port;
         this.protocol = protocol;
         this.path = path;
     }
 
-    public ServerConfImpl(ServerConf serverConf) {
+    public OldServerConfImpl(OldServerConf serverConf) {
         this.ref = serverConf.getRef();
         this.port = serverConf.getPort();
         this.protocol = serverConf.getProtocol();
@@ -90,8 +90,8 @@ public class ServerConfImpl implements ServerConf {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ServerConfImpl)) return false;
-        ServerConfImpl that = (ServerConfImpl)o;
+        if (!(o instanceof OldServerConfImpl)) return false;
+        OldServerConfImpl that = (OldServerConfImpl)o;
         return Objects.equals(ref, that.ref) &&
                Objects.equals(port, that.port) &&
                Objects.equals(protocol, that.protocol) &&
@@ -105,7 +105,7 @@ public class ServerConfImpl implements ServerConf {
 
     @Override
     public String toString() {
-        return "ServerConfImpl{" +
+        return "OldServerConfImpl{" +
                "ref='" + ref + '\'' +
                ", port='" + port + '\'' +
                ", protocol='" + protocol + '\'' +

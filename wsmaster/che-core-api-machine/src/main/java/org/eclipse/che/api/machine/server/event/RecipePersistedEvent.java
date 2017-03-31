@@ -11,7 +11,7 @@
 package org.eclipse.che.api.machine.server.event;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
-import org.eclipse.che.api.machine.shared.ManagedRecipe;
+import org.eclipse.che.api.machine.shared.ManagedOldRecipe;
 import org.eclipse.che.core.db.cascade.event.PersistEvent;
 
 /**
@@ -21,13 +21,13 @@ import org.eclipse.che.core.db.cascade.event.PersistEvent;
  */
 @EventOrigin("recipe")
 public class RecipePersistedEvent extends PersistEvent {
-    private final ManagedRecipe recipe;
+    private final ManagedOldRecipe recipe;
 
-    public RecipePersistedEvent(ManagedRecipe recipe) {
+    public RecipePersistedEvent(ManagedOldRecipe recipe) {
         this.recipe = recipe;
     }
 
-    public ManagedRecipe getRecipe() {
+    public ManagedOldRecipe getRecipe() {
         return recipe;
     }
 }

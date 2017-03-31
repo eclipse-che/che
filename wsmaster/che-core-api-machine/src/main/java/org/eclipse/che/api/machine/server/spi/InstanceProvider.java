@@ -11,9 +11,10 @@
 package org.eclipse.che.api.machine.server.spi;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.OldMachine;
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.model.machine.Recipe;
+import org.eclipse.che.api.core.model.machine.OldMachineConfig;
+import org.eclipse.che.api.core.model.machine.OldRecipe;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
@@ -28,6 +29,8 @@ import java.util.Set;
  *
  * @author gazarenkov
  * @author Alexander Garagatyi
+ *
+ * @deprecated
  */
 public interface InstanceProvider {
     /**
@@ -41,13 +44,13 @@ public interface InstanceProvider {
      * Gets supported recipe types.
      *
      * @return supported recipe types
-     * @see Recipe#getType()
+     * @see OldRecipe#getType()
      */
     Set<String> getRecipeTypes();
 
     /**
      * Creates instance from scratch or by reusing a previously one by using specified {@link org.eclipse.che.api.core.model.machine.MachineSource}
-     * data in {@link org.eclipse.che.api.core.model.machine.MachineConfig}.
+     * data in {@link OldMachineConfig}.
      *
      * @param machine
      *         machine description
@@ -63,7 +66,7 @@ public interface InstanceProvider {
      * @throws MachineException
      *         if other error occurs
      */
-    Instance createInstance(Machine machine,
+    Instance createInstance(OldMachine machine,
                             LineConsumer creationLogsOutput) throws UnsupportedRecipeException,
                                                                     InvalidRecipeException,
                                                                     SourceNotFoundException,

@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.util;
 
-import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.OldMachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.model.machine.Recipe;
+import org.eclipse.che.api.core.model.machine.OldRecipe;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -45,13 +45,13 @@ public class RecipeRetrieverTest {
     private RecipeDownloader recipeDownloader;
 
     /**
-     * Machine config sent to recipe retriever.
+     * OldMachine config sent to recipe retriever.
      */
     @Mock
-    private MachineConfig machineConfig;
+    private OldMachineConfig machineConfig;
 
     /**
-     * Machine source embedded in machine config.
+     * OldMachine source embedded in machine config.
      */
     @Mock
     private MachineSource machineSource;
@@ -81,7 +81,7 @@ public class RecipeRetrieverTest {
     public void checkWithContent() throws MachineException {
         String RECIPE = "FROM TOTO";
         when(machineSource.getContent()).thenReturn(RECIPE);
-        Recipe recipe = recipeRetriever.getRecipe(machineConfig);
+        OldRecipe recipe = recipeRetriever.getRecipe(machineConfig);
         Assert.assertNotNull(recipe);
         assertEquals(recipe.getType(), RECIPE_TYPE);
         assertEquals(recipe.getScript(), RECIPE);

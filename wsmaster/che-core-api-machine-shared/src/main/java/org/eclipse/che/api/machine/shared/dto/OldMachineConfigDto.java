@@ -11,7 +11,7 @@
 package org.eclipse.che.api.machine.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.OldMachineConfig;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.dto.shared.DTO;
@@ -26,14 +26,14 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
  * @author Alexander Garagatyi
  */
 @DTO
-public interface MachineConfigDto extends MachineConfig, Hyperlinks {
+public interface OldMachineConfigDto extends OldMachineConfig, Hyperlinks {
     @Override
     @FactoryParameter(obligation = OPTIONAL)
     String getName();
 
     void setName(String name);
 
-    MachineConfigDto withName(String name);
+    OldMachineConfigDto withName(String name);
 
     @Override
     @FactoryParameter(obligation = MANDATORY)
@@ -41,7 +41,7 @@ public interface MachineConfigDto extends MachineConfig, Hyperlinks {
 
     void setSource(MachineSourceDto source);
 
-    MachineConfigDto withSource(MachineSourceDto source);
+    OldMachineConfigDto withSource(MachineSourceDto source);
 
     @Override
     @FactoryParameter(obligation = MANDATORY)
@@ -49,7 +49,7 @@ public interface MachineConfigDto extends MachineConfig, Hyperlinks {
 
     void setDev(boolean dev);
 
-    MachineConfigDto withDev(boolean dev);
+    OldMachineConfigDto withDev(boolean dev);
 
     @Override
     @FactoryParameter(obligation = MANDATORY)
@@ -57,7 +57,7 @@ public interface MachineConfigDto extends MachineConfig, Hyperlinks {
 
     void setType(String type);
 
-    MachineConfigDto withType(String type);
+    OldMachineConfigDto withType(String type);
 
     @Override
     @FactoryParameter(obligation = OPTIONAL)
@@ -65,22 +65,22 @@ public interface MachineConfigDto extends MachineConfig, Hyperlinks {
 
     void setLimits(MachineLimitsDto limits);
 
-    MachineConfigDto withLimits(MachineLimitsDto limits);
+    OldMachineConfigDto withLimits(MachineLimitsDto limits);
 
     @Override
-    List<ServerConfDto> getServers();
+    List<OldServerConfDto> getServers();
 
-    void setServers(List<ServerConfDto> servers);
+    void setServers(List<OldServerConfDto> servers);
 
-    MachineConfigDto withServers(List<ServerConfDto> servers);
+    OldMachineConfigDto withServers(List<OldServerConfDto> servers);
 
     @Override
     Map<String, String> getEnvVariables();
 
     void setEnvVariables(Map<String, String> envVariables);
 
-    MachineConfigDto withEnvVariables(Map<String, String> envVariables);
+    OldMachineConfigDto withEnvVariables(Map<String, String> envVariables);
 
     @Override
-    MachineConfigDto withLinks(List<Link> links);
+    OldMachineConfigDto withLinks(List<Link> links);
 }

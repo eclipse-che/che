@@ -11,16 +11,16 @@
 package org.eclipse.che.api.machine.shared;
 
 
-import org.eclipse.che.api.core.model.machine.Recipe;
+import org.eclipse.che.api.core.model.machine.OldRecipe;
 
 import java.util.List;
 
 /**
- * Serves as base model for Recipe API.
+ * Serves as base model for OldRecipe API.
  *
  * @author Eugene Voevodin
  */
-public interface ManagedRecipe extends Recipe {
+public interface ManagedOldRecipe extends OldRecipe {
 
     /**
      * Returns recipe identifier.

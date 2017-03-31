@@ -18,21 +18,21 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import org.eclipse.che.api.core.model.machine.Recipe;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.core.model.machine.OldRecipe;
+import org.eclipse.che.api.machine.server.recipe.OldRecipeImpl;
 
 import java.lang.reflect.Type;
 
 /**
- * Type adapter for {@link Recipe recipe}.
+ * Type adapter for {@link OldRecipe recipe}.
  *
  * @author Eugene Voevodin
  */
-public class RecipeTypeAdapter implements JsonDeserializer<Recipe>, JsonSerializer<Recipe> {
+public class RecipeTypeAdapter implements JsonDeserializer<OldRecipe>, JsonSerializer<OldRecipe> {
 
     @Override
-    public Recipe deserialize(JsonElement element, Type type, JsonDeserializationContext context) throws JsonParseException {
-        final RecipeImpl recipe = new RecipeImpl();
+    public OldRecipe deserialize(JsonElement element, Type type, JsonDeserializationContext context) throws JsonParseException {
+        final OldRecipeImpl recipe = new OldRecipeImpl();
         final JsonObject recipeObj = element.getAsJsonObject();
         recipe.setType(recipeObj.get("type") == null ? null : recipeObj.get("type").getAsString());
         recipe.setScript(recipeObj.get("script") == null ? null : recipeObj.get("script").getAsString());
@@ -40,7 +40,7 @@ public class RecipeTypeAdapter implements JsonDeserializer<Recipe>, JsonSerializ
     }
 
     @Override
-    public JsonElement serialize(Recipe recipe, Type type, JsonSerializationContext context) {
-        return context.serialize(recipe, RecipeImpl.class);
+    public JsonElement serialize(OldRecipe recipe, Type type, JsonSerializationContext context) {
+        return context.serialize(recipe, OldRecipeImpl.class);
     }
 }

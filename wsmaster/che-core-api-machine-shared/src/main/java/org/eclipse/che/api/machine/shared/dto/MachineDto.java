@@ -10,42 +10,26 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.shared.dto;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
-import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * @author Alexander Garagatyi
  */
 @DTO
-public interface MachineDto extends Machine, Hyperlinks {
+public interface MachineDto extends Machine {
 
     @Override
-    MachineConfigDto getConfig();
+    Map<String, String> getProperties();
 
-    MachineDto withConfig(MachineConfigDto machineConfig);
-
-    MachineDto withId(String id);
-
-    MachineDto withWorkspaceId(String workspaceId);
-
-    MachineDto withEnvName(String envName);
-
-    MachineDto withOwner(String owner);
-
-    MachineDto withStatus(MachineStatus machineStatus);
+    MachineDto withProperties(Map<String, String> properties);
 
     @Override
-    MachineRuntimeInfoDto getRuntime();
+    Map<String, ServerDto> getServers();
 
-    MachineDto withRuntime(MachineRuntimeInfoDto machineRuntime);
+    MachineDto withServers(Map<String, ServerDto> servers);
 
-    List<Link> getLinks();
 
-    @Override
-    MachineDto withLinks(List<Link> links);
 }

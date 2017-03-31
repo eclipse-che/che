@@ -65,7 +65,7 @@ public class RecipeLoader {
     public void start() throws ServerException {
         for (String recipesPath : recipesPaths) {
             if (recipesPath != null && !recipesPath.isEmpty()) {
-                for (RecipeImpl recipe : loadRecipes(recipesPath)) {
+                for (OldRecipeImpl recipe : loadRecipes(recipesPath)) {
                     try {
                         try {
                             recipeDao.update(recipe);
@@ -89,9 +89,9 @@ public class RecipeLoader {
      * @throws ServerException
      *         when problems occurs with getting or parsing recipe file
      */
-    private List<RecipeImpl> loadRecipes(String recipesPath) throws ServerException {
+    private List<OldRecipeImpl> loadRecipes(String recipesPath) throws ServerException {
         try (InputStream is = getResource(recipesPath)) {
-            return firstNonNull(GSON.fromJson(new InputStreamReader(is), new TypeToken<List<RecipeImpl>>() {}.getType()), emptyList());
+            return firstNonNull(GSON.fromJson(new InputStreamReader(is), new TypeToken<List<OldRecipeImpl>>() {}.getType()), emptyList());
         } catch (IOException | JsonIOException | JsonSyntaxException e) {
             throw new ServerException("Failed to get recipes from specified path " + recipesPath, e);
         }

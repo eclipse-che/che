@@ -12,11 +12,11 @@ package org.eclipse.che.api.machine.server.util;
 
 import com.google.common.base.Strings;
 
-import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.OldMachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.model.machine.Recipe;
+import org.eclipse.che.api.core.model.machine.OldRecipe;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.machine.server.recipe.OldRecipeImpl;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -43,11 +43,11 @@ public class RecipeRetriever {
      * @throws MachineException
      *         if any error occurs
      */
-    public Recipe getRecipe(@NotNull MachineConfig machineConfig) throws MachineException {
+    public OldRecipe getRecipe(@NotNull OldMachineConfig machineConfig) throws MachineException {
         MachineSource machineSource = machineConfig.getSource();
         if (!Strings.isNullOrEmpty(machineSource.getContent())) {
-            return new RecipeImpl().withType(machineSource.getType())
-                                   .withScript(machineSource.getContent());
+            return new OldRecipeImpl().withType(machineSource.getType())
+                                      .withScript(machineSource.getContent());
         } else {
             return recipeDownloader.getRecipe(machineConfig);
         }

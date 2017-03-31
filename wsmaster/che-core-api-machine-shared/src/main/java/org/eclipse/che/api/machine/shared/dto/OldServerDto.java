@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.shared.dto;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.core.model.machine.OldServer;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -19,14 +19,39 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Alexander Garagatyi
  */
 @DTO
-public interface ServerDto extends Server {
+public interface OldServerDto extends OldServer {
+    @Override
+    String getProtocol();
+
+    void setProtocol(String protocol);
+
+    OldServerDto withProtocol(String protocol);
+
+    @Override
+    String getAddress();
+
+    void setAddress(String address);
+
+    OldServerDto withAddress(String address);
 
     @Override
     String getUrl();
 
     void setUrl(String url);
 
-    ServerDto withUrl(String url);
+    OldServerDto withUrl(String url);
 
+    @Override
+    String getRef();
 
+    void setRef(String ref);
+
+    OldServerDto withRef(String ref);
+
+    @Override
+    ServerPropertiesDto getProperties();
+
+    void setProperties(ServerPropertiesDto properties);
+
+    OldServerDto withProperties(ServerPropertiesDto properties);
 }

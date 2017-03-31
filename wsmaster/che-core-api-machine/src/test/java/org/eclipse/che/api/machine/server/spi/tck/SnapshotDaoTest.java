@@ -15,9 +15,9 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
@@ -294,6 +294,6 @@ public class SnapshotDaoTest {
         public WorkspaceConfig getConfig() { return null; }
 
         @Override
-        public WorkspaceRuntime getRuntime() { return null; }
+        public Runtime getRuntime() { return null; }
     }
 }
