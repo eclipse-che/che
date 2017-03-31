@@ -111,10 +111,12 @@ public class DockerRegistryAuthResolver {
     }
 
     private Map<String, AuthConfig> normalizeDockerHubRegistryUrl(Map<String, AuthConfig> authConfigs) {
-        if (authConfigs.containsKey("docker.io")) {
-            Map<String,AuthConfig> normalizedAuthConfigMap = new HashMap<>(authConfigs);
-            normalizedAuthConfigMap.put(DEFAULT_REGISTRY, normalizedAuthConfigMap.remove("docker.io"));
-            return normalizedAuthConfigMap;
+        for (String defaultRegistryAlias : DEFAULT_REGISTRY_SYNONYMS) {
+            if (authConfigs.containsKey(defaultRegistryAlias)) {
+                Map<String, AuthConfig> normalizedAuthConfigMap = new HashMap<>(authConfigs);
+                normalizedAuthConfigMap.put(DEFAULT_REGISTRY, normalizedAuthConfigMap.remove(defaultRegistryAlias));
+                return normalizedAuthConfigMap;
+            }
         }
         return authConfigs;
     }
