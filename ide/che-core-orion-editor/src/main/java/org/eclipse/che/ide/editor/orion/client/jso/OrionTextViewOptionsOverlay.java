@@ -76,4 +76,13 @@ public class OrionTextViewOptionsOverlay extends JavaScriptObject {
     public final native void setOverwriteMode(final boolean newValue) /*-{
         this.overwriteMode = newValue;
     }-*/;
+
+    public final native boolean getWordWrap() /*-{
+        return this.wordWrap;
+    }-*/;
+
+    public final native void setWordWrap(final boolean newValue) /*-{
+        this.wordWrap = newValue;
+    }-*/;
+
 }

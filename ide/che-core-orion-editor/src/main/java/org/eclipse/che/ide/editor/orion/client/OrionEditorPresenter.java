@@ -88,6 +88,7 @@ import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
+import org.eclipse.che.ide.api.editor.texteditor.CanWrapLines;
 import org.eclipse.che.ide.api.editor.texteditor.ContentInitializedHandler;
 import org.eclipse.che.ide.api.editor.texteditor.CursorModelWithHandler;
 import org.eclipse.che.ide.api.editor.texteditor.EditorWidget;
@@ -157,7 +158,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                                                                              HasAnnotationRendering,
                                                                              HasLinkedMode,
                                                                              HasCompletionInformation,
-                                                                             HasGutter {
+                                                                             HasGutter,
+                                                                             CanWrapLines {
     /** File type used when we have no idea of the actual content type. */
     public static final String DEFAULT_CONTENT_TYPE = "text/plain";
 
@@ -321,7 +323,6 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     }
 
     private void setupFileContentUpdateHandler() {
-
         resourceChangeHandler =
                 generalEventBus.addHandler(ResourceChangedEvent.getType(), new ResourceChangedEvent.ResourceChangedHandler() {
                     @Override
@@ -1066,4 +1067,15 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             }, ContextMenuEvent.getType());
         }
     }
+
+    @Override
+    public boolean isWrapLines() {
+        return editorWidget.getTextView().getOptions().getWrapMode();
+    }
+
+    @Override
+    public void toggleWrapLines() {
+        editorWidget.getTextView().toggleWrapMode();
+    }
+
 }

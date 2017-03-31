@@ -35,7 +35,8 @@ public class TabsPropertiesSection implements EditorPropertiesSection {
     public TabsPropertiesSection(EditorLocalizationConstants locale) {
         this.locale = locale;
         properties = Arrays.asList(TAB_SIZE.toString(),
-                                   EXPAND_TAB.toString());
+                                   EXPAND_TAB.toString()
+        );
     }
 
     @Override
