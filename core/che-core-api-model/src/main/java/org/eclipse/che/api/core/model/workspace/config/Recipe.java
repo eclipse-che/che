@@ -8,25 +8,33 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.workspace;
-
-import java.util.Map;
+package org.eclipse.che.api.core.model.workspace.config;
 
 /**
- * Defines environment for machines network.
+ * Describes recipe of workspace environment.
  *
- * @author gazarenkov
  * @author Alexander Garagatyi
  */
-public interface Environment {
+public interface Recipe {
     /**
-     * Returns the recipe (the main script) to define this environment (compose, kubernetes pod).
-     * Type of this recipe defines engine for composing machines network runtime.
+     * Type of the environment, e.g. docker compose.
      */
-    EnvironmentRecipe getRecipe();
+    String getType();
 
     /**
-     * Returns mapping of machine name to additional configuration of machine.
+     * Content type of the environment recipe, e.g. application/x-yaml.
      */
-    Map<String, ? extends ExtendedMachine> getMachines();
+    String getContentType();
+
+    /**
+     * Content of an environment recipe.
+     * Content and location fields are mutually exclusive.
+     */
+    String getContent();
+
+    /**
+     * Location of an environment recipe.
+     * Content and location fields are mutually exclusive.
+     */
+    String getLocation();
 }

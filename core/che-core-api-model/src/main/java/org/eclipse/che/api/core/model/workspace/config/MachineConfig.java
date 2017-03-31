@@ -8,18 +8,29 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.project;
+package org.eclipse.che.api.core.model.workspace.config;
 
+import java.util.List;
 import java.util.Map;
 
 /**
- * @author gazarenkov
+ * Machine configuration
+ *
+ * @author Alexander Garagatyi
  */
-public interface SourceStorage {
+public interface MachineConfig {
+    /**
+     * Returns list of configured agents.
+     */
+    List<String> getAgents();
 
-    String getType();
+    /**
+     * Returns mapping of references to configurations of servers deployed into machine.
+     */
+    Map<String, ? extends ServerConfig> getServers();
 
-    String getLocation();
-
-    Map<String, String> getParameters();
+    /**
+     * Returns attributes of resources of machine.
+     */
+    Map<String, String> getAttributes();
 }

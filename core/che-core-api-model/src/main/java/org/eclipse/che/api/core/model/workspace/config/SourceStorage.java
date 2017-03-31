@@ -8,22 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.machine;
+package org.eclipse.che.api.core.model.workspace.config;
+
+import java.util.Map;
 
 /**
- * Recipe to create new machine.
- *
- * @author Eugene Voevodin
+ * @author gazarenkov
  */
-public interface Recipe {
+public interface SourceStorage {
 
-    /**
-     * Returns recipe type (i.e. 'Dockerfile')
-     */
     String getType();
 
-    /**
-     * Returns recipe script, which is used to instantiate new machine
-     */
-    String getScript();
+    String getLocation();
+
+    Map<String, String> getParameters();
 }

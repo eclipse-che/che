@@ -8,7 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.machine;
+package org.eclipse.che.api.core.model.workspace.runtime;
+
+import org.eclipse.che.api.core.model.machine.OldServer;
 
 import java.util.Map;
 
@@ -17,24 +19,16 @@ import java.util.Map;
  *
  * @author Alexander Garagatyi
  */
-public interface MachineRuntimeInfo {
-    /**
-     * Returns environment variables of machine.
-     */
-    Map<String, String> getEnvVariables();
+public interface Machine {
 
     /**
      * Returns machine specific properties.
      */
     Map<String, String> getProperties();
 
-    /**
-     * It is supposed that this methods returns the same as {@code getEnvVariables().get("CHE_PROJECTS_ROOT")}.
-     */
-    String projectsRoot();
 
     /**
-     * Returns mapping of exposed ports to {@link Server}.
+     * Returns mapping of exposed ports to {@link OldServer}.
      *
      * <p>Key consist of port number and transport protocol - tcp or udp with slash between these parts.
      * <br>Example:
@@ -49,4 +43,6 @@ public interface MachineRuntimeInfo {
      * </pre>
      */
     Map<String, ? extends Server> getServers();
+
+
 }

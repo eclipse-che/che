@@ -13,50 +13,42 @@ package org.eclipse.che.api.core.model.machine;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * Configuration of server that can be started inside of machine
+ * Provides description of the Che server in machine
  *
+ * @author gazarenkov
  * @author Alexander Garagatyi
  */
-public interface ServerConf {
+public interface OldServer {
     /**
-     * Reference to this server.
+     * Reference to this Che server
      */
-    @Nullable
     String getRef();
 
     /**
-     * Port used by server.
+     * External address of the server in form <b>hostname:port</b>.
      * <p>
-     * If udp transport protocol is used then port should include /udp.<br>
-     * If tcp is used /tcp is not required.<br>
-     * Example:
-     * <ul>
-     *     <li>8080</li>
-     *     <li>8080/tcp</li>
-     *     <li>8080/udp</li>
-     * </ul>
+     * This address is used by the browser to communicate with the server.
+     * <b>port</b> is the external port and cannot be configured.
+     * If not explicitly configured that address is set using {@link ServerProperties#getInternalAddress()}
      */
-    String getPort();
+    String getAddress();
 
     /**
-     * Protocol for configuring preview url of this server.
-     * <p>
-     * Example:
-     * <ul>
-     *     <li>http</li>
-     *     <li>https</li>
-     *     <li>tcp</li>
-     *     <li>udp</li>
-     *     <li>ws</li>
-     *     <li>wss</li>
-     * </ul>
+     * Protocol of access to the server.
      */
     @Nullable
     String getProtocol();
 
     /**
-     * Path to access the server.
+     * Url of the server, e.g.&nbsp;http://localhost:8080
      */
     @Nullable
-    String getPath();
+    String getUrl();
+
+
+    /**
+     * Non mandatory properties of the server.
+     */
+    @Nullable
+    ServerProperties getProperties();
 }

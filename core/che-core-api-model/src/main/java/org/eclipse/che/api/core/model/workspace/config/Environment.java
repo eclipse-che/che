@@ -8,28 +8,25 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.project;
+package org.eclipse.che.api.core.model.workspace.config;
 
-import java.util.List;
 import java.util.Map;
 
 /**
+ * Defines environment for machines network.
+ *
  * @author gazarenkov
- * @author Dmitry Shnurenko
+ * @author Alexander Garagatyi
  */
-public interface ProjectConfig {
-    String getName();
+public interface Environment {
+    /**
+     * Returns the recipe (the main script) to define this environment (compose, kubernetes pod).
+     * Type of this recipe defines engine for composing machines network runtime.
+     */
+    Recipe getRecipe();
 
-    String getPath();
-
-    String getDescription();
-
-    String getType();
-
-    List<String> getMixins();
-
-    Map<String, List<String>> getAttributes();
-
-    SourceStorage getSource();
-
+    /**
+     * Returns mapping of machine name to additional configuration of machine.
+     */
+    Map<String, ? extends MachineConfig> getMachines();
 }

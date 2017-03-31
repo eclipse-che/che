@@ -72,5 +72,5 @@ public interface Workspace {
      * returned value is not null, otherwise it is.
      */
     @Nullable
-    WorkspaceRuntime getRuntime();
+    Runtime getRuntime();
 }

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.machine;
+package org.eclipse.che.api.core.model.workspace.config;
 
 import java.util.Map;
 
@@ -22,7 +22,6 @@ public interface Command {
 
     /**
      * Returns command name (i.e. 'start tomcat')
-     * <p>
      * The name should be unique per user in one workspace,
      * which means that user may create only one command with the same name in the same workspace
      */

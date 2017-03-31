@@ -10,11 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.model.workspace;
 
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.commons.annotation.Nullable;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * Defines a contract for workspace runtime.
@@ -31,7 +30,7 @@ import java.util.List;
  *
  * @author Yevhenii Voevodin
  */
-public interface WorkspaceRuntime {
+public interface Runtime {
 
     /**
      * Returns an active environment name.
@@ -40,28 +39,6 @@ public interface WorkspaceRuntime {
      */
     String getActiveEnv();
 
-    /**
-     * Returns a workspace root folder.
-     * The base folder for the workspace projects.
-     */
-    @Nullable
-    String getRootFolder();
-
-    /**
-     * Returns development machine only if its status is either {@link MachineStatus#RUNNING running}
-     * or {@link MachineStatus#DESTROYING destroying}, otherwise returns null
-     * which means that machine is starting or hasn't been started yet.
-     *
-     * <p>Returned machine used for extensions management.
-     * It is guaranteed that configuration of that machine exists
-     * in the active environment.
-     *
-     * <p>There is a contract between this method and {@link #getMachines()} method,
-     * if this method returns null then {@code getMachines()} method returns an empty list,
-     * if this method returns dev-machine then {@code getMachines()} method result includes dev-machine.
-     */
-    @Nullable
-    Machine getDevMachine();
 
     /**
      * Returns all the machines which statuses are either {@link MachineStatus#RUNNING running}
@@ -69,5 +46,12 @@ public interface WorkspaceRuntime {
      *
      * <p>Returned list always contains dev-machine.
      */
-    List<? extends Machine> getMachines();
+    Map<String, ? extends Machine> getMachines();
+
+
+    String getOwner();
+
+//    String getUserToken();
+
+
 }

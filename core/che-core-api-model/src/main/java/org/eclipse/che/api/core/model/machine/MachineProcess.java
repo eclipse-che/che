@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.model.machine;
 
+import org.eclipse.che.api.core.model.workspace.config.Command;
+
 /**
  * Describe process running in a machine
  *

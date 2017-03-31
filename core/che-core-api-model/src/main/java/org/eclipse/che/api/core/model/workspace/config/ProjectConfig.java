@@ -8,29 +8,28 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.workspace;
+package org.eclipse.che.api.core.model.workspace.config;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * Additional information about machine which is needed for purposes of CHE.
- *
- * @author Alexander Garagatyi
+ * @author gazarenkov
+ * @author Dmitry Shnurenko
  */
-public interface ExtendedMachine {
-    /**
-     * Returns list of agents that should be deployed into machine.
-     */
-    List<String> getAgents();
+public interface ProjectConfig {
+    String getName();
 
-    /**
-     * Returns mapping of references to configurations of servers deployed into machine.
-     */
-    Map<String, ? extends ServerConf2> getServers();
+    String getPath();
 
-    /**
-     * Returns attributes of resources of machine.
-     */
-    Map<String, String> getAttributes();
+    String getDescription();
+
+    String getType();
+
+    List<String> getMixins();
+
+    Map<String, List<String>> getAttributes();
+
+    SourceStorage getSource();
+
 }

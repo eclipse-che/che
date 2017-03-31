@@ -8,16 +8,24 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.workspace;
+package org.eclipse.che.api.core.model.machine;
 
-import java.util.Map;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * Configuration of server that can be started inside of machine.
+ * Configuration of server that can be started inside of machine
  *
  * @author Alexander Garagatyi
+ *
+ * @deprecated
  */
-public interface ServerConf2 {
+public interface OldServerConf {
+    /**
+     * Reference to this server.
+     */
+    @Nullable
+    String getRef();
+
     /**
      * Port used by server.
      * <p>
@@ -45,10 +53,12 @@ public interface ServerConf2 {
      *     <li>wss</li>
      * </ul>
      */
+    @Nullable
     String getProtocol();
 
     /**
-     * Additional configuration that can be used to improve usage of machine servers.
+     * Path to access the server.
      */
-    Map<String, String> getProperties();
+    @Nullable
+    String getPath();
 }

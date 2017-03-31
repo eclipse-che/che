@@ -13,7 +13,7 @@ package org.eclipse.che.api.core.model.machine;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * Not mandatory properties of a {@link Server}
+ * Not mandatory properties of a {@link OldServer}
  *
  * @author Mario Loriedo
  */

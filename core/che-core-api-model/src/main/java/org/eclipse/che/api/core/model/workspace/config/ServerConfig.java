@@ -8,33 +8,36 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.workspace;
+package org.eclipse.che.api.core.model.workspace.config;
 
 /**
- * Describes recipe of workspace environment.
+ * Configuration of server that can be started inside of machine.
  *
  * @author Alexander Garagatyi
  */
-public interface EnvironmentRecipe {
+public interface ServerConfig {
     /**
-     * Type of the environment, e.g. docker compose.
+     * Port used by server.
      */
-    String getType();
+    String getPort();
 
     /**
-     * Content type of the environment recipe, e.g. application/x-yaml.
+     * Protocol for configuring preview url of this server.
+     * <p>
+     * Example:
+     * <ul>
+     *     <li>http</li>
+     *     <li>https</li>
+     *     <li>tcp</li>
+     *     <li>udp</li>
+     *     <li>ws</li>
+     *     <li>wss</li>
+     * </ul>
      */
-    String getContentType();
+    String getProtocol();
 
     /**
-     * Content of an environment recipe.
-     * Content and location fields are mutually exclusive.
+     * Path used by server.
      */
-    String getContent();
-
-    /**
-     * Location of an environment recipe.
-     * Content and location fields are mutually exclusive.
-     */
-    String getLocation();
+    String getPath();
 }

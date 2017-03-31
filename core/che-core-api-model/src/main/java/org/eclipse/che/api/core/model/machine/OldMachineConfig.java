@@ -17,8 +17,9 @@ import java.util.Map;
 
 /**
  * @author gazarenkov
+ * @deprecated
  */
-public interface MachineConfig {
+public interface OldMachineConfig {
 
     /**
      * Display name.
@@ -26,7 +27,7 @@ public interface MachineConfig {
     String getName();
 
     /**
-     * From where to create this Machine (Recipe/Snapshot).
+     * From where to create this OldMachine (OldRecipe/Snapshot).
      */
     MachineSource getSource();
 
@@ -36,12 +37,12 @@ public interface MachineConfig {
     boolean isDev();
 
     /**
-     * Machine type (i.e. "docker").
+     * OldMachine type (i.e. "docker").
      */
     String getType();
 
     /**
-     * Machine limits such as RAM size.
+     * OldMachine limits such as RAM size.
      */
     @Nullable
     MachineLimits getLimits();
@@ -51,7 +52,7 @@ public interface MachineConfig {
      *
      * <p>Key is port/transport protocol, e.g. 8080/tcp or 100100/udp
      */
-    List<? extends ServerConf> getServers();
+    List<? extends OldServerConf> getServers();
 
     /**
      * Get predefined environment variables of machine.

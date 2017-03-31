@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.model.project;
 
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,9 @@ import java.util.Map;
  * Defines configuration for creating new project
  *
  * @author Roman Nikitenko
+ *
+ *
+ * @deprecated
  */
 public interface NewProjectConfig extends ProjectConfig {
     /** Sets project name */

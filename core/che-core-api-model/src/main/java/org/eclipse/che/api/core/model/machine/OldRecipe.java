@@ -11,18 +11,21 @@
 package org.eclipse.che.api.core.model.machine;
 
 /**
- * Represents log message from machine
+ * OldRecipe to create new machine.
  *
- * @author Alexander Garagatyi
+ * @author Eugene Voevodin
+ *
+ * @deprecated
  */
-public interface MachineLogMessage {
-    /**
-     * Content of log message
-     */
-    String getContent();
+public interface OldRecipe {
 
     /**
-     * OldMachine name
+     * Returns recipe type (i.e. 'Dockerfile')
      */
-    String getMachineName();
+    String getType();
+
+    /**
+     * Returns recipe script, which is used to instantiate new machine
+     */
+    String getScript();
 }

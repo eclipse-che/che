@@ -11,6 +11,7 @@
 package org.eclipse.che.api.core.model.project;
 
 import org.eclipse.che.api.core.model.project.fs.Folder;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 
 /**
  * @author gazarenkov

@@ -8,21 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.machine;
+package org.eclipse.che.api.core.model.workspace.runtime;
 
 /**
- * Represents log message from machine
- *
- * @author Alexander Garagatyi
+ * @author gazarenkov
  */
-public interface MachineLogMessage {
-    /**
-     * Content of log message
-     */
-    String getContent();
+public interface Server {
 
-    /**
-     * OldMachine name
-     */
-    String getMachineName();
+    String getUrl();
+
 }
