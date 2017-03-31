@@ -37,7 +37,7 @@ public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.
     private final DialogFactory       dialogFactory;
 
     /** Initial value of the command's goal. */
-    private String goalInitial;
+    private String initialGoal;
 
     @Inject
     public GoalPage(GoalPageView view,
@@ -61,10 +61,10 @@ public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.
 
     @Override
     protected void initialize() {
-        goalInitial = editedCommand.getGoal();
+        initialGoal = editedCommand.getGoal();
 
         view.setAvailableGoals(goalRegistry.getAllGoals());
-        view.setGoal(goalInitial);
+        view.setGoal(initialGoal);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.
             return false;
         }
 
-        return !(goalInitial.equals(editedCommand.getGoal()));
+        return !(initialGoal.equals(editedCommand.getGoal()));
     }
 
     @Override
