@@ -12,8 +12,8 @@ package org.eclipse.che.api.agent.server;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
@@ -70,13 +70,14 @@ public class WsAgentHealthCheckerImpl implements WsAgentHealthChecker {
     }
 
     private Server getWsAgent(Machine machine) {
-        final Map<String, ? extends Server> servers = machine.getRuntime().getServers();
-        for (Server server : servers.values()) {
-            if (WSAGENT_REFERENCE.equals(server.getRef())) {
-                return server;
-            }
-        }
-        return null;
+        final Map<String, ? extends Server> servers = machine.getServers();
+        return servers.get(WSAGENT_REFERENCE);
+//        for (Server server : servers.values()) {
+//            if (WSAGENT_REFERENCE.equals(server.getRef())) {
+//                return server;
+//            }
+//        }
+//        return null;
     }
 
 }

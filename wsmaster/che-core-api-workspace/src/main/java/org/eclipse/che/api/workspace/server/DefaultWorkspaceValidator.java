@@ -11,12 +11,13 @@
 package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.workspace.Environment;
+import org.eclipse.che.api.core.model.workspace.config.Command;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -36,22 +37,23 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
     /* should contain [3, 20] characters, first and last character is letter or digit, available characters {A-Za-z0-9.-_}*/
     private static final Pattern WS_NAME = Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,18}[a-zA-Z0-9]");
 
-    private final CheEnvironmentValidator environmentValidator;
+    private final WorkspaceRuntimes runtimes;
 
     @Inject
-    public DefaultWorkspaceValidator(CheEnvironmentValidator environmentValidator) {
-        this.environmentValidator = environmentValidator;
+    public DefaultWorkspaceValidator(WorkspaceRuntimes runtimes) {
+        this.runtimes = runtimes;
     }
 
     @Override
     public void validateWorkspace(Workspace workspace) throws BadRequestException,
                                                               ServerException {
-        validateAttributes(workspace.getAttributes());
-        validateConfig(workspace.getConfig());
+//        validateAttributes(workspace.getAttributes());
+//        validateConfig(workspace.getConfig());
     }
 
     @Override
     public void validateConfig(WorkspaceConfig config) throws BadRequestException,
+                                                              NotFoundException,
                                                               ServerException {
         // configuration object itself
         checkNotNull(config.getName(), "Workspace name required");
@@ -69,7 +71,9 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
 
         for (Map.Entry<String, ? extends Environment> envEntry : config.getEnvironments().entrySet()) {
             try {
-                environmentValidator.validate(envEntry.getKey(), envEntry.getValue());
+
+                validateEnvironment(envEntry.getValue());
+
             } catch (IllegalArgumentException e) {
                 throw new BadRequestException(e.getLocalizedMessage());
             }
@@ -88,6 +92,24 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
 
         //projects
         //TODO
+    }
+
+
+    private void validateEnvironment(Environment environment) throws BadRequestException, NotFoundException, ServerException {
+
+        checkNotNull(environment, "Environment should not be null");
+        Recipe recipe = environment.getRecipe();
+        checkNotNull(recipe, "Environment recipe should not be null");
+        checkNotNull(recipe.getType(), "Environment recipe type should not be null");
+
+        // TODO need that?
+//        checkArgument(recipe.getContent() != null || recipe.getLocation() != null,
+//                      "OldRecipe of environment must contain location or content");
+//        checkArgument(recipe.getContent() != null && recipe.getLocation() != null,
+//                      "OldRecipe of environment must contain either location or content but not both");
+
+// FIXME: spi
+//        runtimes.estimate(environment);
     }
 
     @Override

@@ -11,6 +11,7 @@
 package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
@@ -51,7 +52,7 @@ public interface WorkspaceValidator {
      *         when constraint can not be validated because of network or other errors
      */
     void validateConfig(WorkspaceConfig config) throws BadRequestException,
-                                                       ServerException;
+                                                       ServerException, NotFoundException;
 
     /**
      * Checks that workspace instance attributes are valid.

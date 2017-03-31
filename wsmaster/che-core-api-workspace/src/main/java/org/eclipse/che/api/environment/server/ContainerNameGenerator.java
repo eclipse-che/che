@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.OldMachine;
+import org.eclipse.che.api.core.model.machine.OldMachineConfig;
 
 /**
  * This class is used for generation container name.
@@ -26,11 +26,11 @@ public interface ContainerNameGenerator {
      * @param workspaceId
      *         unique workspace id, see more (@link WorkspaceConfig#getId)
      * @param machineId
-     *         unique machine id, see more {@link Machine#getId()}
+     *         unique machine id, see more {@link OldMachine#getId()}
      * @param namespace
      *         name of the user who is docker container owner
      * @param machineName
-     *         name of the workspace machine, see more {@link MachineConfig#getName()}
+     *         name of the workspace machine, see more {@link OldMachineConfig#getName()}
      */
     String generateContainerName(String workspaceId,
                                  String machineId,

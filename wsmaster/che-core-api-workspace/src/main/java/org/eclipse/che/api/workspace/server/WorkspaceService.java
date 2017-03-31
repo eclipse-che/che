@@ -18,7 +18,6 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Example;
 import io.swagger.annotations.ExampleProperty;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import org.eclipse.che.api.agent.server.WsAgentHealthChecker;
@@ -27,18 +26,17 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
+import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -60,6 +58,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -89,33 +88,31 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public class WorkspaceService extends Service {
 
     private final WorkspaceManager              workspaceManager;
-    private final WorkspaceValidator            validator;
+    //private final WorkspaceValidator            validator;
     private final WsAgentHealthChecker          agentHealthChecker;
     private final WorkspaceServiceLinksInjector linksInjector;
     private final String                        apiEndpoint;
-    private final boolean                       cheWorkspaceAutoSnapshot;
-    private final boolean                       cheWorkspaceAutoRestore;
-    private final boolean                       cheWorkspaceAutoStart;
+//    private final boolean                       cheWorkspaceAutoSnapshot;
+//    private final boolean                       cheWorkspaceAutoRestore;
     @Context
     private SecurityContext securityContext;
 
     @Inject
     public WorkspaceService(@Named("che.api") String apiEndpoint,
                             WorkspaceManager workspaceManager,
-                            WorkspaceValidator validator,
+//                            WorkspaceValidator validator,
                             WsAgentHealthChecker agentHealthChecker,
-                            WorkspaceServiceLinksInjector workspaceServiceLinksInjector,
-                            @Named(CHE_WORKSPACE_AUTO_SNAPSHOT) boolean cheWorkspaceAutoSnapshot,
-                            @Named(CHE_WORKSPACE_AUTO_RESTORE) boolean cheWorkspaceAutoRestore,
-                            @Named(CHE_WORKSPACE_AUTO_START) boolean cheWorkspaceAutoStart) {
+                            WorkspaceServiceLinksInjector workspaceServiceLinksInjector
+//                            @Named(CHE_WORKSPACE_AUTO_SNAPSHOT) boolean cheWorkspaceAutoSnapshot,
+//                            @Named(CHE_WORKSPACE_AUTO_RESTORE) boolean cheWorkspaceAutoRestore
+                           ) {
         this.apiEndpoint = apiEndpoint;
         this.workspaceManager = workspaceManager;
-        this.validator = validator;
+//        this.validator = validator;
         this.agentHealthChecker = agentHealthChecker;
         this.linksInjector = workspaceServiceLinksInjector;
-        this.cheWorkspaceAutoSnapshot = cheWorkspaceAutoSnapshot;
-        this.cheWorkspaceAutoRestore = cheWorkspaceAutoRestore;
-        this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
+//        this.cheWorkspaceAutoSnapshot = cheWorkspaceAutoSnapshot;
+//        this.cheWorkspaceAutoRestore = cheWorkspaceAutoRestore;
     }
 
     @POST
@@ -154,8 +151,8 @@ public class WorkspaceService extends Service {
                                                     NotFoundException {
         requiredNotNull(config, "Workspace configuration");
         final Map<String, String> attributes = parseAttrs(attrsList);
-        validator.validateAttributes(attributes);
-        validator.validateConfig(config);
+//        validator.validateAttributes(attributes);
+//        validator.validateConfig(config);
         relativizeRecipeLinks(config);
         if (namespace == null) {
             namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
@@ -164,7 +161,7 @@ public class WorkspaceService extends Service {
                                                                          namespace,
                                                                          attributes);
         if (startAfterCreate) {
-            workspaceManager.startWorkspace(workspace.getId(), null, false);
+            workspaceManager.startWorkspace(workspace.getId(), null, new HashMap<>());
         }
         return Response.status(201)
                        .entity(linksInjector.injectLinks(asDto(workspace), getServiceContext()))
@@ -268,7 +265,7 @@ public class WorkspaceService extends Service {
                                                            NotFoundException,
                                                            ConflictException {
         requiredNotNull(update, "Workspace configuration");
-        validator.validateWorkspace(update);
+        //validator.validateWorkspace(update);
         relativizeRecipeLinks(update.getConfig());
         return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, update)), getServiceContext());
     }
@@ -287,7 +284,7 @@ public class WorkspaceService extends Service {
                                                                                         NotFoundException,
                                                                                         ConflictException,
                                                                                         ForbiddenException {
-        workspaceManager.removeSnapshots(id);
+        //workspaceManager.removeSnapshots(id);
         workspaceManager.removeWorkspace(id);
     }
 
@@ -316,7 +313,11 @@ public class WorkspaceService extends Service {
                                                           NotFoundException,
                                                           ForbiddenException,
                                                           ConflictException {
-        return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(workspaceId, envName, restore)),
+
+        Map options = new HashMap<>();
+        if(restore != null)
+            options.put("restore", restore.toString());
+        return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(workspaceId, envName, options)),
                                          getServiceContext());
     }
 
@@ -348,14 +349,14 @@ public class WorkspaceService extends Service {
                                                                  ServerException,
                                                                  ConflictException {
         requiredNotNull(config, "Workspace configuration");
-        validator.validateConfig(config);
+        //validator.validateConfig(config);
         relativizeRecipeLinks(config);
         if (namespace == null) {
             namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
         }
         return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(config,
                                                                                namespace,
-                                                                               firstNonNull(isTemporary, false))), getServiceContext());
+                                                                               firstNonNull(isTemporary, false), new HashMap<>())), getServiceContext());
     }
 
     @DELETE
@@ -373,52 +374,9 @@ public class WorkspaceService extends Service {
                                                                                    NotFoundException,
                                                                                    ServerException,
                                                                                    ConflictException {
-        workspaceManager.stopWorkspace(id, createSnapshot);
-    }
-
-    @POST
-    @Path("/{id}/snapshot")
-    @ApiOperation(value = "Create a snapshot from the workspace",
-                  notes = "This operation can be performed only by the workspace owner.")
-    @ApiResponses({@ApiResponse(code = 200, message = "The snapshot successfully created"),
-                   @ApiResponse(code = 404, message = "The workspace with specified id doesn't exist."),
-                   @ApiResponse(code = 403, message = "The user is not workspace owner. " +
-                                                      "The operation is not allowed for the user"),
-                   @ApiResponse(code = 409, message = "Any conflict occurs during the snapshot creation"),
-                   @ApiResponse(code = 500, message = "Internal server error occurred")})
-    @Deprecated
-    public void createSnapshot(@ApiParam("The workspace id") @PathParam("id") String workspaceId) throws BadRequestException,
-                                                                                                         ForbiddenException,
-                                                                                                         NotFoundException,
-                                                                                                         ServerException,
-                                                                                                         ConflictException {
-        workspaceManager.createSnapshot(workspaceId);
-    }
-
-    @GET
-    @Path("/{id}/snapshot")
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Get the snapshot by the id",
-                  notes = "This operation can be performed only by the workspace owner",
-                  response = SnapshotDto.class,
-                  responseContainer = "List")
-    @ApiResponses({@ApiResponse(code = 200, message = "Snapshots successfully fetched"),
-                   @ApiResponse(code = 404, message = "The workspace with specified id doesn't exist." +
-                                                      "The snapshot doesn't exist for the workspace"),
-                   @ApiResponse(code = 403, message = "The user is not workspace owner"),
-                   @ApiResponse(code = 500, message = "Internal server error occurred")})
-    @Deprecated
-    public List<SnapshotDto> getSnapshot(@ApiParam("The id of the workspace") @PathParam("id") String workspaceId)
-            throws ServerException,
-                   BadRequestException,
-                   NotFoundException,
-                   ForbiddenException {
-
-        return workspaceManager.getSnapshot(workspaceId)
-                               .stream()
-                               .map(DtoConverter::asDto)
-                               .map(snapshotDto -> linksInjector.injectLinks(snapshotDto, getServiceContext()))
-                               .collect(toList());
+        Map options = new HashMap<>();
+        options.put("create-snapshot", createSnapshot.toString());
+        workspaceManager.stopWorkspace(id, options);
     }
 
     @POST
@@ -445,7 +403,7 @@ public class WorkspaceService extends Service {
         requiredNotNull(newCommand, "Command");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         workspace.getConfig().getCommands().add(new CommandImpl(newCommand));
-        validator.validateConfig(workspace.getConfig());
+        //validator.validateConfig(workspace.getConfig());
         return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(workspace.getId(), workspace)), getServiceContext());
     }
 
@@ -479,7 +437,7 @@ public class WorkspaceService extends Service {
             throw new NotFoundException(format("Workspace '%s' doesn't contain command '%s'", id, cmdName));
         }
         commands.add(new CommandImpl(update));
-        validator.validateConfig(workspace.getConfig());
+        //validator.validateConfig(workspace.getConfig());
         return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(workspace.getId(), workspace)), getServiceContext());
     }
 
@@ -540,7 +498,7 @@ public class WorkspaceService extends Service {
         relativizeRecipeLinks(newEnvironment);
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(newEnvironment));
-        validator.validateConfig(workspace.getConfig());
+        //validator.validateConfig(workspace.getConfig());
         return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)), getServiceContext());
     }
 
@@ -574,7 +532,7 @@ public class WorkspaceService extends Service {
         if (previous == null) {
             throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", id, envName));
         }
-        validator.validateConfig(workspace.getConfig());
+        //validator.validateConfig(workspace.getConfig());
         return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)), getServiceContext());
     }
 
@@ -626,7 +584,7 @@ public class WorkspaceService extends Service {
         requiredNotNull(newProject, "New project config");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         workspace.getConfig().getProjects().add(new ProjectConfigImpl(newProject));
-        validator.validateConfig(workspace.getConfig());
+        //validator.validateConfig(workspace.getConfig());
         return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)), getServiceContext());
     }
 
@@ -663,7 +621,7 @@ public class WorkspaceService extends Service {
                                                normalizedPath));
         }
         projects.add(new ProjectConfigImpl(update));
-        validator.validateConfig(workspace.getConfig());
+        //validator.validateConfig(workspace.getConfig());
         return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)), getServiceContext());
     }
 
@@ -700,13 +658,16 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public WsAgentHealthStateDto checkAgentHealth(@ApiParam(value = "Workspace id")
-                                                  @PathParam("id") String id) throws NotFoundException, ServerException {
-        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+                                                  @PathParam("id") String key,
+                                                  @QueryParam("machine") String machine
+                                                  ) throws NotFoundException, ServerException {
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
         if (WorkspaceStatus.RUNNING != workspace.getStatus()) {
             return newDto(WsAgentHealthStateDto.class).withWorkspaceStatus(workspace.getStatus());
         }
 
-        final MachineImpl devMachine = workspace.getRuntime().getDevMachine();
+        //String activeEnv = workspace.getRuntime().getActiveEnv();
+        final Machine devMachine = workspace.getRuntime().getMachines().get(machine); //.getDevMachine();
         if (devMachine == null) {
             return newDto(WsAgentHealthStateDto.class)
                     .withWorkspaceStatus(workspace.getStatus())
@@ -725,12 +686,12 @@ public class WorkspaceService extends Service {
     @ApiOperation(value = "Get workspace server configuration values")
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains server settings")})
     public Map<String, String> getSettings() {
-        return ImmutableMap.of(CHE_WORKSPACE_AUTO_SNAPSHOT, Boolean.toString(cheWorkspaceAutoSnapshot), //
-                               CHE_WORKSPACE_AUTO_RESTORE, Boolean.toString(cheWorkspaceAutoRestore), //
-                               CHE_WORKSPACE_AUTO_START, Boolean.toString(cheWorkspaceAutoStart));
+        return new HashMap<>();
+//        return ImmutableMap.of(CHE_WORKSPACE_AUTO_SNAPSHOT, Boolean.toString(cheWorkspaceAutoSnapshot),
+//                               CHE_WORKSPACE_AUTO_RESTORE, Boolean.toString(cheWorkspaceAutoRestore));
     }
 
-    private static Map<String, String> parseAttrs(List<String> attributes) throws BadRequestException {
+    private static Map<String, String> parseAttrs(List<String> attributes) throws BadRequestException, ForbiddenException {
         if (attributes == null) {
             return emptyMap();
         }
@@ -742,7 +703,16 @@ public class WorkspaceService extends Service {
                                               "it should contain name and value separated with colon. " +
                                               "For example: attributeName:attributeValue");
             }
-            res.put(attribute.substring(0, colonIdx), attribute.substring(colonIdx + 1));
+            String name = attribute.substring(0, colonIdx);
+            String value = attribute.substring(colonIdx + 1);
+
+            if(name.isEmpty())
+                throw new BadRequestException("Attribute '" + attribute + "' is not valid, " +
+                                              "Empty attribute name is not allowed. ");
+            if(name.startsWith("codenvy"))
+                throw new ForbiddenException("Attribute '" + attribute + "' is not allowed. 'codenvy' prefix is reserved. ");
+
+            res.put(name, value);
         }
         return res;
     }
@@ -790,7 +760,7 @@ public class WorkspaceService extends Service {
     }
 
     private void relativizeRecipeLinks(EnvironmentDto environment) {
-        EnvironmentRecipeDto recipe =  environment.getRecipe();
+        RecipeDto recipe =  environment.getRecipe();
         if (recipe.getType().equals("dockerfile")) {
             String location = recipe.getLocation();
             if (location != null && location.startsWith(apiEndpoint)) {

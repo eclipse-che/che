@@ -13,14 +13,14 @@ package org.eclipse.che.api.environment.server;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.Environment;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.environment.server.model.CheServiceBuildContextImpl;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -65,9 +65,9 @@ public class EnvironmentParserTest {
     @Mock
     private EnvironmentImpl                            environment;
     @Mock
-    private EnvironmentRecipeImpl                      recipe;
+    private RecipeImpl                                 recipe;
     @Mock
-    private ExtendedMachineImpl                        machine;
+    private MachineConfigImpl                          machine;
     @Mock
     private TypeSpecificEnvironmentParser              envParser;
     @Mock
@@ -79,9 +79,9 @@ public class EnvironmentParserTest {
     @Mock
     private CheServiceImpl                             cheService2;
     @Mock
-    private ExtendedMachineImpl                        extendedMachine1;
+    private MachineConfigImpl                          extendedMachine1;
     @Mock
-    private ExtendedMachineImpl                        extendedMachine2;
+    private MachineConfigImpl                          extendedMachine2;
 
     private EnvironmentParser parser;
 
@@ -111,9 +111,9 @@ public class EnvironmentParserTest {
           expectedExceptionsMessageRegExp = "Environment type '.*' is not supported. " +
                                             "Supported environment types: .*")
     public void shouldThrowExceptionOnParsingUnknownEnvironmentType() throws Exception {
-        parser.parse(new EnvironmentImpl(new EnvironmentRecipeImpl("unknownType",
-                                                                   "text/x-dockerfile",
-                                                                   "content", null),
+        parser.parse(new EnvironmentImpl(new RecipeImpl("unknownType",
+                                                        "text/x-dockerfile",
+                                                        "content", null),
                                          null));
     }
 
@@ -140,7 +140,7 @@ public class EnvironmentParserTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Recipe of environment must contain location or content")
+          expectedExceptionsMessageRegExp = "OldRecipe of environment must contain location or content")
     public void recipeShouldContainsContentOrLocationNotBeNull() throws ServerException {
         when(recipe.getContent()).thenReturn(null);
 
@@ -163,17 +163,17 @@ public class EnvironmentParserTest {
     @Test
     public void shouldOverrideMemoryLimitFromExtendedMachineInComposeEnv() throws Exception {
         // given
-        HashMap<String, ExtendedMachineImpl> machines = new HashMap<>();
-        machines.put("machine1", new ExtendedMachineImpl(emptyList(),
-                                                         emptyMap(),
-                                                         singletonMap("memoryLimitBytes", "101010")));
-        machines.put("machine2", new ExtendedMachineImpl(emptyList(),
-                                                         emptyMap(),
-                                                         emptyMap()));
-        EnvironmentImpl environment = new EnvironmentImpl(new EnvironmentRecipeImpl("compose",
-                                                                                    "application/x-yaml",
-                                                                                    "content",
-                                                                                    null),
+        HashMap<String, MachineConfigImpl> machines = new HashMap<>();
+        machines.put("machine1", new MachineConfigImpl(emptyList(),
+                                                       emptyMap(),
+                                                       singletonMap("memoryLimitBytes", "101010")));
+        machines.put("machine2", new MachineConfigImpl(emptyList(),
+                                                       emptyMap(),
+                                                       emptyMap()));
+        EnvironmentImpl environment = new EnvironmentImpl(new RecipeImpl("compose",
+                                                                         "application/x-yaml",
+                                                                         "content",
+                                                                         null),
                                                           machines);
         CheServicesEnvironmentImpl cheEnv = new CheServicesEnvironmentImpl();
 
@@ -193,14 +193,14 @@ public class EnvironmentParserTest {
     @Test(expectedExceptions = IllegalArgumentException.class,
           expectedExceptionsMessageRegExp = "Value of attribute 'memoryLimitBytes' of machine 'machine1' is illegal")
     public void shouldThrowExceptionInCaseFailedParseMemoryLimit() throws ServerException {
-        HashMap<String, ExtendedMachineImpl> machines = new HashMap<>();
-        machines.put("machine1", new ExtendedMachineImpl(emptyList(),
-                                                         emptyMap(),
-                                                         singletonMap("memoryLimitBytes", "here should be memory size number")));
-        EnvironmentImpl environment = new EnvironmentImpl(new EnvironmentRecipeImpl("compose",
-                                                                                    "application/x-yaml",
-                                                                                    "content",
-                                                                                    null),
+        HashMap<String, MachineConfigImpl> machines = new HashMap<>();
+        machines.put("machine1", new MachineConfigImpl(emptyList(),
+                                                       emptyMap(),
+                                                       singletonMap("memoryLimitBytes", "here should be memory size number")));
+        EnvironmentImpl environment = new EnvironmentImpl(new RecipeImpl("compose",
+                                                                         "application/x-yaml",
+                                                                         "content",
+                                                                         null),
                                                           machines);
 
         CheServicesEnvironmentImpl cheEnv = new CheServicesEnvironmentImpl();
@@ -251,31 +251,31 @@ public class EnvironmentParserTest {
         data.add(getEntryForDockerfileEnv(emptyMap(), emptyList(), emptyMap()));
 
         data.add(getEntryForDockerfileEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "http", emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080", "http", emptyMap())),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "http",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerfileEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080/tcp", "http", emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080/tcp", "http", emptyMap())),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "http",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerfileEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080/udp", "http", emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080/udp", "http", emptyMap())),
                 singletonList("8080/udp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/udp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "http",
                                   SERVER_CONF_LABEL_PREFIX + "8080/udp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerfileEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", emptyMap())),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerfileEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "/some/path"))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "/some/path"))),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1",
@@ -283,47 +283,47 @@ public class EnvironmentParserTest {
                                   "/some/path")));
 
         data.add(getEntryForDockerfileEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "some/path"))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "some/path"))),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PATH_SUFFIX, "some/path")));
 
         data.add(getEntryForDockerfileEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", ""))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", ""))),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PATH_SUFFIX, "")));
 
         data.add(getEntryForDockerfileEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", null))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", null))),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerfileEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", null, emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080", null, emptyMap())),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerfileEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", splitOnPairsAsMap("some", "value"))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", splitOnPairsAsMap("some", "value"))),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerfileEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", splitOnPairsAsMap("some", "value",
-                                                                                            "path", "some"))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", splitOnPairsAsMap("some", "value",
+                                                                                             "path", "some"))),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PATH_SUFFIX, "some")));
 
         data.add(getEntryForDockerfileEnv(
-                serversMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "some/path")),
-                           "ref2", new ServerConf2Impl("9090", "http", singletonMap("path", "/some/path"))),
+                serversMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "some/path")),
+                           "ref2", new ServerConfigImpl("9090", "http", singletonMap("path", "/some/path"))),
                 asList("8080/tcp", "9090/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1",
@@ -334,8 +334,8 @@ public class EnvironmentParserTest {
                                   "/some/path")));
 
         data.add(getEntryForDockerfileEnv(
-                serversMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "some/path")),
-                           "ref2", new ServerConf2Impl("8080/udp", "http", singletonMap("path", "/some/path"))),
+                serversMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "some/path")),
+                           "ref2", new ServerConfigImpl("8080/udp", "http", singletonMap("path", "/some/path"))),
                 asList("8080/tcp", "8080/udp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1",
@@ -347,31 +347,31 @@ public class EnvironmentParserTest {
         data.add(getEntryForDockerimageEnv(emptyMap(), emptyList(), emptyMap()));
 
         data.add(getEntryForDockerimageEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "http", emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080", "http", emptyMap())),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "http",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerimageEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080/tcp", "http", emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080/tcp", "http", emptyMap())),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "http",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerimageEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080/udp", "http", emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080/udp", "http", emptyMap())),
                 singletonList("8080/udp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/udp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "http",
                                   SERVER_CONF_LABEL_PREFIX + "8080/udp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerimageEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", emptyMap())),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerimageEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "/some/path"))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "/some/path"))),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1",
@@ -379,47 +379,47 @@ public class EnvironmentParserTest {
                                   "/some/path")));
 
         data.add(getEntryForDockerimageEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "some/path"))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "some/path"))),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PATH_SUFFIX, "some/path")));
 
         data.add(getEntryForDockerimageEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", ""))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", ""))),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PATH_SUFFIX, "")));
 
         data.add(getEntryForDockerimageEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", null))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", null))),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerimageEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", null, emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080", null, emptyMap())),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerimageEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", splitOnPairsAsMap("some", "value"))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", splitOnPairsAsMap("some", "value"))),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForDockerimageEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", splitOnPairsAsMap("some", "value",
-                                                                                            "path", "some"))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", splitOnPairsAsMap("some", "value",
+                                                                                             "path", "some"))),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PATH_SUFFIX, "some")));
 
         data.add(getEntryForDockerimageEnv(
-                serversMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "some/path")),
-                           "ref2", new ServerConf2Impl("9090", "http", singletonMap("path", "/some/path"))),
+                serversMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "some/path")),
+                           "ref2", new ServerConfigImpl("9090", "http", singletonMap("path", "/some/path"))),
                 asList("8080/tcp", "9090/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1",
@@ -430,8 +430,8 @@ public class EnvironmentParserTest {
                                   "/some/path")));
 
         data.add(getEntryForDockerimageEnv(
-                serversMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "some/path")),
-                           "ref2", new ServerConf2Impl("8080/udp", "http", singletonMap("path", "/some/path"))),
+                serversMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "some/path")),
+                           "ref2", new ServerConfigImpl("8080/udp", "http", singletonMap("path", "/some/path"))),
                 asList("8080/tcp", "8080/udp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PROTOCOL_SUFFIX, "https",
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1",
@@ -443,7 +443,7 @@ public class EnvironmentParserTest {
         data.add(getEntryForComposeEnv(emptyMap(), emptyList(), emptyMap(), emptyList(), emptyMap()));
 
         data.add(getEntryForComposeEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "http", emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080", "http", emptyMap())),
                 emptyList(),
                 emptyMap(),
                 singletonList("8080/tcp"),
@@ -451,7 +451,7 @@ public class EnvironmentParserTest {
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForComposeEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080/tcp", "http", emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080/tcp", "http", emptyMap())),
                 emptyList(),
                 emptyMap(),
                 singletonList("8080/tcp"),
@@ -459,7 +459,7 @@ public class EnvironmentParserTest {
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForComposeEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080/udp", "http", emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080/udp", "http", emptyMap())),
                 emptyList(),
                 emptyMap(),
                 singletonList("8080/udp"),
@@ -467,7 +467,7 @@ public class EnvironmentParserTest {
                                   SERVER_CONF_LABEL_PREFIX + "8080/udp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForComposeEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", emptyMap())),
                 emptyList(),
                 emptyMap(),
                 singletonList("8080/tcp"),
@@ -475,7 +475,7 @@ public class EnvironmentParserTest {
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForComposeEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "/some/path"))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "/some/path"))),
                 emptyList(),
                 emptyMap(),
                 singletonList("8080/tcp"),
@@ -485,7 +485,7 @@ public class EnvironmentParserTest {
                                   "/some/path")));
 
         data.add(getEntryForComposeEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "some/path"))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "some/path"))),
                 emptyList(),
                 emptyMap(),
                 singletonList("8080/tcp"),
@@ -494,7 +494,7 @@ public class EnvironmentParserTest {
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PATH_SUFFIX, "some/path")));
 
         data.add(getEntryForComposeEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", ""))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", ""))),
                 emptyList(),
                 emptyMap(),
                 singletonList("8080/tcp"),
@@ -503,7 +503,7 @@ public class EnvironmentParserTest {
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PATH_SUFFIX, "")));
 
         data.add(getEntryForComposeEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", null))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", null))),
                 emptyList(),
                 emptyMap(),
                 singletonList("8080/tcp"),
@@ -511,14 +511,14 @@ public class EnvironmentParserTest {
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForComposeEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", null, emptyMap())),
+                singletonMap("ref1", new ServerConfigImpl("8080", null, emptyMap())),
                 emptyList(),
                 emptyMap(),
                 singletonList("8080/tcp"),
                 splitOnPairsAsMap(SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForComposeEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", splitOnPairsAsMap("some", "value"))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", splitOnPairsAsMap("some", "value"))),
                 emptyList(),
                 emptyMap(),
                 singletonList("8080/tcp"),
@@ -526,8 +526,8 @@ public class EnvironmentParserTest {
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_REF_SUFFIX, "ref1")));
 
         data.add(getEntryForComposeEnv(
-                singletonMap("ref1", new ServerConf2Impl("8080", "https", splitOnPairsAsMap("some", "value",
-                                                                                            "path", "some"))),
+                singletonMap("ref1", new ServerConfigImpl("8080", "https", splitOnPairsAsMap("some", "value",
+                                                                                             "path", "some"))),
                 emptyList(),
                 emptyMap(),
                 singletonList("8080/tcp"),
@@ -536,8 +536,8 @@ public class EnvironmentParserTest {
                                   SERVER_CONF_LABEL_PREFIX + "8080/tcp" + SERVER_CONF_LABEL_PATH_SUFFIX, "some")));
 
         data.add(getEntryForComposeEnv(
-                serversMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "some/path")),
-                           "ref2", new ServerConf2Impl("9090", "http", singletonMap("path", "/some/path"))),
+                serversMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "some/path")),
+                           "ref2", new ServerConfigImpl("9090", "http", singletonMap("path", "/some/path"))),
                 emptyList(),
                 emptyMap(),
                 asList("8080/tcp", "9090/tcp"),
@@ -550,8 +550,8 @@ public class EnvironmentParserTest {
                                   "/some/path")));
 
         data.add(getEntryForComposeEnv(
-                serversMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "some/path")),
-                           "ref2", new ServerConf2Impl("8080/udp", "http", singletonMap("path", "/some/path"))),
+                serversMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "some/path")),
+                           "ref2", new ServerConfigImpl("8080/udp", "http", singletonMap("path", "/some/path"))),
                 emptyList(),
                 emptyMap(),
                 asList("8080/tcp", "8080/udp"),
@@ -563,8 +563,8 @@ public class EnvironmentParserTest {
                                   SERVER_CONF_LABEL_PREFIX + "8080/udp" + SERVER_CONF_LABEL_PATH_SUFFIX, "/some/path")));
 
         data.add(getEntryForComposeEnv(
-                serversMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "some/path")),
-                           "ref2", new ServerConf2Impl("8080/udp", "http", singletonMap("path", "/some/path"))),
+                serversMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "some/path")),
+                           "ref2", new ServerConfigImpl("8080/udp", "http", singletonMap("path", "/some/path"))),
                 asList("9090/tcp", "9090/udp", "7070", "7070/udp"),
                 emptyMap(),
                 asList("8080/tcp", "8080/udp", "9090/udp", "9090/tcp", "7070/tcp", "7070/udp"),
@@ -576,8 +576,8 @@ public class EnvironmentParserTest {
                                   SERVER_CONF_LABEL_PREFIX + "8080/udp" + SERVER_CONF_LABEL_PATH_SUFFIX, "/some/path")));
 
         data.add(getEntryForComposeEnv(
-                serversMap("ref1", new ServerConf2Impl("8080", "https", singletonMap("path", "some/path")),
-                           "ref2", new ServerConf2Impl("8080/udp", "http", singletonMap("path", "/some/path"))),
+                serversMap("ref1", new ServerConfigImpl("8080", "https", singletonMap("path", "some/path")),
+                           "ref2", new ServerConfigImpl("8080/udp", "http", singletonMap("path", "/some/path"))),
                 emptyList(),
                 splitOnPairsAsMap("label1", "value1",
                                   "label2", "value2"),
@@ -601,9 +601,9 @@ public class EnvironmentParserTest {
         return (Map<String, String>)splitOnPairsAsMap((Object[])args);
     }
 
-    private static Map<String, ServerConf2Impl> serversMap(Object... args) {
+    private static Map<String, ServerConfigImpl> serversMap(Object... args) {
         //noinspection unchecked
-        return (Map<String, ServerConf2Impl>)splitOnPairsAsMap(args);
+        return (Map<String, ServerConfigImpl>)splitOnPairsAsMap(args);
     }
 
     private static Map splitOnPairsAsMap(Object[] args) {
@@ -620,12 +620,12 @@ public class EnvironmentParserTest {
         return result;
     }
 
-    private static List<Object> getEntryForDockerfileEnv(Map<String, ServerConf2Impl> servers,
+    private static List<Object> getEntryForDockerfileEnv(Map<String, ServerConfigImpl> servers,
                                                          List<String> expectedExpose,
                                                          Map<String, String> expectedLabels) {
         EnvironmentImpl environmentConfig = createDockerfileEnvConfig();
 
-        ExtendedMachineImpl extendedMachine = getMachine(environmentConfig);
+        MachineConfigImpl extendedMachine = getMachine(environmentConfig);
         extendedMachine.setServers(servers);
 
         CheServicesEnvironmentImpl parsedCheEnv = new CheServicesEnvironmentImpl();
@@ -635,12 +635,12 @@ public class EnvironmentParserTest {
         return asList(environmentConfig, createExpectedEnvFromDockerfile(expectedExpose, expectedLabels), parsedCheEnv);
     }
 
-    private static List<Object> getEntryForDockerimageEnv(Map<String, ServerConf2Impl> servers,
+    private static List<Object> getEntryForDockerimageEnv(Map<String, ServerConfigImpl> servers,
                                                           List<String> expectedExpose,
                                                           Map<String, String> expectedLabels) {
         EnvironmentImpl environmentConfig = createDockerimageEnvConfig();
 
-        ExtendedMachineImpl extendedMachine = getMachine(environmentConfig);
+        MachineConfigImpl extendedMachine = getMachine(environmentConfig);
         extendedMachine.setServers(servers);
 
         CheServicesEnvironmentImpl parsedCheEnv = new CheServicesEnvironmentImpl();
@@ -649,7 +649,7 @@ public class EnvironmentParserTest {
         return asList(environmentConfig, createExpectedEnvFromImage(expectedExpose, expectedLabels), parsedCheEnv);
     }
 
-    private static List<Object> getEntryForComposeEnv(Map<String, ServerConf2Impl> servers,
+    private static List<Object> getEntryForComposeEnv(Map<String, ServerConfigImpl> servers,
                                                       List<String> composeExpose,
                                                       Map<String, String> composeLabels,
                                                       List<String> expectedExpose,
@@ -658,14 +658,14 @@ public class EnvironmentParserTest {
         CheServicesEnvironmentImpl expectedEnv = createCheServicesEnv(expectedLabels, expectedExpose);
 
         EnvironmentImpl environmentConfig = createCompose1MachineEnvConfig();
-        ExtendedMachineImpl extendedMachine = getMachine(environmentConfig);
+        MachineConfigImpl extendedMachine = getMachine(environmentConfig);
         extendedMachine.setServers(new HashMap<>(servers));
         return asList(environmentConfig,
                       expectedEnv,
                       cheComposeEnv);
     }
 
-    private static ExtendedMachineImpl getMachine(EnvironmentImpl environmentConfig) {
+    private static MachineConfigImpl getMachine(EnvironmentImpl environmentConfig) {
         return environmentConfig.getMachines().values().iterator().next();
     }
 
@@ -684,14 +684,14 @@ public class EnvironmentParserTest {
     private static EnvironmentImpl createDockerfileEnvConfig(String recipeContent,
                                                              String recipeLocation,
                                                              String machineName) {
-        return new EnvironmentImpl(new EnvironmentRecipeImpl("dockerfile",
-                                                             "text/x-dockerfile",
-                                                             recipeContent,
-                                                             recipeLocation),
+        return new EnvironmentImpl(new RecipeImpl("dockerfile",
+                                                  "text/x-dockerfile",
+                                                  recipeContent,
+                                                  recipeLocation),
                                    singletonMap(machineName,
-                                                new ExtendedMachineImpl(emptyList(),
-                                                                        emptyMap(),
-                                                                        emptyMap())));
+                                                new MachineConfigImpl(emptyList(),
+                                                                      emptyMap(),
+                                                                      emptyMap())));
     }
 
     private static EnvironmentImpl createDockerimageEnvConfig() {
@@ -699,25 +699,25 @@ public class EnvironmentParserTest {
     }
 
     private static EnvironmentImpl createDockerimageEnvConfig(String image, String machineName) {
-        return new EnvironmentImpl(new EnvironmentRecipeImpl("dockerimage",
-                                                             null,
-                                                             null,
-                                                             image),
+        return new EnvironmentImpl(new RecipeImpl("dockerimage",
+                                                  null,
+                                                  null,
+                                                  image),
                                    singletonMap(machineName,
-                                                new ExtendedMachineImpl(emptyList(),
-                                                                        emptyMap(),
-                                                                        emptyMap())));
+                                                new MachineConfigImpl(emptyList(),
+                                                                      emptyMap(),
+                                                                      emptyMap())));
     }
 
     private static EnvironmentImpl createCompose1MachineEnvConfig() {
-        Map<String, ExtendedMachineImpl> machines = new HashMap<>();
-        machines.put(DEFAULT_MACHINE_NAME, new ExtendedMachineImpl(emptyList(),
-                                                                   emptyMap(),
-                                                                   emptyMap()));
-        return new EnvironmentImpl(new EnvironmentRecipeImpl("compose",
-                                                             "application/x-yaml",
-                                                             "content",
-                                                             null),
+        Map<String, MachineConfigImpl> machines = new HashMap<>();
+        machines.put(DEFAULT_MACHINE_NAME, new MachineConfigImpl(emptyList(),
+                                                                 emptyMap(),
+                                                                 emptyMap()));
+        return new EnvironmentImpl(new RecipeImpl("compose",
+                                                  "application/x-yaml",
+                                                  "content",
+                                                  null),
                                    machines);
     }
 

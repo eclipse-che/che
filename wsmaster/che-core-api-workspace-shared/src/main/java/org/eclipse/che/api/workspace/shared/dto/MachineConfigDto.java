@@ -11,47 +11,40 @@
 package org.eclipse.che.api.workspace.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.workspace.EnvironmentRecipe;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.dto.shared.DTO;
 
-import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDATORY;
+import java.util.List;
+import java.util.Map;
+
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
 
 /**
  * @author Alexander Garagatyi
  */
 @DTO
-public interface EnvironmentRecipeDto extends EnvironmentRecipe {
-
+public interface MachineConfigDto extends MachineConfig {
     @Override
-    @FactoryParameter(obligation = MANDATORY)
-    String getType();
+    @FactoryParameter(obligation = OPTIONAL)
+    List<String> getAgents();
 
-    void setType(String type);
+    void setAgents(List<String> agents);
 
-    EnvironmentRecipeDto withType(String type);
+    MachineConfigDto withAgents(List<String> agents);
 
     @Override
     @FactoryParameter(obligation = OPTIONAL)
-    String getContentType();
+    Map<String, ServerConfigDto> getServers();
 
-    void setContentType(String contentType);
+    void setServers(Map<String, ServerConfigDto> servers);
 
-    EnvironmentRecipeDto withContentType(String contentType);
-
-    @Override
-    @FactoryParameter(obligation = OPTIONAL)
-    String getContent();
-
-    void setContent(String content);
-
-    EnvironmentRecipeDto withContent(String content);
+    MachineConfigDto withServers(Map<String, ServerConfigDto> servers);
 
     @Override
     @FactoryParameter(obligation = OPTIONAL)
-    String getLocation();
+    Map<String, String> getAttributes();
 
-    void setLocation(String location);
+    void setAttributes(Map<String, String> attributes);
 
-    EnvironmentRecipeDto withLocation(String location);
+    MachineConfigDto withAttributes(Map<String, String> attributes);
 }

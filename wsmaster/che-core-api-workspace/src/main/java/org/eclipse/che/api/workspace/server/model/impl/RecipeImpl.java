@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.model.impl;
 
-import org.eclipse.che.api.core.model.workspace.EnvironmentRecipe;
+import org.eclipse.che.api.core.model.workspace.config.Recipe;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.util.Objects;
@@ -21,7 +20,7 @@ import java.util.Objects;
  * @author Alexander Garagatyi
  */
 @Embeddable
-public class EnvironmentRecipeImpl implements EnvironmentRecipe {
+public class RecipeImpl implements Recipe {
 
     @Column(name = "type")
     private String type;
@@ -35,19 +34,19 @@ public class EnvironmentRecipeImpl implements EnvironmentRecipe {
     @Column(name = "location", columnDefinition = "TEXT")
     private String location;
 
-    public EnvironmentRecipeImpl() {}
+    public RecipeImpl() {}
 
-    public EnvironmentRecipeImpl(String type,
-                                 String contentType,
-                                 String content,
-                                 String location) {
+    public RecipeImpl(String type,
+                      String contentType,
+                      String content,
+                      String location) {
         this.type = type;
         this.contentType = contentType;
         this.content = content;
         this.location = location;
     }
 
-    public EnvironmentRecipeImpl(EnvironmentRecipe recipe) {
+    public RecipeImpl(Recipe recipe) {
         this.type = recipe.getType();
         this.contentType = recipe.getContentType();
         this.content = recipe.getContent();
@@ -93,8 +92,8 @@ public class EnvironmentRecipeImpl implements EnvironmentRecipe {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof EnvironmentRecipeImpl)) return false;
-        EnvironmentRecipeImpl that = (EnvironmentRecipeImpl)o;
+        if (!(o instanceof RecipeImpl)) return false;
+        RecipeImpl that = (RecipeImpl)o;
         return Objects.equals(type, that.type) &&
                Objects.equals(contentType, that.contentType) &&
                Objects.equals(content, that.content) &&
@@ -108,7 +107,7 @@ public class EnvironmentRecipeImpl implements EnvironmentRecipe {
 
     @Override
     public String toString() {
-        return "EnvironmentRecipeImpl{" +
+        return "RecipeImpl{" +
                "type='" + type + '\'' +
                ", contentType='" + contentType + '\'' +
                ", content='" + content + '\'' +

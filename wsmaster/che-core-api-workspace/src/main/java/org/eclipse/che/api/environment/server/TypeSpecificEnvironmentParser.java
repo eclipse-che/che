@@ -11,7 +11,7 @@
 package org.eclipse.che.api.environment.server;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.Environment;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 
 /**

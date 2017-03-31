@@ -62,6 +62,10 @@ import static java.util.Objects.requireNonNull;
  */
 public class DefaultHttpJsonRequest implements HttpJsonRequest {
 
+    public static HttpJsonRequest create(String url) {
+        return new DefaultHttpJsonRequest(url);
+    }
+
     private static final int      DEFAULT_QUERY_PARAMS_LIST_SIZE = 5;
     private static final Object[] EMPTY_ARRAY                    = new Object[0];
 

@@ -15,9 +15,9 @@ import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
-import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
-import org.eclipse.che.api.core.model.workspace.ServerConf2;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -78,10 +78,10 @@ public class AgentConfigApplier {
      */
     public void apply(Environment envConfig,
                       CheServicesEnvironmentImpl internalEnv) throws AgentException {
-        for (Map.Entry<String, ? extends ExtendedMachine> machineEntry : envConfig.getMachines()
-                                                                                  .entrySet()) {
+        for (Map.Entry<String, ? extends MachineConfig> machineEntry : envConfig.getMachines()
+                                                                                .entrySet()) {
             String machineName = machineEntry.getKey();
-            ExtendedMachine machineConf = machineEntry.getValue();
+            MachineConfig machineConf = machineEntry.getValue();
             CheServiceImpl internalMachine = internalEnv.getServices().get(machineName);
 
             apply(machineConf, internalMachine);
@@ -98,7 +98,7 @@ public class AgentConfigApplier {
      * @throws AgentException
      *         if any error occurs
      */
-    public void apply(@Nullable ExtendedMachine machineConf,
+    public void apply(@Nullable MachineConfig machineConf,
                       CheServiceImpl machine) throws AgentException {
         if (machineConf != null) {
             for (AgentKey agentKey : sorter.sort(machineConf.getAgents())) {
@@ -110,15 +110,15 @@ public class AgentConfigApplier {
         }
     }
 
-    private void addLabels(CheServiceImpl service, Map<String, ? extends ServerConf2> servers) {
-        for (Map.Entry<String, ? extends ServerConf2> entry : servers.entrySet()) {
+    private void addLabels(CheServiceImpl service, Map<String, ? extends ServerConfig> servers) {
+        for (Map.Entry<String, ? extends ServerConfig> entry : servers.entrySet()) {
             String ref = entry.getKey();
-            ServerConf2 conf = entry.getValue();
+            ServerConfig conf = entry.getValue();
 
             service.getLabels().put("che:server:" + conf.getPort() + ":protocol", conf.getProtocol());
             service.getLabels().put("che:server:" + conf.getPort() + ":ref", ref);
 
-            String path = conf.getProperties().get("path");
+            String path = conf.getPath();
             if (!isNullOrEmpty(path)) {
                 service.getLabels().put("che:server:" + conf.getPort() + ":path", path);
             }
@@ -151,8 +151,8 @@ public class AgentConfigApplier {
         service.setEnvironment(newEnv);
     }
 
-    private void addExposedPorts(CheServiceImpl service, Map<String, ? extends ServerConf2> servers) {
-        for (ServerConf2 server : servers.values()) {
+    private void addExposedPorts(CheServiceImpl service, Map<String, ? extends ServerConfig> servers) {
+        for (ServerConfig server : servers.values()) {
             service.getExpose().add(server.getPort());
         }
     }

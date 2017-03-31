@@ -11,10 +11,8 @@
 package org.eclipse.che.api.workspace.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.workspace.ServerConf2;
+import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.dto.shared.DTO;
-
-import java.util.Map;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDATORY;
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
@@ -23,28 +21,37 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
  * @author Alexander Garagatyi
  */
 @DTO
-public interface ServerConf2Dto extends ServerConf2 {
-    @Override
-    @FactoryParameter(obligation = MANDATORY)
-    String getPort();
-
-    void setPort(String port);
-
-    ServerConf2Dto withPort(String port);
+public interface RecipeDto extends Recipe {
 
     @Override
     @FactoryParameter(obligation = MANDATORY)
-    String getProtocol();
+    String getType();
 
-    void setProtocol(String protocol);
+    void setType(String type);
 
-    ServerConf2Dto withProtocol(String protocol);
+    RecipeDto withType(String type);
 
     @Override
     @FactoryParameter(obligation = OPTIONAL)
-    Map<String, String> getProperties();
+    String getContentType();
 
-    void setProperties(Map<String, String> properties);
+    void setContentType(String contentType);
 
-    ServerConf2Dto withProperties(Map<String, String> properties);
+    RecipeDto withContentType(String contentType);
+
+    @Override
+    @FactoryParameter(obligation = OPTIONAL)
+    String getContent();
+
+    void setContent(String content);
+
+    RecipeDto withContent(String content);
+
+    @Override
+    @FactoryParameter(obligation = OPTIONAL)
+    String getLocation();
+
+    void setLocation(String location);
+
+    RecipeDto withLocation(String location);
 }

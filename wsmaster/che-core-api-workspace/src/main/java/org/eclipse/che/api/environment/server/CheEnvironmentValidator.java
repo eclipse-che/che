@@ -13,14 +13,13 @@ package org.eclipse.che.api.environment.server;
 import com.google.common.base.Joiner;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.api.core.model.machine.ServerConf;
-import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
-import org.eclipse.che.api.core.model.workspace.ServerConf2;
+import org.eclipse.che.api.core.model.machine.OldMachineConfig;
+import org.eclipse.che.api.core.model.machine.OldServerConf;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
-import org.eclipse.che.api.machine.server.MachineInstanceProviders;
 import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Inject;
@@ -74,15 +73,16 @@ public class CheEnvironmentValidator {
     private static final Pattern VOLUME_FROM_PATTERN =
             Pattern.compile("^(?<serviceName>" + MACHINE_NAME_REGEXP + ")(:(ro|rw))?$");
 
-    private final MachineInstanceProviders     machineInstanceProviders;
+//    private final MachineInstanceProviders     machineInstanceProviders;
     private final EnvironmentParser            environmentParser;
     private final DefaultServicesStartStrategy startStrategy;
 
     @Inject
-    public CheEnvironmentValidator(MachineInstanceProviders machineInstanceProviders,
+    public CheEnvironmentValidator(
+//            MachineInstanceProviders machineInstanceProviders,
                                    EnvironmentParser environmentParser,
                                    DefaultServicesStartStrategy startStrategy) {
-        this.machineInstanceProviders = machineInstanceProviders;
+//        this.machineInstanceProviders = machineInstanceProviders;
         this.environmentParser = environmentParser;
         this.startStrategy = startStrategy;
     }
@@ -99,9 +99,9 @@ public class CheEnvironmentValidator {
                       envName,
                       Joiner.on(',').join(environmentParser.getEnvironmentTypes()));
         checkArgument(env.getRecipe().getContent() != null || env.getRecipe().getLocation() != null,
-                      "Recipe of environment '%s' must contain location or content", envName);
+                      "OldRecipe of environment '%s' must contain location or content", envName);
         checkArgument(env.getRecipe().getContent() == null || env.getRecipe().getLocation() == null,
-                      "Recipe of environment '%s' contains mutually exclusive fields location and content",
+                      "OldRecipe of environment '%s' contains mutually exclusive fields location and content",
                       envName);
 
         CheServicesEnvironmentImpl cheServicesEnvironment;
@@ -167,7 +167,7 @@ public class CheEnvironmentValidator {
     }
 
     protected void validateMachine(String machineName,
-                                   @Nullable ExtendedMachine extendedMachine,
+                                   @Nullable MachineConfig machineConfig,
                                    CheServiceImpl service,
                                    String envName,
                                    Set<String> servicesNames) throws IllegalArgumentException {
@@ -183,11 +183,11 @@ public class CheEnvironmentValidator {
 
         checkArgument(service.getBuild() == null || (isNullOrEmpty(service.getBuild().getContext()) !=
                                                      isNullOrEmpty(service.getBuild().getDockerfileContent())),
-                      "Machine '%s' in environment '%s' contains mutually exclusive dockerfile content and build context.",
+                      "OldMachine '%s' in environment '%s' contains mutually exclusive dockerfile content and build context.",
                       machineName, envName);
 
-        if (extendedMachine != null) {
-            validateExtendedMachine(extendedMachine, envName, machineName);
+        if (machineConfig != null) {
+            validateExtendedMachine(machineConfig, envName, machineName);
         }
 
         service.getExpose()
@@ -205,7 +205,7 @@ public class CheEnvironmentValidator {
 
                    String serviceFromLink = matcher.group("serviceName");
                    checkArgument(servicesNames.contains(serviceFromLink),
-                                 "Machine '%s' in environment '%s' contains link to non existing machine '%s'",
+                                 "OldMachine '%s' in environment '%s' contains link to non existing machine '%s'",
                                  machineName, envName, serviceFromLink);
                });
 
@@ -216,7 +216,7 @@ public class CheEnvironmentValidator {
                                  depends, machineName, envName);
 
                    checkArgument(servicesNames.contains(depends),
-                                 "Machine '%s' in environment '%s' contains dependency to non existing machine '%s'",
+                                 "OldMachine '%s' in environment '%s' contains dependency to non existing machine '%s'",
                                  machineName, envName, depends);
                });
 
@@ -225,12 +225,12 @@ public class CheEnvironmentValidator {
                    Matcher matcher = VOLUME_FROM_PATTERN.matcher(volumesFrom);
 
                    checkArgument(matcher.matches(),
-                                 "Machine name '%s' in field 'volumes_from' of machine '%s' in environment '%s' is invalid",
+                                 "OldMachine name '%s' in field 'volumes_from' of machine '%s' in environment '%s' is invalid",
                                  volumesFrom, machineName, envName);
 
                    String serviceFromVolumesFrom = matcher.group("serviceName");
                    checkArgument(servicesNames.contains(serviceFromVolumesFrom),
-                                 "Machine '%s' in environment '%s' contains non existing machine '%s' in 'volumes_from' field",
+                                 "OldMachine '%s' in environment '%s' contains non existing machine '%s' in 'volumes_from' field",
                                  machineName, envName, serviceFromVolumesFrom);
                });
 
@@ -247,12 +247,12 @@ public class CheEnvironmentValidator {
                       machineName, envName);
     }
 
-    private void validateExtendedMachine(ExtendedMachine extendedMachine, String envName, String machineName) {
-        if (extendedMachine.getAttributes() != null &&
-            extendedMachine.getAttributes().get("memoryLimitBytes") != null) {
+    private void validateExtendedMachine(MachineConfig machineConfig, String envName, String machineName) {
+        if (machineConfig.getAttributes() != null &&
+            machineConfig.getAttributes().get("memoryLimitBytes") != null) {
 
             try {
-                long memoryLimitBytes = Long.parseLong(extendedMachine.getAttributes().get("memoryLimitBytes"));
+                long memoryLimitBytes = Long.parseLong(machineConfig.getAttributes().get("memoryLimitBytes"));
                 checkArgument(memoryLimitBytes > 0,
                               "Value of attribute 'memoryLimitBytes' of machine '%s' in environment '%s' is illegal",
                               machineName, envName);
@@ -263,78 +263,78 @@ public class CheEnvironmentValidator {
             }
         }
 
-        if (extendedMachine.getServers() != null) {
-            extendedMachine.getServers()
-                           .entrySet()
-                           .forEach(serverEntry -> {
+        if (machineConfig.getServers() != null) {
+            machineConfig.getServers()
+                         .entrySet()
+                         .forEach(serverEntry -> {
                                String serverName = serverEntry.getKey();
-                               ServerConf2 server = serverEntry.getValue();
+                               ServerConfig server = serverEntry.getValue();
 
                                checkArgument(server.getPort() != null && SERVER_PORT.matcher(server.getPort()).matches(),
-                                             "Machine '%s' in environment '%s' contains server conf '%s' with invalid port '%s'",
+                                             "OldMachine '%s' in environment '%s' contains server conf '%s' with invalid port '%s'",
                                              machineName, envName, serverName, server.getPort());
                                checkArgument(server.getProtocol() == null || SERVER_PROTOCOL.matcher(server.getProtocol()).matches(),
-                                             "Machine '%s' in environment '%s' contains server conf '%s' with invalid protocol '%s'",
+                                             "OldMachine '%s' in environment '%s' contains server conf '%s' with invalid protocol '%s'",
                                              machineName, envName, serverName, server.getProtocol());
                            });
         }
 
-        if (extendedMachine.getAgents() != null) {
-            for (String agent : extendedMachine.getAgents()) {
+        if (machineConfig.getAgents() != null) {
+            for (String agent : machineConfig.getAgents()) {
                 checkArgument(!isNullOrEmpty(agent),
-                              "Machine '%s' in environment '%s' contains invalid agent '%s'",
+                              "OldMachine '%s' in environment '%s' contains invalid agent '%s'",
                               machineName, envName, agent);
             }
         }
 
     }
 
-    public void validateMachine(MachineConfig machineCfg) throws IllegalArgumentException {
+    public void validateMachine(OldMachineConfig machineCfg) throws IllegalArgumentException {
         String machineName = machineCfg.getName();
-        checkArgument(!isNullOrEmpty(machineName), "Machine name is null or empty");
+        checkArgument(!isNullOrEmpty(machineName), "OldMachine name is null or empty");
         checkArgument(MACHINE_NAME_PATTERN.matcher(machineName).matches(),
-                      "Machine name '%s' is invalid", machineName);
-        checkNotNull(machineCfg.getSource(), "Machine '%s' doesn't have source", machineName);
+                      "OldMachine name '%s' is invalid", machineName);
+        checkNotNull(machineCfg.getSource(), "OldMachine '%s' doesn't have source", machineName);
         checkArgument(machineCfg.getSource().getContent() != null || machineCfg.getSource().getLocation() != null,
                       "Source of machine '%s' must contain location or content", machineName);
         checkArgument(machineCfg.getSource().getContent() == null || machineCfg.getSource().getLocation() == null,
                       "Source of machine '%s' contains mutually exclusive fields location and content",
                       machineName);
-        checkArgument(machineInstanceProviders.hasProvider(machineCfg.getType()),
-                      "Type '%s' of machine '%s' is not supported. Supported values are: %s.",
-                      machineCfg.getType(),
-                      machineName,
-                      Joiner.on(", ").join(machineInstanceProviders.getProviderTypes()));
+//        checkArgument(machineInstanceProviders.hasProvider(machineCfg.getType()),
+//                      "Type '%s' of machine '%s' is not supported. Supported values are: %s.",
+//                      machineCfg.getType(),
+//                      machineName,
+//                      Joiner.on(", ").join(machineInstanceProviders.getProviderTypes()));
 
         if (machineCfg.getSource().getType().equals("dockerfile") && machineCfg.getSource().getLocation() != null) {
             try {
                 final String protocol = new URL(machineCfg.getSource().getLocation()).getProtocol();
                 checkArgument(protocol.equals("http") || protocol.equals("https"),
-                              "Machine '%s' has invalid source location protocol: %s",
+                              "OldMachine '%s' has invalid source location protocol: %s",
                               machineName,
                               machineCfg.getSource().getLocation());
             } catch (MalformedURLException e) {
-                throw new IllegalArgumentException(format("Machine '%s' has invalid source location: '%s'",
+                throw new IllegalArgumentException(format("OldMachine '%s' has invalid source location: '%s'",
                                                           machineName,
                                                           machineCfg.getSource().getLocation()));
             }
         }
-        for (ServerConf serverConf : machineCfg.getServers()) {
+        for (OldServerConf serverConf : machineCfg.getServers()) {
             checkArgument(serverConf.getPort() != null && SERVER_PORT.matcher(serverConf.getPort()).matches(),
-                          "Machine '%s' contains server conf with invalid port '%s'",
+                          "OldMachine '%s' contains server conf with invalid port '%s'",
                           machineName,
                           serverConf.getPort());
             checkArgument(serverConf.getProtocol() == null || SERVER_PROTOCOL.matcher(serverConf.getProtocol()).matches(),
-                          "Machine '%s' contains server conf with invalid protocol '%s'",
+                          "OldMachine '%s' contains server conf with invalid protocol '%s'",
                           machineName,
                           serverConf.getProtocol());
         }
         for (Map.Entry<String, String> envVariable : machineCfg.getEnvVariables().entrySet()) {
             checkArgument(!isNullOrEmpty(envVariable.getKey()),
-                          "Machine '%s' contains environment variable with null or empty name",
+                          "OldMachine '%s' contains environment variable with null or empty name",
                           machineName);
             checkNotNull(envVariable.getValue(),
-                         "Machine '%s' contains environment variable '%s' with null value",
+                         "OldMachine '%s' contains environment variable '%s' with null value",
                          machineName,
                          envVariable.getKey());
         }

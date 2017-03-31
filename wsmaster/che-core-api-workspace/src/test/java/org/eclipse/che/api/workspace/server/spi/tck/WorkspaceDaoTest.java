@@ -22,10 +22,10 @@ import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -360,14 +360,14 @@ public class WorkspaceDaoTest {
         command.getAttributes().clear();
 
         // Add a new environment
-        final EnvironmentRecipeImpl newRecipe = new EnvironmentRecipeImpl();
+        final RecipeImpl newRecipe = new RecipeImpl();
         newRecipe.setLocation("new-location");
         newRecipe.setType("new-type");
         newRecipe.setContentType("new-content-type");
         newRecipe.setContent("new-content");
-        final ExtendedMachineImpl newMachine = new ExtendedMachineImpl();
-        final ServerConf2Impl serverConf1 = new ServerConf2Impl("2265", "http", singletonMap("prop1", "val"));
-        final ServerConf2Impl serverConf2 = new ServerConf2Impl("2266", "ftp", singletonMap("prop1", "val"));
+        final MachineConfigImpl newMachine = new MachineConfigImpl();
+        final ServerConfigImpl serverConf1 = new ServerConfigImpl("2265", "http", singletonMap("prop1", "val"));
+        final ServerConfigImpl serverConf2 = new ServerConfigImpl("2266", "ftp", singletonMap("prop1", "val"));
         newMachine.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
         newMachine.setAgents(ImmutableList.of("agent5", "agent4"));
         newMachine.setAttributes(singletonMap("att1", "val"));
@@ -381,15 +381,15 @@ public class WorkspaceDaoTest {
         // Remove an existing machine config
         final List<String> machineNames = new ArrayList<>(defaultEnv.getMachines().keySet());
         // Update an existing machine
-        final ExtendedMachineImpl existingMachine = defaultEnv.getMachines().get(machineNames.get(1));
+        final MachineConfigImpl existingMachine = defaultEnv.getMachines().get(machineNames.get(1));
         existingMachine.setAgents(asList("new-agent1", "new-agent2"));
         existingMachine.setAttributes(ImmutableMap.of("attr1", "value1",
                                                       "attr2", "value2",
                                                       "attr3", "value3"));
         existingMachine.getServers().clear();
-        existingMachine.getServers().put("new-ref", new ServerConf2Impl("new-port",
-                                                                        "new-protocol",
-                                                                        ImmutableMap.of("prop1", "value")));
+        existingMachine.getServers().put("new-ref", new ServerConfigImpl("new-port",
+                                                                         "new-protocol",
+                                                                         ImmutableMap.of("prop1", "value")));
         defaultEnv.getMachines().remove(machineNames.get(0));
         defaultEnv.getRecipe().setContent("updated-content");
         defaultEnv.getRecipe().setContentType("updated-content-type");
@@ -509,30 +509,30 @@ public class WorkspaceDaoTest {
                                                     "key6", "value6"));
         final List<CommandImpl> commands = new ArrayList<>(asList(cmd1, cmd2));
 
-        // Machine configs
-        final ExtendedMachineImpl exMachine1 = new ExtendedMachineImpl();
-        final ServerConf2Impl serverConf1 = new ServerConf2Impl("2265", "http", singletonMap("prop1", "val"));
-        final ServerConf2Impl serverConf2 = new ServerConf2Impl("2266", "ftp", singletonMap("prop1", "val"));
+        // OldMachine configs
+        final MachineConfigImpl exMachine1 = new MachineConfigImpl();
+        final ServerConfigImpl serverConf1 = new ServerConfigImpl("2265", "http", singletonMap("prop1", "val"));
+        final ServerConfigImpl serverConf2 = new ServerConfigImpl("2266", "ftp", singletonMap("prop1", "val"));
         exMachine1.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
         exMachine1.setAgents(ImmutableList.of("agent5", "agent4"));
         exMachine1.setAttributes(singletonMap("att1", "val"));
 
-        final ExtendedMachineImpl exMachine2 = new ExtendedMachineImpl();
-        final ServerConf2Impl serverConf3 = new ServerConf2Impl("2333", "https", singletonMap("prop2", "val"));
-        final ServerConf2Impl serverConf4 = new ServerConf2Impl("2334", "wss", singletonMap("prop2", "val"));
+        final MachineConfigImpl exMachine2 = new MachineConfigImpl();
+        final ServerConfigImpl serverConf3 = new ServerConfigImpl("2333", "https", singletonMap("prop2", "val"));
+        final ServerConfigImpl serverConf4 = new ServerConfigImpl("2334", "wss", singletonMap("prop2", "val"));
         exMachine2.setServers(ImmutableMap.of("ref1", serverConf3, "ref2", serverConf4));
         exMachine2.setAgents(ImmutableList.of("agent2", "agent1"));
         exMachine2.setAttributes(singletonMap("att1", "val"));
 
-        final ExtendedMachineImpl exMachine3 = new ExtendedMachineImpl();
-        final ServerConf2Impl serverConf5 = new ServerConf2Impl("2333", "https", singletonMap("prop2", "val"));
+        final MachineConfigImpl exMachine3 = new MachineConfigImpl();
+        final ServerConfigImpl serverConf5 = new ServerConfigImpl("2333", "https", singletonMap("prop2", "val"));
         exMachine3.setServers(singletonMap("ref1", serverConf5));
         exMachine3.setAgents(ImmutableList.of("agent6", "agent2"));
         exMachine3.setAttributes(singletonMap("att1", "val"));
 
 
         // Environments
-        final EnvironmentRecipeImpl recipe1 = new EnvironmentRecipeImpl();
+        final RecipeImpl recipe1 = new RecipeImpl();
         recipe1.setLocation("https://eclipse.che/Dockerfile");
         recipe1.setType("dockerfile");
         recipe1.setContentType("text/x-dockerfile");
@@ -543,14 +543,14 @@ public class WorkspaceDaoTest {
                                                        "machine3", exMachine3)));
         env1.setRecipe(recipe1);
 
-        final EnvironmentRecipeImpl recipe2 = new EnvironmentRecipeImpl();
+        final RecipeImpl recipe2 = new RecipeImpl();
         recipe2.setLocation("https://eclipse.che/Dockerfile");
         recipe2.setType("dockerfile");
         recipe2.setContentType("text/x-dockerfile");
         recipe2.setContent("content");
         final EnvironmentImpl env2 = new EnvironmentImpl();
-        env2.setMachines(new HashMap<>(ImmutableMap.of("machine1", new ExtendedMachineImpl(exMachine1),
-                                                       "machine3", new ExtendedMachineImpl(exMachine3))));
+        env2.setMachines(new HashMap<>(ImmutableMap.of("machine1", new MachineConfigImpl(exMachine1),
+                                                       "machine3", new MachineConfigImpl(exMachine3))));
         env2.setRecipe(recipe2);
 
         final Map<String, EnvironmentImpl> environments = ImmutableMap.of("env1", env1, "env2", env2);

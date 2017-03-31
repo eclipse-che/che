@@ -11,6 +11,7 @@
 package org.eclipse.che.api.workspace.server.stack;
 
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
@@ -37,7 +38,7 @@ public class StackValidator {
      *          stack to validate
      * @throws BadRequestException if stack is not valid
      */
-    public void check(Stack stack) throws BadRequestException, ServerException {
+    public void check(Stack stack) throws BadRequestException, ServerException, NotFoundException {
         if (stack == null) {
             throw new BadRequestException("Required non-null stack");
         }

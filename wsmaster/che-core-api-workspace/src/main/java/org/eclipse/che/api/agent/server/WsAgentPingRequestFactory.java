@@ -14,8 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.machine.shared.Constants;
@@ -60,14 +60,20 @@ public class WsAgentPingRequestFactory {
      *         if internal server error occurred
      */
     public HttpJsonRequest createRequest(Machine machine) throws ServerException {
-        Map<String, ? extends Server> servers = machine.getRuntime().getServers();
+        Map<String, ? extends Server> servers = machine.getServers();
         Server wsAgentServer = servers.get(Constants.WS_AGENT_PORT);
+
         if (wsAgentServer == null) {
-            LOG.error("{} WorkspaceId: {}, DevMachine Id: {}, found servers: {}",
-                      WS_AGENT_SERVER_NOT_FOUND_ERROR, machine.getWorkspaceId(), machine.getId(), servers);
+//            LOG.error("{} WorkspaceId: {}, DevMachine Id: {}, found servers: {}",
+//                      WS_AGENT_SERVER_NOT_FOUND_ERROR, machine.getWorkspaceId(), machine.getId(), servers);
             throw new ServerException(WS_AGENT_SERVER_NOT_FOUND_ERROR);
         }
-        String wsAgentPingUrl = wsAgentServer.getProperties().getInternalUrl();
+
+
+        // TODO temporary not internal
+        String wsAgentPingUrl = wsAgentServer.getUrl();
+
+        //String wsAgentPingUrl = wsAgentServer.getProperties().getInternalUrl();
         if (isNullOrEmpty(wsAgentPingUrl)) {
             LOG.error(WS_AGENT_URL_IS_NULL_OR_EMPTY_ERROR);
             throw new ServerException(WS_AGENT_URL_IS_NULL_OR_EMPTY_ERROR);

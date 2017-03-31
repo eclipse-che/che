@@ -10,28 +10,21 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.model.impl;
 
-import org.eclipse.che.api.core.model.workspace.ServerConf2;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
  * @author Alexander Garagatyi
  */
-@Entity(name = "ServerConf")
+@Entity(name = "OldServerConf")
 @Table(name = "serverconf")
-public class ServerConf2Impl implements ServerConf2 {
+public class ServerConfigImpl implements ServerConfig {
 
     @Id
     @GeneratedValue
@@ -44,31 +37,23 @@ public class ServerConf2Impl implements ServerConf2 {
     @Column(name = "protocol")
     private String protocol;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "serverconf_properties",
-                     joinColumns = @JoinColumn(name = "serverconf_id"))
-    @MapKeyColumn(name = "properties_key")
-    @Column(name = "properties")
-    private Map<String, String> properties;
+    @Column(name = "path")
+    private String path;
 
-    public ServerConf2Impl() {}
+    public ServerConfigImpl() {}
 
-    public ServerConf2Impl(String port,
-                           String protocol,
-                           Map<String, String> properties) {
+    public ServerConfigImpl(String port,
+                            String protocol,
+                            String path) {
         this.port = port;
         this.protocol = protocol;
-        if (properties != null) {
-            this.properties = new HashMap<>(properties);
-        }
+        this.path = path;
     }
 
-    public ServerConf2Impl(ServerConf2 serverConf) {
+    public ServerConfigImpl(ServerConfig serverConf) {
         this.port = serverConf.getPort();
         this.protocol = serverConf.getProtocol();
-        if (serverConf.getProperties() != null) {
-            this.properties = new HashMap<>(serverConf.getProperties());
-        }
+        this.path = serverConf.getPath();
     }
 
     @Override
@@ -90,15 +75,12 @@ public class ServerConf2Impl implements ServerConf2 {
     }
 
     @Override
-    public Map<String, String> getProperties() {
-        if (properties == null) {
-            properties = new HashMap<>();
-        }
-        return properties;
+    public String getPath() {
+        return path;
     }
 
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
+    public void setPath(String path) {
+        this.path = path;
     }
 
     @Override
@@ -106,14 +88,14 @@ public class ServerConf2Impl implements ServerConf2 {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof ServerConf2Impl)) {
+        if (!(obj instanceof ServerConfigImpl)) {
             return false;
         }
-        final ServerConf2Impl that = (ServerConf2Impl)obj;
+        final ServerConfigImpl that = (ServerConfigImpl)obj;
         return Objects.equals(id, that.id)
                && Objects.equals(port, that.port)
                && Objects.equals(protocol, that.protocol)
-               && getProperties().equals(that.getProperties());
+               && getPath().equals(that.getPath());
     }
 
     @Override
@@ -122,17 +104,17 @@ public class ServerConf2Impl implements ServerConf2 {
         hash = 31 * hash + Objects.hashCode(id);
         hash = 31 * hash + Objects.hashCode(port);
         hash = 31 * hash + Objects.hashCode(protocol);
-        hash = 31 * hash + getProperties().hashCode();
+        hash = 31 * hash + Objects.hashCode(path);
         return hash;
     }
 
     @Override
     public String toString() {
-        return "ServerConf2Impl{" +
+        return "ServerConfigImpl{" +
                "id=" + id +
                ", port='" + port + '\'' +
                ", protocol='" + protocol + '\'' +
-               ", properties=" + properties +
+               ", path=" + path +
                '}';
     }
 }

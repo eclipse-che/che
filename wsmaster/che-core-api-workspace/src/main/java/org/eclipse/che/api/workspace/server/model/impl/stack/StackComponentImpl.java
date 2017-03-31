@@ -18,7 +18,7 @@ import javax.persistence.Embeddable;
 import java.util.Objects;
 
 /**
- * Server implementation of {@link StackComponent}
+ * OldServer implementation of {@link StackComponent}
  *
  * @author Alexander Andrienko
  */

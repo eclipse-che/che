@@ -22,11 +22,11 @@ import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
-import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
+import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
+import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
-import org.eclipse.che.api.workspace.shared.dto.ServerConf2Dto;
+import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
@@ -145,18 +145,18 @@ public class StackLoaderTest {
                                                                           .withSource(sourceStorageDto);
 
 
-        EnvironmentRecipeDto environmentRecipe = newDto(EnvironmentRecipeDto.class).withContent("some content")
-                                                                                   .withContentType("some content type")
-                                                                                   .withType("someType");
+        RecipeDto environmentRecipe = newDto(RecipeDto.class).withContent("some content")
+                                                             .withContentType("some content type")
+                                                             .withType("someType");
 
-        Map<String, ServerConf2Dto> servers = new HashMap<>();
-        servers.put("server1Ref", newDto(ServerConf2Dto.class).withPort("8080/tcp")
-                                                              .withProtocol("http")
-                                                              .withProperties(singletonMap("key", "value")));
-        Map<String, ExtendedMachineDto> machines = new HashMap<>();
-        machines.put("someMachineName", newDto(ExtendedMachineDto.class).withAgents(Arrays.asList("agent1", "agent2"))
-                                                                        .withServers(servers)
-                                                                        .withAttributes(singletonMap("memoryLimitBytes", "" + 512L * 1024L * 1024L)));
+        Map<String, ServerConfigDto> servers = new HashMap<>();
+        servers.put("server1Ref", newDto(ServerConfigDto.class).withPort("8080/tcp")
+                                                               .withProtocol("http")
+                                                               .withProperties(singletonMap("key", "value")));
+        Map<String, MachineConfigDto> machines = new HashMap<>();
+        machines.put("someMachineName", newDto(MachineConfigDto.class).withAgents(Arrays.asList("agent1", "agent2"))
+                                                                      .withServers(servers)
+                                                                      .withAttributes(singletonMap("memoryLimitBytes", "" + 512L * 1024L * 1024L)));
 
         EnvironmentDto environmentDto = newDto(EnvironmentDto.class).withRecipe(environmentRecipe)
                                                                     .withMachines(machines);

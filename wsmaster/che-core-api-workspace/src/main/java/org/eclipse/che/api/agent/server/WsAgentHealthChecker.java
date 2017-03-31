@@ -11,7 +11,7 @@
 package org.eclipse.che.api.agent.server;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 
 /**

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.filters;
 
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 
 import java.util.ArrayList;
@@ -22,6 +22,7 @@ import java.util.Map;
  *
  * @author Alexander Garagatyi
  */
+// FIXME: spi
 public class AddExecAgentInEnvironmentUtil {
     public static void addExecAgent(WorkspaceConfigDto workspaceConfig) {
         if (workspaceConfig != null) {
@@ -29,13 +30,13 @@ public class AddExecAgentInEnvironmentUtil {
             if (environments != null) {
                 for (EnvironmentDto environment : environments.values()) {
                     if (environment != null && environment.getMachines() != null) {
-                        for (ExtendedMachineDto machine : environment.getMachines().values()) {
+                        for (MachineConfig machine : environment.getMachines().values()) {
                             if (machine.getAgents() != null) {
                                 if (machine.getAgents().contains("org.eclipse.che.terminal") &&
                                     !machine.getAgents().contains("org.eclipse.che.exec")) {
                                     ArrayList<String> updatedAgents = new ArrayList<>(machine.getAgents());
                                     updatedAgents.add("org.eclipse.che.exec");
-                                    machine.setAgents(updatedAgents);
+//                                    machine.setAgents(updatedAgents);
                                 }
                             }
                         }

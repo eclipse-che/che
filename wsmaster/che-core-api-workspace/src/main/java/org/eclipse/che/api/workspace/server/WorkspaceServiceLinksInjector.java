@@ -14,44 +14,30 @@ import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.environment.server.MachineLinksInjector;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.ServerDto;
-import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_STATUS_CHANNEL_TEMPLATE;
-import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_STATUS_CHANNEL;
-import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
-import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
-import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.GET_ALL_USER_WORKSPACES;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_SNAPSHOT;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_IDE_URL;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_SELF;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_START_WORKSPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_STOP_WORKSPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.LIN_REL_GET_WORKSPACE;
 import static org.eclipse.che.dto.server.DtoFactory.cloneDto;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -63,6 +49,8 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 @Singleton
 public class WorkspaceServiceLinksInjector {
 
+    //TODO: we need keep IDE context in some property to have possibility configure it because context is different in Che and Hosted packaging
+    //TODO: not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
     private final MachineLinksInjector machineLinksInjector;
 
     @Inject
@@ -101,13 +89,14 @@ public class WorkspaceServiceLinksInjector {
                                        .toString(),
                              APPLICATION_JSON,
                              GET_ALL_USER_WORKSPACES));
-        links.add(createLink("GET",
-                             uriBuilder.clone()
-                                       .path(WorkspaceService.class, "getSnapshot")
-                                       .build(workspace.getId())
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_GET_SNAPSHOT));
+
+//        links.add(createLink("GET",
+//                             uriBuilder.clone()
+//                                       .path(WorkspaceService.class, "getSnapshot")
+//                                       .build(workspace.getId())
+//                                       .toString(),
+//                             APPLICATION_JSON,
+//                             LINK_REL_GET_SNAPSHOT));
 
         //TODO here we add url to IDE with workspace name not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
         final URI ideUri = uriBuilder.clone()
@@ -143,114 +132,110 @@ public class WorkspaceServiceLinksInjector {
                                                                                                                workspace.getId())))));
 
         // add links for running workspace
-        injectRuntimeLinks(workspace, ideUri, uriBuilder, serviceContext);
+        //injectRuntimeLinks(workspace, ideUri, uriBuilder, serviceContext);
         return workspace.withLinks(links);
+        //return workspace;
     }
 
-    public SnapshotDto injectLinks(SnapshotDto snapshotDto, ServiceContext serviceContext) {
-        final UriBuilder uriBuilder = serviceContext.getServiceUriBuilder();
-        final Link machineLink = createLink("GET",
-                                            serviceContext.getBaseUriBuilder()
-                                                          .path("/machine/{id}")
-                                                          .build(snapshotDto.getId())
-                                                          .toString(),
-                                            APPLICATION_JSON,
-                                            "get machine");
-        final Link workspaceLink = createLink("GET",
-                                              uriBuilder.clone()
-                                                        .path(WorkspaceService.class, "getByKey")
-                                                        .build(snapshotDto.getWorkspaceId())
-                                                        .toString(),
-                                              APPLICATION_JSON,
-                                              LIN_REL_GET_WORKSPACE);
-        final Link workspaceSnapshotLink = createLink("GET",
-                                                      uriBuilder.clone()
-                                                                .path(WorkspaceService.class, "getSnapshot")
-                                                                .build(snapshotDto.getWorkspaceId())
-                                                                .toString(),
-                                                      APPLICATION_JSON,
-                                                      LINK_REL_SELF);
-        return snapshotDto.withLinks(asList(machineLink, workspaceLink, workspaceSnapshotLink));
-    }
+//    public SnapshotDto injectLinks(SnapshotDto snapshotDto, ServiceContext serviceContext) {
+//        final UriBuilder uriBuilder = serviceContext.getServiceUriBuilder();
+//        final Link machineLink = createLink("GET",
+//                                            serviceContext.getBaseUriBuilder()
+//                                                          .path("/machine/{id}")
+//                                                          .build(snapshotDto.getId())
+//                                                          .toString(),
+//                                            APPLICATION_JSON,
+//                                            "get machine");
+//        final Link workspaceLink = createLink("GET",
+//                                              uriBuilder.clone()
+//                                                        .path(WorkspaceService.class, "getByKey")
+//                                                        .build(snapshotDto.getWorkspaceId())
+//                                                        .toString(),
+//                                              APPLICATION_JSON,
+//                                              LIN_REL_GET_WORKSPACE);
+//        final Link workspaceSnapshotLink = createLink("GET",
+//                                                      uriBuilder.clone()
+//                                                                .path(WorkspaceService.class, "getSnapshot")
+//                                                                .build(snapshotDto.getWorkspaceId())
+//                                                                .toString(),
+//                                                      APPLICATION_JSON,
+//                                                      LINK_REL_SELF);
+//        return snapshotDto.withLinks(asList(machineLink, workspaceLink, workspaceSnapshotLink));
+//    }
 
-    protected void injectRuntimeLinks(WorkspaceDto workspace, URI ideUri, UriBuilder uriBuilder, ServiceContext serviceContext) {
-        final WorkspaceRuntimeDto runtime = workspace.getRuntime();
-        // add links for running workspace
-        if (workspace.getStatus() == RUNNING && runtime != null) {
-            runtime.getLinks()
-                   .add(createLink("DELETE",
-                                   uriBuilder.clone()
-                                             .path(WorkspaceService.class, "stop")
-                                             .build(workspace.getId())
-                                             .toString(),
-                                   LINK_REL_STOP_WORKSPACE));
+//    protected void injectRuntimeLinks(WorkspaceDto workspace, URI ideUri, UriBuilder uriBuilder, ServiceContext serviceContext) {
+//        final RuntimeDto runtime = workspace.getRuntime();
+//        // add links for running workspace
+//        if (workspace.getStatus() == RUNNING && runtime != null) {
+//            runtime.getLinks()
+//                   .add(createLink("DELETE",
+//                                   uriBuilder.clone()
+//                                             .path(WorkspaceService.class, "stop")
+//                                             .build(workspace.getId())
+//                                             .toString(),
+//                                   LINK_REL_STOP_WORKSPACE));
+//
+//            // TODO review
+////            runtime.getMachines().forEach(machine -> injectMachineLinks(machine, serviceContext));
+//
+////            final OldMachineDto devMachine = runtime.getDevMachine();
+////            if (devMachine != null) {
+////                final Collection<OldServerDto> servers = devMachine.getRuntime()
+////                                                                .getServers()
+////                                                                .values();
+////                servers.stream()
+////                       .filter(server -> WSAGENT_REFERENCE.equals(server.getRef()))
+////                       .findAny()
+////                       .ifPresent(wsAgent -> {
+////                           runtime.getLinks()
+////                                  .add(createLink("GET",
+////                                                  wsAgent.getUrl(),
+////                                                  WSAGENT_REFERENCE));
+////                           runtime.getLinks()
+////                                  .add(createLink("GET",
+////                                                  UriBuilder.fromUri(wsAgent.getUrl())
+////                                                            .path("ws")
+////                                                            .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
+////                                                            .build()
+////                                                            .toString(),
+////                                                  WSAGENT_WEBSOCKET_REFERENCE));
+////                           devMachine.getLinks()
+////                                     .add(createLink("GET",
+////                                                     UriBuilder.fromUri(wsAgent.getUrl())
+////                                                               .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
+////                                                               .path("/ws")
+////                                                               .build()
+////                                                               .toString(),
+////                                                     WSAGENT_WEBSOCKET_REFERENCE));
+////                       });
+////
+////                servers.stream()
+////                       .filter(server -> TERMINAL_REFERENCE.equals(server.getRef()))
+////                       .findAny()
+////                       .ifPresent(terminal -> {
+////                           devMachine.getLinks()
+////                                     .add(createLink("GET",
+////                                                     UriBuilder.fromUri(terminal.getUrl())
+////                                                               .scheme("https".equals(ideUri.getScheme()) ? "wss"
+////                                                                                                          : "ws")
+////                                                               .path("/pty")
+////                                                               .build()
+////                                                               .toString(),
+////                                                     TERMINAL_REFERENCE));
+////                           devMachine.getLinks()
+////                                     .add(createLink("GET",
+////                                                     UriBuilder.fromUri(terminal.getUrl())
+////                                                               .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
+////                                                               .path("/connect")
+////                                                               .build()
+////                                                               .toString(),
+////                                                     EXEC_AGENT_REFERENCE));
+////                       });
+////            }
+//        }
+//    }
 
-            runtime.getMachines().forEach(machine -> injectMachineLinks(machine, serviceContext));
-
-            final MachineDto devMachine = runtime.getDevMachine();
-            if (devMachine != null) {
-                final Collection<ServerDto> servers = devMachine.getRuntime()
-                                                                .getServers()
-                                                                .values();
-                servers.stream()
-                       .filter(server -> WSAGENT_REFERENCE.equals(server.getRef()))
-                       .findAny()
-                       .ifPresent(wsAgent -> {
-                           runtime.getLinks()
-                                  .add(createLink("GET",
-                                                  wsAgent.getUrl(),
-                                                  WSAGENT_REFERENCE));
-                           runtime.getLinks()
-                                  .add(createLink("GET",
-                                                  UriBuilder.fromUri(wsAgent.getUrl())
-                                                            .path("ws")
-                                                            .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                                            .build()
-                                                            .toString(),
-                                                  WSAGENT_WEBSOCKET_REFERENCE));
-                           devMachine.getLinks()
-                                     .add(createLink("GET",
-                                                     UriBuilder.fromUri(wsAgent.getUrl())
-                                                               .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                                               .path("/ws")
-                                                               .build()
-                                                               .toString(),
-                                                     WSAGENT_WEBSOCKET_REFERENCE));
-                       });
-
-                servers.stream()
-                       .filter(server -> TERMINAL_REFERENCE.equals(server.getRef()))
-                       .findAny()
-                       .ifPresent(terminal -> {
-                           devMachine.getLinks()
-                                     .add(createLink("GET",
-                                                     UriBuilder.fromUri(terminal.getUrl())
-                                                               .scheme("https".equals(ideUri.getScheme()) ? "wss"
-                                                                                                          : "ws")
-                                                               .path("/pty")
-                                                               .build()
-                                                               .toString(),
-                                                     TERMINAL_REFERENCE));
-                       });
-
-                servers.stream()
-                       .filter(server -> EXEC_AGENT_REFERENCE.equals(server.getRef()))
-                       .findAny()
-                       .ifPresent(exec -> {
-                           devMachine.getLinks()
-                                     .add(createLink("GET",
-                                                     UriBuilder.fromUri(exec.getUrl())
-                                                               .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                                               .path("/connect")
-                                                               .build()
-                                                               .toString(),
-                                                     EXEC_AGENT_REFERENCE));
-                       });
-            }
-        }
-    }
-
-    protected MachineDto injectMachineLinks(MachineDto machine, ServiceContext serviceContext) {
-        return machineLinksInjector.injectLinks(machine, serviceContext);
-    }
+//    public OldMachineDto injectMachineLinks(OldMachineDto machine, ServiceContext serviceContext) {
+//        return machineLinksInjector.injectLinks(machine, serviceContext);
+//    }
 }

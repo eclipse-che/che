@@ -14,7 +14,7 @@ import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -112,7 +112,7 @@ public class WorkspaceImpl implements Workspace {
     private WorkspaceStatus status;
 
     @Transient
-    private WorkspaceRuntimeImpl runtime;
+    private Runtime runtime;
 
     public WorkspaceImpl() {}
 
@@ -123,7 +123,7 @@ public class WorkspaceImpl implements Workspace {
     public WorkspaceImpl(String id,
                          Account account,
                          WorkspaceConfig config,
-                         WorkspaceRuntime runtime,
+                         Runtime runtime,
                          Map<String, String> attributes,
                          boolean isTemporary,
                          WorkspaceStatus status) {
@@ -135,7 +135,8 @@ public class WorkspaceImpl implements Workspace {
             this.config = new WorkspaceConfigImpl(config);
         }
         if (runtime != null) {
-            this.runtime = new WorkspaceRuntimeImpl(runtime);
+            this.runtime = new RuntimeImpl(runtime.getActiveEnv(), runtime.getMachines(),
+                                           runtime.getOwner());
         }
         if (attributes != null) {
             this.attributes = new HashMap<>(attributes);
@@ -223,11 +224,11 @@ public class WorkspaceImpl implements Workspace {
     }
 
     @Override
-    public WorkspaceRuntimeImpl getRuntime() {
+    public Runtime getRuntime() {
         return runtime;
     }
 
-    public void setRuntime(WorkspaceRuntimeImpl runtime) {
+    public void setRuntime(Runtime runtime) {
         this.runtime = runtime;
     }
 
@@ -311,7 +312,7 @@ public class WorkspaceImpl implements Workspace {
         private boolean             isTemporary;
         private WorkspaceStatus     status;
         private WorkspaceConfig     config;
-        private WorkspaceRuntime    runtime;
+        private Runtime             runtime;
         private Map<String, String> attributes;
 
         private WorkspaceImplBuilder() {}
@@ -355,7 +356,7 @@ public class WorkspaceImpl implements Workspace {
             return this;
         }
 
-        public WorkspaceImplBuilder setRuntime(WorkspaceRuntime runtime) {
+        public WorkspaceImplBuilder setRuntime(Runtime runtime) {
             this.runtime = runtime;
             return this;
         }

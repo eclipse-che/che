@@ -13,21 +13,21 @@ package org.eclipse.che.api.environment.server;
 import com.google.common.base.Joiner;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.Environment;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.environment.server.model.CheServiceBuildContextImpl;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
-import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.machine.shared.dto.OldMachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
-import org.eclipse.che.api.machine.shared.dto.ServerConfDto;
+import org.eclipse.che.api.machine.shared.dto.OldServerConfDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
+import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -167,7 +167,7 @@ public class CheEnvironmentValidatorTest {
     public static Object[][] invalidEnvironmentProvider() {
         // InvalidEnvironmentObject | ExceptionMessage
         EnvironmentDto env;
-        Map.Entry<String, ExtendedMachineDto> machineEntry;
+        Map.Entry<String, MachineConfigDto> machineEntry;
         List<List<Object>> data = new ArrayList<>();
 
         data.add(asList(createEnv().withRecipe(null), "Environment recipe should not be null"));
@@ -178,11 +178,11 @@ public class CheEnvironmentValidatorTest {
 
         env = createEnv();
         env.getRecipe().withLocation(null).withContent(null);
-        data.add(asList(env, "Recipe of environment 'env' must contain location or content"));
+        data.add(asList(env, "OldRecipe of environment 'env' must contain location or content"));
 
         env = createEnv();
         env.getRecipe().withLocation("location").withContent("content");
-        data.add(asList(env, "Recipe of environment 'env' contains mutually exclusive fields location and content"));
+        data.add(asList(env, "OldRecipe of environment 'env' contains mutually exclusive fields location and content"));
 
         env = createEnv();
         env.setMachines(null);
@@ -194,7 +194,7 @@ public class CheEnvironmentValidatorTest {
 
         env = createEnv();
         env.getMachines().put("missingInEnvMachine",
-                              newDto(ExtendedMachineDto.class).withAgents(singletonList("org.eclipse.che.ws-agent")));
+                              newDto(MachineConfigDto.class).withAgents(singletonList("org.eclipse.che.ws-agent")));
         data.add(asList(env, "Environment 'env' contains machines that are missing in environment recipe: missingInEnvMachine"));
 
         env = createEnv();
@@ -210,11 +210,11 @@ public class CheEnvironmentValidatorTest {
 
         env = createEnv();
         env.getMachines().entrySet().forEach(entry -> entry.getValue().getAgents().add(null));
-        data.add(asList(env, "Machine 'machine2' in environment 'env' contains invalid agent 'null'"));
+        data.add(asList(env, "OldMachine 'machine2' in environment 'env' contains invalid agent 'null'"));
 
         env = createEnv();
         env.getMachines().entrySet().forEach(entry -> entry.getValue().getAgents().add(""));
-        data.add(asList(env, "Machine 'machine2' in environment 'env' contains invalid agent ''"));
+        data.add(asList(env, "OldMachine 'machine2' in environment 'env' contains invalid agent ''"));
 
         env = createEnv();
         machineEntry = env.getMachines().entrySet().iterator().next();
@@ -368,7 +368,7 @@ public class CheEnvironmentValidatorTest {
                                                         null,
                                                         "some content",
                                                         new HashMap<String, String>() {{put("argkey","argvalue");}}));
-        data.add(asList(env, format("Machine '%s' in environment 'env' contains mutually exclusive dockerfile content and build context.",
+        data.add(asList(env, format("OldMachine '%s' in environment 'env' contains mutually exclusive dockerfile content and build context.",
                                     serviceEntry.getKey())));
 
         return data.stream()
@@ -384,9 +384,9 @@ public class CheEnvironmentValidatorTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Machine name is null or empty")
+          expectedExceptionsMessageRegExp = "OldMachine name is null or empty")
     public void shouldFailValidationIfMachineNameIsNull() throws Exception {
-        MachineConfigDto config = createMachineConfig();
+        OldMachineConfigDto config = createMachineConfig();
         config.withName(null);
 
 
@@ -394,9 +394,9 @@ public class CheEnvironmentValidatorTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Machine name is null or empty")
+          expectedExceptionsMessageRegExp = "OldMachine name is null or empty")
     public void shouldFailValidationIfMachineNameIsEmpty() throws Exception {
-        MachineConfigDto config = createMachineConfig();
+        OldMachineConfigDto config = createMachineConfig();
         config.withName("");
 
 
@@ -404,9 +404,9 @@ public class CheEnvironmentValidatorTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Machine '.*' doesn't have source")
+          expectedExceptionsMessageRegExp = "OldMachine '.*' doesn't have source")
     public void shouldFailValidationIfMachineSourceIsNull() throws Exception {
-        MachineConfigDto config = createMachineConfig();
+        OldMachineConfigDto config = createMachineConfig();
         config.withSource(null);
 
 
@@ -416,7 +416,7 @@ public class CheEnvironmentValidatorTest {
     @Test(expectedExceptions = IllegalArgumentException.class,
           expectedExceptionsMessageRegExp = "Type 'null' of machine '.*' is not supported. Supported values are: docker, ssh.")
     public void shouldFailValidationIfMachineTypeIsNull() throws Exception {
-        MachineConfigDto config = createMachineConfig();
+        OldMachineConfigDto config = createMachineConfig();
         config.withType(null);
 
 
@@ -426,7 +426,7 @@ public class CheEnvironmentValidatorTest {
     @Test(expectedExceptions = IllegalArgumentException.class,
           expectedExceptionsMessageRegExp = "Type 'compose' of machine '.*' is not supported. Supported values are: docker, ssh.")
     public void shouldFailValidationIfMachineTypeIsNotDocker() throws Exception {
-        MachineConfigDto config = createMachineConfig();
+        OldMachineConfigDto config = createMachineConfig();
         config.withType("compose");
 
 
@@ -434,12 +434,12 @@ public class CheEnvironmentValidatorTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Machine .* contains server conf with invalid port .*",
+          expectedExceptionsMessageRegExp = "OldMachine .* contains server conf with invalid port .*",
           dataProvider = "invalidPortProvider")
     public void shouldFailValidationIfServerConfPortIsInvalid(String invalidPort) throws Exception {
-        MachineConfigDto config = createMachineConfig();
+        OldMachineConfigDto config = createMachineConfig();
         config.getServers()
-              .add(newDto(ServerConfDto.class).withPort(invalidPort));
+              .add(newDto(OldServerConfDto.class).withPort(invalidPort));
 
 
         environmentValidator.validateMachine(config);
@@ -472,9 +472,9 @@ public class CheEnvironmentValidatorTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Machine '.*' contains environment variable with null or empty name")
+          expectedExceptionsMessageRegExp = "OldMachine '.*' contains environment variable with null or empty name")
     public void shouldFailValidationIfEnvVarNameIsNull() throws Exception {
-        MachineConfigDto config = createMachineConfig();
+        OldMachineConfigDto config = createMachineConfig();
         config.getEnvVariables()
               .put(null, "value");
 
@@ -483,9 +483,9 @@ public class CheEnvironmentValidatorTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Machine '.*' contains environment variable with null or empty name")
+          expectedExceptionsMessageRegExp = "OldMachine '.*' contains environment variable with null or empty name")
     public void shouldFailValidationIfEnvVarNameIsEmpty() throws Exception {
-        MachineConfigDto config = createMachineConfig();
+        OldMachineConfigDto config = createMachineConfig();
         config.getEnvVariables()
               .put("", "value");
 
@@ -494,9 +494,9 @@ public class CheEnvironmentValidatorTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Machine '.*' contains environment variable 'key' with null value")
+          expectedExceptionsMessageRegExp = "OldMachine '.*' contains environment variable 'key' with null value")
     public void shouldFailValidationIfEnvVarValueIsNull() throws Exception {
-        MachineConfigDto config = createMachineConfig();
+        OldMachineConfigDto config = createMachineConfig();
         config.getEnvVariables()
               .put("key", null);
 
@@ -507,25 +507,25 @@ public class CheEnvironmentValidatorTest {
     @Test(expectedExceptions = IllegalArgumentException.class,
           expectedExceptionsMessageRegExp = "Source of machine '.*' must contain location or content")
     public void shouldFailValidationIfMissingSourceLocationAndContent() throws Exception {
-        MachineConfigDto config = createMachineConfig();
+        OldMachineConfigDto config = createMachineConfig();
         config.withSource(newDto(MachineSourceDto.class).withType("dockerfile"));
 
         environmentValidator.validateMachine(config);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Machine '.*' has invalid source location: 'localhost'")
+          expectedExceptionsMessageRegExp = "OldMachine '.*' has invalid source location: 'localhost'")
     public void shouldFailValidationIfLocationIsInvalidUrl() throws Exception {
-        MachineConfigDto config = createMachineConfig();
+        OldMachineConfigDto config = createMachineConfig();
         config.withSource(newDto(MachineSourceDto.class).withType("dockerfile").withLocation("localhost"));
 
         environmentValidator.validateMachine(config);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Machine '.*' has invalid source location protocol: ftp://localhost")
+          expectedExceptionsMessageRegExp = "OldMachine '.*' has invalid source location protocol: ftp://localhost")
     public void shouldFailValidationIfLocationHasInvalidProtocol() throws Exception {
-        MachineConfigDto config = createMachineConfig();
+        OldMachineConfigDto config = createMachineConfig();
         config.withSource(newDto(MachineSourceDto.class).withType("dockerfile")
                                                         .withLocation("ftp://localhost"));
 
@@ -533,13 +533,13 @@ public class CheEnvironmentValidatorTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Machine .* contains server conf with invalid protocol .*",
+          expectedExceptionsMessageRegExp = "OldMachine .* contains server conf with invalid protocol .*",
           dataProvider = "invalidProtocolProvider")
     public void shouldFailValidationIfServerConfProtocolIsInvalid(String invalidProtocol) throws Exception {
-        MachineConfigDto config = createMachineConfig();
+        OldMachineConfigDto config = createMachineConfig();
         config.getServers()
-              .add(newDto(ServerConfDto.class).withPort("8080/tcp")
-                                              .withProtocol(invalidProtocol));
+              .add(newDto(OldServerConfDto.class).withPort("8080/tcp")
+                                                 .withProtocol(invalidProtocol));
 
 
         environmentValidator.validateMachine(config);
@@ -555,46 +555,46 @@ public class CheEnvironmentValidatorTest {
                 };
     }
 
-    private MachineConfigDto createMachineConfig() {
-        List<ServerConfDto> serversConf = new ArrayList<>(asList(newDto(ServerConfDto.class).withRef("ref1")
-                                                                                            .withPort("8080/tcp")
-                                                                                            .withProtocol("https")
-                                                                                            .withPath("some/path"),
-                                                                 newDto(ServerConfDto.class).withRef("ref2")
-                                                                                            .withPort("9090/udp")
-                                                                                            .withProtocol("protocol")
-                                                                                            .withPath("/some/path")));
-        return newDto(MachineConfigDto.class).withDev(true)
-                                             .withName("machine1")
-                                             .withType("docker")
-                                             .withSource(newDto(MachineSourceDto.class)
+    private OldMachineConfigDto createMachineConfig() {
+        List<OldServerConfDto> serversConf = new ArrayList<>(asList(newDto(OldServerConfDto.class).withRef("ref1")
+                                                                                                  .withPort("8080/tcp")
+                                                                                                  .withProtocol("https")
+                                                                                                  .withPath("some/path"),
+                                                                    newDto(OldServerConfDto.class).withRef("ref2")
+                                                                                                  .withPort("9090/udp")
+                                                                                                  .withProtocol("protocol")
+                                                                                                  .withPath("/some/path")));
+        return newDto(OldMachineConfigDto.class).withDev(true)
+                                                .withName("machine1")
+                                                .withType("docker")
+                                                .withSource(newDto(MachineSourceDto.class)
                                                                                      .withLocation("http://location")
                                                                                      .withType("dockerfile"))
-                                             .withServers(serversConf)
-                                             .withEnvVariables(new HashMap<>(singletonMap("key1", "value1")));
+                                                .withServers(serversConf)
+                                                .withEnvVariables(new HashMap<>(singletonMap("key1", "value1")));
     }
 
     private static EnvironmentDto createEnv() {
         // singletonMap, asList are wrapped into modifiable collections to ease env modifying by tests
         EnvironmentImpl env = new EnvironmentImpl();
-        Map<String, ExtendedMachineImpl> machines = new HashMap<>();
-        Map<String, ServerConf2Impl> servers = new HashMap<>();
+        Map<String, MachineConfigImpl> machines = new HashMap<>();
+        Map<String, ServerConfigImpl> servers = new HashMap<>();
 
-        servers.put("ref1", new ServerConf2Impl("8080/tcp",
-                                                "proto1",
-                                                singletonMap("prop1", "propValue")));
-        servers.put("ref2", new ServerConf2Impl("8080/udp", "proto1", null));
-        servers.put("ref3", new ServerConf2Impl("9090", "proto1", null));
-        machines.put("dev-machine", new ExtendedMachineImpl(asList("org.eclipse.che.ws-agent", "someAgent"),
-                                                            servers,
-                                                            singletonMap("memoryLimitBytes", "10000")));
-        machines.put("machine2", new ExtendedMachineImpl(asList("someAgent2", "someAgent3"),
-                                                         null,
-                                                         singletonMap("memoryLimitBytes", "10000")));
-        env.setRecipe(new EnvironmentRecipeImpl("compose",
-                                                "application/x-yaml",
-                                                "content",
-                                                null));
+        servers.put("ref1", new ServerConfigImpl("8080/tcp",
+                                                 "proto1",
+                                                 singletonMap("prop1", "propValue")));
+        servers.put("ref2", new ServerConfigImpl("8080/udp", "proto1", null));
+        servers.put("ref3", new ServerConfigImpl("9090", "proto1", null));
+        machines.put("dev-machine", new MachineConfigImpl(asList("org.eclipse.che.ws-agent", "someAgent"),
+                                                          servers,
+                                                          singletonMap("memoryLimitBytes", "10000")));
+        machines.put("machine2", new MachineConfigImpl(asList("someAgent2", "someAgent3"),
+                                                       null,
+                                                       singletonMap("memoryLimitBytes", "10000")));
+        env.setRecipe(new RecipeImpl("compose",
+                                     "application/x-yaml",
+                                     "content",
+                                     null));
         env.setMachines(machines);
 
         return DtoConverter.asDto(env);
