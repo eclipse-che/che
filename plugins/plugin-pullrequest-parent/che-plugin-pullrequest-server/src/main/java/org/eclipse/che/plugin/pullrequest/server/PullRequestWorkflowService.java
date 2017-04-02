@@ -31,8 +31,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 /**
  * Pull Request Workflow REST API. It provides server defined configuration of the Pull Request Workflow feature.
  */
-@Path("/pullrequestwf")
-@Api(value = "/pullrequestwf", //
+@Path("/pullrequest")
+@Api(value = "/pullrequest", //
      description = "Pull Request Workflow REST API. It provides server defined configuration of the Pull Request Workflow feature")
 public class PullRequestWorkflowService {
 

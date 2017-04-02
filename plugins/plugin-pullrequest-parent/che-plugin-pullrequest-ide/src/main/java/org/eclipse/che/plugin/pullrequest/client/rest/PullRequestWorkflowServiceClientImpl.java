@@ -31,7 +31,7 @@ public class PullRequestWorkflowServiceClientImpl implements PullRequestWorkflow
                                                 AsyncRequestFactory asyncRequestFactory,//
                                                 DtoUnmarshallerFactory unmarshallerFactory) {
         this.asyncRequestFactory = asyncRequestFactory;
-        this.baseHttpUrl = appContext.getMasterEndpoint() + "/pullrequestwf";
+        this.baseHttpUrl = appContext.getMasterEndpoint() + "/pullrequest";
         this.unmarshallerFactory = unmarshallerFactory;
     }
 
