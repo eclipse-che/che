@@ -25,7 +25,7 @@ import javax.ws.rs.Produces;
 import org.eclipse.che.plugin.pullrequest.shared.dto.ShouldGenerateReviewUrl;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.eclipse.che.plugin.pullrequest.shared.Constants.CHE_PULLREQUEST_GENERATE__REVIEW__FACTORY;
+import static org.eclipse.che.plugin.pullrequest.shared.Constants.CHE_PR_GENERATE_REVIEW_FACTORY_PROP;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
@@ -39,7 +39,7 @@ public class PullRequestWorkflowService {
     protected boolean generateReviewFactory;
 
     @Inject
-    public PullRequestWorkflowService(@Named(CHE_PULLREQUEST_GENERATE__REVIEW__FACTORY) boolean generateReviewFactory) {
+    public PullRequestWorkflowService(@Named(CHE_PR_GENERATE_REVIEW_FACTORY_PROP) boolean generateReviewFactory) {
         this.generateReviewFactory = generateReviewFactory;
     }
 
