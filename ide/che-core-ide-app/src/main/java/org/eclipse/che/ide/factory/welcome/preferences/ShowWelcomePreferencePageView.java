@@ -8,22 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.factory;
+package org.eclipse.che.ide.factory.welcome.preferences;
 
-import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.inject.Singleton;
+import com.google.gwt.user.client.ui.HasValue;
 
-import org.eclipse.che.ide.api.factory.FactoryServiceClient;
+import org.eclipse.che.ide.api.mvp.View;
 
 /**
- * GIN module for configuring Factory API components.
- *
- * @author Artem Zatsarynnyi
+ * @author Vitaliy Guliy
  */
-public class FactoryApiModule extends AbstractGinModule {
+public interface ShowWelcomePreferencePageView extends View<ShowWelcomePreferencePageView.ActionDelegate> {
 
-    @Override
-    protected void configure() {
-        bind(FactoryServiceClient.class).to(FactoryServiceClientImpl.class).in(Singleton.class);
+    interface ActionDelegate {
+        void onDirtyChanged();
     }
+
+    HasValue<Boolean> welcomeField();
+
 }

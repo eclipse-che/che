@@ -47,7 +47,7 @@ import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.debug.DebugApiModule;
 import org.eclipse.che.ide.editor.EditorApiModule;
 import org.eclipse.che.ide.editor.preferences.EditorPreferencesModule;
-import org.eclipse.che.ide.factory.FactoryApiModule;
+import org.eclipse.che.ide.factory.inject.FactoryGinModule;
 import org.eclipse.che.ide.filetypes.FileTypeApiModule;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
 import org.eclipse.che.ide.macro.MacroApiModule;
@@ -106,7 +106,7 @@ public class CoreGinModule extends AbstractGinModule {
         install(new ProjectApiModule());
         install(new ProjectImportModule());
         install(new OAuthApiModule());
-        install(new FactoryApiModule());
+        install(new FactoryGinModule());
 
         // configure miscellaneous core components
         bind(StandardComponentInitializer.class).in(Singleton.class);

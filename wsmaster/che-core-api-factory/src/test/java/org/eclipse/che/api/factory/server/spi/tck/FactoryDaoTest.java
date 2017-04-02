@@ -54,7 +54,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -132,15 +131,14 @@ public class FactoryDaoTest {
         factoryDao.create(factory);
     }
 
-    // TODO fix after issue: https://github.com/eclipse/che/issues/2110
-//    @Test(expectedExceptions = ConflictException.class)
-//    public void shouldThrowConflictExceptionWhenCreatingFactoryWithExistingNameAndUserId() throws Exception {
-//        final FactoryImpl factory = createFactory(10, users[0].getId());
-//        final FactoryImpl existing = factories[0];
-//        factory.getCreator().setUserId(existing.getCreator().getUserId());
-//        factory.setName(existing.getName());
-//        factoryDao.create(factory);
-//    }
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionWhenCreatingFactoryWithExistingNameAndUserId() throws Exception {
+        final FactoryImpl factory = createFactory(10, users[0].getId());
+        final FactoryImpl existing = factories[0];
+        factory.getCreator().setUserId(existing.getCreator().getUserId());
+        factory.setName(existing.getName());
+        factoryDao.create(factory);
+    }
 
     @Test
     public void shouldUpdateFactory() throws Exception {
@@ -149,7 +147,7 @@ public class FactoryDaoTest {
         update.setName("new-name");
         update.setV("5_0");
         final long currentTime = System.currentTimeMillis();
-        update.setPolicies(new PoliciesImpl("ref", "match", "per-click", currentTime, currentTime + 1000));
+        update.setPolicies(new PoliciesImpl("ref", "per-click", currentTime, currentTime + 1000));
         update.setCreator(new AuthorImpl(userId, currentTime));
         update.setButton(new ButtonImpl(new ButtonAttributesImpl("green", "icon", "opacity 0.9", true),
                                         Button.Type.NOLOGO));
@@ -161,14 +159,13 @@ public class FactoryDaoTest {
         assertEquals(factoryDao.getById(update.getId()), update);
     }
 
-// TODO fix after issue: https://github.com/eclipse/che/issues/2110
-//    @Test(expectedExceptions = ConflictException.class)
-//    public void shouldThrowConflictExceptionWhenUpdateFactoryWithExistingNameAndUserId() throws Exception {
-//        final FactoryImpl update = factories[0];
-//        update.setName(factories[1].getName());
-//        update.getCreator().setUserId(factories[1].getCreator().getUserId());
-//        factoryDao.update(update);
-//    }
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionWhenUpdateFactoryWithExistingNameAndUserId() throws Exception {
+        final FactoryImpl update = factories[0];
+        update.setName(factories[1].getName());
+        update.getCreator().setUserId(factories[1].getCreator().getUserId());
+        factoryDao.update(update);
+    }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenFactoryUpdateIsNull() throws Exception {
@@ -208,13 +205,13 @@ public class FactoryDaoTest {
 
     @Test(dependsOnMethods = "shouldUpdateFactory")
     public void shouldFindFactoryByEmbeddedAttributes() throws Exception {
-        final List<Pair<String, String>> attributes = ImmutableList.of(Pair.of("policies.match", "match"),
+        final List<Pair<String, String>> attributes = ImmutableList.of(Pair.of("policies.referer", "referrer"),
                                                                        Pair.of("policies.create", "perClick"),
                                                                        Pair.of("workspace.defaultEnv", "env1"));
         final FactoryImpl factory1 = factories[1];
         final FactoryImpl factory3 = factories[3];
         factory1.getPolicies().setCreate("perAccount");
-        factory3.getPolicies().setMatch("update");
+        factory3.getPolicies().setReferer("ref2");
         factoryDao.update(factory1);
         factoryDao.update(factory3);
         final List<FactoryImpl> result = factoryDao.getByAttribute(factories.length, 0, attributes);
@@ -252,7 +249,7 @@ public class FactoryDaoTest {
         final ButtonImpl factoryButton = new ButtonImpl(new ButtonAttributesImpl("red", "logo", "style", true),
                                                         Button.Type.LOGO);
         final AuthorImpl creator = new AuthorImpl(userId, timeMs);
-        final PoliciesImpl policies = new PoliciesImpl("referrer", "match", "perClick", timeMs, timeMs + 1000);
+        final PoliciesImpl policies = new PoliciesImpl("referrer", "perClick", timeMs, timeMs + 1000);
         final Set<FactoryImage> images = new HashSet<>();
         final List<ActionImpl> a1 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key1", "value1"))));
         final OnAppLoadedImpl onAppLoaded = new OnAppLoadedImpl(a1);
@@ -294,7 +291,6 @@ public class FactoryDaoTest {
         pCfg1.setDescription("description1");
         pCfg1.getMixins().addAll(asList("mixin1", "mixin2"));
         pCfg1.setSource(source1);
-        pCfg1.getAttributes().putAll(ImmutableMap.of("key1", asList("v1", "v2"), "key2", asList("v1", "v2")));
 
         final ProjectConfigImpl pCfg2 = new ProjectConfigImpl();
         pCfg2.setPath("/path2");
@@ -303,7 +299,6 @@ public class FactoryDaoTest {
         pCfg2.setDescription("description2");
         pCfg2.getMixins().addAll(asList("mixin3", "mixin4"));
         pCfg2.setSource(source2);
-        pCfg2.getAttributes().putAll(ImmutableMap.of("key3", asList("v1", "v2"), "key4", asList("v1", "v2")));
 
         final List<ProjectConfigImpl> projects = new ArrayList<>(asList(pCfg1, pCfg2));
 

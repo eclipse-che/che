@@ -1,0 +1,108 @@
+<!--
+
+    CODENVY CONFIDENTIAL
+    __________________
+
+     [2015] - [2016] Codenvy, S.A.
+     All Rights Reserved.
+
+    NOTICE:  All information contained herein is, and remains
+    the property of Codenvy S.A. and its suppliers,
+    if any.  The intellectual and technical concepts contained
+    herein are proprietary to Codenvy S.A.
+    and its suppliers and may be covered by U.S. and Foreign Patents,
+    patents in process, and are protected by trade secret or copyright law.
+    Dissemination of this information or reproduction of this material
+    is strictly forbidden unless prior written permission is obtained
+    from Codenvy S.A..
+
+-->
+<che-toolbar che-title="All factories" border-none></che-toolbar>
+<che-description che-link-title="Learn more." che-link="/docs/integration-guide/workspace-automation/index.html">
+  Factories enable workspace automation and are packaged as a consumer-friendly URL. Create new Factories to onboard your team, or integrate
+  with your toolchain.
+</che-description>
+<md-content md-scroll-y flex layout="column" md-theme="maincontent-theme" class="factories-list-factories">
+  <md-progress-linear md-mode="indeterminate" class="factories-list-factories-progress"
+                      ng-if="listFactoriesCtrl.isLoading"></md-progress-linear>
+  <md-content flex class="md-maincontent-theme-theme" ng-show="!listFactoriesCtrl.isLoading">
+    <che-list-header che-input-placeholder="Search"
+                     che-search-model="listFactoriesCtrl.factoriesFilter.name"
+                     che-hide-search="listFactoriesCtrl.factories.length === 0"
+                     che-add-button-title="Create Factory"
+                     che-add-button-href="#/factories/create-factory"
+                     che-delete-button-title="Delete"
+                     che-on-delete="listFactoriesCtrl.deleteSelectedFactories()"
+                     che-hide-delete="listFactoriesCtrl.isNoSelected"
+                     che-hide-header="(listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter).length === 0">
+      <div flex="100"
+           layout="row"
+           layout-align="start stretch"
+           class="che-list-item-row">
+        <div layout="column" layout-gt-xs="row"
+             layout-align="start center"
+             class="che-checkbox-area">
+          <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
+            <md-checkbox class="che-list-item-checkbox"
+                         aria-label="Factory list"
+                         ng-checked="listFactoriesCtrl.isBulkChecked"
+                         ng-click="listFactoriesCtrl.changeBulkSelection()"></md-checkbox>
+          </div>
+        </div>
+        <div flex hide-xs layout-gt-xs="row"
+             layout-align="start center"
+             class="che-list-item-details">
+          <che-list-header-column flex-gt-xs="25"
+                                  che-sort-value='listFactoriesCtrl.factoriesOrderBy'
+                                  che-sort-item='[name, id]'
+                                  che-column-title='Factory'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="60"
+                                  che-sort-value='listFactoriesCtrl.factoriesOrderBy'
+                                  che-sort-item='workspace.environments[0].machines[0].limits.ram'
+                                  che-column-title='RAM'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="15"
+                                  che-column-title='Actions'></che-list-header-column>
+        </div>
+      </div>
+    </che-list-header>
+    <che-list ng-show="(listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter).length > 0">
+      <cdvy-factory-item
+              ng-repeat="factory in listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter | orderBy:listFactoriesCtrl.factoriesOrderBy"
+              cdvy-factory="factory"
+              cdvy-is-selectable="true"
+              ng-model="listFactoriesCtrl.factoriesSelectedStatus[factory.id]"
+              cdvy-on-checkbox-click="listFactoriesCtrl.updateSelectedStatus()"/>
+    </che-list>
+    <div class="paging-buttons-area" ng-if="listFactoriesCtrl.isPagination()">
+      <md-button
+              ng-disabled="!listFactoriesCtrl.hasPreviousPage()"
+              ng-click="listFactoriesCtrl.fetchFactoriesPage('first');">
+        <span><<</span>
+      </md-button>
+      <md-button
+              ng-disabled="!listFactoriesCtrl.hasPreviousPage()"
+              ng-click="listFactoriesCtrl.fetchFactoriesPage('prev');">
+        <span><</span>
+      </md-button>
+      <md-button disabled>
+        <span>{{listFactoriesCtrl.pagesInfo.currentPageNumber}}</span>
+      </md-button>
+      <md-button
+              ng-disabled="!listFactoriesCtrl.hasNextPage()"
+              ng-click="listFactoriesCtrl.fetchFactoriesPage('next');">
+        <span>></span>
+      </md-button>
+      <md-button
+              ng-disabled="!listFactoriesCtrl.hasLastPage()"
+              ng-click="listFactoriesCtrl.fetchFactoriesPage('last');">
+        <span>>></span>
+      </md-button>
+    </div>
+    <div class="che-list-empty">
+        <span ng-show="listFactoriesCtrl.factories.length > 0 && (listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter).length === 0">
+          No factories found.
+        </span>
+      <span ng-show="listFactoriesCtrl.factories.length === 0">There are no factories.</span>
+    </div>
+  </md-content>
+</md-content>
