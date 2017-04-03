@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Mykola Morhun
@@ -89,6 +90,7 @@ public class DockerRegistryAuthResolverTest {
     private static final String DEFAULT_REGISTRY_URL_ALIAS1 = null;
     private static final String DEFAULT_REGISTRY_URL_ALIAS2 = "";
     private static final String DEFAULT_REGISTRY_URL_ALIAS3 = "docker.io";
+    private static final String DEFAULT_REGISTRY_URL_ALIAS4 = "index.docker.io";
     private static final String DEFAULT_REGISTRY_URL        = "https://index.docker.io/v1/";
     private static final String DEFAULT_REGISTRY_USERNAME   = "dockerHubUser";
     private static final String DEFAULT_REGISTRY_PASSWORD   = "passwordFromDockerHubAccount";
@@ -145,7 +147,8 @@ public class DockerRegistryAuthResolverTest {
         emptyAuthConfigs = DtoFactory.newDto(AuthConfigs.class).withConfigs(new HashMap<>());
 
         Map<String, AuthConfig> dockerHubAuthConfigMap = new HashMap<>();
-        dockerHubAuthConfigMap.put(DEFAULT_REGISTRY_URL, DtoFactory.newDto(AuthConfig.class).withUsername(DEFAULT_REGISTRY_USERNAME)
+        dockerHubAuthConfigMap.put(DEFAULT_REGISTRY_URL, DtoFactory.newDto(AuthConfig.class)
+                                                                   .withUsername(DEFAULT_REGISTRY_USERNAME)
                                                                    .withPassword(DEFAULT_REGISTRY_PASSWORD));
         dockerHubAuthConfigs = DtoFactory.newDto(AuthConfigs.class).withConfigs(dockerHubAuthConfigMap);
     }
@@ -315,6 +318,38 @@ public class DockerRegistryAuthResolverTest {
     }
 
     @Test
+    public void shouldAcceptDockerHubAlias4WhenGetXRegistryAuthValueFromInitialConfig() {
+        when(initialAuthConfig.getAuthConfigs()).thenReturn(dockerHubAuthConfigs);
+
+        String base64HeaderValue = authResolver.getXRegistryAuthHeaderValue(DEFAULT_REGISTRY_URL_ALIAS4, null);
+
+        assertEqualsXRegistryAuthHeader(base64ToAuthConfig(base64HeaderValue),
+                                        jsonToAuthConfig(DEFAULT_REGISTRY_X_REGISTRY_AUTH_VALUE));
+    }
+
+    @Test
+    public void shouldGetXRegistryAuthValueFromInitialConfigWhenDockerHubRegistryConfiguredWithAlias1() {
+        AuthConfigs dockerHubAuthConfigs = modifyAuthConfigUrl(this.dockerHubAuthConfigs, DEFAULT_REGISTRY_URL, DEFAULT_REGISTRY_URL_ALIAS3);
+        when(initialAuthConfig.getAuthConfigs()).thenReturn(dockerHubAuthConfigs);
+
+        String base64HeaderValue = authResolver.getXRegistryAuthHeaderValue(DEFAULT_REGISTRY_URL_ALIAS1, null);
+
+        assertEqualsXRegistryAuthHeader(base64ToAuthConfig(base64HeaderValue),
+                                        jsonToAuthConfig(DEFAULT_REGISTRY_X_REGISTRY_AUTH_VALUE));
+    }
+
+    @Test
+    public void shouldGetXRegistryAuthValueFromInitialConfigWhenDockerHubRegistryConfiguredWithAlias2() {
+        AuthConfigs dockerHubAuthConfigs = modifyAuthConfigUrl(this.dockerHubAuthConfigs, DEFAULT_REGISTRY_URL, DEFAULT_REGISTRY_URL_ALIAS4);
+        when(initialAuthConfig.getAuthConfigs()).thenReturn(dockerHubAuthConfigs);
+
+        String base64HeaderValue = authResolver.getXRegistryAuthHeaderValue(DEFAULT_REGISTRY_URL_ALIAS1, null);
+
+        assertEqualsXRegistryAuthHeader(base64ToAuthConfig(base64HeaderValue),
+                                        jsonToAuthConfig(DEFAULT_REGISTRY_X_REGISTRY_AUTH_VALUE));
+    }
+
+    @Test
     public void shouldAcceptDockerHubAlias1WhenGetXRegistryAuthValueFromCustomConfig() {
         when(initialAuthConfig.getAuthConfigs()).thenReturn(emptyAuthConfigs);
 
@@ -339,6 +374,38 @@ public class DockerRegistryAuthResolverTest {
         when(initialAuthConfig.getAuthConfigs()).thenReturn(emptyAuthConfigs);
 
         String base64HeaderValue = authResolver.getXRegistryAuthHeaderValue(DEFAULT_REGISTRY_URL_ALIAS3, dockerHubAuthConfigs);
+
+        assertEqualsXRegistryAuthHeader(base64ToAuthConfig(base64HeaderValue),
+                                        jsonToAuthConfig(DEFAULT_REGISTRY_X_REGISTRY_AUTH_VALUE));
+    }
+
+    @Test
+    public void shouldAcceptDockerHubAlias4WhenGetXRegistryAuthValueFromCustomConfig() {
+        when(initialAuthConfig.getAuthConfigs()).thenReturn(emptyAuthConfigs);
+
+        String base64HeaderValue = authResolver.getXRegistryAuthHeaderValue(DEFAULT_REGISTRY_URL_ALIAS4, dockerHubAuthConfigs);
+
+        assertEqualsXRegistryAuthHeader(base64ToAuthConfig(base64HeaderValue),
+                                        jsonToAuthConfig(DEFAULT_REGISTRY_X_REGISTRY_AUTH_VALUE));
+    }
+
+    @Test
+    public void shouldGetXRegistryAuthValueFromCustomConfigWhenDockerHubRegistryConfiguredWithAlias1() {
+        AuthConfigs dockerHubAuthConfigs = modifyAuthConfigUrl(this.dockerHubAuthConfigs, DEFAULT_REGISTRY_URL, DEFAULT_REGISTRY_URL_ALIAS3);
+        when(initialAuthConfig.getAuthConfigs()).thenReturn(emptyAuthConfigs);
+
+        String base64HeaderValue = authResolver.getXRegistryAuthHeaderValue(DEFAULT_REGISTRY_URL_ALIAS1, dockerHubAuthConfigs);
+
+        assertEqualsXRegistryAuthHeader(base64ToAuthConfig(base64HeaderValue),
+                                        jsonToAuthConfig(DEFAULT_REGISTRY_X_REGISTRY_AUTH_VALUE));
+    }
+
+    @Test
+    public void shouldGetXRegistryAuthValueFromCustomConfigWhenDockerHubRegistryConfiguredWithAlias2() {
+        AuthConfigs dockerHubAuthConfigs = modifyAuthConfigUrl(this.dockerHubAuthConfigs, DEFAULT_REGISTRY_URL, DEFAULT_REGISTRY_URL_ALIAS4);
+        when(initialAuthConfig.getAuthConfigs()).thenReturn(emptyAuthConfigs);
+
+        String base64HeaderValue = authResolver.getXRegistryAuthHeaderValue(DEFAULT_REGISTRY_URL_ALIAS1, dockerHubAuthConfigs);
 
         assertEqualsXRegistryAuthHeader(base64ToAuthConfig(base64HeaderValue),
                                         jsonToAuthConfig(DEFAULT_REGISTRY_X_REGISTRY_AUTH_VALUE));
@@ -389,6 +456,52 @@ public class DockerRegistryAuthResolverTest {
 
         assertEqualsXRegistryConfigHeader(base64ToAuthConfigs(base64HeaderValue),
                                           jsonToAuthConfigs(DEFAULT_REGISTRY_X_AUTH_CONFIG_VALUE));
+    }
+
+    @Test
+    public void shouldGetXRegistryConfigValueFromInitialConfigWhenDockerHubRegistryConfiguredWithAlias1() {
+        AuthConfigs initialAuthConfigs = copyAuthConfigs(this.initialAuthConfigs);
+        initialAuthConfigs.getConfigs().put(DEFAULT_REGISTRY_URL_ALIAS3,
+                                            dockerHubAuthConfigs.getConfigs().get(DEFAULT_REGISTRY_URL));
+        when(initialAuthConfig.getAuthConfigs()).thenReturn(initialAuthConfigs);
+
+        String base64HeaderValue = authResolver.getXRegistryConfigHeaderValue(null);
+
+        assertTrue(base64ToAuthConfigs(base64HeaderValue).getConfigs().containsKey(DEFAULT_REGISTRY_URL));
+    }
+
+    @Test
+    public void shouldGetXRegistryConfigValueFromInitialConfigWhenDockerHubRegistryConfiguredWithAlias2() {
+        AuthConfigs initialAuthConfigs = copyAuthConfigs(this.initialAuthConfigs);
+        initialAuthConfigs.getConfigs().put(DEFAULT_REGISTRY_URL_ALIAS4,
+                                            dockerHubAuthConfigs.getConfigs().get(DEFAULT_REGISTRY_URL));
+        when(initialAuthConfig.getAuthConfigs()).thenReturn(initialAuthConfigs);
+
+        String base64HeaderValue = authResolver.getXRegistryConfigHeaderValue(null);
+
+        assertTrue(base64ToAuthConfigs(base64HeaderValue).getConfigs().containsKey(DEFAULT_REGISTRY_URL));
+    }
+
+    @Test
+    public void shouldGetXRegistryConfigValueWithDockerHubCredentialsFromCustomConfigWhenDockerHubRegistryConfiguredWithAlias1() {
+        AuthConfigs dockerHubAuthConfigs = copyAuthConfigs(this.dockerHubAuthConfigs);
+        dockerHubAuthConfigs.getConfigs().put(DEFAULT_REGISTRY_URL_ALIAS3,
+                                              dockerHubAuthConfigs.getConfigs().remove(DEFAULT_REGISTRY_URL));
+
+        String base64HeaderValue = authResolver.getXRegistryConfigHeaderValue(dockerHubAuthConfigs);
+
+        assertTrue(base64ToAuthConfigs(base64HeaderValue).getConfigs().containsKey(DEFAULT_REGISTRY_URL));
+    }
+
+    @Test
+    public void shouldGetXRegistryConfigValueWithDockerHubCredentialsFromCustomConfigWhenDockerHubRegistryConfiguredWithAlias2() {
+        AuthConfigs dockerHubAuthConfigs = copyAuthConfigs(this.dockerHubAuthConfigs);
+        dockerHubAuthConfigs.getConfigs().put(DEFAULT_REGISTRY_URL_ALIAS4,
+                                              dockerHubAuthConfigs.getConfigs().remove(DEFAULT_REGISTRY_URL));
+
+        String base64HeaderValue = authResolver.getXRegistryConfigHeaderValue(dockerHubAuthConfigs);
+
+        assertTrue(base64ToAuthConfigs(base64HeaderValue).getConfigs().containsKey(DEFAULT_REGISTRY_URL));
     }
 
     @Test
@@ -453,11 +566,22 @@ public class DockerRegistryAuthResolverTest {
     }
 
     private AuthConfigs jsonToAuthConfigs(String json) {
-        return DtoFactory.getInstance().createDtoFromJson(json, AuthConfigs.class);
+        return DtoFactory.getInstance().createDtoFromJson("{\"configs\":" + json + '}', AuthConfigs.class);
     }
 
     private void assertEqualsXRegistryConfigHeader(AuthConfigs actual, AuthConfigs expected) {
         assertEquals(actual.getConfigs(), expected.getConfigs());
+    }
+
+    private AuthConfigs copyAuthConfigs(AuthConfigs origin) {
+        Map<String, AuthConfig> authConfigMap = new HashMap<>(origin.getConfigs());
+        return DtoFactory.newDto(AuthConfigs.class).withConfigs(authConfigMap);
+    }
+
+    private AuthConfigs modifyAuthConfigUrl(AuthConfigs authConfigs, String oldKey, String newKey) {
+        Map<String, AuthConfig> authConfigMap = new HashMap<>(authConfigs.getConfigs());
+        authConfigMap.put(newKey, authConfigMap.remove(oldKey));
+        return DtoFactory.newDto(AuthConfigs.class).withConfigs(authConfigMap);
     }
 
 }

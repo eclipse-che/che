@@ -21,6 +21,7 @@ import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -36,7 +37,7 @@ public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.
     private final DialogFactory       dialogFactory;
 
     /** Initial value of the command's goal. */
-    private String goalInitial;
+    private String initialGoal;
 
     @Inject
     public GoalPage(GoalPageView view,
@@ -60,13 +61,10 @@ public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.
 
     @Override
     protected void initialize() {
-        final String goalId = editedCommand.getGoal();
-        final CommandGoal goal = goalRegistry.getGoalForId(goalId);
-
-        goalInitial = goal.getId();
+        initialGoal = editedCommand.getGoal();
 
         view.setAvailableGoals(goalRegistry.getAllGoals());
-        view.setGoal(goal.getId());
+        view.setGoal(initialGoal);
     }
 
     @Override
@@ -75,9 +73,7 @@ public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.
             return false;
         }
 
-        CommandGoal goal = goalRegistry.getGoalForId(editedCommand.getGoal());
-
-        return !(goalInitial.equals(goal.getId()));
+        return !(initialGoal.equals(editedCommand.getGoal()));
     }
 
     @Override
@@ -88,24 +84,49 @@ public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.
 
     @Override
     public void onCreateGoal() {
-        InputCallback inputCallback = value -> {
-            Set<CommandGoal> goals = goalRegistry.getAllGoals();
-            goals.add(goalRegistry.getGoalForId(value));
+        createGoal("");
+    }
 
-            view.setAvailableGoals(goals);
-            view.setGoal(value);
+    /** Asks user for the the new goal name nad creates it if another one with the same name doesn't exists. */
+    private void createGoal(String initialName) {
+        final InputCallback inputCallback = value -> {
+            final String newGoalName = value.trim();
 
-            editedCommand.setGoal(value);
-            notifyDirtyStateChanged();
+            final Set<CommandGoal> allGoals = goalRegistry.getAllGoals();
+
+            final Optional<CommandGoal> existingGoal = allGoals.stream()
+                                                               .filter(goal -> goal.getId().equalsIgnoreCase(newGoalName))
+                                                               .findAny();
+
+            if (existingGoal.isPresent()) {
+                dialogFactory.createMessageDialog(messages.pageGoalNewGoalTitle(),
+                                                  messages.pageGoalNewGoalAlreadyExistsMessage(existingGoal.get().getId()),
+                                                  () -> createGoal(newGoalName)).show();
+            } else {
+                setGoal(newGoalName);
+            }
         };
 
         dialogFactory.createInputDialog(messages.pageGoalNewGoalTitle(),
                                         messages.pageGoalNewGoalLabel(),
-                                        "",
+                                        initialName,
                                         0,
-                                        0,
+                                        initialName.length(),
                                         messages.pageGoalNewGoalButtonCreate(),
                                         inputCallback,
                                         null).show();
+    }
+
+    /** Set the specified goal name for the currently edited command. */
+    private void setGoal(String goalName) {
+        editedCommand.setGoal(goalName);
+
+        Set<CommandGoal> allGoals = goalRegistry.getAllGoals();
+        allGoals.add(goalRegistry.getGoalForId(goalName));
+
+        view.setAvailableGoals(allGoals);
+        view.setGoal(goalName);
+
+        notifyDirtyStateChanged();
     }
 }

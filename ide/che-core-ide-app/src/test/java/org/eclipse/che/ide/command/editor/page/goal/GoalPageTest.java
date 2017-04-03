@@ -29,10 +29,6 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -75,10 +71,7 @@ public class GoalPageTest {
         when(goalRegistry.getGoalForId(anyString())).thenReturn(goal);
 
         when(editedCommand.getApplicableContext()).thenReturn(editedCommandApplicableContext);
-
-        Map<String, String> attributes = new HashMap<>();
-        attributes.put(COMMAND_GOAL_ATTRIBUTE_NAME, COMMAND_GOAL_ID);
-        when(editedCommand.getAttributes()).thenReturn(attributes);
+        when(editedCommand.getGoal()).thenReturn(COMMAND_GOAL_ID);
 
         page.setDirtyStateListener(dirtyStateListener);
         page.edit(editedCommand);
@@ -110,6 +103,7 @@ public class GoalPageTest {
 
     @Test
     public void shouldCreateGoal() throws Exception {
+        // given
         InputDialog inputDialog = mock(InputDialog.class);
         when(dialogFactory.createInputDialog(anyString(),
                                              anyString(),
@@ -121,8 +115,10 @@ public class GoalPageTest {
                                              any(CancelCallback.class))).thenReturn(inputDialog);
         String newGoalId = "new goal";
 
+        // when
         page.onCreateGoal();
 
+        // then
         ArgumentCaptor<InputCallback> inputCaptor = ArgumentCaptor.forClass(InputCallback.class);
         verify(dialogFactory).createInputDialog(anyString(),
                                                 anyString(),
