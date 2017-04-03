@@ -897,7 +897,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         // create new node
         final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, children);
-        newMachineNode.setRunning(true);
+        newMachineNode.setRunning(RUNNING == machine.getStatus());
         newMachineNode.setHasTerminalAgent(hasAgent(machine.getDisplayName(), TERMINAL_AGENT) || hasTerminal(machineId));
         newMachineNode.setHasSSHAgent(hasAgent(machine.getDisplayName(), SSH_AGENT));
         for (ProcessTreeNode child : children) {

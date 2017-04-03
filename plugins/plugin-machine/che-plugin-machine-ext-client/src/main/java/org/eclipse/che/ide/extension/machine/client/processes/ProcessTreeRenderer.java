@@ -20,6 +20,8 @@ import elemental.html.SpanElement;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -35,6 +37,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
@@ -56,20 +59,24 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
     private final MachineResources            resources;
     private final MachineLocalizationConstant locale;
     private final PartStackUIResources        partStackUIResources;
-    private       AddTerminalClickHandler     addTerminalClickHandler;
-    private       PreviewSshClickHandler      previewSshClickHandler;
-    private       StopProcessHandler          stopProcessHandler;
     private final MachineMonitors             machineMonitors;
+    private final AppContext                  appContext;
+
+    private AddTerminalClickHandler addTerminalClickHandler;
+    private PreviewSshClickHandler  previewSshClickHandler;
+    private StopProcessHandler      stopProcessHandler;
 
     @Inject
     public ProcessTreeRenderer(MachineResources resources,
                                MachineLocalizationConstant locale,
                                PartStackUIResources partStackUIResources,
-                               MachineMonitors machineMonitors) {
+                               MachineMonitors machineMonitors,
+                               AppContext appContext) {
         this.resources = resources;
         this.locale = locale;
         this.partStackUIResources = partStackUIResources;
         this.machineMonitors = machineMonitors;
+        this.appContext = appContext;
     }
 
     @Override
@@ -141,7 +148,8 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
          * New terminal button
          *
          ***************************************************************************/
-        if (node.isRunning() && node.hasTerminalAgent()) {
+        Workspace workspace = appContext.getWorkspace();
+        if (workspace != null && RUNNING == workspace.getStatus() && node.hasTerminalAgent()) {
             SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().newTerminalButton());
             newTerminalButton.appendChild((Node)new SVGImage(resources.addTerminalIcon()).getElement());
             root.appendChild(newTerminalButton);
@@ -203,9 +211,9 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
             }, true);
 
             Tooltip.create(sshButton,
-                    BOTTOM,
-                    MIDDLE,
-                    locale.connectViaSSH());
+                           BOTTOM,
+                           MIDDLE,
+                           locale.connectViaSSH());
         }
 
         Element monitorsElement = Elements.createSpanElement(resources.getCss().machineMonitors());
