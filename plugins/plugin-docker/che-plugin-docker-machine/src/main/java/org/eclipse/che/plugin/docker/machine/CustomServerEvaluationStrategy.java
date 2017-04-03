@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
@@ -60,6 +63,11 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
     private final String chePort;
 
     /**
+     * Secured or not ? (for example https vs http)
+     */
+    private final String cheDockerCustomExternalProtocol;
+
+    /**
      * Template for external addresses.
      */
     private String cheDockerCustomExternalTemplate;
@@ -72,10 +80,12 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
     public CustomServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String cheDockerIp,
                                           @Nullable @Named("che.docker.ip.external") String cheDockerIpExternal,
                                           @Nullable @Named("che.docker.custom.external.template") String cheDockerCustomExternalTemplate,
+                                          @Nullable @Named("che.docker.custom.external.protocol") String cheDockerCustomExternalProtocol,
                                           @Named("che.port") String chePort) {
         super(cheDockerIp, cheDockerIpExternal);
         this.chePort = chePort;
         this.cheDockerCustomExternalTemplate = cheDockerCustomExternalTemplate;
+        this.cheDockerCustomExternalProtocol = cheDockerCustomExternalProtocol;
     }
 
     /**
@@ -94,6 +104,49 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
                     .collect(Collectors.toMap(portKey -> portKey,
                                               portKey -> renderingEvaluation.render(cheDockerCustomExternalTemplate, portKey)));
     }
+
+
+    /**
+     * Constructs a map of {@link ServerImpl} from provided parameters, using selected strategy
+     * for evaluating addresses and ports.
+     *
+     * <p>Keys consist of port number and transport protocol (tcp or udp) separated by
+     * a forward slash (e.g. 8080/tcp)
+     *
+     * @param containerInfo
+     *         the {@link ContainerInfo} describing the container.
+     * @param internalHost
+     *         alternative hostname to use, if address cannot be obtained from containerInfo
+     * @param serverConfMap
+     *         additional Map of {@link ServerConfImpl}. Configurations here override those found
+     *         in containerInfo.
+     * @return a Map of the servers exposed by the container.
+     */
+    public Map<String, ServerImpl> getServers(ContainerInfo containerInfo,
+                                              String internalHost,
+                                              Map<String, ServerConfImpl> serverConfMap) {
+            Map<String, ServerImpl> servers = super.getServers(containerInfo, internalHost, serverConfMap);
+            return servers.entrySet().stream().collect(Collectors.toMap(map -> map.getKey(), map -> updateServer(map.getValue())));
+    }
+
+
+    /**
+     * Updates the protocol for the given server by using given protocol (like https) for http URLs.
+     * @param server the server to update
+     * @return updated server object
+     */
+    protected ServerImpl updateServer(ServerImpl server) {
+        if (!Strings.isNullOrEmpty(cheDockerCustomExternalProtocol)) {
+            if ("http".equals(server.getProtocol())) {
+                server.setProtocol(cheDockerCustomExternalProtocol);
+                String url = server.getUrl();
+                int length = "http".length();
+                server.setUrl(cheDockerCustomExternalProtocol.concat(url.substring(length)));
+            }
+        }
+        return server;
+    }
+
 
     /**
      * Allow to get the rendering outside of the evaluation strategies.
@@ -149,6 +202,7 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
             return this;
         }
 
+        @Override
         protected String getExternalAddress() {
             return externalAddressProperty != null ?
                    externalAddressProperty :
@@ -167,6 +221,13 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
             super(labels, exposedPorts, env);
             this.init();
         }
+    }
+
+    /**
+     * Provides the template.
+     */
+    public String getTemplate() {
+        return this.cheDockerCustomExternalTemplate;
     }
 
     /**
@@ -270,6 +331,7 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
         /**
          * Rendering
          */
+        @Override
         public String render(String template, String port) {
             ST stringTemplate = new ST(template);
             globalPropertiesMap.forEach((key, value) -> stringTemplate.add(key, value));
