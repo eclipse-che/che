@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent;
 
+import org.eclipse.che.api.agent.server.exception.AgentStartException;
 import org.eclipse.che.api.agent.server.launcher.AbstractAgentLauncher;
 import org.eclipse.che.api.agent.server.launcher.ProcessIsLaunchedChecker;
 import org.eclipse.che.api.agent.shared.model.Agent;
@@ -39,7 +40,7 @@ public class TerminalAgentLauncher extends AbstractAgentLauncher {
     }
 
     @Override
-    public void launch(Instance machine, Agent agent) throws ServerException {
+    public void launch(Instance machine, Agent agent) throws ServerException, AgentStartException {
         final AgentImpl agentCopy = new AgentImpl(agent);
         agentCopy.setScript(agent.getScript() + "\n" + runCommand);
         super.launch(machine, agentCopy);

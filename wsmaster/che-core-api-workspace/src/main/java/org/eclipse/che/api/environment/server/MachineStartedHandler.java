@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server;
 
+import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
@@ -25,5 +26,6 @@ import org.eclipse.che.commons.annotation.Nullable;
  * @author Yevhenii Voevodin
  */
 public interface MachineStartedHandler {
-    void started(Instance machine, @Nullable ExtendedMachine machineFromEnvironment) throws EnvironmentException, ServerException;
+    void started(Instance machine, @Nullable ExtendedMachine machineFromEnvironment)
+            throws EnvironmentException, ServerException, AgentException;
 }
