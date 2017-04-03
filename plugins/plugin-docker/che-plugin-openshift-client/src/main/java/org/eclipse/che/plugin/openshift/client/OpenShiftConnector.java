@@ -117,8 +117,6 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
-import io.fabric8.kubernetes.api.model.extensions.Deployment;
-import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
@@ -277,15 +275,15 @@ public class OpenShiftConnector extends DockerConnector {
         String containerID;
         try {
             createOpenShiftService(workspaceID, exposedPorts, additionalLabels);
-            String deploymentName = createOpenShiftDeployment(workspaceID,
-                                                              dockerPullSpec,
-                                                              containerName,
-                                                              exposedPorts,
-                                                              envVariables,
-                                                              volumes,
-                                                              resourceLimits);
+            String podName = createOpenShiftPod(workspaceID,
+                                                dockerPullSpec,
+                                                containerName,
+                                                exposedPorts,
+                                                envVariables,
+                                                volumes,
+                                                resourceLimits);
 
-            containerID = waitAndRetrieveContainerID(deploymentName);
+            containerID = waitAndRetrieveContainerID(podName);
             if (containerID == null) {
                 throw new OpenShiftException("Failed to get the ID of the container running in the OpenShift pod");
             }
@@ -294,8 +292,8 @@ public class OpenShiftConnector extends DockerConnector {
             // in an inconsistent state.
             LOG.info("Error while creating Pod, removing deployment");
             LOG.info(e.getMessage());
-            String deploymentName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
-            cleanUpWorkspaceResources(deploymentName);
+            String podName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
+            cleanUpWorkspaceResources(podName);
             openShiftClient.resource(imageStreamTag).delete();
             throw e;
         }
@@ -362,15 +360,11 @@ public class OpenShiftConnector extends DockerConnector {
         ImageStreamTag tag = getImageStreamTagFromRepo(tagName);
         ImageInfo imageInfo = getImageInfoFromTag(tag);
 
-        String deploymentName = pod.getMetadata().getLabels().get(OPENSHIFT_DEPLOYMENT_LABEL);
-        if (deploymentName == null ) {
-            LOG.warn("No label {} found for Pod {}", OPENSHIFT_DEPLOYMENT_LABEL, pod.getMetadata().getName());
-            return null;
-        }
+        String podName = pod.getMetadata().getName();
 
-        Service svc = getCheServiceBySelector(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
+        Service svc = getCheServiceBySelector(OPENSHIFT_DEPLOYMENT_LABEL, podName);
         if (svc == null) {
-            LOG.warn("No Service found by selector {}={}", OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
+            LOG.warn("No Service found by selector {}={}", OPENSHIFT_DEPLOYMENT_LABEL, podName);
             return null;
         }
 
@@ -381,8 +375,7 @@ public class OpenShiftConnector extends DockerConnector {
     public void removeContainer(final RemoveContainerParams params) throws IOException {
         String containerId = params.getContainer();
         Pod pod = getChePodByContainerId(containerId);
-        String deploymentName = pod.getMetadata().getLabels().get(OPENSHIFT_DEPLOYMENT_LABEL);
-        cleanUpWorkspaceResources(deploymentName);
+        cleanUpWorkspaceResources(pod.getMetadata().getName());
     }
 
     @Override
@@ -857,18 +850,6 @@ public class OpenShiftConnector extends DockerConnector {
         return svc;
     }
 
-    private Deployment getDeploymentByName(String deploymentName) throws IOException {
-        Deployment deployment = openShiftClient
-                            .extensions().deployments()
-                            .inNamespace(this.openShiftCheProjectName)
-                            .withName(deploymentName)
-                            .get();
-        if (deployment == null) {
-            LOG.warn("No Deployment with name {} could be found", deploymentName);
-        }
-        return deployment;
-    }
-
     private List<Route> getRoutesByLabel(String labelKey, String labelValue) throws IOException {
         RouteList routeList = openShiftClient
                 .routes()
@@ -1012,20 +993,20 @@ public class OpenShiftConnector extends DockerConnector {
         LOG.info("OpenShift route {} created", route.getMetadata().getName());
     }
 
-    private String createOpenShiftDeployment(String workspaceID,
-                                             String imageName,
-                                             String sanitizedContainerName,
-                                             Set<String> exposedPorts,
-                                             String[] envVariables,
-                                             String[] volumes,
-                                             Map<String, Quantity> resourceLimits) {
+    private String createOpenShiftPod(String workspaceID,
+                                      String imageName,
+                                      String sanitizedContainerName,
+                                      Set<String> exposedPorts,
+                                      String[] envVariables,
+                                      String[] volumes,
+                                      Map<String, Quantity> resourceLimits) {
 
-        String deploymentName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
-        LOG.info("Creating OpenShift deployment {}", deploymentName);
+        String podName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
+        LOG.info("Creating OpenShift pod {}", podName);
 
-        Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
+        Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, podName);
 
-        LOG.info("Adding container {} to OpenShift deployment {}", sanitizedContainerName, deploymentName);
+        LOG.info("Adding container {} to OpenShift pod {}", sanitizedContainerName, podName);
         String[] command;
         String workspaceDir = getWorkspaceDir(volumes);
         if (workspaceDir != null) {
@@ -1037,45 +1018,42 @@ public class OpenShiftConnector extends DockerConnector {
             command = null;
         }
         if (command != null) {
-            Deployment deployment = createOpenShiftDeploymentInternal(workspaceID,
-                                                                      imageName,
-                                                                      sanitizedContainerName,
-                                                                      exposedPorts,
-                                                                      envVariables,
-                                                                      volumes,
-                                                                      deploymentName,
-                                                                      selector,
-                                                                      command,
-                                                                      false,
-                                                                      resourceLimits);
+            Pod pod = createOpenShiftPodInternal(workspaceID,
+                                                 imageName,
+                                                 sanitizedContainerName,
+                                                 exposedPorts,
+                                                 envVariables,
+                                                 volumes,
+                                                 podName,
+                                                 selector,
+                                                 command,
+                                                 false,
+                                                 resourceLimits);
 
             try {
-                waitAndRetrieveContainerID(deploymentName);
+                waitAndRetrieveContainerID(podName);
             } catch (IOException e) {
                 LOG.error(e.getMessage(), e);
             }
 
-            openShiftClient.extensions()
-                           .deployments()
-                           .inNamespace(this.openShiftCheProjectName)
-                           .delete(deployment);
-            if (!isDeleted(deploymentName)) {
-                LOG.warn("OpenShift deployment {} hasn't been deleted", deploymentName);
+            openShiftClient.resource(pod).delete();
+            if (!isDeleted(podName)) {
+                LOG.warn("OpenShift Pod {} hasn't been deleted", podName);
             }
         }
-        Deployment deployment = createOpenShiftDeploymentInternal(workspaceID,
-                                                       imageName,
-                                                       sanitizedContainerName,
-                                                       exposedPorts,
-                                                       envVariables,
-                                                       volumes,
-                                                       deploymentName,
-                                                       selector,
-                                                       null,
-                                                       true,
-                                                       resourceLimits);
-        LOG.info("OpenShift deployment {} created", deploymentName);
-        return deployment.getMetadata().getName();
+        Pod pod = createOpenShiftPodInternal(workspaceID,
+                                             imageName,
+                                             sanitizedContainerName,
+                                             exposedPorts,
+                                             envVariables,
+                                             volumes,
+                                             podName,
+                                             selector,
+                                             null,
+                                             true,
+                                             resourceLimits);
+        LOG.info("OpenShift pod {} created", podName);
+        return pod.getMetadata().getName();
     }
 
     private boolean isDeleted(String deploymentName) {
@@ -1099,18 +1077,17 @@ public class OpenShiftConnector extends DockerConnector {
         return false;
     }
 
-    private Deployment createOpenShiftDeploymentInternal(String workspaceID,
-                                                         String imageName,
-                                                         String sanitizedContainerName,
-                                                         Set<String> exposedPorts,
-                                                         String[] envVariables,
-                                                         String[] volumes,
-                                                         String deploymentName,
-                                                         Map<String,
-                                                         String> selector,
-                                                         String[] command,
-                                                         boolean withSubpath,
-                                                         Map<String, Quantity> resourceLimits) {
+    private Pod createOpenShiftPodInternal(String workspaceID,
+                                           String imageName,
+                                           String sanitizedContainerName,
+                                           Set<String> exposedPorts,
+                                           String[] envVariables,
+                                           String[] volumes,
+                                           String podName,
+                                           Map<String, String> selector,
+                                           String[] command,
+                                           boolean withSubpath,
+                                           Map<String, Quantity> resourceLimits) {
 
         Container container = new ContainerBuilder()
                                     .withName(sanitizedContainerName)
@@ -1132,32 +1109,20 @@ public class OpenShiftConnector extends DockerConnector {
         PodSpec podSpec = new PodSpecBuilder()
                                  .withContainers(container)
                                  .withVolumes(getVolumesFrom(volumes, workspaceID))
+                                 .withRestartPolicy("Never")
                                  .build();
 
-        Deployment deployment = new DeploymentBuilder()
-                .withNewMetadata()
-                    .withName(deploymentName)
-                    .withNamespace(this.openShiftCheProjectName)
-                .endMetadata()
-                .withNewSpec()
-                    .withReplicas(1)
-                    .withNewSelector()
-                        .withMatchLabels(selector)
-                    .endSelector()
-                    .withNewTemplate()
-                        .withNewMetadata()
-                            .withLabels(selector)
-                        .endMetadata()
-                        .withSpec(podSpec)
-                    .endTemplate()
-                .endSpec()
-                .build();
-
-        deployment = openShiftClient.extensions()
-                                    .deployments()
-                                    .inNamespace(this.openShiftCheProjectName)
-                                    .create(deployment);
-        return deployment;
+        Pod pod = openShiftClient.pods()
+                                 .inNamespace(openShiftCheProjectName)
+                                 .createNew()
+                                 .withNewMetadata()
+                                     .withName(podName)
+                                     .withNamespace(openShiftCheProjectName)
+                                     .withLabels(selector)
+                                 .endMetadata()
+                                 .withSpec(podSpec)
+                                 .done();
+        return pod;
     }
 
     /**
@@ -1279,11 +1244,11 @@ public class OpenShiftConnector extends DockerConnector {
     }
 
 
-    private void cleanUpWorkspaceResources(String deploymentName) throws IOException {
+    private void cleanUpWorkspaceResources(String podName) throws IOException {
 
-        Deployment deployment = getDeploymentByName(deploymentName);
-        Service service = getCheServiceBySelector(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
-        List<Route> routes = getRoutesByLabel(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
+        Pod pod = openShiftClient.pods().inNamespace(openShiftCheProjectName).withName(podName).get();
+        Service service = getCheServiceBySelector(OPENSHIFT_DEPLOYMENT_LABEL, podName);
+        List<Route> routes = getRoutesByLabel(OPENSHIFT_DEPLOYMENT_LABEL, podName);
 
         if (routes != null) {
             for (Route route: routes) {
@@ -1297,9 +1262,9 @@ public class OpenShiftConnector extends DockerConnector {
             openShiftClient.resource(service).delete();
         }
 
-        if (deployment != null) {
-            LOG.info("Removing OpenShift Deployment {}", deployment.getMetadata().getName());
-            openShiftClient.resource(deployment).delete();
+        if (pod != null) {
+            LOG.info("Removing OpenShift Pod {}", pod.getMetadata().getName());
+            openShiftClient.resource(pod).delete();
         }
 
         // Wait for all pods to terminate before returning.
@@ -1307,7 +1272,7 @@ public class OpenShiftConnector extends DockerConnector {
             for (int waitCount = 0; waitCount < OPENSHIFT_WAIT_POD_TIMEOUT; waitCount++) {
                 List<Pod> pods = openShiftClient.pods()
                                                 .inNamespace(openShiftCheProjectName)
-                                                .withLabel(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName)
+                                                .withLabel(OPENSHIFT_DEPLOYMENT_LABEL, podName)
                                                 .list()
                                                 .getItems();
                 if (pods.size() == 0) {
@@ -1453,7 +1418,7 @@ public class OpenShiftConnector extends DockerConnector {
         return "unknown-volume";
     }
 
-    private String waitAndRetrieveContainerID(String deploymentName) throws IOException {
+    private String waitAndRetrieveContainerID(String podName) throws IOException {
         for (int i = 0; i < OPENSHIFT_WAIT_POD_TIMEOUT; i++) {
             try {
                 Thread.sleep(OPENSHIFT_WAIT_POD_DELAY);
@@ -1461,28 +1426,22 @@ public class OpenShiftConnector extends DockerConnector {
                 Thread.currentThread().interrupt();
             }
 
-            List<Pod> pods = openShiftClient.pods()
-                                .inNamespace(this.openShiftCheProjectName)
-                                .withLabel(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName)
-                                .list()
-                                .getItems();
+            Pod pod = openShiftClient.pods()
+                                            .inNamespace(this.openShiftCheProjectName)
+                                            .withName(podName)
+                                            .get();
 
-            if (pods.size() < 1) {
-                throw new OpenShiftException(String.format("Pod with deployment name %s not found",
-                                                           deploymentName));
-            } else if (pods.size() > 1) {
-                throw new OpenShiftException(String.format("Multiple pods with deployment name %s found",
-                                                           deploymentName));
+            if (pod == null) {
+                throw new OpenShiftException(String.format("Pod with name %s not found", podName));
             }
 
-            Pod pod = pods.get(0);
             String status = pod.getStatus().getPhase();
             if (OPENSHIFT_POD_STATUS_RUNNING.equals(status)) {
                 String containerID = pod.getStatus().getContainerStatuses().get(0).getContainerID();
                 String normalizedID = KubernetesStringUtils.normalizeContainerID(containerID);
                 openShiftClient.pods()
                                .inNamespace(openShiftCheProjectName)
-                               .withName(pod.getMetadata().getName())
+                               .withName(podName)
                                .edit()
                                .editMetadata()
                                    .addToLabels(CHE_CONTAINER_IDENTIFIER_LABEL_KEY,
