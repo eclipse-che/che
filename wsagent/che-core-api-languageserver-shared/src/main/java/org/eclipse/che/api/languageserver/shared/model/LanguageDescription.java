@@ -27,9 +27,15 @@ public interface LanguageDescription {
     List<String> getMimeTypes();
 
     /**
-     * The fileExtension this language is associated with. At least one extension must be provided.
+     * The fileExtension this language is associated with. 
      */
     List<String> getFileExtensions();
+    
+    /**
+     * The the list of file name patterns this language matches.
+     */
+    List<String> getFileNamePatterns();
+
 
     /**
      * The optional highlighting configuration to support client side syntax highlighting.

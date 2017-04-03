@@ -10,15 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import io.typefox.lsapi.InitializeResult;
 import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.impl.ClientCapabilitiesImpl;
 import io.typefox.lsapi.impl.InitializeParamsImpl;
 import io.typefox.lsapi.services.LanguageServer;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsMessenger;
@@ -28,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PreDestroy;
+
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +35,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Anatoliy Bazko
@@ -127,17 +127,16 @@ public class ServerInitializerImpl implements ServerInitializer {
 
         CompletableFuture<InitializeResult> completableFuture = server.initialize(initializeParams);
         try {
-            InitializeResult initializeResult = completableFuture.get();
+            InitializeResult initializeResult = completableFuture.get(10000, TimeUnit.MILLISECONDS);
             serversToInitResult.put(server, new LanguageServerDescription(initializeResult, launcher.getLanguageDescription()));
-        } catch (InterruptedException | ExecutionException e) {
+            LOG.info("Initialized Language Server {} on project {}", languageId, projectPath);
+            return server;
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             server.shutdown();
             server.exit();
-
             throw new LanguageServerException("Error fetching server capabilities " + languageId + ". " + e.getMessage(), e);
         }
 
-        LOG.info("Initialized Language Server {} on project {}", languageId, projectPath);
-        return server;
     }
 
     protected void registerCallbacks(LanguageServer server) {

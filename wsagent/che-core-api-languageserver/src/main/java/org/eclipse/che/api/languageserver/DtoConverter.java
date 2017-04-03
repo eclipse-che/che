@@ -42,6 +42,7 @@ public class DtoConverter {
     public static LanguageDescriptionDTO asDto(LanguageDescription languageDescription) {
         LanguageDescriptionDTO languageDescriptionDTO = newDto(LanguageDescriptionDTO.class);
         languageDescriptionDTO.setFileExtensions(languageDescription.getFileExtensions());
+        languageDescriptionDTO.setFileNamePatterns(languageDescription.getFileNamePatterns());
         languageDescriptionDTO.setHighlightingConfiguration(languageDescription.getHighlightingConfiguration());
         languageDescriptionDTO.setLanguageId(languageDescription.getLanguageId());
         languageDescriptionDTO.setMimeTypes(languageDescription.getMimeTypes());

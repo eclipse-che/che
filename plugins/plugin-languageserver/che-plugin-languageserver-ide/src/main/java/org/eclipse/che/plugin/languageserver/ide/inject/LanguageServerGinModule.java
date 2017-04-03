@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.languageserver.ide.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
-
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerFileTypeRegister;
@@ -48,6 +47,6 @@ public class LanguageServerGinModule extends AbstractGinModule {
         GinMapBinder<String, WsAgentComponent> wsAgentComponentsBinder =
                 GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
         wsAgentComponentsBinder.addBinding("Load Language Server file types.").to(LanguageServerFileTypeRegister.class);
-    }
+ }
 
 }

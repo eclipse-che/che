@@ -16,16 +16,22 @@ import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.services.LanguageServer;
 import io.typefox.lsapi.services.TextDocumentService;
 import io.typefox.lsapi.services.WindowService;
-
+import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.api.languageserver.shared.model.impl.LanguageDescriptionImpl;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.Matchers.any;
@@ -45,26 +51,24 @@ import static org.testng.Assert.assertNotNull;
 @Listeners(MockitoTestNGListener.class)
 public class LanguageServerRegistryImplTest {
 
-    private static final String PREFIX       = "file://";
-    private static final String FILE_PATH    = "/projects/1/test.txt";
+    private static final String PREFIX = "file://";
+    private static final String FILE_PATH = "/projects/1/test.txt";
     private static final String PROJECT_PATH = "/1";
 
     @Mock
-    private ServerInitializer                   initializer;
+    private ServerInitializer initializer;
     @Mock
-    private LanguageServerLauncher              languageServerLauncher;
+    private LanguageServerLauncher languageServerLauncher;
     @Mock
-    private LanguageDescription                 languageDescription;
+    private LanguageDescription languageDescription;
     @Mock
-    private LanguageServer                      languageServer;
+    private LanguageServer languageServer;
     @Mock
-    private InitializeResult                    initializeResult;
+    private InitializeResult initializeResult;
     @Mock
-    private ServerCapabilities                  serverCapabilities;
+    private ServerCapabilities serverCapabilities;
     @Mock
     private CompletableFuture<InitializeResult> completableFuture;
-
-    private LanguageServerRegistryImpl registry;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -81,26 +85,64 @@ public class LanguageServerRegistryImplTest {
         when(languageServer.getWindowService()).thenReturn(mock(WindowService.class));
         when(languageServer.initialize(any(InitializeParams.class))).thenReturn(completableFuture);
 
-        registry = spy(new LanguageServerRegistryImpl(Collections.singleton(languageServerLauncher),
-                                                      null,
-                                                      initializer));
-
         when(initializer.initialize(any(LanguageServerLauncher.class), anyString())).thenAnswer(invocation -> {
-            Object[] arguments = invocation.getArguments();
-            registry.onServerInitialized(languageServer, serverCapabilities, languageDescription, (String)arguments[1]);
             return languageServer;
         });
-
-        doReturn(PROJECT_PATH).when(registry).extractProjectPath(FILE_PATH);
+    }
+    
+    private LanguageServerLauncher createLauncher(String id, List<String> extensions, List<String> patterns, ServerCapabilities capabilities) throws LanguageServerException {
+        LanguageDescriptionImpl description = new LanguageDescriptionImpl();
+        description.setFileExtensions(extensions);
+        description.setFilenamePatterns(patterns);
+        description.setLanguageId(id);
+        LanguageServerLauncher launcher = mock(LanguageServerLauncher.class);
+        when(launcher.getLanguageDescription()).thenReturn(description);
+        when(launcher.isAbleToLaunch()).thenReturn(true);
+        return launcher;
     }
 
     @Test
     public void testFindServer() throws Exception {
+        LanguageServerRegistryImpl registry = spy(
+                        new LanguageServerRegistryImpl(Collections.singleton(languageServerLauncher), null, initializer));
+        doReturn(PROJECT_PATH).when(registry).extractProjectPath(FILE_PATH);
+
         LanguageServer server = registry.findServer(PREFIX + FILE_PATH);
 
         assertNotNull(server);
         assertEquals(server, languageServer);
         verify(initializer).initialize(eq(languageServerLauncher), eq(PROJECT_PATH));
-        verify(registry).onServerInitialized(eq(languageServer), eq(serverCapabilities), eq(languageDescription), eq(PROJECT_PATH));
+    }
+    
+    @Test
+    void testFindByPattern() throws Exception {
+        LanguageServerLauncher xmlLauncher = createLauncher("xml", Arrays.asList("xml"), null, null);
+        LanguageServerLauncher pomLauncher = createLauncher("xml", Arrays.asList(), Arrays.asList("pom\\.xml"), null);
+        LanguageServer xmlServer = mock(LanguageServer.class);
+        LanguageServer pomServer = mock(LanguageServer.class);
+        ServerInitializer initializer= mock(ServerInitializer.class);
+        when(initializer.initialize(any(LanguageServerLauncher.class), anyString())).thenAnswer(new Answer<LanguageServer>() {
+
+            @Override
+            public LanguageServer answer(InvocationOnMock invocation) throws Throwable {
+                if (invocation.getArguments()[0] == xmlLauncher) {
+                    return xmlServer; 
+                } else if (invocation.getArguments()[0] == pomLauncher) {
+                    return pomServer;
+                }
+                return null;
+            }
+        });
+        LanguageServerRegistryImpl registry = spy(
+                        new LanguageServerRegistryImpl(new HashSet<>(Arrays.asList(xmlLauncher, pomLauncher)), null, initializer) {
+                            @Override
+                            protected String extractProjectPath(String filePath) throws LanguageServerException {
+                                return PROJECT_PATH;
+                            }
+                        });
+        
+        
+        assertEquals(xmlServer, registry.findServer("/foo/bar/foo.xml"));
+        assertEquals(pomServer, registry.findServer("/foo/bar/pom.xml"));
     }
 }
