@@ -582,7 +582,7 @@ public class CheEnvironmentValidatorTest {
 
         servers.put("ref1", new ServerConfigImpl("8080/tcp",
                                                  "proto1",
-                                                 singletonMap("prop1", "propValue")));
+                                                 "path1"));
         servers.put("ref2", new ServerConfigImpl("8080/udp", "proto1", null));
         servers.put("ref3", new ServerConfigImpl("9090", "proto1", null));
         machines.put("dev-machine", new MachineConfigImpl(asList("org.eclipse.che.ws-agent", "someAgent"),

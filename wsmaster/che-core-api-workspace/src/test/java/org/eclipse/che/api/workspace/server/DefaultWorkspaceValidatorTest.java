@@ -233,8 +233,7 @@ public class DefaultWorkspaceValidatorTest {
                 newDto(MachineConfigDto.class).withAgents(singletonList("org.eclipse.che.ws-agent"))
                                               .withServers(singletonMap("ref1",
                                                                           newDto(ServerConfigDto.class).withPort("8080/tcp")
-                                                                                                       .withProtocol("https")
-                                                                                                       .withProperties(singletonMap("some", "prop"))))
+                                                                                                       .withProtocol("https")))
                                               .withAttributes(singletonMap("memoryLimitBytes", "1000000"));
         EnvironmentDto env = newDto(EnvironmentDto.class).withMachines(singletonMap("devmachine1", extendedMachine))
                                                          .withRecipe(newDto(RecipeDto.class).withType("type")

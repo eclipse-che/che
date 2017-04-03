@@ -151,8 +151,7 @@ public class StackLoaderTest {
 
         Map<String, ServerConfigDto> servers = new HashMap<>();
         servers.put("server1Ref", newDto(ServerConfigDto.class).withPort("8080/tcp")
-                                                               .withProtocol("http")
-                                                               .withProperties(singletonMap("key", "value")));
+                                                               .withProtocol("http"));
         Map<String, MachineConfigDto> machines = new HashMap<>();
         machines.put("someMachineName", newDto(MachineConfigDto.class).withAgents(Arrays.asList("agent1", "agent2"))
                                                                       .withServers(servers)
