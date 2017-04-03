@@ -34,7 +34,7 @@ import static javax.persistence.CascadeType.ALL;
  * @author Anton Korneta
  */
 @Entity(name = "OnAppClosed")
-@Table(name = "onappclosed")
+@Table(name = "che_factory_on_app_closed_action")
 public class OnAppClosedImpl implements OnAppClosed {
 
     @Id
@@ -43,9 +43,9 @@ public class OnAppClosedImpl implements OnAppClosed {
     private Long id;
 
     @OneToMany(cascade = ALL, orphanRemoval = true)
-    @JoinTable(name = "onappclosed_action",
-               joinColumns = @JoinColumn(name = "onappclosed_id"),
-               inverseJoinColumns = @JoinColumn(name = "actions_entityid"))
+    @JoinTable(name = "che_factory_on_app_closed_action_value",
+               joinColumns = @JoinColumn(name = "on_app_closed_id"),
+               inverseJoinColumns = @JoinColumn(name = "action_entity_id"))
     private List<ActionImpl> actions;
 
     public OnAppClosedImpl() {}

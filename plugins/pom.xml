@@ -51,6 +51,7 @@
         <module>plugin-php</module>
         <module>plugin-ssh-machine</module>
         <module>plugin-languageserver</module>
+        <module>plugin-urlfactory</module>
         <module>plugin-json</module>
         <module>plugin-composer</module>
         <module>plugin-zend-debugger</module>
@@ -58,5 +59,6 @@
         <module>plugin-testing-java</module>
         <module>plugin-terminal-ui</module>
         <module>plugin-requirejs</module>
+        <module>plugin-pullrequest-parent</module>
     </modules>
 </project>
