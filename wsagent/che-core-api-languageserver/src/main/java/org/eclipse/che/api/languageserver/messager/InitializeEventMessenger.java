@@ -12,15 +12,13 @@ package org.eclipse.che.api.languageserver.messager;
 
 import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.services.LanguageServer;
-
-import com.google.gson.Gson;
-
 import org.eclipse.che.api.languageserver.DtoConverter;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.api.languageserver.registry.ServerInitializer;
 import org.eclipse.che.api.languageserver.registry.ServerInitializerObserver;
 import org.eclipse.che.api.languageserver.shared.event.LanguageServerInitializeEventDto;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;
@@ -31,6 +29,7 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.websocket.EncodeException;
+
 import java.io.IOException;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -77,7 +76,7 @@ public class InitializeEventMessenger implements ServerInitializerObserver {
         try {
             final ChannelBroadcastMessage bm = new ChannelBroadcastMessage();
             bm.setChannel("languageserver");
-            bm.setBody(new Gson().toJson(message));
+            bm.setBody(DtoFactory.getInstance().toJson(message));
             WSConnectionContext.sendMessage(bm);
         } catch (EncodeException | IOException e) {
             LOG.error(e.getMessage(), e);
