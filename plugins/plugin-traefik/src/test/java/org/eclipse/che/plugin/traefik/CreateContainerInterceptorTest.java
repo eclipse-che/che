@@ -81,7 +81,7 @@ public class CreateContainerInterceptorTest {
     @BeforeMethod
     protected void setup() throws Exception {
 
-        this.customServerEvaluationStrategy = new CustomServerEvaluationStrategy("10.0.0.1", "127.0.0.1", "<foo>", "8080");
+        this.customServerEvaluationStrategy = new CustomServerEvaluationStrategy("10.0.0.1", "127.0.0.1", "<serverName>.<machineName>.<workspaceId>.<wildcardNipDomain>:<chePort>", "http", "8080");
         createContainerInterceptor.setCustomServerEvaluationStrategy(customServerEvaluationStrategy);
 
         containerLabels = new HashMap<>(6);

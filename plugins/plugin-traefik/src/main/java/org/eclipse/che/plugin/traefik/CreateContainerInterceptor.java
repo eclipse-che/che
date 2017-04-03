@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.traefik;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -23,11 +21,14 @@ import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
 import org.eclipse.che.plugin.docker.machine.CustomServerEvaluationStrategy;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import static java.lang.String.format;
 
 /**
  * Intercept the calls on createContainer on docker Connector.
@@ -44,6 +45,9 @@ public class CreateContainerInterceptor implements MethodInterceptor {
      * Regexp to extract port (under the form 22/tcp or 4401/tcp, etc.) from references
      */
     public static final String LABEL_CHE_SERVER_REF_KEY = "^che:server:(.*):ref$";
+
+    @Inject
+    private String strategyTemplate;
 
     /**
      * Grab labels of the config and from image to get all exposed ports and the labels defined if any
@@ -91,10 +95,15 @@ public class CreateContainerInterceptor implements MethodInterceptor {
             final String serviceName = renderingEvaluation.render("service-<serverName>", portValue);
             final String port = portValue.split("/")[0];
 
-            final String host = renderingEvaluation.render("Host:<serverName>.<machineName>.<workspaceId>.<wildcardNipDomain>", portValue);
-            containerLabels.put(String.format("traefik.%s.port", serviceName), port);
-            containerLabels.put(String.format("traefik.%s.frontend.entryPoints", serviceName), "http");
-            containerLabels.put(String.format("traefik.%s.frontend.rule", serviceName), host);
+            String hostnameAndPort = renderingEvaluation.render(customServerEvaluationStrategy.getTemplate(), portValue);
+
+            // extract only host from host:port
+            String[] elements = hostnameAndPort.split(":");
+            String hostName = elements[0];
+            final String host = format("Host:%s", hostName);
+            containerLabels.put(format("traefik.%s.port", serviceName), port);
+            containerLabels.put(format("traefik.%s.frontend.entryPoints", serviceName), "http");
+            containerLabels.put(format("traefik.%s.frontend.rule", serviceName), host);
         });
 
         return methodInvocation.proceed();
