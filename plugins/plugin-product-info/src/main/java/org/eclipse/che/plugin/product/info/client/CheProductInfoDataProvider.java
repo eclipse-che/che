@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.product.info.client;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
+import org.eclipse.che.ide.api.ProductInfoDataProviderImpl;
 import org.eclipse.che.ide.ui.Resources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -24,7 +25,7 @@ import javax.inject.Inject;
  * @author Alexander Andrienko
  */
 @Singleton
-public class CheProductInfoDataProvider implements ProductInfoDataProvider {
+public class CheProductInfoDataProvider extends ProductInfoDataProviderImpl {
 
     private final LocalizationConstant locale;
     private final Resources            resources;
