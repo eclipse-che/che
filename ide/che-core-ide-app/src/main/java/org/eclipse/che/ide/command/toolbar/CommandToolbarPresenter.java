@@ -18,7 +18,7 @@ import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandPresenter;
 import org.eclipse.che.ide.command.toolbar.previews.PreviewsPresenter;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListPresenter;
-import org.eclipse.che.ide.ui.menubutton.MenuPopupButton;
+import org.eclipse.che.ide.ui.menubutton.MenuButton;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,7 +32,7 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
     private final ExecuteCommandPresenter executeCommandPresenter;
     private final ToolbarButtonsFactory   toolbarButtonsFactory;
     private final CommandToolbarView      view;
-    private       MenuPopupButton         openCommandsPaletteButton;
+    private       MenuButton              openCommandsPaletteButton;
 
     @Inject
     public CommandToolbarPresenter(CommandToolbarView view,

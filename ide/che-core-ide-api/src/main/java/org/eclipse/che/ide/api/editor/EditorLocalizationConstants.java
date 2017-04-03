@@ -40,6 +40,9 @@ public interface EditorLocalizationConstants extends Messages {
     @DefaultMessage("Tabs")
     String tabsPropertiesSection();
 
+    @DefaultMessage("Edit")
+    String tabsEditSection();
+
     @DefaultMessage("Typing")
     String typingPropertiesSection();
 
@@ -52,54 +55,57 @@ public interface EditorLocalizationConstants extends Messages {
     @DefaultMessage("Language tools")
     String languageToolsPropertiesSection();
 
-    @DefaultMessage("Expand Tab:")
+    @DefaultMessage("Expand Tab")
     String propertyExpandTab();
 
-    @DefaultMessage("Tab Size:")
+    @DefaultMessage("Tab Size")
     String propertyTabSize();
 
-    @DefaultMessage("Autopair (Parentheses):")
+    @DefaultMessage("Soft Wrap")
+    String propertySoftWrap();
+
+    @DefaultMessage("Autopair (Parentheses)")
     String propertyAutoPairParentheses();
 
-    @DefaultMessage("Autopair Braces:")
+    @DefaultMessage("Autopair Braces")
     String propertyAutoPairBraces();
 
-    @DefaultMessage("Autopair [Square] Brackets:")
+    @DefaultMessage("Autopair [Square] Brackets")
     String propertyAutoPairSquareBrackets();
 
-    @DefaultMessage("Autopair <Angle> Brackets:")
+    @DefaultMessage("Autopair <Angle> Brackets")
     String propertyAutoPairAngelBrackets();
 
-    @DefaultMessage("Autopair \"Quotations\":")
+    @DefaultMessage("Autopair \"Quotations\"")
     String propertyAutoPairQuotations();
 
-    @DefaultMessage("Autocomplete /** Block Comments */:")
+    @DefaultMessage("Autocomplete /** Block Comments */")
     String propertyAutoCompleteComments();
 
-    @DefaultMessage("Smart Indentation:")
+    @DefaultMessage("Smart Indentation")
     String propertySmartIndentation();
 
-    @DefaultMessage("Show Whitespace Characters:")
+    @DefaultMessage("Show Whitespace Characters")
     String propertyShowWhitespaces();
 
-    @DefaultMessage("Show Annotation Ruler:")
+    @DefaultMessage("Show Annotation Ruler")
     String propertyShowAnnotationRuler();
 
-    @DefaultMessage("Show Line Number Ruler:")
+    @DefaultMessage("Show Line Number Ruler")
     String propertyShowLineNumberRuler();
 
-    @DefaultMessage("Show Folding Ruler:")
+    @DefaultMessage("Show Folding Ruler")
     String propertyShowFoldingRuler();
 
-    @DefaultMessage("Show Overview Ruler:")
+    @DefaultMessage("Show Overview Ruler")
     String propertyShowOverviewRuler();
 
-    @DefaultMessage("Show Zoom Ruler:")
+    @DefaultMessage("Show Zoom Ruler")
     String propertyShowZoomRuler();
 
-    @DefaultMessage("Show Occurrences:")
+    @DefaultMessage("Show Occurrences")
     String propertyShowOccurrences();
 
-    @DefaultMessage("Show Content Assist automatically:")
+    @DefaultMessage("Show Content Assist automatically")
     String propertyShowContentAssistAutomatically();
 }

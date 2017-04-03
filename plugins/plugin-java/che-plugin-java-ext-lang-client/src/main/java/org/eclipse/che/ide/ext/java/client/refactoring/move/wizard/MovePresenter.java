@@ -23,7 +23,6 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.ng.FileTrackingEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification.Status;
 import org.eclipse.che.ide.api.resources.Container;
@@ -51,9 +50,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ReorgDestination;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.MOVE;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingMoveEvent;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingResumeEvent;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingSuspendEvent;
@@ -185,7 +181,7 @@ public class MovePresenter implements MoveView.ActionDelegate {
                 for (JavaProject project : projects) {
                     currentProject.add(project);
                 }
-                view.setTreeOfDestinations(currentProject);
+                view.setTreeOfDestinations(refactorInfo, currentProject);
                 view.show(refactorInfo);
             }
         }).catchError(new Operation<PromiseError>() {

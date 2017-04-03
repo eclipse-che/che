@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.factory.shared.Constants.HTML_SNIPPET_TYPE;
 import static org.eclipse.che.api.factory.shared.Constants.IFRAME_SNIPPET_TYPE;
@@ -42,8 +43,12 @@ import static org.eclipse.che.api.factory.shared.Constants.URL_SNIPPET_TYPE;
 @Singleton
 public class FactoryManager {
 
+    private final FactoryDao factoryDao;
+
     @Inject
-    private FactoryDao factoryDao;
+    public FactoryManager(FactoryDao factoryDao) {
+        this.factoryDao = factoryDao;
+    }
 
     /**
      * Stores {@link Factory} instance.
@@ -82,6 +87,9 @@ public class FactoryManager {
         requireNonNull(factory);
         final FactoryImpl newFactory = new FactoryImpl(factory, images);
         newFactory.setId(NameGenerator.generate("factory", 16));
+        if (isNullOrEmpty(newFactory.getName())) {
+           newFactory.setName(NameGenerator.generate("f", 9));
+        }
         return factoryDao.create(newFactory);
     }
 

@@ -186,5 +186,20 @@ public class InitialAuthConfigTest {
 
         new InitialAuthConfig(configurationProperties);
     }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
+          expectedExceptionsMessageRegExp = "Docker hub registry is configured more than one time")
+    public void shouldThrowExceptionIfUserConfigureDockerHubMoreThanOneTime() {
+        properties.put(CONFIG_PREFIX + "registry3.url", "docker.io");
+        properties.put(CONFIG_PREFIX + "registry3.username", "inattentive");
+        properties.put(CONFIG_PREFIX + "registry3.password", "Be careful");
+
+        properties.put(CONFIG_PREFIX + "registry4.url", "index.docker.io");
+        properties.put(CONFIG_PREFIX + "registry4.username", "duplicate");
+        properties.put(CONFIG_PREFIX + "registry4.password", "config");
+
+        new InitialAuthConfig(configurationProperties);
+    }
+
 }
 

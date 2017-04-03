@@ -27,21 +27,22 @@ import org.eclipse.che.ide.command.palette.CommandsPalettePresenter;
 import org.eclipse.che.ide.command.palette.PaletteMessages;
 import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
 import org.eclipse.che.ide.ui.Tooltip;
-import org.eclipse.che.ide.ui.menubutton.MenuPopupButton;
-import org.eclipse.che.ide.ui.menubutton.MenuPopupItemDataProvider;
-import org.eclipse.che.ide.ui.menubutton.PopupItem;
+import org.eclipse.che.ide.ui.menubutton.MenuButton;
+import org.eclipse.che.ide.ui.menubutton.ItemsProvider;
+import org.eclipse.che.ide.ui.menubutton.MenuItem;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 import org.eclipse.che.ide.util.input.KeyMapUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /** Button for opening Commands Palette. */
-class OpenCommandsPaletteButton extends MenuPopupButton {
+class OpenCommandsPaletteButton extends MenuButton {
 
     private final Provider<ActionManager>   actionManagerProvider;
     private final Provider<KeyBindingAgent> keyBindingAgentProvider;
@@ -53,29 +54,29 @@ class OpenCommandsPaletteButton extends MenuPopupButton {
                               Provider<KeyBindingAgent> keyBindingAgentProvider,
                               Provider<ShowCommandsPaletteAction> showCommandsPaletteActionProvider,
                               @Assisted SafeHtml content) {
-        super(content, new MenuPopupItemDataProvider() {
+        super(content, new ItemsProvider() {
             @Override
-            public PopupItem getDefaultItem() {
+            public Optional<MenuItem> getDefaultItem() {
+                return Optional.empty();
+            }
+
+            @Override
+            public List<MenuItem> getItems() {
                 return null;
             }
 
             @Override
-            public List<PopupItem> getItems() {
-                return null;
-            }
-
-            @Override
-            public boolean isGroup(PopupItem item) {
+            public boolean isGroup(MenuItem item) {
                 return false;
             }
 
             @Override
-            public Pair<List<PopupItem>, String> getChildren(PopupItem parent) {
+            public Pair<List<MenuItem>, String> getChildren(MenuItem parent) {
                 return null;
             }
 
             @Override
-            public void setItemDataChangedHandler(ItemDataChangeHandler handler) {
+            public void setDataChangedHandler(DataChangedHandler handler) {
             }
         });
 

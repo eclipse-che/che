@@ -45,13 +45,13 @@ public class NamePageViewImpl extends Composite implements NamePageView {
     }
 
     @Override
-    public void setCommandName(String name) {
-        commandName.setValue(name);
+    public void setDelegate(ActionDelegate delegate) {
+        this.delegate = delegate;
     }
 
     @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
+    public void setCommandName(String name) {
+        commandName.setValue(name);
     }
 
     @UiHandler({"commandName"})

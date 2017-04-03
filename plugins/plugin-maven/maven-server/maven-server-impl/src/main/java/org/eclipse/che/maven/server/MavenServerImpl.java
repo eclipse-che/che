@@ -425,8 +425,9 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
                                                                              new ArtifactRequest(RepositoryUtils.toArtifact(artifact),
                                                                                                  remoteRepositories, null));
         return MavenModelUtil.convertArtifact(RepositoryUtils.toArtifact(artifactResult.getArtifact()), localRepository);
-        } catch (ArtifactResolutionException e) {
-            MavenServerContext.getLogger().info(e);
+        } catch (ArtifactResolutionException ignored) {
+            //we need ignore exception, it's some times has class that client doesn't has
+            // .printStackTrace() may be solution, but it will spam wsagent logs
         }
         return MavenModelUtil.convertArtifact(artifact, localRepository);
     }

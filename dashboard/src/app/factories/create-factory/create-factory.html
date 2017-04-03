@@ -1,0 +1,117 @@
+<!--
+
+    CODENVY CONFIDENTIAL
+    __________________
+
+     [2015] - [2016] Codenvy, S.A.
+     All Rights Reserved.
+
+    NOTICE:  All information contained herein is, and remains
+    the property of Codenvy S.A. and its suppliers,
+    if any.  The intellectual and technical concepts contained
+    herein are proprietary to Codenvy S.A.
+    and its suppliers and may be covered by U.S. and Foreign Patents,
+    patents in process, and are protected by trade secret or copyright law.
+    Dissemination of this information or reproduction of this material
+    is strictly forbidden unless prior written permission is obtained
+    from Codenvy S.A..
+
+-->
+<che-toolbar che-title="New Factory From"></che-toolbar>
+
+<md-content md-scroll-y flex md-theme="default">
+  <md-progress-linear md-mode="indeterminate" class="create-factory-progress"
+                      ng-show="createFactoryCtrl.isLoading"></md-progress-linear>
+  <div class="create-factory" ng-hide="createFactoryCtrl.isLoading">
+
+    <!-- Name -->
+    <che-label-container che-label-name="Name">
+      <ng-form name="createFactoryForm">
+        <div layout="column" class="create-factory-input"
+             ng-init="createFactoryCtrl.setForm(createFactoryForm)">
+          <che-input-box che-form="createFactoryForm"
+                     che-name="name"
+                     che-place-holder="Name of the factory"
+                     aria-label="Name of the factory"
+                     ng-model="createFactoryCtrl.name"
+                     ng-trim
+                     ng-minlength="3"
+                     ng-maxlength="20"
+                     ng-pattern="/^[ A-Za-z0-9_\-\.]+$/">
+            <div ng-message="required">A name is required.</div>
+            <div ng-message="pattern">Factory name may contain digits, latin letters, spaces, _ , . , - and should start
+              only
+              with digits, latin letters or underscores
+            </div>
+            <div ng-message="minlength">The name has to be more than 3 characters long.</div>
+            <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+          </che-input-box>
+        </div>
+      </ng-form>
+    </che-label-container>
+
+    <!--Factory source-->
+    <che-label-container che-label-name="Source"
+                         class="che-label-container-last">
+      <md-tabs md-dynamic-height="true" md-stretch-tabs="auto" md-center-tabs="false" md-selected="selectedIndex"
+               md-border-bottom="true"
+               class="factory-select-source-details">
+        <md-tab md-on-select="createFactoryCtrl.clearFactoryContent()">
+          <md-tab-label>
+            <md-icon md-font-icon="fa fa-server" class="che-tab-label-icon"></md-icon>
+            <span class="che-tab-label-title">Workspace</span>
+          </md-tab-label>
+          <md-tab-body>
+            <cdvy-factory-from-workspace cdvy-factory-content="createFactoryCtrl.factoryContent"
+                                         cdvy-is-loading="createFactoryCtrl.isLoading"
+                                         cdvy-is-importing="createFactoryCtrl.isImporting"></cdvy-factory-from-workspace>
+          </md-tab-body>
+        </md-tab>
+        <md-tab md-on-select="createFactoryCtrl.clearFactoryContent()">
+          <md-tab-label>
+            <md-icon md-font-icon="fa-git" class="fa che-tab-label-icon"></md-icon>
+            <span class="che-tab-label-title">Git</span>
+          </md-tab-label>
+          <md-tab-body>
+            <div layout="row" layout-align="start center" class="create-factory-git-content">
+              <cdvy-create-factory-git cdvy-git-location="createFactoryCtrl.gitLocation" layout-fill
+                                       layout-align="start start"></cdvy-create-factory-git>
+            </div>
+          </md-tab-body>
+        </md-tab>
+        <md-tab md-on-select="createFactoryCtrl.clearFactoryContent()">
+          <md-tab-label>
+            <md-icon md-font-icon="fa fa-download" class="che-tab-label-icon"></md-icon>
+            <span class="che-tab-label-title">Config</span>
+          </md-tab-label>
+          <md-tab-body>
+            <div layout-fill layout="row" layout-align="start center">
+              <cdvy-factory-from-file cdvy-factory-content="createFactoryCtrl.factoryContent"
+                                      cdvy-is-importing="createFactoryCtrl.isImporting" layout="column"
+                                      flex></cdvy-factory-from-file>
+            </div>
+          </md-tab-body>
+        </md-tab>
+        <md-tab md-on-select="createFactoryCtrl.clearFactoryContent(); templateSelected = true;" md-on-deselect="templateSelected = false;">
+          <md-tab-label>
+            <md-icon md-font-icon="fa fa-magic" class="che-tab-label-icon"></md-icon>
+            <span class="che-tab-label-title">Template</span>
+          </md-tab-label>
+          <md-tab-body>
+            <div layout-fill layout="row" layout-align="start center" ng-if="templateSelected">
+              <cdvy-factory-from-template cdvy-factory-content="createFactoryCtrl.factoryContent"
+                                          cdvy-is-importing="createFactoryCtrl.isImporting" layout="column"
+                                          flex></cdvy-factory-from-template>
+            </div>
+          </md-tab-body>
+        </md-tab>
+      </md-tabs>
+    </che-label-container>
+
+    <!--button 'Create'-->
+    <che-button-primary id="create-factory-next-button"
+                        che-button-title="Create"
+                        ng-click="createFactoryCtrl.createFactoryByContent(createFactoryCtrl.factoryContent)"
+                        ng-disabled="createFactoryCtrl.isFormInvalid() || !createFactoryCtrl.factoryContent || createFactoryCtrl.isImporting || createFactoryCtrl.isLoading"></che-button-primary>
+  </div>
+</md-content>

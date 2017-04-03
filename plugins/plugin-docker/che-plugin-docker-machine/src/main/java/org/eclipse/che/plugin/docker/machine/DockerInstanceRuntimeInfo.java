@@ -59,9 +59,14 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
     public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API";
 
     /**
-     * Environment variable that will be setup in developer machine will contain ID of a workspace for which this machine has been created
+     * Environment variable that will contain ID of a workspace for which this machine has been created
      */
     public static final String CHE_WORKSPACE_ID = "CHE_WORKSPACE_ID";
+
+    /**
+     * Environment variable that will contain Name of the machine
+     */
+    public static final String CHE_MACHINE_NAME = "CHE_MACHINE_NAME";
 
     /**
      * Default HOSTNAME that will be added in all docker containers that are started. This host will container the Docker host's ip

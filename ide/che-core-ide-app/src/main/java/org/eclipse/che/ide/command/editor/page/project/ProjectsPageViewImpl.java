@@ -47,11 +47,16 @@ public class ProjectsPageViewImpl extends Composite implements ProjectsPageView 
     }
 
     @Override
+    public void setDelegate(ActionDelegate delegate) {
+        this.delegate = delegate;
+    }
+
+    @Override
     public void setProjects(Map<Project, Boolean> projects) {
         projectsPanel.clear();
         mainPanel.setVisible(!projects.isEmpty());
 
-        projects.entrySet().forEach(entry -> addProjectSwitcherToPanel(entry.getKey(), entry.getValue()));
+        projects.forEach(this::addProjectSwitcherToPanel);
     }
 
     private void addProjectSwitcherToPanel(Project project, boolean applicable) {
@@ -60,11 +65,6 @@ public class ProjectsPageViewImpl extends Composite implements ProjectsPageView 
         switcher.addValueChangeHandler(event -> delegate.onApplicableProjectChanged(project, event.getValue()));
 
         projectsPanel.add(switcher);
-    }
-
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
     }
 
     interface ProjectsPageViewImplUiBinder extends UiBinder<Widget, ProjectsPageViewImpl> {
