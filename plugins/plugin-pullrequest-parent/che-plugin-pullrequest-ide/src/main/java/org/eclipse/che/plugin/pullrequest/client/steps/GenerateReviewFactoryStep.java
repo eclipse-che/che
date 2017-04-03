@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.pullrequest.client.steps;
 
+import java.util.Map;
+
 import org.eclipse.che.plugin.pullrequest.client.ContributeMessages;
+import org.eclipse.che.plugin.pullrequest.client.rest.PullRequestWorkflowServiceClient;
 import org.eclipse.che.plugin.pullrequest.client.utils.FactoryHelper;
 import org.eclipse.che.plugin.pullrequest.client.workflow.Context;
 import org.eclipse.che.plugin.pullrequest.client.workflow.Step;
 import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowExecutor;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -35,30 +39,45 @@ import javax.inject.Inject;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.plugin.pullrequest.shared.Constants.CHE_PULLREQUEST_GENERATE__REVIEW__FACTORY;
 
 /**
  * Generates a factory for the contribution reviewer.
  */
 @Singleton
 public class GenerateReviewFactoryStep implements Step {
-    private final ContributeMessages   messages;
-    private final AppContext           appContext;
-    private final NotificationManager  notificationManager;
-    private final FactoryServiceClient factoryService;
+    private final ContributeMessages               messages;
+    private final AppContext                       appContext;
+    private final NotificationManager              notificationManager;
+    private final FactoryServiceClient             factoryService;
+    private final PullRequestWorkflowServiceClient pullRequestWorkflowService;
 
     @Inject
     public GenerateReviewFactoryStep(final ContributeMessages messages,
                                      final AppContext appContext,
                                      final NotificationManager notificationManager,
+                                     final PullRequestWorkflowServiceClient pullRequestWorkflowService,
                                      final FactoryServiceClient factoryService) {
         this.messages = messages;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
+        this.pullRequestWorkflowService = pullRequestWorkflowService;
         this.factoryService = factoryService;
     }
 
     @Override
     public void execute(final WorkflowExecutor executor, final Context context) {
+        pullRequestWorkflowService.getSettings() //
+                                  .then((Map<String, String> settings) -> {
+                                      if (!Boolean.parseBoolean(settings.getOrDefault(CHE_PULLREQUEST_GENERATE__REVIEW__FACTORY, "true"))) {
+                                          executor.done(GenerateReviewFactoryStep.this, context);
+                                          return;
+                                      }
+                                      generateReviewFactory(executor, context);
+                                  });
+    }
+
+    public void generateReviewFactory(final WorkflowExecutor executor, final Context context) {
         factoryService.getFactoryJson(appContext.getWorkspaceId(), null)
                       .then(updateProjectAttributes(context))
                       .then(new Operation<FactoryDto>() {
