@@ -28,6 +28,7 @@ public interface VcsHostingService {
 
     /**
      * Initializes new implementation if additional data from remote url is required
+     *
      * @param remoteUrl
      * @return
      */

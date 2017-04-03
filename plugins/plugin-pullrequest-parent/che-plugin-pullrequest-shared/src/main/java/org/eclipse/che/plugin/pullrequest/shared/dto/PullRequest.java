@@ -18,6 +18,14 @@ public interface PullRequest {
 
     PullRequest withId(String id);
 
+    int getVersion();
+
+    PullRequest withVersion(int version);
+
+    String getTitle();
+
+    PullRequest withTitle(String title);
+
     String getUrl();
 
     PullRequest withUrl(String url);
