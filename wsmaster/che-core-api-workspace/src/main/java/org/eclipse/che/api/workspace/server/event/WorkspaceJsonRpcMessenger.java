@@ -28,6 +28,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 
+/**
+ * Send workspace events using JSON RPC to the clients
+ */
 @Singleton
 public class WorkspaceJsonRpcMessenger implements EventSubscriber<WorkspaceStatusEvent> {
     private final RequestTransmitter transmitter;
