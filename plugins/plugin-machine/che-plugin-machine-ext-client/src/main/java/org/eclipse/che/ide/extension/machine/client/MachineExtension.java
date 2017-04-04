@@ -48,7 +48,7 @@ import org.eclipse.che.ide.extension.machine.client.processes.actions.CloseConso
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ReRunProcessAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProcessAction;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
-import org.eclipse.che.ide.terminal.client.TerminalResources;
+import org.eclipse.che.lib.terminal.client.TerminalResources;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.plugin.requirejs.ide.RequireJsLoader;
 

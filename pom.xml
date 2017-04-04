@@ -55,6 +55,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
+                <artifactId>assembly-factory-war</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-ide-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
@@ -504,6 +509,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
+                <artifactId>che-terminal-client</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>che-tomcat8-slf4j-logback</artifactId>
                 <version>${che.lib.version}</version>
                 <type>zip</type>
@@ -585,6 +595,21 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-factory-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-factory-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-factory-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-gdb-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -600,6 +625,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-github-factory-resolver</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-github-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -611,6 +641,11 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-github-provider-github</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-github-pullrequest</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
@@ -790,6 +825,21 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-pullrequest-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-pullrequest-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-pullrequest-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-python-lang-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -896,6 +946,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-url-factory</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-web-ext-server</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -972,11 +1027,6 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>org.eclipse.ui.ide</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>plugin-terminal-ui</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

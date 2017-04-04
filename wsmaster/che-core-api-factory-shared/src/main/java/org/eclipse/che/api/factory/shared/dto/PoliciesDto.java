@@ -59,17 +59,6 @@ public interface PoliciesDto extends Policies {
     PoliciesDto withUntil(Long until);
 
     /**
-     * Re-open project on factory 2-nd click
-     */
-    @Override
-    @FactoryParameter(obligation = OPTIONAL)
-    String getMatch();
-
-    void setMatch(String match);
-
-    PoliciesDto withMatch(String match);
-
-    /**
      * Workspace creation strategy
      */
     @Override

@@ -1,0 +1,28 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<che-label-container che-label-name="Git URL">
+  <form name="createFactoryGitForm">
+    <div class="create-factory-git-input">
+      <che-input-box che-form="createFactoryGitForm"
+                 che-name="remoteGitURL"
+                 che-place-holder="Repository URL"
+                 che-width="auto"
+                 ng-model="createFactoryGitCtrl.location"
+                 git-url
+                 required>
+        <div ng-message="gitUrl">Invalid Git URL</div>
+        <div ng-message="required">A repository URL is required.</div>
+      </che-input-box>
+    </div>
+  </form>
+</che-label-container>

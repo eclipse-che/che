@@ -102,12 +102,12 @@
             <artifactId>che-core-orion-editor</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-requirejs</artifactId>
+            <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>che-terminal-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>plugin-terminal-ui</artifactId>
+            <artifactId>che-plugin-requirejs</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
@@ -189,8 +189,8 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.plugin</groupId>
-                                    <artifactId>plugin-terminal-ui</artifactId>
+                                    <groupId>org.eclipse.che.lib</groupId>
+                                    <artifactId>che-terminal-client</artifactId>
                                     <version>${project.version}</version>
                                     <type>jar</type>
                                     <overWrite>false</overWrite>

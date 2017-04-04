@@ -28,5 +28,7 @@
         <module>che-plugin-github-ide</module>
         <module>che-plugin-github-server</module>
         <module>che-plugin-github-shared</module>
+        <module>che-plugin-github-pullrequest</module>
+        <module>che-plugin-github-factory-resolver</module>
     </modules>
 </project>
