@@ -843,8 +843,10 @@ public class WorkspaceManager {
         sharedPool.execute(() -> {
             try {
                 runtimes.startMachine(workspaceId, machineConfig);
-            } catch (AgentException ignored) {
+            } catch (AgentException e) {
                 // Agent start failed. User should fix that. No need to disturb an admin
+                LOG.warn("Error occurs on start of additional machine in workspace %s. Error: %s",
+                         workspaceId, e.getLocalizedMessage());
             } catch (ApiException | EnvironmentException e) {
                 LOG.error(e.getLocalizedMessage(), e);
             }
