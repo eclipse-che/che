@@ -49,11 +49,13 @@ import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.util.input.KeyMapUtil;
 import org.vectomatic.dom.svg.ui.SVGImage;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 
 /**
@@ -98,7 +100,10 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
 
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
-        logo.appendChild(new SVGImage(productInfoDataProvider.getLogo()).getSvgElement().getElement());
+        final SVGResource logo = productInfoDataProvider.getLogo();
+        if (nonNull(logo)) {
+            this.logo.appendChild(new SVGImage(logo).getSvgElement().getElement());
+        }
         //Sometimes initialization of Create/Import Project actions are completed after the Empty editor page is rendered.
         //In this case we need to wait when actions will be initialized.
         Timer hoverToRenderTimer = new Timer() {
