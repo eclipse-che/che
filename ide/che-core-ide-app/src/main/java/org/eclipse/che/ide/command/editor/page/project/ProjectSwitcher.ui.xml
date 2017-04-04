@@ -17,8 +17,11 @@
              xmlns:che='urn:import:org.eclipse.che.ide.ui.switcher'>
 
     <ui:style>
+        @eval commandEditorProjectsTableRowColor org.eclipse.che.ide.api.theme.Style.getCommandEditorProjectsTableRowColor();
+        @eval commandEditorProjectSwitcherBorder org.eclipse.che.ide.api.theme.Style.getCommandEditorProjectSwitcherBorder();
+
         .panel {
-            background-color: #3D4650;
+            background-color: commandEditorProjectsTableRowColor;
             padding: 5px 0 5px 0;
         }
 
@@ -32,6 +35,7 @@
             display: inline-block;
             margin-left: 10px;
             vertical-align: middle;
+            border: commandEditorProjectSwitcherBorder;
         }
     </ui:style>
 
