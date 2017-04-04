@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.launcher;
 
+import org.eclipse.che.api.agent.server.exception.AgentStartException;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -129,7 +130,7 @@ public class AbstractAgentLauncherTest {
                                                   any(Instance.class));
     }
 
-    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "Fail launching agent .*. Workspace ID:.*")
+    @Test(expectedExceptions = AgentStartException.class, expectedExceptionsMessageRegExp = "Fail launching agent .*. Workspace ID:.*")
     public void shouldNotCheckIfAgentIsLaunchedMoreThanAgentMaxStartTime() throws Exception {
         // given
         launcher = spy(new TestAgentLauncher(200, 100, agentChecker));
@@ -253,7 +254,7 @@ public class AbstractAgentLauncherTest {
         verify(machine).createProcess(eq(new CommandImpl(agentId, agentScript, "agent")), eq(null));
     }
 
-    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "Fail launching agent .*\\. Workspace ID:.*")
+    @Test(expectedExceptions = AgentStartException.class, expectedExceptionsMessageRegExp = "Fail launching agent .*\\. Workspace ID:.*")
     public void shouldLogAgentStartLogsIfTimeoutReached() throws Exception {
         // given
         launcher = spy(new TestAgentLauncher(-1, 100, agentChecker));

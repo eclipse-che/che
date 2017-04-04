@@ -35,7 +35,6 @@ import org.eclipse.che.api.environment.server.MachineStartedHandler;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
 import org.eclipse.che.api.environment.server.exception.EnvironmentStartInterruptedException;
-import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -415,6 +414,7 @@ public class WorkspaceRuntimes {
                                  MachineConfig machineConfig) throws ServerException,
                                                                      ConflictException,
                                                                      NotFoundException,
+                                                                     AgentException,
                                                                      EnvironmentException {
 
         try (@SuppressWarnings("unused") Unlocker u = locks.readLock(workspaceId)) {
@@ -686,18 +686,14 @@ public class WorkspaceRuntimes {
         return state;
     }
 
-    protected void launchAgents(Instance instance, List<String> agents) throws ServerException {
-        try {
-            for (AgentKey agentKey : agentSorter.sort(agents)) {
-                if (!Thread.currentThread().isInterrupted()) {
-                    LOG.info("Launching '{}' agent at workspace {}", agentKey.getId(), instance.getWorkspaceId());
-                    Agent agent = agentRegistry.getAgent(agentKey);
-                    AgentLauncher launcher = launcherFactory.find(agentKey.getId(), instance.getConfig().getType());
-                    launcher.launch(instance, agent);
-                }
+    protected void launchAgents(Instance instance, List<String> agents) throws ServerException, AgentException {
+        for (AgentKey agentKey : agentSorter.sort(agents)) {
+            if (!Thread.currentThread().isInterrupted()) {
+                LOG.info("Launching '{}' agent at workspace {}", agentKey.getId(), instance.getWorkspaceId());
+                Agent agent = agentRegistry.getAgent(agentKey);
+                AgentLauncher launcher = launcherFactory.find(agentKey.getId(), instance.getConfig().getType());
+                launcher.launch(instance, agent);
             }
-        } catch (AgentException e) {
-            throw new MachineException(e.getMessage(), e);
         }
     }
 
@@ -710,7 +706,8 @@ public class WorkspaceRuntimes {
                                                   String envName,
                                                   boolean recover) throws ServerException,
                                                                           EnvironmentException,
-                                                                          ConflictException {
+                                                                          ConflictException,
+                                                                          AgentException {
         try {
             envEngine.start(workspaceId,
                             envName,
@@ -725,7 +722,7 @@ public class WorkspaceRuntimes {
             compareAndSetStatus(workspaceId, WorkspaceStatus.STARTING, WorkspaceStatus.STOPPING);
             removeStateAndPublishStopEvents(workspaceId);
             throw x;
-        } catch (EnvironmentException | ServerException | ConflictException x) {
+        } catch (EnvironmentException | ServerException | ConflictException | AgentException x) {
             // environment can't be started for some reason, STARTING -> STOPPED
             removeState(workspaceId);
             eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
@@ -1044,7 +1041,9 @@ public class WorkspaceRuntimes {
 
     private class MachineAgentsLauncher implements MachineStartedHandler {
         @Override
-        public void started(Instance machine, @Nullable ExtendedMachine extendedMachine) throws ServerException {
+        public void started(Instance machine, @Nullable ExtendedMachine extendedMachine)
+                throws ServerException, AgentException {
+
             if (extendedMachine != null) {
                 launchAgents(machine, extendedMachine.getAgents());
             }
