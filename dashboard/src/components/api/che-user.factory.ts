@@ -373,11 +373,15 @@ export class CheUser {
   fetchUser(): ng.IPromise<any> {
     let promise = this.remoteUserAPI.get().$promise;
     // check if if was OK or not
-    promise.then((user: che.IUser) => {
+    return promise.then((user: che.IUser) => {
       this.user = user;
-      });
-
-    return promise;
+      return user;
+    }, (error: any) => {
+      if (error && error.status === 304) {
+        return this.user;
+      }
+      return this.$q.reject(error);
+    });
   }
 
   fetchUserId(userId: string): ng.IPromise<any> {
