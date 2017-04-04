@@ -38,9 +38,9 @@ public class WorkspaceMasterJsonRpcInitializer {
         internalInitialize();
     }
 
-    private static native String getRestContext() /*-{
+    private static native String getWebsocketContext() /*-{
         if ($wnd.IDE && $wnd.IDE.config) {
-            return $wnd.IDE.config.restContext;
+            return $wnd.IDE.config.websocketContext;
         } else {
             return null;
         }
@@ -64,7 +64,7 @@ public class WorkspaceMasterJsonRpcInitializer {
     private void internalInitialize() {
         String protocol = "https:".equals(getProtocol()) ? "wss://" : "ws://";
         String host = getHost();
-        String context = getRestContext().replace("/api", "") + "/websocket/";
+        String context = getWebsocketContext() + "/";
         String workspaceMasterUrl = protocol + host + context + appContext.getAppId();
 
         initializer.initialize("ws-master", singletonMap("url", workspaceMasterUrl));
