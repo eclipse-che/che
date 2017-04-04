@@ -30,7 +30,7 @@
         <module>ide</module>
         <module>agents</module>
         <module>plugins</module>
-        <module>ide/che-core-basic-ide</module>
+        <module>ide/che-ide-core</module>
         <module>samples</module>
         <module>dashboard</module>
         <module>assembly</module>
@@ -166,7 +166,7 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-agent-basic-server</artifactId>
+                <artifactId>che-wsagent-core</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
             </dependency>
@@ -379,7 +379,7 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-basic-ide</artifactId>
+                <artifactId>che-ide-core</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

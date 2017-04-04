@@ -40,6 +40,6 @@
         <module>che-core-api-testing</module>
         <module>che-core-api-testing-shared</module>
         <module>wsagent-local</module>
-        <module>che-agent-basic-server</module>
+        <module>che-wsagent-core</module>
     </modules>
 </project>

@@ -18,7 +18,7 @@
         <groupId>org.eclipse.che.core</groupId>
         <version>5.7.0-SNAPSHOT</version>
     </parent>
-    <artifactId>che-agent-basic-server</artifactId>
+    <artifactId>che-wsagent-core</artifactId>
     <packaging>war</packaging>
     <name>Che Workspace Agent War Packaging</name>
     <dependencies>

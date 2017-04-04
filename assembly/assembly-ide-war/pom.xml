@@ -29,7 +29,7 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-basic-ide</artifactId>
+            <artifactId>che-ide-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.lib</groupId>
