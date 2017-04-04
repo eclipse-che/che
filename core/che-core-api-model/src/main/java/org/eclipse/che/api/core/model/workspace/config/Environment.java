@@ -34,7 +34,7 @@ public interface Environment {
     Map<String, ? extends MachineConfig> getMachines();
 
     /**
-     * Returns the list of the warnings, indicating that the environment
+     * Returns the list of the warnings indicating that the environment
      * violates some non-critical constraints or some preferable configuration is missing
      * so defaults are used.
      */

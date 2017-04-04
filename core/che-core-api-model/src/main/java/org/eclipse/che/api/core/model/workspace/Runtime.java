@@ -56,7 +56,8 @@ public interface Runtime {
 
     /**
      * Returns the list of the warnings indicating that the runtime
-     * is created using some default values or it violates non-critical constraints.
+     * violates some non-critical constraints or default configuration
+     * values are used to boot it.
      */
     List<? extends Warning> getWarnings();
 }

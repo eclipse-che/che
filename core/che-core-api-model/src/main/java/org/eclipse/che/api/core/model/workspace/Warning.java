@@ -11,7 +11,7 @@
 package org.eclipse.che.api.core.model.workspace;
 
 /**
- * Describes a warning, a couple of message and a code
+ * Describes a warning, a pair of a message and a code
  * which may indicate some context specific non-critical violation.
  *
  * @author Yevhenii Voevodin
