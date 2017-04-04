@@ -111,7 +111,6 @@ public class CoreGinModule extends AbstractGinModule {
         install(new ProjectApiModule());
         install(new ProjectImportModule());
         install(new OAuthApiModule());
-        install(new FactoryApiModule());
         install(new WorkspaceEventsModule());
         install(new FactoryGinModule());
         install(new WorkspaceEventsModule());
