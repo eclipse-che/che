@@ -69,7 +69,7 @@ public class ServerInitializerImplTest {
     public void initializerShouldNotifyObservers() throws Exception {
         when(languageDescription.getLanguageId()).thenReturn("languageId");
         when(server.initialize(any(InitializeParams.class))).thenReturn(completableFuture);
-        when(completableFuture.get()).thenReturn(mock(InitializeResult.class));
+        when(completableFuture.get(any(), any())).thenReturn(mock(InitializeResult.class));
 
         when(launcher.getLanguageDescription()).thenReturn(languageDescription);
         when(launcher.launch(anyString())).thenReturn(server);
