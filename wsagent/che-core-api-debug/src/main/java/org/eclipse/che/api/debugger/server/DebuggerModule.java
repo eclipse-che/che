@@ -30,6 +30,7 @@ public class DebuggerModule extends AbstractModule {
         bind(DebuggerWebSocketMessenger.class);
 
         bind(DebuggerActionProvider.class);
+        Multibinder.newSetBinder(binder(), DebuggerFactory.class);
         final Multibinder<Class> ignoredClasses = Multibinder.newSetBinder(binder(), Class.class, Names.named("che.json.ignored_classes"));
         ignoredClasses.addBinding().toInstance(ActionDto.class);
     }

@@ -44,6 +44,10 @@
             <artifactId>google-http-client-jackson2</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client</artifactId>
         </dependency>
