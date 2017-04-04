@@ -36,17 +36,17 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
- * Tests for {@link WorkspaceValidator} and {@link DefaultWorkspaceValidator}
+ * Tests for {@link WorkspaceValidator} and {@link WorkspaceValidator}
  *
  * @author Alexander Reshetnyak
  */
 @Listeners(MockitoTestNGListener.class)
-public class DefaultWorkspaceValidatorTest {
+public class WorkspaceValidatorTest {
 
     @Mock
     CheEnvironmentValidator environmentValidator;
     @InjectMocks
-    DefaultWorkspaceValidator wsValidator;
+    WorkspaceValidator      wsValidator;
 
     @Test
     public void shouldValidateCorrectWorkspace() throws Exception {

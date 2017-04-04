@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
@@ -56,6 +57,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -883,6 +885,11 @@ public class RuntimesTest {
             machines.put("machine", new MachineImpl(new HashMap<>(), servers));
 
             return machines;
+        }
+
+        @Override
+        public List<? extends Warning> getWarnings() {
+            return null;
         }
 
         @Override

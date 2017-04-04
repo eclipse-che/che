@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.model.workspace.config;
 
+import org.eclipse.che.api.core.model.workspace.Warning;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,4 +32,11 @@ public interface Environment {
      * Returns mapping of machine name to additional configuration of machine.
      */
     Map<String, ? extends MachineConfig> getMachines();
+
+    /**
+     * Returns the list of the warnings, indicating that the environment
+     * violates some non-critical constraints or some preferable configuration is missing
+     * so defaults are used.
+     */
+    List<? extends Warning> getWarnings();
 }

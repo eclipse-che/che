@@ -13,6 +13,7 @@ package org.eclipse.che.api.core.model.workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,5 +54,9 @@ public interface Runtime {
 
 //    String getUserToken();
 
-
+    /**
+     * Returns the list of the warnings indicating that the runtime
+     * is created using some default values or it violates non-critical constraints.
+     */
+    List<? extends Warning> getWarnings();
 }

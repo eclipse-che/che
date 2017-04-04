@@ -33,6 +33,7 @@ import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.WorkspaceMessageBodyAdapter;
+import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.eclipse.che.api.workspace.server.stack.StackMessageBodyAdapter;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
@@ -113,7 +114,7 @@ public class WsMasterModule extends AbstractModule {
                    .toInstance("predefined-recipes.json");
 
         bind(org.eclipse.che.api.workspace.server.WorkspaceValidator.class)
-                .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
+                .to(WorkspaceValidator.class);
 
         bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
 

@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.model.impl;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -23,10 +25,11 @@ import java.util.Objects;
  */
 public class RuntimeImpl implements Runtime {
 
-    private final String                   activeEnv;
-    private String                         owner;
-    private String                         userToken;
-    private Map<String, ? extends Machine> machines;
+    private final String                         activeEnv;
+    private       String                         owner;
+    private       String                         userToken;
+    private       Map<String, ? extends Machine> machines;
+    private       List<WarningImpl>              warnings;
 
 //    public RuntimeImpl(String activeEnv) {
 //        this.activeEnv = activeEnv;
@@ -54,6 +57,14 @@ public class RuntimeImpl implements Runtime {
     @Override
     public String getOwner() {
         return owner;
+    }
+
+    @Override
+    public List<WarningImpl> getWarnings() {
+        if (warnings == null) {
+            warnings = new ArrayList<>();
+        }
+        return warnings;
     }
 
     public String getUserToken() {

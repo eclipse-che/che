@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.model.impl;
 
+import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
@@ -25,7 +26,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -51,6 +55,9 @@ public class EnvironmentImpl implements Environment {
     @JoinColumn(name = "machines_id")
     @MapKeyColumn(name = "machines_key")
     private Map<String, MachineConfigImpl> machines;
+
+    @Transient
+    private List<Warning> warnings;
 
     public EnvironmentImpl() {}
 
@@ -94,6 +101,14 @@ public class EnvironmentImpl implements Environment {
             machines = new HashMap<>();
         }
         return machines;
+    }
+
+    @Override
+    public List<? extends Warning> getWarnings() {
+        if (warnings == null) {
+            warnings = new ArrayList<>();
+        }
+        return warnings;
     }
 
     public void setMachines(Map<String, MachineConfigImpl> machines) {

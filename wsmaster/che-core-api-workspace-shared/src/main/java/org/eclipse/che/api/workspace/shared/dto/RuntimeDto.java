@@ -11,9 +11,11 @@
 package org.eclipse.che.api.workspace.shared.dto;
 
 import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.dto.shared.DTO;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,6 +56,12 @@ public interface RuntimeDto extends Runtime {
 
     void setUserToken(String userToken);
 
+    @Override
+    List<WarningDto> getWarnings();
+
+    void setWarnings(List<WarningDto> warnings);
+
+    RuntimeDto withWarnings(List<WarningDto> warnings);
 
     //    void setRootFolder(String rootFolder);
 //
