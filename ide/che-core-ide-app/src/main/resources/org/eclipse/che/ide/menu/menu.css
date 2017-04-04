@@ -81,6 +81,7 @@
 }
 
 .rightPanel {
+    min-width: 0;
     width: 100%;
     float: left;
     height: inherit;

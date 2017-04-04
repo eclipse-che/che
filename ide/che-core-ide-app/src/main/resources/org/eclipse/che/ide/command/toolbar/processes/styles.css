@@ -45,12 +45,18 @@
 .processWidgetMachineNameLabel {
     float: left;
     color: #a3a3a3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: literal("calc(100% - 50px)");
 }
 
 .processWidgetCommandNameLabel {
     float: left;
     color: #e3e3e3;
     font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: literal("calc(100% - 200px)");
 }
 
 .processWidgetPidLabel {
