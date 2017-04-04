@@ -22,6 +22,8 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 
 import org.eclipse.che.ide.actions.ActionApiModule;
+import org.eclipse.che.ide.api.ProductInfoDataProvider;
+import org.eclipse.che.ide.api.ProductInfoDataProviderImpl;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
@@ -29,10 +31,12 @@ import org.eclipse.che.ide.api.extension.ExtensionRegistry;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.git.GitServiceClientImpl;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.api.machine.CheWsAgentLinksModifier;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.ExecAgentEventManager;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClientImpl;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.machine.execagent.ConnectedEventHandler;
 import org.eclipse.che.ide.api.machine.execagent.JsonRpcExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.execagent.JsonRpcExecAgentEventManager;
@@ -151,6 +155,8 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ExecAgentEventManager.class).to(JsonRpcExecAgentEventManager.class);
         bind(ConnectedEventHandler.class).asEagerSingleton();
         bind(AskCredentialsDialog.class).to(AskCredentialsDialogImpl.class);
+        bind(ProductInfoDataProvider.class).to(ProductInfoDataProviderImpl.class);
+        bind(WsAgentURLModifier.class).to(CheWsAgentLinksModifier.class);
     }
 
     @Provides
