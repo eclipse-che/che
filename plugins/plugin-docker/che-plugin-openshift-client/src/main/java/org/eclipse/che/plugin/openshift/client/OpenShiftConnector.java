@@ -18,14 +18,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,6 +41,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.eclipse.che.api.core.event.ServerIdleEvent;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
@@ -98,6 +105,8 @@ import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.DoneableEndpoints;
+import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimList;
@@ -123,7 +132,10 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
+import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.utils.InputStreamPumper;
+import io.fabric8.openshift.api.model.DeploymentConfig;
+import io.fabric8.openshift.api.model.DoneableDeploymentConfig;
 import io.fabric8.openshift.api.model.Image;
 import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.ImageStreamTag;
@@ -131,6 +143,7 @@ import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteList;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
+import io.fabric8.openshift.client.dsl.DeployableScalableResource;
 
 /**
  * Client for OpenShift API.
@@ -159,6 +172,12 @@ public class OpenShiftConnector extends DockerConnector {
     private static final String OPENSHIFT_VOLUME_STORAGE_CLASS           = "volume.beta.kubernetes.io/storage-class";
     private static final String OPENSHIFT_VOLUME_STORAGE_CLASS_NAME      = "che-workspace";
     private static final String OPENSHIFT_IMAGE_PULL_POLICY_IFNOTPRESENT = "IfNotPresent";
+    private static final String IDLING_ALPHA_OPENSHIFT_IO_IDLED_AT       = "idling.alpha.openshift.io/idled-at";
+    private static final String IDLING_ALPHA_OPENSHIFT_IO_PREVIOUS_SCALE = "idling.alpha.openshift.io/previous-scale";
+    private static final String OPENSHIFT_CHE_SERVER_DEPLOYMENT_NAME     = "che";
+    private static final String OPENSHIFT_CHE_SERVER_SERVICE_NAME        = "che-host";
+    private static final String IDLING_ALPHA_OPENSHIFT_IO_UNIDLE_TARGETS = "idling.alpha.openshift.io/unidle-targets";
+    private static final String ISO_8601_DATE_FORMAT                     = "yyyy-MM-dd'T'HH:mm:ssX";
 
     private Map<String, KubernetesExecHolder> execMap = new HashMap<>();
 
@@ -179,6 +198,7 @@ public class OpenShiftConnector extends DockerConnector {
                               DockerConnectionFactory connectionFactory,
                               DockerRegistryAuthResolver authResolver,
                               DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider,
+                              EventService eventService,
                               @Nullable @Named("che.docker.ip.external") String cheServerExternalAddress,
                               @Named("che.openshift.project") String openShiftCheProjectName,
                               @Named("che.openshift.liveness.probe.delay") int openShiftLivenessProbeDelay,
@@ -203,6 +223,61 @@ public class OpenShiftConnector extends DockerConnector {
         this.cheWorkspaceMemoryRequest = cheWorkspaceMemoryRequest;
         this.cheWorkspaceMemoryLimit = cheWorkspaceMemoryLimit;
         this.secureRoutes = secureRoutes;
+        eventService.subscribe(new EventSubscriber<ServerIdleEvent>() {
+
+            @Override
+            public void onEvent(ServerIdleEvent event) {
+                idleCheServer(event);
+            }
+        });
+    }
+
+    private void idleCheServer(ServerIdleEvent event) {
+    	try (DefaultOpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
+            DeployableScalableResource<DeploymentConfig, DoneableDeploymentConfig> deploymentConfigResource = openShiftClient.deploymentConfigs()
+                                                                                                                             .inNamespace(openShiftCheProjectName)
+                                                                                                                             .withName(OPENSHIFT_CHE_SERVER_DEPLOYMENT_NAME);
+            DeploymentConfig deploymentConfig = deploymentConfigResource.get();
+            if (deploymentConfig == null) {
+                LOG.warn(String.format("Deployment config %s not found", OPENSHIFT_CHE_SERVER_DEPLOYMENT_NAME));
+                return;
+            }
+            Integer replicas = deploymentConfig.getSpec().getReplicas();
+            if (replicas != null && replicas > 0) {
+                Resource<Endpoints, DoneableEndpoints> endpointResource = openShiftClient.endpoints()
+                                                                                         .inNamespace(openShiftCheProjectName)
+                                                                                         .withName(OPENSHIFT_CHE_SERVER_SERVICE_NAME);
+                Endpoints endpoint = endpointResource.get();
+                if (endpoint == null) {
+                    LOG.warn(String.format("Endpoint %s not found", OPENSHIFT_CHE_SERVER_SERVICE_NAME));
+                    return;
+                }
+                Map<String, String> annotations = deploymentConfig.getMetadata().getAnnotations();
+                if (annotations == null) {
+                    annotations = new HashMap<>();
+                    deploymentConfig.getMetadata().setAnnotations(annotations);
+                }
+                TimeZone tz = TimeZone.getTimeZone("UTC");
+                DateFormat df = new SimpleDateFormat(ISO_8601_DATE_FORMAT);
+                df.setTimeZone(tz);
+                String idle = df.format(new Date());
+                annotations.put(IDLING_ALPHA_OPENSHIFT_IO_IDLED_AT, idle);
+                annotations.put(IDLING_ALPHA_OPENSHIFT_IO_PREVIOUS_SCALE, "1");
+                deploymentConfig.getSpec().setReplicas(0);
+                deploymentConfigResource.patch(deploymentConfig);
+                Map<String, String> endpointAnnotations = endpoint.getMetadata().getAnnotations();
+                if (endpointAnnotations == null) {
+                    endpointAnnotations = new HashMap<>();
+                    endpoint.getMetadata().setAnnotations(endpointAnnotations);
+                }
+                endpointAnnotations.put(IDLING_ALPHA_OPENSHIFT_IO_IDLED_AT, idle);
+                endpointAnnotations.put(IDLING_ALPHA_OPENSHIFT_IO_UNIDLE_TARGETS,
+                            "[{\"kind\":\"DeploymentConfig\",\"name\":\"" + OPENSHIFT_CHE_SERVER_DEPLOYMENT_NAME
+                            + "\",\"replicas\":1}]");
+                endpointResource.patch(endpoint);
+                LOG.info("Che server has been idled");
+            }
+    	}
     }
 
     /**
@@ -1613,4 +1688,5 @@ public class OpenShiftConnector extends DockerConnector {
     private boolean isDevMachine(final Set<String> exposedPorts) {
         return exposedPorts.contains(CHE_WORKSPACE_AGENT_PORT + "/tcp");
     }
+
 }
