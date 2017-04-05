@@ -19,7 +19,7 @@ export class CheHttpBackend {
   private httpBackend: ng.IHttpBackendService;
   private projectsPerWorkspace: Map<string, any>;
   private workspaces: Map<string, any>;
-  private profilesMap: any;
+  private profilesMap: Map<string, any>;
   private projectDetailsMap: Map<string, any>;
   private remoteGitUrlArraysMap: Map<string, any>;
   private localGitUrlsMap: Map<string, any>;
@@ -294,7 +294,7 @@ export class CheHttpBackend {
    * @param profile
    */
   addProfileId(profile: any): void {
-    this.profilesMap.put(profile.id, profile);
+    this.profilesMap.set(profile.id, profile);
   }
 
 
