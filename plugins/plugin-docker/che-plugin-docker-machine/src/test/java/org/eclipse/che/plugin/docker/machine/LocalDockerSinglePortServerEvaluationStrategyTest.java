@@ -11,7 +11,14 @@
 
 package org.eclipse.che.plugin.docker.machine;
 
-import org.eclipse.che.api.core.model.machine.MachineConfig;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
@@ -24,14 +31,6 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 @Listeners(MockitoTestNGListener.class)
 public class LocalDockerSinglePortServerEvaluationStrategyTest {
@@ -123,14 +122,14 @@ public class LocalDockerSinglePortServerEvaluationStrategyTest {
         Map<String, ServerImpl> expectedServers = new HashMap<>();
         expectedServers.put("4301/tcp", new ServerImpl("sysServer1-tcp",
                 "http",
-                "sysServer1-tcp." + WORKSPACE_ID + "." + externalAddress,
-                "http://" + "sysServer1-tcp." + WORKSPACE_ID + "." + externalAddress + "/some/path1",
+                "sysServer1-tcp-" + WORKSPACE_ID + "-" + externalAddress,
+                "http://" + "sysServer1-tcp-" + WORKSPACE_ID + "-" + externalAddress + "/some/path1",
                 new ServerPropertiesImpl("/some/path1",
                                          internalAddress + port1,
                                          "http://" + internalAddress + port1 + "/some/path1")));
         expectedServers.put("4305/udp", new ServerImpl("devSysServer1-udp",
                 null,
-                "devSysServer1-udp." + WORKSPACE_ID + "." + externalAddress,
+                "devSysServer1-udp-" + WORKSPACE_ID + "-" + externalAddress,
                 null,
                 new ServerPropertiesImpl("some/path4",
                                          internalAddress + port2,
