@@ -31,7 +31,6 @@ import {ProxySettingsConfig} from './proxy/proxy-settings.constant';
 import {WorkspacesConfig} from './workspaces/workspaces-config';
 import {StacksConfig} from './stacks/stacks-config';
 import {DemoComponentsCtrl} from './demo-components/demo-components.controller';
-import {DocsConfig} from './documentation/docs-config';
 
 
 // init module
@@ -383,5 +382,4 @@ new ProjectsConfig(instanceRegister);
 new WorkspacesConfig(instanceRegister);
 new DashboardConfig(instanceRegister);
 new StacksConfig(instanceRegister);
-new DocsConfig(instanceRegister);
 new FactoryConfig(instanceRegister);
