@@ -16,6 +16,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
@@ -52,6 +53,8 @@ public class OpenShiftConnectorTest {
     private DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider;
     @Mock
     private CreateContainerParams              createContainerParams;
+    @Mock
+    private EventService                       eventService;
 
     private OpenShiftConnector                 openShiftConnector;
 
@@ -69,6 +72,7 @@ public class OpenShiftConnectorTest {
                                                     dockerConnectionFactory,
                                                     authManager,
                                                     dockerApiVersionPathPrefixProvider,
+                                                    eventService,
                                                     CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS,
                                                     CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
                                                     OPENSHIFT_LIVENESS_PROBE_DELAY,
