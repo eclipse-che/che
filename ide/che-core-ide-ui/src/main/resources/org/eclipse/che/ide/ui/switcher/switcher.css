@@ -29,7 +29,7 @@
     display: block;
     overflow: hidden;
     cursor: pointer;
-    width: 55px;
+    width: 50px;
     height: 18px;
     background-color: outputBackgroundColor;
 }
@@ -84,6 +84,6 @@
 }
 
 .onoffswitchCheckbox:checked + .onoffswitchLabel .onoffswitchSwitch {
-    right: 0px;
+    right: 4px;
     background: primaryButtonBackground;
 }

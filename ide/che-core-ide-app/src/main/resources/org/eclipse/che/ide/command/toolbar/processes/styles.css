@@ -16,10 +16,9 @@
 
 .processesListLabel {
     float: left;
-    background-color: #1d1d1d;
-    border-left: solid 0.6px #454545;
-    border-top: solid 0.6px #454545;
-    border-bottom: solid 0.6px #454545;
+    border-left: commandsToolbarProcessesLabelBorder;
+    border-top: commandsToolbarProcessesLabelBorder;
+    border-bottom: commandsToolbarProcessesLabelBorder;
     border-right: 0;
     font-family: mainFontFamily;
     font-size: 9px;
@@ -31,7 +30,7 @@
     width: 44px;
     height: 22px;
     line-height: 22px;
-    background-image: linear-gradient(to bottom, #292929, #131313);
+    background: commandsToolbarProcessesLabelBackground;
     cursor: default;
 }
 
@@ -44,7 +43,7 @@
 
 .processWidgetMachineNameLabel {
     float: left;
-    color: #a3a3a3;
+    color: commandsToolbarMachineNameColor;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: literal("calc(100% - 50px)");
@@ -52,7 +51,7 @@
 
 .processWidgetCommandNameLabel {
     float: left;
-    color: #e3e3e3;
+    color: commandsToolbarCommandNameColor;
     font-weight: bold;
     overflow: hidden;
     text-overflow: ellipsis;

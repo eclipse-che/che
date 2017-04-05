@@ -14,26 +14,28 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <ui:style>
-        @eval selectCommandActionColor org.eclipse.che.ide.api.theme.Style.getSelectCommandActionColor();
-        @eval selectCommandActionHoverColor org.eclipse.che.ide.api.theme.Style.getSelectCommandActionHoverColor();
+        @eval dropdownListBackground org.eclipse.che.ide.api.theme.Style.getDropdownListBackground();
+        @eval hoveredDropdownListBackground org.eclipse.che.ide.api.theme.Style.getHoveredDropdownListBackground();
+        @eval activeDropdownListBackground org.eclipse.che.ide.api.theme.Style.getActiveDropdownListBackground();
+        @eval dropdownListBorder org.eclipse.che.ide.api.theme.Style.getDropdownListBorder();
+        @eval dropdownListButtonColor org.eclipse.che.ide.api.theme.Style.getDropdownListButtonColor();
 
         .widget {
             height: 22px;
             display: inline-block;
             cursor: pointer;
-            background-color: #33373b;
-            background-image: linear-gradient(to bottom, #444444, #343434 98%);
-            border: solid 0.6px #454545;
+            background: dropdownListBackground;
+            border: dropdownListBorder;
         }
 
         .widget:hover {
             color: #53a2ff;
-            background-image: linear-gradient(to bottom, #3d3d3d, #1d1d1d 98%);
+            background: hoveredDropdownListBackground;
         }
 
         .widget:active {
             color: #235c9e;
-            background-image: linear-gradient(to bottom, #3d3d3d, #1d1d1d);
+            background: activeDropdownListBackground;
         }
 
         .selectedItemPanel {
@@ -57,11 +59,7 @@
         .dropButton svg {
             width: 10px;
             height: 7px;
-            fill: selectCommandActionColor;
-        }
-
-        .dropButton:hover svg {
-            fill: selectCommandActionHoverColor;
+            fill: dropdownListButtonColor;
         }
     </ui:style>
 

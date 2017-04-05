@@ -77,7 +77,7 @@
     width: 0;
     height: 0;
     border-bottom: 34px solid mainMenuBkgColor;
-    border-right: 25px solid transparent;
+    border-right: 25px solid commandsToolbarBackgroundColor;
 }
 
 .rightPanel {
@@ -86,6 +86,10 @@
     float: left;
     height: inherit;
     white-space: nowrap;
+}
+
+.commandToolbar {
+    background-color: commandsToolbarBackgroundColor;
 }
 
 .customComponent {

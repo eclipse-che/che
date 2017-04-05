@@ -37,6 +37,8 @@ public interface MenuResources extends ClientBundle {
 
         String rightPanel();
 
+        String commandToolbar();
+
         String customComponent();
 
         String panelSeparator();
