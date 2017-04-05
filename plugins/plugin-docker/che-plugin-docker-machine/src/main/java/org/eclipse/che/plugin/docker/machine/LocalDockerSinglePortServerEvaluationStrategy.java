@@ -33,7 +33,7 @@ import java.util.stream.Stream;
  * This server evaluation strategy will return a completed {@link ServerImpl} with internal addresses set
  * as {@link LocalDockerServerEvaluationStrategy} does. Contrary external addresses will have the following format:
  *
- *       serverName.workspaceID.cheExternalAddress (e.g. terminal.79rfwhqaztq2ru2k.che.local)
+ *       serverName-workspaceID-cheExternalAddress (e.g. terminal-79rfwhqaztq2ru2k-che.local)
  *
  * <p>cheExternalAddress can be set using property {@code che.docker.ip.external}.
  * This strategy is useful when Che and the workspace servers need to be exposed on the same single TCP port
@@ -71,7 +71,7 @@ public class LocalDockerSinglePortServerEvaluationStrategy extends LocalDockerSe
         Map<String, String> addressesAndPorts = new HashMap<>();
         for (String serverKey : portBindings.keySet()) {
             String serverName = getWorkspaceServerName(labels, serverKey);
-            String serverURL = serverName + "." + workspaceID + "." + cheExternalAddress;
+            String serverURL = serverName + "-" + workspaceID + "-" + cheExternalAddress;
             addressesAndPorts.put(serverKey, serverURL);
         }
 
