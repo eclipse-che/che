@@ -114,6 +114,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
+                <artifactId>ls-bayesian-agent</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
                 <artifactId>ls-csharp-agent</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -503,7 +508,11 @@
                 <artifactId>org-eclipse-jdt-core-repack</artifactId>
                 <version>${che.lib.version}</version>
             </dependency>
-            <dependency>
+           <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-bayesian-lang-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>            <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-composer-ide</artifactId>
                 <version>${che.version}</version>
