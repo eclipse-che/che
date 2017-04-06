@@ -11,8 +11,15 @@
 package org.eclipse.che.api.workspace.server.spi;
 
 import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.workspace.server.ServerRewritingStrategy;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,11 +29,18 @@ import java.util.Map;
  */
 public abstract class InternalRuntime implements Runtime {
 
-    private final RuntimeContext context;
+    private final RuntimeContext          context;
+    private final ServerRewritingStrategy serverRewritingStrategy;
+    private Map<String, Machine>    cachedExternalMachines;
+    private final List<Warning> warnings = new ArrayList<>();
 
-    public InternalRuntime(RuntimeContext context) {
+    public InternalRuntime(RuntimeContext context, ServerRewritingStrategy serverRewritingStrategy) {
         this.context = context;
+        this.serverRewritingStrategy = serverRewritingStrategy;
     }
+
+    public abstract Map<String, ? extends Machine> getInternalMachines();
+
 
     @Override
     public String getActiveEnv() {
@@ -39,7 +53,32 @@ public abstract class InternalRuntime implements Runtime {
     }
 
     @Override
-    public abstract Map<String, ? extends Machine> getMachines();
+    public List<? extends Warning> getWarnings() {
+        return warnings;
+    }
+
+    @Override
+    public Map<String, ? extends Machine> getMachines() {
+
+        if(cachedExternalMachines == null) {
+            cachedExternalMachines = new HashMap<>();
+            for(Map.Entry<String, ? extends Machine> entry : getInternalMachines().entrySet()) {
+                String key = entry.getKey();
+                Machine machine = entry.getValue();
+                ServerRewritingStrategy.Result result = serverRewritingStrategy.rewrite(context.getIdentity(), entry.getValue().getServers());
+                Map<String, Server> newServers = result.getServers();
+                MachineImpl newMachine = new MachineImpl(machine.getProperties(), newServers);
+                cachedExternalMachines.put(key, newMachine);
+                if(!result.getWarnings().isEmpty()) {
+                    warnings.addAll(result.getWarnings());
+                }
+            }
+
+        }
+        return cachedExternalMachines;
+
+    }
+
 
     /**
      * @return some implementation specific properties if any
@@ -52,6 +91,5 @@ public abstract class InternalRuntime implements Runtime {
     public final RuntimeContext getContext() {
         return context;
     }
-
 
 }

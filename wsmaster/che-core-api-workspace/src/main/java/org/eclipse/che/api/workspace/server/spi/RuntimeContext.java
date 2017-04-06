@@ -26,19 +26,19 @@ import java.util.Map;
  */
 public abstract class RuntimeContext {
 
-    protected final Environment               environment;
-    protected final InternalEnvironmentConfig internalEnv;
-    protected final RuntimeIdentity           identity;
-    protected final RuntimeInfrastructure     infrastructure;
+    protected final Environment           environment;
+    protected final InternalRuntimeConfig internalRuntimeConfig;
+    protected final RuntimeIdentity       identity;
+    protected final RuntimeInfrastructure infrastructure;
     // TODO other than WorkspaceStatus impl
-    protected       WorkspaceStatus           state;
+    protected       WorkspaceStatus       state;
 
     public RuntimeContext(Environment environment, RuntimeIdentity identity,
                           RuntimeInfrastructure infrastructure, URL registryEndpoint) throws ValidationException, ApiException, IOException {
         this.environment = environment;
         this.identity = identity;
         this.infrastructure = infrastructure;
-        this.internalEnv = new InternalEnvironmentConfig(environment, registryEndpoint);
+        this.internalRuntimeConfig = new InternalRuntimeConfig(environment, registryEndpoint);
     }
 
 

@@ -13,10 +13,11 @@ package org.eclipse.che.plugin.docker.machine;
 
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.OldMachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
-import org.eclipse.che.api.core.model.machine.ServerConf;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
+import org.eclipse.che.api.core.model.machine.OldServerConf;
+import org.eclipse.che.api.machine.server.model.impl.OldServerConfImpl;
+//import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
@@ -74,21 +75,21 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
      */
     public static final String USER_TOKEN = "USER_TOKEN";
 
-    private final ContainerInfo                    info;
-    private final Map<String, ServerConfImpl>      serversConf;
+    private final ContainerInfo                 info;
+    private final Map<String, OldServerConfImpl>      serversConf;
     private final String                           internalHost;
     private final ServerEvaluationStrategyProvider provider;
 
     @Inject
     public DockerInstanceRuntimeInfo(@Assisted ContainerInfo containerInfo,
-                                     @Assisted MachineConfig machineConfig,
+                                     @Assisted OldMachineConfig machineConfig,
                                      @Assisted String internalHost,
                                      ServerEvaluationStrategyProvider provider,
-                                     @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineSystemServers,
-                                     @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesSystemServers) {
+                                     @Named("machine.docker.dev_machine.machine_servers") Set<OldServerConf> devMachineSystemServers,
+                                     @Named("machine.docker.machine_servers") Set<OldServerConf> allMachinesSystemServers) {
         this.info = containerInfo;
 
-        Stream<ServerConf> confStream = Stream.concat(machineConfig.getServers().stream(), allMachinesSystemServers.stream());
+        Stream<OldServerConf> confStream = Stream.concat(machineConfig.getServers().stream(), allMachinesSystemServers.stream());
         if (machineConfig.isDev()) {
             confStream = Stream.concat(confStream, devMachineSystemServers.stream());
         }
@@ -96,7 +97,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
         this.serversConf = confStream.collect(toMap(srvConf -> srvConf.getPort().contains("/") ?
                                                                srvConf.getPort() :
                                                                srvConf.getPort() + "/tcp",
-                                                    ServerConfImpl::new));
+                                                    OldServerConfImpl::new));
 
         this.internalHost = internalHost;
         this.provider = provider;

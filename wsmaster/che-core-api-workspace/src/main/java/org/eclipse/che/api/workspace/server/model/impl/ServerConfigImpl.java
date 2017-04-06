@@ -22,7 +22,7 @@ import java.util.Objects;
 /**
  * @author Alexander Garagatyi
  */
-@Entity(name = "OldServerConf")
+@Entity(name = "ServerConf")
 @Table(name = "serverconf")
 public class ServerConfigImpl implements ServerConfig {
 

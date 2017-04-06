@@ -25,13 +25,13 @@ import java.util.Map;
  * Environment configuration transformed to view useful for Infrastructure to create Runtime
  * @author gazarenkov
  */
-public class InternalEnvironmentConfig {
+public class InternalRuntimeConfig {
 
     protected Map<String, InternalMachineConfig> internalMachines;
     protected InternalRecipeConfig recipe;
     protected EnvironmentImpl config;
 
-    public InternalEnvironmentConfig(Environment environment, URL registryEndpoint) throws ApiException, IOException {
+    public InternalRuntimeConfig(Environment environment, URL registryEndpoint) throws ApiException, IOException {
 
         this.recipe = new InternalRecipeConfig(environment.getRecipe());
 

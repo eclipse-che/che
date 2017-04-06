@@ -32,7 +32,7 @@ public class MachineImpl implements Machine {
     }
 
 //    public MachineImpl(Machine machineRuntime) {
-//        this(machineRuntime.getEnvVariables(), machineRuntime.getProperties(), machineRuntime.getServers());
+//        this(machineRuntime.getProperties(), machineRuntime.getServers());
 //    }
 
     public MachineImpl(Map<String, String> properties,

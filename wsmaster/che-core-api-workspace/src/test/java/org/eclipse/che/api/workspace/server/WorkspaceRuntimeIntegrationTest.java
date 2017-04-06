@@ -127,10 +127,10 @@ public class WorkspaceRuntimeIntegrationTest {
 //        when(instance.getId()).thenReturn("machineId");
 //        when(instance.getConfig()).thenReturn(machineConfig);
 //
-//        CheServicesEnvironmentImpl internalEnv = new CheServicesEnvironmentImpl();
-//        internalEnv.getServices().put("service1", new CheServiceImpl().withId("machineId"));
+//        CheServicesEnvironmentImpl internalRuntimeConfig = new CheServicesEnvironmentImpl();
+//        internalRuntimeConfig.getServices().put("service1", new CheServiceImpl().withId("machineId"));
 //
-//        when(environmentParser.parse(any(Environment.class))).thenReturn(internalEnv);
+//        when(environmentParser.parse(any(Environment.class))).thenReturn(internalRuntimeConfig);
 //        when(instanceProvider.startService(anyString(),
 //                                           anyString(),
 //                                           anyString(),
