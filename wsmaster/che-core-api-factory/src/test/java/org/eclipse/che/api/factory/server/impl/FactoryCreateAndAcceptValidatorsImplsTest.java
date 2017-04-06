@@ -59,7 +59,7 @@ public class FactoryCreateAndAcceptValidatorsImplsTest {
     }
 
     @Test
-    public void testValidateOnCreate() throws ApiException {
+    public void testValidateOnCreate() throws Exception {
         FactoryCreateValidatorImpl spy = spy(createValidator);
         doNothing().when(spy)
                    .validateProjects(any(FactoryDto.class));

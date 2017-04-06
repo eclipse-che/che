@@ -28,8 +28,8 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.factory.Factory;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.factory.server.builder.FactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.AuthorDto;
@@ -39,6 +39,7 @@ import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.spi.ValidationException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
@@ -152,7 +153,8 @@ public class FactoryService extends Service {
     public FactoryDto saveFactory(Iterator<FileItem> formData) throws ForbiddenException,
                                                                       ConflictException,
                                                                       BadRequestException,
-                                                                      ServerException {
+                                                                      ServerException, NotFoundException,
+                                                                      ValidationException {
         try {
             final Set<FactoryImage> images = new HashSet<>();
             FactoryDto factory = null;
@@ -203,9 +205,9 @@ public class FactoryService extends Service {
                    @ApiResponse(code = 409, message = "When factory with given name and creator already exists"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public FactoryDto saveFactory(FactoryDto factory) throws BadRequestException,
-                                                                ServerException,
-                                                                ForbiddenException,
-                                                                ConflictException {
+                                                             ServerException,
+                                                             ForbiddenException,
+                                                             ConflictException, NotFoundException, ValidationException {
         requiredNotNull(factory, "Factory configuration");
         factoryBuilder.checkValid(factory);
         processDefaults(factory);
@@ -298,7 +300,7 @@ public class FactoryService extends Service {
                                                               NotFoundException,
                                                               ServerException,
                                                               ForbiddenException,
-                                                              ConflictException {
+                                                              ConflictException, ValidationException {
         requiredNotNull(update, "Factory configuration");
         update.setId(factoryId);
         final Factory existing = factoryManager.getById(factoryId);

@@ -12,14 +12,14 @@ package org.eclipse.che.api.factory.server.impl;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.factory.server.FactoryParameterValidator;
 
 import java.util.Map;
 
+import static java.lang.String.format;
 import static org.eclipse.che.api.factory.server.FactoryConstants.PARAMETRIZED_ILLEGAL_PARAMETER_VALUE_MESSAGE;
 import static org.eclipse.che.api.factory.server.FactoryConstants.PARAMETRIZED_INVALID_PARAMETER_MESSAGE;
-import static java.lang.String.format;
 
 /**
  * @author Alexander Garagatyi

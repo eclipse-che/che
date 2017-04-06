@@ -15,7 +15,6 @@ import org.eclipse.che.api.agent.server.launcher.ProcessIsLaunchedChecker;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.server.spi.Instance;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -39,7 +38,7 @@ public class ExecAgentLauncher extends AbstractAgentLauncher {
     }
 
     @Override
-    public void launch(Instance machine, Agent agent) throws ServerException {
+    public void launch(Runtime machine, Agent agent) throws ServerException {
         final AgentImpl agentCopy = new AgentImpl(agent);
         agentCopy.setScript(agent.getScript() + "\n" + runCommand);
         super.launch(machine, agentCopy);
