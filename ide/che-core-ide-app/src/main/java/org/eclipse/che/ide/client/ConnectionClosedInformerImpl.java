@@ -42,7 +42,7 @@ public class ConnectionClosedInformerImpl implements ConnectionClosedInformer {
     private CoreLocalizationConstant localizationConstant;
 
     @Inject
-    ConnectionClosedInformerImpl(DialogFactory dialogFactory,
+    public ConnectionClosedInformerImpl(DialogFactory dialogFactory,
                                  CoreLocalizationConstant localizationConstant) {
         this.dialogFactory = dialogFactory;
         this.localizationConstant = localizationConstant;
