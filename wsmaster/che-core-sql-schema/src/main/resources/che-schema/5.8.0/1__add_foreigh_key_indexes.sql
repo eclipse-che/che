@@ -17,8 +17,8 @@ CREATE INDEX index_preference_preferences_userid ON preference_preferences (pref
 CREATE INDEX index_externalmachine_agents_externalmachineid ON externalmachine_agents (externalmachine_id);
 CREATE INDEX index_workspace_attributes_workspaceid ON workspace_attributes (workspace_id);
 
-CREATE INDEX index_action_properties_entityid ON action_properties  (action_entityid);
-CREATE INDEX index_command_attributes_commandid ON command_attributes  (command_id);
+CREATE INDEX index_action_properties_entityid ON action_properties (action_entityid);
+CREATE INDEX index_command_attributes_commandid ON command_attributes (command_id);
 CREATE INDEX index_command_commandsid ON command (commands_id);
 CREATE INDEX index_environment_environmentsid ON environment (environments_id);
 CREATE INDEX index_externalmachine_attributes_externalmachineid ON externalmachine_attributes (externalmachine_id);
@@ -37,10 +37,10 @@ CREATE INDEX index_ide_onprojectsloadedid ON che_factory_ide (on_projects_loaded
 
 CREATE INDEX index_profile_attributes_userid ON profile_attributes (user_id);
 CREATE INDEX index_projectattribute_dbattributesid ON projectattribute (dbattributes_id);
-CREATE INDEX index_projectattribute_values_projectattributeid ON projectattribute_values  (projectattribute_id);
-CREATE INDEX index_projectconfig_mixins_projectconfigid ON projectconfig_mixins  (projectconfig_id);
-CREATE INDEX index_projectconfig_projectsid ON projectconfig  (projects_id);
-CREATE INDEX index_projectconfig_sourceid ON projectconfig  (source_id);
+CREATE INDEX index_projectattribute_values_projectattributeid ON projectattribute_values (projectattribute_id);
+CREATE INDEX index_projectconfig_mixins_projectconfigid ON projectconfig_mixins (projectconfig_id);
+CREATE INDEX index_projectconfig_projectsid ON projectconfig (projects_id);
+CREATE INDEX index_projectconfig_sourceid ON projectconfig (source_id);
 CREATE INDEX index_recipe_tags_recipeid ON recipe_tags (recipe_id);
 
 
