@@ -13,14 +13,10 @@
 -- from Codenvy S.A..
 --
 
-CREATE INDEX index_externalmachine_agents_externalmachineid ON externalmachine_agents (externalmachine_id);
-
 CREATE INDEX index_action_properties_entityid ON action_properties (action_entityid);
+
 CREATE INDEX index_command_attributes_commandid ON command_attributes (command_id);
 CREATE INDEX index_command_commandsid ON command (commands_id);
-CREATE INDEX index_environment_environmentsid ON environment (environments_id);
-CREATE INDEX index_externalmachine_attributes_externalmachineid ON externalmachine_attributes (externalmachine_id);
-CREATE INDEX index_externalmachine_machinesid ON externalmachine (machines_id);
 
 CREATE INDEX index_factory_buttonid ON che_factory (button_id);
 CREATE INDEX index_factory_ideid ON che_factory (ide_id);
@@ -30,6 +26,11 @@ CREATE INDEX index_factory_images_factoryid ON che_factory_image (factory_id);
 CREATE INDEX index_ide_onappclosedid ON che_factory_ide (on_app_closed_id);
 CREATE INDEX index_ide_onapploadedid ON che_factory_ide (on_app_loaded_id);
 CREATE INDEX index_ide_onprojectsloadedid ON che_factory_ide (on_projects_loaded_id);
+
+CREATE INDEX index_environment_environmentsid ON environment (environments_id);
+CREATE INDEX index_externalmachine_agents_externalmachineid ON externalmachine_agents (externalmachine_id);
+CREATE INDEX index_externalmachine_attributes_externalmachineid ON externalmachine_attributes (externalmachine_id);
+CREATE INDEX index_externalmachine_machinesid ON externalmachine (machines_id);
 
 CREATE INDEX index_preference_preferences_userid ON preference_preferences (preference_userid);
 CREATE INDEX index_profile_attributes_userid ON profile_attributes (user_id);
