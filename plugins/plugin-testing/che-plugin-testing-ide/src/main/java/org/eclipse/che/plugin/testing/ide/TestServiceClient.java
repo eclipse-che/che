@@ -37,7 +37,6 @@ import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.command.goal.TestGoal;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.extension.machine.client.command.CommandManagerImpl;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
@@ -50,6 +49,8 @@ import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
 /**
  * Client for calling test services
@@ -175,7 +176,7 @@ public class TestServiceClient {
                         public void apply(String expandedCommandLine) throws OperationException {
                             Map<String, String> attributes = new HashMap<>();
                             attributes.putAll(command.getAttributes());
-                            attributes.remove(CommandManagerImpl.PREVIEW_URL_ATTR);
+                            attributes.remove(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
 
                             CommandImpl expandedCommand = new CommandImpl(command.getName(), expandedCommandLine,
                                                                           command.getType(), attributes);
