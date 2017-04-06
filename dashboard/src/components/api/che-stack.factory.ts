@@ -10,7 +10,7 @@
  */
 'use strict';
 
-interface IremoteStackAPI<T> extends ng.resource.IResourceClass<T> {
+interface IRemoteStackAPI<T> extends ng.resource.IResourceClass<T> {
   getStacks(): ng.resource.IResource<T>;
   getStack(data: {stackId: string}): ng.resource.IResource<T>;
   updateStack(data: {stackId: string}, stack: che.IStack): ng.resource.IResource<T>;
@@ -29,7 +29,7 @@ export class CheStack {
   stacksById: { [stackId: string]: che.IStack };
   stacks: Array<any>;
   usedStackNames: Array<string>;
-  remoteStackAPI: IremoteStackAPI<any>;
+  remoteStackAPI: IRemoteStackAPI<any>;
 
   /**
    * Default constructor that is using resource
@@ -50,7 +50,7 @@ export class CheStack {
     this.usedStackNames = [];
 
     // remote call
-    this.remoteStackAPI = <IremoteStackAPI<any>>this.$resource('/api/stack', {}, {
+    this.remoteStackAPI = <IRemoteStackAPI<any>>this.$resource('/api/stack', {}, {
       getStacks: {method: 'GET', url: '/api/stack?maxItems=50', isArray: true}, //TODO 50 items is temp solution while paging is not added
       getStack: {method: 'GET', url: '/api/stack/:stackId'},
       updateStack: {method: 'PUT', url: '/api/stack/:stackId'},
