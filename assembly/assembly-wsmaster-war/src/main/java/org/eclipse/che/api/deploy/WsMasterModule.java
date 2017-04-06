@@ -156,8 +156,8 @@ public class WsMasterModule extends AbstractModule {
                 Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
         machineImageProviderMultibinder.addBinding().to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
 
-        bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
-                .to(org.eclipse.che.plugin.docker.machine.MachineProviderImpl.class);
+//        bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
+//                .to(org.eclipse.che.plugin.docker.machine.MachineProviderImpl.class);
 
         install(new org.eclipse.che.api.core.rest.CoreRestModule());
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
@@ -179,8 +179,8 @@ public class WsMasterModule extends AbstractModule {
         bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
         bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class)
                 .to(org.eclipse.che.plugin.docker.machine.cleaner.LocalWorkspaceFilesCleaner.class);
-        bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
-                .to(org.eclipse.che.plugin.docker.machine.local.LocalCheInfrastructureProvisioner.class);
+//        bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
+//                .to(org.eclipse.che.plugin.docker.machine.local.LocalCheInfrastructureProvisioner.class);
 
         // system components
         bind(org.eclipse.che.api.system.server.SystemService.class);

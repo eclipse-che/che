@@ -74,14 +74,14 @@ public class DockerMachineModule extends AbstractModule {
                                          Names.named("machine.docker.networks"))
                            .permitDuplicates();
 
-        bind(org.eclipse.che.api.environment.server.ContainerNameGenerator.class)
-                .to(org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.class);
+//        bind(org.eclipse.che.api.environment.server.ContainerNameGenerator.class)
+//                .to(org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.class);
 
-        MapBinder<String, TypeSpecificEnvironmentParser> envParserMapBinder = MapBinder.newMapBinder(binder(),
-                                                                                                     String.class,
-                                                                                                     TypeSpecificEnvironmentParser.class);
-        envParserMapBinder.addBinding("dockerfile").to(DockerfileEnvironmentParser.class);
-        envParserMapBinder.addBinding("dockerimage").to(DockerImageEnvironmentParser.class);
+//        MapBinder<String, TypeSpecificEnvironmentParser> envParserMapBinder = MapBinder.newMapBinder(binder(),
+//                                                                                                     String.class,
+//                                                                                                     TypeSpecificEnvironmentParser.class);
+//        envParserMapBinder.addBinding("dockerfile").to(DockerfileEnvironmentParser.class);
+//        envParserMapBinder.addBinding("dockerimage").to(DockerImageEnvironmentParser.class);
 
         allMachinesEnvVars.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ApiEndpointEnvVariableProvider.class);
 

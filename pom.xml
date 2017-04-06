@@ -26,6 +26,7 @@
     <modules>
         <module>core</module>
         <module>wsmaster</module>
+        <module>infrastructure</module>
         <module>wsagent</module>
         <module>ide</module>
         <module>agents</module>
