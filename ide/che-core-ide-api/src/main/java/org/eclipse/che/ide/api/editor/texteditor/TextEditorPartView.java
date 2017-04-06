@@ -69,6 +69,14 @@ public interface TextEditorPartView extends RequiresResize, IsWidget, HasNotific
     void showPlaceHolder(Widget placeHolder);
 
     /**
+     * Sets whether the info panel is visible.
+     *
+     * @param visible
+     *         {@code true} to show the info panel, {@code false} to hide it
+     */
+    void setInfoPanelVisible(boolean visible);
+
+    /**
      * Sets the initial state of the info panel.
      *
      * @param mode
