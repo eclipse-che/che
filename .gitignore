@@ -68,3 +68,9 @@ docs/.sass-cache
 docs/.jekyll-metadata
 docs/assets/imgs
 !assembly/assembly-main/src/assembly/bin/
+
+
+# NodeJs modules #
+##################
+plugins/plugin-terminal-ui/node_modules/
+plugins/plugin-terminal-ui/build/
