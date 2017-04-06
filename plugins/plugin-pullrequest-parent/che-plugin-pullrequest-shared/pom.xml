@@ -89,7 +89,7 @@
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-dto-maven-plugin</artifactId>
-                <version>${che.version}</version>
+                <version>${project.version}</version>
                 <!-- only need client side -->
                 <executions>
                     <execution>
