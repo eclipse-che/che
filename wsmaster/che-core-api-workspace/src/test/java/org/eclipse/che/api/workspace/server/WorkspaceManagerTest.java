@@ -59,122 +59,123 @@ import static org.testng.util.Strings.isNullOrEmpty;
  */
 @Listeners(value = {MockitoTestNGListener.class})
 public class WorkspaceManagerTest {
-
-    private static final String USER_ID     = "user123";
-    private static final String NAMESPACE   = "userNS";
-    private static final String NAMESPACE_2 = "userNS2";
-
-    @Mock
-    private WorkspaceDao                  workspaceDao;
-    @Mock
-    private WorkspaceRuntimes             runtimes;
-    @Mock
-    private AccountManager                accountManager;
-    @Mock
-    private SnapshotDao                   snapshotDao;
-    @Mock
-    private WorkspaceSharedPool           sharedPool;
-    @Mock
-    private EventService                  eventService;
-    @Captor
-    private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
-    @Captor
-    private ArgumentCaptor<Runnable>      taskCaptor;
-
-    private WorkspaceManager workspaceManager;
-
-    @BeforeMethod
-    public void setUp() throws Exception {
-        workspaceManager = new WorkspaceManager(workspaceDao,
-                                                runtimes,
-                                                eventService,
-                                                accountManager,
-//                                                false,
-//                                                false,
-//                                                snapshotDao,
-                                                sharedPool);
-        when(accountManager.getByName(NAMESPACE)).thenReturn(new AccountImpl("accountId", NAMESPACE, "test"));
-        when(accountManager.getByName(NAMESPACE_2)).thenReturn(new AccountImpl("accountId2", NAMESPACE_2, "test"));
-        when(workspaceDao.create(any(WorkspaceImpl.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
-        when(workspaceDao.update(any(WorkspaceImpl.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
-
-        EnvironmentContext.setCurrent(new EnvironmentContext() {
-            @Override
-            public Subject getSubject() {
-                return new SubjectImpl(NAMESPACE, USER_ID, "token", false);
-            }
-        });
-    }
-
-    @Test
-    public void shouldBeAbleToCreateWorkspace() throws Exception {
-        final WorkspaceConfig cfg = createConfig();
-
-        final WorkspaceImpl workspace = workspaceManager.createWorkspace(cfg, NAMESPACE, null);
-
-        assertNotNull(workspace);
-        assertFalse(isNullOrEmpty(workspace.getId()));
-        assertEquals(workspace.getNamespace(), NAMESPACE);
-        assertEquals(workspace.getConfig(), cfg);
-        assertFalse(workspace.isTemporary());
-        assertEquals(workspace.getStatus(), WorkspaceStatus.STOPPED);
-        assertNotNull(workspace.getAttributes().get(WorkspaceManager.CREATED_ATTRIBUTE_NAME));
-        verify(workspaceDao).create(workspace);
-    }
-
-    @Test
-    public void getsWorkspaceByIdWithoutRuntime() throws Exception {
-        WorkspaceImpl workspace = createAndMockWorkspace();
-
-        final WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getId());
-
-        assertEquals(result, workspace);
-    }
-
-    @Test
-    public void getsWorkspaceByIdWithRuntime() throws Exception {
-        WorkspaceImpl workspace = createAndMockWorkspace();
-        //createAndMockRuntime(workspace, WorkspaceStatus.STARTING);
-        workspaceManager.startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
-
-        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getId());
-
-        assertEquals(result.getStatus(), WorkspaceStatus.STARTING, "Workspace status must be taken from the runtime instance");
-    }
-
-    @Test
-    public void shouldBeAbleToGetWorkspaceByName() throws Exception {
-        WorkspaceImpl workspace = createAndMockWorkspace();
-
-        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getConfig().getName(), workspace.getNamespace());
-
-        assertEquals(result, workspace);
-    }
-
-    @Test(expectedExceptions = NotFoundException.class)
-    public void getWorkspaceShouldThrowNotFoundExceptionWhenWorkspaceDoesNotExist() throws Exception {
-        when(workspaceDao.get(any())).thenThrow(new NotFoundException("not found"));
-
-        workspaceManager.getWorkspace("workspace123");
-    }
-
-    @Test
-    public void shouldBeAbleToGetWorkspaceByKey() throws Exception {
-        WorkspaceImpl workspace = createAndMockWorkspace();
-
-        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getNamespace() + ":" + workspace.getConfig().getName());
-
-        assertEquals(result, workspace);
-    }
-
-    @Test
-    public void shouldBeAbleToGetWorkspaceByKeyWithoutOwner() throws Exception {
-        WorkspaceImpl workspace = createAndMockWorkspace();
-
-        WorkspaceImpl result = workspaceManager.getWorkspace(":" + workspace.getConfig().getName());
-
-        assertEquals(result, workspace);
-    }
+// FIXME: spi
+//
+//    private static final String USER_ID     = "user123";
+//    private static final String NAMESPACE   = "userNS";
+//    private static final String NAMESPACE_2 = "userNS2";
+//
+//    @Mock
+//    private WorkspaceDao                  workspaceDao;
+//    @Mock
+//    private WorkspaceRuntimes             runtimes;
+//    @Mock
+//    private AccountManager                accountManager;
+//    @Mock
+//    private SnapshotDao                   snapshotDao;
+//    @Mock
+//    private WorkspaceSharedPool           sharedPool;
+//    @Mock
+//    private EventService                  eventService;
+//    @Captor
+//    private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
+//    @Captor
+//    private ArgumentCaptor<Runnable>      taskCaptor;
+//
+//    private WorkspaceManager workspaceManager;
+//
+//    @BeforeMethod
+//    public void setUp() throws Exception {
+//        workspaceManager = new WorkspaceManager(workspaceDao,
+//                                                runtimes,
+//                                                eventService,
+//                                                accountManager,
+////                                                false,
+////                                                false,
+////                                                snapshotDao,
+//                                                sharedPool);
+//        when(accountManager.getByName(NAMESPACE)).thenReturn(new AccountImpl("accountId", NAMESPACE, "test"));
+//        when(accountManager.getByName(NAMESPACE_2)).thenReturn(new AccountImpl("accountId2", NAMESPACE_2, "test"));
+//        when(workspaceDao.create(any(WorkspaceImpl.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
+//        when(workspaceDao.update(any(WorkspaceImpl.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
+//
+//        EnvironmentContext.setCurrent(new EnvironmentContext() {
+//            @Override
+//            public Subject getSubject() {
+//                return new SubjectImpl(NAMESPACE, USER_ID, "token", false);
+//            }
+//        });
+//    }
+//
+//    @Test
+//    public void shouldBeAbleToCreateWorkspace() throws Exception {
+//        final WorkspaceConfig cfg = createConfig();
+//
+//        final WorkspaceImpl workspace = workspaceManager.createWorkspace(cfg, NAMESPACE, null);
+//
+//        assertNotNull(workspace);
+//        assertFalse(isNullOrEmpty(workspace.getId()));
+//        assertEquals(workspace.getNamespace(), NAMESPACE);
+//        assertEquals(workspace.getConfig(), cfg);
+//        assertFalse(workspace.isTemporary());
+//        assertEquals(workspace.getStatus(), WorkspaceStatus.STOPPED);
+//        assertNotNull(workspace.getAttributes().get(WorkspaceManager.CREATED_ATTRIBUTE_NAME));
+//        verify(workspaceDao).create(workspace);
+//    }
+//
+//    @Test
+//    public void getsWorkspaceByIdWithoutRuntime() throws Exception {
+//        WorkspaceImpl workspace = createAndMockWorkspace();
+//
+//        final WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getId());
+//
+//        assertEquals(result, workspace);
+//    }
+//
+//    @Test
+//    public void getsWorkspaceByIdWithRuntime() throws Exception {
+//        WorkspaceImpl workspace = createAndMockWorkspace();
+//        //createAndMockRuntime(workspace, WorkspaceStatus.STARTING);
+//        workspaceManager.startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
+//
+//        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getId());
+//
+//        assertEquals(result.getStatus(), WorkspaceStatus.STARTING, "Workspace status must be taken from the runtime instance");
+//    }
+//
+//    @Test
+//    public void shouldBeAbleToGetWorkspaceByName() throws Exception {
+//        WorkspaceImpl workspace = createAndMockWorkspace();
+//
+//        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getConfig().getName(), workspace.getNamespace());
+//
+//        assertEquals(result, workspace);
+//    }
+//
+//    @Test(expectedExceptions = NotFoundException.class)
+//    public void getWorkspaceShouldThrowNotFoundExceptionWhenWorkspaceDoesNotExist() throws Exception {
+//        when(workspaceDao.get(any())).thenThrow(new NotFoundException("not found"));
+//
+//        workspaceManager.getWorkspace("workspace123");
+//    }
+//
+//    @Test
+//    public void shouldBeAbleToGetWorkspaceByKey() throws Exception {
+//        WorkspaceImpl workspace = createAndMockWorkspace();
+//
+//        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getNamespace() + ":" + workspace.getConfig().getName());
+//
+//        assertEquals(result, workspace);
+//    }
+//
+//    @Test
+//    public void shouldBeAbleToGetWorkspaceByKeyWithoutOwner() throws Exception {
+//        WorkspaceImpl workspace = createAndMockWorkspace();
+//
+//        WorkspaceImpl result = workspaceManager.getWorkspace(":" + workspace.getConfig().getName());
+//
+//        assertEquals(result, workspace);
+//    }
 
 //    @Test
 //    public void shouldBeAbleToGetWorkspacesAvailableForUserWithRuntimes() throws Exception {
@@ -917,41 +918,41 @@ public class WorkspaceManagerTest {
 //        when(descriptor.getRuntime()).thenReturn(runtime);
 //        return descriptor;
 //    }
+////
+//    private WorkspaceImpl createAndMockWorkspace() throws NotFoundException, ServerException {
+//        return createAndMockWorkspace(createConfig(), "test-namespace");
+//    }
 //
-    private WorkspaceImpl createAndMockWorkspace() throws NotFoundException, ServerException {
-        return createAndMockWorkspace(createConfig(), "test-namespace");
-    }
-
-    private WorkspaceImpl createAndMockWorkspace(WorkspaceConfig cfg, String namespace) throws NotFoundException, ServerException {
-        WorkspaceImpl workspace = WorkspaceImpl.builder()
-                                               .generateId()
-                                               .setConfig(cfg)
-                                               .setAccount(new AccountImpl("id", namespace, "type"))
-                                               .setStatus(WorkspaceStatus.STOPPED)
-                                               .build();
-        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
-        when(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace())).thenReturn(workspace);
-        when(workspaceDao.get(workspace.getConfig().getName(), NAMESPACE)).thenReturn(workspace);
-        when(workspaceDao.getByNamespace(workspace.getNamespace())).thenReturn(singletonList(workspace));
-        when(workspaceDao.getByNamespace(NAMESPACE)).thenReturn(singletonList(workspace));
-        return workspace;
-    }
-
-    private static WorkspaceConfigImpl createConfig() {
-        EnvironmentImpl environment = new EnvironmentImpl(new RecipeImpl("type",
-                                                                         "contentType",
-                                                                         "content",
-                                                                         null),
-                                                          singletonMap("dev-machine",
-                                                                       new MachineConfigImpl(singletonList("org.eclipse.che.ws-agent"),
-                                                                                             null,
-                                                                                             singletonMap("memoryLimitBytes", "10000"))));
-        return WorkspaceConfigImpl.builder()
-                                  .setName("dev-workspace")
-                                  .setDefaultEnv("dev-env")
-                                  .setEnvironments(singletonMap("dev-env", environment))
-                                  .build();
-    }
+//    private WorkspaceImpl createAndMockWorkspace(WorkspaceConfig cfg, String namespace) throws NotFoundException, ServerException {
+//        WorkspaceImpl workspace = WorkspaceImpl.builder()
+//                                               .generateId()
+//                                               .setConfig(cfg)
+//                                               .setAccount(new AccountImpl("id", namespace, "type"))
+//                                               .setStatus(WorkspaceStatus.STOPPED)
+//                                               .build();
+//        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+//        when(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace())).thenReturn(workspace);
+//        when(workspaceDao.get(workspace.getConfig().getName(), NAMESPACE)).thenReturn(workspace);
+//        when(workspaceDao.getByNamespace(workspace.getNamespace())).thenReturn(singletonList(workspace));
+//        when(workspaceDao.getByNamespace(NAMESPACE)).thenReturn(singletonList(workspace));
+//        return workspace;
+//    }
+//
+//    private static WorkspaceConfigImpl createConfig() {
+//        EnvironmentImpl environment = new EnvironmentImpl(new RecipeImpl("type",
+//                                                                         "contentType",
+//                                                                         "content",
+//                                                                         null),
+//                                                          singletonMap("dev-machine",
+//                                                                       new MachineConfigImpl(singletonList("org.eclipse.che.ws-agent"),
+//                                                                                             null,
+//                                                                                             singletonMap("memoryLimitBytes", "10000"))));
+//        return WorkspaceConfigImpl.builder()
+//                                  .setName("dev-workspace")
+//                                  .setDefaultEnv("dev-env")
+//                                  .setEnvironments(singletonMap("dev-env", environment))
+//                                  .build();
+//    }
 //
 //    private OldMachineImpl createMachine(String workspaceId, String envName, boolean isDev) {
 //        return OldMachineImpl.builder()

@@ -360,5 +360,13 @@ public class WorkspaceImpl implements Workspace {
             this.runtime = runtime;
             return this;
         }
+
+        public WorkspaceImplBuilder putAttribute(String name, String value) {
+            if (attributes == null) {
+                attributes = new HashMap<>();
+            }
+            attributes.put(name, value);
+            return this;
+        }
     }
 }

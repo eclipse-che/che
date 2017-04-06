@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.Command;
@@ -30,13 +29,16 @@ import static java.lang.String.format;
 
 /**
  * Validator for {@link Workspace}.
- * In all the cases when entity is not valid throws {@link ValidationException}.
  *
  * @author Yevhenii Voevodin
  */
 @Singleton
 public class WorkspaceValidator {
-    /* should contain [3, 20] characters, first and last character is letter or digit, available characters {A-Za-z0-9.-_}*/
+
+    /**
+     * Must contain [3, 20] characters, first and last character is
+     * letter or digit, available characters {A-Za-z0-9.-_}.
+     */
     private static final Pattern WS_NAME = Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,18}[a-zA-Z0-9]");
 
     private final WorkspaceRuntimes runtimes;
@@ -46,111 +48,107 @@ public class WorkspaceValidator {
         this.runtimes = runtimes;
     }
 
-    public void validateWorkspace(Workspace workspace) throws BadRequestException,
-                                                              ServerException {
-//        validateAttributes(workspace.getAttributes());
-//        validateConfig(workspace.getConfig());
-    }
-
-    public void validateConfig(WorkspaceConfig config) throws BadRequestException,
+    /**
+     * Checks whether given workspace configuration object is in application valid state,
+     * so it provides enough data to be processed by internal components, and the data
+     * it provides is valid so consistency is not violated.
+     *
+     * @param config
+     *         configuration to validate
+     * @throws ValidationException
+     *         if any of validation constraints is violated
+     * @throws NotFoundException
+     *         when configuration contains a recipe with a type which is not supported
+     *         by currently available workspace infrastructures
+     * @throws ServerException
+     *         when any other error occurs during environment validation
+     */
+    public void validateConfig(WorkspaceConfig config) throws ValidationException,
                                                               NotFoundException,
                                                               ServerException {
-        // configuration object itself
+        // configuration object properties
         checkNotNull(config.getName(), "Workspace name required");
-        checkArgument(WS_NAME.matcher(config.getName()).matches(),
-                      "Incorrect workspace name, it must be between 3 and 20 characters and may contain digits, " +
-                      "latin letters, underscores, dots, dashes and should start and end only with digits, " +
-                      "latin letters or underscores");
+        check(WS_NAME.matcher(config.getName()).matches(),
+              "Incorrect workspace name, it must be between 3 and 20 characters and may contain digits, " +
+              "latin letters, underscores, dots, dashes and must start and end only with digits, " +
+              "latin letters or underscores");
 
+        // environments
+        check(!isNullOrEmpty(config.getDefaultEnv()), "Workspace default environment name required");
+        checkNotNull(config.getEnvironments(), "Workspace must contain at least one environment");
+        check(config.getEnvironments().containsKey(config.getDefaultEnv()), "Workspace default environment configuration required");
 
-        //environments
-        checkArgument(!isNullOrEmpty(config.getDefaultEnv()), "Workspace default environment name required");
-        checkNotNull(config.getEnvironments(), "Workspace should contain at least one environment");
-        checkArgument(config.getEnvironments().containsKey(config.getDefaultEnv()),
-                      "Workspace default environment configuration required");
+        for (Environment environment : config.getEnvironments().values()) {
+            checkNotNull(environment, "Environment must not be null");
+            Recipe recipe = environment.getRecipe();
+            checkNotNull(recipe, "Environment recipe must not be null");
+            checkNotNull(recipe.getType(), "Environment recipe type must not be null");
 
-        for (Map.Entry<String, ? extends Environment> envEntry : config.getEnvironments().entrySet()) {
-            try {
-
-                validateEnvironment(envEntry.getValue());
-
-            } catch (IllegalArgumentException e) {
-                throw new BadRequestException(e.getLocalizedMessage());
-            }
+            runtimes.estimate(environment);
         }
 
         //commands
         for (Command command : config.getCommands()) {
-            checkArgument(!isNullOrEmpty(command.getName()),
-                          "Workspace %s contains command with null or empty name",
-                          config.getName());
-            checkArgument(!isNullOrEmpty(command.getCommandLine()),
-                          "Command line required for command '%s' in workspace '%s'",
-                          command.getName(),
-                          config.getName());
+            check(!isNullOrEmpty(command.getName()),
+                  "Workspace %s contains command with null or empty name",
+                  config.getName());
+            check(!isNullOrEmpty(command.getCommandLine()),
+                  "Command line required for command '%s' in workspace '%s'",
+                  command.getName(),
+                  config.getName());
         }
 
         //projects
         //TODO
     }
 
-
-    private void validateEnvironment(Environment environment) throws BadRequestException, NotFoundException, ServerException {
-
-        checkNotNull(environment, "Environment should not be null");
-        Recipe recipe = environment.getRecipe();
-        checkNotNull(recipe, "Environment recipe should not be null");
-        checkNotNull(recipe.getType(), "Environment recipe type should not be null");
-
-        // TODO need that?
-//        checkArgument(recipe.getContent() != null || recipe.getLocation() != null,
-//                      "OldRecipe of environment must contain location or content");
-//        checkArgument(recipe.getContent() != null && recipe.getLocation() != null,
-//                      "OldRecipe of environment must contain either location or content but not both");
-
-// FIXME: spi
-//        runtimes.estimate(environment);
-    }
-
-    public void validateAttributes(Map<String, String> attributes) throws BadRequestException {
+    /**
+     * Checks whether workspace attributes are valid.
+     * The attribute is valid if it's key is not null & not empty & is not prefixed with 'codenvy'.
+     *
+     * @param attributes
+     *         the map to check
+     * @throws ValidationException
+     *         when attributes are not valid
+     */
+    public void validateAttributes(Map<String, String> attributes) throws ValidationException {
         for (String attributeName : attributes.keySet()) {
             //attribute name should not be empty and should not start with codenvy
-            checkArgument(attributeName != null && !attributeName.trim().isEmpty() && !attributeName.toLowerCase().startsWith("codenvy"),
-                          "Attribute name '%s' is not valid",
-                          attributeName);
+            check(attributeName != null && !attributeName.trim().isEmpty() && !attributeName.toLowerCase().startsWith("codenvy"),
+                  "Attribute name '%s' is not valid",
+                  attributeName);
         }
     }
 
     /**
-     * Checks that object reference is not null, throws {@link BadRequestException}
+     * Checks that object reference is not null, throws {@link ValidationException}
      * in the case of null {@code object} with given {@code message}.
      */
-    private static void checkNotNull(Object object, String message) throws BadRequestException {
+    private static void checkNotNull(Object object, String message) throws ValidationException {
         if (object == null) {
-            throw new BadRequestException(message);
+            throw new ValidationException(message);
         }
     }
 
     /**
-     * Checks that expression is true, throws {@link BadRequestException} otherwise.
+     * Checks that expression is true, throws {@link ValidationException} otherwise.
      *
      * <p>Exception uses error message built from error message template and error message parameters.
      */
-    private static void checkArgument(boolean expression, String errorMessageTemplate, Object... errorMessageParams)
-            throws BadRequestException {
+    private static void check(boolean expression, String fmt, Object... args) throws ValidationException {
         if (!expression) {
-            throw new BadRequestException(format(errorMessageTemplate, errorMessageParams));
+            throw new ValidationException(format(fmt, args));
         }
     }
 
     /**
-     * Checks that expression is true, throws {@link BadRequestException} otherwise.
+     * Checks that expression is true, throws {@link ValidationException} otherwise.
      *
      * <p>Exception uses error message built from error message template and error message parameters.
      */
-    private static void checkArgument(boolean expression, String errorMessage) throws BadRequestException {
+    private static void check(boolean expression, String message) throws ValidationException {
         if (!expression) {
-            throw new BadRequestException(errorMessage);
+            throw new ValidationException(message);
         }
     }
 }

@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
+import org.eclipse.che.api.workspace.server.spi.ValidationException;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 
 import javax.inject.Inject;
@@ -54,6 +55,10 @@ public class StackValidator {
         if (stack.getWorkspaceConfig() == null) {
             throw new BadRequestException("Workspace config required");
         }
-        wsValidator.validateConfig(stack.getWorkspaceConfig());
+        try {
+            wsValidator.validateConfig(stack.getWorkspaceConfig());
+        } catch (ValidationException x) {
+            throw new BadRequestException(x.getMessage());
+        }
     }
 }
