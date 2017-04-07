@@ -217,7 +217,6 @@ public class DebuggerTest extends BaseTest {
         OperationConfiguratorOneToNone operationConfiguratorOneToNone = mock(OperationConfiguratorOneToNone.class);
 
         doReturn(methodNameConfigurator).when(configurator).newConfiguration();
-        doReturn(methodNameConfigurator).when(configurator).newConfiguration();
         doReturn(paramsConfigurator).when(methodNameConfigurator).methodName(anyString());
         doReturn(resultConfiguratorFromOne).when(paramsConfigurator).paramsAsDto(anyObject());
         doReturn(operationConfiguratorOneToNone).when(resultConfiguratorFromOne).noResult();
