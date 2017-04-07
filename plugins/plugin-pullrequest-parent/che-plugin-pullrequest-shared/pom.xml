@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-pullrequest-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.7.0-SNAPSHOT</version>
+        <version>5.8.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-pullrequest-shared</artifactId>
     <name>Che Plugin :: Pull request :: Shared</name>
@@ -89,7 +89,7 @@
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-dto-maven-plugin</artifactId>
-                <version>${che.version}</version>
+                <version>${project.version}</version>
                 <!-- only need client side -->
                 <executions>
                     <execution>
