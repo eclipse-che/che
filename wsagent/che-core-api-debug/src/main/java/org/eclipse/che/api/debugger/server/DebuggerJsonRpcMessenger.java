@@ -1,0 +1,110 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.api.debugger.server;
+
+import com.google.inject.Singleton;
+
+import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
+import org.eclipse.che.api.debug.shared.dto.LocationDto;
+import org.eclipse.che.api.debug.shared.dto.event.BreakpointActivatedEventDto;
+import org.eclipse.che.api.debug.shared.dto.event.DisconnectEventDto;
+import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
+import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
+import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
+import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import java.util.Set;
+
+import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static org.eclipse.che.api.debugger.server.DtoConverter.asDto;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
+
+/**
+ * Send debugger events using JSON RPC to the clients
+ */
+@Singleton
+public class DebuggerJsonRpcMessenger implements EventSubscriber<DebuggerMessage> {
+    private static final String EVENT_DEBUGGER_MESSAGE_BREAKPOINT = "event:debugger:breakpoint";
+    private static final String EVENT_DEBUGGER_MESSAGE_DISCONNECT = "event:debugger:disconnect";
+    private static final String EVENT_DEBUGGER_MESSAGE_SUSPEND    = "event:debugger:suspend";
+    private static final String EVENT_DEBUGGER_UN_SUBSCRIBE       = "event:debugger:un-subscribe";
+    private static final String EVENT_DEBUGGER_SUBSCRIBE          = "event:debugger:subscribe";
+
+    private final EventService       eventService;
+    private final RequestTransmitter transmitter;
+
+    private final Set<String> endpointIds = newConcurrentHashSet();
+
+    @Inject
+    public DebuggerJsonRpcMessenger(EventService eventService, RequestTransmitter transmitter) {
+        this.eventService = eventService;
+        this.transmitter = transmitter;
+    }
+
+    @PostConstruct
+    private void subscribe() {
+        eventService.subscribe(this);
+    }
+
+    @PreDestroy
+    private void unsubscribe() {
+        eventService.unsubscribe(this);
+    }
+
+    @Override
+    public void onEvent(DebuggerMessage event) {
+        switch (event.getDebuggerEvent().getType()) {
+            case SUSPEND:
+                final LocationDto location = asDto(((SuspendEvent)event.getDebuggerEvent()).getLocation());
+                final SuspendEventDto suspendEvent = newDto(SuspendEventDto.class).withType(DebuggerEvent.TYPE.SUSPEND)
+                                                                                  .withLocation(location);
+                endpointIds.forEach(it -> transmitter.transmitOneToNone(it, EVENT_DEBUGGER_MESSAGE_SUSPEND, suspendEvent));
+                break;
+            case BREAKPOINT_ACTIVATED:
+                final BreakpointDto breakpointDto = asDto(((BreakpointActivatedEvent)event.getDebuggerEvent()).getBreakpoint());
+                final BreakpointActivatedEventDto breakpointActivatedEvent = newDto(BreakpointActivatedEventDto.class)
+                        .withType(DebuggerEvent.TYPE.BREAKPOINT_ACTIVATED)
+                        .withBreakpoint(breakpointDto);
+                endpointIds.forEach(it -> transmitter.transmitOneToNone(it, EVENT_DEBUGGER_MESSAGE_BREAKPOINT, breakpointActivatedEvent));
+                break;
+            case DISCONNECT:
+                final DisconnectEventDto disconnectEvent = newDto(DisconnectEventDto.class).withType(DebuggerEvent.TYPE.DISCONNECT);
+                endpointIds.forEach(it -> transmitter.transmitOneToNone(it, EVENT_DEBUGGER_MESSAGE_DISCONNECT, disconnectEvent));
+                break;
+            default:
+        }
+    }
+
+    @Inject
+    private void configureSubscribeHandler(RequestHandlerConfigurator configurator) {
+        configurator.newConfiguration()
+                    .methodName(EVENT_DEBUGGER_SUBSCRIBE)
+                    .paramsAsEmpty()
+                    .noResult()
+                    .withConsumer((endpointId, aVoid) -> endpointIds.add(endpointId));
+    }
+
+    @Inject
+    private void configureUnSubscribeHandler(RequestHandlerConfigurator configurator) {
+        configurator.newConfiguration()
+                    .methodName(EVENT_DEBUGGER_UN_SUBSCRIBE)
+                    .paramsAsString()
+                    .noResult()
+                    .withConsumer((endpointId, aVoid) -> endpointIds.remove(endpointId));
+    }
+}

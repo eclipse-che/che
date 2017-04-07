@@ -26,9 +26,10 @@ import javax.inject.Singleton;
 import static org.eclipse.che.api.debugger.server.DtoConverter.asDto;
 
 /**
- * @author Anatoliy Bazko
+ * @deprecated As of release 5.8.0, replaced by {@link DebuggerJsonRpcMessenger}
  */
 @Singleton
+@Deprecated
 public class DebuggerWebSocketMessenger implements EventSubscriber<DebuggerMessage> {
     private static final Logger LOG     = LoggerFactory.getLogger(DebuggerWebSocketMessenger.class);
     private static final String CHANNEL = "%s:events:";
