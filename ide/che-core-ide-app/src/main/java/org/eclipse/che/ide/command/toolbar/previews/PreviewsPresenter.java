@@ -82,7 +82,7 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
 
             @Override
             public void onWsAgentStopped(WsAgentStateEvent event) {
-                view.removeAll();
+                view.removeAllURLs();
             }
         });
 
@@ -92,7 +92,7 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
 
     /** Updates view with preview URLs of all running processes. */
     private void updateView() {
-        view.removeAll();
+        view.removeAllURLs();
 
         final WorkspaceRuntime runtime = appContext.getActiveRuntime();
 
@@ -108,7 +108,7 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
      * the process with the given {@code pid} on the specified {@code machine}.
      * Returns promise that rejects with an error if preview URL isn't available.
      */
-    private Promise<PreviewUrl> getPreviewUrl(int pid, Machine machine) {
+    private Promise<PreviewUrlItem> getPreviewUrl(int pid, Machine machine) {
         return execAgentClient.getProcess(machine.getId(), pid)
                               // get command's preview URL
                               .then((Function<GetProcessResponseDto, String>)process -> {
@@ -125,9 +125,9 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
                                   return promiseProvider.reject(new Exception(messages.previewsNotAvailableError()));
                               })
                               // compose preview URL's display name
-                              .then((Function<String, PreviewUrl>)previewUrl -> new PreviewUrl(previewUrl,
-                                                                                               getPreviewUrlDisplayName(previewUrl)
-                                                                                                       .orElse(previewUrl)));
+                              .then((Function<String, PreviewUrlItem>)previewUrl -> new PreviewUrlItem(previewUrl,
+                                                                                                       getPreviewUrlDisplayName(previewUrl)
+                                                                                                               .orElse(previewUrl)));
     }
 
     private Optional<String> getPreviewUrlDisplayName(String previewUrl) {
@@ -160,7 +160,7 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
     }
 
     @Override
-    public void onUrlChosen(PreviewUrl previewUrl) {
-        Window.open(previewUrl.getUrl(), "_blank", null);
+    public void onUrlChosen(PreviewUrlItem previewUrlItem) {
+        Window.open(previewUrlItem.getUrl(), "_blank", null);
     }
 }

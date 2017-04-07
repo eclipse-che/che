@@ -14,6 +14,4 @@ package org.eclipse.che.ide.ui.menubutton;
 public interface MenuItem {
 
     String getName();
-
-    boolean isDisabled();
 }

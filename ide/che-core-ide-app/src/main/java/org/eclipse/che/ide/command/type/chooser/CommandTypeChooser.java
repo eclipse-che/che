@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.command.type.CommandTypeMessages;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Comparator.comparing;
@@ -66,7 +67,7 @@ public class CommandTypeChooser implements CommandTypeChooserView.ActionDelegate
      * or rejected in case command type selection has been cancelled
      */
     public Promise<CommandType> show(int left, int top) {
-        final List<CommandType> commandTypes = commandTypeRegistry.getCommandTypes();
+        final List<CommandType> commandTypes = new ArrayList<>(commandTypeRegistry.getCommandTypes());
 
         if (commandTypes.size() == 1) {
             return promiseProvider.resolve(commandTypes.get(0));

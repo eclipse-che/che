@@ -36,6 +36,7 @@ import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
+import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -54,7 +55,6 @@ import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFac
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
-import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
 import org.junit.Before;
@@ -67,6 +67,7 @@ import org.mockito.Mock;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.COMMAND_NODE;
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.MACHINE_NODE;
@@ -625,8 +626,7 @@ public class ProcessesPanelPresenterTest {
 
         CommandOutputConsole outputConsole = mock(CommandOutputConsole.class);
 
-        CommandType commandType = mock(CommandType.class);
-        when(commandTypeRegistry.getCommandTypeById(anyString())).thenReturn(commandType);
+        when(commandTypeRegistry.getCommandTypeById(anyString())).thenReturn(Optional.of(mock(CommandType.class)));
         when(commandConsoleFactory.create(anyObject(),
                                           any(org.eclipse.che.api.core.model.machine.Machine.class))).thenReturn(outputConsole);
 
