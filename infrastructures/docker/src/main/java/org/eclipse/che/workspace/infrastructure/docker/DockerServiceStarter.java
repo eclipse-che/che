@@ -1,47 +1,32 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.old;
+package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.SystemInfo;
-import org.eclipse.che.api.environment.server.MachineInstanceProvider;
-import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
-import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
-import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Size;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
-import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
@@ -49,25 +34,26 @@ import org.eclipse.che.plugin.docker.client.json.Volume;
 import org.eclipse.che.plugin.docker.client.json.container.NetworkingConfig;
 import org.eclipse.che.plugin.docker.client.json.network.ConnectContainer;
 import org.eclipse.che.plugin.docker.client.json.network.EndpointConfig;
-import org.eclipse.che.plugin.docker.client.json.network.NewNetwork;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
-import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
+import org.eclipse.che.workspace.infrastructure.docker.old.DockerInstance;
+import org.eclipse.che.workspace.infrastructure.docker.old.DockerInstanceRuntimeInfo;
+import org.eclipse.che.workspace.infrastructure.docker.old.DockerMachineSource;
 import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceStopDetector;
 import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerMachineFactory;
 import org.eclipse.che.workspace.infrastructure.docker.old.extra.LogMessagePrinter;
 import org.eclipse.che.workspace.infrastructure.docker.old.local.node.DockerNode;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
 import java.io.FileWriter;
@@ -94,17 +80,14 @@ import static java.util.stream.Collectors.toSet;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * Creates/destroys docker networks and creates docker compose based {@link Instance}.
- *
  * @author Alexander Garagatyi
  */
-public class MachineProviderImpl implements MachineInstanceProvider {
-    private static final Logger LOG = getLogger(MachineProviderImpl.class);
-
+public class DockerServiceStarter {
+    private static final Logger LOG = getLogger(DockerServiceStarter.class);
     /**
      * Prefix of image repository, used to identify that the image is a machine saved to snapshot.
      */
-    public static final String MACHINE_SNAPSHOT_PREFIX = "machine_snapshot_";
+    public static final  String MACHINE_SNAPSHOT_PREFIX = "machine_snapshot_";
 
     public static final Pattern SNAPSHOT_LOCATION_PATTERN = Pattern.compile("(.+/)?" + MACHINE_SNAPSHOT_PREFIX + ".+");
 
@@ -125,7 +108,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final String[]                                      allMachinesExtraHosts;
     private final boolean                                       snapshotUseRegistry;
     private final double                                        memorySwapMultiplier;
-    private final String                                        networkDriver;
     private final Set<String>                                   additionalNetworks;
     private final String                                        parentCgroup;
     private final String                                        cpusetCpus;
@@ -134,33 +116,30 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final WindowsPathEscaper                            windowsPathEscaper;
     private final String[]                                      dnsResolvers;
 
-    @Inject
-    public MachineProviderImpl(DockerConnectorProvider dockerProvider,
-                               UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
-                               DockerMachineFactory dockerMachineFactory,
-                               DockerInstanceStopDetector dockerInstanceStopDetector,
-                               @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
-                               @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
-                               @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
-                               @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
-                               @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
-                               @Named("che.docker.privileged") boolean privilegedMode,
-                               @Named("che.docker.pids_limit") int pidsLimit,
-                               @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
-                               @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
-                               @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
-                               @Named("che.docker.swap") double memorySwapMultiplier,
-                               @Named("machine.docker.networks") Set<Set<String>> additionalNetworks,
-                               @Nullable @Named("che.docker.network_driver") String networkDriver,
-                               @Nullable @Named("che.docker.parent_cgroup") String parentCgroup,
-                               @Nullable @Named("che.docker.cpuset_cpus") String cpusetCpus,
-                               @Named("che.docker.cpu_period") long cpuPeriod,
-                               @Named("che.docker.cpu_quota") long cpuQuota,
-                               WindowsPathEscaper windowsPathEscaper,
-                               @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
-                               @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers)
-            throws IOException {
-        this.docker = dockerProvider.get();
+    public DockerServiceStarter(DockerConnector docker,
+                                UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
+                                DockerMachineFactory dockerMachineFactory,
+                                DockerInstanceStopDetector dockerInstanceStopDetector,
+                                @Named("machine.docker.dev_machine.machine_servers") Set<ServerConfig> devMachineServers,
+                                @Named("machine.docker.machine_servers") Set<ServerConfig> allMachinesServers,
+                                @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
+                                @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
+                                @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
+                                @Named("che.docker.privileged") boolean privilegedMode,
+                                @Named("che.docker.pids_limit") int pidsLimit,
+                                @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
+                                @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
+                                @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
+                                @Named("che.docker.swap") double memorySwapMultiplier,
+                                @Named("machine.docker.networks") Set<Set<String>> additionalNetworks,
+                                @Nullable @Named("che.docker.parent_cgroup") String parentCgroup,
+                                @Nullable @Named("che.docker.cpuset_cpus") String cpusetCpus,
+                                @Named("che.docker.cpu_period") long cpuPeriod,
+                                @Named("che.docker.cpu_quota") long cpuQuota,
+                                WindowsPathEscaper windowsPathEscaper,
+                                @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
+                                @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers) {
+        this.docker = docker;
         this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
@@ -176,7 +155,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         //  according to docker docs field  memorySwap should be equal to memory+swap
         //  we calculate this field as memorySwap=memory * (1 + multiplier) so we just add 1 to multiplier
         this.memorySwapMultiplier = memorySwapMultiplier == -1 ? -1 : memorySwapMultiplier + 1;
-        this.networkDriver = networkDriver;
         this.parentCgroup = parentCgroup;
         this.cpusetCpus = cpusetCpus;
         this.cpuPeriod = cpuPeriod;
@@ -213,10 +191,10 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
         this.devMachinePortsToExpose = new ArrayList<>(allMachinesServers.size() + devMachineServers.size());
         this.commonMachinePortsToExpose = new ArrayList<>(allMachinesServers.size());
-        for (ServerConf serverConf : devMachineServers) {
+        for (ServerConfig serverConf : devMachineServers) {
             devMachinePortsToExpose.add(serverConf.getPort());
         }
-        for (ServerConf serverConf : allMachinesServers) {
+        for (ServerConfig serverConf : allMachinesServers) {
             commonMachinePortsToExpose.add(serverConf.getPort());
             devMachinePortsToExpose.add(serverConf.getPort());
         }
@@ -246,23 +224,18 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         // TODO single point of failure in case of highly loaded system
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineLogsStreamer-%d")
                                                                            .setUncaughtExceptionHandler(
-                                                                                   LoggingUncaughtExceptionHandler.getInstance())
+                                                                                   LoggingUncaughtExceptionHandler
+                                                                                           .getInstance())
                                                                            .setDaemon(true)
                                                                            .build());
     }
 
-    @Override
-    public Instance startService(String namespace,
-                                 String workspaceId,
-                                 String envName,
-                                 String machineName,
-                                 boolean isDev,
-                                 String networkName,
-                                 CheServiceImpl service,
-                                 LineConsumer machineLogger) throws ServerException {
+    public MachineRuntime startService(String networkName,
+                                       DockerService service,
+                                       LineConsumer machineLogger) throws ServerException {
 
         // copy to not affect/be affected by changes in origin
-        service = new CheServiceImpl(service);
+        service = new DockerService(service);
 
         ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
         ProgressMonitor progressMonitor = currentProgressStatus -> {
@@ -302,29 +275,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                       service.getId(),
                                                       workspaceId);
 
-            final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
-            MachineImpl machine = new MachineImpl(MachineConfigImpl.builder()
-                                                                   .setDev(isDev)
-                                                                   .setName(machineName)
-                                                                   .setType("docker")
-                                                                   // casting considered as safe because more than int of megabytes is a lot!
-                                                                   .setLimits(new MachineLimitsImpl((int)Size
-                                                                           .parseSizeToMegabytes(
-                                                                                   service.getMemLimit() + "b")))
-                                                                   .setSource(new MachineSourceImpl(service.getBuild() != null ?
-                                                                                                    "context" :
-                                                                                                    "image")
-                                                                                      .setLocation(service.getBuild() != null ?
-                                                                                                   service.getBuild().getContext() :
-                                                                                                   service.getImage()))
-                                                                   .build(),
-                                                  service.getId(),
-                                                  workspaceId,
-                                                  envName,
-                                                  userId,
-                                                  MachineStatus.RUNNING,
-                                                  null);
-
             return dockerMachineFactory.createInstance(machine,
                                                        container,
                                                        image,
@@ -338,29 +288,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         }
     }
 
-    @Override
-    public void createNetwork(String networkName) throws ServerException {
-        try {
-            docker.createNetwork(CreateNetworkParams.create(new NewNetwork().withName(networkName)
-                                                                            .withDriver(networkDriver)
-                                                                            .withCheckDuplicate(true)));
-        } catch (IOException e) {
-            throw new ServerException(e.getLocalizedMessage(), e);
-        }
-    }
-
-    @Override
-    public void destroyNetwork(String networkName) throws ServerException {
-        try {
-            docker.removeNetwork(RemoveNetworkParams.create(networkName));
-        } catch (NetworkNotFoundException ignore) {
-        } catch (IOException e) {
-            throw new ServerException(e.getLocalizedMessage(), e);
-        }
-    }
-
     private String prepareImage(String machineName,
-                                CheServiceImpl service,
+                                DockerService service,
                                 ProgressMonitor progressMonitor)
             throws ServerException,
                    NotFoundException {
@@ -384,7 +313,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         return imageName;
     }
 
-    protected void buildImage(CheServiceImpl service,
+    protected void buildImage(DockerService service,
                               String machineImageName,
                               boolean doForcePullOnBuild,
                               ProgressMonitor progressMonitor)
@@ -442,7 +371,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
      * @throws MachineException
      *         if any other error occurs
      */
-    protected void pullImage(CheServiceImpl service,
+    protected void pullImage(DockerService service,
                              String machineImageName,
                              ProgressMonitor progressMonitor) throws MachineException {
         DockerMachineSource dockerMachineSource = new DockerMachineSource(
@@ -486,7 +415,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                    boolean isDev,
                                    String image,
                                    String networkName,
-                                   CheServiceImpl service) throws IOException {
+                                   DockerService service) throws IOException {
 
         long machineMemorySwap = memorySwapMultiplier == -1 ?
                                  -1 :
@@ -566,7 +495,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
     private void addSystemWideContainerSettings(String workspaceId,
                                                 boolean isDev,
-                                                CheServiceImpl composeService) throws IOException {
+                                                DockerService composeService) throws IOException {
         List<String> portsToExpose;
         List<String> volumes;
         Map<String, String> env;
@@ -586,15 +515,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         composeService.getEnvironment().putAll(env);
         composeService.getVolumes().addAll(volumes);
         composeService.getNetworks().addAll(additionalNetworks);
-    }
-
-    private void connectContainerToAdditionalNetworks(String container,
-                                                      CheServiceImpl service) throws IOException {
-
-        for (String network : service.getNetworks()) {
-            docker.connectContainerToNetwork(
-                    ConnectContainerToNetworkParams.create(network, new ConnectContainer().withContainer(container)));
-        }
     }
 
     private void readContainerLogsInSeparateThread(String container,
@@ -627,15 +547,17 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                              container,
                              e.getMessage(),
                              e);
-                    if (errorTime - lastErrorTime < 20_000L) { // if new error occurs less than 20 seconds after previous
+                    if (errorTime - lastErrorTime <
+                        20_000L) { // if new error occurs less than 20 seconds after previous
                         if (++errorsCounter == 5) {
-                            LOG.error("Too many errors while streaming logs from machine {} of workspace {} backed by container {}. " +
-                                      "Logs streaming is closed. Last error: {}.",
-                                      machineId,
-                                      workspaceId,
-                                      container,
-                                      e.getMessage(),
-                                      e);
+                            LOG.error(
+                                    "Too many errors while streaming logs from machine {} of workspace {} backed by container {}. " +
+                                    "Logs streaming is closed. Last error: {}.",
+                                    machineId,
+                                    workspaceId,
+                                    container,
+                                    e.getMessage(),
+                                    e);
                             break;
                         }
                     } else {
@@ -665,10 +587,12 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         }
     }
 
-    // workspaceId parameter is required, because in case of separate storage for tokens
-    // you need to know exactly which workspace and which user to apply the token.
-    protected String getUserToken(String wsId) {
-        return EnvironmentContext.getCurrent().getSubject().getToken();
+    /** Converts list to array if it is not null, otherwise returns null */
+    private String[] toArrayIfNotNull(List<String> list) {
+        if (list == null) {
+            return null;
+        }
+        return list.toArray(new String[list.size()]);
     }
 
     /**
@@ -678,6 +602,12 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         return paths.stream()
                     .filter(path -> !Strings.isNullOrEmpty(path))
                     .collect(toSet());
+    }
+
+    // workspaceId parameter is required, because in case of separate storage for tokens
+    // you need to know exactly which workspace and which user to apply the token.
+    protected String getUserToken(String wsId) {
+        return EnvironmentContext.getCurrent().getSubject().getToken();
     }
 
     /**
@@ -694,11 +624,12 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                     .collect(toSet());
     }
 
-    /** Converts list to array if it is not null, otherwise returns null */
-    private String[] toArrayIfNotNull(List<String> list) {
-        if (list == null) {
-            return null;
+    private void connectContainerToAdditionalNetworks(String container,
+                                                      DockerService service) throws IOException {
+
+        for (String network : service.getNetworks()) {
+            docker.connectContainerToNetwork(
+                    ConnectContainerToNetworkParams.create(network, new ConnectContainer().withContainer(container)));
         }
-        return list.toArray(new String[list.size()]);
     }
 }

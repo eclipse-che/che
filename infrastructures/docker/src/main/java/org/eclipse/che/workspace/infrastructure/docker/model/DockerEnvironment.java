@@ -23,12 +23,9 @@ import static java.util.stream.Collectors.toMap;
  */
 public class DockerEnvironment {
     private Map<String, DockerService> services;
+    private String                     network;
 
     public DockerEnvironment() {}
-
-    public DockerEnvironment(Map<String, DockerService> services) {
-        this.services = services;
-    }
 
     public DockerEnvironment(DockerEnvironment environment) {
         if (environment.getServices() != null) {
@@ -59,23 +56,38 @@ public class DockerEnvironment {
         return this;
     }
 
+    public String getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(String network) {
+        this.network = network;
+    }
+
+    public DockerEnvironment withNetwork(String network) {
+        this.network = network;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DockerEnvironment)) return false;
         DockerEnvironment that = (DockerEnvironment)o;
-        return Objects.equals(getServices(), that.getServices());
+        return Objects.equals(getServices(), that.getServices()) &&
+               Objects.equals(getNetwork(), that.getNetwork());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getServices());
+        return Objects.hash(getServices(), getNetwork());
     }
 
     @Override
     public String toString() {
         return "DockerEnvironment{" +
                "services=" + services +
+               ", network='" + network + '\'' +
                '}';
     }
 }

@@ -151,6 +151,6 @@ public class ComposeEnvironmentParser implements TypeSpecificEnvironmentParser {
 
             services.put(composeServiceEntry.getKey(), cheService);
         }
-        return new DockerEnvironment(services);
+        return new DockerEnvironment().withServices(services);
     }
 }

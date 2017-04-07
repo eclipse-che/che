@@ -92,7 +92,9 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                         identity,
                                         this,
                                         null,
-                                        orderedServices);
+                                        orderedServices,
+                                        null,
+                                        serviceStarter);
     }
 
 
