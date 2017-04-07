@@ -16,7 +16,7 @@
 CREATE INDEX index_command_attributes_commandid ON command_attributes (command_id);
 CREATE INDEX index_command_commandsid ON command (commands_id);
 
-CREATE INDEX index_factory_action_properties_entityid ON che_factory_action_properties (action_entityid);
+CREATE INDEX index_factory_action_properties_entityid ON che_factory_action_properties (action_entity_id);
 CREATE INDEX index_factory_buttonid ON che_factory (button_id);
 CREATE INDEX index_factory_ideid ON che_factory (ide_id);
 CREATE INDEX index_factory_userid ON che_factory (user_id);
