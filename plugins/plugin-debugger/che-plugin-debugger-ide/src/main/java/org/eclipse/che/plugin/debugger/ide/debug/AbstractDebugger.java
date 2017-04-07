@@ -84,9 +84,9 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  * @author Anatoliy Bazko
  */
 public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
-    private static final String EVENT_DEBUGGER_MESSAGE_BREAKPOINT = "event:debugger:message:breakpoint";
-    private static final String EVENT_DEBUGGER_MESSAGE_DISCONNECT = "event:debugger:message:disconnect";
-    private static final String EVENT_DEBUGGER_MESSAGE_SUSPEND    = "event:debugger:message:suspend";
+    private static final String EVENT_DEBUGGER_MESSAGE_BREAKPOINT = "event:debugger:breakpoint";
+    private static final String EVENT_DEBUGGER_MESSAGE_DISCONNECT = "event:debugger:disconnect";
+    private static final String EVENT_DEBUGGER_MESSAGE_SUSPEND    = "event:debugger:suspend";
     private static final String EVENT_DEBUGGER_UN_SUBSCRIBE       = "event:debugger:un-subscribe";
     private static final String EVENT_DEBUGGER_SUBSCRIBE          = "event:debugger:subscribe";
 
