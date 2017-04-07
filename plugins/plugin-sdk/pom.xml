@@ -24,7 +24,6 @@
     <name>Che Plugin :: SDK :: Parent</name>
     <modules>
         <module>che-plugin-sdk-ext-plugins</module>
-        <module>che-plugin-sdk-env-local</module>
         <module>che-plugin-sdk-tools</module>
     </modules>
     <properties>

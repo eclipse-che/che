@@ -1048,4 +1048,10 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("export.config.dialog.not.under.vcs.text")
     String exportConfigDialogNotUnderVcsText();
 
+    @Key("messages.server.failure")
+    String messagesServerFailure();
+
+    @Key("connection.closed.dialog.title")
+    String connectionClosedDialogTitle();
+
 }
