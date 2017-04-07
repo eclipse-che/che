@@ -22,7 +22,6 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.server.JsonArrayImpl;
 import org.eclipse.che.dto.server.JsonSerializable;
@@ -34,7 +33,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -61,10 +59,6 @@ import static java.util.Objects.requireNonNull;
  * @see DefaultHttpJsonRequestFactory
  */
 public class DefaultHttpJsonRequest implements HttpJsonRequest {
-
-    public static HttpJsonRequest create(String url) {
-        return new DefaultHttpJsonRequest(url);
-    }
 
     private static final int      DEFAULT_QUERY_PARAMS_LIST_SIZE = 5;
     private static final Object[] EMPTY_ARRAY                    = new Object[0];

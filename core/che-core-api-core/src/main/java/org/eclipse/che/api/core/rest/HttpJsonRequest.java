@@ -31,7 +31,7 @@ import java.util.Objects;
 /**
  * Defines simple set of methods for requesting json objects.
  *
- * <p>Unlike {@link HttpJsonHelper} - provides <i>builder-like</i> style for building requests and getting responses.
+ * <p>Unlike {@link HttpRequestHelper} - provides <i>builder-like</i> style for building requests and getting responses.
  *
  * <p>Simple use-cases:
  * <pre>{@code

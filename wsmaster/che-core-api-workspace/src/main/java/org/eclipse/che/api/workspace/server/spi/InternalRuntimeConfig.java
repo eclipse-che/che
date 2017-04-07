@@ -12,11 +12,12 @@ package org.eclipse.che.api.workspace.server.spi;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
-import org.eclipse.che.api.core.rest.DefaultHttpJsonRequest;
+import org.eclipse.che.api.core.model.workspace.config.Recipe;
+import org.eclipse.che.api.core.rest.HttpRequestHelper;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 
+import javax.ws.rs.HttpMethod;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
@@ -57,7 +58,7 @@ public class InternalRuntimeConfig {
             if(recipe.getContent() != null && !recipe.getContent().isEmpty()) {
                 script = recipe.getContent();
             } else if(recipe.getLocation() != null && !recipe.getLocation().isEmpty()) {
-                script = DefaultHttpJsonRequest.create(recipe.getLocation()).request().asString();
+                script = HttpRequestHelper.requestString(recipe.getLocation(), HttpMethod.GET, null, null);
             } else {
                 script = "";
             }
