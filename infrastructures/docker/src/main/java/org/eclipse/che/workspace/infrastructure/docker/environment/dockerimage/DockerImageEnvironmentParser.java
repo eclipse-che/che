@@ -10,13 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage;
 
+import com.google.common.base.Joiner;
+
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
-import org.eclipse.che.workspace.infrastructure.docker.environment.AbstractEnvironmentParser;
+import org.eclipse.che.workspace.infrastructure.docker.environment.TypeSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 
 /**
@@ -25,7 +28,7 @@ import static java.lang.String.format;
  * @author Alexander Garagatyi
  * @author Alexander Andrienko
  */
-public class DockerImageEnvironmentParser extends AbstractEnvironmentParser {
+public class DockerImageEnvironmentParser implements TypeSpecificEnvironmentParser {
 
     @Override
     public DockerEnvironment parse(Environment environment) throws IllegalArgumentException, ServerException {
@@ -43,5 +46,17 @@ public class DockerImageEnvironmentParser extends AbstractEnvironmentParser {
         service.setImage(recipe.getLocation());
 
         return dockerEnv;
+    }
+
+    private String getMachineName(Environment environment) throws IllegalArgumentException {
+        checkArgument(environment.getMachines().size() == 1,
+                      "Environment of type '%s' doesn't support multiple machines, but contains machines: %s",
+                      environment.getRecipe().getType(),
+                      Joiner.on(", ").join(environment.getMachines().keySet()));
+
+        return environment.getMachines()
+                          .keySet()
+                          .iterator()
+                          .next();
     }
 }

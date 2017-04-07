@@ -22,6 +22,7 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.ValidationException;
+import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentValidator;
 
 import java.io.IOException;
 import java.util.Set;
@@ -33,7 +34,8 @@ import java.util.Set;
  * @author Alexander Garagatyi
  */
 public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
-    static final Set<String> SUPPORTED_RECIPE_TYPES = ImmutableSet.of("dockerimage", "dockerfile", "compose");
+    // TODO rework
+    public static final Set<String> SUPPORTED_RECIPE_TYPES = ImmutableSet.of("dockerimage", "dockerfile", "compose");
 
     private final DockerEnvironmentValidator dockerEnvironmentValidator;
 
@@ -45,8 +47,15 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
 
     public Environment estimate(Environment environment) throws ValidationException,
                                                                 ServerException {
+        // TODO add an actual estimation of what is missing in the environment
         environment = dockerEnvironmentValidator.validate(environment);
         return environment;
+    }
+
+    public RuntimeContext prepare(RuntimeIdentity id, Environment environment) throws ValidationException,
+                                                                                      ApiException,
+                                                                                      IOException {
+        throw new ApiException("");
     }
 
     public Set<RuntimeIdentity> getIdentities() throws NotSupportedException {
@@ -55,11 +64,5 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
 
     public InternalRuntime getRuntime(RuntimeIdentity id) throws NotSupportedException {
         throw new NotSupportedException();
-    }
-
-    public RuntimeContext prepare(RuntimeIdentity id, Environment environment) throws ValidationException,
-                                                                                      ApiException,
-                                                                                      IOException {
-        throw new ApiException("");
     }
 }

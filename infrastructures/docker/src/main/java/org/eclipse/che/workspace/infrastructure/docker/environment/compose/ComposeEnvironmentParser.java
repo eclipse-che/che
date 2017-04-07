@@ -20,7 +20,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
-import org.eclipse.che.workspace.infrastructure.docker.TypeSpecificEnvironmentParser;
+import org.eclipse.che.workspace.infrastructure.docker.environment.TypeSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;

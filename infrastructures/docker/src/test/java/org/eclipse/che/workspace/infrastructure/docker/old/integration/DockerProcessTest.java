@@ -1,0 +1,131 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.workspace.infrastructure.docker.old.integration;
+
+import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
+import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
+import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
+import org.eclipse.che.plugin.docker.client.InitialAuthConfig;
+import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
+import org.eclipse.che.plugin.docker.client.helper.DefaultNetworkFinder;
+import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
+import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
+import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
+import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
+import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
+import org.eclipse.che.plugin.docker.machine.DockerProcess;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
+
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * @author Alexander Garagatyi
+ */
+@Listeners(MockitoTestNGListener.class)
+public class DockerProcessTest {
+    private DockerConnectorConfiguration dockerConnectorConfiguration;
+    private DockerConnector              docker;
+    private String                       container;
+
+    private AtomicInteger pidGenerator = new AtomicInteger(1);
+
+    @Mock
+    private DockerConnectorProvider dockerConnectorProvider;
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+
+        dockerConnectorConfiguration = new DockerConnectorConfiguration(new InitialAuthConfig(),
+                                                                        new DefaultNetworkFinder());
+        docker = new DockerConnector(dockerConnectorConfiguration,
+                                     new DockerConnectionFactory(dockerConnectorConfiguration),
+                                     new DockerRegistryAuthResolver(null, null),
+                                     new DockerApiVersionPathPrefixProvider("1.18"));
+
+        final ContainerCreated containerCreated = docker.createContainer(
+                CreateContainerParams.create(new ContainerConfig().withImage("ubuntu")
+                                                                  .withCmd("tail", "-f", "/dev/null")));
+        container = containerCreated.getId();
+        docker.startContainer(StartContainerParams.create(containerCreated.getId()));
+        when(dockerConnectorProvider.get()).thenReturn(docker);
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+        if (container != null) {
+            docker.stopContainer(StopContainerParams.create(container)
+                                                    .withTimeout(2, TimeUnit.SECONDS));
+            docker.removeContainer(RemoveContainerParams.create(container)
+                                                        .withForce(true)
+                                                        .withRemoveVolumes(true));
+        }
+    }
+
+    /**
+     * This test requires TCP access to docker API to get timeout exception.<br>
+     * If default access to docker is UNIX socket try to reconfigure docker connector for this test.<br>
+     * This test may fail if system doesn't allow such access.
+     */
+    @Test(expectedExceptions = MachineException.class,
+          expectedExceptionsMessageRegExp = "Command output read timeout is reached. Process is still running and has id \\d+ inside machine")
+    public void shouldThrowErrorWithRealPIDIfSocketTimeoutExceptionHappens() throws Exception {
+        DockerConnectorConfiguration dockerConnectorConfiguration = this.dockerConnectorConfiguration;
+        DockerConnector docker = this.docker;
+        if ("unix".equals(dockerConnectorConfiguration.getDockerDaemonUri().getScheme())) {
+            // access through unix socket - reconfigure to use tcp
+            dockerConnectorConfiguration = new DockerConnectorConfiguration(new URI("http://localhost:2375"),
+                                                                            null,
+                                                                            new InitialAuthConfig(),
+                                                                            new DefaultNetworkFinder());
+            docker = new DockerConnector(dockerConnectorConfiguration,
+                                         new DockerConnectionFactory(dockerConnectorConfiguration),
+                                         new DockerRegistryAuthResolver(null, null),
+                                         new DockerApiVersionPathPrefixProvider(""));
+        }
+        Command command = new CommandImpl("tailf", "tail -f /dev/null", "mvn");
+        final DockerProcess dockerProcess = new DockerProcess(dockerConnectorProvider,
+                                                              command,
+                                                              container,
+                                                              "outputChannel",
+                                                              "/tmp/chetests",
+                                                              pidGenerator.incrementAndGet());
+
+        dockerProcess.start(new SOUTLineConsumer());
+    }
+
+    static class SOUTLineConsumer implements LineConsumer {
+        @Override
+        public void writeLine(String line) throws IOException {
+            System.out.println(line);
+        }
+
+        @Override
+        public void close() throws IOException {
+        }
+    }
+}

@@ -10,14 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.environment.dockerfile;
 
+import com.google.common.base.Joiner;
+
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
-import org.eclipse.che.workspace.infrastructure.docker.environment.AbstractEnvironmentParser;
+import org.eclipse.che.workspace.infrastructure.docker.environment.TypeSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 
 /**
@@ -26,7 +29,7 @@ import static java.lang.String.format;
  * @author Alexander Garagatyi
  * @author Alexander Andrienko
  */
-public class DockerfileEnvironmentParser extends AbstractEnvironmentParser {
+public class DockerfileEnvironmentParser implements TypeSpecificEnvironmentParser {
 
     @Override
     public DockerEnvironment parse(Environment environment) throws IllegalArgumentException, ServerException {
@@ -54,5 +57,17 @@ public class DockerfileEnvironmentParser extends AbstractEnvironmentParser {
         }
 
         return cheServiceEnv;
+    }
+
+    private String getMachineName(Environment environment) throws IllegalArgumentException {
+        checkArgument(environment.getMachines().size() == 1,
+                      "Environment of type '%s' doesn't support multiple machines, but contains machines: %s",
+                      environment.getRecipe().getType(),
+                      Joiner.on(", ").join(environment.getMachines().keySet()));
+
+        return environment.getMachines()
+                          .keySet()
+                          .iterator()
+                          .next();
     }
 }

@@ -166,7 +166,7 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule());
         install(new org.eclipse.che.swagger.deploy.DocsModule());
         install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
-        install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());
+        install(new org.eclipse.che.workspace.infrastructure.docker.old.proxy.DockerProxyModule());
         install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
 
         final Multibinder<MessageBodyAdapter> adaptersMultibinder = Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);
@@ -178,7 +178,7 @@ public class WsMasterModule extends AbstractModule {
         requestInjection(interceptor);
         bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
         bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class)
-                .to(org.eclipse.che.plugin.docker.machine.cleaner.LocalWorkspaceFilesCleaner.class);
+                .to(org.eclipse.che.workspace.infrastructure.docker.old.cleaner.LocalWorkspaceFilesCleaner.class);
 //        bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
 //                .to(org.eclipse.che.plugin.docker.machine.local.LocalCheInfrastructureProvisioner.class);
 
@@ -186,7 +186,7 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.system.server.SystemService.class);
         bind(org.eclipse.che.api.system.server.SystemEventsWebsocketBroadcaster.class).asEagerSingleton();
 
-        install(new org.eclipse.che.plugin.docker.machine.dns.DnsResolversModule());
+        install(new org.eclipse.che.workspace.infrastructure.docker.old.config.dns.DnsResolversModule());
 
         bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
         bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);

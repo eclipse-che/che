@@ -24,7 +24,6 @@
     <name>Che Plugin :: Docker :: Parent</name>
     <modules>
         <module>che-plugin-docker-client</module>
-        <module>che-plugin-docker-machine</module>
         <module>che-plugin-openshift-client</module>
     </modules>
     <properties>
