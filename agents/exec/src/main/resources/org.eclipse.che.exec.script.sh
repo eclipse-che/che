@@ -20,6 +20,7 @@ command -v wget >/dev/null 2>&1 && WGET_INSTALLED=true
 # no curl, no wget, install curl
 if [ ${CURL_INSTALLED} = false ] && [ ${WGET_INSTALLED} = false ]; then
   PACKAGES=${PACKAGES}" curl";
+  CURL_INSTALLED=true
 fi
 
 test "$(id -u)" = 0 || SUDO="sudo -E"
