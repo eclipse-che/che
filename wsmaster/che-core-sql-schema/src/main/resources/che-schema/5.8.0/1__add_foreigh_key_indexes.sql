@@ -13,8 +13,6 @@
 -- from Codenvy S.A..
 --
 
-CREATE INDEX index_action_properties_entityid ON action_properties (action_entityid);
-
 CREATE INDEX index_command_attributes_commandid ON command_attributes (command_id);
 CREATE INDEX index_command_commandsid ON command (commands_id);
 
