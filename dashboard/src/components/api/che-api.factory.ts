@@ -18,8 +18,6 @@ import {ChePreferences} from './che-preferences.factory';
 import {CheProjectTemplate} from './che-project-template.factory';
 import {CheWebsocket} from './che-websocket.factory';
 import {CheService} from './che-service.factory';
-import {CheAdminPlugins} from './che-admin-plugins.factory';
-import {CheAdminService} from './che-admin-service.factory';
 import {CheRecipe} from './che-recipe.factory';
 import {CheRecipeTemplate} from './che-recipe-template.factory';
 import {CheStack} from './che-stack.factory';
@@ -43,8 +41,6 @@ export class CheAPI {
   private cheFactory: CheFactory;
   private cheFactoryTemplate: CheFactoryTemplate;
   private cheService: CheService;
-  private cheAdminPlugins: CheAdminPlugins;
-  private cheAdminService: CheAdminService;
   private cheRecipe: CheRecipe;
   private cheRecipeTemplate: CheRecipeTemplate;
   private cheStack: CheStack;
@@ -59,8 +55,8 @@ export class CheAPI {
    */
   constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate, cheProfile: CheProfile,
               chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate, cheWebsocket: CheWebsocket, cheService: CheService,
-              cheAdminPlugins: CheAdminPlugins, cheAdminService: CheAdminService, cheRecipe: CheRecipe, cheRecipeTemplate: CheRecipeTemplate,
-              cheStack: CheStack, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent, cheSsh: CheSsh, cheUser: CheUser) {
+              cheRecipe: CheRecipe, cheRecipeTemplate: CheRecipeTemplate, cheStack: CheStack, cheOAuthProvider: CheOAuthProvider,
+              cheAgent: CheAgent, cheSsh: CheSsh, cheUser: CheUser) {
     this.cheWorkspace = cheWorkspace;
     this.cheProfile = cheProfile;
     this.cheFactory = cheFactory;
@@ -69,8 +65,6 @@ export class CheAPI {
     this.cheProjectTemplate = cheProjectTemplate;
     this.cheWebsocket = cheWebsocket;
     this.cheService = cheService;
-    this.cheAdminPlugins = cheAdminPlugins;
-    this.cheAdminService = cheAdminService;
     this.cheRecipe = cheRecipe;
     this.cheRecipeTemplate = cheRecipeTemplate;
     this.cheStack = cheStack;
@@ -135,23 +129,6 @@ export class CheAPI {
    */
   getService(): CheService {
     return this.cheService;
-  }
-
-  /**
-   * The Che Admin Services API
-   * @returns {CheAdminService}
-   */
-  getAdminService(): CheAdminService {
-    return this.cheAdminService;
-  }
-
-
-  /**
-   * The Che Admin plugins API
-   * @returns {CheAdminPlugins}
-   */
-  getAdminPlugins(): CheAdminPlugins {
-    return this.cheAdminPlugins;
   }
 
   /**
