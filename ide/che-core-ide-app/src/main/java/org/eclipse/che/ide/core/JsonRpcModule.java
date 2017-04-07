@@ -14,6 +14,7 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 
 import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
+import org.eclipse.che.ide.api.jsonrpc.WorkspaceMasterJsonRpcInitializer;
 import org.eclipse.che.ide.jsonrpc.BuildingRequestTransmitter;
 import org.eclipse.che.ide.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
@@ -30,6 +31,8 @@ public class JsonRpcModule extends AbstractGinModule {
     @Override
     protected void configure() {
         bind(JsonRpcWebSocketAgentEventListener.class).asEagerSingleton();
+        bind(WorkspaceMasterJsonRpcInitializer.class).asEagerSingleton();
+
         bind(JsonRpcInitializer.class).to(WebSocketJsonRpcInitializer.class);
 
         install(new GinFactoryModuleBuilder().build(JsonRpcFactory.class));

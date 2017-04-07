@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server;
 
+import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.util.JsonRpcEndpointIdsHolder;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
@@ -65,6 +67,11 @@ public class MachineProcessManagerTest {
     @Mock
     CheEnvironmentEngine environmentEngine;
 
+    @Mock
+    RequestTransmitter       transmitter;
+    @Mock
+    JsonRpcEndpointIdsHolder endpointIdsHolder;
+
     private MachineProcessManager manager;
 
     @BeforeMethod
@@ -74,7 +81,9 @@ public class MachineProcessManagerTest {
         IoUtil.deleteRecursive(new File(machineLogsDir));
         manager = spy(new MachineProcessManager(machineLogsDir,
                                                 eventService,
-                                                environmentEngine));
+                                                environmentEngine,
+                                                transmitter,
+                                                endpointIdsHolder));
 
         EnvironmentContext envCont = new EnvironmentContext();
         envCont.setSubject(CREATOR);

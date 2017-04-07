@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -106,6 +107,31 @@ public class RequestTransmitter {
                    .endpointId(endpointId)
                    .methodName(method)
                    .paramsAsDto(pValue)
+                   .sendAndSkipResult();
+
+    }
+
+    /**
+     * Transmit a notification with params as a single string
+     *
+     * @param endpointId
+     *         endpoint to address a transmission
+     * @param method
+     *         method name to address a transmission
+     * @param pValue
+     *         params value
+     */
+    public void transmitStringToNone(String endpointId, String method, String pValue) {
+        checkEndpointId(endpointId);
+        checkMethodName(method);
+        checkParamsValue(pValue);
+
+        LOG.debug("Initiating a transmission of a notification:endpoint ID: {}, method: {}, string: {}", endpointId, method, pValue);
+
+        transmitter.newRequest()
+                   .endpointId(endpointId)
+                   .methodName(method)
+                   .paramsAsListOfString(Collections.singletonList(pValue))
                    .sendAndSkipResult();
 
     }
