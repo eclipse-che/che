@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.old;
+package org.eclipse.che.workspace.infrastructure.docker.old.strategy;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;

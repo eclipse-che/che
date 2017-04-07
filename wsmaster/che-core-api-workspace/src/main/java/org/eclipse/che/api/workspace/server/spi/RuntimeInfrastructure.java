@@ -58,8 +58,8 @@ public abstract class RuntimeInfrastructure {
      * For example: for validating it before storing
      * The method SHOULD validate Environment. If it is valid, an Infrastructure MAY return more fine grained Environment
      * For example:
-     * - if Machines are not described this method may add machine descriptions calculated against OldRecipe
-     * - implementation may add additional Attributes based on incoming OldRecipe
+     * - if Machines are not described this method may add machine descriptions calculated against Recipe
+     * - implementation may add additional Attributes based on incoming Recipe
      *
      * @param environment
      *         incoming Environment to estimate
@@ -73,10 +73,10 @@ public abstract class RuntimeInfrastructure {
     public abstract Environment estimate(Environment environment) throws ValidationException, ServerException;
 
     /**
-     * An Infrastructure MAY track Runtimes. In this case the method should be overriden.
+     * An Infrastructure MAY track Runtimes. In this case the method should be overridden.
      *
      * One of the reason for infrastructure to support this is ability to recover infrastructure
-     * after shutting down Master OldServer. For this purpose an Infrastructure should also implement
+     * after shutting down Master server. For this purpose an Infrastructure should also implement
      * getRuntime(id) method
      *
      * @return list of tracked Runtimes' Identities.
@@ -88,10 +88,10 @@ public abstract class RuntimeInfrastructure {
     }
 
     /**
-     * An Infrastructure MAY track Runtimes. In this case the method should be overriden.
+     * An Infrastructure MAY track Runtimes. In this case the method should be overridden.
      *
      * One of the reason for infrastructure to support this is ability to recover infrastructure
-     * after shutting down Master OldServer.
+     * after shutting down Master server.
      *
      * @param id
      *         the RuntimeIdentity
@@ -105,7 +105,7 @@ public abstract class RuntimeInfrastructure {
 
     /**
      * Making Runtime is a two phase process.
-     * On the first phase implementation MUST prepare RuntimeContext, this is supposedly "fast" methid
+     * On the first phase implementation MUST prepare RuntimeContext, this is supposedly "fast" method
      * On the second phase Runtime is created with RuntimeContext.start() which is supposedly "long" method
      *
      * @param id
@@ -116,7 +116,7 @@ public abstract class RuntimeInfrastructure {
      * @throws ValidationException
      *         if incoming Environment is not valid
      * @throws ServerException
-     *         if some other error occured
+     *         if some other error occurred
      */
     public abstract RuntimeContext prepare(RuntimeIdentity id, Environment environment) throws ValidationException, ApiException,
                                                                                                IOException;

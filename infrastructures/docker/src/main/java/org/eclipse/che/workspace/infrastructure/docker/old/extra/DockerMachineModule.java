@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.old;
+package org.eclipse.che.workspace.infrastructure.docker.old.extra;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -17,6 +17,9 @@ import com.google.inject.name.Names;
 
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.environment.server.TypeSpecificEnvironmentParser;
+import org.eclipse.che.workspace.infrastructure.docker.old.MachineProviderImpl;
+import org.eclipse.che.workspace.infrastructure.docker.old.config.ApiEndpointEnvVariableProvider;
+import org.eclipse.che.workspace.infrastructure.docker.old.config.DockerExtraHostsFromPropertyProvider;
 
 import java.util.Set;
 

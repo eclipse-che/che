@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.old;
+package org.eclipse.che.workspace.infrastructure.docker.old.extra;
 
 import com.google.inject.assistedinject.Assisted;
 
@@ -20,6 +20,7 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.workspace.infrastructure.docker.old.DockerInstanceRuntimeInfo;
 import org.eclipse.che.workspace.infrastructure.docker.old.local.node.DockerNode;
 
 /**

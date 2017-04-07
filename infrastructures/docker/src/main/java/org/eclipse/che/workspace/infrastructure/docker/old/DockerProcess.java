@@ -29,6 +29,7 @@ import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
+import org.eclipse.che.workspace.infrastructure.docker.old.extra.LogMessagePrinter;
 
 import javax.inject.Inject;
 import java.io.IOException;

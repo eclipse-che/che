@@ -17,6 +17,8 @@ import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
+import org.eclipse.che.workspace.infrastructure.docker.old.strategy.DefaultServerEvaluationStrategy;
+import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategy;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;

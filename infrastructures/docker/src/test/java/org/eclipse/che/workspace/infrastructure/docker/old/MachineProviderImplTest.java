@@ -39,6 +39,8 @@ import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
+import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceStopDetector;
+import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerMachineFactory;
 import org.eclipse.che.workspace.infrastructure.docker.old.local.node.DockerNode;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;

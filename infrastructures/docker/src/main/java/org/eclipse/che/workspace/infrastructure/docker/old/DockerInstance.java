@@ -40,6 +40,10 @@ import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
+import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceProcessesCleaner;
+import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceStopDetector;
+import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerMachineFactory;
+import org.eclipse.che.workspace.infrastructure.docker.old.extra.LogMessagePrinter;
 import org.eclipse.che.workspace.infrastructure.docker.old.local.node.DockerNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,14 +93,14 @@ public class DockerInstance extends AbstractInstance {
             format("for pidFile in $(find %s -print 2>/dev/null); do kill -0 \"$(cat ${pidFile})\" 2>/dev/null && echo \"${pidFile}\"; done",
                    format(PID_FILE_TEMPLATE, "*"));
 
-    private final DockerMachineFactory                        dockerMachineFactory;
-    private final String                                      container;
-    private final DockerConnector                             docker;
-    private final String                                      image;
-    private final LineConsumer                                outputConsumer;
-    private final String                                      registry;
-    private final String                                      registryNamespace;
-    private final DockerNode                                  node;
+    private final DockerMachineFactory dockerMachineFactory;
+    private final String               container;
+    private final DockerConnector      docker;
+    private final String               image;
+    private final LineConsumer         outputConsumer;
+    private final String               registry;
+    private final String               registryNamespace;
+    private final DockerNode           node;
     private final DockerInstanceStopDetector                  dockerInstanceStopDetector;
     private final DockerInstanceProcessesCleaner              processesCleaner;
     private final ConcurrentHashMap<Integer, InstanceProcess> machineProcesses;

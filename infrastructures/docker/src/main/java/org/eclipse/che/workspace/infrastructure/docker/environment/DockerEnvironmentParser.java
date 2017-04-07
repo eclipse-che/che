@@ -22,11 +22,11 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 
 import javax.inject.Inject;
 import java.util.Map;
-import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkArgument;
+import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkNotNull;
 
 /**
  * Parses {@link Environment} into {@link DockerEnvironment}.
@@ -49,63 +49,56 @@ public class DockerEnvironmentParser {
     }
 
     /**
-     * Returns supported types of environments.
-     */
-    public Set<String> getEnvironmentTypes() {
-        return environmentParsers.keySet();
-    }
-
-    /**
      * Parses {@link Environment} into {@link DockerEnvironment}.
      *
      * @param environment
      *         environment to parse
      * @return environment representation as compose environment
-     * @throws IllegalArgumentException
+     * @throws ValidationException
      *         if provided environment is illegal
      * @throws ServerException
      *         if fetching of environment recipe content fails
      */
-    public DockerEnvironment parse(Environment environment) throws IllegalArgumentException,
-                                                                   ServerException, ValidationException {
+    public DockerEnvironment parse(Environment environment) throws ValidationException,
+                                                                   ServerException {
 
         checkNotNull(environment, "Environment should not be null");
         Recipe recipe = environment.getRecipe();
         checkNotNull(recipe, "Environment recipe should not be null");
         checkNotNull(recipe.getType(), "Environment recipe type should not be null");
         checkArgument(recipe.getContent() != null || recipe.getLocation() != null,
-                      "OldRecipe of environment must contain location or content");
+                      "Recipe of environment must contain location or content");
+        checkArgument(recipe.getContent() == null || recipe.getLocation() == null,
+                      "Recipe of environment contains mutually exclusive fields location and content");
 
-        String envType = recipe.getType();
-        Set<String> envTypes = getEnvironmentTypes();
-
-        if (!envTypes.contains(envType)) {
-            throw new IllegalArgumentException(format("Environment type '%s' is not supported. " +
-                                                      "Supported environment types: %s",
-                                                      envType,
-                                                      Joiner.on(", ").join(envTypes)));
+        TypeSpecificEnvironmentParser parser = environmentParsers.get(recipe.getType());
+        if (parser == null) {
+            throw new ValidationException(format("Environment type '%s' is not supported. " +
+                                                 "Supported environment types: %s",
+                                                 recipe.getType(),
+                                                 Joiner.on(", ").join(environmentParsers.keySet())));
         }
 
-        TypeSpecificEnvironmentParser parser = environmentParsers.get(envType);
-        DockerEnvironment cheServicesEnvironment = parser.parse(environment);
 
-        cheServicesEnvironment.getServices().forEach((name, service) -> {
-            MachineConfig machineConfig = environment.getMachines().get(name);
+        DockerEnvironment dockerEnvironment = parser.parse(environment);
+
+        for (Map.Entry<String, DockerService> entry : dockerEnvironment.getServices().entrySet()) {
+            MachineConfig machineConfig = environment.getMachines().get(entry.getKey());
             if (machineConfig != null) {
-                normalizeMachine(name, service, machineConfig);
+                normalizeMachine(entry.getKey(), entry.getValue(), machineConfig);
             }
-        });
+        }
 
-        return cheServicesEnvironment;
+        return dockerEnvironment;
     }
 
-    private void normalizeMachine(String name, DockerService service, MachineConfig machineConfig) {
+    private void normalizeMachine(String name, DockerService service, MachineConfig machineConfig)
+            throws ValidationException {
         if (machineConfig.getAttributes().containsKey("memoryLimitBytes")) {
-
             try {
                 service.setMemLimit(Long.parseLong(machineConfig.getAttributes().get("memoryLimitBytes")));
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(
+                throw new ValidationException(
                         format("Value of attribute 'memoryLimitBytes' of machine '%s' is illegal", name));
             }
         }
@@ -140,16 +133,5 @@ public class DockerEnvironmentParser {
                                         serverConf.getProtocol());
             }
         });
-    }
-
-    /**
-     * Checks that object reference is not null, throws {@link IllegalArgumentException} otherwise.
-     *
-     * <p>Exception uses error message built from error message template and error message parameters.
-     */
-    private static void checkNotNull(Object object, String errorMessageTemplate, Object... errorMessageParams) {
-        if (object == null) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, errorMessageParams));
-        }
     }
 }

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.old;
+package org.eclipse.che.workspace.infrastructure.docker.old.extra;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -25,6 +25,7 @@ import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.network.GetNetworksParams;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
+import org.eclipse.che.workspace.infrastructure.docker.DockerContainerNameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,6 @@ import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
-import static org.eclipse.che.plugin.docker.client.params.RemoveContainerParams.create;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
 
 /**

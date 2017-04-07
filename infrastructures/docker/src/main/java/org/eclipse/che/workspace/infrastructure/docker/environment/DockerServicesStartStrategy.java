@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker.environment;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
+import org.eclipse.che.api.workspace.server.spi.ValidationException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 
@@ -37,10 +38,10 @@ public class DockerServicesStartStrategy {
     /**
      * Resolves order of start for machines in an environment.
      *
-     * @throws IllegalArgumentException
+     * @throws ValidationException
      *         if order of machines can not be calculated
      */
-    public List<String> order(DockerEnvironment environment) throws IllegalArgumentException {
+    public List<String> order(DockerEnvironment environment) throws ValidationException {
 
         Map<String, Integer> weights = weightMachines(environment.getServices());
 
@@ -50,11 +51,11 @@ public class DockerServicesStartStrategy {
     /**
      * Returns mapping of names of machines to its weights in dependency graph.
      *
-     * @throws IllegalArgumentException
+     * @throws ValidationException
      *         if weights of machines can not be calculated
      */
     private Map<String, Integer> weightMachines(Map<String, DockerService> services)
-            throws IllegalArgumentException {
+            throws ValidationException {
 
         HashMap<String, Integer> weights = new HashMap<>();
 
@@ -116,7 +117,7 @@ public class DockerServicesStartStrategy {
                 }
             }
             if (dependencies.size() == previousSize) {
-                throw new IllegalArgumentException("Launch order of machines '" +
+                throw new ValidationException("Launch order of machines '" +
                                                    Joiner.on(", ").join(dependencies.keySet()) +
                                                    "' can't be evaluated. Circular dependency.");
             }
@@ -128,12 +129,12 @@ public class DockerServicesStartStrategy {
     /**
      * Parses link content into depends_on field representation - removes column and further chars
      */
-    private String getServiceFromLink(String link) throws IllegalArgumentException {
+    private String getServiceFromLink(String link) throws ValidationException {
         String service = link;
         if (link != null) {
             String[] split = service.split(":");
             if (split.length > 2) {
-                throw new IllegalArgumentException(format("Service link '%s' is invalid", link));
+                throw new ValidationException(format("Service link '%s' is invalid", link));
             }
             service = split[0];
         }
@@ -143,12 +144,12 @@ public class DockerServicesStartStrategy {
     /**
      * Parses volumesFrom content into depends_on field representation - removes column and further chars
      */
-    private String getServiceFromVolumesFrom(String volumesFrom) throws IllegalArgumentException {
+    private String getServiceFromVolumesFrom(String volumesFrom) throws ValidationException {
         String service = volumesFrom;
         if (volumesFrom != null) {
             String[] split = service.split(":");
             if (split.length > 2) {
-                throw new IllegalArgumentException(format("Service volumes_from '%s' is invalid", volumesFrom));
+                throw new ValidationException(format("Service volumes_from '%s' is invalid", volumesFrom));
             }
             service = split[0];
         }
@@ -163,12 +164,13 @@ public class DockerServicesStartStrategy {
                       .collect(Collectors.toList());
     }
 
-    private void checkDependency(String dependency, String serviceName, Map<String, DockerService> services, String errorMessage) {
+    private void checkDependency(String dependency, String serviceName, Map<String, DockerService> services, String errorMessage)
+            throws ValidationException {
         if (serviceName.equals(dependency)) {
-            throw new IllegalArgumentException(errorMessage + ": " + serviceName);
+            throw new ValidationException(errorMessage + ": " + serviceName);
         }
         if (!services.containsKey(dependency)) {
-            throw new IllegalArgumentException(
+            throw new ValidationException(
                     format("Dependency '%s' in machine '%s' points to unknown machine.",
                            dependency, serviceName));
         }

@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.workspace.infrastructure.docker.DockerContainerNameGenerator;
 import org.mockito.InjectMocks;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.DataProvider;

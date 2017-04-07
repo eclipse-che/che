@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.old;
+package org.eclipse.che.workspace.infrastructure.docker.old.strategy;
 
 import org.eclipse.che.api.core.model.machine.ServerProperties;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;

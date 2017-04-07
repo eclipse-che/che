@@ -22,9 +22,13 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.ValidationException;
+import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentValidator;
+import org.eclipse.che.workspace.infrastructure.docker.environment.DockerServicesStartStrategy;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -37,31 +41,67 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     // TODO rework
     public static final Set<String> SUPPORTED_RECIPE_TYPES = ImmutableSet.of("dockerimage", "dockerfile", "compose");
 
-    private final DockerEnvironmentValidator dockerEnvironmentValidator;
+    private final DockerEnvironmentValidator  dockerEnvironmentValidator;
+    private final DockerEnvironmentParser     dockerEnvironmentParser;
+    private final DockerServicesStartStrategy startStrategy;
+    private final InfrastructureProvisioner   infrastructureProvisioner;
+    private final DockerEnvironmentNormalizer environmentNormalizer;
 
     @Inject
-    public DockerRuntimeInfrastructure(DockerEnvironmentValidator dockerEnvironmentValidator) {
+    public DockerRuntimeInfrastructure(DockerEnvironmentParser dockerEnvironmentParser,
+                                       DockerEnvironmentValidator dockerEnvironmentValidator,
+                                       DockerServicesStartStrategy startStrategy,
+                                       InfrastructureProvisioner infrastructureProvisioner,
+                                       DockerEnvironmentNormalizer environmentNormalizer) {
         super("docker", SUPPORTED_RECIPE_TYPES);
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
+        this.dockerEnvironmentParser = dockerEnvironmentParser;
+        this.startStrategy = startStrategy;
+        this.infrastructureProvisioner = infrastructureProvisioner;
+        this.environmentNormalizer = environmentNormalizer;
     }
 
+    @Override
     public Environment estimate(Environment environment) throws ValidationException,
                                                                 ServerException {
+        DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);
+        dockerEnvironmentValidator.validate(environment, dockerEnvironment);
+        // check that order can be resolved
+        startStrategy.order(dockerEnvironment);
         // TODO add an actual estimation of what is missing in the environment
-        environment = dockerEnvironmentValidator.validate(environment);
+
         return environment;
     }
 
-    public RuntimeContext prepare(RuntimeIdentity id, Environment environment) throws ValidationException,
-                                                                                      ApiException,
-                                                                                      IOException {
-        throw new ApiException("");
+    @Override
+    public RuntimeContext prepare(RuntimeIdentity identity, Environment environment) throws ValidationException,
+                                                                                            ApiException,
+                                                                                            IOException {
+        DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);
+        dockerEnvironmentValidator.validate(environment, dockerEnvironment);
+        // check that order can be resolved
+        List<String> orderedServices = startStrategy.order(dockerEnvironment);
+
+        infrastructureProvisioner.provision(environment, dockerEnvironment);
+
+        environmentNormalizer.normalize(environment, dockerEnvironment, identity);
+
+        // environment holder
+        return new DockerRuntimeContext(dockerEnvironment,
+                                        environment,
+                                        identity,
+                                        this,
+                                        null,
+                                        orderedServices);
     }
 
+
+    @Override
     public Set<RuntimeIdentity> getIdentities() throws NotSupportedException {
         throw new NotSupportedException();
     }
 
+    @Override
     public InternalRuntime getRuntime(RuntimeIdentity id) throws NotSupportedException {
         throw new NotSupportedException();
     }

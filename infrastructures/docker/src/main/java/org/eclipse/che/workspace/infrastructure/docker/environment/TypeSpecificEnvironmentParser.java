@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.docker.environment;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.workspace.server.spi.ValidationException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
@@ -23,8 +24,10 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  */
 public interface TypeSpecificEnvironmentParser {
     /**
-     * Returns {@link DockerEnvironment} with parameters parsed
-     * from {@link Environment}.
+     * Parses compose file from {@link Environment} into {@link DockerEnvironment}.
+     * <p/>
+     * {@link Recipe#getContent()} in {@code Environment} must not be null even.
+     * It is supposed that class that uses this methods sets it if needed.
      *
      * @param environment
      *         environment to parsing

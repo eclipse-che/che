@@ -24,6 +24,8 @@ import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerState;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
+import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategy;
+import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategyProvider;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -75,8 +77,8 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
      */
     public static final String USER_TOKEN = "USER_TOKEN";
 
-    private final ContainerInfo                 info;
-    private final Map<String, OldServerConfImpl>      serversConf;
+    private final ContainerInfo                    info;
+    private final Map<String, OldServerConfImpl>   serversConf;
     private final String                           internalHost;
     private final ServerEvaluationStrategyProvider provider;
 
@@ -101,126 +103,6 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
 
         this.internalHost = internalHost;
         this.provider = provider;
-    }
-
-    @Override
-    public Map<String, String> getProperties() {
-        Map<String, String> md = new LinkedHashMap<>();
-        md.put("id", info.getId());
-        md.put("created", info.getCreated());
-        md.put("image", info.getImage());
-        md.put("path", info.getPath());
-        md.put("appArmorProfile", info.getAppArmorProfile());
-        md.put("driver", info.getDriver());
-        md.put("execDriver", info.getExecDriver());
-        md.put("hostnamePath", info.getHostnamePath());
-        md.put("hostsPath", info.getHostsPath());
-        md.put("mountLabel", info.getMountLabel());
-        md.put("name", info.getName());
-        md.put("processLabel", info.getProcessLabel());
-        md.put("volumesRW", String.valueOf(info.getVolumesRW()));
-        md.put("resolvConfPath", info.getResolvConfPath());
-        md.put("args", Arrays.toString(info.getArgs()));
-        md.put("volumes", String.valueOf(info.getVolumes()));
-        md.put("restartCount", String.valueOf(info.getRestartCount()));
-        md.put("logPath", String.valueOf(info.getLogPath()));
-        ContainerConfig config = info.getConfig();
-        if (config != null) {
-            md.put("config.domainName", config.getDomainName());
-            md.put("config.hostname", config.getHostname());
-            md.put("config.image", config.getImage());
-            md.put("config.user", config.getUser());
-            md.put("config.workingDir", config.getWorkingDir());
-            md.put("config.cmd", Arrays.toString(config.getCmd()));
-            md.put("config.volumes", String.valueOf(config.getVolumes()));
-            md.put("config.entrypoint", Arrays.toString(config.getEntrypoint()));
-            md.put("config.exposedPorts", String.valueOf(config.getExposedPorts()));
-            md.put("config.macAddress", config.getMacAddress());
-            md.put("config.securityOpts", Arrays.toString(config.getSecurityOpts()));
-            md.put("config.env", Arrays.toString(config.getEnv()));
-            md.put("config.attachStderr", Boolean.toString(config.isAttachStderr()));
-            md.put("config.attachStdin", Boolean.toString(config.isAttachStdin()));
-            md.put("config.attachStdout", Boolean.toString(config.isAttachStdout()));
-            md.put("config.networkDisabled", Boolean.toString(config.isNetworkDisabled()));
-            md.put("config.openStdin", Boolean.toString(config.isOpenStdin()));
-            md.put("config.stdinOnce", Boolean.toString(config.isStdinOnce()));
-            md.put("config.tty", Boolean.toString(config.isTty()));
-            md.put("config.labels", String.valueOf(config.getLabels()));
-        }
-        ContainerState state = info.getState();
-        if (state != null) {
-            md.put("state.startedAt", state.getStartedAt());
-            md.put("state.exitCode", Integer.toString(state.getExitCode()));
-            md.put("state.pid", Integer.toString(state.getPid()));
-            md.put("state.running", Boolean.toString(state.isRunning()));
-            md.put("state.finishedAt", state.getFinishedAt());
-            md.put("state.paused", Boolean.toString(state.isPaused()));
-            md.put("state.restarting", Boolean.toString(state.isRestarting()));
-            md.put("state.dead", String.valueOf(state.isDead()));
-            md.put("state.OOMKilled", String.valueOf(state.isOOMKilled()));
-            md.put("state.error", state.getError());
-        }
-        NetworkSettings networkSettings = info.getNetworkSettings();
-        if (networkSettings != null) {
-            md.put("network.bridge", networkSettings.getBridge());
-            md.put("network.gateway", networkSettings.getGateway());
-            md.put("network.ipAddress", networkSettings.getIpAddress());
-            md.put("network.ipPrefixLen", Integer.toString(networkSettings.getIpPrefixLen()));
-            md.put("network.portMappings", Arrays.toString(networkSettings.getPortMapping()));
-            md.put("network.macAddress", networkSettings.getMacAddress());
-            md.put("network.ports", String.valueOf(networkSettings.getPorts()));
-            md.put("network.linkLocalIPv6PrefixLen", String.valueOf(networkSettings.getLinkLocalIPv6PrefixLen()));
-            md.put("network.globalIPv6Address", networkSettings.getGlobalIPv6Address());
-            md.put("network.globalIPv6PrefixLen", String.valueOf(networkSettings.getGlobalIPv6PrefixLen()));
-            md.put("network.iPv6Gateway", networkSettings.getIpV6Gateway());
-            md.put("network.linkLocalIPv6Address", networkSettings.getLinkLocalIPv6Address());
-        }
-        HostConfig hostConfig = info.getHostConfig();
-        if (hostConfig != null) {
-            md.put("hostConfig.cgroupParent", hostConfig.getCgroupParent());
-            md.put("hostConfig.containerIDFile", hostConfig.getContainerIDFile());
-            md.put("hostConfig.cpusetCpus", hostConfig.getCpusetCpus());
-            md.put("hostConfig.ipcMode", hostConfig.getIpcMode());
-            md.put("hostConfig.memory", Long.toString(hostConfig.getMemory()));
-            md.put("hostConfig.networkMode", hostConfig.getNetworkMode());
-            md.put("hostConfig.pidMode", hostConfig.getPidMode());
-            md.put("hostConfig.binds", Arrays.toString(hostConfig.getBinds()));
-            md.put("hostConfig.capAdd", Arrays.toString(hostConfig.getCapAdd()));
-            md.put("hostConfig.capDrop", Arrays.toString(hostConfig.getCapDrop()));
-            md.put("hostConfig.cpuShares", String.valueOf(hostConfig.getCpuShares()));
-            md.put("hostConfig.devices", Arrays.toString(hostConfig.getDevices()));
-            md.put("hostConfig.dns", Arrays.toString(hostConfig.getDns()));
-            md.put("hostConfig.dnsSearch", Arrays.toString(hostConfig.getDnsSearch()));
-            md.put("hostConfig.extraHosts", Arrays.toString(hostConfig.getExtraHosts()));
-            md.put("hostConfig.links", Arrays.toString(hostConfig.getLinks()));
-            md.put("hostConfig.logConfig", String.valueOf(hostConfig.getLogConfig()));
-            md.put("hostConfig.lxcConf", Arrays.toString(hostConfig.getLxcConf()));
-            md.put("hostConfig.memorySwap", String.valueOf(hostConfig.getMemorySwap()));
-            md.put("hostConfig.portBindings", String.valueOf(hostConfig.getPortBindings()));
-            md.put("hostConfig.restartPolicy", String.valueOf(hostConfig.getRestartPolicy()));
-            md.put("hostConfig.ulimits", Arrays.toString(hostConfig.getUlimits()));
-            md.put("hostConfig.volumesFrom", Arrays.toString(hostConfig.getVolumesFrom()));
-            md.put("hostConfig.pidsLimit", Long.toString(hostConfig.getPidsLimit()));
-        }
-
-        return md;
-    }
-
-    @Override
-    public Map<String, String> getEnvVariables() {
-        final Map<String, String> envVariables = new HashMap<>();
-        if (info.getConfig() != null && info.getConfig().getEnv() != null) {
-            for (String envVariable : info.getConfig().getEnv()) {
-                final String[] variableNameValue = envVariable.split("=", 2);
-                envVariables.put(variableNameValue[0], variableNameValue[1]);
-            }
-        }
-        return envVariables;
-    }
-
-    @Override
-    public String projectsRoot() {
-        return getEnvVariables().get(PROJECTS_ROOT_VARIABLE);
     }
 
     @Override

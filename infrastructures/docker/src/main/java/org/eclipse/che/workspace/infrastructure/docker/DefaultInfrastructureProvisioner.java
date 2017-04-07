@@ -8,16 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.old;
+package org.eclipse.che.workspace.infrastructure.docker;
 
 import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
-import org.eclipse.che.api.environment.server.AgentConfigApplier;
-import org.eclipse.che.api.environment.server.InfrastructureProvisioner;
-import org.eclipse.che.api.environment.server.exception.EnvironmentException;
-import org.eclipse.che.api.environment.server.model.CheServiceImpl;
-import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import javax.inject.Inject;
 
@@ -35,20 +31,11 @@ public class DefaultInfrastructureProvisioner implements InfrastructureProvision
     }
 
     @Override
-    public void provision(Environment envConfig, CheServicesEnvironmentImpl internalEnv) throws EnvironmentException {
+    public void provision(Environment envConfig, DockerEnvironment dockerEnvironment) throws ServerException {
         try {
-            agentConfigApplier.apply(envConfig, internalEnv);
+            agentConfigApplier.apply(envConfig, dockerEnvironment);
         } catch (AgentException e) {
-            throw new EnvironmentException(e.getLocalizedMessage(), e);
-        }
-    }
-
-    @Override
-    public void provision(MachineConfig machineConfig, CheServiceImpl internalMachine) throws EnvironmentException {
-        try {
-            agentConfigApplier.apply(machineConfig, internalMachine);
-        } catch (AgentException e) {
-            throw new EnvironmentException(e.getLocalizedMessage(), e);
+            throw new ServerException(e.getLocalizedMessage(), e);
         }
     }
 }

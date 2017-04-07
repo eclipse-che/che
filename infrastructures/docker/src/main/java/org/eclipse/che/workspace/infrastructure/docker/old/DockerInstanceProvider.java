@@ -14,9 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
@@ -37,8 +36,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * Docker implementation of {@link InstanceProvider}
@@ -52,7 +49,7 @@ import java.util.Set;
  */
 @Deprecated
 @Singleton
-public class DockerInstanceProvider implements InstanceProvider {
+public class DockerInstanceProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DockerInstanceProvider.class);
 
     /**
@@ -80,19 +77,9 @@ public class DockerInstanceProvider implements InstanceProvider {
         this.snapshotUseRegistry = snapshotUseRegistry;
     }
 
-    @Override
-    public String getType() {
-        return "docker";
-    }
-
-    @Override
-    public Set<String> getRecipeTypes() {
-        return Collections.emptySet();
-    }
-
     /**
      * Creates instance from scratch or by reusing a previously one by using specified {@link MachineSource}
-     * data in {@link MachineConfig}.
+     * data in {@link }.
      *
      * @param machine
      *         machine description
@@ -108,7 +95,6 @@ public class DockerInstanceProvider implements InstanceProvider {
      * @throws MachineException
      *         if other error occurs
      */
-    @Override
     public Instance createInstance(Machine machine,
                                    LineConsumer creationLogsOutput) throws NotFoundException,
                                                                            MachineException {
@@ -123,7 +109,6 @@ public class DockerInstanceProvider implements InstanceProvider {
      * @throws SnapshotException
      *         if exception occurs on instance snapshot removal
      */
-    @Override
     public void removeInstanceSnapshot(final MachineSource machineSource) throws SnapshotException {
         // use registry API directly because docker doesn't have such API yet
         // https://github.com/docker/docker-registry/issues/45

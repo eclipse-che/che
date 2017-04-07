@@ -50,17 +50,6 @@ public class ComposeEnvironmentParser implements TypeSpecificEnvironmentParser {
         this.recipeDownloader = recipeDownloader;
     }
 
-    /**
-     * Parses compose file from {@link Environment} into {@link DockerEnvironment}.
-     *
-     * @param environment
-     *         environment with {@link Recipe} to parse.
-     *         {@link Recipe} contains {@link DockerEnvironment} definition.
-     * @throws IllegalArgumentException
-     *         when environment or environment recipe is invalid
-     * @throws ServerException
-     *         when environment recipe can not be retrieved
-     */
     @Override
     public DockerEnvironment parse(Environment environment) throws ServerException {
         requireNonNull(environment, "Environment should not be null");

@@ -14,10 +14,9 @@ import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.plugin.docker.client.DockerFileException;
+import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.parser.DockerImageIdentifier;
 import org.eclipse.che.plugin.docker.client.parser.DockerImageIdentifierParser;
-
-import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY_SYNONYMS;
 
 /**
  * Set of helper methods that identifies docker image properties

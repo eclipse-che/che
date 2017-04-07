@@ -131,10 +131,10 @@ public class WorkspaceRuntimes {
 
 
     public Environment estimate(Environment environment) throws NotFoundException, ServerException, ValidationException {
-
+        // TODO decide whether throw exception when dev machine not found
         String type = environment.getRecipe().getType();
         if (!infraByRecipe.containsKey(type))
-            throw new NotFoundException("Ifrastructure not found for type: " + type);
+            throw new NotFoundException("Infrastructure not found for type: " + type);
 
         return infraByRecipe.get(type).estimate(environment);
     }

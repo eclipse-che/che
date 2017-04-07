@@ -18,7 +18,6 @@ import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.spi.ValidationException;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.workspace.infrastructure.docker.DockerRuntimeInfrastructure;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 
@@ -32,15 +31,12 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static org.eclipse.che.workspace.infrastructure.docker.DockerRuntimeInfrastructure.SUPPORTED_RECIPE_TYPES;
+import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkArgument;
 
 /**
  * @author Alexander Garagatyi
  */
 public class DockerEnvironmentValidator {
-    static final String SUPPORTED_RECIPE_TYPES_STRING =
-            Joiner.on(',').join(DockerRuntimeInfrastructure.SUPPORTED_RECIPE_TYPES);
-
     /* machine name must contain only {a-zA-Z0-9_-} characters and it's needed for validation machine names */
     private static final String  MACHINE_NAME_REGEXP  = "[a-zA-Z0-9_-]+";
     private static final Pattern MACHINE_NAME_PATTERN = Pattern.compile("^" + MACHINE_NAME_REGEXP + "$");
@@ -72,40 +68,13 @@ public class DockerEnvironmentValidator {
     private static final Pattern VOLUME_FROM_PATTERN =
             Pattern.compile("^(?<serviceName>" + MACHINE_NAME_REGEXP + ")(:(ro|rw))?$");
 
-    //    private final MachineInstanceProviders     machineInstanceProviders;
-    private final DockerEnvironmentParser     dockerEnvironmentParser;
-    private final DockerServicesStartStrategy startStrategy;
-
     @Inject
-    public DockerEnvironmentValidator(DockerEnvironmentParser dockerEnvironmentParser,
-                                      DockerServicesStartStrategy startStrategy) {
-        this.dockerEnvironmentParser = dockerEnvironmentParser;
-        this.startStrategy = startStrategy;
+    public DockerEnvironmentValidator() {
+
     }
 
-    public Environment validate(Environment env) throws ValidationException,
+    public void validate(Environment env, DockerEnvironment dockerEnvironment) throws ValidationException,
                                                         ServerException {
-        checkNotNull(env.getRecipe(), "Environment recipe should not be null");
-        checkArgument(SUPPORTED_RECIPE_TYPES.contains(env.getRecipe().getType()),
-                      "Environment type '%s' is not supported. Supported types: %s",
-                      env.getRecipe().getType(),
-                      SUPPORTED_RECIPE_TYPES_STRING);
-        checkArgument(env.getRecipe().getContent() != null || env.getRecipe().getLocation() != null,
-                      "Recipe of environment must contain location or content");
-        checkArgument(env.getRecipe().getContent() == null || env.getRecipe().getLocation() == null,
-                      "Recipe of environment contains mutually exclusive fields location and content");
-
-        DockerEnvironment dockerEnvironment;
-        try {
-            dockerEnvironment = dockerEnvironmentParser.parse(env);
-        } catch (ServerException e) {
-            throw new ServerException(
-                    format("Parsing of recipe of environment failed. Error: %s", e.getLocalizedMessage()));
-        } catch (IllegalArgumentException e) {
-            throw new ValidationException(
-                    format("Parsing of recipe of environment failed. Error: %s", e.getLocalizedMessage()));
-        }
-
         checkArgument(dockerEnvironment.getServices() != null && !dockerEnvironment.getServices().isEmpty(),
                       "Environment should contain at least 1 machine");
 
@@ -145,23 +114,12 @@ public class DockerEnvironmentValidator {
                             entry.getValue(),
                             servicesNames);
         }
-
-        // check that order can be resolved
-        try {
-            startStrategy.order(dockerEnvironment);
-        } catch (IllegalArgumentException e) {
-            throw new ValidationException(
-                    format("Start order of machine in environment is not resolvable. Error: %s",
-                           e.getLocalizedMessage()));
-        }
-
-        return env;
     }
 
-    protected void validateMachine(String machineName,
-                                   @Nullable MachineConfig machineConfig,
-                                   DockerService service,
-                                   Set<String> servicesNames) throws ValidationException {
+    private void validateMachine(String machineName,
+                                 @Nullable MachineConfig machineConfig,
+                                 DockerService service,
+                                 Set<String> servicesNames) throws ValidationException {
         checkArgument(MACHINE_NAME_PATTERN.matcher(machineName).matches(),
                       "Name of machine '%s' in environment is invalid",
                       machineName);
@@ -275,30 +233,5 @@ public class DockerEnvironmentValidator {
             }
         }
 
-    }
-
-    /**
-     * Checks that object reference is not null, throws {@link IllegalArgumentException} otherwise.
-     *
-     * <p>Exception uses error message built from error message template and error message parameters.
-     */
-    private static void checkNotNull(Object object, String errorMessageTemplate, Object... errorMessageParams)
-            throws ValidationException {
-        if (object == null) {
-            throw new ValidationException(format(errorMessageTemplate, errorMessageParams));
-        }
-    }
-
-    private static void checkArgument(boolean expression, String error) throws ValidationException {
-        if (expression) {
-            throw new ValidationException(error);
-        }
-    }
-
-    private static void checkArgument(boolean expression, String errorMessageTemplate, Object... errorMessageParams)
-            throws ValidationException {
-        if (expression) {
-            throw new ValidationException(format(errorMessageTemplate, errorMessageParams));
-        }
     }
 }

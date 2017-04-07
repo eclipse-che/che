@@ -8,9 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.old;
+package org.eclipse.che.workspace.infrastructure.docker.old.config;
 
 import com.google.common.base.Strings;
+
+import org.eclipse.che.workspace.infrastructure.docker.old.DockerInstanceRuntimeInfo;
 
 import javax.inject.Inject;
 import javax.inject.Named;

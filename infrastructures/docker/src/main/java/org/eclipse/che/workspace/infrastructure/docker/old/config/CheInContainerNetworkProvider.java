@@ -8,43 +8,38 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.old;
+package org.eclipse.che.workspace.infrastructure.docker.old.config;
 
 import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-import java.util.Arrays;
+import javax.inject.Singleton;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-
 /**
- * Retrieves hosts entries for docker machines from property.
- *
- * </p> Property {@value PROPERTY} contains hosts entries separated by coma "," sign.
+ * Provides network that all containers of workspaces in Che should join to properly communicate with Che server.
  *
  * @author Alexander Garagatyi
  */
-public class DockerExtraHostsFromPropertyProvider implements Provider<Set<String>> {
-    private static final String PROPERTY = "che.workspace.hosts";
+@Singleton
+public class CheInContainerNetworkProvider implements Provider<Set<String>> {
 
-    private final Set<String> extraHosts;
+    private Set<String> networks;
 
     @Inject
-    public DockerExtraHostsFromPropertyProvider(@Nullable @Named(PROPERTY) String extraHosts) {
-        if (isNullOrEmpty(extraHosts)) {
-            this.extraHosts = Collections.emptySet();
+    public CheInContainerNetworkProvider(@Nullable @Named("che.docker.network") String cheMasterNetwork) {
+        if (cheMasterNetwork == null) {
+            networks = Collections.emptySet();
         } else {
-            this.extraHosts = new HashSet<>(Arrays.asList(extraHosts.split(",")));
+            networks = Collections.singleton(cheMasterNetwork);
         }
     }
 
     @Override
     public Set<String> get() {
-        return extraHosts;
+        return networks;
     }
 }

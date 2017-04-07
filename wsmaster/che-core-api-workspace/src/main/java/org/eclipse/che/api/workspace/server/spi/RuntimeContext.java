@@ -69,6 +69,7 @@ public abstract class RuntimeContext {
     public final void stop(Map<String, String> stopOptions) throws ServerException, ConflictException {
         if(this.state != null)
             throw new ConflictException("Context already used");
+        state = WorkspaceStatus.STOPPING;
         internalStop(stopOptions);
         state = WorkspaceStatus.STOPPED;
     }
@@ -86,7 +87,7 @@ public abstract class RuntimeContext {
      * it during the whole life time of Runtime. Repeating calls of this method should return the same URL
      * If infrastructure implementation provides a channel it guarantees:
      * - this endpoint is open and ready to use
-     * - this endpoint emmits only messages of specified formats (TODO specify the formats)
+     * - this endpoint emits only messages of specified formats (TODO specify the formats)
      * - high loaded infrastructure provides scaling of "messaging server" to avoid overloading
      * @return URL of the channels endpoint
      * @throws NotSupportedException if implementation does not provide channel
