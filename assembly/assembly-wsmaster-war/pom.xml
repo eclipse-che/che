@@ -216,11 +216,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-url-factory</artifactId>
+            <artifactId>che-plugin-traefik</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-traefik</artifactId>
+            <artifactId>che-plugin-url-factory</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
