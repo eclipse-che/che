@@ -12,7 +12,6 @@ package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;

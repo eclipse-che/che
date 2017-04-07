@@ -10,14 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import org.eclipse.che.api.agent.server.AgentRegistry;
-import org.eclipse.che.api.agent.server.impl.AgentSorter;
-import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.environment.server.ContainerNameGenerator;
-import org.eclipse.che.api.environment.server.EnvironmentParser;
-import org.eclipse.che.api.environment.server.InfrastructureProvisioner;
-import org.eclipse.che.api.environment.server.MachineInstanceProvider;
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
@@ -35,36 +27,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 @Listeners(MockitoTestNGListener.class)
 public class WorkspaceRuntimeIntegrationTest {
-    private static final Logger LOG          = getLogger(WorkspaceRuntimeIntegrationTest.class);
-    private static final String WORKSPACE_ID = "workspace123";
-    private static final String ENV_NAME     = "default-env";
-
-    @Mock
-    private EventService              eventService;
-    @Mock
-    private MachineInstanceProviders  machineInstanceProviders;
-    @Mock
-    private EnvironmentParser         environmentParser;
-    @Mock
-    private MachineInstanceProvider   instanceProvider;
-    @Mock
-    private InfrastructureProvisioner infrastructureProvisioner;
-    @Mock
-    private RecipeDownloader          recipeDownloader;
-    @Mock
-    private ContainerNameGenerator    containerNameGenerator;
-    @Mock
-    private AgentRegistry             agentRegistry;
-    @Mock
-    private AgentSorter               agentSorter;
-    @Mock
-    private AgentLauncherFactory      launcherFactory;
-    @Mock
-    private WorkspaceSharedPool       sharedPool;
-    @Mock
-    private SnapshotDao               snapshotDao;
-
-    private ExecutorService   executor;
+// FIXME: spi
 //    private WorkspaceRuntimes runtimes;
 
 //    @BeforeMethod
