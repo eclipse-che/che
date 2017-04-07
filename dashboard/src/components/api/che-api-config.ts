@@ -26,8 +26,6 @@ import {CheHttpBackendProviderFactory} from './test/che-http-backend-provider.fa
 import {CheFactoryTemplate} from './che-factory-template.factory';
 import {CheHttpBackendFactory} from './test/che-http-backend.factory';
 import {CheAPIBuilder} from './builder/che-api-builder.factory';
-import {CheAdminPlugins} from './che-admin-plugins.factory';
-import {CheAdminService} from './che-admin-service.factory';
 import {CheRemote} from './remote/che-remote.factory';
 import {CheOAuthProvider} from './che-o-auth-provider.factory';
 import {CheEnvironmentRegistry} from './environment/che-environment-registry.factory';
@@ -51,8 +49,6 @@ export class ApiConfig {
     register.factory('cheHttpBackendProvider', CheHttpBackendProviderFactory);
     register.factory('cheHttpBackend', CheHttpBackendFactory);
     register.factory('cheAPIBuilder', CheAPIBuilder);
-    register.factory('cheAdminPlugins', CheAdminPlugins);
-    register.factory('cheAdminService', CheAdminService);
     register.factory('cheFactoryTemplate', CheFactoryTemplate);
     register.factory('cheService', CheService);
     register.factory('cheAPI', CheAPI);

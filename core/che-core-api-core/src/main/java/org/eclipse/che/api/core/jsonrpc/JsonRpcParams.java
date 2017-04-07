@@ -14,6 +14,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
@@ -65,7 +66,12 @@ public class JsonRpcParams {
         if (params == null || params.isEmpty()) {
             this.paramsList = Collections.emptyList();
         } else {
-            this.paramsList = params.stream().map(Object::toString).map(jsonParser::parse).collect(Collectors.toList());
+            // ugly workaround will be fixed in next release
+            if (params.get(0) instanceof String) {
+                this.paramsList = params.stream().map(it -> new JsonPrimitive(it.toString())).collect(Collectors.toList());
+            } else {
+                this.paramsList = params.stream().map(Object::toString).map(jsonParser::parse).collect(Collectors.toList());
+            }
         }
     }
 

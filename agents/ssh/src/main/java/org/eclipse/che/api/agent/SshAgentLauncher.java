@@ -33,8 +33,7 @@ public class SshAgentLauncher extends AbstractAgentLauncher {
                             @Named("che.agent.dev.ping_delay_ms") long agentPingDelayMs) {
         super(agentMaxStartTimeMs,
               agentPingDelayMs,
-              new CompositeAgentLaunchingChecker(new ProcessIsLaunchedChecker("sshd"),
-                                                 new MappedPortIsListeningAgentChecker("22/tcp")));
+              new MappedPortIsListeningAgentChecker("22/tcp"));
     }
 
     @Override

@@ -15,10 +15,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
@@ -28,9 +24,9 @@ import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
@@ -52,13 +48,14 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
                                      EventBus eventBus,
                                      AppContext appContext,
                                      NotificationManager notificationManager,
-                                     MessageBusProvider messageBusProvider,
                                      BrowserAddress browserAddress,
                                      DialogFactory dialogFactory,
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
-                                     WorkspaceEventsHandler workspaceEventsHandler,
-                                     LoaderPresenter loader) {
+                                     LoaderPresenter loader,
+                                     MachineLogsRestorer restorer,
+                                     RequestTransmitter transmitter,
+                                     WorkspaceEventsHandler handler) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
               startWorkspacePresenter,
@@ -67,38 +64,32 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
               eventBus,
               appContext,
               notificationManager,
-              messageBusProvider,
               browserAddress,
               dialogFactory,
               preferencesManager,
               dtoFactory,
-              workspaceEventsHandler,
-              loader);
+              loader,
+              restorer,
+              transmitter);
     }
 
     /** {@inheritDoc} */
     @Override
     public void start(final Callback<Component, Exception> callback) {
         this.callback = callback;
-        workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey()).then(
-                new Operation<WorkspaceDto>() {
-                    @Override
-                    public void apply(WorkspaceDto workspaceDto) throws OperationException {
-                        handleWorkspaceEvents(workspaceDto, callback, null);
-                    }
-                }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                needToReloadComponents = true;
-                dialogFactory.createMessageDialog(locale.getWsErrorDialogTitle(),
-                                                  locale.getWsErrorDialogContent(error.getMessage()),
-                                                  null).show();
-            }
-        });
+        workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
+                              .then(workspaceDto -> {
+                                  handleWorkspaceEvents(workspaceDto, callback, null);
+                              })
+                              .catchError(error -> {
+                                  needToReloadComponents = true;
+                                  String dialogTitle = locale.getWsErrorDialogTitle();
+                                  String dialogContent = locale.getWsErrorDialogContent(error.getMessage());
+                                  dialogFactory.createMessageDialog(dialogTitle, dialogContent, null).show();
+                              });
     }
 
     @Override
     public void tryStartWorkspace() {
     }
-
 }

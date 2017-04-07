@@ -21,6 +21,7 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.SimpleFileVisitor;
@@ -126,6 +127,8 @@ public class FileTreeWalker {
                 }
             });
             LOG.debug("Tree walk finished");
+        } catch (NoSuchFileException e) {
+            LOG.debug("Trying to process a file, however seems like it is already not present: {}", e.getMessage());
         } catch (Exception e) {
             LOG.error("Error while walking file tree", e);
         }

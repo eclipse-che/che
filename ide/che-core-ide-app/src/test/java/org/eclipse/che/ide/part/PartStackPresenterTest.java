@@ -201,6 +201,7 @@ public class PartStackPresenterTest {
     @Test
     public void partShouldBeHidden() {
         presenter.addPart(partPresenter);
+        presenter.setActivePart(partPresenter);
 
         presenter.minimize();
 
