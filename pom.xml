@@ -26,10 +26,10 @@
     <modules>
         <module>core</module>
         <module>wsmaster</module>
-        <module>infrastructure</module>
         <module>wsagent</module>
         <module>ide</module>
         <module>agents</module>
+        <module>infrastructures</module>
         <module>plugins</module>
         <module>samples</module>
         <module>dashboard</module>
