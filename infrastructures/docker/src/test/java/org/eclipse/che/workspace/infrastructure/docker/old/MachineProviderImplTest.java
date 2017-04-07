@@ -11,9 +11,11 @@
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.core.util.JsonRpcEndpointIdsHolder;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
@@ -108,6 +110,12 @@ public class MachineProviderImplTest {
 
     @Mock
     private DockerInstanceStopDetector dockerInstanceStopDetector;
+
+    @Mock
+    private RequestTransmitter transmitter;
+
+    @Mock
+    private JsonRpcEndpointIdsHolder endpointIdsHolder;
 
     @Mock
     private DockerNode dockerNode;
@@ -1577,6 +1585,8 @@ public class MachineProviderImplTest {
                                            credentialsReader,
                                            dockerMachineFactory,
                                            dockerInstanceStopDetector,
+                                           transmitter,
+                                           endpointIdsHolder,
                                            devMachineServers,
                                            allMachineServers,
                                            devMachineVolumes,
