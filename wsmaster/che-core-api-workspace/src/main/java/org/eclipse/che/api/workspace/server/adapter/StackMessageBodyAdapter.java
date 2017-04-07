@@ -8,13 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.server.stack;
+package org.eclipse.che.api.workspace.server.adapter;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
-import org.eclipse.che.api.workspace.server.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 

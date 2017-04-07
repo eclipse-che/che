@@ -14,6 +14,7 @@ import com.google.common.io.CharStreams;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigJsonAdapter;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;

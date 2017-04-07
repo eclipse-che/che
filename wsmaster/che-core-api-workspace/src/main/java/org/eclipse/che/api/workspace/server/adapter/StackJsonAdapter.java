@@ -8,17 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.server.stack;
+package org.eclipse.che.api.workspace.server.adapter;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.workspace.server.WorkspaceConfigJsonAdapter;
+import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigJsonAdapter;
 
 import javax.inject.Inject;
 
-import static org.eclipse.che.api.workspace.server.WorkspaceConfigJsonAdapter.findDevMachine;
+import static org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigJsonAdapter.findDevMachine;
 
 /**
  * Moves stack source to the workspace configuration, and adapts

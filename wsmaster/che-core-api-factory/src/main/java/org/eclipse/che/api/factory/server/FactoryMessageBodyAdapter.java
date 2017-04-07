@@ -15,7 +15,7 @@ import com.google.gson.JsonObject;
 
 import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-import org.eclipse.che.api.workspace.server.WorkspaceConfigMessageBodyAdapter;
+import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigMessageBodyAdapter;
 
 import javax.inject.Singleton;
 import java.util.Set;
