@@ -48,7 +48,7 @@ che:
 
 
 traefik:
-  image: florentbenoit/traefik
+  image: image: <%= ENV["IMAGE_TRAEFIK"] %>
   command: --logLevel=DEBUG
   links:
     - 'che:che'
