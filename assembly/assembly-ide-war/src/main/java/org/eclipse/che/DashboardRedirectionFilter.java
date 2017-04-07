@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  */
 
 public class DashboardRedirectionFilter implements Filter {
-    private static Pattern projectPattern = Pattern.compile("^/[^/]+?/.+");
+    private static Pattern projectPattern = Pattern.compile("^/(_app|[^/]+?)/.+");
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
