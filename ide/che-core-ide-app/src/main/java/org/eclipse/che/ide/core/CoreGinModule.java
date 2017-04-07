@@ -22,6 +22,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 
 import org.eclipse.che.ide.actions.ActionApiModule;
+import org.eclipse.che.ide.api.ConnectionClosedInformer;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.ProductInfoDataProviderImpl;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -46,6 +47,7 @@ import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.ssh.SshServiceClientImpl;
 import org.eclipse.che.ide.api.user.AskCredentialsDialog;
+import org.eclipse.che.ide.client.ConnectionClosedInformerImpl;
 import org.eclipse.che.ide.clipboard.ClipboardModule;
 import org.eclipse.che.ide.command.CommandApiModule;
 import org.eclipse.che.ide.context.AppContextImpl;
@@ -160,6 +162,7 @@ public class CoreGinModule extends AbstractGinModule {
         bind(AskCredentialsDialog.class).to(AskCredentialsDialogImpl.class);
         bind(ProductInfoDataProvider.class).to(ProductInfoDataProviderImpl.class);
         bind(WsAgentURLModifier.class).to(CheWsAgentLinksModifier.class);
+        bind(ConnectionClosedInformer.class).to(ConnectionClosedInformerImpl.class);
     }
 
     @Provides

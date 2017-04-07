@@ -8,10 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.env.local.client;
+package org.eclipse.che.ide.client;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.ConnectionClosedInformer;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
@@ -34,15 +35,15 @@ import static org.eclipse.che.ide.websocket.events.WebSocketClosedEvent.CLOSE_VI
  *
  * @author Roman Nikitenko
  */
-public class CheConnectionClosedInformer implements ConnectionClosedInformer {
+public class ConnectionClosedInformerImpl implements ConnectionClosedInformer {
 
 
-    private DialogFactory        dialogFactory;
-    private LocalizationConstant localizationConstant;
+    private DialogFactory            dialogFactory;
+    private CoreLocalizationConstant localizationConstant;
 
     @Inject
-    CheConnectionClosedInformer(DialogFactory dialogFactory,
-                                LocalizationConstant localizationConstant) {
+    public ConnectionClosedInformerImpl(DialogFactory dialogFactory,
+                                 CoreLocalizationConstant localizationConstant) {
         this.dialogFactory = dialogFactory;
         this.localizationConstant = localizationConstant;
     }
