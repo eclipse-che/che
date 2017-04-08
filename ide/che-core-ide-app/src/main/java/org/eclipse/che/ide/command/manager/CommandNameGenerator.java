@@ -44,12 +44,12 @@ class CommandNameGenerator {
      *
      * @param commandTypeId
      *         ID of the command type which display name should be used as part of the generated name
-     * @param desiredName
-     *         desired name. If some command with {@code desiredName} already exists
-     *         then generated name will be begin with {@code desiredName}
+     * @param customName
+     *         desired name. If some command with {@code customName} already exists
+     *         then generated name will be begin with {@code customName}
      * @return command name
      */
-    String generate(String commandTypeId, @Nullable String desiredName) {
+    String generate(String commandTypeId, @Nullable String customName) {
         final Set<String> existingNames = commandManagerProvider.get().getCommands()
                                                                 .stream()
                                                                 .map(CommandImpl::getName)
@@ -57,7 +57,7 @@ class CommandNameGenerator {
 
         String newName;
 
-        if (isNullOrEmpty(desiredName)) {
+        if (isNullOrEmpty(customName)) {
             Optional<CommandType> commandType = typeRegistry.getCommandTypeById(commandTypeId);
             newName = "new";
 
@@ -65,11 +65,11 @@ class CommandNameGenerator {
                 newName = newName + commandType.get().getDisplayName();
             }
         } else {
-            if (!existingNames.contains(desiredName)) {
-                return desiredName;
+            if (!existingNames.contains(customName)) {
+                return customName;
             }
 
-            newName = desiredName + " copy";
+            newName = customName + " copy";
         }
 
         if (!existingNames.contains(newName)) {
