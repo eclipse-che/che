@@ -2131,7 +2131,7 @@
         }]
     },
     "stackIcon": {
-        "name": "type-java.svg",
+        "name": "type-vertx.svg",
         "mediaType": "image/svg+xml"
     }
   }
