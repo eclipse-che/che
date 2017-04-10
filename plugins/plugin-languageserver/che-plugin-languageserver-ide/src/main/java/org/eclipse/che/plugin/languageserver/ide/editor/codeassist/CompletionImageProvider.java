@@ -10,16 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.lsp4j.CompletionItemKind;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Evgen Vidolob

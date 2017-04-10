@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import java.util.Map;
-
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.lsp4j.services.LanguageServer;
+
+import java.util.Map;
 
 /**
  * Is responsible to start new {@link LanguageServer}.

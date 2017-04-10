@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
@@ -30,8 +31,8 @@ import org.eclipse.lsp4j.TextDocumentSyncKind;
  */
 public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
 
-    private int version = 0;
     private final TextDocumentSynchronize synchronize;
+    private int version = 0;
 
     @Inject
     public LanguageServerReconcileStrategy(TextDocumentSynchronizeFactory synchronizeFactory,

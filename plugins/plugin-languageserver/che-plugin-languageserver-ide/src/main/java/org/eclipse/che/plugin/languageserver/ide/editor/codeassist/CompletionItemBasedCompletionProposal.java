@@ -11,7 +11,12 @@
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
 
-import java.util.List;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Overflow;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.promises.client.Operation;
@@ -32,13 +37,7 @@ import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Overflow;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.List;
 
 import static org.eclipse.che.ide.api.theme.Style.theme;
 
@@ -48,15 +47,15 @@ import static org.eclipse.che.ide.api.theme.Style.theme;
  */
 public class CompletionItemBasedCompletionProposal implements CompletionProposal {
 
-    private ExtendedCompletionItem               completionItem;
     private final TextDocumentServiceClient documentServiceClient;
-    private final TextDocumentIdentifier documentId;
+    private final TextDocumentIdentifier    documentId;
     private final LanguageServerResources   resources;
     private final Icon                      icon;
     private final ServerCapabilities        serverCapabilities;
     private final List<Match>               highlights;
     private final int                       offset;
-    private boolean resolved;
+    private       ExtendedCompletionItem    completionItem;
+    private       boolean                   resolved;
 
     CompletionItemBasedCompletionProposal(ExtendedCompletionItem completionItem,
                                           TextDocumentServiceClient documentServiceClient,
@@ -118,43 +117,43 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     @Override
     public String getDisplayString() {
         SafeHtmlBuilder builder = new SafeHtmlBuilder();
-        
+
         String label = completionItem.getLabel();
         int pos = 0;
         for (Match highlight : highlights) {
             if (highlight.getStart() == highlight.getEnd()) {
                 continue;
             }
-            
+
             if (pos < highlight.getStart()) {
                 appendPlain(builder, label.substring(pos, highlight.getStart()));
             }
-            
+
             appendHighlighted(builder, label.substring(highlight.getStart(), highlight.getEnd()));
             pos = highlight.getEnd();
         }
-        
+
         if (pos < label.length()) {
             appendPlain(builder, label.substring(pos));
         }
-        
+
         if (completionItem.getDetail() != null) {
             appendDetail(builder, completionItem.getDetail());
         }
-        
+
         return builder.toSafeHtml().asString();
     }
-    
+
     private void appendPlain(SafeHtmlBuilder builder, String text) {
         builder.appendEscaped(text);
     }
-    
+
     private void appendHighlighted(SafeHtmlBuilder builder, String text) {
         builder.appendHtmlConstant("<span class=\"" + resources.css().codeassistantHighlight() + "\">");
         builder.appendEscaped(text);
         builder.appendHtmlConstant("</span>");
     }
-    
+
     private void appendDetail(SafeHtmlBuilder builder, String text) {
         builder.appendHtmlConstant(" <span class=\"" + resources.css().codeassistantDetail() + "\">");
         builder.appendEscaped(text);
@@ -186,7 +185,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     private static class CompletionImpl implements Completion {
 
         private CompletionItem completionItem;
-        private int               offset;
+        private int            offset;
 
         public CompletionImpl(CompletionItem completionItem, int offset) {
             this.completionItem = completionItem;

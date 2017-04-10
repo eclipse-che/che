@@ -18,31 +18,31 @@ import org.eclipse.lsp4j.ServerCapabilities;
  */
 public class LanguageServerInitializeEvent {
 
-	private String projectPath;
-	private LanguageDescription supportedLanguages;
-	private ServerCapabilities serverCapabilities;
+    private String              projectPath;
+    private LanguageDescription supportedLanguages;
+    private ServerCapabilities  serverCapabilities;
 
-	public String getProjectPath() {
-		return projectPath;
-	}
+    public String getProjectPath() {
+        return projectPath;
+    }
 
     public void setProjectPath(String projectPath) {
-    	this.projectPath= projectPath;
-	}
+        this.projectPath = projectPath;
+    }
 
     public LanguageDescription getSupportedLanguages() {
-    	return supportedLanguages;
+        return supportedLanguages;
     }
 
     public void setSupportedLanguages(LanguageDescription supportedLanguages) {
-    	this.supportedLanguages= supportedLanguages;
+        this.supportedLanguages = supportedLanguages;
     }
 
     public ServerCapabilities getServerCapabilities() {
-    	return serverCapabilities;
+        return serverCapabilities;
     }
 
     public void setServerCapabilities(ServerCapabilities serverCapabilities) {
-    	this.serverCapabilities= serverCapabilities;
+        this.serverCapabilities = serverCapabilities;
     }
 }

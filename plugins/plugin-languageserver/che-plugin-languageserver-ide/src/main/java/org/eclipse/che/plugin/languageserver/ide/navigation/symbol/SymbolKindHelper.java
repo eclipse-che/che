@@ -10,19 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.symbol;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.lsp4j.SymbolKind;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Provides icons and text description for {@link SymbolKind}
- * 
+ *
  * @author Evgen Vidolob
  */
 @Singleton

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import javax.inject.Inject;
-
 import org.eclipse.che.api.languageserver.shared.model.ExtendedInitializeResult;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -32,14 +30,18 @@ import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
 
+import javax.inject.Inject;
+
 /**
  * Provide editor with LS support
  */
 public class LanguageServerEditorProvider implements AsyncEditorProvider, EditorProvider {
 
-    private LanguageServerEditorConfigurationFactory editorConfigurationFactory;
-    private final LanguageServerRegistry             registry;
-    private final LoaderFactory loaderFactory;
+    private final LanguageServerRegistry                   registry;
+    private final LoaderFactory                            loaderFactory;
+    private       LanguageServerEditorConfigurationFactory editorConfigurationFactory;
+    @com.google.inject.Inject
+    private EditorBuilder editorBuilder;
 
     @Inject
     public LanguageServerEditorProvider(LanguageServerEditorConfigurationFactory editorConfigurationFactory,
@@ -59,11 +61,6 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
     public String getDescription() {
         return "Code Editor";
     }
-
-
-    @com.google.inject.Inject
-    private EditorBuilder editorBuilder;
-
 
     @Override
     public TextEditor getEditor() {
@@ -87,7 +84,8 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
             File resource = (File)file;
 
             Promise<ExtendedInitializeResult> promise =
-                    registry.getOrInitializeServer(resource.getRelatedProject().get().getPath(), resource.getExtension(), resource.getLocation().toString());
+                    registry.getOrInitializeServer(resource.getRelatedProject().get().getPath(), resource.getExtension(),
+                                                   resource.getLocation().toString());
             final MessageLoader loader = loaderFactory.newLoader("Initializing Language Server for " + resource.getExtension());
             loader.show();
             return promise.thenPromise(new Function<ExtendedInitializeResult, Promise<EditorPartPresenter>>() {

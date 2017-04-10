@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
@@ -25,9 +26,8 @@ import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 import org.eclipse.che.plugin.languageserver.ide.editor.signature.LanguageServerSignatureHelpFactory;
 import org.eclipse.lsp4j.ServerCapabilities;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.assistedinject.Assisted;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Configure editor with LS support
@@ -61,7 +61,8 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
         this.annotationModel = annotationModelFactory.get(docPositionMapProvider.get());
 
         this.reconciler = new ReconcilerWithAutoSave(DocumentPartitioner.DEFAULT_CONTENT_TYPE, getPartitioner());
-        reconciler.addReconcilingStrategy(DocumentPartitioner.DEFAULT_CONTENT_TYPE, reconcileStrategyProviderFactory.build(serverCapabilities));
+        reconciler.addReconcilingStrategy(DocumentPartitioner.DEFAULT_CONTENT_TYPE,
+                                          reconcileStrategyProviderFactory.build(serverCapabilities));
         if (serverCapabilities.getSignatureHelpProvider() != null) {
             signatureHelpProvider = signatureHelpFactory.create(serverCapabilities);
         } else {

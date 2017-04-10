@@ -10,17 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import static com.google.common.io.Files.getFileExtension;
-import static org.eclipse.che.api.languageserver.shared.ProjectExtensionKey.createProjectKey;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
@@ -34,9 +26,17 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageServer;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import static com.google.common.io.Files.getFileExtension;
+import static org.eclipse.che.api.languageserver.shared.ProjectExtensionKey.createProjectKey;
 
 @Singleton
 public class LanguageServerRegistryImpl implements LanguageServerRegistry, ServerInitializerObserver {
@@ -53,7 +53,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     private final ConcurrentHashMap<ProjectExtensionKey, LanguageServer> projectToServer;
 
     private final Provider<ProjectManager> projectManagerProvider;
-    private final ServerInitializer        initializer; 
+    private final ServerInitializer        initializer;
 
     @Inject
     public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerLaunchers,

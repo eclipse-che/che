@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import java.util.Collections;
-import java.util.List;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -42,8 +42,8 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextEdit;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Evgen Vidolob
@@ -53,7 +53,7 @@ public class LanguageServerFormatter implements ContentFormatter {
     private final TextDocumentServiceClient client;
     private final DtoFactory                dtoFactory;
     private final NotificationManager       manager;
-    private final ServerCapabilities        capabilities; 
+    private final ServerCapabilities        capabilities;
     private final EditorPropertiesManager   editorPropertiesManager;
     private       TextEditor                editor;
 
@@ -63,14 +63,14 @@ public class LanguageServerFormatter implements ContentFormatter {
                                    NotificationManager manager,
                                    @Assisted ServerCapabilities capabilities,
                                    EditorPropertiesManager editorPropertiesManager) {
-        this.client = client; 
+        this.client = client;
         this.dtoFactory = dtoFactory;
         this.manager = manager;
         this.capabilities = capabilities;
         this.editorPropertiesManager = editorPropertiesManager;
     }
 
-    @Override 
+    @Override
     public void format(Document document) {
 
         TextRange selectedRange = document.getSelectedTextRange();
@@ -121,7 +121,7 @@ public class LanguageServerFormatter implements ContentFormatter {
     }
 
     private void formatFullDocument(Document document) {
-    	DocumentFormattingParams params = dtoFactory.createDto(DocumentFormattingParams.class);
+        DocumentFormattingParams params = dtoFactory.createDto(DocumentFormattingParams.class);
 
         TextDocumentIdentifier identifier = dtoFactory.createDto(TextDocumentIdentifier.class);
         identifier.setUri(document.getFile().getLocation().toString());
@@ -156,7 +156,7 @@ public class LanguageServerFormatter implements ContentFormatter {
             if (undoRedo != null) {
                 undoRedo.beginCompoundChange();
             }
-            
+
             // #2437: apply the text edits from last to first to avoid messing up the document
             Collections.reverse(edits);
             for (TextEdit change : edits) {

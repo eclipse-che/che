@@ -10,18 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
-import java.util.concurrent.CompletableFuture;
-
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsMessenger;
 import org.eclipse.che.api.languageserver.messager.ShowMessageMessenger;
@@ -36,6 +24,18 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.concurrent.CompletableFuture;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+
 /**
  * @author Anatoliy Bazko
  */
@@ -47,7 +47,7 @@ public class ServerInitializerImplTest {
     @Mock
     private PublishDiagnosticsParamsMessenger   publishDiagnosticsParamsMessenger;
     @Mock
-    private ShowMessageMessenger          showMessageParamsMessenger;
+    private ShowMessageMessenger                showMessageParamsMessenger;
     @Mock
     private LanguageDescription                 languageDescription;
     @Mock

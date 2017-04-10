@@ -29,6 +29,14 @@ public class ProjectExtensionKey {
     public ProjectExtensionKey() {
     }
 
+    public static ProjectExtensionKey createProjectKey(String project, String extension) {
+        return new ProjectExtensionKey(project, extension);
+    }
+
+    public static ProjectExtensionKey createAllProjectKey(String extension) {
+        return new ProjectExtensionKey(ALL_PROJECT_MARKER, extension);
+    }
+
     public String getProject() {
         return project;
     }
@@ -45,21 +53,13 @@ public class ProjectExtensionKey {
         this.extension = extension;
     }
 
-    public static ProjectExtensionKey createProjectKey(String project, String extension) {
-        return new ProjectExtensionKey(project, extension);
-    }
-
-    public static ProjectExtensionKey createAllProjectKey(String extension) {
-        return new ProjectExtensionKey(ALL_PROJECT_MARKER, extension);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;
         if (!(o instanceof ProjectExtensionKey))
             return false;
-        ProjectExtensionKey that = (ProjectExtensionKey) o;
+        ProjectExtensionKey that = (ProjectExtensionKey)o;
         return Objects.equals(extension, that.extension) && Objects.equals(project, that.project);
     }
 

@@ -10,14 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.messager;
 
-import java.io.IOException;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.websocket.EncodeException;
-
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls;
@@ -26,6 +18,13 @@ import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.websocket.EncodeException;
+import java.io.IOException;
 
 @Singleton
 public class PublishDiagnosticsParamsMessenger implements EventSubscriber<PublishDiagnosticsParams> {

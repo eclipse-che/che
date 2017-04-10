@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.signature;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.base.Optional;
 
 import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
 import org.eclipse.che.ide.api.editor.signature.SignatureInfo;
 import org.eclipse.lsp4j.SignatureInformation;
 
-import com.google.common.base.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Evgen Vidolob

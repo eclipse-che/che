@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.quickopen;
 
+import com.google.inject.Inject;
+
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-
-import com.google.inject.Inject;
 
 /**
  * @author Evgen Vidolob

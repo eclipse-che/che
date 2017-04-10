@@ -60,13 +60,13 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-python-lang-shared</artifactId>
         </dependency>
-		<dependency>
-		  <groupId>org.eclipse.lsp4j</groupId>
-		  <artifactId>org.eclipse.lsp4j</artifactId>
-		</dependency>
-		<dependency>
-		  <groupId>org.eclipse.lsp4j</groupId>
-		  <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
+        </dependency>
     </dependencies>
 </project>

@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.location;
 
-import java.util.Collections;
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
@@ -30,9 +29,9 @@ import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.eclipse.lsp4j.Location;
 
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.inject.Inject;
+import javax.validation.constraints.NotNull;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Evgen Vidolob
@@ -75,8 +74,8 @@ public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelega
     }
 
     private class LocationNode extends AbstractTreeNode implements HasAction, HasPresentation {
-        private final Location location;
-        private NodePresentation nodePresentation;
+        private final Location         location;
+        private       NodePresentation nodePresentation;
 
         public LocationNode(Location location) {
             this.location = location;

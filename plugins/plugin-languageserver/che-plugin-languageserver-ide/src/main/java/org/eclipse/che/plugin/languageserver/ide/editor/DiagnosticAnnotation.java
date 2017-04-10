@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
+import elemental.dom.Element;
+import elemental.js.dom.JsElement;
+
 import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.vectomatic.dom.svg.ui.SVGImage;
-
-import elemental.dom.Element;
-import elemental.js.dom.JsElement;
 
 /**
  * @author Evgen Vidolob

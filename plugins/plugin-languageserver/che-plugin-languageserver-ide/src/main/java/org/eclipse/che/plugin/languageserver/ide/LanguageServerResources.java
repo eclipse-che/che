@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide;
 
-import org.eclipse.che.ide.ui.list.SimpleList;
-import org.vectomatic.dom.svg.ui.SVGResource;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+
+import org.eclipse.che.ide.ui.list.SimpleList;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * @author Anatolii Bazko
@@ -108,7 +108,7 @@ public interface LanguageServerResources extends ClientBundle {
         String codeassistantHighlight();
     }
 
-    interface QuickOpenListCss extends SimpleList.Css{
+    interface QuickOpenListCss extends SimpleList.Css {
         int menuListBorderPx();
 
         String listItem();

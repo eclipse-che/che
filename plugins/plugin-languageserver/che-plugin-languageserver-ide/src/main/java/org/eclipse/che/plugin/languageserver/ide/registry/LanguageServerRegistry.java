@@ -10,11 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.registry;
 
-import static org.eclipse.che.api.languageserver.shared.ProjectExtensionKey.createProjectKey;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.gwt.core.client.Callback;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.languageserver.shared.ProjectExtensionKey;
 import org.eclipse.che.api.languageserver.shared.event.LanguageServerInitializeEvent;
@@ -39,10 +38,11 @@ import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
 import org.eclipse.lsp4j.ServerCapabilities;
 
-import com.google.gwt.core.client.Callback;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.eclipse.che.api.languageserver.shared.ProjectExtensionKey.createProjectKey;
 
 
 /**
@@ -120,7 +120,8 @@ public class LanguageServerRegistry {
             }
 
             @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) { }
+            public void onWsAgentStopped(WsAgentStateEvent event) {
+            }
         });
     }
 

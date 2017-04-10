@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.symbol;
 
-import java.util.List;
-
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
@@ -19,16 +17,18 @@ import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenEntryGroup;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import java.util.List;
+
 /**
  * @author Evgen Vidolob
  */
 class SymbolEntry extends QuickOpenEntryGroup {
 
-    private String    name;
-    private String    type;
-    private String    description;
-    private TextRange range;
-    private TextEditor editor;
+    private String      name;
+    private String      type;
+    private String      description;
+    private TextRange   range;
+    private TextEditor  editor;
     private SVGResource icon;
 
     public SymbolEntry(String name,

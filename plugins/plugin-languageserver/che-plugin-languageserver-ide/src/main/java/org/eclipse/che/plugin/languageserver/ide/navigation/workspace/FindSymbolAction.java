@@ -10,15 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.workspace;
 
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import javax.validation.constraints.NotNull;
+import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceSymbolParams;
 import org.eclipse.che.api.promises.async.Task;
@@ -45,10 +40,14 @@ import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.SymbolInformation;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * @author Evgen Vidolob
@@ -56,16 +55,16 @@ import com.google.inject.Singleton;
 @Singleton
 public class FindSymbolAction extends AbstractPerspectiveAction implements QuickOpenPresenter.QuickOpenPresenterOpts {
 
-    private static final Set<String> SUPPORTED_OPEN_TYPES = Sets.newHashSet("class", "interface", "enum","function", "method");
-    private static final int SEARCH_DELAY = 500;
+    private static final Set<String> SUPPORTED_OPEN_TYPES = Sets.newHashSet("class", "interface", "enum", "function", "method");
+    private static final int         SEARCH_DELAY         = 500;
 
-    private final OpenFileInEditorHelper editorHelper;
-    private final QuickOpenPresenter     presenter;
-    private final WorkspaceServiceClient workspaceServiceClient;
-    private final DtoFactory             dtoFactory;
-    private final EditorAgent            editorAgent;
-    private final SymbolKindHelper       symbolKindHelper;
-    private final FuzzyMatches           fuzzyMatches;
+    private final OpenFileInEditorHelper              editorHelper;
+    private final QuickOpenPresenter                  presenter;
+    private final WorkspaceServiceClient              workspaceServiceClient;
+    private final DtoFactory                          dtoFactory;
+    private final EditorAgent                         editorAgent;
+    private final SymbolKindHelper                    symbolKindHelper;
+    private final FuzzyMatches                        fuzzyMatches;
     private final ThrottledDelayer<List<SymbolEntry>> delayer;
 
     @Inject
@@ -103,7 +102,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
     public Promise<QuickOpenModel> getModel(final String value) {
         Promise<List<SymbolEntry>> promise;
 
-        if (Strings.isNullOrEmpty(value)|| editorAgent.getActiveEditor() == null) {
+        if (Strings.isNullOrEmpty(value) || editorAgent.getActiveEditor() == null) {
             promise = Promises.resolve(Collections.<SymbolEntry>emptyList());
         } else {
             promise = delayer.trigger(new Task<Promise<List<SymbolEntry>>>() {
@@ -136,7 +135,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
     private List<SymbolEntry> toSymbolEntries(List<SymbolInformation> types, String value) {
         List<SymbolEntry> result = new ArrayList<>();
         for (SymbolInformation element : types) {
-            if(!SUPPORTED_OPEN_TYPES.contains(symbolKindHelper.from(element.getKind()))){
+            if (!SUPPORTED_OPEN_TYPES.contains(symbolKindHelper.from(element.getKind()))) {
                 continue;
             }
             List<Match> matches = fuzzyMatches.fuzzyMatch(value, element.getName());

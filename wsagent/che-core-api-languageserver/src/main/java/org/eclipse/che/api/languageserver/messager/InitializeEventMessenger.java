@@ -10,14 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.messager;
 
-import java.io.IOException;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.websocket.EncodeException;
-
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.api.languageserver.registry.ServerInitializer;
 import org.eclipse.che.api.languageserver.registry.ServerInitializerObserver;
@@ -30,6 +22,13 @@ import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.websocket.EncodeException;
+import java.io.IOException;
 
 /**
  * @author Anatolii Bazko
@@ -51,7 +50,7 @@ public class InitializeEventMessenger implements ServerInitializerObserver {
                                     LanguageDescription languageDescription,
                                     String projectPath) {
 
-        LanguageServerInitializeEventDto initializeEventDto = new DtoServerImpls.LanguageServerInitializeEventDto(); 
+        LanguageServerInitializeEventDto initializeEventDto = new DtoServerImpls.LanguageServerInitializeEventDto();
         initializeEventDto.setSupportedLanguages(new DtoServerImpls.LanguageDescriptionDto(languageDescription));
         initializeEventDto.setServerCapabilities(new DtoServerImpls.ServerCapabilitiesDto(serverCapabilities));
         initializeEventDto.setProjectPath(projectPath.substring(LanguageServerRegistryImpl.PROJECT_FOLDER_PATH.length()));

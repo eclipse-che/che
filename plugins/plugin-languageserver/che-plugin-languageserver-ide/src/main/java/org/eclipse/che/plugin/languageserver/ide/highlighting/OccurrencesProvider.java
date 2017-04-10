@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.highlighting;
 
-import java.util.logging.Logger;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -29,24 +30,24 @@ import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.DocumentHighlight;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.logging.Logger;
 
 /**
  * Provides occurrences highlights for the Orion Editor.
- * 
+ *
  * @author Xavier Coulon, Red Hat
  */
 @Singleton
 public class OccurrencesProvider implements OrionOccurrencesHandler {
 
-	private static final Logger LOGGER = Logger.getLogger(OccurrencesProvider.class.getName());
-	private final EditorAgent               editorAgent;
+    private static final Logger LOGGER = Logger.getLogger(OccurrencesProvider.class.getName());
+    private final EditorAgent               editorAgent;
     private final TextDocumentServiceClient client;
     private final DtoBuildHelper            helper;
 
     /**
      * Constructor.
+     *
      * @param editorAgent
      * @param client
      * @param helper
@@ -60,7 +61,7 @@ public class OccurrencesProvider implements OrionOccurrencesHandler {
 
     @Override
     public JsPromise<OrionOccurrenceOverlay[]> computeOccurrences(
-    		OrionOccurrenceContextOverlay context) {
+            OrionOccurrenceContextOverlay context) {
         final EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
         if (activeEditor == null || !(activeEditor instanceof TextEditor)) {
             return null;
@@ -70,7 +71,8 @@ public class OccurrencesProvider implements OrionOccurrencesHandler {
             return null;
         }
         final LanguageServerEditorConfiguration configuration = (LanguageServerEditorConfiguration)editor.getConfiguration();
-        if (configuration.getServerCapabilities().getDocumentHighlightProvider() == null || !configuration.getServerCapabilities().getDocumentHighlightProvider()) {
+        if (configuration.getServerCapabilities().getDocumentHighlightProvider() == null ||
+            !configuration.getServerCapabilities().getDocumentHighlightProvider()) {
             return null;
         }
         final Document document = editor.getDocument();
@@ -80,19 +82,19 @@ public class OccurrencesProvider implements OrionOccurrencesHandler {
         Promise<OrionOccurrenceOverlay[]> then = promise.then(new Function<DocumentHighlight, OrionOccurrenceOverlay[]>() {
             @Override
             public OrionOccurrenceOverlay[] apply(DocumentHighlight highlight) throws FunctionException {
-            	if(highlight == null) {
-            		return new OrionOccurrenceOverlay[0];
-            	}
-            	final OrionOccurrenceOverlay[] occurrences = new OrionOccurrenceOverlay[1];
-        		final OrionOccurrenceOverlay occurrence = OrionOccurrenceOverlay.create();
-						// FIXME: this assumes that the language server will
-						// compute a range based on 'line 1', ie, the whole
-						// file content is on line 1 and the location to
-						// highlight is given by the 'character' position
-						// only.
-        		occurrence.setStart(highlight.getRange().getStart().getCharacter());
-        		occurrence.setEnd(highlight.getRange().getEnd().getCharacter() + 1);
-        		occurrences[0] = occurrence;
+                if (highlight == null) {
+                    return new OrionOccurrenceOverlay[0];
+                }
+                final OrionOccurrenceOverlay[] occurrences = new OrionOccurrenceOverlay[1];
+                final OrionOccurrenceOverlay occurrence = OrionOccurrenceOverlay.create();
+                // FIXME: this assumes that the language server will
+                // compute a range based on 'line 1', ie, the whole
+                // file content is on line 1 and the location to
+                // highlight is given by the 'character' position
+                // only.
+                occurrence.setStart(highlight.getRange().getStart().getCharacter());
+                occurrence.setEnd(highlight.getRange().getEnd().getCharacter() + 1);
+                occurrences[0] = occurrence;
                 return occurrences;
             }
         });

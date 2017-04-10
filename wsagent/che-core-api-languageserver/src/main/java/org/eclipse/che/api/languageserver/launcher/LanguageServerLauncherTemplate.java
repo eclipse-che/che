@@ -27,5 +27,6 @@ public abstract class LanguageServerLauncherTemplate implements LanguageServerLa
 
     abstract protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException;
 
-    abstract protected LanguageServer connectToLanguageServer(Process languageServerProcess, LanguageClient client) throws LanguageServerException;
+    abstract protected LanguageServer connectToLanguageServer(Process languageServerProcess, LanguageClient client)
+            throws LanguageServerException;
 }

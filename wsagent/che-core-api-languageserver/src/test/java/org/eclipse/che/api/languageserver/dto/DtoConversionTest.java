@@ -57,11 +57,13 @@ public class DtoConversionTest {
         ExtendedCompletionListDto convertedDto = ExtendedCompletionListDto.fromJson(jsonString);
         Assert.assertTrue(reflectionEquals(originalDto, convertedDto));
     }
- 
+
     @Test
     public void testMapConversion() {
         Map<String, List<TextEdit>> changes = Collections.singletonMap("anURL",
-                        Arrays.asList(new TextEdit(new Range(new Position(0, 1), new Position(3, 4)), "blabla")));
+                                                                       Arrays.asList(new TextEdit(
+                                                                               new Range(new Position(0, 1), new Position(3, 4)),
+                                                                               "blabla")));
         WorkspaceEdit edit = new WorkspaceEdit();
         edit.setChanges(changes);
 
@@ -118,7 +120,7 @@ public class DtoConversionTest {
                     if (!field.isSynthetic() && !Modifier.isStatic(field.getModifiers())) {
                         if (!reflectionEquals(field.get(left), field.get(right), field.getType(), field.getType())) {
                             return false;
-                        } 
+                        }
                     }
                 } catch (IllegalArgumentException e) {
                     return false;
@@ -137,7 +139,8 @@ public class DtoConversionTest {
             return false;
         }
         for (int i = 0; i < size; i++) {
-            if (!reflectionEquals(Array.get(left, i), Array.get(right, i), left.getClass().getComponentType(), right.getClass().getComponentType())) {
+            if (!reflectionEquals(Array.get(left, i), Array.get(right, i), left.getClass().getComponentType(),
+                                  right.getClass().getComponentType())) {
                 return false;
             }
         }

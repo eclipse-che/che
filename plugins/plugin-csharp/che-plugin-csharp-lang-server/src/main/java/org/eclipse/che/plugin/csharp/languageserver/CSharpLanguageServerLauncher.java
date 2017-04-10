@@ -10,14 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.csharp.languageserver;
 
-import static java.util.Arrays.asList;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
@@ -27,8 +21,14 @@ import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+
+import static java.util.Arrays.asList;
 
 
 /**
@@ -38,18 +38,11 @@ import com.google.inject.Singleton;
 public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate {
 
     private static final String   LANGUAGE_ID = "csharp";
-    private static final String[] EXTENSIONS  = new String[] {"cs", "csx"};
-    private static final String[] MIME_TYPES  = new String[] {"text/x-csharp"};
+    private static final String[] EXTENSIONS  = new String[]{"cs", "csx"};
+    private static final String[] MIME_TYPES  = new String[]{"text/x-csharp"};
     private static final LanguageDescription description;
 
     private final Path launchScript;
-
-    static {
-        description = new LanguageDescription();
-        description.setFileExtensions(asList(EXTENSIONS));
-        description.setLanguageId(LANGUAGE_ID);
-        description.setMimeTypes(Arrays.asList(MIME_TYPES));
-    }
 
     @Inject
     public CSharpLanguageServerLauncher() {
@@ -87,12 +80,13 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
         }
     }
 
-	@Override
-	protected LanguageServer connectToLanguageServer(final Process languageServerProcess, LanguageClient client) {
-		Launcher<LanguageServer> launcher = Launcher.createLauncher(client, LanguageServer.class, languageServerProcess.getInputStream(), languageServerProcess.getOutputStream());
-		launcher.startListening();
-		return launcher.getRemoteProxy();
-	}
+    @Override
+    protected LanguageServer connectToLanguageServer(final Process languageServerProcess, LanguageClient client) {
+        Launcher<LanguageServer> launcher = Launcher.createLauncher(client, LanguageServer.class, languageServerProcess.getInputStream(),
+                                                                    languageServerProcess.getOutputStream());
+        launcher.startListening();
+        return launcher.getRemoteProxy();
+    }
 
     @Override
     public LanguageDescription getLanguageDescription() {
@@ -102,5 +96,12 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
     @Override
     public boolean isAbleToLaunch() {
         return Files.exists(launchScript);
+    }
+
+    static {
+        description = new LanguageDescription();
+        description.setFileExtensions(asList(EXTENSIONS));
+        description.setLanguageId(LANGUAGE_ID);
+        description.setMimeTypes(Arrays.asList(MIME_TYPES));
     }
 }

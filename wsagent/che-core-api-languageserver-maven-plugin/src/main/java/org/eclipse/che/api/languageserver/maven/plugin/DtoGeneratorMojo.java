@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.maven.plugin;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -22,6 +19,9 @@ import org.eclipse.che.api.languageserver.generator.ClientDtoGenerator;
 import org.eclipse.che.api.languageserver.generator.DtoGenerator;
 import org.eclipse.che.api.languageserver.generator.ServerDtoGenerator;
 
+import java.io.File;
+import java.io.IOException;
+
 /** Mojo to run {@link org.eclipse.che.api.languageserver.generator.DtoGenerator}. */
 @Mojo(name = "generate", requiresDependencyResolution = ResolutionScope.COMPILE)
 public class DtoGeneratorMojo extends AbstractMojo {
@@ -30,9 +30,9 @@ public class DtoGeneratorMojo extends AbstractMojo {
 
     @Parameter(property = "dtoPackages", required = true)
     private String[] dtoPackages;
-    
+
     @Parameter(property = "classes", required = false)
-    private String[] classes= new String[]{};
+    private String[] classes = new String[]{};
 
 
     @Parameter(property = "genClassName", required = true)
@@ -43,21 +43,21 @@ public class DtoGeneratorMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-    	DtoGenerator generator;
-    	if ("client".equals(impl)) {
-    		generator= new ClientDtoGenerator();
-    	} else {
-    		generator= new ServerDtoGenerator();
-    	}
-        
-    	int lastDot = genClassName.lastIndexOf('.');
-		String targetClass= genClassName.substring(lastDot+1);
-		String targetPackage= genClassName.substring(0, lastDot);
-    	
+        DtoGenerator generator;
+        if ("client".equals(impl)) {
+            generator = new ClientDtoGenerator();
+        } else {
+            generator = new ServerDtoGenerator();
+        }
+
+        int lastDot = genClassName.lastIndexOf('.');
+        String targetClass = genClassName.substring(lastDot + 1);
+        String targetPackage = genClassName.substring(0, lastDot);
+
         try {
-			generator.generate(new File(outputDirectory), targetClass, targetPackage, dtoPackages, classes);
-		} catch (IOException e) {
-			throw new MojoExecutionException("Generation failed", e);
-		}
+            generator.generate(new File(outputDirectory), targetClass, targetPackage, dtoPackages, classes);
+        } catch (IOException e) {
+            throw new MojoExecutionException("Generation failed", e);
+        }
     }
 }

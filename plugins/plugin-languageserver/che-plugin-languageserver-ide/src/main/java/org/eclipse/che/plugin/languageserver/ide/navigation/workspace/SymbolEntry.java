@@ -10,25 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.workspace;
 
-import java.util.List;
-
 import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.EditorQuickOpenEntry;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import java.util.List;
+
 /**
  * @author Evgen Vidolob
  */
 class SymbolEntry extends EditorQuickOpenEntry {
 
-    private String    name;
-    private String    parameters;
-    private String    description;
-    private String    filePath;
-    private String    type;
-    private TextRange range;
+    private String      name;
+    private String      parameters;
+    private String      description;
+    private String      filePath;
+    private String      type;
+    private TextRange   range;
     private SVGResource icon;
 
     public SymbolEntry(String name,
@@ -70,7 +70,7 @@ class SymbolEntry extends EditorQuickOpenEntry {
         return icon;
     }
 
-    public String getType(){
+    public String getType() {
         return type;
     }
 

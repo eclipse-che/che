@@ -10,11 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.service;
 
-import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
-
-import java.util.List;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
@@ -55,8 +52,11 @@ import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.TextEdit;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.List;
+
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
+import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
 
 /**
@@ -291,9 +291,10 @@ public class TextDocumentServiceClient {
                            .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)saveEvent).toJson()).send();
     }
 
-   
+
     /**
-     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#documentHighlight(io.typefox.lsapi.TextDocumentPositionParams position)}
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#documentHighlight(io.typefox.lsapi.TextDocumentPositionParams
+     * position)}
      *
      * @param position
      * @return a {@link Promise} of an array of {@link DocumentHighlightDTO} which will be computed by the language server.
@@ -302,10 +303,11 @@ public class TextDocumentServiceClient {
         final String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/documentHighlight";
         final Unmarshallable<DocumentHighlight> unmarshaller = unmarshallerFactory.newUnmarshaller(DocumentHighlight.class);
         return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
-                           .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)position).toJson()).send(unmarshaller);
+                                  .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)position).toJson()).send(unmarshaller);
     }
+
     /**
-     * Subscribes to websocket for 'textDocument/publishDiagnostics' notifications. 
+     * Subscribes to websocket for 'textDocument/publishDiagnostics' notifications.
      */
     private void subscribeToPublishDiagnostics(final MessageBus messageBus) {
         org.eclipse.che.ide.websocket.rest.Unmarshallable<PublishDiagnosticsParams> unmarshaller =
@@ -330,7 +332,7 @@ public class TextDocumentServiceClient {
     }
 
     /**
-     * Subscribes to websocket for 'window/showMessage' notifications. 
+     * Subscribes to websocket for 'window/showMessage' notifications.
      */
     private void subscribeToShowMessages(final MessageBus messageBus) {
         final org.eclipse.che.ide.websocket.rest.Unmarshallable<ShowMessageRequestParams> unmarshaller =

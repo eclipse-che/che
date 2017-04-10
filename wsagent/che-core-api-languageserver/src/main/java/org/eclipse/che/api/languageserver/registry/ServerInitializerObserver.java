@@ -23,9 +23,9 @@ public interface ServerInitializerObserver {
      * Notifies observers when server is initialized and ready to use.
      *
      * @param server
-     *      the {@link LanguageServer}
+     *         the {@link LanguageServer}
      * @param capabilities
-     *      the supported capabilities by server
+     *         the supported capabilities by server
      * @param languageDescription
      * @param projectPath
      */

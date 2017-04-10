@@ -10,15 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.symbol;
 
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -50,8 +43,14 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * Action for 'Go to symbol' function
@@ -63,18 +62,18 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
 
     public static final String SCOPE_PREFIX = ":";
     private final LanguageServerLocalization
-                                             localization;
-    private final TextDocumentServiceClient  client;
-    private final EditorAgent                editorAgent;
-    private final DtoFactory                 dtoFactory;
-    private final NotificationManager        notificationManager;
-    private final FuzzyMatches               fuzzyMatches;
-    private final SymbolKindHelper           symbolKindHelper;
-    private       QuickOpenPresenter         presenter;
-    private       List<SymbolInformation> cachedItems;
-    private       LinearRange                selectedLinearRange;
-    private       TextEditor                 activeEditor;
-    private       TextPosition               cursorPosition;
+                                            localization;
+    private final TextDocumentServiceClient client;
+    private final EditorAgent               editorAgent;
+    private final DtoFactory                dtoFactory;
+    private final NotificationManager       notificationManager;
+    private final FuzzyMatches              fuzzyMatches;
+    private final SymbolKindHelper          symbolKindHelper;
+    private       QuickOpenPresenter        presenter;
+    private       List<SymbolInformation>   cachedItems;
+    private       LinearRange               selectedLinearRange;
+    private       TextEditor                activeEditor;
+    private       TextPosition              cursorPosition;
 
     @Inject
     public GoToSymbolAction(QuickOpenPresenter presenter,

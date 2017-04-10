@@ -10,53 +10,53 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.shared.model;
 
+import org.eclipse.lsp4j.ServerCapabilities;
+
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.lsp4j.ServerCapabilities;
-
 /**
  * Initialize result per project and language
- * 
+ *
  * @author Anatoliy Bazko
  * @author Thomas Mäder
  */
 public class ExtendedInitializeResult {
 
-	private String project;
-    private ServerCapabilities  capabilities;
+    private String                              project;
+    private ServerCapabilities                  capabilities;
     private List<? extends LanguageDescription> supportedLanguages;
 
     public ExtendedInitializeResult(String project, ServerCapabilities serverCapabilities, LanguageDescription languageDescription) {
         this.project = project;
-		this.capabilities = serverCapabilities;
+        this.capabilities = serverCapabilities;
         this.supportedLanguages = Collections.singletonList(languageDescription);
     }
-    
+
     public ExtendedInitializeResult() {
-	}
-    
+    }
+
     public String getProject() {
-		return project;
-	}
-    
+        return project;
+    }
+
     public void setProject(String project) {
-		this.project = project;
-	}
-    
+        this.project = project;
+    }
+
     public ServerCapabilities getCapabilities() {
         return capabilities;
     }
-    
+
     public void setCapabilities(ServerCapabilities capabilities) {
-		this.capabilities = capabilities;
-	}
-    
+        this.capabilities = capabilities;
+    }
+
     public List<? extends LanguageDescription> getSupportedLanguages() {
         return supportedLanguages;
     }
-    
+
     public void setSupportedLanguages(List<? extends LanguageDescription> supportedLanguages) {
-		this.supportedLanguages = supportedLanguages;
-	}
+        this.supportedLanguages = supportedLanguages;
+    }
 }

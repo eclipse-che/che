@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModelImpl;
 import org.eclipse.che.ide.api.editor.document.Document;
@@ -27,8 +25,10 @@ import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Evgen Vidolob
@@ -36,7 +36,7 @@ import com.google.inject.assistedinject.AssistedInject;
 public class LanguageServerAnnotationModel extends AnnotationModelImpl implements DiagnosticCollector, OrionAnnotationSeverityProvider {
     private final LanguageServerResources.LSCss lsCss;
     private final EditorResources.EditorCss     editorCss;
-    private       List<Diagnostic>           diagnostics;
+    private       List<Diagnostic>              diagnostics;
     private List<DiagnosticAnnotation> generatedAnnotations = new ArrayList<>();
 
     @AssistedInject

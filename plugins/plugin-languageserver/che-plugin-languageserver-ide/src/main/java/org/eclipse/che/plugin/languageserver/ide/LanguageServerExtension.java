@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide;
 
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -38,9 +40,7 @@ import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 
 @Extension(title = "LanguageServer")
 @Singleton
@@ -78,9 +78,9 @@ public class LanguageServerExtension {
         } else {
             keyBindingManager.getGlobal().addKey(new KeyBuilder().action().charCode(KeyCodeMap.F12).build(), "LSGoToSymbolAction");
         }
-        keyBindingManager.getGlobal().addKey(new KeyBuilder().alt().charCode('n').build(),"LSFindSymbolAction");
-        keyBindingManager.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F7).build(),"LSFindReferencesAction");
-        keyBindingManager.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.F4).build(),"LSFindDefinitionAction");
+        keyBindingManager.getGlobal().addKey(new KeyBuilder().alt().charCode('n').build(), "LSFindSymbolAction");
+        keyBindingManager.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F7).build(), "LSFindReferencesAction");
+        keyBindingManager.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.F4).build(), "LSFindDefinitionAction");
 
     }
 

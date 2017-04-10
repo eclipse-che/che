@@ -10,6 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.util;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.google.gwt.core.client.Scheduler;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
@@ -24,14 +30,9 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import com.google.gwt.core.client.Scheduler;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 /**
  * Util class, helps to open file by path in editor
+ *
  * @author Evgen Vidolob
  */
 @Singleton
@@ -39,7 +40,7 @@ public class OpenFileInEditorHelper {
 
     private final EditorAgent              editorAgent;
     private final ProjectExplorerPresenter projectExplorer;
-    private final AppContext appContext;
+    private final AppContext               appContext;
 
     @Inject
     public OpenFileInEditorHelper(EditorAgent editorAgent,
@@ -73,7 +74,7 @@ public class OpenFileInEditorHelper {
         return new Function<Optional<File>, Optional<File>>() {
             @Override
             public Optional<File> apply(Optional<File> node) {
-                if(node.isPresent()){
+                if (node.isPresent()) {
                     openFile(node.get(), selectionRange);
                 }
                 return node;

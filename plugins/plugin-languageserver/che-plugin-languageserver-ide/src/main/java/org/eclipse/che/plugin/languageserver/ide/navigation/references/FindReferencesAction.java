@@ -10,12 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.references;
 
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
+import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
@@ -36,7 +31,11 @@ import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 
-import com.google.inject.Inject;
+import javax.validation.constraints.NotNull;
+import java.util.List;
+
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * @author Evgen Vidolob

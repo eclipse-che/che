@@ -10,15 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.web.typescript;
 
-import static java.util.Arrays.asList;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import javax.inject.Singleton;
-
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
@@ -27,20 +18,28 @@ import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 
+import javax.inject.Singleton;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static java.util.Arrays.asList;
+
 
 /**
  * Launcher for TypeScript Language Server
  */
 @Singleton
 public class TSLSLauncher extends LanguageServerLauncherTemplate {
-    private static final String[] EXTENSIONS  = new String[] {Constants.TS_EXT};
-    private static final String[] MIME_TYPES  = new String[] {Constants.TS_MIME_TYPE};
+    private static final String[] EXTENSIONS = new String[]{Constants.TS_EXT};
+    private static final String[] MIME_TYPES = new String[]{Constants.TS_MIME_TYPE};
     private static final LanguageDescription description;
 
     private final Path launchScript;
 
     public TSLSLauncher() {
-        launchScript =  Paths.get(System.getenv("HOME"), "che/ls-typescript/launch.sh");
+        launchScript = Paths.get(System.getenv("HOME"), "che/ls-typescript/launch.sh");
     }
 
     @Override
@@ -56,11 +55,12 @@ public class TSLSLauncher extends LanguageServerLauncherTemplate {
     }
 
     @Override
-	protected LanguageServer connectToLanguageServer(final Process languageServerProcess, LanguageClient client) {
-		Launcher<LanguageServer> launcher = Launcher.createLauncher(client, LanguageServer.class, languageServerProcess.getInputStream(), languageServerProcess.getOutputStream());
-		launcher.startListening();
-		return launcher.getRemoteProxy();
-	}
+    protected LanguageServer connectToLanguageServer(final Process languageServerProcess, LanguageClient client) {
+        Launcher<LanguageServer> launcher = Launcher.createLauncher(client, LanguageServer.class, languageServerProcess.getInputStream(),
+                                                                    languageServerProcess.getOutputStream());
+        launcher.startListening();
+        return launcher.getRemoteProxy();
+    }
 
     @Override
     public LanguageDescription getLanguageDescription() {

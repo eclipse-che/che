@@ -10,12 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide;
 
-import static com.google.common.collect.Lists.newArrayList;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
+import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JsArrayString;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.promises.client.Operation;
@@ -36,10 +34,12 @@ import org.eclipse.che.plugin.languageserver.ide.highlighting.OccurrencesProvide
 import org.eclipse.che.plugin.languageserver.ide.hover.HoverProvider;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
 
-import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.JsArrayString;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Evgen Vidolob
@@ -47,8 +47,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class LanguageServerFileTypeRegister implements WsAgentComponent {
 
-	
-	
+
     private final LanguageServerRegistryServiceClient serverLanguageRegistry;
     private final FileTypeRegistry                    fileTypeRegistry;
     private final LanguageServerResources             resources;

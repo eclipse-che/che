@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.languageserver.ide.hover;
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -42,64 +43,64 @@ import java.util.List;
 @Singleton
 public class HoverProvider implements OrionHoverHandler {
 
-	private final EditorAgent editorAgent;
-	private final TextDocumentServiceClient client;
-	private final DtoBuildHelper helper;
+    private final EditorAgent               editorAgent;
+    private final TextDocumentServiceClient client;
+    private final DtoBuildHelper            helper;
 
-	@Inject
-	public HoverProvider(EditorAgent editorAgent, TextDocumentServiceClient client, DtoBuildHelper helper) {
-		this.editorAgent = editorAgent;
-		this.client = client;
-		this.helper = helper;
-	}
+    @Inject
+    public HoverProvider(EditorAgent editorAgent, TextDocumentServiceClient client, DtoBuildHelper helper) {
+        this.editorAgent = editorAgent;
+        this.client = client;
+        this.helper = helper;
+    }
 
-	@Override
-	public JsPromise<OrionHoverOverlay> computeHover(OrionHoverContextOverlay context) {
-		EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-		if (activeEditor == null || !(activeEditor instanceof TextEditor)) {
-			return null;
-		}
+    @Override
+    public JsPromise<OrionHoverOverlay> computeHover(OrionHoverContextOverlay context) {
+        EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+        if (activeEditor == null || !(activeEditor instanceof TextEditor)) {
+            return null;
+        }
 
-		TextEditor editor = ((TextEditor) activeEditor);
-		if (!(editor.getConfiguration() instanceof LanguageServerEditorConfiguration)) {
-			return null;
-		}
+        TextEditor editor = ((TextEditor)activeEditor);
+        if (!(editor.getConfiguration() instanceof LanguageServerEditorConfiguration)) {
+            return null;
+        }
 
-		LanguageServerEditorConfiguration configuration = (LanguageServerEditorConfiguration) editor.getConfiguration();
-		if (configuration.getServerCapabilities().getHoverProvider() == null
-				|| !configuration.getServerCapabilities().getHoverProvider()) {
-			return null;
-		}
+        LanguageServerEditorConfiguration configuration = (LanguageServerEditorConfiguration)editor.getConfiguration();
+        if (configuration.getServerCapabilities().getHoverProvider() == null
+            || !configuration.getServerCapabilities().getHoverProvider()) {
+            return null;
+        }
 
-		Document document = editor.getDocument();
-		TextDocumentPositionParams paramsDTO = helper.createTDPP(document, context.getOffset());
+        Document document = editor.getDocument();
+        TextDocumentPositionParams paramsDTO = helper.createTDPP(document, context.getOffset());
 
-		Promise<Hover> promise = client.hover(paramsDTO);
-		Promise<OrionHoverOverlay> then = promise.then(new Function<Hover, OrionHoverOverlay>() {
-			@Override
-			public OrionHoverOverlay apply(Hover arg) throws FunctionException {
-				OrionHoverOverlay hover = OrionHoverOverlay.create();
-				hover.setType("markdown");
-				String content = renderContent(arg);
-				// do not show hover with only white spaces
-				if (StringUtils.isNullOrWhitespace(content)) {
-					return null;
-				}
-				hover.setContent(content);
+        Promise<Hover> promise = client.hover(paramsDTO);
+        Promise<OrionHoverOverlay> then = promise.then(new Function<Hover, OrionHoverOverlay>() {
+            @Override
+            public OrionHoverOverlay apply(Hover arg) throws FunctionException {
+                OrionHoverOverlay hover = OrionHoverOverlay.create();
+                hover.setType("markdown");
+                String content = renderContent(arg);
+                // do not show hover with only white spaces
+                if (StringUtils.isNullOrWhitespace(content)) {
+                    return null;
+                }
+                hover.setContent(content);
 
-				return hover;
-			}
+                return hover;
+            }
 
-			private String renderContent(Hover hover) {
-				List<String> contents = new ArrayList<String>();
-				for (String dto : hover.getContents()) {
-					// plain markdown text
-					contents.add(dto);
-				}
-				return Joiner.on("\n\n").join(contents);
-			}
-		});
-		return (JsPromise<OrionHoverOverlay>) then;
+            private String renderContent(Hover hover) {
+                List<String> contents = new ArrayList<String>();
+                for (String dto : hover.getContents()) {
+                    // plain markdown text
+                    contents.add(dto);
+                }
+                return Joiner.on("\n\n").join(contents);
+            }
+        });
+        return (JsPromise<OrionHoverOverlay>)then;
 
-	}
+    }
 }

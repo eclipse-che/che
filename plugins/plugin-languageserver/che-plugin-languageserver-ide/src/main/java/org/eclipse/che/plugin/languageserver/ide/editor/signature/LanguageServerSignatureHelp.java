@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.signature;
 
-import java.util.List;
+import com.google.common.base.Optional;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -31,10 +34,7 @@ import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 
-import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-import com.google.web.bindery.event.shared.HandlerRegistration;
+import java.util.List;
 
 /**
  * LS implementation for Signature help feature

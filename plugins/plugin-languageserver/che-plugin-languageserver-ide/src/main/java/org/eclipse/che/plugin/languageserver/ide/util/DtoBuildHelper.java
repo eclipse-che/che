@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.util;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Helps to create LS DTO objects

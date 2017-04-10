@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.location;
 
-import java.util.List;
+import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.lsp4j.Location;
 
-import com.google.inject.ImplementedBy;
+import java.util.List;
 
 /**
  * @author Evgen Vidolob
@@ -28,7 +28,7 @@ public interface OpenLocationView extends View<OpenLocationView.ActionDelegate> 
 
     void setTitle(String title);
 
-    interface ActionDelegate extends BaseActionDelegate{
+    interface ActionDelegate extends BaseActionDelegate {
 
         void onLocationSelected(Location location);
     }

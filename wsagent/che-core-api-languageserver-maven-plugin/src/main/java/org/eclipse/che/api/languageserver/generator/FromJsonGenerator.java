@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.generator;
 
-import static org.eclipse.che.api.languageserver.generator.DtoGenerator.INDENT;
-import static org.eclipse.che.api.languageserver.generator.DtoGenerator.dtoName;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
@@ -23,22 +22,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import static org.eclipse.che.api.languageserver.generator.DtoGenerator.INDENT;
+import static org.eclipse.che.api.languageserver.generator.DtoGenerator.dtoName;
 
 /**
  * This class generates property conversion code from json properties to dto
  * fields.
- * 
- * @author Thomas Mäder
  *
+ * @author Thomas Mäder
  */
 public class FromJsonGenerator extends ConversionGenerator {
+
+    private final JsonImpl json;
 
     public FromJsonGenerator(JsonImpl json) {
         this.json = json;
     }
-
-    private final JsonImpl json;
 
     public void generateFromJson(String indent, PrintWriter out, Method m, String objectName, String jsonName) {
 
@@ -62,17 +61,17 @@ public class FromJsonGenerator extends ConversionGenerator {
             generateEitherConversion(indent, out, varName, valueAccess, paramType);
         } else {
             out.println(indent + String.format("%1$s %2$s = %3$s;", getRawClass(paramType).getName(), varName,
-                            fromJsonConversion(getRawClass(paramType), valueAccess)));
+                                               fromJsonConversion(getRawClass(paramType), valueAccess)));
         }
     }
 
     private void generateMapConversion(String indent, PrintWriter out, String varName, String jsonValName, Type paramType) {
-        ParameterizedType genericType = (ParameterizedType) paramType;
+        ParameterizedType genericType = (ParameterizedType)paramType;
         Type containedType = genericType.getActualTypeArguments()[1];
         String objectName = varName + "o";
         String containedName = objectName + "X";
         out.println(indent + String.format("HashMap<String, %1$s> %2$s= new HashMap<String, %3$s>();", containedType.getTypeName(), varName,
-                        containedType.getTypeName()));
+                                           containedType.getTypeName()));
         out.println(indent + String.format("%1$s %2$s = %3$s;", json.object(), objectName, json.objectValue(jsonValName)));
 
         json.iterateObject(indent, out, objectName, (String keyName, String valueName) -> {
@@ -84,7 +83,7 @@ public class FromJsonGenerator extends ConversionGenerator {
     private void generateListConversion(String indent, PrintWriter out, String varName, String jsonValName, Type paramType) {
         Type containedType = containedType(paramType);
         out.println(indent + String.format("ArrayList<%1$s> %2$s= new ArrayList<%3$s>();", containedType.getTypeName(), varName,
-                        containedType.getTypeName()));
+                                           containedType.getTypeName()));
         String arrayName = varName + "a";
         String containedName = arrayName + "X";
         String indexName = arrayName + "i";
@@ -153,7 +152,7 @@ public class FromJsonGenerator extends ConversionGenerator {
         } else if (String.class.isAssignableFrom(t)) {
             return String.format("%1$s;", json.asString(valueName));
         } else if (Number.class.isAssignableFrom(t)) {
-            return String.format("(%1$s)%2$s;", primitiveCast((Class<? extends Number>) t), json.asDouble(valueName));
+            return String.format("(%1$s)%2$s;", primitiveCast((Class<? extends Number>)t), json.asDouble(valueName));
         } else if (isSimpleNumberType(t)) {
             return String.format("(%1$s)%2$s;", t.getSimpleName(), json.asDouble(valueName));
         } else if (t == boolean.class || Boolean.class.isAssignableFrom(t)) {

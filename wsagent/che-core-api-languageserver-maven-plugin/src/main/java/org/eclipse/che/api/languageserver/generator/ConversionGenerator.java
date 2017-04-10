@@ -19,9 +19,8 @@ import java.util.List;
 /**
  * Base class for conversion generators. Subclasses are responsible for
  * generating conversion code for a single property of a dto.
- * 
- * @author Thomas Mäder
  *
+ * @author Thomas Mäder
  */
 public abstract class ConversionGenerator {
 
@@ -33,11 +32,11 @@ public abstract class ConversionGenerator {
             return null;
         }
         if (paramType instanceof ParameterizedType) {
-            ParameterizedType genericType = (ParameterizedType) paramType;
+            ParameterizedType genericType = (ParameterizedType)paramType;
             return getUpperBound(genericType.getActualTypeArguments()[0]);
         }
         if (paramType instanceof Class<?>) {
-            Class<?> clazz = (Class<?>) paramType;
+            Class<?> clazz = (Class<?>)paramType;
             Type c = containedType(clazz.getGenericSuperclass());
             if (c != null) {
                 return c;
@@ -54,18 +53,18 @@ public abstract class ConversionGenerator {
 
     private Type getUpperBound(Type type) {
         if (type instanceof WildcardType) {
-            return ((WildcardType) type).getUpperBounds()[0];
+            return ((WildcardType)type).getUpperBounds()[0];
         }
         return type;
     }
 
     protected Class<?> getRawClass(Type type) {
         if (type instanceof ParameterizedType) {
-            return getRawClass(((ParameterizedType) type).getRawType());
+            return getRawClass(((ParameterizedType)type).getRawType());
         } else if (type instanceof WildcardType) {
-            return getRawClass(((WildcardType) type).getUpperBounds()[0]);
+            return getRawClass(((WildcardType)type).getUpperBounds()[0]);
         }
-        return (Class<?>) type;
+        return (Class<?>)type;
     }
 
     protected boolean isSimpleNumberType(Class<?> clazz) {
@@ -76,10 +75,10 @@ public abstract class ConversionGenerator {
         if (boolean.class == m.getParameterTypes()[0] || Boolean.class == m.getParameterTypes()[0]) {
             String root = m.getName().substring(3);
             try {
-                return receiverClass.getMethod("is" + root, new Class<?>[] {}).getName();
+                return receiverClass.getMethod("is" + root, new Class<?>[]{}).getName();
             } catch (NoSuchMethodException e) {
                 try {
-                    return receiverClass.getMethod("get" + root, new Class<?>[] {}).getName();
+                    return receiverClass.getMethod("get" + root, new Class<?>[]{}).getName();
                 } catch (NoSuchMethodException e1) {
                     StringBuilder b = new StringBuilder(root);
                     b.setCharAt(0, Character.toLowerCase(root.charAt(0)));
@@ -96,5 +95,5 @@ public abstract class ConversionGenerator {
         return name.toString();
     }
 
-    
+
 }

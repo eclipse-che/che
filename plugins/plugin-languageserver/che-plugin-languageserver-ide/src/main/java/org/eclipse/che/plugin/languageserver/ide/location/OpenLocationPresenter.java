@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.location;
 
-import java.util.List;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -29,10 +32,7 @@ import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Range;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
+import java.util.List;
 
 /**
  * @author Evgen Vidolob
@@ -44,7 +44,7 @@ public class OpenLocationPresenter extends BasePresenter implements OpenLocation
     private final WorkspaceAgent          workspaceAgent;
     private final OpenFileInEditorHelper  helper;
     private final NotificationManager     notificationManager;
-    private final String title;
+    private final String                  title;
 
     @Inject
     public OpenLocationPresenter(LanguageServerResources resources,

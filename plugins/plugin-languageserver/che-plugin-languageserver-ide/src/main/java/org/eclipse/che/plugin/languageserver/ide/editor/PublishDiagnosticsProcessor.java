@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
@@ -19,18 +22,15 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 /**
  * @author Anatolii Bazko
  */
 @Singleton
 public class PublishDiagnosticsProcessor {
-    
+
     private final EditorAgent editorAgent;
-    
-    @Inject 
+
+    @Inject
     public PublishDiagnosticsProcessor(EditorAgent editorAgent) {
         this.editorAgent = editorAgent;
     }
@@ -43,7 +43,7 @@ public class PublishDiagnosticsProcessor {
         }
 
         if (openedEditor instanceof TextEditor) {
-            TextEditorConfiguration editorConfiguration = ((TextEditor) openedEditor).getConfiguration();
+            TextEditorConfiguration editorConfiguration = ((TextEditor)openedEditor).getConfiguration();
             AnnotationModel annotationModel = editorConfiguration.getAnnotationModel();
             if (annotationModel != null && annotationModel instanceof DiagnosticCollector) {
                 DiagnosticCollector collector = (DiagnosticCollector)annotationModel;

@@ -21,7 +21,7 @@ public class LanguageDescription {
     /**
      * The language id.
      */
-    private String languageId;
+    private String       languageId;
     /**
      * The optional content types this language is associated with.
      */
@@ -34,7 +34,7 @@ public class LanguageDescription {
      * The optional highlighting configuration to support client side syntax highlighting.
      * The format is client (editor) dependent.
      */
-    private String highlightingConfiguration;
+    private String       highlightingConfiguration;
 
     public String getLanguageId() {
         return this.languageId;

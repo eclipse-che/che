@@ -16,14 +16,14 @@ import java.util.Collection;
 
 /**
  * This class is a backport from org.eclipse.lsp4j.jsonrpc.messages.Either in version 0.2.0-SNAPSHOT remove when moving to 0.2.0 version
- * @author Thomas Mäder
  *
+ * @author Thomas Mäder
  */
 public class EitherUtil {
     static Type getLeftDisjointType(Type type) {
         return getDisjointType(type, 0);
     }
-    
+
     static Type getRightDisjointType(Type type) {
         return getDisjointType(type, 1);
     }
@@ -31,11 +31,11 @@ public class EitherUtil {
 
     private static Type getDisjointType(Type type, int index) {
         if (type instanceof ParameterizedType) {
-            final ParameterizedType parameterizedType = (ParameterizedType) type;
+            final ParameterizedType parameterizedType = (ParameterizedType)type;
             return parameterizedType.getActualTypeArguments()[0];
         }
         if (type instanceof Class) {
-            final Class<?> cls = (Class<?>) type;
+            final Class<?> cls = (Class<?>)type;
             return cls.getTypeParameters()[index];
         }
         return null;
@@ -51,10 +51,10 @@ public class EitherUtil {
     private static Collection<Type> collectDisjoinTypes(Type type, Collection<Type> types) {
         if (isEither(type)) {
             if (type instanceof ParameterizedType) {
-                return collectDisjoinTypes((ParameterizedType) type, types);
+                return collectDisjoinTypes((ParameterizedType)type, types);
             }
             if (type instanceof Class) {
-                return collectDisjoinTypes((Class<?>) type, types);
+                return collectDisjoinTypes((Class<?>)type, types);
             }
         }
         types.add(type);
@@ -74,16 +74,16 @@ public class EitherUtil {
         }
         return types;
     }
-    
+
     /**
      * Test whether the given type is Either.
      */
     private static boolean isEither(Type type) {
         if (type instanceof ParameterizedType) {
-            return isEither((ParameterizedType) type);
+            return isEither((ParameterizedType)type);
         }
         if (type instanceof Class) {
-            return isEither((Class<?>) type);
+            return isEither((Class<?>)type);
         }
         return false;
     }

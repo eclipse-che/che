@@ -10,11 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.service;
 
-import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
-
-import java.util.List;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -24,8 +21,11 @@ import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.WorkspaceSymbolParams;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.List;
+
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
+import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
 /**
  * @author Evgen Vidolob
@@ -33,15 +33,15 @@ import com.google.inject.Singleton;
 @Singleton
 public class WorkspaceServiceClient {
     private final DtoUnmarshallerFactory unmarshallerFactory;
-    private final AppContext appContext;
-    private final AsyncRequestFactory asyncRequestFactory;
-    
-    
+    private final AppContext             appContext;
+    private final AsyncRequestFactory    asyncRequestFactory;
+
+
     @Inject
     public WorkspaceServiceClient(final DtoUnmarshallerFactory unmarshallerFactory,
                                   final AppContext appContext,
                                   final AsyncRequestFactory asyncRequestFactory
-                                  ) {
+                                 ) {
         this.unmarshallerFactory = unmarshallerFactory;
         this.appContext = appContext;
         this.asyncRequestFactory = asyncRequestFactory;
@@ -61,5 +61,5 @@ public class WorkspaceServiceClient {
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
                                   .send(unmarshaller);
     }
-    
+
 }

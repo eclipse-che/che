@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.signature;
 
+import com.google.common.base.Optional;
+
 import org.eclipse.che.ide.api.editor.signature.ParameterInfo;
 import org.eclipse.lsp4j.ParameterInformation;
-
-import com.google.common.base.Optional;
 
 /**
  * @author Evgen Vidolob

@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.sync;
 
-import java.util.Collections;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
@@ -20,8 +21,7 @@ import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.Collections;
 
 /**
  * Handles full text synchronization
@@ -31,7 +31,7 @@ import com.google.inject.Singleton;
 @Singleton
 class FullTextDocumentSynchronize implements TextDocumentSynchronize {
 
-    private final DtoFactory dtoFactory;
+    private final DtoFactory                dtoFactory;
     private final TextDocumentServiceClient textDocumentService;
 
     @Inject

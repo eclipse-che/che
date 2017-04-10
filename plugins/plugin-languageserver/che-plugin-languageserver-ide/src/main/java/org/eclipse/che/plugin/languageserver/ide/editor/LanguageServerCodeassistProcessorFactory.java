@@ -17,6 +17,6 @@ import org.eclipse.lsp4j.ServerCapabilities;
  * @author Evgen Vidolob
  */
 public interface LanguageServerCodeassistProcessorFactory {
-    
+
     LanguageServerCodeAssistProcessor create(ServerCapabilities capabilities);
 }

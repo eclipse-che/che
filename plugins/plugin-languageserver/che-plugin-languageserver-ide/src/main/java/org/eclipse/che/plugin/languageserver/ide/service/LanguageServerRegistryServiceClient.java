@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.service;
 
-import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-
-import java.util.List;
+import com.google.inject.Inject;
 
 import org.eclipse.che.api.languageserver.shared.model.ExtendedInitializeResult;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
@@ -22,7 +19,10 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
-import com.google.inject.Inject;
+import java.util.List;
+
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 
 /**
  * @author Sven Efftinge
@@ -33,8 +33,8 @@ public class LanguageServerRegistryServiceClient {
     public static final String BASE_URI = "/languageserver";
 
     private final DtoUnmarshallerFactory unmarshallerFactory;
-    private final AsyncRequestFactory asyncRequestFactory;
-    private final AppContext appContext;
+    private final AsyncRequestFactory    asyncRequestFactory;
+    private final AppContext             appContext;
 
     @Inject
     public LanguageServerRegistryServiceClient(DtoUnmarshallerFactory unmarshallerFactory,
