@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
+import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
@@ -79,5 +80,10 @@ public class RunAllTestAction extends JavaEditorAction
     @Override
     public TestResultPresenter getPresenter() {
         return presenter;
+    }
+    
+    @Override
+    public String getTestingFramework() {
+        return "junit";
     }
 }

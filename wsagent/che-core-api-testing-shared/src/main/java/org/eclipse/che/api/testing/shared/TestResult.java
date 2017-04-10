@@ -23,6 +23,20 @@ import org.eclipse.che.dto.shared.DTO;
 public interface TestResult {
 
     /**
+     * Returns the path of the project containing the test cases.
+     * 
+     * @return the framework name
+     */
+    String getProjectPath();
+
+    /**
+     * Sets the path of the project containing the test cases.
+     * 
+     * @param projectPath
+     */
+    void setProjectPath(String projectPath);
+
+    /**
      * Returns the framework name used for executing the test cases.
      * 
      * @return the framework name
@@ -51,18 +65,32 @@ public interface TestResult {
     void setSuccess(boolean success);
 
     /**
-     * Returns the details of the failing test cases.
+     * Returns the details of the test cases.
      * 
-     * @return a list of test failures.
+     * @return a list of test cases.
      */
-    List<Failure> getFailures();
+    List<TestCase> getTestCases();
 
     /**
-     * Sets the details of the failing test cases.
+     * Sets the details of the test cases.
      * 
      * @param failures
      */
-    void setFailures(List<Failure> failures);
+    void setTestCases(List<TestCase> failures);
+
+    /**
+     * Indicates how many tests were run.
+     * 
+     * @return the count of run test cases.
+     */
+    int getTestCaseCount();
+
+    /**
+     * Sets how many tests were run.
+     * 
+     * @param count
+     */
+    void setTestCaseCount(int count);
 
     /**
      * Indicates how many tests were failed.
