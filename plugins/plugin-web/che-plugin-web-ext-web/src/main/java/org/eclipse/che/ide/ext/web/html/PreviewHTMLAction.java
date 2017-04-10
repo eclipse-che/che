@@ -31,15 +31,15 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class PreviewAction extends AbstractPerspectiveAction {
+public class PreviewHTMLAction extends AbstractPerspectiveAction {
 
     private final WsAgentURLModifier wsAgentURLModifier;
     private final AppContext         appContext;
 
     @Inject
-    public PreviewAction(WsAgentURLModifier wsAgentURLModifier,
-                         AppContext appContext,
-                         WebLocalizationConstant localizationConstants) {
+    public PreviewHTMLAction(WsAgentURLModifier wsAgentURLModifier,
+                             AppContext appContext,
+                             WebLocalizationConstant localizationConstants) {
         super(singletonList(PROJECT_PERSPECTIVE_ID),
               localizationConstants.previewHTMLActionTitle(),
               localizationConstants.previewHTMLActionDescription(),
@@ -51,21 +51,19 @@ public class PreviewAction extends AbstractPerspectiveAction {
 
     @Override
     public void updateInPerspective(ActionEvent e) {
-        e.getPresentation().setVisible(true);
-
         final Resource[] resources = appContext.getResources();
         if (resources != null && resources.length == 1) {
             final Resource selectedResource = resources[0];
             if (Resource.FILE == selectedResource.getResourceType()) {
                 final String fileExtension = ((File)selectedResource).getExtension();
                 if ("html".equals(fileExtension)) {
-                    e.getPresentation().setEnabled(true);
+                    e.getPresentation().setEnabledAndVisible(true);
                     return;
                 }
             }
         }
 
-        e.getPresentation().setEnabled(false);
+        e.getPresentation().setEnabledAndVisible(false);
     }
 
     @Override
