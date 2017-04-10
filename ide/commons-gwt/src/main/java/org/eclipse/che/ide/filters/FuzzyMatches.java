@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.ide.filters;
+package org.eclipse.che.ide.filters;
 
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.plugin.languageserver.ide.filters.Matcher.MatcherUtil.or;
+import static org.eclipse.che.ide.filters.Matcher.MatcherUtil.or;
 
 /**
  * @author Evgen Vidolob
