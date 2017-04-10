@@ -12,6 +12,7 @@
 import {CheAPI} from '../../components/api/che-api.factory';
 import {CheWorkspace} from '../../components/api/che-workspace.factory';
 import {RouteHistory} from '../../components/routing/route-history.service';
+import {CheUIElementsInjectorService} from '../../components/injector/che-ui-elements-injector.service';
 
 /**
  * This class is handling the service for viewing the IDE
@@ -32,6 +33,7 @@ class IdeSvc {
   proxySettings: any;
   routeHistory: RouteHistory;
   userDashboardConfig: any;
+  cheUIElementsInjectorService: CheUIElementsInjectorService;
 
   ideParams: Map<string, string>;
   lastWorkspace: any;
@@ -48,7 +50,7 @@ class IdeSvc {
   constructor($location: ng.ILocationService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService,
               $q: ng.IQService, $rootScope: ng.IRootScopeService, $sce: ng.ISCEService, $timeout: ng.ITimeoutService,
               $websocket: ng.websocket.IWebSocketProvider, cheAPI: CheAPI, cheWorkspace: CheWorkspace, lodash: any,
-              proxySettings: any, routeHistory: RouteHistory, userDashboardConfig: any) {
+              proxySettings: any, routeHistory: RouteHistory, userDashboardConfig: any, cheUIElementsInjectorService: CheUIElementsInjectorService) {
     this.$location = $location;
     this.$log = $log;
     this.$mdDialog = $mdDialog;
@@ -63,6 +65,7 @@ class IdeSvc {
     this.proxySettings = proxySettings;
     this.routeHistory = routeHistory;
     this.userDashboardConfig = userDashboardConfig;
+    this.cheUIElementsInjectorService = cheUIElementsInjectorService;
 
     this.ideParams = new Map();
 
@@ -266,11 +269,19 @@ class IdeSvc {
       this.ideParams.clear();
     }
 
+    // perform remove of iframes in parent node. It's needed to avoid any script execution (canceled requests) on iframe source changes.
+    let iframeParent = angular.element('#ide-application-frame');
+    iframeParent.find('iframe').remove();
+
     if (inDevMode) {
       (this.$rootScope as any).ideIframeLink = this.$sce.trustAsResourceUrl(ideUrlLink + appendUrl);
     } else {
       (this.$rootScope as any).ideIframeLink = ideUrlLink + appendUrl;
     }
+
+    // iframe element for IDE application:
+    let iframeElement = '<iframe class=\"ide-page-frame\" id=\"ide-application-iframe\" ng-src=\"{{ideIframeLink}}\" ></iframe>';
+    this.cheUIElementsInjectorService.injectAdditionalElement(iframeParent, iframeElement);
 
     let defer = this.$q.defer();
     if (workspace.status === 'RUNNING') {

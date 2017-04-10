@@ -24,7 +24,6 @@ import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.machine.chooser.MachineChooser;
 
 import java.util.List;
-import java.util.ListIterator;
 
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.ide.util.StringUtils.containsIgnoreCase;
@@ -77,15 +76,7 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
         final List<CommandImpl> filteredCommands = commandManager.getCommands();
 
         if (!filterValue.isEmpty()) {
-            final ListIterator<CommandImpl> it = filteredCommands.listIterator();
-
-            while (it.hasNext()) {
-                final CommandImpl command = it.next();
-
-                if (!containsIgnoreCase(command.getName(), filterValue)) {
-                    it.remove();
-                }
-            }
+            filteredCommands.removeIf(command -> !containsIgnoreCase(command.getName(), filterValue));
         }
 
         view.setCommands(commandUtils.groupCommandsByGoal(filteredCommands));

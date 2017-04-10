@@ -39,7 +39,7 @@ public class AccountValidatorTest {
     @InjectMocks
     private AccountValidator accountValidator;
 
-    @Test(dataProvider = "normalizeNames")
+    @Test(dataProvider = "namesToNormalize")
     public void testNormalizeAccountName(String input, String expected) throws Exception {
         doThrow(NotFoundException.class).when(accountManager).getByName(anyString());
 
@@ -53,40 +53,48 @@ public class AccountValidatorTest {
         Assert.assertTrue(accountValidator.normalizeAccountName("#", "name").startsWith("name"));
     }
 
-    @Test(dataProvider = "validNames")
+    @Test(dataProvider = "namesToValidate")
     public void testValidUserName(String input, boolean expected) throws Exception {
         doThrow(NotFoundException.class).when(accountManager).getByName(anyString());
 
         Assert.assertEquals(accountValidator.isValidName(input), expected);
     }
 
-    @DataProvider(name = "normalizeNames")
-    public Object[][] normalizeNames() {
+    @DataProvider
+    public Object[][] namesToNormalize() {
         return new Object[][] {{"test", "test"},
                                {"test123", "test123"},
                                {"test 123", "test123"},
                                {"test@gmail.com", "testgmailcom"},
                                {"TEST", "TEST"},
                                {"test-", "test"},
-                               {"te-st", "test"},
                                {"-test", "test"},
                                {"te_st", "test"},
-                               {"te#st", "test"}
+                               {"te#st", "test"},
+                               {"-test", "test"},
+                               {"test-", "test"},
+                               {"--test--", "test"},
+                               {"t-----e--s-t", "t-e-s-t"}
         };
     }
 
-    @DataProvider(name = "validNames")
-    public Object[][] validNames() {
+    @DataProvider
+    public Object[][] namesToValidate() {
         return new Object[][] {{"test", true},
+                               {"t-e-s-t", true},
                                {"test123", true},
+                               {"TEST", true},
+                               {"te-st", true},
                                {"test 123", false},
                                {"test@gmail.com", false},
-                               {"TEST", true},
                                {"test-", false},
-                               {"te-st", false},
                                {"-test", false},
                                {"te_st", false},
-                               {"te#st", false}
+                               {"te#st", false},
+                               {"-test", false},
+                               {"test-", false},
+                               {"--test--", false},
+                               {"te--st", false}
         };
     }
 }

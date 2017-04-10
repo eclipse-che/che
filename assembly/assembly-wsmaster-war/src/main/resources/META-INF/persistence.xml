@@ -38,6 +38,18 @@
         <class>org.eclipse.che.api.machine.server.model.impl.SnapshotImpl</class>
         <class>org.eclipse.che.api.machine.server.recipe.RecipeImpl</class>
 
+        <class>org.eclipse.che.api.factory.server.model.impl.FactoryImpl</class>
+        <class>org.eclipse.che.api.factory.server.model.impl.OnAppClosedImpl</class>
+        <class>org.eclipse.che.api.factory.server.model.impl.OnProjectsLoadedImpl</class>
+        <class>org.eclipse.che.api.factory.server.model.impl.OnAppLoadedImpl</class>
+        <class>org.eclipse.che.api.factory.server.model.impl.PoliciesImpl</class>
+        <class>org.eclipse.che.api.factory.server.model.impl.ActionImpl</class>
+        <class>org.eclipse.che.api.factory.server.model.impl.AuthorImpl</class>
+        <class>org.eclipse.che.api.factory.server.model.impl.ButtonAttributesImpl</class>
+        <class>org.eclipse.che.api.factory.server.model.impl.ButtonImpl</class>
+        <class>org.eclipse.che.api.factory.server.model.impl.IdeImpl</class>
+        <class>org.eclipse.che.api.factory.server.FactoryImage</class>
+
         <class>org.eclipse.che.api.ssh.server.model.impl.SshPairImpl</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>

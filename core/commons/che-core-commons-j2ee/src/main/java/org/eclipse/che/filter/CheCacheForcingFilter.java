@@ -33,6 +33,7 @@ public class CheCacheForcingFilter extends CacheForcingFilter {
 
     private Set<Pattern> actionPatterns = new HashSet<>();
 
+    @Override
     public void init(FilterConfig filterConfig) {
         Enumeration<String> names = filterConfig.getInitParameterNames();
         while (names.hasMoreElements()) {

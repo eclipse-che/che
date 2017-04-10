@@ -28,6 +28,7 @@ public class DebuggerModule extends AbstractModule {
         bind(DebuggerManager.class);
         bind(DebuggerService.class);
         bind(DebuggerWebSocketMessenger.class);
+        bind(DebuggerJsonRpcMessenger.class);
 
         bind(DebuggerActionProvider.class);
         final Multibinder<Class> ignoredClasses = Multibinder.newSetBinder(binder(), Class.class, Names.named("che.json.ignored_classes"));

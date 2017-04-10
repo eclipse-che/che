@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
+import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -769,12 +770,12 @@ public class WorkspaceManager {
                         }
                         try {
                             throw ex;
-                        } catch (EnvironmentException envEx) {
-                            // it's okay, e.g. recipe is invalid | start interrupted
+                        } catch (EnvironmentException | AgentException e) {
+                            // it's okay, e.g. recipe is invalid | start interrupted | agent start failed
                             LOG.info("Workspace '{}/{}' can't be started because: {}",
                                      workspace.getNamespace(),
                                      workspace.getConfig().getName(),
-                                     envEx.getMessage());
+                                     e.getMessage());
                         } catch (Throwable thr) {
                             LOG.error(thr.getMessage(), thr);
                         }
@@ -842,6 +843,10 @@ public class WorkspaceManager {
         sharedPool.execute(() -> {
             try {
                 runtimes.startMachine(workspaceId, machineConfig);
+            } catch (AgentException e) {
+                // Agent start failed. User should fix that. No need to disturb an admin
+                LOG.warn("Error occurs on start of additional machine in workspace %s. Error: %s",
+                         workspaceId, e.getLocalizedMessage());
             } catch (ApiException | EnvironmentException e) {
                 LOG.error(e.getLocalizedMessage(), e);
             }

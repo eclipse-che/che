@@ -17,7 +17,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -37,11 +36,10 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
-import org.eclipse.che.ide.websocket.MessageBus;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
-import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
@@ -59,6 +57,10 @@ import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.WORKSPACE_STO
  * @author Yevhenii Voevodin
  */
 public abstract class WorkspaceComponent implements Component, WsAgentStateHandler, WorkspaceStoppedEvent.Handler {
+    private static final String WS_STATUS_ERROR_MSG       = "Tried to subscribe to workspace status events, but got error";
+    private static final String WS_AGENT_OUTPUT_ERROR_MSG = "Tried to subscribe to workspace agent output, but got error";
+    private static final String ENV_STATUS_ERROR_MSG      = "Tried to subscribe to environment status events, but got error";
+    private static final String ENV_OUTPUT_ERROR_MSG      = "Tried to subscribe to environment output, but got error";
 
     protected final WorkspaceServiceClient   workspaceServiceClient;
     protected final CoreLocalizationConstant locale;
@@ -72,14 +74,13 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     protected final NotificationManager      notificationManager;
     protected final StartWorkspacePresenter  startWorkspacePresenter;
 
-    private final EventBus                 eventBus;
-    private final MessageBusProvider       messageBusProvider;
-    private final WorkspaceEventsHandler   workspaceEventsHandler;
-    private final LoaderPresenter          loader;
+    private final EventBus            eventBus;
+    private final LoaderPresenter     loader;
+    private final MachineLogsRestorer machineLogsRestorer;
+    private final RequestTransmitter  transmitter;
 
     protected Callback<Component, Exception> callback;
     protected boolean                        needToReloadComponents;
-    private   MessageBus                     messageBus;
 
     public WorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
                               CreateWorkspacePresenter createWorkspacePresenter,
@@ -89,13 +90,13 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                               EventBus eventBus,
                               AppContext appContext,
                               NotificationManager notificationManager,
-                              MessageBusProvider messageBusProvider,
                               BrowserAddress browserAddress,
                               DialogFactory dialogFactory,
                               PreferencesManager preferencesManager,
                               DtoFactory dtoFactory,
-                              WorkspaceEventsHandler workspaceEventsHandler,
-                              LoaderPresenter loader) {
+                              LoaderPresenter loader,
+                              MachineLogsRestorer machineLogsRestorer,
+                              RequestTransmitter transmitter) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.createWorkspacePresenter = createWorkspacePresenter;
         this.startWorkspacePresenter = startWorkspacePresenter;
@@ -104,13 +105,13 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         this.eventBus = eventBus;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
-        this.messageBusProvider = messageBusProvider;
         this.browserAddress = browserAddress;
         this.dialogFactory = dialogFactory;
         this.preferencesManager = preferencesManager;
         this.dtoFactory = dtoFactory;
-        this.workspaceEventsHandler = workspaceEventsHandler;
         this.loader = loader;
+        this.machineLogsRestorer = machineLogsRestorer;
+        this.transmitter = transmitter;
 
         this.needToReloadComponents = true;
 
@@ -166,55 +167,58 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
      */
     public void handleWorkspaceEvents(final WorkspaceDto workspace, final Callback<Component, Exception> callback,
                                       final Boolean restoreFromSnapshot) {
-        this.callback = callback;
-        if (messageBus != null) {
-            messageBus.cancelReconnection();
+
+        loader.show(STARTING_WORKSPACE_RUNTIME);
+
+        setCurrentWorkspace(workspace);
+
+        String workspaceId = appContext.getWorkspaceId();
+
+        subscribe(WS_STATUS_ERROR_MSG, "event:workspace-status:subscribe", workspaceId);
+        subscribe(WS_AGENT_OUTPUT_ERROR_MSG, "event:ws-agent-output:subscribe", workspaceId);
+        subscribe(ENV_STATUS_ERROR_MSG, "event:environment-status:subscribe", workspaceId);
+
+        if (appContext.getActiveRuntime() != null && appContext.getDevMachine() != null) {
+            subscribe(ENV_OUTPUT_ERROR_MSG, "event:environment-output:subscribe", appContext.getDevMachine().getId());
+
+            machineLogsRestorer.restore(appContext.getDevMachine());
+
         }
-        messageBus = messageBusProvider.createMessageBus();
 
-        messageBus.addOnOpenHandler(new ConnectionOpenedHandler() {
-            @Override
-            public void onOpen() {
-                loader.show(STARTING_WORKSPACE_RUNTIME);
+        WorkspaceStatus workspaceStatus = workspace.getStatus();
+        switch (workspaceStatus) {
+            case SNAPSHOTTING:
+                loader.show(CREATING_WORKSPACE_SNAPSHOT);
+                break;
+            case STARTING:
+                subscribe(ENV_OUTPUT_ERROR_MSG, "event:environment-output:subscribe", appContext.getDevMachine().getId());
 
-                messageBus.removeOnOpenHandler(this);
+                eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
+                break;
+            case RUNNING:
+                Scheduler.get().scheduleDeferred(() -> {
+                    loader.setSuccess(STARTING_WORKSPACE_RUNTIME);
+                    eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
+                });
+                break;
+            default:
+                workspaceServiceClient.getSettings()
+                                      .then((Function<Map<String, String>, Map<String, String>>)settings -> {
+                                          if (Boolean.parseBoolean(settings.getOrDefault(CHE_WORKSPACE_AUTO_START, "true"))) {
+                                              startWorkspaceById(workspaceId, workspace.getConfig().getDefaultEnv(),
+                                                                 restoreFromSnapshot);
+                                          } else {
+                                              loader.show(WORKSPACE_STOPPED);
+                                          }
+                                          return settings;
+                                      });
+        }
+    }
 
-                setCurrentWorkspace(workspace);
-                workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
-
-                final WorkspaceStatus workspaceStatus = workspace.getStatus();
-                switch (workspaceStatus) {
-                    case SNAPSHOTTING:
-                        loader.show(CREATING_WORKSPACE_SNAPSHOT);
-                        break;
-                    case STARTING:
-                        eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
-                        break;
-                    case RUNNING:
-                        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                            @Override
-                            public void execute() {
-                                loader.setSuccess(STARTING_WORKSPACE_RUNTIME);
-                                eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
-                            }
-                        });
-                        break;
-                    default:
-                        workspaceServiceClient.getSettings() //
-                                              .then(new Function<Map<String, String>, Map<String, String>>() {
-                                                  @Override
-                                                  public Map<String, String> apply(Map<String, String> settings) throws FunctionException {
-                                                      if (Boolean.parseBoolean(settings.getOrDefault(CHE_WORKSPACE_AUTO_START, "true"))) {
-                                                          startWorkspaceById(workspace.getId(), workspace.getConfig().getDefaultEnv(), restoreFromSnapshot);
-                                                      } else {
-                                                          loader.show(WORKSPACE_STOPPED);
-                                                      }
-                                                      return settings;
-                                                  }
-                                              });
-                }
-            }
-        });
+    private void subscribe(String it, String methodName, String id) {
+        workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
+                              .then((Operation<WorkspaceDto>)skip -> transmitter.transmitStringToNone("ws-master", methodName, id))
+                              .catchError((Operation<PromiseError>)error -> Log.error(getClass(), it + ": " + error.getMessage()));
     }
 
     /**

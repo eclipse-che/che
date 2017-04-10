@@ -11,9 +11,11 @@
 package org.eclipse.che.plugin.docker.machine;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.core.util.JsonRpcEndpointIdsHolder;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
@@ -105,6 +107,12 @@ public class MachineProviderImplTest {
 
     @Mock
     private DockerInstanceStopDetector dockerInstanceStopDetector;
+
+    @Mock
+    private RequestTransmitter transmitter;
+
+    @Mock
+    private JsonRpcEndpointIdsHolder endpointIdsHolder;
 
     @Mock
     private DockerNode dockerNode;
@@ -1074,6 +1082,32 @@ public class MachineProviderImplTest {
     }
 
     @Test
+    public void shouldAddMachineNameEnvVariableOnDevInstanceCreationFromRecipe() throws Exception {
+        String wsId = "myWs";
+        createInstanceFromRecipe(true, wsId);
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
+                           .contains(DockerInstanceRuntimeInfo.CHE_MACHINE_NAME + "=" + MACHINE_NAME),
+                   "Machine Name variable is missing. Required " + DockerInstanceRuntimeInfo.CHE_MACHINE_NAME + "=" +
+                   MACHINE_NAME +
+                   ". Found " + Arrays.toString(argumentCaptor.getValue().getContainerConfig().getEnv()));
+    }
+
+    @Test
+    public void shouldAddMachineNameEnvVariableOnNonDevInstanceCreationFromRecipe() throws Exception {
+        String wsId = "myWs";
+        createInstanceFromRecipe(false, wsId);
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
+                           .contains(DockerInstanceRuntimeInfo.CHE_MACHINE_NAME + "=" + MACHINE_NAME),
+                   "Machine Name variable is missing. Required " + DockerInstanceRuntimeInfo.CHE_MACHINE_NAME + "=" +
+                   MACHINE_NAME +
+                   ". Found " + Arrays.toString(argumentCaptor.getValue().getContainerConfig().getEnv()));
+    }
+
+    @Test
     public void shouldAddWorkspaceIdEnvVariableOnDevInstanceCreationFromSnapshot() throws Exception {
         String wsId = "myWs";
         createInstanceFromSnapshot(true, wsId);
@@ -1087,14 +1121,14 @@ public class MachineProviderImplTest {
     }
 
     @Test
-    public void shouldNotAddWorkspaceIdEnvVariableOnNonDevInstanceCreationFromRecipe() throws Exception {
+    public void shouldAddWorkspaceIdEnvVariableOnNonDevInstanceCreationFromRecipe() throws Exception {
         String wsId = "myWs";
         createInstanceFromRecipe(false, wsId);
         ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture());
-        assertFalse(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
+        assertTrue(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
                             .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
-                    "Non dev machine should not contains " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID);
+                    "Non dev machine should contains " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID);
     }
 
     @Test
@@ -1574,6 +1608,8 @@ public class MachineProviderImplTest {
                                            credentialsReader,
                                            dockerMachineFactory,
                                            dockerInstanceStopDetector,
+                                           transmitter,
+                                           endpointIdsHolder,
                                            devMachineServers,
                                            allMachineServers,
                                            devMachineVolumes,

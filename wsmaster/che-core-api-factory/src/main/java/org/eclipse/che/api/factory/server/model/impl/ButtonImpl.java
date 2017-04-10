@@ -29,7 +29,7 @@ import java.util.Objects;
  * @author Anton Korneta
  */
 @Entity(name = "Button")
-@Table(name = "button")
+@Table(name = "che_factory_button")
 public class ButtonImpl implements Button {
 
     @Id

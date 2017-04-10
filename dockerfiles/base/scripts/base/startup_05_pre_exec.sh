@@ -20,7 +20,7 @@ cli_parse () {
 
   case $1 in
     init|config|start|stop|restart|backup|restore|info|offline|destroy|download|\
-    rmi|upgrade|version|ssh|sync|action|test|compile|dir|help)
+    rmi|upgrade|version|ssh|sync|action|test|compile|dir|help|archetype)
     ;;
   *)
     error "You passed an unknown command: $1"

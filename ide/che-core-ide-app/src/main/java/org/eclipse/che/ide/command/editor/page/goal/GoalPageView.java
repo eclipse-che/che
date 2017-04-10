@@ -38,5 +38,8 @@ public interface GoalPageView extends View<GoalPageView.ActionDelegate> {
          *         new value of the command goal
          */
         void onGoalChanged(String goalId);
+
+        /** Called when creating new goal is requested. */
+        void onCreateGoal();
     }
 }

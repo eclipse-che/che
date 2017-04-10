@@ -142,12 +142,12 @@ public class DockerInstanceProvider implements InstanceProvider {
             return;
         }
 
-        final String registry = dockerMachineSource.getRegistry();
         final String repository = dockerMachineSource.getRepository();
-        if (registry == null || repository == null) {
+        if (repository == null) {
             LOG.error("Failed to remove instance snapshot: invalid machine source: {}", dockerMachineSource);
             throw new SnapshotException("Snapshot removing failed. Snapshot attributes are not valid");
         }
+        final String registry = (dockerMachineSource.getRegistry() == null) ? "index.docker.io" : dockerMachineSource.getRegistry();
 
         try {
             URL url = UriBuilder.fromUri("http://" + registry) // TODO make possible to use https here
@@ -156,10 +156,10 @@ public class DockerInstanceProvider implements InstanceProvider {
                                 .toURL();
             final HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             try {
+                conn.setInstanceFollowRedirects(true);
                 conn.setConnectTimeout(30 * 1000);
                 conn.setRequestMethod("DELETE");
                 // TODO add auth header for secured registry
-                // conn.setRequestProperty("Authorization", authHeader);
                 final int responseCode = conn.getResponseCode();
                 if ((responseCode / 100) != 2) {
                     InputStream in = conn.getErrorStream();

@@ -44,18 +44,19 @@ public class ProjectResolverTest {
 
             @Override
             public void warning(Throwable t) throws RemoteException {
+                t.printStackTrace();
             }
 
             @Override
             public void info(Throwable t) throws RemoteException {
+                t.printStackTrace();
             }
 
             @Override
             public void error(Throwable t) throws RemoteException {
+                t.printStackTrace();
             }
-        }, (file, relativePath) -> {
-            System.out.println(file.getAbsolutePath());
-        });
+        }, (file, relativePath) -> System.out.println(file.getAbsolutePath()));
         MavenSettings mavenSettings = new MavenSettings();
         mavenSettings.setLoggingLevel(MavenTerminal.LEVEL_INFO);
         mavenSettings.setMavenHome(new File(System.getenv("M2_HOME")));
@@ -69,7 +70,6 @@ public class ProjectResolverTest {
         }, new MavenServerProgressNotifier() {
             @Override
             public void setText(String text) throws RemoteException {
-                System.out.println(text);
             }
 
             @Override
@@ -142,6 +142,14 @@ public class ProjectResolverTest {
         MavenArtifact artifact = mavenServer.resolveArtifact(artifactKey, Collections.emptyList());
         assertNotNull(artifact);
         assertTrue(artifact.isResolved());
+    }
+
+    @Test
+    public void testResolveLog4jSource() throws Exception {
+        MavenArtifactKey artifactKey = new MavenArtifactKey("log4j", "log4j", "1.2.12", "jar", "sources");
+        MavenArtifact artifact = mavenServer.resolveArtifact(artifactKey, Collections.emptyList());
+        assertNotNull(artifact);
+        assertFalse(artifact.isResolved());
     }
 
     @Test

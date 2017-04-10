@@ -22,6 +22,7 @@ export class CheNavBarController {
     administration: '#/administration',
     // subsections
     plugins: '#/admin/plugins',
+    factories: '#/factories',
     account: '#/account',
     stacks: '#/stacks'
   };
@@ -80,6 +81,11 @@ export class CheNavBarController {
 
   getWorkspacesNumber(): number {
     return this.cheAPI.getWorkspace().getWorkspaces().length;
+  }
+  
+  getFactoriesNumber(): number {
+    let pagesInfo = this.cheAPI.getFactory().getPagesInfo();
+    return pagesInfo && pagesInfo.count ? pagesInfo.count : this.cheAPI.getFactory().factoriesById.size;
   }
 
   openLinkInNewTab(url: string): void {

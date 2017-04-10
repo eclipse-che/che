@@ -18,7 +18,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -36,10 +35,10 @@ import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.context.QueryParameters;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
@@ -73,14 +72,14 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
                                      EventBus eventBus,
                                      AppContext appContext,
                                      NotificationManager notificationManager,
-                                     MessageBusProvider messageBusProvider,
                                      BrowserAddress browserAddress,
                                      DialogFactory dialogFactory,
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
-                                     WorkspaceEventsHandler workspaceEventsHandler,
                                      LoaderPresenter loader,
-                                     QueryParameters queryParameters) {
+                                     QueryParameters queryParameters,
+                                     MachineLogsRestorer machineLogsRestorer,
+                                     RequestTransmitter requestTransmitter) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
               startWorkspacePresenter,
@@ -89,13 +88,13 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
               eventBus,
               appContext,
               notificationManager,
-              messageBusProvider,
               browserAddress,
               dialogFactory,
               preferencesManager,
               dtoFactory,
-              workspaceEventsHandler,
-              loader);
+              loader,
+              machineLogsRestorer,
+              requestTransmitter);
         this.factoryServiceClient = factoryServiceClient;
         this.queryParameters = queryParameters;
     }
@@ -122,24 +121,16 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
             factoryPromise = factoryServiceClient.resolveFactory(factoryParameters, true);
         }
 
-        Promise<Void> promise = factoryPromise.then(new Function<FactoryDto, Void>() {
-            @Override
-            public Void apply(final FactoryDto factory) throws FunctionException {
-
-                if (appContext instanceof AppContextImpl) {
-                    ((AppContextImpl)appContext).setFactory(factory);
-                }
-
-                // get workspace
-                tryStartWorkspace();
-                return null;
+        factoryPromise.then((Function<FactoryDto, Void>)factory -> {
+            if (appContext instanceof AppContextImpl) {
+                (appContext).setFactory(factory);
             }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                Log.error(FactoryWorkspaceComponent.class, "Unable to load Factory", error);
-                callback.onFailure(new Exception(error.getCause()));
-            }
+            // get workspace
+            tryStartWorkspace();
+            return null;
+        }).catchError(error -> {
+            Log.error(FactoryWorkspaceComponent.class, "Unable to load Factory", error);
+            callback.onFailure(new Exception(error.getCause()));
         });
 
     }
@@ -164,15 +155,12 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
      * Checks if specified workspace has {@link WorkspaceStatus} which is {@code RUNNING}
      */
     protected Operation<WorkspaceDto> checkWorkspaceIsStarted() {
-        return new Operation<WorkspaceDto>() {
-            @Override
-            public void apply(WorkspaceDto workspace) throws OperationException {
-                if (!RUNNING.equals(workspace.getStatus())) {
-                    notificationManager.notify(locale.failedToLoadFactory(), locale.workspaceNotRunning(), FAIL, FLOAT_MODE);
-                    throw new OperationException(locale.workspaceNotRunning());
-                } else {
-                    startWorkspace().apply(workspace);
-                }
+        return workspace -> {
+            if (!RUNNING.equals(workspace.getStatus())) {
+                notificationManager.notify(locale.failedToLoadFactory(), locale.workspaceNotRunning(), FAIL, FLOAT_MODE);
+                throw new OperationException(locale.workspaceNotRunning());
+            } else {
+                startWorkspace().apply(workspace);
             }
         };
     }

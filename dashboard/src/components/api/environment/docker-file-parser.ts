@@ -122,7 +122,7 @@ export class DockerfileParser {
       case 'ENV':
         let firstSpaceIndex = argumentStr.indexOf(' '),
             firstEqualIndex = argumentStr.indexOf('=');
-        if (firstEqualIndex > -1 && firstEqualIndex < firstSpaceIndex) {
+        if (firstEqualIndex > -1 && (firstSpaceIndex === -1 || firstEqualIndex < firstSpaceIndex)) {
           // this argument string contains one or more environment variables
           let match;
           while (match = this.envVariablesRE.exec(argumentStr)) {

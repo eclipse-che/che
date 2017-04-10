@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.fileupload.FileItem;
+import org.eclipse.che.api.agent.server.filters.AddExecAgentInEnvironmentUtil;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -138,6 +139,10 @@ public class FactoryService extends Service {
         this.factoryParametersResolvers = factoryParametersResolverHolder.getFactoryParametersResolvers();
     }
 
+    /**
+     * @deprecated this is a legacy method for functionality that is no longer exists.
+     * use {@link #saveFactory(FactoryDto)}
+     */
     @POST
     @Consumes(MULTIPART_FORM_DATA)
     @Produces(APPLICATION_JSON)
@@ -148,6 +153,7 @@ public class FactoryService extends Service {
                    @ApiResponse(code = 403, message = "The user does not have rights to create factory"),
                    @ApiResponse(code = 409, message = "When factory with given name and creator already exists"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
+    @Deprecated
     public FactoryDto saveFactory(Iterator<FileItem> formData) throws ForbiddenException,
                                                                       ConflictException,
                                                                       BadRequestException,
@@ -183,6 +189,7 @@ public class FactoryService extends Service {
             }
             requiredNotNull(factory, "factory configuration");
             processDefaults(factory);
+            AddExecAgentInEnvironmentUtil.addExecAgent(factory.getWorkspace());
             createValidator.validateOnCreate(factory);
             return injectLinks(asDto(factoryManager.saveFactory(factory, images)), images);
         } catch (IOException ioEx) {
@@ -325,6 +332,10 @@ public class FactoryService extends Service {
         factoryManager.removeFactory(id);
     }
 
+    /**
+     * @deprecated this is a legacy method for functionality that is no longer exists.
+     * There is no alternative for this method.
+     */
     @GET
     @Path("/{id}/image")
     @Produces("image/*")
@@ -334,6 +345,7 @@ public class FactoryService extends Service {
                    @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 404, message = "Factory or factory image not found"),
                    @ApiResponse(code = 500, message = "Internal server error")})
+    @Deprecated
     public Response getImage(@ApiParam(value = "Factory identifier")
                              @PathParam("id")
                              String factoryId,
@@ -358,6 +370,10 @@ public class FactoryService extends Service {
         return Response.ok(image.getImageData(), image.getMediaType()).build();
     }
 
+    /**
+     * @deprecated this is a legacy method for functionality that is no longer exists.
+     * There is no alternative for this method.
+     */
     @GET
     @Path("/{id}/snippet")
     @Produces(TEXT_PLAIN)
@@ -367,6 +383,7 @@ public class FactoryService extends Service {
                    @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 404, message = "Factory or factory snippet not found"),
                    @ApiResponse(code = 500, message = "Internal server error")})
+    @Deprecated
     public String getFactorySnippet(@ApiParam(value = "Factory identifier")
                                     @PathParam("id")
                                     String factoryId,

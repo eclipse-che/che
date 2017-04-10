@@ -210,4 +210,12 @@ public interface AppContext {
 
 
     String getDevAgentEndpoint();
+
+    /**
+     * Returns web application identifier. Most obvious use - to distinguish web applications
+     * on server side (e.g. connected via websocket)
+     *
+     * @return identifier
+     */
+    String getAppId();
 }

@@ -13,12 +13,12 @@ package org.eclipse.che.ide.part.widgets.editortab;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -125,12 +125,18 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
         eventBus.addHandler(FileEvent.TYPE, this);
 
-        closeButton.addDomHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                editorAgent.closeEditor(relatedEditorPart);
-            }
-        }, ClickEvent.getType());
+        sinkEvents(Event.ONMOUSEDOWN);
+
+        closeButton.addDomHandler(event -> editorAgent.closeEditor(relatedEditorPart), ClickEvent.getType());
+    }
+
+    @Override
+    public void onBrowserEvent(Event event) {
+        if (event.getTypeInt() == Event.ONMOUSEDOWN && event.getButton() == NativeEvent.BUTTON_MIDDLE) {
+            editorAgent.closeEditor(relatedEditorPart);
+        }
+
+        super.onBrowserEvent(event);
     }
 
     /** {@inheritDoc} */
@@ -169,14 +175,12 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     /** {@inheritDoc} */
     @Override
     public void select() {
-        /** Marks tab is focused */
         getElement().setAttribute("focused", "");
     }
 
     /** {@inheritDoc} */
     @Override
     public void unSelect() {
-        /** Marks tab is not focused */
         getElement().removeAttribute("focused");
     }
 
@@ -216,8 +220,6 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     public void onClick(@NotNull ClickEvent event) {
         if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
             delegate.onTabClicked(this);
-        } else if (NativeEvent.BUTTON_MIDDLE == event.getNativeButton()) {
-            editorAgent.closeEditor(relatedEditorPart);
         }
     }
 

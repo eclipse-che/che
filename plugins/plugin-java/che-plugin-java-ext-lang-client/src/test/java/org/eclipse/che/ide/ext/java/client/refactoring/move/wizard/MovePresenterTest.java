@@ -228,7 +228,7 @@ public class MovePresenterTest {
         verify(projectsPromise).then(projectsOperation.capture());
         projectsOperation.getValue().apply(javaProjects);
 
-        verify(moveView).setTreeOfDestinations(any());
+        verify(moveView).setTreeOfDestinations(any(), any());
         verify(moveView).show(refactorInfo);
     }
 

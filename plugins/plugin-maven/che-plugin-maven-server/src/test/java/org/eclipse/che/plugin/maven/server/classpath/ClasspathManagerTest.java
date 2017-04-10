@@ -45,6 +45,7 @@ import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -122,6 +123,27 @@ public class ClasspathManagerTest extends BaseTest {
         mavenWorkspace.waitForUpdate();
         boolean downloadSources = classpathManager.downloadSources(test.getFullPath().toOSString(), "org.junit.Test");
         assertTrue(downloadSources);
+    }
+
+    @Test
+    public void testDownloadSourcesLog4j() throws Exception {
+        String pom = "<groupId>test</groupId>" +
+                     "<artifactId>testArtifact</artifactId>" +
+                     "<version>42</version>" +
+                     "<dependencies>" +
+                     "    <dependency>" +
+                     "        <groupId>log4j</groupId>" +
+                     "        <artifactId>log4j</artifactId>" +
+                     "        <version>1.2.12</version>" +
+                     "    </dependency>" +
+                     "</dependencies>";
+        createTestProject("test", pom);
+
+        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
+        mavenWorkspace.update(Collections.singletonList(test));
+        mavenWorkspace.waitForUpdate();
+        boolean downloadSources = classpathManager.downloadSources(test.getFullPath().toOSString(), "org.apache.log4j.Logger");
+        assertFalse(downloadSources);
     }
 
     @Test

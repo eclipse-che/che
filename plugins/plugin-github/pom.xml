@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.6.0-SNAPSHOT</version>
+        <version>5.8.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-github-parent</artifactId>
@@ -28,5 +28,7 @@
         <module>che-plugin-github-ide</module>
         <module>che-plugin-github-server</module>
         <module>che-plugin-github-shared</module>
+        <module>che-plugin-github-pullrequest</module>
+        <module>che-plugin-github-factory-resolver</module>
     </modules>
 </project>

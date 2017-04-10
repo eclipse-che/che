@@ -243,6 +243,7 @@ public class CheEnvironmentEngine {
                                 MessageConsumer<MachineLogMessage> messageConsumer,
                                 MachineStartedHandler startedHandler) throws ServerException,
                                                                              EnvironmentException,
+                                                                             AgentException,
                                                                              ConflictException {
 
         EnvironmentImpl environment = new EnvironmentImpl(env);
@@ -294,6 +295,7 @@ public class CheEnvironmentEngine {
                                 boolean recover,
                                 MessageConsumer<MachineLogMessage> messageConsumer) throws ServerException,
                                                                                            ConflictException,
+                                                                                           AgentException,
                                                                                            EnvironmentException {
         return start(workspaceId, envName, env, recover, messageConsumer, NO_OP_HANDLER);
     }
@@ -730,6 +732,7 @@ public class CheEnvironmentEngine {
                                        boolean recover,
                                        MachineStartedHandler startedHandler)
             throws ServerException,
+                   AgentException,
                    EnvironmentException {
         // Starting all machines in environment one by one by getting configs
         // from the corresponding starting queue.

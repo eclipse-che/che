@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.Server;
@@ -239,7 +238,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             return;
         }
 
-        ProcessTreeNode machineToSelect = null;
         for (MachineEntity machine : machines) {
             if (machine.isDev()) {
                 provideMachineNode(machine, true);
@@ -252,9 +250,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             provideMachineNode(machine, true);
         }
 
-        if (machineToSelect == null) {
-            machineToSelect = machineNodes.entrySet().iterator().next().getValue();
-        }
+        ProcessTreeNode machineToSelect = machineNodes.entrySet().iterator().next().getValue();
 
         view.selectNode(machineToSelect);
         notifyTreeNodeSelected(machineToSelect);
@@ -887,19 +883,27 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             return existedMachineNode;
         }
 
+        //we need to keep old machine node children
+        ArrayList<ProcessTreeNode> children = new ArrayList<>();
+
         // remove existed node
         for (ProcessTreeNode node : rootNode.getChildren()) {
             if (machine.getConfig().getName().equals(node.getName())) {
+                children.addAll(node.getChildren());
                 rootNode.getChildren().remove(node);
                 break;
             }
         }
 
         // create new node
-        final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, new ArrayList<ProcessTreeNode>());
-        newMachineNode.setRunning(true);
+        final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, children);
+        newMachineNode.setRunning(RUNNING == machine.getStatus());
         newMachineNode.setHasTerminalAgent(hasAgent(machine.getDisplayName(), TERMINAL_AGENT) || hasTerminal(machineId));
         newMachineNode.setHasSSHAgent(hasAgent(machine.getDisplayName(), SSH_AGENT));
+        for (ProcessTreeNode child : children) {
+            child.setParent(newMachineNode);
+        }
+
         machineNodes.put(machineId, newMachineNode);
 
         // add to children

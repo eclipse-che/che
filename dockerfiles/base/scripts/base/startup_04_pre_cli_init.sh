@@ -36,13 +36,19 @@ cli_init() {
   CLI_ENV=${CLI_ENV%*]}
   IFS=' ' read -r -a CLI_ENV_ARRAY <<< "$CLI_ENV"
 
-  if is_initialized; then 
+  CHE_HOST_PROTOCOL="http"
+  if is_initialized; then
     CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
     CHE_HOST_ENV=$(get_value_of_var_from_env ${CHE_PRODUCT_NAME}_HOST)
     if [[ "${CHE_HOST_ENV}" != "" ]] && 
        [[ "${CHE_HOST_ENV}" != "${CHE_HOST_LOCAL}" ]]; then
       warning "cli" "'${CHE_PRODUCT_NAME}_HOST=${CHE_HOST_ENV}' from command line overriding '${CHE_PRODUCT_NAME}_HOST=${CHE_HOST_LOCAL}' from ${CHE_ENVIRONMENT_FILE}"
       CHE_HOST=$CHE_HOST_ENV
+    fi
+
+    CHE_HOST_PROTOCOL_ENV=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST_PROTOCOL)
+    if [[ "${CHE_HOST_PROTOCOL_ENV}" != "" ]]; then
+      CHE_HOST_PROTOCOL=${CHE_HOST_PROTOCOL_ENV}
     fi
 
     if [[ "${CHE_HOST_ENV}" = "" ]] && 
@@ -86,9 +92,10 @@ cli_verify_nightly() {
       update_image $CHE_IMAGE_FULLNAME
 
       local NEW_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
-
       if [[ "${CURRENT_DIGEST}" != "${NEW_DIGEST}" ]]; then
+        # Per CODENVY-1773 - removes orphaned nightly image
         warning "Pulled new 'nightly' image - please rerun CLI"
+        docker rmi -f $(docker images --filter "dangling=true" -q $CHE_IMAGE_NAME) 2>/dev/null
         return 2;
       fi
     fi 

@@ -108,6 +108,7 @@ public class MainMenuViewImpl extends Composite implements MainMenuView, CloseMe
         final DivElement triangleSeparator = Elements.createDivElement(resources.menuCss().triangleSeparator());
 
         rightPanel.addStyleName(resources.menuCss().rightPanel());
+        rightPanel.addStyleName(resources.menuCss().commandToolbar());
 
         rootPanel.add(leftPanel);
         rootPanel.add(table);

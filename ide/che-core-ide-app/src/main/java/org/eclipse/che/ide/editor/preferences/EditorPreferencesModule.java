@@ -16,6 +16,7 @@ import com.google.gwt.inject.client.multibindings.GinMultibinder;
 
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.editor.preferences.editorproperties.propertiessection.EditorPropertiesSectionPresenter;
+import org.eclipse.che.ide.editor.preferences.editorproperties.sections.EditPropertiesSection;
 import org.eclipse.che.ide.editor.preferences.editorproperties.sections.EditorPreferenceSectionFactory;
 import org.eclipse.che.ide.editor.preferences.editorproperties.sections.EditorPropertiesSection;
 import org.eclipse.che.ide.editor.preferences.editorproperties.sections.LanguageToolsPropertiesSection;
@@ -50,6 +51,7 @@ public class EditorPreferencesModule extends AbstractGinModule {
                 GinMultibinder.newSetBinder(binder(), EditorPropertiesSection.class);
 
         editorPropertiesSectionBinder.addBinding().to(TabsPropertiesSection.class);
+        editorPropertiesSectionBinder.addBinding().to(EditPropertiesSection.class);
         editorPropertiesSectionBinder.addBinding().to(LanguageToolsPropertiesSection.class);
         editorPropertiesSectionBinder.addBinding().to(TypingPropertiesSection.class);
         editorPropertiesSectionBinder.addBinding().to(WhiteSpacesPropertiesSection.class);

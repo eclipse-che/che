@@ -12,8 +12,8 @@
     width: 32px;
     height: 22px;
     color: #4990e2;
-    background-image: linear-gradient(to bottom, #444444, #343434 98%);
-    border: solid 0.6px #454545;
+    background: menuButtonBackground;
+    border: menuButtonBorder;
     font-size: 17px;
     font-weight: normal;
     font-style: normal;
@@ -28,18 +28,19 @@
 
 .button:hover {
     color: #53a2ff;
-    background-image: linear-gradient(to bottom, #3d3d3d, #1d1d1d 98%);
+    background: hoveredMenuButtonBackground;
 }
 
 .button:active {
     color: #235c9e;
-    background-image: linear-gradient(to bottom, #3d3d3d, #1d1d1d);
+    background: activeMenuButtonBackground;
 }
 
 .popupPanel {
-    background-color: #212325;
-    box-shadow: 0 1px 3px 0 #202020;
-    border: solid 1px #161819;
+    background-color: openedFilesDropdownListBackgroundColor;
+    border: 1px solid openedFilesDropdownListBorderColor;
+    box-shadow: 0 2px 2px 0 openedFilesDropdownListShadowColor;
+    border-radius: 0 0 3px 3px;
     font-size: 10px;
     font-weight: normal;
     font-style: normal;
@@ -59,11 +60,7 @@
 .expandedImage svg {
     width: 9px;
     height: 9px;
-    fill: selectCommandActionColor;
-}
-
-.expandedImage:hover svg {
-    fill: selectCommandActionHoverColor;
+    fill: dropdownListButtonColor;
 }
 
 .popupItem {
@@ -71,10 +68,11 @@
     line-height: 20px;
     padding: 0 10px;
     cursor: default;
+    color: selectCommandActionColor;
 }
 
 .popupItemOver {
-    background-color: #2e3945;
+    background-color: hoverBackgroundColor;
     color: #4eabff;
 }
 

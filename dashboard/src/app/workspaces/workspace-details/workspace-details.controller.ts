@@ -36,6 +36,7 @@ export class WorkspaceDetailsController {
   $rootScope: ng.IRootScopeService;
   $scope: ng.IScope;
   $timeout: ng.ITimeoutService;
+  lodash: _.LoDashStatic;
   cheEnvironmentRegistry: CheEnvironmentRegistry;
   cheNotification: CheNotification;
   cheWorkspace: CheWorkspace;
@@ -48,6 +49,9 @@ export class WorkspaceDetailsController {
   selectedTabIndex: number;
 
   namespaceId: string = '';
+  namespaceLabel: string;
+  namespaceLabels: Array<string>;
+  onNamespaceChanged: Function;
   workspaceId: string = '';
   workspaceName: string = '';
   newName: string = '';
@@ -76,7 +80,7 @@ export class WorkspaceDetailsController {
               $route: ng.route.IRouteService, $rootScope: ng.IRootScopeService, $scope: ng.IScope, $timeout: ng.ITimeoutService,
               cheEnvironmentRegistry: CheEnvironmentRegistry, cheNotification: CheNotification, cheWorkspace: CheWorkspace,
               ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, cheNamespaceRegistry: CheNamespaceRegistry,
-              confirmDialogService: ConfirmDialogService) {
+              confirmDialogService: ConfirmDialogService, lodash: _.LoDashStatic) {
     this.$log = $log;
     this.$location = $location;
     this.$mdDialog = $mdDialog;
@@ -92,6 +96,7 @@ export class WorkspaceDetailsController {
     this.ideSvc = ideSvc;
     this.workspaceDetailsService = workspaceDetailsService;
     this.confirmDialogService = confirmDialogService;
+    this.lodash = lodash;
 
     cheWorkspace.fetchWorkspaces().then(() => {
       let workspaces: any[] = cheWorkspace.getWorkspaces();
@@ -177,7 +182,19 @@ export class WorkspaceDetailsController {
       };
       this.copyWorkspaceDetails = angular.copy(this.workspaceDetails);
       this.cheNamespaceRegistry.fetchNamespaces().then(() => {
-        this.namespaceId = this.$location.search().namespace || (this.getNamespaces().length ? this.getNamespaces()[0].id : undefined);
+        //check provided namespace exists:
+        let namespace = this.$location.search().namespace ? this.getNamespace(this.$location.search().namespace) : null;
+
+        this.namespaceId = namespace ?  namespace.id : (this.getNamespaces().length ? this.getNamespaces()[0].id : undefined);
+        this.namespaceLabel = namespace ?  namespace.label : (this.getNamespaces().length ? this.getNamespaces()[0].label : undefined);
+        this.namespaceLabels = this.getNamespaces().length ? this.lodash.pluck(this.getNamespaces(), 'label') : [];
+
+        this.onNamespaceChanged = (label: string) => {
+          let namespace = this.getNamespaces().find((namespace: any) => {
+            return namespace.label === label;
+          });
+          this.namespaceId = namespace ? namespace.id : this.namespaceId;
+        }
       });
     }
     this.newName = this.workspaceName;
