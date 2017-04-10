@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-import io.typefox.lsapi.ServerCapabilities;
-import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.CompletionListDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
+import static com.google.common.collect.Lists.newArrayList;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -24,16 +24,18 @@ import org.eclipse.che.ide.api.editor.codeassist.CodeAssistCallback;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.filters.FuzzyMatches;
-import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
+import org.eclipse.che.plugin.languageserver.ide.filters.FuzzyMatches;
+import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
+import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 /**
  * Implement code assist with LS
@@ -69,8 +71,8 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
     public void computeCompletionProposals(TextEditor editor, final int offset, final boolean triggered, final CodeAssistCallback callback) {
         this.lastErrorMessage = null;
 
-        TextDocumentPositionParamsDTO documentPosition = dtoBuildHelper.createTDPP(editor.getDocument(), offset);
-        final TextDocumentIdentifierDTO documentId = documentPosition.getTextDocument();
+        TextDocumentPositionParams documentPosition = dtoBuildHelper.createTDPP(editor.getDocument(), offset);
+        final TextDocumentIdentifier documentId = documentPosition.getTextDocument();
         String currentLine = editor.getDocument().getLineContent(documentPosition.getPosition().getLine());
         final String currentWord = getCurrentWord(currentLine, documentPosition.getPosition().getCharacter());
 
@@ -78,9 +80,9 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
             // no need to send new completion request
             computeProposals(currentWord, offset - latestCompletionResult.getOffset(), callback);
         } else {
-            documentServiceClient.completion(documentPosition).then(new Operation<CompletionListDTO>() {
+            documentServiceClient.completion(documentPosition).then(new Operation<ExtendedCompletionList>() {
                 @Override
-                public void apply(CompletionListDTO list) throws OperationException {
+                public void apply(ExtendedCompletionList list) throws OperationException {
                     latestCompletionResult.update(documentId, offset, currentWord, list);
                     computeProposals(currentWord, 0, callback);
                 }
@@ -116,7 +118,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
             c == '-';
     }
 
-    private List<Match> filter(String word, CompletionItemDTO item) {
+    private List<Match> filter(String word, CompletionItem item) {
         return filter(word, item.getLabel(), item.getFilterText());
     }
 
@@ -138,7 +140,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
 
     private void computeProposals(String currentWord, int offset, CodeAssistCallback callback) {
         List<CompletionProposal> proposals = newArrayList();
-        for (CompletionItemDTO item : latestCompletionResult.getCompletionList().getItems()) {
+        for (ExtendedCompletionItem item : latestCompletionResult.getCompletionList().getItems()) {
             List<Match> highlights = filter(currentWord, item);
             if (highlights != null) {
                 proposals.add(new CompletionItemBasedCompletionProposal(item, 

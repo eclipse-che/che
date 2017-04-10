@@ -20,14 +20,12 @@ import javax.websocket.EncodeException;
 
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls;
+import org.eclipse.lsp4j.MessageParams;
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
-
-import io.typefox.lsapi.MessageParams;
 
 /**
  * {@link EventSubscriber} for incoming <code>window/showMessage</code> notifications.
@@ -49,7 +47,7 @@ public class ShowMessageMessenger implements EventSubscriber<MessageParams> {
         try {
             final ChannelBroadcastMessage bm = new ChannelBroadcastMessage();
             bm.setChannel("languageserver/window/showMessage");
-            bm.setBody(new Gson().toJson(event));
+            bm.setBody(new DtoServerImpls.MessageParamsDto(event).toJson());
             WSConnectionContext.sendMessage(bm);
         } catch (EncodeException | IOException e) {
             LOG.error(e.getMessage(), e);

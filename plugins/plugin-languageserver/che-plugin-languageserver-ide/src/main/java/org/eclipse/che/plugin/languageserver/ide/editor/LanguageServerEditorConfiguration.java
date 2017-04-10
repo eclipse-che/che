@@ -10,11 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import io.typefox.lsapi.ServerCapabilities;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.assistedinject.Assisted;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
@@ -26,9 +23,11 @@ import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilerWithAutoSave;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 import org.eclipse.che.plugin.languageserver.ide.editor.signature.LanguageServerSignatureHelpFactory;
+import org.eclipse.lsp4j.ServerCapabilities;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.assistedinject.Assisted;
 
 /**
  * Configure editor with LS support
@@ -53,8 +52,8 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
                                              LanguageServerSignatureHelpFactory signatureHelpFactory,
                                              @Assisted ServerCapabilities serverCapabilities) {
         codeAssistProcessorFactory = codeAssistProcessor;
-        if ((serverCapabilities.isDocumentFormattingProvider() != null && serverCapabilities.isDocumentFormattingProvider()) ||
-            (serverCapabilities.isDocumentRangeFormattingProvider() != null && serverCapabilities.isDocumentRangeFormattingProvider()) ||
+        if ((serverCapabilities.getDocumentFormattingProvider() != null && serverCapabilities.getDocumentFormattingProvider()) ||
+            (serverCapabilities.getDocumentRangeFormattingProvider() != null && serverCapabilities.getDocumentRangeFormattingProvider()) ||
             serverCapabilities.getDocumentOnTypeFormattingProvider() != null) {
             this.formatter = formatterFactory.create(serverCapabilities);
         }

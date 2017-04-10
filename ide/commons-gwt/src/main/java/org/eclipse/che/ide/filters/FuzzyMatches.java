@@ -8,11 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.filters;
+package org.eclipse.che.plugin.languageserver.ide.filters;
 
-import com.google.gwt.regexp.shared.MatchResult;
-import com.google.gwt.regexp.shared.RegExp;
-import com.google.inject.Singleton;
+import static org.eclipse.che.plugin.languageserver.ide.filters.Matcher.MatcherUtil.or;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,12 +18,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.ide.filters.Matcher.MatcherUtil.or;
-
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.inject.Singleton;
 
 /**
- * Fuzzy logic to match some string
- *
  * @author Evgen Vidolob
  */
 @Singleton

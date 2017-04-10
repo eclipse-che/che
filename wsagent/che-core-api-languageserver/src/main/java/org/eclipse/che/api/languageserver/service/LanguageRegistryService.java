@@ -10,17 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.service;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import static java.util.stream.Collectors.toList;
 
-import org.eclipse.che.api.languageserver.DtoConverter;
-import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
-import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
-import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
-import org.eclipse.che.api.languageserver.shared.ProjectExtensionKey;
-import org.eclipse.che.api.languageserver.shared.lsapi.InitializeResultDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.LanguageDescriptionDTO;
+import java.util.Collections;
+import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -28,12 +21,19 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.Collections;
-import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-import static org.eclipse.che.api.languageserver.DtoConverter.asDto;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import org.eclipse.che.api.languageserver.exception.LanguageServerException;
+import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
+import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
+import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedInitializeResultDto;
+import org.eclipse.che.api.languageserver.shared.ProjectExtensionKey;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedInitializeResult;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
 @Path("languageserver")
@@ -49,17 +49,14 @@ public class LanguageRegistryService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("supported")
-	public List<LanguageDescriptionDTO> getSupportedLanguages() {
-		return registry.getSupportedLanguages()
-					   .stream()
-					   .map(DtoConverter::asDto)
-					   .collect(toList());
+	public List<LanguageDescription> getSupportedLanguages() {
+		return registry.getSupportedLanguages();
 	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("registered")
-	public List<InitializeResultDTO> getRegisteredLanguages() {
+	public List<ExtendedInitializeResultDto> getRegisteredLanguages() {
 		return registry.getInitializedLanguages()
 					   .entrySet()
 					   .stream()
@@ -67,14 +64,12 @@ public class LanguageRegistryService {
 						   ProjectExtensionKey projectExtensionKey = entry.getKey();
 						   LanguageServerDescription serverDescription = entry.getValue();
 
-						   List<LanguageDescriptionDTO> languageDescriptionDTOs
-								   = Collections.singletonList(asDto(serverDescription.getLanguageDescription()));
 
-						   InitializeResultDTO dto = newDto(InitializeResultDTO.class);
+						   ExtendedInitializeResult dto = new ExtendedInitializeResult();
 						   dto.setProject(projectExtensionKey.getProject().substring(LanguageServerRegistryImpl.PROJECT_FOLDER_PATH.length()));
-						   dto.setSupportedLanguages(languageDescriptionDTOs);
-						   dto.setCapabilities(asDto(serverDescription.getInitializeResult().getCapabilities()));
-						   return dto;
+						   dto.setSupportedLanguages(Collections.singletonList(serverDescription.getLanguageDescription()));
+						   dto.setCapabilities(serverDescription.getInitializeResult().getCapabilities());
+						   return new DtoServerImpls.ExtendedInitializeResultDto(dto);
 					   })
 					   .collect(toList());
 

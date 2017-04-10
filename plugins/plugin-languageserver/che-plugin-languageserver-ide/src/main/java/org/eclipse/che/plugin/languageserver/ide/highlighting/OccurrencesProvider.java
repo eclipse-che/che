@@ -12,8 +12,6 @@ package org.eclipse.che.plugin.languageserver.ide.highlighting;
 
 import java.util.logging.Logger;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.DocumentHighlightDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -28,6 +26,8 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionOccurrenceOverlay;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
+import org.eclipse.lsp4j.DocumentHighlight;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -70,16 +70,16 @@ public class OccurrencesProvider implements OrionOccurrencesHandler {
             return null;
         }
         final LanguageServerEditorConfiguration configuration = (LanguageServerEditorConfiguration)editor.getConfiguration();
-        if (configuration.getServerCapabilities().isDocumentHighlightProvider() == null || !configuration.getServerCapabilities().isDocumentHighlightProvider()) {
+        if (configuration.getServerCapabilities().getDocumentHighlightProvider() == null || !configuration.getServerCapabilities().getDocumentHighlightProvider()) {
             return null;
         }
         final Document document = editor.getDocument();
-        final TextDocumentPositionParamsDTO paramsDTO = helper.createTDPP(document, context.getStart());
+        final TextDocumentPositionParams paramsDTO = helper.createTDPP(document, context.getStart());
         // FIXME: the result should be a Promise<List<DocumentHighlightDTO>> but the typefox API returns a single DocumentHighlightDTO
-        Promise<DocumentHighlightDTO> promise = client.documentHighlight(paramsDTO);
-        Promise<OrionOccurrenceOverlay[]> then = promise.then(new Function<DocumentHighlightDTO, OrionOccurrenceOverlay[]>() {
+        Promise<DocumentHighlight> promise = client.documentHighlight(paramsDTO);
+        Promise<OrionOccurrenceOverlay[]> then = promise.then(new Function<DocumentHighlight, OrionOccurrenceOverlay[]>() {
             @Override
-            public OrionOccurrenceOverlay[] apply(DocumentHighlightDTO highlight) throws FunctionException {
+            public OrionOccurrenceOverlay[] apply(DocumentHighlight highlight) throws FunctionException {
             	if(highlight == null) {
             		return new OrionOccurrenceOverlay[0];
             	}

@@ -10,16 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide;
 
-import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.JsArrayString;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import static com.google.common.collect.Lists.newArrayList;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.LanguageDescriptionDTO;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -38,10 +36,10 @@ import org.eclipse.che.plugin.languageserver.ide.highlighting.OccurrencesProvide
 import org.eclipse.che.plugin.languageserver.ide.hover.HoverProvider;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.google.common.collect.Lists.newArrayList;
+import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JsArrayString;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * @author Evgen Vidolob
@@ -89,13 +87,13 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
 
     @Override
     public void start(final Callback<WsAgentComponent, Exception> callback) {
-        Promise<List<LanguageDescriptionDTO>> registeredLanguages = serverLanguageRegistry.getSupportedLanguages();
-        registeredLanguages.then(new Operation<List<LanguageDescriptionDTO>>() {
+        Promise<List<LanguageDescription>> registeredLanguages = serverLanguageRegistry.getSupportedLanguages();
+        registeredLanguages.then(new Operation<List<LanguageDescription>>() {
             @Override
-            public void apply(List<LanguageDescriptionDTO> langs) throws OperationException {
+            public void apply(List<LanguageDescription> langs) throws OperationException {
                 if (!langs.isEmpty()) {
                     JsArrayString contentTypes = JsArrayString.createArray().cast();
-                    for (LanguageDescriptionDTO lang : langs) {
+                    for (LanguageDescription lang : langs) {
                         String primaryExtension = lang.getFileExtensions().get(0);
                         for (String ext : lang.getFileExtensions()) {
                             final FileType fileType = new FileType(resources.file(), ext);

@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.workspace;
 
+import java.util.List;
+
 import org.eclipse.che.ide.api.editor.text.TextRange;
-import org.eclipse.che.ide.filters.Match;
+import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.EditorQuickOpenEntry;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 import org.vectomatic.dom.svg.ui.SVGResource;
-
-import java.util.List;
 
 /**
  * @author Evgen Vidolob

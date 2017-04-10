@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.CompletionListDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
 
 /**
  * Contains the latest completion result retrieved from the completion service.
@@ -20,10 +20,10 @@ import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO
  */
 public class LatestCompletionResult {
 
-    private TextDocumentIdentifierDTO documentId;
+    private TextDocumentIdentifier documentId;
     private int                       offset;
     private String                    word;
-    private CompletionListDTO         completionList;
+    private ExtendedCompletionList         completionList;
 
     /**
      * Returns the identifier of document used to compute the latest completion
@@ -31,7 +31,7 @@ public class LatestCompletionResult {
      * 
      * @return the document identifier
      */
-    public TextDocumentIdentifierDTO getDocumentId() {
+    public TextDocumentIdentifier getDocumentId() {
         return this.documentId;
     }
 
@@ -60,7 +60,7 @@ public class LatestCompletionResult {
      * 
      * @return the completion list
      */
-    public CompletionListDTO getCompletionList() {
+    public ExtendedCompletionList getCompletionList() {
         return this.completionList;
     }
 
@@ -96,9 +96,9 @@ public class LatestCompletionResult {
      * @return <code>true</code> if the completion result can still be used for
      *         the given document position, <code>false</code> otherwise.
      */
-    public boolean isGoodFor(TextDocumentIdentifierDTO documentId, int offset, String word) {
+    public boolean isGoodFor(TextDocumentIdentifier documentId, int offset, String word) {
         return completionList != null &&
-               !completionList.isIncomplete() &&
+               !completionList.isInComplete() &&
                this.documentId.getUri().equals(documentId.getUri()) &&
                word.startsWith(this.word) && 
                offset - this.offset == word.length() - this.word.length();
@@ -116,8 +116,8 @@ public class LatestCompletionResult {
      * @param completionList
      *            a completion list
      */
-    public void update(TextDocumentIdentifierDTO documentId, int offset, String word,
-            CompletionListDTO completionList) {
+    public void update(TextDocumentIdentifier documentId, int offset, String word,
+            ExtendedCompletionList completionList) {
         this.documentId = documentId;
         this.offset = offset;
         this.word = word;

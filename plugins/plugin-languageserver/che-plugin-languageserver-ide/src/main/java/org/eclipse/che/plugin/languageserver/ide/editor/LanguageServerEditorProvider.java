@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import io.typefox.lsapi.InitializeResult;
+import javax.inject.Inject;
 
+import org.eclipse.che.api.languageserver.shared.model.ExtendedInitializeResult;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -30,8 +31,6 @@ import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
-
-import javax.inject.Inject;
 
 /**
  * Provide editor with LS support
@@ -87,13 +86,13 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
         if (file instanceof File) {
             File resource = (File)file;
 
-            Promise<InitializeResult> promise =
+            Promise<ExtendedInitializeResult> promise =
                     registry.getOrInitializeServer(resource.getRelatedProject().get().getPath(), resource.getExtension(), resource.getLocation().toString());
             final MessageLoader loader = loaderFactory.newLoader("Initializing Language Server for " + resource.getExtension());
             loader.show();
-            return promise.thenPromise(new Function<InitializeResult, Promise<EditorPartPresenter>>() {
+            return promise.thenPromise(new Function<ExtendedInitializeResult, Promise<EditorPartPresenter>>() {
                 @Override
-                public Promise<EditorPartPresenter> apply(InitializeResult arg) throws FunctionException {
+                public Promise<EditorPartPresenter> apply(ExtendedInitializeResult arg) throws FunctionException {
                     loader.hide();
                     return Promises.<EditorPartPresenter>resolve(createEditor(editorConfigurationFactory.build(arg.getCapabilities())));
                 }

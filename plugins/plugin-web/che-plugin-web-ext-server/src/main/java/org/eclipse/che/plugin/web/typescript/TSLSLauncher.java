@@ -10,22 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.web.typescript;
 
-import io.typefox.lsapi.services.LanguageServer;
-import io.typefox.lsapi.services.json.JsonBasedLanguageServer;
+import static java.util.Arrays.asList;
 
-import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.eclipse.che.api.languageserver.shared.model.impl.LanguageDescriptionImpl;
-import org.eclipse.che.plugin.web.shared.Constants;
-
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static java.util.Arrays.asList;
+import javax.inject.Singleton;
+
+import org.eclipse.che.api.languageserver.exception.LanguageServerException;
+import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.plugin.web.shared.Constants;
+import org.eclipse.lsp4j.jsonrpc.Launcher;
+import org.eclipse.lsp4j.services.LanguageClient;
+import org.eclipse.lsp4j.services.LanguageServer;
+
 
 /**
  * Launcher for TypeScript Language Server
@@ -34,7 +35,7 @@ import static java.util.Arrays.asList;
 public class TSLSLauncher extends LanguageServerLauncherTemplate {
     private static final String[] EXTENSIONS  = new String[] {Constants.TS_EXT};
     private static final String[] MIME_TYPES  = new String[] {Constants.TS_MIME_TYPE};
-    private static final LanguageDescriptionImpl description;
+    private static final LanguageDescription description;
 
     private final Path launchScript;
 
@@ -55,11 +56,11 @@ public class TSLSLauncher extends LanguageServerLauncherTemplate {
     }
 
     @Override
-    protected LanguageServer connectToLanguageServer(Process languageServerProcess) throws LanguageServerException {
-        JsonBasedLanguageServer languageServer = new JsonBasedLanguageServer();
-        languageServer.connect(languageServerProcess.getInputStream(), languageServerProcess.getOutputStream());
-        return languageServer;
-    }
+	protected LanguageServer connectToLanguageServer(final Process languageServerProcess, LanguageClient client) {
+		Launcher<LanguageServer> launcher = Launcher.createLauncher(client, LanguageServer.class, languageServerProcess.getInputStream(), languageServerProcess.getOutputStream());
+		launcher.startListening();
+		return launcher.getRemoteProxy();
+	}
 
     @Override
     public LanguageDescription getLanguageDescription() {
@@ -72,7 +73,7 @@ public class TSLSLauncher extends LanguageServerLauncherTemplate {
     }
 
     static {
-        description = new LanguageDescriptionImpl();
+        description = new LanguageDescription();
         description.setFileExtensions(asList(EXTENSIONS));
         description.setLanguageId(Constants.TS_LANG);
         description.setMimeTypes(asList(MIME_TYPES));
