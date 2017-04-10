@@ -33,10 +33,10 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.autocomplete.AutoCompleteResources;
+import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
-import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenEntry.Mode;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
@@ -50,7 +50,7 @@ import java.util.List;
 public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
 
     private final AutoCompleteResources.Css css;
-    private final LanguageServerResources    languageServerResources;
+    private final LanguageServerResources   languageServerResources;
     private final SimpleList.ListItemRenderer<QuickOpenEntry> listItemRenderer =
             new SimpleList.ListItemRenderer<QuickOpenEntry>() {
                 @Override
@@ -119,17 +119,17 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
                 }
             };
     @UiField
-    TextBox nameField;
+    TextBox         nameField;
     @UiField
     DockLayoutPanel layoutPanel;
     @UiField
-    FlowPanel actionsPanel;
+    FlowPanel       actionsPanel;
     @UiField
-    HTML actionsContainer;
-    private       ActionDelegate             delegate;
-    private       Resources                  resources;
-    private       SimpleList<QuickOpenEntry> list;
-    private QuickOpenModel model;
+    HTML            actionsContainer;
+    private ActionDelegate             delegate;
+    private Resources                  resources;
+    private SimpleList<QuickOpenEntry> list;
+    private QuickOpenModel             model;
 
     private final SimpleList.ListEventDelegate<QuickOpenEntry> eventDelegate = new SimpleList.ListEventDelegate<QuickOpenEntry>() {
         @Override
