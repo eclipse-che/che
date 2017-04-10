@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.testing.junit.ide.action;
+package org.eclipse.che.plugin.testing.testng.ide.action;
 
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
@@ -22,16 +22,20 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
-import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
+import org.eclipse.che.ide.resources.tree.ContainerNode;
 import org.eclipse.che.ide.resources.tree.FileNode;
+import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
-import org.eclipse.che.plugin.testing.junit.ide.JUnitTestLocalizationConstant;
-import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
+import org.eclipse.che.plugin.testing.testng.ide.TestNGLocalizationConstant;
+import org.eclipse.che.plugin.testing.testng.ide.TestNGResources;
 
 import com.google.inject.Inject;
 
@@ -39,8 +43,8 @@ import com.google.inject.Inject;
  * @author Mirage Abeysekara
  * @author David Festal
  */
-public class RunClassContextTestAction extends AbstractPerspectiveAction
-                                       implements RunTestActionDelegate.Source {
+public class RunTestXMLContextAction extends AbstractPerspectiveAction
+                              implements RunTestActionDelegate.Source {
 
     private final NotificationManager   notificationManager;
     private final TestResultPresenter   presenter;
@@ -50,15 +54,15 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
     private final RunTestActionDelegate delegate;
 
     @Inject
-    public RunClassContextTestAction(JUnitTestResources resources,
-                                     NotificationManager notificationManager,
-                                     AppContext appContext,
-                                     TestResultPresenter presenter,
-                                     TestServiceClient service,
-                                     SelectionAgent selectionAgent,
-                                     JUnitTestLocalizationConstant localization) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.actionRunClassContextTitle(),
-              localization.actionRunClassContextDescription(), null, resources.testIcon());
+    public RunTestXMLContextAction(TestNGResources resources,
+                                   NotificationManager notificationManager,
+                                   AppContext appContext,
+                                   TestResultPresenter presenter,
+                                   TestServiceClient service,
+                                   SelectionAgent selectionAgent,
+                                   TestNGLocalizationConstant localization) {
+        super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.actionRunXMLTitle(),
+              localization.actionRunXMLDescription(), null, resources.testAllIcon());
         this.notificationManager = notificationManager;
         this.presenter = presenter;
         this.service = service;
@@ -71,18 +75,21 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
     public void actionPerformed(ActionEvent e) {
         final Selection< ? > selection = selectionAgent.getSelection();
         final Object possibleNode = selection.getHeadElement();
-        if (possibleNode instanceof FileNode) {
-            VirtualFile file = ((FileNode)possibleNode).getData();
-            String fqn = JavaUtil.resolveFQN(file);
-            Map<String, String> parameters = new HashMap<>();
-            parameters.put("fqn", fqn);
-            parameters.put("runClass", "true");
-            delegate.doRunTests(e, parameters);
+        if (possibleNode instanceof ContainerNode) {
+            Container container = ((ContainerNode)possibleNode).getData();
+            Project project = container.getProject();
+            if (project != null) {
+                Map<String, String> parameters = new HashMap<>();
+                parameters.put("testngXML",
+                               project.getPath() + "/" + MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER + "/testng.xml");
+                delegate.doRunTests(e, parameters);
+            }
         }
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent e) {
+        e.getPresentation().setEnabledAndVisible(false);
         if ((appContext.getRootProject() == null)) {
             e.getPresentation().setEnabledAndVisible(false);
             return;
@@ -96,17 +103,30 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
             e.getPresentation().setEnabledAndVisible(false);
             return;
         }
+        String expectedXmlFile = MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER + "/testng.xml";
         final Object possibleNode = selection.getHeadElement();
-        if (!(possibleNode instanceof FileNode)) {
-            e.getPresentation().setEnabledAndVisible(false);
-            return;
+        if (possibleNode instanceof FileNode) {
+            VirtualFile file = ((FileNode)possibleNode).getData();
+            if (file instanceof File) {
+                e.getPresentation().setEnabledAndVisible(file.getLocation().toString().endsWith(expectedXmlFile));
+            } else {
+                e.getPresentation().setEnabledAndVisible(false);
+            }
         }
-
-        e.getPresentation().setVisible(true);
-        boolean enable = "java".equals(((FileNode)possibleNode).getData().getExtension());
-        e.getPresentation().setEnabled(enable);
+        if (possibleNode instanceof ContainerNode) {
+            Container container = ((ContainerNode)possibleNode).getData();
+            Project project = container.getProject();
+            if (project != null) {
+                String projectType = project.getType();
+                boolean enable = "maven".equals(projectType);
+                e.getPresentation().setEnabledAndVisible(enable);
+                return;
+            } else {
+                e.getPresentation().setEnabledAndVisible(false);
+            }
+        }
     }
-
+    
     @Override
     public NotificationManager getNotificationManager() {
         return notificationManager;
@@ -127,9 +147,8 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
         return presenter;
     }
 
-
     @Override
     public String getTestingFramework() {
-        return "junit";
+        return "testng";
     }
 }

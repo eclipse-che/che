@@ -21,10 +21,13 @@ import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
+import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.eclipse.che.plugin.testing.ide.view.navigation.TestClassNavigation;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+
 /**
  * Tree node for display the failing methods.
  * 
@@ -32,27 +35,33 @@ import com.google.inject.assistedinject.Assisted;
  */
 public class TestResultMethodNode extends AbstractTreeNode implements HasAction, HasPresentation {
 
-    private String methodName;
-    private String stackTrace;
-    private String message;
-    private int lineNumber;
+    private String              methodName;
+    private boolean             success;
+    private String              stackTrace;
+    private String              message;
+    private int                 lineNumber;
     private TestClassNavigation navigationHandler;
+    private final TestResources testResources;
     private final JavaResources javaResources;
-    private NodePresentation nodePresentation;
+    private NodePresentation    nodePresentation;
 
 
     @Inject
-    public TestResultMethodNode(JavaResources javaResources,
+    public TestResultMethodNode(TestResources testResources,
+                                JavaResources javaResources,
+                                @Assisted boolean success,
                                 @Assisted("methodName") String methodName,
                                 @Assisted("stackTrace") String stackTrace,
                                 @Assisted("message") String message,
                                 @Assisted int lineNumber,
                                 @Assisted TestClassNavigation navigationHandler) {
         this.methodName = methodName;
+        this.success = success;
         this.stackTrace = stackTrace;
         this.message = message;
         this.lineNumber = lineNumber;
         this.navigationHandler = navigationHandler;
+        this.testResources = testResources;
         this.javaResources = javaResources;
     }
 
@@ -78,11 +87,16 @@ public class TestResultMethodNode extends AbstractTreeNode implements HasAction,
         return stackTrace;
     }
 
+    public boolean isSuccess() {
+        return success;
+    }
+
     @Override
     public void actionPerformed() {
         if (getParent() instanceof TestResultClassNode) {
-            String packagePath = ((TestResultClassNode) getParent()).getClassName().replace(".", "/") + ".java";
-            navigationHandler.gotoClass(packagePath, lineNumber);
+            String packagePath = ((TestResultClassNode)getParent()).getClassName().replace(".", "/") + ".java";
+            String className = ((TestResultClassNode)getParent()).getClassName();
+            navigationHandler.gotoClass(packagePath, className, methodName, lineNumber);
         }
     }
 
@@ -93,6 +107,8 @@ public class TestResultMethodNode extends AbstractTreeNode implements HasAction,
         }
         presentation.setPresentableText(methodName);
         presentation.setPresentableIcon(javaResources.publicMethod());
+        SVGResource svg = success ? javaResources.publicMethod() : testResources.testMethodFail();
+        presentation.setPresentableIcon(svg);
     }
 
     @Override

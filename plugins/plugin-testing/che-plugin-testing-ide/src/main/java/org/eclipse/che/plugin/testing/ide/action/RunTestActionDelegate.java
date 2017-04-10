@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.testing.junit.ide.action;
+package org.eclipse.che.plugin.testing.ide.action;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -45,6 +45,8 @@ public class RunTestActionDelegate {
         TestServiceClient getService();
 
         TestResultPresenter getPresenter();
+        
+        String getTestingFramework();
     }
 
     public RunTestActionDelegate(Source source) {
@@ -56,7 +58,7 @@ public class RunTestActionDelegate {
         source.getNotificationManager().notify(notification);
         final Project project = source.getAppContext().getRootProject();
         parameters.put("updateClasspath", "true");
-        Promise<TestResult> testResultPromise = source.getService().getTestResult(project.getPath(), "junit", parameters, notification);
+        Promise<TestResult> testResultPromise = source.getService().getTestResult(project.getPath(), source.getTestingFramework(), parameters, notification);
         testResultPromise.then(new Operation<TestResult>() {
             @Override
             public void apply(TestResult result) throws OperationException {
