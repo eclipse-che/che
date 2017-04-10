@@ -15,13 +15,13 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineSource;
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.OldMachineConfigImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.api.machine.server.spi.impl.AbstractInstance;
@@ -69,9 +69,16 @@ import static java.lang.String.format;
  * @author Anton Korneta
  * @author Mykola Morhun
  */
-public class DockerInstance extends AbstractInstance {
+public class DockerInstance {
     private static final Logger LOG = LoggerFactory.getLogger(DockerInstance.class);
 
+    private final OldMachineConfigImpl machineConfig;
+    private final MachineImpl          machineRuntime;
+    private final String               workspace;
+    private final String               envName;
+    private final String               owner;
+    private       MachineStatus        status;
+    private       String               id;
     /**
      * Name of the latest tag used in Docker image.
      */
@@ -135,6 +142,56 @@ public class DockerInstance extends AbstractInstance {
         processesCleaner.trackProcesses(this);
         this.snapshotUseRegistry = snapshotUseRegistry;
         this.machineRuntime = doGetRuntime();
+        this.workspace = workspace;
+        this.envName = envName;
+        this.owner = owner;
+        this.machineConfig = new OldMachineConfigImpl(machineConfig);
+        this.id = id;
+        this.status = status;
+        this.machineRuntime = machine != null ? new MachineImpl(machine.getProperties(), machine.getServers()) : null;
+    }
+
+    @Override
+    public OldMachineConfigImpl getConfig() {
+        return machineConfig;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @Override
+    public String getWorkspaceId() {
+        return workspace;
+    }
+
+    @Override
+    public String getEnvName() {
+        return envName;
+    }
+
+    @Override
+    public String getOwner() {
+        return owner;
+    }
+
+    @Override
+    public MachineStatus getStatus() {
+        return status;
+    }
+
+    @Override
+    public MachineImpl getRuntime() {
+        return machineRuntime;
+    }
+
+    public void setStatus(MachineStatus status) {
+        this.status = status;
     }
 
     @Override

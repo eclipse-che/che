@@ -46,19 +46,25 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     private final DockerServicesStartStrategy startStrategy;
     private final InfrastructureProvisioner   infrastructureProvisioner;
     private final DockerEnvironmentNormalizer environmentNormalizer;
+    private final DockerServiceStarter serviceStarter;
+    private final DockerNetworkLifecycle networkLifecycle;
 
     @Inject
     public DockerRuntimeInfrastructure(DockerEnvironmentParser dockerEnvironmentParser,
                                        DockerEnvironmentValidator dockerEnvironmentValidator,
                                        DockerServicesStartStrategy startStrategy,
                                        InfrastructureProvisioner infrastructureProvisioner,
-                                       DockerEnvironmentNormalizer environmentNormalizer) {
+                                       DockerEnvironmentNormalizer environmentNormalizer,
+                                       DockerServiceStarter serviceStarter,
+                                       DockerNetworkLifecycle networkLifecycle) {
         super("docker", SUPPORTED_RECIPE_TYPES);
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
         this.dockerEnvironmentParser = dockerEnvironmentParser;
         this.startStrategy = startStrategy;
         this.infrastructureProvisioner = infrastructureProvisioner;
         this.environmentNormalizer = environmentNormalizer;
+        this.serviceStarter = serviceStarter;
+        this.networkLifecycle = networkLifecycle;
     }
 
     @Override
@@ -93,7 +99,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                         this,
                                         null,
                                         orderedServices,
-                                        null,
+                                        networkLifecycle,
                                         serviceStarter);
     }
 

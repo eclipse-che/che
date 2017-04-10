@@ -6,19 +6,15 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
-import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.lang.Size;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
@@ -52,7 +48,6 @@ import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerMachineFa
 import org.eclipse.che.workspace.infrastructure.docker.old.extra.LogMessagePrinter;
 import org.eclipse.che.workspace.infrastructure.docker.old.local.node.DockerNode;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import java.io.File;
@@ -230,9 +225,9 @@ public class DockerServiceStarter {
                                                                            .build());
     }
 
-    public MachineRuntime startService(String networkName,
-                                       DockerService service,
-                                       LineConsumer machineLogger) throws ServerException {
+    public DockerMachine startService(String networkName,
+                                      DockerService service,
+                                      LineConsumer machineLogger) throws ServerException {
 
         // copy to not affect/be affected by changes in origin
         service = new DockerService(service);

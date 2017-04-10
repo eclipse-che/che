@@ -2,14 +2,15 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.NotSupportedException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.ValidationException;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 
@@ -30,10 +31,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 // backups
 // containers monitoring
 public class DockerRuntimeContext extends RuntimeContext {
-    private final DockerEnvironment      dockerEnvironment;
-    private final List<String>           orderedServices;
-    private final Queue<String>          startQueue;
-    private final CopyOnWriteArrayList   machines;
+    private final DockerEnvironment                   dockerEnvironment;
+    private final List<String>                        orderedServices;
+    private final Queue<String>                       startQueue;
+    private final CopyOnWriteArrayList<DockerMachine> machines;
+
     private final DockerNetworkLifecycle dockerNetworkLifecycle;
     private final DockerServiceStarter   serviceStarter;
 
@@ -42,7 +44,8 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 RuntimeIdentity identity,
                                 RuntimeInfrastructure infrastructure,
                                 URL registryEndpoint,
-                                List<String> orderedServices, DockerNetworkLifecycle dockerNetworkLifecycle,
+                                List<String> orderedServices,
+                                DockerNetworkLifecycle dockerNetworkLifecycle,
                                 DockerServiceStarter serviceStarter)
             throws ValidationException,
                    ApiException,
@@ -56,32 +59,70 @@ public class DockerRuntimeContext extends RuntimeContext {
         this.machines = new CopyOnWriteArrayList<>();
     }
 
+    // TODO what should be thrown if start is interrupted in another thread, in current thread
+    // TODO which error will be thrown if start fails because of something we don't control
+    // and admin doesn't want to know about this problem
     @Override
     protected InternalRuntime internalStart(Map<String, String> startOptions) throws ServerException {
-        // https://github.com/eclipse/che/blob/master/wsmaster/che-core-api-workspace/src/main/java/org/eclipse/che/api/environment/server/CheEnvironmentEngine.java#L728
-        // peek machine
-        // start each machine
-        // start agents in each machine
-        // peek machine
         dockerNetworkLifecycle.createNetwork(dockerEnvironment.getNetwork());
-        String machine = queuePeek();
+        String machine = startQueue.peek();
         while (machine != null) {
-            DockerService service = getService(machine);
-            MachineRuntime machineRuntime = serviceStarter.startService(dockerEnvironment.getNetwork(),
-                                                                        service,
-                                                                        logger);
-            startedHandler.started(machineRuntime, agents);
-            machine = queuePeek();
+            // add infrastructural things such as backup/restore
+            DockerService service = dockerEnvironment.getServices().get(machine);
+            DockerMachine machineRuntime = startMachine(service, startOptions);
+            machines.add(machineRuntime);
+            // add agents start
+            startQueue.poll();
+            machine = startQueue.peek();
         }
 
+        return getInternalRuntime();
+        // TODO catch error. Cleanup env
+    }
+
+    private InternalRuntime getInternalRuntime() {
         return null;
     }
 
+    private DockerMachine startMachine(DockerService service, Map<String, String> startOptions) {
+        DockerMachine machineRuntime = serviceStarter.startService(dockerEnvironment.getNetwork(),
+                                                                   service,
+                                                                   startOptions);
+        return machineRuntime;
+    }
+
+    private DockerService normalizeServiceSource(DockerService service, MachineSource machineSource) {
+        DockerService serviceWithNormalizedSource = service;
+        if (machineSource != null) {
+            serviceWithNormalizedSource = new DockerService(service);
+            if ("image".equals(machineSource.getType())) {
+                serviceWithNormalizedSource.setBuild(null);
+                serviceWithNormalizedSource.setImage(machineSource.getLocation());
+            } else {
+                // dockerfile
+                serviceWithNormalizedSource.setImage(null);
+                if (machineSource.getContent() != null) {
+                    serviceWithNormalizedSource.setBuild(new DockerBuildContext(null,
+                                                                                null,
+                                                                                machineSource.getContent(),
+                                                                                null));
+                } else {
+                    serviceWithNormalizedSource.setBuild(new DockerBuildContext(machineSource.getLocation(),
+                                                                                null,
+                                                                                null,
+                                                                                null));
+                }
+            }
+        }
+        return serviceWithNormalizedSource;
+    }
+
+
+    // TODO stop of starting WS - if not supported specific exception
     @Override
     protected void internalStop(Map<String, String> stopOptions) throws ServerException {
 
     }
-
 
     @Override
     public URL getOutputChannel() throws NotSupportedException, ServerException {
