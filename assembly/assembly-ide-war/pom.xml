@@ -32,10 +32,6 @@
             <artifactId>che-ide-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>che-terminal-client</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-composer-ide</artifactId>
         </dependency>
