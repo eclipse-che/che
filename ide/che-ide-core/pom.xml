@@ -96,10 +96,6 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-machine-ext-client</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-sdk-env-local</artifactId>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
