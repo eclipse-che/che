@@ -18,54 +18,68 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Mirage Abeysekara
  */
 @DTO
-public interface Failure {
+public interface TestCase {
 
     /**
-     * Returns the fully qualified class name of the failing test class.
+     * Returns the fully qualified class name of the test class.
      *
-     * @return fully qualified class name of the failing test class
+     * @return fully qualified class name of the test class
      */
-    String getFailingClass();
+    String getClassName();
 
     /**
-     * Sets the fully qualified class name of the failing test class.
+     * Sets the fully qualified class name of the test class.
      * 
      * @param className
      */
-    void setFailingClass(String className);
+    void setClassName(String className);
 
     /**
-     * Returns the method name of the failing test case.
+     * Returns the method name of the test case.
      *
-     * @return the method name of the failing test case.
+     * @return the method name of the test case.
      */
-    String getFailingMethod();
+    String getMethod();
 
     /**
-     * Sets the method name of the failing test case.
+     * Sets the method name of the test case.
      * 
      * @param methodName
      */
-    void setFailingMethod(String methodName);
+    void setMethod(String methodName);
 
     /**
-     * Returns the line number of the failing test case according to the stack trace.
+     * Returns whether a test case failed.
      *
-     * @return the line number of the failing test case.
+     * @return true if the test case failed, and false if the test succeeded.
+     */
+    Boolean isFailed();
+
+    /**
+     * Sets the test case as failed.
+     * 
+     * @param failed status
+     */
+    void setFailed(Boolean failed);
+
+    /**
+     * Returns the line number of a failing test case according to the stack trace.
+     *
+     * @return the line number of the failing test case, or -1 if the test succeeded.
      */
     Integer getFailingLine();
 
     /**
-     * Sets the line number of the failing test case according to the stack trace.
+     * Sets the line number of a failing test case according to the stack trace.
      * 
      * @param lineNumber
      */
     void setFailingLine(Integer lineNumber);
 
     /**
-     * Returns the error message for the test failure.
+     * Returns the error message for a test failure.
      *
-     * @return the error message
+     * @return the error message, or an empty string if the test succeeded
      */
     String getMessage();
 
@@ -77,9 +91,9 @@ public interface Failure {
     void setMessage(String message);
 
     /**
-     * Returns the stack trace of the failing test case.
+     * Returns the stack trace of a failing test case.
      *
-     * @return the stack trace of the failing test case.
+     * @return the stack trace of the failing test case, or an empty string if the test succeeded.
      */
     String getTrace();
 

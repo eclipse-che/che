@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.testing.server;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +19,11 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.che.api.testing.server.framework.TestFrameworkRegistry;
@@ -59,29 +62,51 @@ public class TestingService {
      *                     the name returned by {@link TestRunner#getName()} implementation.
      * </pre>
      *
-     * @param uriInfo
-     *            JAX-RS implementation of UrlInfo with set of query parameters.
+     * @param uriInfo JAX-RS implementation of UrlInfo with set of query parameters.
      * @return the test result of test case
-     * @throws Exception
-     *             when the test runner failed to execute test cases.
+     * @throws Exception when the test runner failed to execute test cases.
      */
     @GET
     @Path("run")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Execute Java tests and return results", notes = "The GET parameters are passed to the test framework implementation.")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Server error") })
+    @ApiOperation(value = "Execute Java tests and return results",
+        notes = "The GET parameters are passed to the test framework implementation.")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Server error")})
     public TestResult run(@Context UriInfo uriInfo) throws Exception {
-        Map<String, String> queryParameters = getMap(uriInfo.getQueryParameters());
-        String projectPath = queryParameters.get("projectPath");
-        String absoluteProjectPath = ResourcesPlugin.getPathToWorkspace() + projectPath;
-        queryParameters.put("absoluteProjectPath", absoluteProjectPath);
-        String testFramework = queryParameters.get("testFramework");
-        TestRunner runner = frameworkRegistry.getTestRunner(testFramework);
-        if (runner == null) {
-            throw new Exception("No test frameworks found: " + testFramework);
+        try {
+            Map<String, String> queryParameters = getMap(uriInfo.getQueryParameters());
+            String projectPath = queryParameters.get("projectPath");
+            String absoluteProjectPath = ResourcesPlugin.getPathToWorkspace() + projectPath;
+            queryParameters.put("absoluteProjectPath", absoluteProjectPath);
+            String testFramework = queryParameters.get("testFramework");
+            TestRunner runner = frameworkRegistry.getTestRunner(testFramework);
+            if (runner == null) {
+                throw new WebApplicationException("No test frameworks found: " + testFramework);
+            }
+            TestResult result = frameworkRegistry.getTestRunner(testFramework).execute(queryParameters);
+            return result;
+        } catch (Throwable e) {
+            throw translateException(e);
         }
-        TestResult result = frameworkRegistry.getTestRunner(testFramework).execute(queryParameters);
-        return result;
+
+    }
+
+    private WebApplicationException translateException(Throwable e) {
+        if (e instanceof WebApplicationException) {
+            return (WebApplicationException)e;
+        }
+        Throwable cause = null;
+        if (e instanceof InvocationTargetException) {
+            cause = e.getCause();
+        }
+        if (e instanceof RuntimeException) {
+            cause = e.getCause();
+        }
+        if (cause != null && cause != e) {
+            return translateException(cause);
+        }
+        return new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                                                   .entity("An unexpected error occured during test execution: " + e.toString()).build());
     }
 
     private Map<String, String> getMap(MultivaluedMap<String, String> queryParameters) {
