@@ -13,6 +13,8 @@ package org.eclipse.che.plugin.languageserver.ide.editor.quickassist;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -51,107 +53,113 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * A {@link QuickAssistProcessor} that implements LSP code actions as quick assists.
+ * A {@link QuickAssistProcessor} that implements LSP code actions as quick
+ * assists.
+ * 
  * @author Thomas Mäder
  *
  */
 public class LanguageServerQuickAssistProcessor implements QuickAssistProcessor {
-	private TextDocumentServiceClient textDocumentService;
-	private ActionManager actionManager;
-	private PerspectiveManager perspectiveManager;
+    private TextDocumentServiceClient textDocumentService;
+    private ActionManager             actionManager;
+    private PerspectiveManager        perspectiveManager;
 
-	@Inject
-	public LanguageServerQuickAssistProcessor(TextDocumentServiceClient textDocumentService, ActionManager actionManager, PerspectiveManager perspectiveManager) {
-		this.textDocumentService = textDocumentService;
-		this.actionManager = actionManager;
-		this.perspectiveManager= perspectiveManager;
-	}
+    @Inject
+    public LanguageServerQuickAssistProcessor(TextDocumentServiceClient textDocumentService, ActionManager actionManager,
+                                              PerspectiveManager perspectiveManager) {
+        this.textDocumentService = textDocumentService;
+        this.actionManager = actionManager;
+        this.perspectiveManager = perspectiveManager;
+    }
 
-	@Override
-	public void computeQuickAssistProposals(QuickAssistInvocationContext invocationContext, CodeAssistCallback callback) {
-		LinearRange range = invocationContext.getTextEditor().getSelectedLinearRange();
-		Document document = invocationContext.getTextEditor().getDocument();
-		QueryAnnotationsEvent.AnnotationFilter filter = new QueryAnnotationsEvent.AnnotationFilter() {
+    @Override
+    public void computeQuickAssistProposals(QuickAssistInvocationContext invocationContext, CodeAssistCallback callback) {
+        LinearRange range = invocationContext.getTextEditor().getSelectedLinearRange();
+        Document document = invocationContext.getTextEditor().getDocument();
+        QueryAnnotationsEvent.AnnotationFilter filter = new QueryAnnotationsEvent.AnnotationFilter() {
 
-			@Override
-			public boolean accept(Annotation annotation) {
-				return annotation instanceof DiagnosticAnnotation;
-			}
+            @Override
+            public boolean accept(Annotation annotation) {
+                return annotation instanceof DiagnosticAnnotation;
+            }
 
-		};
-		QueryAnnotationsEvent.QueryCallback annotationCallback = new QueryAnnotationsEvent.QueryCallback() {
+        };
+        QueryAnnotationsEvent.QueryCallback annotationCallback = new QueryAnnotationsEvent.QueryCallback() {
 
-			@Override
-			public void respond(Map<Annotation, Position> annotations) {
-				List<DiagnosticDTO> diagnostics = new ArrayList<>();
-				// iteration with range never returns anything; need to filter ourselves.
-				// https://github.com/eclipse/che/issues/4338
-				annotations.entrySet().stream().filter((e)->e.getValue().overlapsWith(range.getStartOffset(), range.getLength())).forEach((e) -> diagnostics.add(((DiagnosticAnnotation) e.getKey()).getDiagnostic()));
-				CodeActionContextDTO context = CodeActionContextDTOImpl.make().withDiagnostics(diagnostics);
-				CodeActionParamsDTO params = CodeActionParamsDTOImpl.make().withContext(context);
+            @Override
+            public void respond(Map<Annotation, Position> annotations) {
+                List<DiagnosticDTO> diagnostics = new ArrayList<>();
+                // iteration with range never returns anything; need to filter
+                // ourselves.
+                // https://github.com/eclipse/che/issues/4338
+                annotations.entrySet().stream().filter((e) -> e.getValue().overlapsWith(range.getStartOffset(), range.getLength()))
+                                .map(Entry::getKey).map(a -> (DiagnosticAnnotation) a).map(DiagnosticAnnotation::getDiagnostic)
+                                .collect(Collectors.toList());
 
-				params.setTextDocument(
-								TextDocumentIdentifierDTOImpl.make().withUri(document.getFile().getLocation().toString()));
+                CodeActionContextDTO context = CodeActionContextDTOImpl.make().withDiagnostics(diagnostics);
+                CodeActionParamsDTO params = CodeActionParamsDTOImpl.make().withContext(context);
 
-				TextPosition start = document.getPositionFromIndex(range.getStartOffset());
-				TextPosition end = document.getPositionFromIndex(range.getStartOffset() + range.getLength());
-				PositionDTO rangeStart = PositionDTOImpl.make().withLine(start.getLine());
-				rangeStart.setCharacter(start.getCharacter());
-				PositionDTO rangeEnd = PositionDTOImpl.make().withLine(end.getLine());
-				rangeEnd.setCharacter(end.getCharacter());
-				RangeDTO rangeParam = RangeDTOImpl.make().withStart(rangeStart);
-				rangeParam.setEnd(rangeEnd);
-				params.setRange(rangeParam);
+                params.setTextDocument(TextDocumentIdentifierDTOImpl.make().withUri(document.getFile().getLocation().toString()));
 
-				Promise<List<CommandDTO>> codeAction = textDocumentService.codeAction(params);
-				List<CompletionProposal> proposals = new ArrayList<>();
-				codeAction.then((commands) -> {
-					for (CommandDTO command : commands) {
-						Action action = actionManager.getAction(command.getCommand());
-						if (action != null) {
+                TextPosition start = document.getPositionFromIndex(range.getStartOffset());
+                TextPosition end = document.getPositionFromIndex(range.getStartOffset() + range.getLength());
+                PositionDTO rangeStart = PositionDTOImpl.make().withLine(start.getLine());
+                rangeStart.setCharacter(start.getCharacter());
+                PositionDTO rangeEnd = PositionDTOImpl.make().withLine(end.getLine());
+                rangeEnd.setCharacter(end.getCharacter());
+                RangeDTO rangeParam = RangeDTOImpl.make().withStart(rangeStart);
+                rangeParam.setEnd(rangeEnd);
+                params.setRange(rangeParam);
 
-							proposals.add(new CompletionProposal() {
+                Promise<List<CommandDTO>> codeAction = textDocumentService.codeAction(params);
+                List<CompletionProposal> proposals = new ArrayList<>();
+                codeAction.then((commands) -> {
+                    for (CommandDTO command : commands) {
+                        Action action = actionManager.getAction(command.getCommand());
+                        if (action != null) {
 
-								@Override
-								public void getAdditionalProposalInfo(AsyncCallback<Widget> callback) {
-								}
+                            proposals.add(new CompletionProposal() {
 
-								@Override
-								public String getDisplayString() {
-									return command.getTitle();
-								}
+                                @Override
+                                public void getAdditionalProposalInfo(AsyncCallback<Widget> callback) {
+                                }
 
-								@Override
-								public Icon getIcon() {
-									return null;
-								}
+                                @Override
+                                public String getDisplayString() {
+                                    return command.getTitle();
+                                }
 
-								@Override
-								public void getCompletion(CompletionCallback callback) {
-									callback.onCompletion(new Completion() {
+                                @Override
+                                public Icon getIcon() {
+                                    return null;
+                                }
 
-										@Override
-										public LinearRange getSelection(Document document) {
-											return null;
-										}
+                                @Override
+                                public void getCompletion(CompletionCallback callback) {
+                                    callback.onCompletion(new Completion() {
 
-										@Override
-										public void apply(Document document) {
-											QuickassistActionEvent evt = new QuickassistActionEvent(new Presentation(), actionManager, perspectiveManager, command.getArguments());
-											action.actionPerformed(evt);
-										}
-									});
-								}
-							});
-						}
-					}
-					;
-					callback.proposalComputed(proposals);
-				});
-			}
-		};
-		QueryAnnotationsEvent event = new QueryAnnotationsEvent.Builder().withFilter(filter).withCallback(annotationCallback).build();
-		document.getDocumentHandle().getDocEventBus().fireEvent(event);
-	}
+                                        @Override
+                                        public LinearRange getSelection(Document document) {
+                                            return null;
+                                        }
+
+                                        @Override
+                                        public void apply(Document document) {
+                                            QuickassistActionEvent evt = new QuickassistActionEvent(new Presentation(), actionManager,
+                                                            perspectiveManager, command.getArguments());
+                                            action.actionPerformed(evt);
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    };
+                    callback.proposalComputed(proposals);
+                });
+            }
+        };
+        QueryAnnotationsEvent event = new QueryAnnotationsEvent.Builder().withFilter(filter).withCallback(annotationCallback).build();
+        document.getDocumentHandle().getDocEventBus().fireEvent(event);
+    }
 
 }
