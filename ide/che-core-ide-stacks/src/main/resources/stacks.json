@@ -969,7 +969,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "eclipse/centos_jdk8"
+      "origin": "rhche/centos_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -977,7 +977,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -986,7 +986,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/centos_jdk8",
+            "location": "rhche/centos_jdk8",
             "type": "dockerimage"
           }
         }
