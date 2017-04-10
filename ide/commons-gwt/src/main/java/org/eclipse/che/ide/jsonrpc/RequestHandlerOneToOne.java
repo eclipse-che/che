@@ -47,7 +47,11 @@ public class RequestHandlerOneToOne<P, R> implements RequestHandler {
 
         Log.debug(getClass(), "Handling request from: " + endpointId + ", with params: " + params);
 
-        P paramsObject = params.getAs(pClass);
+        P paramsObject = pClass.equals(String.class) ||
+                         pClass.equals(Boolean.class) ||
+                         pClass.equals(Double.class) ? params.getAsListOf(pClass).get(0)
+                                                     : params.getAs(pClass);
+        
         Log.debug(getClass(), "Created raw params object: " + paramsObject);
         R result = biFunction.apply(endpointId, paramsObject);
         Log.debug(getClass(), "Received result: " + result);

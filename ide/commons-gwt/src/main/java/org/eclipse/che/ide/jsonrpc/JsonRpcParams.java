@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jsonrpc;
 
-import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonFactory;
+import elemental.json.JsonObject;
 import elemental.json.JsonType;
 import elemental.json.JsonValue;
 
@@ -23,6 +23,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -35,15 +36,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@link JsonRpcFactory#createParams(String)} to get an instance.
  */
 public class JsonRpcParams {
-    private static final JsonValue EMPTY_OBJECT = Json.instance().parse("{}");
-    private static final JsonValue EMPTY_ARRAY  = Json.instance().parse("[]");
-
     private final JsonFactory jsonFactory;
     private final DtoFactory  dtoFactory;
 
-    private List<JsonValue> paramsList;
-    private List<String>    stringParamsList;
-    private JsonValue       params;
+    private List<Param<?>> params;
+    private Param<?>       param;
 
     @AssistedInject
     public JsonRpcParams(@Assisted("message") String message, JsonFactory jsonFactory, DtoFactory dtoFactory) {
@@ -56,18 +53,37 @@ public class JsonRpcParams {
         JsonValue jsonValue = jsonFactory.parse(message);
         if (jsonValue.getType().equals(JsonType.ARRAY)) {
             JsonArray jsonArray = jsonFactory.parse(message);
-            this.paramsList = new ArrayList<>(jsonArray.length());
-            this.stringParamsList = new ArrayList<>(jsonArray.length());
+            this.params = new ArrayList<>(jsonArray.length());
             for (int i = 0; i < jsonArray.length(); i++) {
                 JsonValue element = jsonArray.get(i);
+                Param<?> paramCandidate;
                 if (element.getType().equals(JsonType.STRING)) {
-                    this.stringParamsList.add(element.asString());
+                    paramCandidate = new Param<>(String.class, element.asString());
+                } else if (element.getType().equals(JsonType.BOOLEAN)) {
+                    paramCandidate = new Param<>(Boolean.class, element.asBoolean());
+                } else if (element.getType().equals(JsonType.NUMBER)) {
+                    paramCandidate = new Param<>(Double.class, element.asNumber());
                 } else {
-                    this.paramsList.add(i, element);
+                    paramCandidate = new Param<>(Object.class, element);
                 }
+                this.params.add(paramCandidate);
             }
+            this.param = null;
+        } else if (jsonValue.getType().equals(JsonType.STRING)) {
+            this.param = new Param<>(String.class, jsonValue.asString());
+            this.params = null;
+        } else if (jsonValue.getType().equals(JsonType.BOOLEAN)) {
+            this.param = new Param<>(Boolean.class, jsonValue.asBoolean());
+            this.params = null;
+        } else if (jsonValue.getType().equals(JsonType.NUMBER)) {
+            this.param = new Param<>(Double.class, jsonValue.asNumber());
+            this.params = null;
+        } else if (jsonValue.getType().equals(JsonType.OBJECT)) {
+            this.param = new Param<>(Object.class, jsonValue);
+            this.params = null;
         } else {
-            this.params = jsonFactory.parse(message);
+            this.param = null;
+            this.params = null;
         }
     }
 
@@ -76,116 +92,115 @@ public class JsonRpcParams {
         this.jsonFactory = jsonFactory;
         this.dtoFactory = dtoFactory;
 
-        if (params instanceof String) {
-            this.params = jsonFactory.create((String)params);
-        } else if (params instanceof Double) {
-            this.params = jsonFactory.create((Double)params);
-        } else if (params instanceof Boolean) {
-            this.params = jsonFactory.create((Boolean)params);
-        } else if (params == null) {
-            this.params = jsonFactory.createObject();
+        if (params == null) {
+            this.param = null;
+            this.params = null;
         } else {
-            this.params = jsonFactory.parse(params.toString());
+            if (params instanceof List) {
+                List<?> listParams = (List<?>)params;
+                this.params = new ArrayList<>(listParams.size());
+
+                for (Object param : listParams) {
+                    Param<?> paramCandidate;
+                    if (param instanceof String) {
+                        paramCandidate = new Param<>(String.class, (String)param);
+                    } else if (param instanceof Double) {
+                        paramCandidate = new Param<>(Double.class, (Double)param);
+                    } else if (param instanceof Boolean) {
+                        paramCandidate = new Param<>(Boolean.class, (Boolean)param);
+                    } else {
+                        paramCandidate = new Param<>(Object.class, param);
+                    }
+                    this.params.add(paramCandidate);
+                }
+
+                this.param = null;
+            } else {
+                if (params instanceof String) {
+                    this.param = new Param<>(String.class, (String)params);
+                } else if (params instanceof Double) {
+                    this.param = new Param<>(Double.class, (Double)params);
+                } else if (params instanceof Boolean) {
+                    this.param = new Param<>(Boolean.class, (Boolean)params);
+                } else {
+                    this.param = new Param<>(Object.class, params);
+                }
+
+                this.params = null;
+            }
         }
     }
 
-    @AssistedInject
-    public JsonRpcParams(@Assisted("params") List<?> params, JsonFactory jsonFactory, DtoFactory dtoFactory) {
-        checkNotNull(params, "Params must not be null");
-        checkArgument(!params.isEmpty(), "Params must not be empty");
-
-        this.jsonFactory = jsonFactory;
-        this.dtoFactory = dtoFactory;
-
-        this.paramsList = new ArrayList<>(params.size());
-        this.stringParamsList = new ArrayList<>(params.size());
-
-        for (int i = 0; i < params.size(); i++) {
-            Object item = params.get(i);
-            if (item instanceof String) {
-//                paramsList.add(i, jsonFactory.create((String)item));
-                this.stringParamsList.add((String)item);
-            } else if (item instanceof Double) {
-                paramsList.add(i, jsonFactory.create((Double)item));
-            } else if (item instanceof Boolean) {
-                paramsList.add(i, jsonFactory.create((Boolean)item));
-            } else {
-                paramsList.add(i, jsonFactory.parse(item.toString()));
-            }
-        }
+    @SuppressWarnings("unchecked")
+    static <T> T cast(Object object) {
+        return (T)object;
     }
 
     public boolean emptyOrAbsent() {
-        return (paramsList == null || EMPTY_ARRAY.jsEquals(toJsonValue())) && (params == null || EMPTY_OBJECT.jsEquals(toJsonValue()));
+        return (params == null || params.isEmpty()) &&
+               (param == null || (param.value instanceof JsonObject && jsonFactory.createObject().jsEquals((JsonObject)param.value)));
     }
 
     public JsonValue toJsonValue() {
-        if (params != null) {
-            return params;
-        } else {
-            JsonArray array = jsonFactory.createArray();
-            for (int i = 0; i < stringParamsList.size(); i++) {
-                String value = stringParamsList.get(i);
-                array.set(i, value);
+        if (param != null) {
+            if (param.type.equals(String.class)) {
+                return jsonFactory.create((String)param.value);
+            } else if (param.type.equals(Boolean.class)) {
+                return jsonFactory.create((Boolean)param.value);
+            } else if (param.type.equals(Double.class)) {
+                return jsonFactory.create((Double)param.value);
+            } else {
+                return jsonFactory.parse(param.value.toString());
             }
-            for (int i = 0; i < paramsList.size(); i++) {
-                JsonValue value = paramsList.get(i);
-                array.set(i, value);
-            }
-            return array;
         }
+
+        JsonArray array = jsonFactory.createArray();
+        for (int i = 0; i < params.size(); i++) {
+            Param<?> paramCandidate = params.get(i);
+            JsonValue jsonValue;
+            if (paramCandidate.type.equals(String.class)) {
+                jsonValue = jsonFactory.create((String)paramCandidate.value);
+            } else if (paramCandidate.type.equals(Boolean.class)) {
+                jsonValue = jsonFactory.create((Boolean)paramCandidate.value);
+            } else if (paramCandidate.type.equals(Double.class)) {
+                jsonValue = jsonFactory.create((Double)paramCandidate.value);
+            } else {
+                jsonValue = jsonFactory.parse(paramCandidate.value.toString());
+            }
+
+            array.set(i, jsonValue);
+        }
+
+        return array;
     }
 
     public <T> T getAs(Class<T> type) {
-        checkNotNull(params, "Type must not be null");
+        checkNotNull(param, "Type must not be null");
 
-        if (type.equals(String.class)) {
-            String s = params.asString();
-            return (T)s;
-        } else if (type.equals(Double.class)) {
-            Double d = params.asNumber();
-            return (T)d;
-        } else if (type.equals(Boolean.class)) {
-            Boolean b = params.asBoolean();
-            return (T)b;
-        } else if (type.equals(Void.class)) {
-            return (T)null;
-        } else {
-            return dtoFactory.createDtoFromJson(params.toJson(), type);
-        }
+        return param.type.equals(Object.class)
+               ? dtoFactory.createDtoFromJson(param.value.toString(), type)
+               : cast(param.value);
+
     }
 
     public <T> List<T> getAsListOf(Class<T> type) {
         checkNotNull(type, "Type must not be null");
 
-        if (type.equals(String.class)){
-            return (List<T>)stringParamsList;
-        }
-
-        List<T> list = new ArrayList<>(paramsList.size());
-
-        for (int i = 0; i < paramsList.size(); i++) {
-            JsonValue jsonValue = paramsList.get(i);
-            T item;
-            if (type.equals(String.class)) {
-                item = (T)jsonValue.asString();
-            } else if (type.equals(Double.class)) {
-                Double d = jsonValue.asNumber();
-                item = (T)d;
-            } else if (type.equals(Boolean.class)) {
-                Boolean b = jsonValue.asBoolean();
-                item = (T)b;
-            } else {
-                item = dtoFactory.createDtoFromJson(jsonValue.toJson(), type);
-            }
-            list.add(i, item);
-        }
-
-        return list;
+        return params.stream().map(it -> it.value).collect(cast(Collectors.toList()));
     }
 
     @Override
     public String toString() {
         return toJsonValue().toJson();
+    }
+
+    private class Param<T> {
+        final private Class<T> type;
+        final private T        value;
+
+        private Param(Class<T> type, T value) {
+            this.type = type;
+            this.value = value;
+        }
     }
 }
