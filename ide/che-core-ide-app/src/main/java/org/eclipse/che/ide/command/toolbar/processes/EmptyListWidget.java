@@ -16,9 +16,12 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandAddedEvent;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandRemovedEvent;
+import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.command.toolbar.CommandCreationGuide;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
@@ -42,26 +45,13 @@ public class EmptyListWidget extends FlowPanel {
     private FlowPanel noCommandWidget;
 
     @Inject
-    public EmptyListWidget(CommandManager commandManager, CommandCreationGuide commandCreationGuide) {
+    public EmptyListWidget(CommandManager commandManager, CommandCreationGuide commandCreationGuide, EventBus eventBus) {
         this.commandManager = commandManager;
         this.commandCreationGuide = commandCreationGuide;
 
-        commandManager.addCommandLoadedListener(this::updateState);
-        commandManager.addCommandChangedListener(new CommandManager.CommandChangedListener() {
-            @Override
-            public void onCommandAdded(CommandImpl command) {
-                updateState();
-            }
-
-            @Override
-            public void onCommandUpdated(CommandImpl previousCommand, CommandImpl command) {
-            }
-
-            @Override
-            public void onCommandRemoved(CommandImpl command) {
-                updateState();
-            }
-        });
+        eventBus.addHandler(CommandsLoadedEvent.getType(), e -> updateState());
+        eventBus.addHandler(CommandAddedEvent.getType(), e -> updateState());
+        eventBus.addHandler(CommandRemovedEvent.getType(), e -> updateState());
     }
 
     @Inject

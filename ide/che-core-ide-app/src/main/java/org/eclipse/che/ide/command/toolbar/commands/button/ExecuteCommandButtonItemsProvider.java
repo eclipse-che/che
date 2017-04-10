@@ -18,33 +18,36 @@ import org.eclipse.che.ide.ui.menubutton.MenuItem;
 import org.eclipse.che.ide.util.Pair;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
-/** Provides items for {@link GoalButton}. */
-public class GoalButtonItemsProvider implements ItemsProvider {
+/** Provides items for {@link ExecuteCommandButton}. */
+public class ExecuteCommandButtonItemsProvider implements ItemsProvider {
 
-    private final List<CommandImpl> commands;
-    private final AppContext        appContext;
-    private final MenuItemsFactory  menuItemsFactory;
+    private final Set<CommandImpl> commands;
+    private final AppContext       appContext;
+    private final MenuItemsFactory menuItemsFactory;
 
     private DataChangedHandler dataChangedHandler;
     private MenuItem           defaultItem;
 
-    public GoalButtonItemsProvider(AppContext appContext, MenuItemsFactory menuItemsFactory) {
+    ExecuteCommandButtonItemsProvider(AppContext appContext, MenuItemsFactory menuItemsFactory) {
         this.appContext = appContext;
         this.menuItemsFactory = menuItemsFactory;
-        this.commands = new ArrayList<>();
+        this.commands = new HashSet<>();
     }
 
     @Override
     public Optional<MenuItem> getDefaultItem() {
-        return Optional.ofNullable(defaultItem);
+        return ofNullable(defaultItem);
     }
 
-    public void setDefaultItem(MenuItem item) {
+    void setDefaultItem(MenuItem item) {
         defaultItem = item;
     }
 
@@ -94,20 +97,37 @@ public class GoalButtonItemsProvider implements ItemsProvider {
 
     @Override
     public void setDataChangedHandler(DataChangedHandler handler) {
-        this.dataChangedHandler = handler;
+        dataChangedHandler = handler;
     }
 
-    public void setCommands(List<CommandImpl> commands) {
-        this.commands.clear();
-        this.commands.addAll(commands);
+    /** Adds the given {@code command} to the provider. */
+    public void addCommand(CommandImpl command) {
+        commands.add(command);
 
-        defaultItem = null;
-
-        dataChangedHandler.onDataChanged();
+        if (dataChangedHandler != null) {
+            dataChangedHandler.onDataChanged();
+        }
     }
 
-    /** Checks whether the {@link GuideItem} is the only item. */
-    public boolean hasGuideOnly() {
+    /** Removes the given {@code command} from the provider. */
+    public void removeCommand(CommandImpl command) {
+        commands.remove(command);
+
+        // reset the defaultItem
+        if (defaultItem instanceof CommandItem) {
+            final CommandImpl cmd = ((CommandItem)defaultItem).getCommand();
+            if (cmd.equals(command)) {
+                defaultItem = null;
+            }
+        }
+
+        if (dataChangedHandler != null) {
+            dataChangedHandler.onDataChanged();
+        }
+    }
+
+    /** Checks whether the {@link GuideItem} is the only item which provider contains. */
+    boolean containsGuideItemOnly() {
         List<MenuItem> items = getItems();
 
         return items.isEmpty() || (items.size() == 1 && items.get(0) instanceof GuideItem);

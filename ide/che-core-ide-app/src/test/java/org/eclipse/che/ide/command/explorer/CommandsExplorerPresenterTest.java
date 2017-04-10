@@ -14,17 +14,24 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandAddedEvent;
+import org.eclipse.che.ide.api.command.CommandAddedEvent.CommandAddedHandler;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandRemovedEvent;
+import org.eclipse.che.ide.api.command.CommandRemovedEvent.CommandRemovedHandler;
 import org.eclipse.che.ide.api.command.CommandType;
+import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
+import org.eclipse.che.ide.api.command.CommandUpdatedEvent.CommandUpdatedHandler;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
@@ -86,6 +93,8 @@ public class CommandsExplorerPresenterTest {
     private EditorAgent                               editorAgent;
     @Mock
     private AppContext                                appContext;
+    @Mock
+    private EventBus                                  eventBus;
 
     @InjectMocks
     private CommandsExplorerPresenter presenter;
@@ -116,7 +125,11 @@ public class CommandsExplorerPresenterTest {
 
         verify(workspaceAgent).openPart(presenter, PartStackType.NAVIGATION, Constraints.LAST);
         verifyViewRefreshed();
-        verify(commandManager).addCommandChangedListener(presenter);
+
+        verify(eventBus).addHandler(eq(CommandAddedEvent.getType()), any(CommandAddedHandler.class));
+        verify(eventBus).addHandler(eq(CommandRemovedEvent.getType()), any(CommandRemovedHandler.class));
+        verify(eventBus).addHandler(eq(CommandUpdatedEvent.getType()), any(CommandUpdatedHandler.class));
+
         verify(callback).onSuccess(presenter);
     }
 
@@ -322,29 +335,6 @@ public class CommandsExplorerPresenterTest {
         errorOperationCaptor.getValue().apply(mock(PromiseError.class));
         verify(messages).unableRemove();
         verify(notificationManager).notify(anyString(), anyString(), eq(FAIL), eq(EMERGE_MODE));
-    }
-
-    @Test
-    public void shouldRefreshViewWhenCommandAdded() throws Exception {
-        CommandImpl command = mock(CommandImpl.class);
-
-        presenter.onCommandAdded(command);
-
-        verifyViewRefreshed();
-    }
-
-    @Test
-    public void shouldRefreshViewWhenCommandUpdated() throws Exception {
-        presenter.onCommandUpdated(mock(CommandImpl.class), mock(CommandImpl.class));
-
-        verifyViewRefreshed();
-    }
-
-    @Test
-    public void shouldRefreshViewWhenCommandRemoved() throws Exception {
-        presenter.onCommandRemoved(mock(CommandImpl.class));
-
-        verifyViewRefreshed();
     }
 
     private void verifyViewRefreshed() throws Exception {

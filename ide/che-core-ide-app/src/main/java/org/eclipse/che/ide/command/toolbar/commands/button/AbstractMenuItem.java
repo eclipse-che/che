@@ -10,23 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.commands.button;
 
-import com.google.inject.Inject;
-
-import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.ui.menubutton.MenuItem;
 
-/** A {@link MenuItem} represents a hint which guides the user into the flow of creating a command. */
-public class GuideItem implements MenuItem {
+/** An abstract {@link MenuItem} for {@link ExecuteCommandButton}s. */
+public abstract class AbstractMenuItem implements MenuItem {
 
-    private final ToolbarMessages messages;
+    private final CommandImpl command;
 
-    @Inject
-    public GuideItem(ToolbarMessages messages) {
-        this.messages = messages;
+    protected AbstractMenuItem(CommandImpl command) {
+        this.command = command;
     }
 
-    @Override
-    public String getName() {
-        return messages.guideItemLabel();
+    public CommandImpl getCommand() {
+        return command;
     }
 }
