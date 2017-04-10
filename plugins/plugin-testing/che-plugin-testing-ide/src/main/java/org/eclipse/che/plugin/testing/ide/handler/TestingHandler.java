@@ -86,7 +86,6 @@ public class TestingHandler {
             messageBus.subscribe(TESTING_OUTPUT_CHANNEL_NAME, new MessageHandler() {
                 @Override
                 public void onMessage(String message) {
-                    Log.info(getClass(), message);
                     TestingOutput archetypeOutput = factory.createDtoFromJson(message, TestingOutput.class);
                     switch (archetypeOutput.getState()) {
                         case SESSION_START:

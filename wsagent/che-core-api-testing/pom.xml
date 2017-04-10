@@ -54,6 +54,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-dto</artifactId>
         </dependency>
         <dependency>
@@ -71,6 +75,10 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>org.eclipse.core.resources</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jayway.restassured</groupId>
@@ -117,6 +125,8 @@
                 <configuration>
                     <excludes>
                         <exclude>**/**/TestingOutputImpl.java</exclude>
+                        <exclude>**/**/AbstractTestListener.java</exclude>
+                        <exclude>**/**/OutputTestListener.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

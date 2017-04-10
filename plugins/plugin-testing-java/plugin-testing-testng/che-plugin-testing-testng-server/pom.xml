@@ -61,5 +61,9 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>org.eclipse.core.resources</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+        </dependency>
     </dependencies>
 </project>
