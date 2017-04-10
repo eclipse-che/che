@@ -4,7 +4,7 @@
     "creator": "ide",
     "name": "Java-MySQL",
     "description": "Multi-machine environment with Default Java Stack and MySQL database",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "Java 1.8, Tomcat 8, MySQL 5.7"
     ],
@@ -73,7 +73,7 @@
     "creator": "ide",
     "name": "Java",
     "description": "Default Java Stack with JDK 8, Maven and Tomcat.",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "Java",
       "JDK",
@@ -142,7 +142,7 @@
     "creator": "ide",
     "name": "Blank",
     "description": "Default Blank Stack.",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "Blank",
       "Ubuntu",
@@ -188,7 +188,7 @@
     "creator": "ide",
     "name": "Android",
     "description": "Default Android Stack with Java 1.8, Maven 3.2.3, Android (21 api level).",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "Android",
       "Ubuntu",
@@ -253,7 +253,7 @@
     "creator": "ide",
     "name": "C++",
     "description": "Default C++ Stack with C++, gcc 4.8.4, GNU Make 3.81.",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "C++",
       "gcc",
@@ -320,7 +320,7 @@
     "creator": "ide",
     "name": ".NET",
     "description": "Default .NET Stack with .NET Core SDK",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "Ubuntu",
       "dotnet",
@@ -392,7 +392,7 @@
     "creator": "ide",
     "name": "Go",
     "description": "Default Go Stack with Go 1.6.2",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "Ubuntu",
       "Go"
@@ -514,7 +514,7 @@
     "creator": "ide",
     "name": "Node",
     "description": "Default Node Stack with Node 0.12.",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "Ubuntu",
       "Git",
@@ -591,7 +591,7 @@
     "creator": "ide",
     "name": "PHP",
     "description": "Default PHP Stack with PHP 5.6, most popular extensions and dockerimager.",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "Ubuntu",
       "Git",
@@ -703,7 +703,7 @@
     "creator": "ide",
     "name": "Python",
     "description": "Default Python Stack with Python 3.5.1, pip 8.1.1.",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "Python 3.5",
       "pip",
@@ -768,7 +768,7 @@
     "creator": "ide",
     "name": "Rails",
     "description": "Default Rails Stack with Ruby 2.3.0, Rails 4.2.6, Bundler 1.11.2.",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "Ruby",
       "Rails",
@@ -940,7 +940,7 @@
     "creator": "ide",
     "name": "Java CentOS",
     "description": "Java JDK Stack on CentOS.",
-    "scope": "advanced",
+    "scope": "general",
     "tags": [
       "Java",
       "JDK",
@@ -1965,7 +1965,7 @@
     "creator": "ide",
     "name": "PlatformIO",
     "description": "Stack for IoT development",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "PlatformIO",
       "IoT",
@@ -2070,7 +2070,7 @@
     "creator": "Clement Escoffier",
     "name": "Eclipse Vert.x",
     "description": "Eclipse Vert.x Stack on CentOS.",
-    "scope": "advanced",
+    "scope": "general",
     "tags": [
         "Java",
         "JDK",
