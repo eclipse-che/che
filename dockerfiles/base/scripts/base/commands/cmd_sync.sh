@@ -50,6 +50,7 @@ cmd_sync() {
 
   docker_run --cap-add SYS_ADMIN \
              --device /dev/fuse \
+             --security-opt apparmor:unconfined \
              -e CHE_VERSION=${CHE_VERSION} \
              --name che-mount \
              -v "${SYNC_MOUNT}":/mnthost \

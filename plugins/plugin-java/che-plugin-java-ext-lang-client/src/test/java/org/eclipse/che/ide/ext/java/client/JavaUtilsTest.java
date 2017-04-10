@@ -43,4 +43,30 @@ public class JavaUtilsTest {
     public void shouldInvalidatePackageNameStartingWithSpaces() throws Exception {
         assertFalse(JavaUtils.isValidPackageName(" Package_name"));
     }
+
+    @Test
+    public void shouldValidateClassNameWithCorrectContent() throws Exception {
+        assertTrue(JavaUtils.isValidCompilationUnitName("Class_name"));
+    }
+
+    @Test
+    public void shouldInvalidateClassNameWithSpecialSymbols() throws Exception {
+        assertFalse(JavaUtils.isValidCompilationUnitName("&%$#"));
+    }
+
+    @Test
+    public void shouldInvalidateClassNameWithMinuses() throws Exception {
+        assertFalse(JavaUtils.isValidCompilationUnitName("Class-name"));
+    }
+
+    @Test
+    public void shouldInvalidateClassNameStartingWithNumbers() throws Exception {
+        assertFalse(JavaUtils.isValidCompilationUnitName("1Class_name"));
+    }
+
+    @Test
+    public void shouldInvalidateClassNameStartingWithSpaces() throws Exception {
+        assertFalse(JavaUtils.isValidCompilationUnitName(" Class_name"));
+    }
+
 }

@@ -68,7 +68,6 @@ declare namespace _che {
     name: string;
     projects?: any;
     links?: Array<any>;
-    runtime?: any;
     temporary?: boolean;
     status?: string;
     namespace?: string;
@@ -185,6 +184,8 @@ declare namespace _che {
 
   export interface IProject {
     source: IProjectSource;
+    workspaceId?: string;
+    workspaceName?: string;
   }
 
   export interface IWorkspaceProjects {
@@ -225,5 +226,23 @@ declare namespace _che {
     id: string;
     label: string;
     location: string;
+  }
+
+  export interface IUser {
+    id: string;
+    name: string;
+    email: string;
+    aliases: Array<string>;
+  }
+
+  export interface IFactory {
+    id: string;
+    name?: string;
+    v: string;
+    workspace: IWorkspaceConfig;
+    creator: any;
+    ide?: any;
+    button?: any;
+    policies?: any;
   }
 }

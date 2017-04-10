@@ -76,7 +76,7 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
     protected TabItem       activeTab;
     protected double        currentSize;
 
-    private State state = State.NORMAL;
+    private State state = State.MINIMIZED;
 
     private ActionDelegate delegate;
 
@@ -399,6 +399,8 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         if (activeTab != null) {
             activeTab.unSelect();
         }
+
+        activePart = null;
 
         // Notify the part stack state has been changed.
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {

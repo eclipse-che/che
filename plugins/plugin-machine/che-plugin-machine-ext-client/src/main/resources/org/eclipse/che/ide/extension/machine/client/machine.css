@@ -140,56 +140,6 @@
     text-shadow: 0 1px 0 rgba(0, 0, 0, 1);
 }
 
-.selectCommandBox:first-child > .selectCommandBoxIconPanel:first-child {
-    border-top-left-radius: 2px;
-    border-bottom-left-radius: 2px;
-}
-
-.selectCommandBox:first-child > .selectCommandBoxIconPanel:first-child + div {
-    font-family: textFieldFontFamily;
-    color: selectCommandActionColor;
-    font-size: textFieldFontSize;
-}
-
-.selectCommandBox:first-child > .selectCommandBoxIconPanel:first-child + div:hover {
-    color: selectCommandActionHoverColor;
-}
-
-.selectCommandBox {
-    height: 100%;
-    min-width: 336px;
-    white-space: nowrap;
-    margin: 0 !important;
-    display: inline-block;
-}
-
-.selectCommandBoxIconPanel {
-    float: left;
-    width: 40px;
-    height: 100%;
-    margin-top: auto;
-    line-height: 24px;
-    background-color: selectCommandActionIconBackgroundColor;
-}
-
-.selectCommandBox .selectCommandBoxIconPanel + div {
-    float: left;
-    text-align: left;
-    width: 150px;
-    padding: 0 5px 0 5px;
-    display: inline-block;
-}
-
-.selectCommandBoxIconPanel svg {
-    max-width: 22px;
-    max-height: 22px;
-    fill: selectCommandActionIconColor;
-}
-
-.selectCommandBoxIconPanel svg path {
-    fill: selectCommandActionIconColor !important;
-}
-
 .processTree {
     font-family: mainFontFamily;
     font-size: fontSize;

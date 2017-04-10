@@ -24,5 +24,5 @@ public interface TestClassNavigation {
      * @param line
      */
     @Deprecated
-    void gotoClass(String packagePath, int line);
+    void gotoClass(String packagePath, String className, String methodName, int line);
 }

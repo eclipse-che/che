@@ -16,14 +16,14 @@
     <parent>
         <artifactId>che-plugin-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.5.0-SNAPSHOT</version>
+        <version>5.8.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-orion-parent</artifactId>
     <packaging>pom</packaging>
     <name>Che Plugin :: Orion :: Parent</name>
     <modules>
-        <module>che-plugin-orion-editor</module>
         <module>che-plugin-orion-compare</module>
+        <module>che-plugin-orion-editor</module>
     </modules>
 </project>

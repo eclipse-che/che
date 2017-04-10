@@ -30,6 +30,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.ErrorCodes.ATTRIBUTE_NAME_PROBLEM;
+import static org.eclipse.che.api.core.ErrorCodes.NO_PROJECT_CONFIGURED_IN_WS;
+import static org.eclipse.che.api.core.ErrorCodes.NO_PROJECT_ON_FILE_SYSTEM;
 
 /**
  * Internal Project implementation.
@@ -87,11 +90,11 @@ public class RegisteredProject implements ProjectConfig {
         this.detected = detected;
 
         if (folder == null || folder.isFile()) {
-            problems.add(new Problem(10, "No project folder on file system " + this.config.getPath()));
+            problems.add(new Problem(NO_PROJECT_ON_FILE_SYSTEM, "No project folder on file system " + this.config.getPath()));
         }
 
         if (config == null) {
-            problems.add(new Problem(11, "No project configured in workspace " + this.config.getPath()));
+            problems.add(new Problem(NO_PROJECT_CONFIGURED_IN_WS, "No project configured in workspace " + this.config.getPath()));
         }
 
 
@@ -141,8 +144,10 @@ public class RegisteredProject implements ProjectConfig {
                                 valueProvider.setValues(name, value.getList());
                             }
                         } catch (ValueStorageException e) {
-                            this.problems.add(new Problem(13, format("Value for attribute %s is not initialized, caused by: %s",
-                                                                     variable.getId(), e.getLocalizedMessage())));
+                            final Problem problem = new Problem(ATTRIBUTE_NAME_PROBLEM,
+                                                                format("Value for attribute %s is not initialized, caused by: %s",
+                                                                       variable.getId(), e.getLocalizedMessage()));
+                            this.problems.add(problem);
                         }
 
                     } else {
@@ -151,7 +156,9 @@ public class RegisteredProject implements ProjectConfig {
                 }
 
                 if (value.isEmpty() && variable.isRequired()) {
-                    this.problems.add(new Problem(13, "Value for required attribute is not initialized " + variable.getId()));
+                    final Problem problem = new Problem(ATTRIBUTE_NAME_PROBLEM,
+                                                        "Value for required attribute is not initialized " + variable.getId());
+                    this.problems.add(problem);
                     //throw new ProjectTypeConstraintException("Value for required attribute is not initialized " + variable.getId());
                 }
 

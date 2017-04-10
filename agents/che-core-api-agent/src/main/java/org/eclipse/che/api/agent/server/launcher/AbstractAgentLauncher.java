@@ -13,6 +13,7 @@ package org.eclipse.che.api.agent.server.launcher;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.eclipse.che.api.agent.server.exception.AgentStartException;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
@@ -69,7 +70,7 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
     }
 
     @Override
-    public void launch(Instance machine, Agent agent) throws ServerException {
+    public void launch(Instance machine, Agent agent) throws ServerException, AgentStartException {
         if (isNullOrEmpty(agent.getScript())) {
             return;
         }
@@ -109,8 +110,8 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
             agentLogger.close();
         }
 
-        logAsErrorAgentStartLogs(agent.getName(), agentLogger.getText());
-        throw new ServerException(format("Fail launching agent %s. Workspace ID:%s", agent.getName(), machine.getWorkspaceId()));
+        throw new AgentStartException(format("Fail launching agent %s. Workspace ID:%s",
+                                             agent.getName(), machine.getWorkspaceId()));
     }
 
     protected InstanceProcess start(Instance machine, Agent agent, LineConsumer lineConsumer) throws ServerException {

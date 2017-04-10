@@ -42,6 +42,7 @@ public class JsonRpcParams {
     private final DtoFactory  dtoFactory;
 
     private List<JsonValue> paramsList;
+    private List<String>    stringParamsList;
     private JsonValue       params;
 
     @AssistedInject
@@ -56,8 +57,14 @@ public class JsonRpcParams {
         if (jsonValue.getType().equals(JsonType.ARRAY)) {
             JsonArray jsonArray = jsonFactory.parse(message);
             this.paramsList = new ArrayList<>(jsonArray.length());
+            this.stringParamsList = new ArrayList<>(jsonArray.length());
             for (int i = 0; i < jsonArray.length(); i++) {
-                this.paramsList.add(i, jsonArray.get(i));
+                JsonValue element = jsonArray.get(i);
+                if (element.getType().equals(JsonType.STRING)) {
+                    this.stringParamsList.add(element.asString());
+                } else {
+                    this.paramsList.add(i, element);
+                }
             }
         } else {
             this.params = jsonFactory.parse(message);
@@ -91,10 +98,13 @@ public class JsonRpcParams {
         this.dtoFactory = dtoFactory;
 
         this.paramsList = new ArrayList<>(params.size());
+        this.stringParamsList = new ArrayList<>(params.size());
+
         for (int i = 0; i < params.size(); i++) {
             Object item = params.get(i);
             if (item instanceof String) {
-                paramsList.add(i, jsonFactory.create((String)item));
+//                paramsList.add(i, jsonFactory.create((String)item));
+                this.stringParamsList.add((String)item);
             } else if (item instanceof Double) {
                 paramsList.add(i, jsonFactory.create((Double)item));
             } else if (item instanceof Boolean) {
@@ -114,6 +124,10 @@ public class JsonRpcParams {
             return params;
         } else {
             JsonArray array = jsonFactory.createArray();
+            for (int i = 0; i < stringParamsList.size(); i++) {
+                String value = stringParamsList.get(i);
+                array.set(i, value);
+            }
             for (int i = 0; i < paramsList.size(); i++) {
                 JsonValue value = paramsList.get(i);
                 array.set(i, value);
@@ -143,6 +157,10 @@ public class JsonRpcParams {
 
     public <T> List<T> getAsListOf(Class<T> type) {
         checkNotNull(type, "Type must not be null");
+
+        if (type.equals(String.class)){
+            return (List<T>)stringParamsList;
+        }
 
         List<T> list = new ArrayList<>(paramsList.size());
 

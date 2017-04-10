@@ -1,0 +1,48 @@
+<!--
+
+    Copyright (c) 2012-2017 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style>
+        .rootPanel {
+            margin-top: 5px;
+        }
+
+        .commandsPanel {
+            float: left;
+        }
+
+        .processesListPanel {
+            width: literal("calc(100% - 285px)");
+            float: left;
+            margin-left: 15px;
+        }
+
+        .buttonsPanel {
+            float: right;
+        }
+
+        .previewUrlListPanel {
+            float: right;
+            margin-left: 15px;
+            margin-right: 15px;
+        }
+    </ui:style>
+
+    <g:FlowPanel ui:field="rootPanel" debugId="commandToolbar" styleName="{style.rootPanel}">
+        <g:SimplePanel ui:field="commandsPanel" addStyleNames="{style.commandsPanel}"/>
+        <g:SimplePanel ui:field="processesListPanel" addStyleNames="{style.processesListPanel}"/>
+        <g:SimplePanel ui:field="previewUrlListPanel" addStyleNames="{style.previewUrlListPanel}"/>
+        <g:SimplePanel ui:field="buttonsPanel" addStyleNames="{style.buttonsPanel}"/>
+    </g:FlowPanel>
+</ui:UiBinder>

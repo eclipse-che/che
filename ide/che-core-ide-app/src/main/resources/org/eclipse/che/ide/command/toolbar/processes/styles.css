@@ -1,0 +1,77 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+.toolbarButton {
+    float: left;
+    line-height: 20px;
+    margin-left: 15px;
+}
+
+.processesListLabel {
+    float: left;
+    border-left: commandsToolbarProcessesLabelBorder;
+    border-top: commandsToolbarProcessesLabelBorder;
+    border-bottom: commandsToolbarProcessesLabelBorder;
+    border-right: 0;
+    font-family: mainFontFamily;
+    font-size: 9px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    text-align: center;
+    color: #4eabff;
+    width: 44px;
+    height: 22px;
+    line-height: 22px;
+    background: commandsToolbarProcessesLabelBackground;
+    cursor: default;
+}
+
+.processWidgetText {
+    font-family: mainFontFamily;
+    font-size: fontSize;
+    color: selectCommandActionColor;
+    margin: 0 0 0 0;
+}
+
+.processWidgetMachineNameLabel {
+    float: left;
+    color: commandsToolbarMachineNameColor;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: literal("calc(100% - 50px)");
+}
+
+.processWidgetCommandNameLabel {
+    float: left;
+    color: commandsToolbarCommandNameColor;
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: literal("calc(100% - 200px)");
+}
+
+.processWidgetPidLabel {
+    float: right;
+    margin: 0 10px 0 0;
+}
+
+.processWidgetActionButton {
+    color: #4eabff;
+}
+
+.previewUrlWidget {
+    color: #4eabff;
+    font-size: 18px;
+}
+
+.previewUrlWidget:active {
+    color: #235c9e;
+}

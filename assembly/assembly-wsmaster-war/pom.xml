@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.5.0-SNAPSHOT</version>
+        <version>5.8.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsmaster-war</artifactId>
     <packaging>war</packaging>
@@ -60,7 +60,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>go-agents</artifactId>
+            <artifactId>exec-agent</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
@@ -88,6 +88,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
+            <artifactId>terminal-agent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
             <artifactId>unison-agent</artifactId>
         </dependency>
         <dependency>
@@ -101,6 +105,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-factory</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -176,6 +184,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-github-factory-resolver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-github-oauth2</artifactId>
         </dependency>
         <dependency>
@@ -196,7 +208,15 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-pullrequest-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-ssh-machine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-url-factory</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
@@ -224,6 +244,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>javax.websocket</groupId>
+            <artifactId>javax.websocket-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-catalina</artifactId>
             <scope>provided</scope>
@@ -231,11 +256,6 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-factory</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

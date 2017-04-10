@@ -48,6 +48,7 @@ import org.eclipse.che.ide.actions.SignatureHelpAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;
+import org.eclipse.che.ide.actions.SoftWrapAction;
 import org.eclipse.che.ide.actions.common.MaximizePartAction;
 import org.eclipse.che.ide.actions.common.MinimizePartAction;
 import org.eclipse.che.ide.actions.common.RestorePartAction;
@@ -56,6 +57,7 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
+import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.editor.texteditor.EditorResources;
@@ -67,6 +69,8 @@ import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
+import org.eclipse.che.ide.command.editor.CommandEditorProvider;
+import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
 import org.eclipse.che.ide.connection.WsConnectionListener;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.macro.ServerHostNameMacro;
@@ -88,6 +92,7 @@ import org.eclipse.che.ide.part.editor.actions.SwitchPreviousEditorAction;
 import org.eclipse.che.ide.part.editor.recent.ClearRecentListAction;
 import org.eclipse.che.ide.part.editor.recent.OpenRecentFilesAction;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
+import org.eclipse.che.ide.part.explorer.project.synchronize.ProjectConfigSynchronized;
 import org.eclipse.che.ide.resources.action.CopyResourceAction;
 import org.eclipse.che.ide.resources.action.CutResourceAction;
 import org.eclipse.che.ide.resources.action.PasteResourceAction;
@@ -142,24 +147,26 @@ import static org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar.BLANK_
 @Singleton
 public class StandardComponentInitializer {
 
-    public static final String NAVIGATE_TO_FILE    = "navigateToFile";
-    public static final String FULL_TEXT_SEARCH    = "fullTextSearch";
-    public static final String FIND_ACTION         = "findActionAction";
-    public static final String FORMAT              = "format";
-    public static final String COPY                = "copy";
-    public static final String CUT                 = "cut";
-    public static final String PASTE               = "paste";
-    public static final String SWITCH_LEFT_TAB     = "switchLeftTab";
-    public static final String SWITCH_RIGHT_TAB    = "switchRightTab";
-    public static final String OPEN_RECENT_FILES   = "openRecentFiles";
-    public static final String DELETE_ITEM         = "deleteItem";
-    public static final String NEW_FILE            = "newFile";
-    public static final String CREATE_PROJECT      = "createProject";
-    public static final String IMPORT_PROJECT      = "importProject";
-    public static final String CLOSE_ACTIVE_EDITOR = "closeActiveEditor";
-    public static final String SIGNATURE_HELP      = "signatureHelp";
-    public static final String RENAME              = "renameResource";
-    public static final String SHOW_REFERENCE      = "showReference";
+    public static final String NAVIGATE_TO_FILE      = "navigateToFile";
+    public static final String FULL_TEXT_SEARCH      = "fullTextSearch";
+    public static final String FIND_ACTION           = "findActionAction";
+    public static final String FORMAT                = "format";
+    public static final String COPY                  = "copy";
+    public static final String CUT                   = "cut";
+    public static final String PASTE                 = "paste";
+    public static final String SWITCH_LEFT_TAB       = "switchLeftTab";
+    public static final String SWITCH_RIGHT_TAB      = "switchRightTab";
+    public static final String OPEN_RECENT_FILES     = "openRecentFiles";
+    public static final String DELETE_ITEM           = "deleteItem";
+    public static final String NEW_FILE              = "newFile";
+    public static final String CREATE_PROJECT        = "createProject";
+    public static final String IMPORT_PROJECT        = "importProject";
+    public static final String CLOSE_ACTIVE_EDITOR   = "closeActiveEditor";
+    public static final String SIGNATURE_HELP        = "signatureHelp";
+    public static final String SOFT_WRAP             = "softWrap";
+    public static final String RENAME                = "renameResource";
+    public static final String SHOW_REFERENCE        = "showReference";
+    public static final String SHOW_COMMANDS_PALETTE = "showCommandsPalette";
 
     public interface ParserResource extends ClientBundle {
         @Source("org/eclipse/che/ide/blank.svg")
@@ -363,6 +370,12 @@ public class StandardComponentInitializer {
     private RestorePartAction restorePartAction;
 
     @Inject
+    private ShowCommandsPaletteAction showCommandsPaletteAction;
+
+    @Inject
+    private SoftWrapAction softWrapAction;
+
+    @Inject
     private PerspectiveManager perspectiveManager;
 
     @Inject
@@ -414,7 +427,15 @@ public class StandardComponentInitializer {
     private FileType jpgFile;
 
     @Inject
+    private CommandEditorProvider commandEditorProvider;
+    @Inject
+    @Named("CommandFileType")
+    private FileType              commandFileType;
+    @Inject
     private WsConnectionListener wsConnectionListener;
+
+    @Inject
+    private ProjectConfigSynchronized projectConfigSynchronized;
 
     @Inject
     private TreeResourceRevealer treeResourceRevealer; //just to work with it
@@ -476,6 +497,9 @@ public class StandardComponentInitializer {
 
         fileTypeRegistry.registerFileType(jpgFile);
         editorRegistry.registerDefaultEditor(jpgFile, imageViewerProvider);
+
+        fileTypeRegistry.registerFileType(commandFileType);
+        editorRegistry.registerDefaultEditor(commandFileType, commandEditorProvider);
 
         // Workspace (New Menu)
         DefaultActionGroup workspaceGroup = (DefaultActionGroup)actionManager.getAction(GROUP_WORKSPACE);
@@ -558,6 +582,9 @@ public class StandardComponentInitializer {
 
         actionManager.registerAction("redo", redoAction);
         editGroup.add(redoAction);
+
+        actionManager.registerAction(SOFT_WRAP, softWrapAction);
+        editGroup.add(softWrapAction);
 
         actionManager.registerAction(CUT, cutResourceAction);
         editGroup.add(cutResourceAction);
@@ -711,6 +738,10 @@ public class StandardComponentInitializer {
         editorTabContextMenu.add(splitVerticallyAction);
         actionManager.registerAction(SIGNATURE_HELP, signatureHelpAction);
 
+        actionManager.registerAction(SHOW_COMMANDS_PALETTE, showCommandsPaletteAction);
+        DefaultActionGroup runGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RUN);
+        runGroup.add(showCommandsPaletteAction);
+
         DefaultActionGroup editorContextMenuGroup = new DefaultActionGroup(actionManager);
         actionManager.registerAction(GROUP_EDITOR_CONTEXT_MENU, editorContextMenuGroup);
 
@@ -718,6 +749,7 @@ public class StandardComponentInitializer {
         editorContextMenuGroup.add(redoAction);
         editorContextMenuGroup.addSeparator();
         editorContextMenuGroup.add(formatterAction);
+        editorContextMenuGroup.add(softWrapAction);
 
         editorContextMenuGroup.addSeparator();
         editorContextMenuGroup.add(fullTextSearchAction);
@@ -737,10 +769,13 @@ public class StandardComponentInitializer {
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.ARROW_RIGHT).build(), SWITCH_RIGHT_TAB);
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('e').build(), OPEN_RECENT_FILES);
         keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.DELETE).build(), DELETE_ITEM);
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('w').build(), SOFT_WRAP);
 
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('N').build(), NEW_FILE);
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('x').build(), CREATE_PROJECT);
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('A').build(), IMPORT_PROJECT);
+
+        keyBinding.getGlobal().addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F10).build(), SHOW_COMMANDS_PALETTE);
 
         if (UserAgent.isMac()) {
             keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('w').build(), CLOSE_ACTIVE_EDITOR);

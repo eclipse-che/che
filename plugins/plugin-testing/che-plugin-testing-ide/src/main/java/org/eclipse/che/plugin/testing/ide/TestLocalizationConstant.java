@@ -25,6 +25,9 @@ public interface TestLocalizationConstant extends Messages {
     @Key("actionGroup.menu.name")
     String actionGroupMenuName();
 
+    @Key("contextActionGroup.menu.name")
+    String contextActionGroupMenuName();
+    
     /* Titles */
 
     @Key("title.testResultPresenter")

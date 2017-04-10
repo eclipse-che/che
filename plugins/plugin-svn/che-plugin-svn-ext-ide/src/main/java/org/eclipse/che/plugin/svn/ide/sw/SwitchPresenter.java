@@ -23,8 +23,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.subversion.Credentials;
-import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
+import org.eclipse.che.ide.api.user.Credentials;
+import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.resource.Path;
@@ -82,7 +82,7 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
                            StatusColors statusColors,
                            NodesResources resources,
                            SubversionExtensionLocalizationConstants locale,
-                           SubversionCredentialsDialog credentialsDialog) {
+                           AskCredentialsDialog credentialsDialog) {
         super(appContext, consoleFactory, processesPanelPresenter, statusColors, locale, notificationManager, credentialsDialog);
 
         this.notificationManager = notificationManager;

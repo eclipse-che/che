@@ -12,12 +12,14 @@
 
 import {CheWorkspaceBuilder} from './che-workspace-builder';
 import {CheProjectReferenceBuilder} from './che-projectreference-builder';
+import {CheFactoryBuilder} from './che-factory-builder';
 import {CheProjectDetailsBuilder} from './che-projectdetails-builder';
 import {CheProjectTypeBuilder} from './che-projecttype-builder';
 import {CheProjectTemplateBuilder} from './che-projecttemplate-builder';
 import {CheProjectTypeAttributeDescriptorBuilder} from './che-projecttype-attribute-descriptor-builder';
 import {CheProfileBuilder} from './che-profile-builder';
 import {CheStackBuilder} from './che-stack-builder';
+import {CheUserBuilder} from './che-user-builder';
 
 /**
  * This class is providing the entry point for accessing the builders
@@ -95,5 +97,21 @@ export class CheAPIBuilder {
    */
   getStackBuilder() {
     return new CheStackBuilder();
+  }
+
+  /***
+   * The Che Factory builder
+   * @returns {CheFactoryBuilder}
+   */
+  getFactoryBuilder() {
+    return new CheFactoryBuilder();
+  }
+
+  /***
+   * The Che User builder
+   * @returns {CheUserBuilder}
+   */
+  getUserBuilder() {
+    return new CheUserBuilder();
   }
 }

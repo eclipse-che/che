@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-machine-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.5.0-SNAPSHOT</version>
+        <version>5.8.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-machine-ext-client</artifactId>
     <packaging>jar</packaging>
@@ -63,6 +63,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-project-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-ssh-shared</artifactId>
         </dependency>
         <dependency>
@@ -94,16 +98,16 @@
             <artifactId>che-core-ide-ui</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-orion-editor</artifactId>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-orion-editor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>che-terminal-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-requirejs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>plugin-terminal-ui</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
@@ -138,11 +142,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-dto</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-project-shared</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -190,8 +189,8 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.plugin</groupId>
-                                    <artifactId>plugin-terminal-ui</artifactId>
+                                    <groupId>org.eclipse.che.lib</groupId>
+                                    <artifactId>che-terminal-client</artifactId>
                                     <version>${project.version}</version>
                                     <type>jar</type>
                                     <overWrite>false</overWrite>

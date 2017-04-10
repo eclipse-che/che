@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.5.0-SNAPSHOT</version>
+        <version>5.8.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsagent-war</artifactId>
     <packaging>war</packaging>
@@ -25,10 +25,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
@@ -288,11 +284,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                    <packagingExcludes>
-                        WEB-INF/lib/*gwt*.jar,
+                    <packagingExcludes>WEB-INF/lib/*gwt*.jar,
                         WEB-INF/lib/gin-*.jar,
-                        WEB-INF/lib/jsr305*.jar
-                    </packagingExcludes>
+                        WEB-INF/lib/jsr305*.jar</packagingExcludes>
                 </configuration>
             </plugin>
         </plugins>

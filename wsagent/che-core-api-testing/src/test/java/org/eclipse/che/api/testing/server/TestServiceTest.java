@@ -63,7 +63,7 @@ public class TestServiceTest {
 
     private DtoFactory dto;
     @SuppressWarnings("unused") // not really...
-    private TestService testingService;
+    private TestingService testingService;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -72,7 +72,7 @@ public class TestServiceTest {
         when(projectRegistry.getProject(anyString())).thenReturn(registeredProject);
         when(frameworkRegistry.getTestRunner(TEST_FRAMEWORK_A)).thenReturn(testRunnerA);
         when(frameworkRegistry.getTestRunner(TEST_FRAMEWORK_B)).thenReturn(testRunnerB);
-        testingService = new TestService(frameworkRegistry);
+        testingService = new TestingService(frameworkRegistry);
     }
 
     // Asking for run a test from known framework.

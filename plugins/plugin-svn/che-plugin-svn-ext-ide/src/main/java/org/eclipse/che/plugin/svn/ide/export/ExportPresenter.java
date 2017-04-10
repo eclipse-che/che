@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
+import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
@@ -59,7 +59,7 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
     @Inject
     public ExportPresenter(AppContext appContext,
                            SubversionOutputConsoleFactory consoleFactory,
-                           SubversionCredentialsDialog credentialsDialog,
+                           AskCredentialsDialog credentialsDialog,
                            ProcessesPanelPresenter processesPanelPresenter,
                            ExportView view,
                            SubversionClientService service,

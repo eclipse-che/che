@@ -157,6 +157,7 @@ export class DiagnosticsRunningWorkspaceCheck {
    */
   checkWebSocketWsAgent(diagnosticCallback : DiagnosticCallback) : ng.IPromise {
     let workspace: che.IWorkspace = diagnosticCallback.getShared('workspace');
+    let machineToken: string = diagnosticCallback.getShared('machineToken');
 
     let wsAgentSocketWebLink = this.lodash.find(workspace.runtime.links, (link: any) => {
       return link.rel === 'wsagent.websocket';
@@ -166,6 +167,10 @@ export class DiagnosticsRunningWorkspaceCheck {
     } else {
       wsAgentSocketWebLink = wsAgentSocketWebLink.href;
     }
+    if (machineToken) {
+      wsAgentSocketWebLink += '?token=' + machineToken;
+    }
+
     let wsAgentRemoteBus : MessageBus = this.cheWebsocket.getRemoteBus(wsAgentSocketWebLink);
     diagnosticCallback.setMessageBus(wsAgentRemoteBus);
 
@@ -201,8 +206,15 @@ export class DiagnosticsRunningWorkspaceCheck {
    * @returns {Promise}
    */
   callSCM(diagnosticCallback : DiagnosticCallback, wsAgentHRef : string, errorInsteadOfFailure : boolean) : ng.IPromise {
+
+    let uriWsAgent : string = wsAgentHRef + '/';
+    let machineToken: string = diagnosticCallback.getShared('machineToken');
+    if (machineToken) {
+      uriWsAgent += '?token=' + machineToken;
+    }
+
     // connect to the workspace agent
-    let resourceAPI : any = this.$resource(wsAgentHRef + '/', {}, {
+    let resourceAPI : any = this.$resource(uriWsAgent, {}, {
       getDetails: {method: 'OPTIONS', timeout : 15000}
     }, {
       stripTrailingSlashes: false

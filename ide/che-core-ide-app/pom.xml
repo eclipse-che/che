@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-ide-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.5.0-SNAPSHOT</version>
+        <version>5.8.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-ide-app</artifactId>
     <packaging>jar</packaging>
@@ -68,6 +68,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-factory-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-git-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -279,27 +283,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.eclipse.che.core</groupId>-->
-            <!--<artifactId>che-core-api-dto-maven-plugin</artifactId>-->
-            <!--<version>${project.version}</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<phase>process-sources</phase>-->
-            <!--<goals>-->
-            <!--<goal>generate</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--<configuration>-->
-            <!--<dtoPackages>-->
-            <!--<package>org.eclipse.che.ide.statepersistance.dto</package>-->
-            <!--</dtoPackages>-->
-            <!--<outputDirectory>${dto-generator-out-directory}</outputDirectory>-->
-            <!--<genClassName>org.eclipse.che.ide.statepersistance.dto.DtoClientImpls</genClassName>-->
-            <!--<impl>client</impl>-->
-            <!--</configuration>-->
-            <!--</plugin>-->
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-dyna-provider-generator-maven-plugin</artifactId>

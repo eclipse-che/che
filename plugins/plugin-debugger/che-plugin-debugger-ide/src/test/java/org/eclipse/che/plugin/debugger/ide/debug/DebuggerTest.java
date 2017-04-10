@@ -52,11 +52,15 @@ import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerObserver;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
+import org.eclipse.che.ide.jsonrpc.reception.MethodNameConfigurator;
+import org.eclipse.che.ide.jsonrpc.reception.OperationConfiguratorOneToNone;
+import org.eclipse.che.ide.jsonrpc.reception.ParamsConfigurator;
+import org.eclipse.che.ide.jsonrpc.reception.ResultConfiguratorFromOne;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
-import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.plugin.debugger.ide.BaseTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,6 +81,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
@@ -104,23 +109,25 @@ public class DebuggerTest extends BaseTest {
     public static final String PATH        = "test/src/main/java/Test.java";
 
     @Mock
-    private DebuggerServiceClient service;
+    private DebuggerServiceClient      service;
     @Mock
-    private DtoFactory            dtoFactory;
+    private DtoFactory                 dtoFactory;
     @Mock
-    private LocalStorageProvider  localStorageProvider;
+    private LocalStorageProvider       localStorageProvider;
     @Mock
-    private MessageBusProvider    messageBusProvider;
+    private EventBus                   eventBus;
     @Mock
-    private EventBus              eventBus;
+    private ActiveFileHandler          activeFileHandler;
     @Mock
-    private ActiveFileHandler     activeFileHandler;
+    private DebuggerManager            debuggerManager;
     @Mock
-    private DebuggerManager       debuggerManager;
+    private NotificationManager        notificationManager;
     @Mock
-    private NotificationManager   notificationManager;
+    private BreakpointManager          breakpointManager;
     @Mock
-    private BreakpointManager     breakpointManager;
+    private RequestTransmitter         transmitter;
+    @Mock
+    private RequestHandlerConfigurator configurator;
 
     @Mock
     private Promise<Void>         promiseVoid;
@@ -173,20 +180,17 @@ public class DebuggerTest extends BaseTest {
         doReturn(breakpointDto).when(dtoFactory).createDto(BreakpointDto.class);
         doReturn(locationDto).when(breakpointDto).getLocation();
 
-        doReturn(messageBus).when(messageBusProvider).getMachineMessageBus();
-
         doReturn(localStorage).when(localStorageProvider).get();
         doReturn(DEBUG_INFO).when(localStorage).getItem(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_SESSION_KEY);
         doReturn(debugSessionDto).when(dtoFactory).createDtoFromJson(anyString(), eq(DebugSessionDto.class));
 
         doReturn(Path.valueOf(PATH)).when(file).getLocation();
 
-        debugger = new TestDebugger(service, dtoFactory, localStorageProvider, messageBusProvider, eventBus,
+        debugger = new TestDebugger(service, transmitter, configurator, dtoFactory, localStorageProvider, eventBus,
                                     activeFileHandler, debuggerManager, notificationManager, "id");
         doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
         doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
-        // setup messageBus
         verify(eventBus).addHandler(eq(WsAgentStateEvent.TYPE), extServerStateHandlerCaptor.capture());
         extServerStateHandlerCaptor.getValue().onWsAgentStarted(WsAgentStateEvent.createWsAgentStartedEvent());
 
@@ -206,6 +210,16 @@ public class DebuggerTest extends BaseTest {
 
         Map<String, String> connectionProperties = mock(Map.class);
         Promise<DebugSessionDto> promiseDebuggerInfo = mock(Promise.class);
+
+        MethodNameConfigurator methodNameConfigurator = mock(MethodNameConfigurator.class);
+        ParamsConfigurator paramsConfigurator = mock(ParamsConfigurator.class);
+        ResultConfiguratorFromOne resultConfiguratorFromOne = mock(ResultConfiguratorFromOne.class);
+        OperationConfiguratorOneToNone operationConfiguratorOneToNone = mock(OperationConfiguratorOneToNone.class);
+
+        doReturn(methodNameConfigurator).when(configurator).newConfiguration();
+        doReturn(paramsConfigurator).when(methodNameConfigurator).methodName(anyString());
+        doReturn(resultConfiguratorFromOne).when(paramsConfigurator).paramsAsDto(anyObject());
+        doReturn(operationConfiguratorOneToNone).when(resultConfiguratorFromOne).noResult();
 
         doReturn(promiseDebuggerInfo).when(service).connect("id", connectionProperties);
         doReturn(promiseVoid).when(promiseDebuggerInfo).then((Function<DebugSessionDto, Void>)any());
@@ -230,7 +244,6 @@ public class DebuggerTest extends BaseTest {
 
         assertTrue(debugger.isConnected());
         verify(localStorage).setItem(eq(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_SESSION_KEY), eq(debugSessionJson));
-        verify(messageBus).subscribe(eq("id:events:"), any(SubscriptionHandler.class));
     }
 
     @Test
@@ -247,13 +260,10 @@ public class DebuggerTest extends BaseTest {
         doReturn(promiseVoid).when(service).disconnect(SESSION_ID);
         doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>)any());
 
-        doReturn(true).when(messageBus).isHandlerSubscribed(any(), any());
-
         debugger.disconnect();
 
         assertFalse(debugger.isConnected());
         verify(localStorage).setItem(eq(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_SESSION_KEY), eq(""));
-        verify(messageBus, times(1)).unsubscribe(anyString(), any());
 
         verify(promiseVoid).then(operationVoidCaptor.capture());
         verify(promiseVoid).catchError(operationPromiseErrorCaptor.capture());
@@ -583,18 +593,20 @@ public class DebuggerTest extends BaseTest {
     private class TestDebugger extends AbstractDebugger {
 
         public TestDebugger(DebuggerServiceClient service,
+                            RequestTransmitter transmitter,
+                            RequestHandlerConfigurator configurator,
                             DtoFactory dtoFactory,
                             LocalStorageProvider localStorageProvider,
-                            MessageBusProvider messageBusProvider,
                             EventBus eventBus,
                             ActiveFileHandler activeFileHandler,
                             DebuggerManager debuggerManager,
                             NotificationManager notificationManager,
                             String id) {
             super(service,
+                  transmitter,
+                  configurator,
                   dtoFactory,
                   localStorageProvider,
-                  messageBusProvider,
                   eventBus,
                   activeFileHandler,
                   debuggerManager,

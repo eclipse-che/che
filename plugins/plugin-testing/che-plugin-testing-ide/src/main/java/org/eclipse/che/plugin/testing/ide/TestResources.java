@@ -33,6 +33,18 @@ public interface TestResources extends ClientBundle {
     @Deprecated
     SVGResource testResultsFail();
     
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_method_fail.svg")
+    SVGResource testMethodFail();
+
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_class_fail.svg")
+    SVGResource testClassFail();
+
+    @Source("org/eclipse/che/plugin/testing/ide/svg/show_all_tests_icon.svg")
+    SVGResource showAllTestsButtonIcon();
+
+    @Source("org/eclipse/che/plugin/testing/ide/svg/show_failures_only_icon.svg")
+    SVGResource showFailuresOnlyButtonIcon();
+    
     @Source("org/eclipse/che/plugin/testing/ide/svg/test_result_failure.svg")
     SVGResource testResultFailureIcon();
     

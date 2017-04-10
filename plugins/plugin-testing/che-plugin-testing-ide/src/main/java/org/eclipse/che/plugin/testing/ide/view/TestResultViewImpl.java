@@ -16,6 +16,7 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_S
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,8 +24,9 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.testing.shared.Failure;
+import org.eclipse.che.api.testing.shared.TestCase;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.api.testing.shared.dto.TestResultTraceDto;
@@ -37,11 +39,14 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.resources.File;
-import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
+import org.eclipse.che.ide.ext.java.shared.dto.Region;
+import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
+import org.eclipse.che.ide.ext.java.shared.dto.model.Method;
+import org.eclipse.che.ide.ext.java.shared.dto.model.Type;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
@@ -89,18 +94,21 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     interface Styles extends CssResource {
 
         String traceOutputMessage();
-        
+
         String traceOutputStack();
 
     }
 
     private static final TestResultViewImplUiBinder UI_BINDER = GWT.create(TestResultViewImplUiBinder.class);
 
+    private final JavaNavigationService javaNavigationService;
     private final AppContext appContext;
     private final EditorAgent editorAgent;
     private final EventBus eventBus;
     private final TestResultNodeFactory nodeFactory;
+    private TestResult lastTestResult;
     private int lastWentLine = 0;
+    private boolean showFailuresOnly = false;
 
     @UiField(provided = true)
     SplitLayoutPanel splitLayoutPanel;
@@ -115,9 +123,10 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     FlowPanel traceOutputPanel;
 
     @Inject
-    public TestResultViewImpl(PartStackUIResources resources, EditorAgent editorAgent, AppContext appContext,
-            EventBus eventBus, TestResultNodeFactory nodeFactory) {
+    public TestResultViewImpl(PartStackUIResources resources, JavaNavigationService javaNavigationService,
+            EditorAgent editorAgent, AppContext appContext, EventBus eventBus, TestResultNodeFactory nodeFactory) {
         super(resources);
+        this.javaNavigationService = javaNavigationService;
         this.editorAgent = editorAgent;
         this.appContext = appContext;
         this.eventBus = eventBus;
@@ -173,19 +182,28 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     }
 
     @Deprecated
-    private void fillNavigationPanel(TestResult result) {
+    private void fillNavigationPanel(final TestResult result) {
         Tree resultTree = buildResultTree(result);
-        // outputResult.setText("");
-        TestResultGroupNode root = nodeFactory.getTestResultGroupNode(result);
-        Map<String, List<Node>> classNodeHashMap = new HashMap<>();
-        for (Failure failure : result.getFailures()) {
-            if (!classNodeHashMap.containsKey(failure.getFailingClass())) {
-                List<Node> methodNodes = new ArrayList<>();
-                classNodeHashMap.put(failure.getFailingClass(), methodNodes);
+        TestResultGroupNode root = nodeFactory.getTestResultGroupNode(lastTestResult, showFailuresOnly, new Runnable() {
+            @Override
+            public void run() {
+                showFailuresOnly = !showFailuresOnly;
+                clear();
+                fillNavigationPanel(result);
             }
-            classNodeHashMap.get(failure.getFailingClass())
-                    .add(nodeFactory.getTestResultMethodNodeNode(failure.getFailingMethod(), failure.getTrace(),
-                            failure.getMessage(), failure.getFailingLine(), this));
+        });
+        HashMap<String, List<Node>> classNodeHashMap = new LinkedHashMap<>();
+        for (TestCase testCase : lastTestResult.getTestCases()) {
+            if (!testCase.isFailed() && showFailuresOnly) {
+                continue;
+            }
+            if (!classNodeHashMap.containsKey(testCase.getClassName())) {
+                List<Node> methodNodes = new ArrayList<>();
+                classNodeHashMap.put(testCase.getClassName(), methodNodes);
+            }
+            classNodeHashMap.get(testCase.getClassName())
+                    .add(nodeFactory.getTestResultMethodNodeNode(!testCase.isFailed(), testCase.getMethod(),
+                            testCase.getTrace(), testCase.getMessage(), testCase.getFailingLine(), this));
         }
         List<Node> classNodes = new ArrayList<>();
         for (Map.Entry<String, List<Node>> entry : classNodeHashMap.entrySet()) {
@@ -195,6 +213,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         }
         root.setChildren(classNodes);
         resultTree.getNodeStorage().add(root);
+        resultTree.expandAll();
         navigationPanel.add(resultTree);
     }
 
@@ -204,7 +223,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         resultTree.getNodeStorage().add(root);
         navigationPanel.add(resultTree);
     }
-    
+
     @Deprecated
     private Tree buildResultTree(TestResult result) {
         Tree resultTree = createTree();
@@ -219,7 +238,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         });
         return resultTree;
     }
-    
+
     private Tree buildResultTree(TestResultRootDto result) {
         Tree resultTree = createTree();
         resultTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
@@ -271,24 +290,57 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
 
     @Override
     @Deprecated
-    public void gotoClass(String packagePath, int line) {
+    public void gotoClass(final String packagePath, String className, String methodName, int line) {
+        if (lastTestResult == null) {
+            return;
+        }
+        String projectPath = lastTestResult.getProjectPath();
+        if (projectPath == null) {
+            return;
+        }
+
         lastWentLine = line;
-        final Project project = appContext.getRootProject();
-        String testSrcPath = project.getPath() + "/" + DEFAULT_TEST_SOURCE_FOLDER;
-        appContext.getWorkspaceRoot().getFile(testSrcPath + packagePath).then(new Operation<Optional<File>>() {
+        String testSrcPath = projectPath + "/" + DEFAULT_TEST_SOURCE_FOLDER;
+        appContext.getWorkspaceRoot().getFile(testSrcPath + "/" + packagePath).then(new Operation<Optional<File>>() {
             @Override
-            public void apply(Optional<File> file) throws OperationException {
-                if (file.isPresent()) {
-                    eventBus.fireEvent(FileEvent.createOpenFileEvent(file.get()));
+            public void apply(Optional<File> maybeFile) throws OperationException {
+                if (maybeFile.isPresent()) {
+                    File file = maybeFile.get();
+                    editorAgent.openEditor(file);
                     Timer t = new Timer() {
                         @Override
                         public void run() {
                             EditorPartPresenter editorPart = editorAgent.getActiveEditor();
-                            Document doc = ((TextEditor) editorPart).getDocument();
-                            doc.setCursorPosition(new TextPosition(lastWentLine - 1, 0));
+                            final Document doc = ((TextEditor) editorPart).getDocument();
+                            if (line == -1 && className != null && methodName != null) {
+                                Promise<CompilationUnit> cuPromise = javaNavigationService
+                                        .getCompilationUnit(file.getProject().getLocation(), className, true);
+                                cuPromise.then(new Operation<CompilationUnit>() {
+                                    @Override
+                                    public void apply(CompilationUnit cu) throws OperationException {
+                                        for (Type type : cu.getTypes()) {
+                                            if (type.isPrimary()) {
+                                                for (Method m : type.getMethods()) {
+                                                    if (methodName.equals(m.getElementName())) {
+                                                        Region methodRegion = m.getFileRegion();
+                                                        if (methodRegion != null) {
+                                                            lastWentLine = doc
+                                                                    .getLineAtOffset(methodRegion.getOffset());
+                                                            doc.setCursorPosition(
+                                                                    new TextPosition(lastWentLine - 1, 0));
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            } else {
+                                doc.setCursorPosition(new TextPosition(lastWentLine - 1, 0));
+                            }
                         }
                     };
-                    t.schedule(500);
+                    t.schedule(1000);
                 }
             }
         }).catchError(new Operation<PromiseError>() {

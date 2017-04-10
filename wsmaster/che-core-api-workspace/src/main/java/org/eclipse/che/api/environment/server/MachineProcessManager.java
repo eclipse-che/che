@@ -17,18 +17,21 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.CompositeLineConsumer;
 import org.eclipse.che.api.core.util.FileLineConsumer;
+import org.eclipse.che.api.core.util.JsonRpcEndpointIdsHolder;
+import org.eclipse.che.api.core.util.JsonRpcLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.core.util.WebsocketLineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.api.machine.shared.dto.event.MachineProcessEvent;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,9 +63,11 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public class MachineProcessManager {
     private static final Logger LOG = LoggerFactory.getLogger(MachineProcessManager.class);
 
-    private final File                 machineLogsDir;
-    private final CheEnvironmentEngine environmentEngine;
-    private final EventService         eventService;
+    private final File                     machineLogsDir;
+    private final CheEnvironmentEngine     environmentEngine;
+    private final EventService             eventService;
+    private final RequestTransmitter       transmitter;
+    private final JsonRpcEndpointIdsHolder endpointIdsHolder;
 
     @VisibleForTesting
     final ExecutorService executor;
@@ -70,10 +75,14 @@ public class MachineProcessManager {
     @Inject
     public MachineProcessManager(@Named("che.workspace.logs") String machineLogsDir,
                                  EventService eventService,
-                                 CheEnvironmentEngine environmentEngine) {
+                                 CheEnvironmentEngine environmentEngine,
+                                 RequestTransmitter transmitter,
+                                 JsonRpcEndpointIdsHolder endpointIdsHolder) {
         this.eventService = eventService;
         this.machineLogsDir = new File(machineLogsDir);
         this.environmentEngine = environmentEngine;
+        this.transmitter = transmitter;
+        this.endpointIdsHolder = endpointIdsHolder;
 
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineProcessManager-%d")
                                                                            .setUncaughtExceptionHandler(
@@ -112,7 +121,10 @@ public class MachineProcessManager {
         final InstanceProcess instanceProcess = machine.createProcess(command, outputChannel);
         final int pid = instanceProcess.getPid();
 
-        final LineConsumer processLogger = getProcessLogger(machineId, pid, outputChannel);
+        JsonRpcLineConsumer jsonRpcLineConsumer =
+                new JsonRpcLineConsumer("event:ws-agent-output:message", transmitter, endpointIdsHolder.getEndpointIds());
+
+        LineConsumer processLogger = new CompositeLineConsumer(getProcessLogger(machineId, pid, outputChannel), jsonRpcLineConsumer);
 
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             try {

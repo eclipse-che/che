@@ -40,13 +40,16 @@ public interface TestResultNodeFactory {
     TestResultTraceFrameNode createTestResultTraceFrameNode(TestResultTraceFrameDto testResultTraceFrameDto);
 
     @Deprecated
-    TestResultGroupNode getTestResultGroupNode(TestResult result);
+    TestResultGroupNode getTestResultGroupNode(TestResult result,
+                                               boolean showFailuresOnly,
+                                               Runnable showOnlyFailuresDelegate);
 
     @Deprecated
     TestResultClassNode getTestResultClassNodeNode(String className);
 
     @Deprecated
-    TestResultMethodNode getTestResultMethodNodeNode(@Assisted("methodName") String methodName,
+    TestResultMethodNode getTestResultMethodNodeNode(boolean success,
+                                                     @Assisted("methodName") String methodName,
                                                      @Assisted("stackTrace") String stackTrace, 
                                                      @Assisted("message") String message, 
                                                      int lineNumber,

@@ -21,8 +21,9 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import org.eclipse.che.plugin.debugger.ide.debug.BasicActiveFileHandler;
 import org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType;
@@ -41,18 +42,20 @@ public class ZendDebugger extends AbstractDebugger {
 
     @Inject
     public ZendDebugger(DebuggerServiceClient service,
+                        RequestTransmitter transmitter,
+                        RequestHandlerConfigurator configurator,
                         DtoFactory dtoFactory,
                         LocalStorageProvider localStorageProvider,
-                        MessageBusProvider messageBusProvider,
                         EventBus eventBus,
                         BasicActiveFileHandler activeFileHandler,
                         NotificationManager notificationManager,
                         DebuggerManager debuggerManager,
                         BreakpointManager breakpointManager) {
         super(service,
+              transmitter,
+              configurator,
               dtoFactory,
               localStorageProvider,
-              messageBusProvider,
               eventBus,
               activeFileHandler,
               debuggerManager,
@@ -75,7 +78,7 @@ public class ZendDebugger extends AbstractDebugger {
     @Override
     protected DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties) {
         return new DebuggerDescriptor("Zend Debugger",
-                "Zend Debugger, port: " + connectionProperties.get(ZendDbgConfigurationType.ATTR_DEBUG_PORT));
+                                      "Zend Debugger, port: " + connectionProperties.get(ZendDbgConfigurationType.ATTR_DEBUG_PORT));
     }
 
 }

@@ -25,7 +25,7 @@ describe('Simper dockerfile parser', () => {
   });
 
   describe('method _parseArgument()', () => {
-    it('should parse ENV argument with single environment variable #1', () => {
+    it('should parse ENV argument as single variable form #1', () => {
       let instruction = 'ENV',
           argument = 'name environment variable value';
 
@@ -38,7 +38,7 @@ describe('Simper dockerfile parser', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    it('should parse ENV argument with single environment variable #2', () => {
+    it('should parse ENV argument as single variable form #2', () => {
       let instruction = 'ENV',
           argument = 'SBT_OPTS \'-Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080 -Dhttps.proxyHost=proxy.wdf.sap.corp -Dhttps.proxyPort=8080 -Dhttp.nonProxyHosts=nexus.wdf.sap.corp\'';
 
@@ -51,7 +51,19 @@ describe('Simper dockerfile parser', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    it('should parse ENV argument with several environment variables', () => {
+    it('should parse ENV argument as multiple variables form #1', () => {
+      let instruction = 'ENV',
+          argument = 'key=value';
+      let result = parser._parseArgument(instruction, argument);
+
+      let expectedResult = [{
+        instruction: 'ENV',
+        argument: ['key', 'value']
+      }];
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should parse ENV argument as multiple variables form #2', () => {
       let instruction = 'ENV',
           argument = 'myName="John Doe" myDog=Rex\ The\ Dog myCat=fluffy';
 
@@ -74,9 +86,9 @@ describe('Simper dockerfile parser', () => {
 
   it('should parse a dockerfile', () => {
     let dockerfile = 'FROM codenvy/ubuntu_jdk8ENV'
-    + '\n#ENV myCat fluffy'
-    + '\nENV myDog Rex The Dog'
-    + '\nENV myName John Doe';
+      + '\n#ENV myCat fluffy'
+      + '\nENV myDog Rex The Dog'
+      + '\nENV myName="John Doe"';
 
     let result = parser.parse(dockerfile);
 

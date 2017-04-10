@@ -16,10 +16,10 @@ import com.google.gwt.user.client.Element;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.filetypes.FileType;
-import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab.ActionDelegate;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
@@ -57,8 +57,6 @@ public class EditorTabWidgetTest {
     @Mock
     private SVGResource          icon;
     @Mock
-    private FileTypeRegistry     fileTypeRegistry;
-    @Mock
     private SVGImage             iconImage;
     @Mock
     private EditorPartPresenter  editorPartPresenter;
@@ -81,6 +79,8 @@ public class EditorTabWidgetTest {
     @Mock
     private EventBus                    eventBus;
     @Mock
+    private EditorAgent                 editorAgent;
+    @Mock
     private EditorInput                 editorInput;
 
     private EditorTabWidget tab;
@@ -97,7 +97,7 @@ public class EditorTabWidgetTest {
                                   resources,
                                   editorTabContextMenuFactory,
                                   eventBus,
-                                  fileTypeRegistry);
+                                  editorAgent);
         tab.setDelegate(delegate);
     }
 
@@ -166,14 +166,13 @@ public class EditorTabWidgetTest {
         FileType fileType = mock(FileType.class);
 
         when(editorPartPresenter.getEditorInput()).thenReturn(editorInput);
-        when(fileTypeRegistry.getFileTypeByFile(file)).thenReturn(fileType);
         when(fileType.getImage()).thenReturn(icon);
         when(editorInput.getFile()).thenReturn(file);
 
         tab.update(editorPartPresenter);
 
         verify(editorPartPresenter, times(2)).getEditorInput();
-        verify(fileTypeRegistry).getFileTypeByFile(file);
+        verify(editorPartPresenter, times(2)).getTitleImage();
         verify(tab.iconPanel).setWidget(Matchers.<SVGImage>anyObject());
     }
 
@@ -184,7 +183,6 @@ public class EditorTabWidgetTest {
         VirtualFile newFile = mock(VirtualFile.class);
 
         when(editorPartPresenter.getEditorInput()).thenReturn(editorInput);
-        when(fileTypeRegistry.getFileTypeByFile(newFile)).thenReturn(fileType);
         when(fileType.getImage()).thenReturn(icon);
         when(editorInput.getFile()).thenReturn(newFile);
 

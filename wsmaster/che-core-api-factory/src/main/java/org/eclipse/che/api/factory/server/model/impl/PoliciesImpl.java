@@ -12,7 +12,6 @@ package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.core.model.factory.Policies;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.util.Objects;
@@ -25,11 +24,8 @@ import java.util.Objects;
 @Embeddable
 public class PoliciesImpl implements Policies {
 
-    @Column(name = "referer")
+    @Column(name = "referrer")
     private String referer;
-
-    @Column(name = "match_reopen")
-    private String match;
 
     @Column(name = "creation_strategy")
     private String create;
@@ -43,12 +39,10 @@ public class PoliciesImpl implements Policies {
     public PoliciesImpl() {}
 
     public PoliciesImpl(String referer,
-                        String match,
                         String create,
                         Long until,
                         Long since) {
         this.referer = referer;
-        this.match = match;
         this.create = create;
         this.until = until;
         this.since = since;
@@ -56,7 +50,6 @@ public class PoliciesImpl implements Policies {
 
     public PoliciesImpl(Policies policies) {
         this(policies.getReferer(),
-             policies.getMatch(),
              policies.getCreate(),
              policies.getUntil(),
              policies.getSince());
@@ -69,15 +62,6 @@ public class PoliciesImpl implements Policies {
 
     public void setReferer(String referer) {
         this.referer = referer;
-    }
-
-    @Override
-    public String getMatch() {
-        return match;
-    }
-
-    public void setMatch(String match) {
-        this.match = match;
     }
 
     @Override
@@ -113,7 +97,6 @@ public class PoliciesImpl implements Policies {
         if (!(obj instanceof PoliciesImpl)) return false;
         final PoliciesImpl other = (PoliciesImpl)obj;
         return Objects.equals(referer, other.referer)
-               && Objects.equals(match, other.match)
                && Objects.equals(create, other.create)
                && Objects.equals(until, other.until)
                && Objects.equals(since, other.since);
@@ -123,7 +106,6 @@ public class PoliciesImpl implements Policies {
     public int hashCode() {
         int result = 7;
         result = 31 * result + Objects.hashCode(referer);
-        result = 31 * result + Objects.hashCode(match);
         result = 31 * result + Objects.hashCode(create);
         result = 31 * result + Objects.hashCode(until);
         result = 31 * result + Objects.hashCode(since);
@@ -134,7 +116,6 @@ public class PoliciesImpl implements Policies {
     public String toString() {
         return "PoliciesImpl{" +
                "referer='" + referer + '\'' +
-               ", match='" + match + '\'' +
                ", create='" + create + '\'' +
                ", until=" + until +
                ", since=" + since +
