@@ -21,6 +21,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
 public class OpenShiftRouteCreator {
     private static final Logger LOG = LoggerFactory.getLogger(OpenShiftRouteCreator.class);
     private static final String TLS_TERMINATION_EDGE = "edge";
+    private static final String REDIRECT_INSECURE_EDGE_TERMINATION_POLICY = "Redirect";
 
     public static void createRoute (final OpenShiftClient openShiftClient,
                                     final String namespace,
@@ -60,6 +61,7 @@ public class OpenShiftRouteCreator {
         if (enableTls) {
             routeSpec.withNewTls()
                          .withTermination(TLS_TERMINATION_EDGE)
+                         .withInsecureEdgeTerminationPolicy(REDIRECT_INSECURE_EDGE_TERMINATION_POLICY)
                      .endTls();
         }
 
