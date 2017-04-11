@@ -14,15 +14,14 @@ package org.eclipse.che.ide.command.type;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.util.loging.Log;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -33,8 +32,7 @@ import java.util.Set;
 @Singleton
 public class CommandTypeRegistryImpl implements CommandTypeRegistry {
 
-    private final CommandTypeMessages messages;
-
+    private final CommandTypeMessages      messages;
     private final Map<String, CommandType> commandTypes;
 
     @Inject
@@ -56,14 +54,13 @@ public class CommandTypeRegistryImpl implements CommandTypeRegistry {
         }
     }
 
-    @Nullable
     @Override
-    public CommandType getCommandTypeById(String id) {
-        return commandTypes.get(id);
+    public Optional<CommandType> getCommandTypeById(String id) {
+        return Optional.ofNullable(commandTypes.get(id));
     }
 
     @Override
-    public List<CommandType> getCommandTypes() {
-        return new ArrayList<>(commandTypes.values());
+    public Set<CommandType> getCommandTypes() {
+        return new HashSet<>(commandTypes.values());
     }
 }

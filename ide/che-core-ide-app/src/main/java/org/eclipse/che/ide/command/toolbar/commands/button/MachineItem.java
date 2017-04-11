@@ -15,41 +15,32 @@ import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.ui.menubutton.MenuItem;
 
 /** Item contains {@link CommandImpl} and {@link Machine}. */
-public class MachineItem implements MenuItem {
+public class MachineItem extends AbstractMenuItem {
 
-    private final CommandImpl command;
-    private final Machine     machine;
-    private final String      name;
+    private final Machine machine;
+    private final String  name;
 
     @AssistedInject
     public MachineItem(@Assisted CommandImpl command, @Assisted Machine machine) {
-        this.command = command;
+        super(command);
+
         this.machine = machine;
         this.name = machine.getConfig().getName();
     }
 
     @AssistedInject
     public MachineItem(@Assisted MachineItem item) {
-        this.command = item.command;
+        super(item.getCommand());
+
         this.machine = item.machine;
-        this.name = command.getName() + " on " + machine.getConfig().getName();
+        this.name = getCommand().getName() + " on " + machine.getConfig().getName();
     }
 
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public boolean isDisabled() {
-        return false;
-    }
-
-    public CommandImpl getCommand() {
-        return command;
     }
 
     public Machine getMachine() {

@@ -14,7 +14,7 @@ import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.ui.menubutton.MenuItem;
 
-/** Factory for {@link MenuItem}s for {@link GoalButton}. */
+/** Factory for {@link MenuItem}s for {@link ExecuteCommandButton}. */
 public interface MenuItemsFactory {
 
     GuideItem newGuideItem();

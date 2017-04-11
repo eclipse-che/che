@@ -21,46 +21,41 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.command.goal.DebugGoal;
 import org.eclipse.che.ide.command.goal.RunGoal;
-import org.eclipse.che.ide.command.toolbar.commands.button.GoalButton;
-import org.eclipse.che.ide.command.toolbar.commands.button.GoalButtonFactory;
-import org.eclipse.che.ide.command.toolbar.commands.button.GoalButtonItemsProvider;
+import org.eclipse.che.ide.command.toolbar.commands.button.ExecuteCommandButton;
+import org.eclipse.che.ide.command.toolbar.commands.button.ExecuteCommandButtonFactory;
+import org.eclipse.che.ide.command.toolbar.commands.button.ExecuteCommandButtonItemsProvider;
 import org.eclipse.che.ide.ui.menubutton.MenuButton;
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import static java.util.Collections.emptyList;
+import java.util.Set;
 
 /**
  * Implementation of {@link ExecuteCommandView} uses {@link MenuButton}s
- * for displaying commands grouped by goal.
- * Allows to execute command by choosing one from the button's dropdown menu.
+ * for displaying commands grouped by goals.
+ * Allows to choose command from the {@link MenuButton}'s dropdown menu.
  */
 @Singleton
 public class ExecuteCommandViewImpl implements ExecuteCommandView {
 
-    private final Map<CommandGoal, List<CommandImpl>> commands;
-    /** Stores created buttons by goals in order to reuse it. */
-    private final Map<CommandGoal, GoalButton>        buttonsCache;
+    /** Stores created buttons by goals. */
+    private final Map<String, ExecuteCommandButton> goalButtons;
+    private final FlowPanel                         buttonsPanel;
 
-    private final FlowPanel         buttonsPanel;
-    private final RunGoal           runGoal;
-    private final DebugGoal         debugGoal;
-    private final GoalButtonFactory buttonFactory;
+    private final ExecuteCommandButtonFactory buttonFactory;
+    private final RunGoal                     runGoal;
+    private final DebugGoal                   debugGoal;
 
     private ActionDelegate delegate;
 
     @Inject
-    public ExecuteCommandViewImpl(RunGoal runGoal, DebugGoal debugGoal, GoalButtonFactory buttonFactory) {
+    public ExecuteCommandViewImpl(ExecuteCommandButtonFactory buttonFactory, RunGoal runGoal, DebugGoal debugGoal) {
+        this.buttonFactory = buttonFactory;
         this.runGoal = runGoal;
         this.debugGoal = debugGoal;
-        this.buttonFactory = buttonFactory;
 
-        commands = new HashMap<>();
-        buttonsCache = new HashMap<>();
+        goalButtons = new HashMap<>();
         buttonsPanel = new FlowPanel();
     }
 
@@ -75,42 +70,46 @@ public class ExecuteCommandViewImpl implements ExecuteCommandView {
     }
 
     @Override
-    public void setCommands(Map<CommandGoal, List<CommandImpl>> commands) {
-        this.commands.clear();
-        this.commands.putAll(commands);
-
-        buttonsPanel.clear();
-
-        createOrUpdateButtons();
+    public void setGoals(Set<CommandGoal> goals) {
+        goals.forEach(this::createButton);
     }
 
-    /** Adds buttons with commands to panel. */
-    private void createOrUpdateButtons() {
-        List<CommandGoal> goals = new ArrayList<>();
-        goals.add(runGoal);
-        goals.add(debugGoal);
-
-        goals.forEach(this::createOrUpdateButton);
-    }
-
-    /** Adds button with the commands of the given goal to panel. */
-    private void createOrUpdateButton(CommandGoal goal) {
-        GoalButton button = buttonsCache.get(goal);
-
-        if (button == null) {
-            button = buttonFactory.newButton(goal, delegate, getKeyBinding(goal));
-        }
-
-        buttonsCache.put(goal, button);
-
-        final List<CommandImpl> commandsOfGoal = commands.getOrDefault(goal, emptyList());
-        final GoalButtonItemsProvider itemsProvider = button.getItemProvider();
-
-        itemsProvider.setCommands(commandsOfGoal);
+    /** Creates {@link ExecuteCommandButton} for the given goal and adds button to the panel. */
+    private void createButton(CommandGoal goal) {
+        ExecuteCommandButton button = buttonFactory.newButton(goal, delegate, getKeyBinding(goal));
+        goalButtons.put(goal.getId(), button);
 
         button.updateTooltip();
 
         buttonsPanel.add(button);
+    }
+
+    @Override
+    public void addCommand(CommandImpl command) {
+        final ExecuteCommandButton button = goalButtons.get(command.getGoal());
+
+        if (button == null) {
+            return;
+        }
+
+        ExecuteCommandButtonItemsProvider itemsProvider = button.getItemsProvider();
+        itemsProvider.addCommand(command);
+
+        button.updateTooltip();
+    }
+
+    @Override
+    public void removeCommand(CommandImpl command) {
+        final ExecuteCommandButton button = goalButtons.get(command.getGoal());
+
+        if (button == null) {
+            return;
+        }
+
+        ExecuteCommandButtonItemsProvider itemsProvider = button.getItemsProvider();
+        itemsProvider.removeCommand(command);
+
+        button.updateTooltip();
     }
 
     @Nullable

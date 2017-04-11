@@ -24,7 +24,6 @@ import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.ui.Tooltip;
-import org.eclipse.che.ide.ui.menubutton.ItemsProvider;
 import org.eclipse.che.ide.ui.menubutton.MenuButton;
 import org.eclipse.che.ide.ui.menubutton.MenuItem;
 import org.eclipse.che.ide.util.dom.Elements;
@@ -36,8 +35,8 @@ import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MID
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 import static org.eclipse.che.ide.util.input.KeyMapUtil.getShortcutText;
 
-/** {@link MenuButton} displays commands which belong to the same {@link CommandGoal}. */
-public class GoalButton extends MenuButton {
+/** {@link MenuButton} allows to chose a command for execution. */
+public class ExecuteCommandButton extends MenuButton {
 
     private static final String ACTION_PREFIX = "execute_command_";
 
@@ -48,13 +47,13 @@ public class GoalButton extends MenuButton {
     private Tooltip tooltip;
     private String  tooltipText;
 
-    GoalButton(CommandGoal goal,
-               SafeHtml icon,
-               ItemsProvider itemsProvider,
-               ToolbarMessages messages,
-               ActionManager actionManager,
-               KeyBindingAgent keyBindingAgent,
-               @Nullable CharCodeWithModifiers keyBinding) {
+    ExecuteCommandButton(CommandGoal goal,
+                         SafeHtml icon,
+                         ExecuteCommandButtonItemsProvider itemsProvider,
+                         ToolbarMessages messages,
+                         ActionManager actionManager,
+                         KeyBindingAgent keyBindingAgent,
+                         @Nullable CharCodeWithModifiers keyBinding) {
         super(icon, itemsProvider);
 
         this.goal = goal;
@@ -67,8 +66,8 @@ public class GoalButton extends MenuButton {
         }
     }
 
-    public GoalButtonItemsProvider getItemProvider() {
-        return (GoalButtonItemsProvider)itemsProvider;
+    public ExecuteCommandButtonItemsProvider getItemsProvider() {
+        return (ExecuteCommandButtonItemsProvider)itemsProvider;
     }
 
     /** Updates button's tooltip depending on it's state (what child elements it contains). */
@@ -76,8 +75,18 @@ public class GoalButton extends MenuButton {
         final Optional<MenuItem> defaultItem = itemsProvider.getDefaultItem();
 
         if (defaultItem.isPresent()) {
-            setTooltip(messages.goalButtonTooltipExecute(defaultItem.get().getName()), keyBinding);
-        } else if (getItemProvider().hasGuideOnly()) {
+            MenuItem menuItem = defaultItem.get();
+            String message = "";
+            if (menuItem instanceof CommandItem) {
+                message = messages.goalButtonTooltipExecute(menuItem.getName());
+            } else if (menuItem instanceof MachineItem) {
+                MachineItem machineMenuItem = (MachineItem)menuItem;
+                message = messages.goalButtonTooltipExecuteOnMachine(machineMenuItem.getCommand().getName(),
+                                                                     machineMenuItem.getName());
+            }
+
+            setTooltip(message, keyBinding);
+        } else if (getItemsProvider().containsGuideItemOnly()) {
             setTooltip(messages.goalButtonTooltipNoCommand(goal.getId()), null);
         } else {
             setTooltip(messages.goalButtonTooltipChooseCommand(goal.getId()), null);

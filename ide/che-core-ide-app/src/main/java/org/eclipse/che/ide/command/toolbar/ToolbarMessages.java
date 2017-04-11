@@ -31,6 +31,9 @@ public interface ToolbarMessages extends Messages {
     @Key("goal_button.tooltip.execute")
     String goalButtonTooltipExecute(String commandName);
 
+    @Key("goal_button.tooltip.execute_on_machine")
+    String goalButtonTooltipExecuteOnMachine(String commandName, String machineName);
+
     @Key("previews.tooltip")
     String previewsTooltip();
 

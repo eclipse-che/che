@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -24,13 +25,15 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandAddedEvent;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
+import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.command.CommandType;
+import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -57,8 +60,7 @@ import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 /** Presenter for Commands Explorer. */
 @Singleton
 public class CommandsExplorerPresenter extends BasePresenter implements CommandsExplorerView.ActionDelegate,
-                                                                        WsAgentComponent,
-                                                                        CommandChangedListener {
+                                                                        WsAgentComponent {
 
     private final CommandsExplorerView view;
     private final CommandResources     resources;
@@ -72,6 +74,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     private final NodeFactory          nodeFactory;
     private final EditorAgent          editorAgent;
     private final AppContext           appContext;
+    private final EventBus             eventBus;
 
     @Inject
     public CommandsExplorerPresenter(CommandsExplorerView view,
@@ -85,7 +88,8 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
                                      DialogFactory dialogFactory,
                                      NodeFactory nodeFactory,
                                      EditorAgent editorAgent,
-                                     AppContext appContext) {
+                                     AppContext appContext,
+                                     EventBus eventBus) {
         this.view = view;
         this.resources = commandResources;
         this.workspaceAgent = workspaceAgent;
@@ -98,6 +102,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         this.nodeFactory = nodeFactory;
         this.editorAgent = editorAgent;
         this.appContext = appContext;
+        this.eventBus = eventBus;
 
         view.setDelegate(this);
     }
@@ -111,7 +116,10 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         }
 
         refreshView();
-        commandManager.addCommandChangedListener(this);
+
+        eventBus.addHandler(CommandAddedEvent.getType(), e -> refreshView());
+        eventBus.addHandler(CommandRemovedEvent.getType(), e -> refreshView());
+        eventBus.addHandler(CommandUpdatedEvent.getType(), e -> refreshView());
     }
 
     @Override
@@ -202,21 +210,6 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
             notificationManager.notify(title, err.getMessage(), FAIL, EMERGE_MODE);
             throw new OperationException(err.getMessage());
         };
-    }
-
-    @Override
-    public void onCommandAdded(CommandImpl command) {
-        refreshView();
-    }
-
-    @Override
-    public void onCommandUpdated(CommandImpl previousCommand, CommandImpl command) {
-        refreshView();
-    }
-
-    @Override
-    public void onCommandRemoved(CommandImpl command) {
-        refreshView();
     }
 
     /** Refresh view and preserve current selection. */

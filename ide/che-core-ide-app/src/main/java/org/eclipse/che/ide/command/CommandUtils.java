@@ -15,10 +15,10 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandGoal;
+import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
-import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.vectomatic.dom.svg.ui.SVGImage;
@@ -73,10 +73,10 @@ public class CommandUtils {
     /** Returns the icon for the given command type ID or {@code null} if none. */
     @Nullable
     public SVGResource getCommandTypeIcon(String typeId) {
-        final CommandType commandType = commandTypeRegistry.getCommandTypeById(typeId);
+        final Optional<CommandType> commandType = commandTypeRegistry.getCommandTypeById(typeId);
 
-        if (commandType != null) {
-            final Icon icon = iconRegistry.getIconIfExist("command.type." + commandType.getId());
+        if (commandType.isPresent()) {
+            final Icon icon = iconRegistry.getIconIfExist("command.type." + commandType.get().getId());
 
             if (icon != null) {
                 final SVGImage svgImage = icon.getSVGImage();

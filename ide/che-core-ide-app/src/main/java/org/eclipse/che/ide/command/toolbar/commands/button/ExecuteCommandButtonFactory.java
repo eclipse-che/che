@@ -29,9 +29,9 @@ import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandView.ActionDelegate;
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 
-/** Factory for {@link GoalButton}s. */
+/** Factory for {@link ExecuteCommandButton}s. */
 @Singleton
-public class GoalButtonFactory {
+public class ExecuteCommandButtonFactory {
 
     private final CommandResources resources;
     private final AppContext       appContext;
@@ -43,14 +43,14 @@ public class GoalButtonFactory {
     private final DebugGoal        debugGoal;
 
     @Inject
-    public GoalButtonFactory(CommandResources resources,
-                             AppContext appContext,
-                             MenuItemsFactory menuItemsFactory,
-                             ToolbarMessages messages,
-                             RunGoal runGoal,
-                             DebugGoal debugGoal,
-                             ActionManager actionManager,
-                             KeyBindingAgent keyBindingAgent) {
+    public ExecuteCommandButtonFactory(CommandResources resources,
+                                       AppContext appContext,
+                                       MenuItemsFactory menuItemsFactory,
+                                       ToolbarMessages messages,
+                                       RunGoal runGoal,
+                                       DebugGoal debugGoal,
+                                       ActionManager actionManager,
+                                       KeyBindingAgent keyBindingAgent) {
         this.resources = resources;
         this.appContext = appContext;
         this.menuItemsFactory = menuItemsFactory;
@@ -62,7 +62,7 @@ public class GoalButtonFactory {
     }
 
     /**
-     * Creates new instance of the {@link GoalButton}.
+     * Creates new instance of the {@link ExecuteCommandButton}.
      *
      * @param goal
      *         {@link CommandGoal} for displaying commands
@@ -70,23 +70,23 @@ public class GoalButtonFactory {
      *         delegate for receiving events
      * @param keyBinding
      *         key binding for the button
-     * @return {@link GoalButton}
+     * @return {@link ExecuteCommandButton}
      */
-    public GoalButton newButton(CommandGoal goal, ActionDelegate delegate, @Nullable CharCodeWithModifiers keyBinding) {
-        final GoalButtonItemsProvider itemsProvider = new GoalButtonItemsProvider(appContext, menuItemsFactory);
-        final GoalButton button = new GoalButton(goal,
-                                                 getIconForGoal(goal),
-                                                 itemsProvider,
-                                                 messages,
-                                                 actionManager,
-                                                 keyBindingAgent,
-                                                 keyBinding);
+    public ExecuteCommandButton newButton(CommandGoal goal, ActionDelegate delegate, @Nullable CharCodeWithModifiers keyBinding) {
+        final ExecuteCommandButtonItemsProvider itemsProvider = new ExecuteCommandButtonItemsProvider(appContext, menuItemsFactory);
+        final ExecuteCommandButton button = new ExecuteCommandButton(goal,
+                                                                     getIconForGoal(goal),
+                                                                     itemsProvider,
+                                                                     messages,
+                                                                     actionManager,
+                                                                     keyBindingAgent,
+                                                                     keyBinding);
 
         button.setActionHandler(item -> {
             if (item instanceof CommandItem) {
                 final CommandImpl command = ((CommandItem)item).getCommand();
 
-                delegate.onCommandExecute(command, null);
+                delegate.onCommandExecute(command);
                 itemsProvider.setDefaultItem(item);
                 button.updateTooltip();
             } else if (item instanceof MachineItem) {
