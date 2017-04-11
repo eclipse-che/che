@@ -30,7 +30,6 @@ import org.eclipse.che.ide.command.toolbar.processes.ProcessItemRenderer.StopPro
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 
-import static com.google.gwt.dom.client.Style.Float.RIGHT;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
@@ -165,7 +164,6 @@ class ProcessWidget extends FlowPanel {
         ActionButton(SafeHtml content) {
             super(Document.get().createDivElement());
 
-            getElement().getStyle().setFloat(RIGHT);
             getElement().setInnerSafeHtml(content);
             asWidget().addStyleName(RESOURCES.commandToolbarCss().processWidgetActionButton());
         }
