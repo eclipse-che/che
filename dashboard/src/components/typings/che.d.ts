@@ -34,11 +34,11 @@ declare namespace _che {
   export interface IRegisterService {
     app: ng.IModule;
     directive(name: string, constructorFn: Function);
-    filter(name: string, constructorFn: Function): che.IRegisterService;
-    controller(name: string, constructorFn: Function): che.IRegisterService;
-    service(name: string, constructorFn: Function): che.IRegisterService;
-    provider(name: string, constructorFn: ng.IServiceProvider): che.IRegisterService;
-    factory(name: string, constructorFn: Function): che.IRegisterService;
+    filter(name: string, constructorFn: Function): IRegisterService;
+    controller(name: string, constructorFn: Function): IRegisterService;
+    service(name: string, constructorFn: Function): IRegisterService;
+    provider(name: string, constructorFn: ng.IServiceProvider): IRegisterService;
+    factory(name: string, constructorFn: Function): IRegisterService;
   }
 
   export interface IWorkspaceCommand {
@@ -229,6 +229,11 @@ declare namespace _che {
   }
 
   export interface IUser {
+    attributes: {
+      firstName?: string;
+      lastName?: string;
+      [propName: string]: string | number;
+    };
     id: string;
     name: string;
     email: string;

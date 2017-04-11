@@ -44,6 +44,7 @@ import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.command.node.NodeFactory;
 import org.eclipse.che.ide.command.type.chooser.CommandTypeChooser;
+import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 
 /** Presenter for Commands Explorer. */
+@DynaObject
 @Singleton
 public class CommandsExplorerPresenter extends BasePresenter implements CommandsExplorerView.ActionDelegate,
                                                                         WsAgentComponent {
