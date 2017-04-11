@@ -97,44 +97,40 @@ public class GwtXmlGenerator {
      *         --loggingEnabled - Enable or disable gwt logging, default "false"
      *         --includePackages - Include only specific packages where *.gwt.xml can be found, default "No value. Means all packages"
      *         --excludePackages - Exclude packages from *.gwt.xml scanning	, default "com.google", "elemental","java.util","java.lang"
+     * @throws IOException 
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
-        try {
-            System.out.println(" ------------------------------------------------------------------------ ");
-            System.out.println("Searching for GWT");
-            System.out.println(" ------------------------------------------------------------------------ ");
-            Map<String, Set<String>> parsedArgs = GeneratorUtils.parseArgs(args);
+        System.out.println(" ------------------------------------------------------------------------ ");
+        System.out.println("Searching for GWT");
+        System.out.println(" ------------------------------------------------------------------------ ");
+        Map<String, Set<String>> parsedArgs = GeneratorUtils.parseArgs(args);
 
-            GwtXmlModuleSearcher searcher = new GwtXmlModuleSearcher(parsedArgs.getOrDefault("excludePackages",
-                                                                                             ImmutableSet.of("com.google",
-                                                                                                             "elemental",
-                                                                                                             "java.util",
-                                                                                                             "java.lang"
-                                                                                                            )),
-                                                                     parsedArgs.getOrDefault("includePackages", Collections.emptySet()),
-                                                                     Collections.emptySet());
-            Set<String> gwtModules = searcher.getGwtModulesFromClassPath();
-            gwtModules.forEach(System.out::println);
-            System.out.println("Found " + gwtModules.size() + " gwt modules");
+        GwtXmlModuleSearcher searcher = new GwtXmlModuleSearcher(parsedArgs.getOrDefault("excludePackages",
+                                                                                         ImmutableSet.of("com.google",
+                                                                                                         "elemental",
+                                                                                                         "java.util",
+                                                                                                         "java.lang"
+                                                                                                        )),
+                                                                 parsedArgs.getOrDefault("includePackages", Collections.emptySet()),
+                                                                 Collections.emptySet());
+        Set<String> gwtModules = searcher.getGwtModulesFromClassPath();
+        gwtModules.forEach(System.out::println);
+        System.out.println("Found " + gwtModules.size() + " gwt modules");
 
 
-            GwtXmlGeneratorConfig gwtXmlGeneratorConfig =
-                    new GwtXmlGeneratorConfig(gwtModules,
-                                              new File(getSingleValueOrDefault(parsedArgs, "rootDir", ".")),
-                                              getSingleValueOrDefault(parsedArgs, "gwtFileName", DEFAULT_GWT_XML_PATH),
-                                              getSingleValueOrDefault(parsedArgs, "entryPoint", DEFAULT_GWT_ETNRY_POINT),
-                                              getSingleValueOrDefault(parsedArgs, "styleSheet", DEFAULT_STYLE_SHEET),
-                                              parseBoolean(
-                                                      getSingleValueOrDefault(parsedArgs, "loggingEnabled", DEFAULT_LOGGING.toString()))
-                    );
-            GwtXmlGenerator gwtXmlGenerator = new GwtXmlGenerator(gwtXmlGeneratorConfig);
-            gwtXmlGenerator.generateGwtXml();
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-            // error
-            System.exit(1);//NOSONAR
-        }
+        GwtXmlGeneratorConfig gwtXmlGeneratorConfig =
+                new GwtXmlGeneratorConfig(gwtModules,
+                                          new File(getSingleValueOrDefault(parsedArgs, "rootDir", ".")),
+                                          getSingleValueOrDefault(parsedArgs, "gwtFileName", DEFAULT_GWT_XML_PATH),
+                                          getSingleValueOrDefault(parsedArgs, "entryPoint", DEFAULT_GWT_ETNRY_POINT),
+                                          getSingleValueOrDefault(parsedArgs, "styleSheet", DEFAULT_STYLE_SHEET),
+                                          parseBoolean(
+                                                  getSingleValueOrDefault(parsedArgs, "loggingEnabled", DEFAULT_LOGGING.toString()))
+            );
+        GwtXmlGenerator gwtXmlGenerator = new GwtXmlGenerator(gwtXmlGeneratorConfig);
+        gwtXmlGenerator.generateGwtXml();
+
     }
 
     private static String getSingleValueOrDefault(Map<String, Set<String>> parsedArgs, String key, String defaultValue) {
