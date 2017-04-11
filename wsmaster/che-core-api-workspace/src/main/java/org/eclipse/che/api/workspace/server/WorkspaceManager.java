@@ -522,29 +522,24 @@ public class WorkspaceManager {
             workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
             workspaceDao.update(workspace);
         }
-        return sharedPool.runAsync(() -> {
-            final String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
-            LOG.info("Workspace '{}/{}' with id '{}' is being stopped by user '{}'",
-                     workspace.getNamespace(),
-                     workspace.getConfig().getName(),
-                     workspace.getId(),
-                     firstNonNull(stoppedBy, "undefined"));
 
+        String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
+        LOG.info("Workspace '{}/{}' with id '{}' is being stopped by user '{}'",
+                 workspace.getNamespace(),
+                 workspace.getConfig().getName(),
+                 workspace.getId(),
+                 firstNonNull(stoppedBy, "undefined"));
+
+        return sharedPool.runAsync(() -> {
             try {
                 runtimes.stop(workspace.getId(), options);
+                states.remove(workspace.getId());
 
-                if (!workspace.isTemporary()) {
-                    workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
-                    workspaceDao.update(workspace);
-                }
                 LOG.info("Workspace '{}/{}' with id '{}' stopped by user '{}'",
                          workspace.getNamespace(),
                          workspace.getConfig().getName(),
                          workspace.getId(),
                          firstNonNull(stoppedBy, "undefined"));
-
-                states.put(workspace.getId(), WorkspaceStatus.STOPPED);
-
             } catch (Exception ex) {
                 LOG.error(ex.getLocalizedMessage(), ex);
             } finally {
