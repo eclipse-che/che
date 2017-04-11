@@ -23,6 +23,10 @@ public class InfrastructureException extends Exception {
         super(message);
     }
 
+    public InfrastructureException(Exception e) {
+        super(e);
+    }
+
     public InfrastructureException(String message, Throwable cause) {
         super(message, cause);
     }

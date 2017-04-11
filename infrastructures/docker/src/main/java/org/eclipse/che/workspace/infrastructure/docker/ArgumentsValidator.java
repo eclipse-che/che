@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import org.eclipse.che.api.workspace.server.spi.ValidationException;
+import org.eclipse.che.api.core.ValidationException;
 
 import static java.lang.String.format;
 

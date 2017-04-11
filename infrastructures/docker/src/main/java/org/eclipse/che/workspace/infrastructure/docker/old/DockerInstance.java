@@ -70,141 +70,6 @@ import static java.lang.String.format;
  * @author Mykola Morhun
  */
 public class DockerInstance {
-    private static final Logger LOG = LoggerFactory.getLogger(DockerInstance.class);
-
-    private final OldMachineConfigImpl machineConfig;
-    private final MachineImpl          machineRuntime;
-    private final String               workspace;
-    private final String               envName;
-    private final String               owner;
-    private       MachineStatus        status;
-    private       String               id;
-    /**
-     * Name of the latest tag used in Docker image.
-     */
-    public static final String LATEST_TAG = "latest";
-
-    private static final AtomicInteger pidSequence           = new AtomicInteger(1);
-    private static final String        PID_FILE_TEMPLATE     = "/tmp/docker-exec-%s.pid";
-    private static final Pattern       PID_FILE_PATH_PATTERN = Pattern.compile(String.format(PID_FILE_TEMPLATE, "([0-9]+)"));
-    /**
-     * Produces output in form:
-     * <pre>
-     * /some/path/pid_file_template-1.pid
-     * /some/path/pid_file_template-3.pid
-     * /some/path/pid_file_template-14.pid
-     * </pre>
-     * Where each line is full path to pid file of <b>process that is running<b/>
-     */
-    private static final String GET_ALIVE_PROCESSES_COMMAND =
-            format("for pidFile in $(find %s -print 2>/dev/null); do kill -0 \"$(cat ${pidFile})\" 2>/dev/null && echo \"${pidFile}\"; done",
-                   format(PID_FILE_TEMPLATE, "*"));
-
-    private final DockerMachineFactory dockerMachineFactory;
-    private final String               container;
-    private final DockerConnector      docker;
-    private final String               image;
-    private final LineConsumer         outputConsumer;
-    private final String               registry;
-    private final String               registryNamespace;
-    private final DockerNode           node;
-    private final DockerInstanceStopDetector                  dockerInstanceStopDetector;
-    private final DockerInstanceProcessesCleaner              processesCleaner;
-    private final ConcurrentHashMap<Integer, InstanceProcess> machineProcesses;
-    private final boolean                                     snapshotUseRegistry;
-    private final MachineRuntimeInfoImpl                      machineRuntime;
-
-    @Inject
-    public DockerInstance(DockerConnectorProvider dockerProvider,
-                          @Named("che.docker.registry") String registry,
-                          @Named("che.docker.namespace") @Nullable String registryNamespace,
-                          DockerMachineFactory dockerMachineFactory,
-                          @Assisted Machine machine,
-                          @Assisted("container") String container,
-                          @Assisted("image") String image,
-                          @Assisted DockerNode node,
-                          @Assisted LineConsumer outputConsumer,
-                          DockerInstanceStopDetector dockerInstanceStopDetector,
-                          DockerInstanceProcessesCleaner processesCleaner,
-                          @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) throws MachineException {
-        super(machine);
-        this.dockerMachineFactory = dockerMachineFactory;
-        this.container = container;
-        this.docker = dockerProvider.get();
-        this.image = image;
-        this.outputConsumer = outputConsumer;
-        this.registry = registry;
-        this.registryNamespace = registryNamespace;
-        this.node = node;
-        this.dockerInstanceStopDetector = dockerInstanceStopDetector;
-        this.processesCleaner = processesCleaner;
-        this.machineProcesses = new ConcurrentHashMap<>();
-        processesCleaner.trackProcesses(this);
-        this.snapshotUseRegistry = snapshotUseRegistry;
-        this.machineRuntime = doGetRuntime();
-        this.workspace = workspace;
-        this.envName = envName;
-        this.owner = owner;
-        this.machineConfig = new OldMachineConfigImpl(machineConfig);
-        this.id = id;
-        this.status = status;
-        this.machineRuntime = machine != null ? new MachineImpl(machine.getProperties(), machine.getServers()) : null;
-    }
-
-    @Override
-    public OldMachineConfigImpl getConfig() {
-        return machineConfig;
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    @Override
-    public String getWorkspaceId() {
-        return workspace;
-    }
-
-    @Override
-    public String getEnvName() {
-        return envName;
-    }
-
-    @Override
-    public String getOwner() {
-        return owner;
-    }
-
-    @Override
-    public MachineStatus getStatus() {
-        return status;
-    }
-
-    @Override
-    public MachineImpl getRuntime() {
-        return machineRuntime;
-    }
-
-    public void setStatus(MachineStatus status) {
-        this.status = status;
-    }
-
-    @Override
-    public LineConsumer getLogger() {
-        return outputConsumer;
-    }
-
-    @Override
-    public MachineRuntimeInfoImpl getRuntime() {
-        return machineRuntime;
-    }
-
-    @Override
     public InstanceProcess getProcess(final int pid) throws NotFoundException, MachineException {
         final InstanceProcess machineProcess = machineProcesses.get(pid);
         if (machineProcess != null) {
@@ -219,7 +84,6 @@ public class DockerInstance {
         throw new NotFoundException(format("Process with pid %s not found", pid));
     }
 
-    @Override
     public List<InstanceProcess> getProcesses() throws MachineException {
         List<InstanceProcess> processes = new LinkedList<>();
         try {
@@ -247,53 +111,6 @@ public class DockerInstance {
         }
     }
 
-    @Override
-    public InstanceProcess createProcess(Command command, String outputChannel) throws MachineException {
-        final Integer pid = pidSequence.getAndIncrement();
-        final InstanceProcess process = dockerMachineFactory.createProcess(command,
-                                                                           container,
-                                                                           outputChannel,
-                                                                           String.format(PID_FILE_TEMPLATE, pid),
-                                                                           pid);
-        machineProcesses.put(pid, process);
-        return process;
-    }
-
-    @Override
-    public MachineSource saveToSnapshot() throws MachineException {
-        try {
-            String image = generateRepository();
-            if(!snapshotUseRegistry) {
-                commitContainer(image, LATEST_TAG);
-                return new DockerMachineSource(image).withTag(LATEST_TAG);
-            }
-
-            PushParams pushParams = PushParams.create(image)
-                                              .withRegistry(registry)
-                                              .withTag(LATEST_TAG);
-
-            final String fullRepo = pushParams.getFullRepo();
-            commitContainer(fullRepo, LATEST_TAG);
-            //TODO fix this workaround. Docker image is not visible after commit when using swarm
-            Thread.sleep(2000);
-            final ProgressLineFormatterImpl lineFormatter = new ProgressLineFormatterImpl();
-            final String digest = docker.push(pushParams,
-                                              progressMonitor -> {
-                                                  try {
-                                                      outputConsumer.writeLine(lineFormatter.format(progressMonitor));
-                                                  } catch (IOException ignored) {
-                                                  }
-                                              });
-            docker.removeImage(RemoveImageParams.create(fullRepo).withForce(false));
-            return new DockerMachineSource(image).withRegistry(registry).withDigest(digest).withTag(LATEST_TAG);
-        } catch (IOException ioEx) {
-            throw new MachineException(ioEx);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new MachineException(e.getLocalizedMessage(), e);
-        }
-    }
-
     @VisibleForTesting
     protected void commitContainer(String repository, String tag) throws IOException {
         String comment = format("Suspended at %1$ta %1$tb %1$td %1$tT %1$tZ %1$tY",
@@ -314,14 +131,12 @@ public class DockerInstance {
         return DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX + NameGenerator.generate(null, 16);
     }
 
-    @Override
     public void destroy() throws MachineException {
         try {
             outputConsumer.close();
         } catch (IOException ignored) {}
 
         machineProcesses.clear();
-        processesCleaner.untrackProcesses(getId());
         dockerInstanceStopDetector.stopDetection(container);
         try {
             if (getConfig().isDev()) {
@@ -344,7 +159,6 @@ public class DockerInstance {
         }
     }
 
-    @Override
     public DockerNode getNode() {
         return node;
     }
@@ -370,7 +184,6 @@ public class DockerInstance {
      * @throws MachineException
      *         if any error occurs with file reading
      */
-    @Override
     public String readFileContent(String filePath, int startFrom, int limit) throws MachineException {
         if (limit <= 0 || startFrom <= 0) {
             throw new MachineException("Impossible to read file " + limit + " lines from " + startFrom + " line");
@@ -398,7 +211,6 @@ public class DockerInstance {
         return content;
     }
 
-    @Override
     public void copy(Instance sourceMachine, String sourcePath, String targetPath, boolean overwriteDirNonDir) throws MachineException {
         if (!(sourceMachine instanceof DockerInstance)) {
             throw new MachineException("Unsupported copying between not docker machines");
@@ -419,25 +231,8 @@ public class DockerInstance {
      *
      * {@inheritDoc}
      */
-    @Override
     public void copy(String sourcePath, String targetPath) throws MachineException {
         throw new MachineException("Unsupported operation for docker machine implementation");
-    }
-
-    /**
-     * Removes process from the list of processes
-     *
-     * <p>Used by {@link DockerInstanceProcessesCleaner}
-     */
-    void removeProcess(int pid) {
-        machineProcesses.remove(pid);
-    }
-
-    /**
-     * Can be used for docker specific operations with machine
-     */
-    public String getContainer() {
-        return container;
     }
 
     private MachineRuntimeInfoImpl doGetRuntime() throws MachineException {

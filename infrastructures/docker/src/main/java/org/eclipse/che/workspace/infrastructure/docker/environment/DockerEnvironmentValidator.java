@@ -12,11 +12,11 @@ package org.eclipse.che.workspace.infrastructure.docker.environment;
 
 import com.google.common.base.Joiner;
 
-import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.workspace.server.spi.ValidationException;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
@@ -74,7 +74,7 @@ public class DockerEnvironmentValidator {
     }
 
     public void validate(Environment env, DockerEnvironment dockerEnvironment) throws ValidationException,
-                                                        ServerException {
+                                                                                      InfrastructureException {
         checkArgument(dockerEnvironment.getServices() != null && !dockerEnvironment.getServices().isEmpty(),
                       "Environment should contain at least 1 machine");
 
@@ -204,7 +204,7 @@ public class DockerEnvironmentValidator {
                               "Value of attribute 'memoryLimitBytes' of machine '%s' in environment is illegal",
                               machineName);
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(
+                throw new ValidationException(
                         format("Value of attribute 'memoryLimitBytes' of machine '%s' in environment is illegal",
                                machineName));
             }

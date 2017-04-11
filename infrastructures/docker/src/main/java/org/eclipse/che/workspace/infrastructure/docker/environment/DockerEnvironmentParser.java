@@ -12,11 +12,11 @@ package org.eclipse.che.workspace.infrastructure.docker.environment;
 
 import com.google.common.base.Joiner;
 
-import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
-import org.eclipse.che.api.workspace.server.spi.ValidationException;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 
@@ -56,11 +56,11 @@ public class DockerEnvironmentParser {
      * @return environment representation as compose environment
      * @throws ValidationException
      *         if provided environment is illegal
-     * @throws ServerException
+     * @throws InfrastructureException
      *         if fetching of environment recipe content fails
      */
     public DockerEnvironment parse(Environment environment) throws ValidationException,
-                                                                   ServerException {
+                                                                   InfrastructureException {
 
         checkNotNull(environment, "Environment should not be null");
         Recipe recipe = environment.getRecipe();

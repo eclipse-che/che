@@ -19,10 +19,11 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
@@ -49,6 +50,7 @@ import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
+import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 import org.eclipse.che.workspace.infrastructure.docker.old.DockerInstance;
 import org.eclipse.che.workspace.infrastructure.docker.old.DockerInstanceRuntimeInfo;
@@ -82,6 +84,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.LATEST_TAG;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -237,7 +240,8 @@ public class DockerServiceStarter {
 
     public DockerMachine startService(String networkName,
                                       DockerService service,
-                                      LineConsumer machineLogger) throws ServerException {
+                                      Map<String, String> startOptions) throws InfrastructureException {
+        LineConsumer machineLogger = new ListLineConsumer();
 
         // copy to not affect/be affected by changes in origin
         service = new DockerService(service);
@@ -285,11 +289,9 @@ public class DockerServiceStarter {
                                                        image,
                                                        node,
                                                        machineLogger);
-        } catch (SourceNotFoundException e) {
-            throw e;
         } catch (RuntimeException | ServerException | NotFoundException | IOException e) {
             cleanUpContainer(container);
-            throw new ServerException(e.getLocalizedMessage(), e);
+            throw new InfrastructureException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -297,7 +299,7 @@ public class DockerServiceStarter {
                                 DockerService service,
                                 ProgressMonitor progressMonitor)
             throws ServerException,
-                   NotFoundException {
+                   NotFoundException, SourceNotFoundException {
 
         String imageName = "eclipse-che/" + service.getContainerName();
         if ((service.getBuild() == null || (service.getBuild().getContext() == null &&
@@ -378,7 +380,7 @@ public class DockerServiceStarter {
      */
     protected void pullImage(DockerService service,
                              String machineImageName,
-                             ProgressMonitor progressMonitor) throws MachineException {
+                             ProgressMonitor progressMonitor) throws MachineException, SourceNotFoundException {
         DockerMachineSource dockerMachineSource = new DockerMachineSource(
                 new MachineSourceImpl("image").setLocation(service.getImage()));
         if (dockerMachineSource.getRepository() == null) {
@@ -392,7 +394,7 @@ public class DockerServiceStarter {
             if (!isSnapshot || snapshotUseRegistry) {
                 PullParams pullParams = PullParams.create(dockerMachineSource.getRepository())
                                                   .withTag(MoreObjects.firstNonNull(dockerMachineSource.getTag(),
-                                                                                    DockerInstance.LATEST_TAG))
+                                                                                    LATEST_TAG))
                                                   .withRegistry(dockerMachineSource.getRegistry())
                                                   .withAuthConfigs(dockerCredentials.getCredentials());
                 docker.pull(pullParams, progressMonitor);

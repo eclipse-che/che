@@ -17,9 +17,11 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.environment.TypeSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
@@ -30,7 +32,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 import java.io.IOException;
 import java.util.Map;
 
-import static java.util.Objects.requireNonNull;
+import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkNotNull;
 
 /**
  * Converters compose file to {@link ComposeEnvironment} and vise versa or
@@ -51,10 +53,10 @@ public class ComposeEnvironmentParser implements TypeSpecificEnvironmentParser {
     }
 
     @Override
-    public DockerEnvironment parse(Environment environment) throws ServerException {
-        requireNonNull(environment, "Environment should not be null");
+    public DockerEnvironment parse(Environment environment) throws ValidationException, InfrastructureException {
+        checkNotNull(environment, "Environment should not be null");
         Recipe recipe = environment.getRecipe();
-        requireNonNull(environment.getRecipe(), "Environment recipe should not be null");
+        checkNotNull(environment.getRecipe(), "Environment recipe should not be null");
 
         String content = getContentOfRecipe(recipe);
         ComposeEnvironment composeEnvironment = parse(content, recipe.getContentType());
@@ -66,14 +68,15 @@ public class ComposeEnvironmentParser implements TypeSpecificEnvironmentParser {
      *
      * @param recipeContent
      *         compose file to parse
-     * @throws IllegalArgumentException
+     * @throws ValidationException
      *         when environment or environment recipe is invalid
-     * @throws ServerException
+     * @throws InfrastructureException
      *         when environment recipe can not be retrieved
      */
-    public ComposeEnvironment parse(String recipeContent, String contentType) throws ServerException {
-        requireNonNull(recipeContent, "Recipe content should not be null");
-        requireNonNull(contentType, "Recipe content type should not be null");
+    public ComposeEnvironment parse(String recipeContent, String contentType)
+            throws ValidationException {
+        checkNotNull(recipeContent, "Recipe content should not be null");
+        checkNotNull(contentType, "Recipe content type should not be null");
 
         ComposeEnvironment composeEnvironment;
         switch (contentType) {
@@ -83,12 +86,12 @@ public class ComposeEnvironmentParser implements TypeSpecificEnvironmentParser {
                 try {
                     composeEnvironment = YAML_PARSER.readValue(recipeContent, ComposeEnvironment.class);
                 } catch (IOException e) {
-                    throw new IllegalArgumentException(
+                    throw new ValidationException(
                             "Parsing of environment configuration failed. " + e.getLocalizedMessage());
                 }
                 break;
             default:
-                throw new IllegalArgumentException("Provided environment recipe content type '" +
+                throw new ValidationException("Provided environment recipe content type '" +
                                                    contentType +
                                                    "' is unsupported. Supported values are: " +
                                                    "application/x-yaml, text/yaml, text/x-yaml");
@@ -101,24 +104,28 @@ public class ComposeEnvironmentParser implements TypeSpecificEnvironmentParser {
      *
      * @param composeEnvironment
      *         Docker Compose environment model file
-     * @throws IllegalArgumentException
+     * @throws ValidationException
      *         when argument is null or conversion to YAML fails
      */
-    public String toYaml(ComposeEnvironment composeEnvironment) {
-        requireNonNull(composeEnvironment, "Compose environment should not be null");
+    public String toYaml(ComposeEnvironment composeEnvironment) throws ValidationException {
+        checkNotNull(composeEnvironment, "Compose environment should not be null");
 
         try {
             return YAML_PARSER.writeValueAsString(composeEnvironment);
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException(e.getLocalizedMessage(), e);
+            throw new ValidationException(e.getLocalizedMessage(), e);
         }
     }
 
-    private String getContentOfRecipe(Recipe environmentRecipe) throws ServerException {
+    private String getContentOfRecipe(Recipe environmentRecipe) throws InfrastructureException {
         if (environmentRecipe.getContent() != null) {
             return environmentRecipe.getContent();
         } else {
-            return recipeDownloader.getRecipe(environmentRecipe.getLocation());
+            try {
+                return recipeDownloader.getRecipe(environmentRecipe.getLocation());
+            } catch (ServerException e) {
+                throw new InfrastructureException(e.getLocalizedMessage(), e);
+            }
         }
     }
 

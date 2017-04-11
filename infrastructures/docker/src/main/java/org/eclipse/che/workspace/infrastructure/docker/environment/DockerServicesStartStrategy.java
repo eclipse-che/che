@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker.environment;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
-import org.eclipse.che.api.workspace.server.spi.ValidationException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 

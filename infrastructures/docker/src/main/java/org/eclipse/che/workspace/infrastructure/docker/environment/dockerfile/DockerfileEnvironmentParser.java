@@ -12,7 +12,7 @@ package org.eclipse.che.workspace.infrastructure.docker.environment.dockerfile;
 
 import com.google.common.base.Joiner;
 
-import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.TypeSpecificEnvironmentParser;
@@ -20,8 +20,8 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
+import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkArgument;
 
 /**
  * Dockerfile specific environment parser.
@@ -32,16 +32,16 @@ import static java.lang.String.format;
 public class DockerfileEnvironmentParser implements TypeSpecificEnvironmentParser {
 
     @Override
-    public DockerEnvironment parse(Environment environment) throws IllegalArgumentException, ServerException {
+    public DockerEnvironment parse(Environment environment) throws ValidationException {
         Recipe recipe = environment.getRecipe();
 
         if (!"dockerfile".equals(recipe.getType())) {
-            throw new IllegalArgumentException(format("Dockerfile environment parser doesn't support recipe type '%s'",
+            throw new ValidationException(format("Dockerfile environment parser doesn't support recipe type '%s'",
                                                       recipe.getType()));
         }
 
         if (!"text/x-dockerfile".equals(recipe.getContentType())) {
-            throw new IllegalArgumentException(format("Content type '%s' of recipe of environment is unsupported." +
+            throw new ValidationException(format("Content type '%s' of recipe of environment is unsupported." +
                                                       " Supported values are: text/x-dockerfile",
                                                       recipe.getContentType()));
         }
@@ -59,7 +59,7 @@ public class DockerfileEnvironmentParser implements TypeSpecificEnvironmentParse
         return cheServiceEnv;
     }
 
-    private String getMachineName(Environment environment) throws IllegalArgumentException {
+    private String getMachineName(Environment environment) throws ValidationException {
         checkArgument(environment.getMachines().size() == 1,
                       "Environment of type '%s' doesn't support multiple machines, but contains machines: %s",
                       environment.getRecipe().getType(),

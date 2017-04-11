@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker;
+package org.eclipse.che.workspace.infrastructure.docker.old;
 
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
@@ -29,7 +29,7 @@ import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.docker.AgentConfigApplier.PROPERTIES.ENVIRONMENT;
+import static org.eclipse.che.workspace.infrastructure.docker.old.AgentConfigApplier.PROPERTIES.ENVIRONMENT;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**

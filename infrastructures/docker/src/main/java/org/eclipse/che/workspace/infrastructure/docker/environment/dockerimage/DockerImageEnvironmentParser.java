@@ -12,15 +12,15 @@ package org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage;
 
 import com.google.common.base.Joiner;
 
-import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.TypeSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
+import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkArgument;
 
 /**
  * Docker image specific environment parser.
@@ -31,11 +31,11 @@ import static java.lang.String.format;
 public class DockerImageEnvironmentParser implements TypeSpecificEnvironmentParser {
 
     @Override
-    public DockerEnvironment parse(Environment environment) throws IllegalArgumentException, ServerException {
+    public DockerEnvironment parse(Environment environment) throws ValidationException {
         Recipe recipe = environment.getRecipe();
 
         if (!"dockerimage".equals(recipe.getType())) {
-            throw new IllegalArgumentException(format("Docker image environment parser doesn't support recipe type '%s'",
+            throw new ValidationException(format("Docker image environment parser doesn't support recipe type '%s'",
                                                       recipe.getType()));
         }
 
@@ -48,7 +48,7 @@ public class DockerImageEnvironmentParser implements TypeSpecificEnvironmentPars
         return dockerEnv;
     }
 
-    private String getMachineName(Environment environment) throws IllegalArgumentException {
+    private String getMachineName(Environment environment) throws ValidationException {
         checkArgument(environment.getMachines().size() == 1,
                       "Environment of type '%s' doesn't support multiple machines, but contains machines: %s",
                       environment.getRecipe().getType(),

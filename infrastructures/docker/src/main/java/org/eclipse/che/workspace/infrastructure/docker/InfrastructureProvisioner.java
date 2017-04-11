@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.environment.server.exception.EnvironmentException;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 /**
@@ -28,8 +27,8 @@ public interface InfrastructureProvisioner {
      *         configuration of environment
      * @param internalEnv
      *         internal environment representation
-     * @throws EnvironmentException
+     * @throws InfrastructureException
      *         if any error occurs
      */
-    void provision(Environment envConfig, DockerEnvironment internalEnv) throws ServerException;
+    void provision(Environment envConfig, DockerEnvironment internalEnv) throws InfrastructureException;
 }

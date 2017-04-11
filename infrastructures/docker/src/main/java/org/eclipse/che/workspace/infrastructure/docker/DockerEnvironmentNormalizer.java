@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
@@ -42,8 +43,9 @@ public class DockerEnvironmentNormalizer {
     }
 
     public void normalize(Environment environment, DockerEnvironment dockerEnvironment, RuntimeIdentity identity)
-            throws ServerException {
+            throws InfrastructureException {
         String networkId = NameGenerator.generate(identity.getWorkspaceId() + "_", 16);
+        dockerEnvironment.setNetwork(networkId);
 
         Map<String, DockerService> services = dockerEnvironment.getServices();
         for (Map.Entry<String, DockerService> serviceEntry : services.entrySet()) {
@@ -84,7 +86,7 @@ public class DockerEnvironmentNormalizer {
      * @param services
      *         all services in environment
      */
-    void normalizeLinks(DockerService serviceToNormalizeLinks, Map<String, DockerService> services) {
+    private void normalizeLinks(DockerService serviceToNormalizeLinks, Map<String, DockerService> services) {
         serviceToNormalizeLinks.setLinks(
                 serviceToNormalizeLinks.getLinks()
                                        .stream()
@@ -111,7 +113,7 @@ public class DockerEnvironmentNormalizer {
     private void normalize(String namespace,
                            String workspaceId,
                            String machineName,
-                           DockerService service) throws ServerException {
+                           DockerService service) throws InfrastructureException {
         // set default mem limit for service if it is not set
         if (service.getMemLimit() == null || service.getMemLimit() == 0) {
             service.setMemLimit(defaultMachineMemorySizeBytes);
@@ -121,7 +123,12 @@ public class DockerEnvironmentNormalizer {
             service.getBuild().getContext() != null &&
             recipeApiPattern.matcher(service.getBuild().getContext()).matches()) {
 
-            String recipeContent = recipeDownloader.getRecipe(service.getBuild().getContext());
+            String recipeContent;
+            try {
+                recipeContent = recipeDownloader.getRecipe(service.getBuild().getContext());
+            } catch (ServerException e) {
+                throw new InfrastructureException(e.getLocalizedMessage(), e);
+            }
             service.getBuild().setDockerfileContent(recipeContent);
             service.getBuild().setContext(null);
             service.getBuild().setDockerfilePath(null);
@@ -136,7 +143,7 @@ public class DockerEnvironmentNormalizer {
                                                                               machineName));
     }
 
-    String generateMachineId() {
+    private String generateMachineId() {
         return NameGenerator.generate("machine", 16);
     }
 }

@@ -13,21 +13,18 @@ package org.eclipse.che.workspace.infrastructure.docker;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
-import org.eclipse.che.api.workspace.server.spi.NotSupportedException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
-import org.eclipse.che.api.workspace.server.spi.ValidationException;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerServicesStartStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -69,7 +66,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
 
     @Override
     public Environment estimate(Environment environment) throws ValidationException,
-                                                                ServerException {
+                                                                InfrastructureException {
         DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);
         dockerEnvironmentValidator.validate(environment, dockerEnvironment);
         // check that order can be resolved
@@ -81,8 +78,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
 
     @Override
     public RuntimeContext prepare(RuntimeIdentity identity, Environment environment) throws ValidationException,
-                                                                                            ApiException,
-                                                                                            IOException {
+                                                                                            InfrastructureException {
         DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);
         dockerEnvironmentValidator.validate(environment, dockerEnvironment);
         // check that order can be resolved
@@ -105,12 +101,12 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
 
 
     @Override
-    public Set<RuntimeIdentity> getIdentities() throws NotSupportedException {
-        throw new NotSupportedException();
+    public Set<RuntimeIdentity> getIdentities() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public InternalRuntime getRuntime(RuntimeIdentity id) throws NotSupportedException {
-        throw new NotSupportedException();
+    public InternalRuntime getRuntime(RuntimeIdentity id) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
     }
 }
