@@ -11,10 +11,19 @@
 package org.eclipse.che.api.workspace.server.spi;
 
 /**
- * @author gazarenkov
+ * An exception thrown by {@link RuntimeInfrastructure} and related components.
+ * Indicates that an infrastructure operation can't be performed or
+ * an error occurred during operation execution.
+ *
+ * @author Yevhenii Voevodin
  */
-public class NotSupportedException extends Exception {
-    public NotSupportedException() {
-        super("Operation not supported");
+public class InfrastructureException extends Exception {
+
+    public InfrastructureException(String message) {
+        super(message);
+    }
+
+    public InfrastructureException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

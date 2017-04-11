@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.spi;
 
-import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 
@@ -22,6 +20,7 @@ import java.util.Map;
 
 /**
  * A Context for running Workspace's Runtime
+ *
  * @author gazarenkov
  */
 public abstract class RuntimeContext {
@@ -34,7 +33,8 @@ public abstract class RuntimeContext {
     protected       WorkspaceStatus       state;
 
     public RuntimeContext(Environment environment, RuntimeIdentity identity,
-                          RuntimeInfrastructure infrastructure, URL registryEndpoint) throws ValidationException, ApiException, IOException {
+                          RuntimeInfrastructure infrastructure, URL registryEndpoint)
+            throws ValidationException, InfrastructureException, IOException {
         this.environment = environment;
         this.identity = identity;
         this.infrastructure = infrastructure;
@@ -47,34 +47,46 @@ public abstract class RuntimeContext {
      * In practice this method launching supposed to take unpredictable long time
      * so normally it should be launched in separated thread
      *
-     * @param startOptions optional parameters
-     * @return running Runtime
+     * @param startOptions
+     *         optional parameters
+     * @return running runtime
+     * @throws StateException
+     *         when the context is already used
+     * @throws InfrastructureException
+     *         when any other error occurs
      */
-    public final InternalRuntime start(Map<String, String> startOptions) throws ApiException {
-        if(this.state != null)
-            throw new ConflictException("Context already used");
+    public final InternalRuntime start(Map<String, String> startOptions) throws InfrastructureException {
+        if (this.state != null)
+            throw new StateException("Context already used");
         state = WorkspaceStatus.STARTING;
         InternalRuntime runtime = internalStart(startOptions);
         state = WorkspaceStatus.RUNNING;
         return runtime;
     }
 
-    protected abstract InternalRuntime internalStart(Map<String, String> startOptions) throws ServerException;
+    protected abstract InternalRuntime internalStart(Map<String, String> startOptions) throws InfrastructureException;
 
     /**
      * Stops Runtime
      * Presumably can take some time so considered to launch in separate thread
+     *
      * @param stopOptions
+     * @throws StateException
+     *         when the context is already used or the context
+     *         can't be stopped because otherwise it would be in inconsistent state
+     *         (e.g. stop(interrupt) might not be allowed during start)
+     * @throws InfrastructureException
+     *         when any other error occurs
      */
-    public final void stop(Map<String, String> stopOptions) throws ServerException, ConflictException {
-        if(this.state != null)
-            throw new ConflictException("Context already used");
+    public final void stop(Map<String, String> stopOptions) throws InfrastructureException {
+        if (this.state != null)
+            throw new StateException("Context already used");
         state = WorkspaceStatus.STOPPING;
         internalStop(stopOptions);
         state = WorkspaceStatus.STOPPED;
     }
 
-    protected abstract void internalStop(Map<String, String> stopOptions) throws ServerException;
+    protected abstract void internalStop(Map<String, String> stopOptions) throws InfrastructureException;
 
     /**
      * Infrastructure should assign channel (usual WebSocket) to push long lived processes messages
@@ -89,10 +101,12 @@ public abstract class RuntimeContext {
      * - this endpoint is open and ready to use
      * - this endpoint emits only messages of specified formats (TODO specify the formats)
      * - high loaded infrastructure provides scaling of "messaging server" to avoid overloading
+     *
      * @return URL of the channels endpoint
-     * @throws NotSupportedException if implementation does not provide channel
+     * @throws UnsupportedOperationException
+     *         if implementation does not provide channel
      */
-    public abstract URL getOutputChannel() throws NotSupportedException, ServerException;
+    public abstract URL getOutputChannel() throws InfrastructureException;
 
 
     /**

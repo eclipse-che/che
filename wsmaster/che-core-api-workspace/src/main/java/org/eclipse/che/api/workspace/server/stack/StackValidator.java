@@ -13,8 +13,8 @@ package org.eclipse.che.api.workspace.server.stack;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
-import org.eclipse.che.api.workspace.server.spi.ValidationException;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 
 import javax.inject.Inject;

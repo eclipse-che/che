@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.machine.MachineLogMessage;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -25,11 +26,10 @@ import org.eclipse.che.api.core.util.MessageConsumer;
 import org.eclipse.che.api.core.util.WebsocketMessageConsumer;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
-import org.eclipse.che.api.workspace.server.spi.NotSupportedException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
-import org.eclipse.che.api.workspace.server.spi.ValidationException;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -52,6 +52,8 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE;
 import static org.slf4j.LoggerFactory.getLogger;
+
+// TODO: spi: deal with exceptions
 
 //import org.eclipse.che.api.machine.server.spi.Runtime;
 
@@ -110,10 +112,13 @@ public class WorkspaceRuntimes {
                 for (RuntimeIdentity id : infra.getIdentities()) {
                     runtimes.put(id.getWorkspaceId(), validate(infra.getRuntime(id)));
                 }
-            } catch (NotSupportedException e) {
+            } catch (UnsupportedOperationException e) {
                 LOG.warn("Not recoverable infrastructure: " + infra.getName() + " Reason: " + e.getMessage());
+            } catch (InfrastructureException x) {
+                LOG.error("An error occurred while attempting to recover runtimes using infrastructure '{}'. Reason: '{}'",
+                          infra.getName(),
+                          x.getMessage());
             }
-
         }
         //
 
@@ -130,7 +135,7 @@ public class WorkspaceRuntimes {
     }
 
 
-    public Environment estimate(Environment environment) throws NotFoundException, ServerException, ValidationException {
+    public Environment estimate(Environment environment) throws NotFoundException, InfrastructureException, ValidationException {
         // TODO decide whether throw exception when dev machine not found
         String type = environment.getRecipe().getType();
         if (!infraByRecipe.containsKey(type))
@@ -194,7 +199,12 @@ public class WorkspaceRuntimes {
      */
     public Runtime start(Workspace workspace,
                          String envName,
-                         Map<String, String> options) throws ApiException, ValidationException, IOException {
+                         Map<String, String> options) throws InfrastructureException,
+                                                             ValidationException,
+                                                             IOException,
+                                                             NotFoundException,
+                                                             ConflictException,
+                                                             ServerException {
 
         final EnvironmentImpl environment = copyEnv(workspace, envName);
         final String workspaceId = workspace.getId();
@@ -236,7 +246,7 @@ public class WorkspaceRuntimes {
      *         when running workspace status is different from {@link WorkspaceStatus#RUNNING}
      * @see WorkspaceStatus#STOPPING
      */
-    public void stop(String workspaceId, Map<String, String> options) throws NotFoundException, ServerException, ConflictException {
+    public void stop(String workspaceId, Map<String, String> options) throws NotFoundException, InfrastructureException, ConflictException {
 
         eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                         .withWorkspaceId(workspaceId)
@@ -290,10 +300,13 @@ public class WorkspaceRuntimes {
         return runtimes.containsKey(workspaceId);
     }
 
-
     private void doStart(EnvironmentImpl environment,
                          String workspaceId, String envName,
-                         Map<String, String> options) throws ApiException, ValidationException, IOException {
+                         Map<String, String> options) throws InfrastructureException,
+                                                             NotFoundException,
+                                                             ConflictException,
+                                                             ValidationException,
+                                                             IOException {
 
         requireNonNull(environment, "Environment should not be null " + workspaceId);
         requireNonNull(environment.getRecipe(), "OldRecipe should not be null " + workspaceId);
@@ -325,8 +338,8 @@ public class WorkspaceRuntimes {
         InternalRuntime runtime = infra.prepare(runtimeId, environment).start(options);
 
         if (runtime == null)
-            throw new ServerException("SPI contract violated. RuntimeInfrastructure.start(...) must not return null: "
-                                      + RuntimeInfrastructure.class);
+            throw new IllegalStateException("SPI contract violated. RuntimeInfrastructure.start(...) must not return null: "
+                                            + RuntimeInfrastructure.class);
 
 
 //        // Phase 2: start agents if any

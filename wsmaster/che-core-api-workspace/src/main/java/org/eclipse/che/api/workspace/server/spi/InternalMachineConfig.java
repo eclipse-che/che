@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.spi;
 
-import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 
@@ -34,7 +33,7 @@ public class InternalMachineConfig {
 
     private final Map<String, String> attributes = new HashMap<>();
 
-    public InternalMachineConfig(MachineConfig originalConfig, URL agentRegistry) throws ApiException, IOException {
+    public InternalMachineConfig(MachineConfig originalConfig, URL agentRegistry) throws InfrastructureException, IOException {
 
         initAgents(originalConfig.getAgents(), agentRegistry);
 
@@ -48,7 +47,7 @@ public class InternalMachineConfig {
     // TODO
     // Obtain scripts and organize correctly ordered list according to Agents configuration,
     // including dependencies and excluding duplicates
-    private void initAgents(List<String> agentIds, URL agentRegistry) throws ApiException, IOException{
+    private void initAgents(List<String> agentIds, URL agentRegistry) throws InfrastructureException, IOException{
 
 //        List<String> ids = new ArrayList<>();
 //

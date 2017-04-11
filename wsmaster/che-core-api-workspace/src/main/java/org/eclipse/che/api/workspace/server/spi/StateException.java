@@ -8,24 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker;
-
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
-import org.eclipse.che.api.core.model.workspace.runtime.Server;
-
-import java.util.Map;
+package org.eclipse.che.api.workspace.server.spi;
 
 /**
- * @author Alexander Garagatyi
+ * Thrown by {@link RuntimeContext} and related components.
+ * Indicates that an operation cannot be performed due to context
+ * state violation(e.g. workspace cannot be stopped while it is starting).
+ *
+ * @author Yevhenii Voevodin
  */
-public class DockerMachine implements Machine {
-    @Override
-    public Map<String, String> getProperties() {
-        return null;
-    }
-
-    @Override
-    public Map<String, ? extends Server> getServers() {
-        return null;
+public class StateException extends InfrastructureException {
+    public StateException(String message) {
+        super(message);
     }
 }

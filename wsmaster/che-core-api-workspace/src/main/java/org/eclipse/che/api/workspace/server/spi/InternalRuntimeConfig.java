@@ -32,7 +32,7 @@ public class InternalRuntimeConfig {
     protected InternalRecipeConfig recipe;
     protected EnvironmentImpl config;
 
-    public InternalRuntimeConfig(Environment environment, URL registryEndpoint) throws ApiException, IOException {
+    public InternalRuntimeConfig(Environment environment, URL registryEndpoint) throws InfrastructureException, IOException {
 
         this.recipe = new InternalRecipeConfig(environment.getRecipe());
 
@@ -53,12 +53,16 @@ public class InternalRuntimeConfig {
     private class InternalRecipeConfig {
         private String script;
 
-        public InternalRecipeConfig(Recipe recipe) throws ApiException, IOException {
+        public InternalRecipeConfig(Recipe recipe) throws InfrastructureException, IOException {
             //this.recipe = new RecipeImpl(recipe.getType(), recipe.getContentType(), recipe.getContent(), recipe.getLocation());
             if(recipe.getContent() != null && !recipe.getContent().isEmpty()) {
                 script = recipe.getContent();
             } else if(recipe.getLocation() != null && !recipe.getLocation().isEmpty()) {
-                script = HttpRequestHelper.requestString(recipe.getLocation(), HttpMethod.GET, null, null);
+                try {
+                    script = HttpRequestHelper.requestString(recipe.getLocation(), HttpMethod.GET, null, null);
+                } catch (ApiException x) {
+                    throw new IOException(x);
+                }
             } else {
                 script = "";
             }

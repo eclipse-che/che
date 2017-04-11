@@ -12,12 +12,13 @@ package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.workspace.server.spi.ValidationException;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -84,7 +85,12 @@ public class WorkspaceValidator {
             checkNotNull(recipe, "Environment recipe must not be null");
             checkNotNull(recipe.getType(), "Environment recipe type must not be null");
 
-            runtimes.estimate(environment);
+            // TODO: spi: deal with exceptions
+            try {
+                runtimes.estimate(environment);
+            } catch (InfrastructureException e) {
+                throw new ServerException(e);
+            }
         }
 
         //commands

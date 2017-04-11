@@ -39,7 +39,6 @@ import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.spi.ValidationException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
@@ -153,8 +152,7 @@ public class FactoryService extends Service {
     public FactoryDto saveFactory(Iterator<FileItem> formData) throws ForbiddenException,
                                                                       ConflictException,
                                                                       BadRequestException,
-                                                                      ServerException, NotFoundException,
-                                                                      ValidationException {
+                                                                      ServerException, NotFoundException {
         try {
             final Set<FactoryImage> images = new HashSet<>();
             FactoryDto factory = null;
@@ -207,7 +205,7 @@ public class FactoryService extends Service {
     public FactoryDto saveFactory(FactoryDto factory) throws BadRequestException,
                                                              ServerException,
                                                              ForbiddenException,
-                                                             ConflictException, NotFoundException, ValidationException {
+                                                             ConflictException, NotFoundException {
         requiredNotNull(factory, "Factory configuration");
         factoryBuilder.checkValid(factory);
         processDefaults(factory);
@@ -226,15 +224,15 @@ public class FactoryService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public FactoryDto getFactory(@ApiParam(value = "Factory identifier")
                                  @PathParam("id")
-                                 String factoryId,
+                                         String factoryId,
                                  @ApiParam(value = "Whether or not to validate values like it is done when accepting the factory",
                                            allowableValues = "true, false",
                                            defaultValue = "false")
                                  @DefaultValue("false")
                                  @QueryParam("validate")
-                                 Boolean validate) throws BadRequestException,
-                                                          NotFoundException,
-                                                          ServerException {
+                                         Boolean validate) throws BadRequestException,
+                                                                  NotFoundException,
+                                                                  ServerException {
         final FactoryDto factoryDto = asDto(factoryManager.getById(factoryId));
         if (validate) {
             acceptValidator.validateOnAccept(factoryDto);
@@ -254,13 +252,13 @@ public class FactoryService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error")})
     public List<FactoryDto> getFactoryByAttribute(@DefaultValue("0")
                                                   @QueryParam("skipCount")
-                                                  Integer skipCount,
+                                                          Integer skipCount,
                                                   @DefaultValue("30")
                                                   @QueryParam("maxItems")
-                                                  Integer maxItems,
+                                                          Integer maxItems,
                                                   @Context
-                                                  UriInfo uriInfo) throws BadRequestException,
-                                                                          ServerException {
+                                                          UriInfo uriInfo) throws BadRequestException,
+                                                                                  ServerException {
         final Set<String> skip = ImmutableSet.of("token", "skipCount", "maxItems");
         final List<Pair<String, String>> query = URLEncodedUtils.parse(uriInfo.getRequestUri())
                                                                 .entrySet()
@@ -295,12 +293,12 @@ public class FactoryService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error")})
     public FactoryDto updateFactory(@ApiParam(value = "Factory identifier")
                                     @PathParam("id")
-                                    String factoryId,
+                                            String factoryId,
                                     FactoryDto update) throws BadRequestException,
                                                               NotFoundException,
                                                               ServerException,
                                                               ForbiddenException,
-                                                              ConflictException, ValidationException {
+                                                              ConflictException {
         requiredNotNull(update, "Factory configuration");
         update.setId(factoryId);
         final Factory existing = factoryManager.getById(factoryId);
@@ -324,8 +322,8 @@ public class FactoryService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error")})
     public void removeFactory(@ApiParam(value = "Factory identifier")
                               @PathParam("id")
-                              String id) throws ForbiddenException,
-                                                ServerException {
+                                      String id) throws ForbiddenException,
+                                                        ServerException {
         factoryManager.removeFactory(id);
     }
 
@@ -340,12 +338,12 @@ public class FactoryService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error")})
     public Response getImage(@ApiParam(value = "Factory identifier")
                              @PathParam("id")
-                             String factoryId,
+                                     String factoryId,
                              @ApiParam(value = "Image identifier")
                              @QueryParam("imgId")
-                             String imageId) throws NotFoundException,
-                                                    BadRequestException,
-                                                    ServerException {
+                                     String imageId) throws NotFoundException,
+                                                            BadRequestException,
+                                                            ServerException {
         final Set<FactoryImage> images;
         if (isNullOrEmpty(imageId)) {
             if ((images = factoryManager.getFactoryImages(factoryId)).isEmpty()) {
@@ -373,16 +371,16 @@ public class FactoryService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error")})
     public String getFactorySnippet(@ApiParam(value = "Factory identifier")
                                     @PathParam("id")
-                                    String factoryId,
+                                            String factoryId,
                                     @ApiParam(value = "Snippet type",
                                               required = true,
                                               allowableValues = "url, html, iframe, markdown",
                                               defaultValue = "url")
                                     @DefaultValue("url")
                                     @QueryParam("type")
-                                    String type) throws NotFoundException,
-                                                        BadRequestException,
-                                                        ServerException {
+                                            String type) throws NotFoundException,
+                                                                BadRequestException,
+                                                                ServerException {
         final String factorySnippet = factoryManager.getFactorySnippet(factoryId, type, uriInfo.getBaseUri());
         checkArgument(factorySnippet != null, "Snippet type \"" + type + "\" is unsupported.");
         return factorySnippet;
@@ -399,12 +397,12 @@ public class FactoryService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error")})
     public Response getFactoryJson(@ApiParam(value = "Workspace identifier")
                                    @PathParam("ws-id")
-                                   String wsId,
+                                           String wsId,
                                    @ApiParam(value = "Project path")
                                    @QueryParam("path")
-                                   String path) throws BadRequestException,
-                                                       NotFoundException,
-                                                       ServerException {
+                                           String path) throws BadRequestException,
+                                                               NotFoundException,
+                                                               ServerException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(wsId);
         excludeProjectsWithoutLocation(workspace, path);
         final FactoryDto factoryDto = DtoFactory.newDto(FactoryDto.class)
@@ -426,14 +424,14 @@ public class FactoryService extends Service {
                    @ApiResponse(code = 400, message = "Missed required parameters, failed to validate factory"),
                    @ApiResponse(code = 500, message = "Internal server error")})
     public FactoryDto resolveFactory(@ApiParam(value = "Parameters provided to create factories")
-                                     Map<String, String> parameters,
+                                             Map<String, String> parameters,
                                      @ApiParam(value = "Whether or not to validate values like it is done when accepting a Factory",
                                                allowableValues = "true,false",
                                                defaultValue = "false")
                                      @DefaultValue("false")
                                      @QueryParam(VALIDATE_QUERY_PARAMETER)
-                                     Boolean validate) throws ServerException,
-                                                              BadRequestException {
+                                             Boolean validate) throws ServerException,
+                                                                      BadRequestException {
 
         // check parameter
         requiredNotNull(parameters, "Factory build parameters");

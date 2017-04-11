@@ -13,16 +13,14 @@ package org.eclipse.che.api.workspace.server.spi;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 
-import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.Set;
 
 /**
- * Starting point of describing the contract which Infrastructure provider should implement
+ * Starting point of describing the contract which infrastructure provider should implement
  * for making infrastructure suitable for serving workspace runtimes.
  *
  * @author gazarenkov
@@ -67,10 +65,10 @@ public abstract class RuntimeInfrastructure {
      * In all of this cases Environment is taken as valid.
      * @throws ValidationException
      *         if incoming Environment is not valid
-     * @throws ServerException
-     *         if some other error occurred
+     * @throws InfrastructureException
+     *         if any other error occurred
      */
-    public abstract Environment estimate(Environment environment) throws ValidationException, ServerException;
+    public abstract Environment estimate(Environment environment) throws ValidationException, InfrastructureException;
 
     /**
      * An Infrastructure MAY track Runtimes. In this case the method should be overridden.
@@ -80,11 +78,13 @@ public abstract class RuntimeInfrastructure {
      * getRuntime(id) method
      *
      * @return list of tracked Runtimes' Identities.
-     * @throws NotSupportedException
+     * @throws UnsupportedOperationException
      *         if implementation does not support runtimes tracking
+     * @throws InfrastructureException
+     *         if any other error occurred
      */
-    public Set<RuntimeIdentity> getIdentities() throws NotSupportedException {
-        throw new NotSupportedException();
+    public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -96,11 +96,13 @@ public abstract class RuntimeInfrastructure {
      * @param id
      *         the RuntimeIdentity
      * @return the Runtime
-     * @throws NotSupportedException
+     * @throws UnsupportedOperationException
      *         if implementation does not support runtimes tracking
+     * @throws InfrastructureException
+     *         if any other error occurred
      */
-    public InternalRuntime getRuntime(RuntimeIdentity id) throws NotSupportedException {
-        throw new NotSupportedException();
+    public InternalRuntime getRuntime(RuntimeIdentity id) throws InfrastructureException {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -114,12 +116,9 @@ public abstract class RuntimeInfrastructure {
      *         incoming Environment (configuration)
      * @return new RuntimeContext object
      * @throws ValidationException
-     *         if incoming Environment is not valid
-     * @throws ServerException
-     *         if some other error occurred
+     *         if incoming environment is not valid
+     * @throws InfrastructureException
+     *         if any other error occurred
      */
-    public abstract RuntimeContext prepare(RuntimeIdentity id, Environment environment) throws ValidationException, ApiException,
-                                                                                               IOException;
-
-
+    public abstract RuntimeContext prepare(RuntimeIdentity id, Environment environment) throws ValidationException, InfrastructureException;
 }

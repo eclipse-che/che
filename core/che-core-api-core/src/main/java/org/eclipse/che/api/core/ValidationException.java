@@ -8,10 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.server.spi;
+package org.eclipse.che.api.core;
 
 /**
- * @author gazarenkov
+ * Might be thrown by those system components that validate
+ * objects state before performing operations with them so
+ * all conditions are met and the system is in consistent state.
+ *
+ * @author Yevhenii Voevodin
  */
 public class ValidationException extends Exception {
 
