@@ -30,6 +30,7 @@
                 <configuration>
                     <excludes>
                         <exclude>**/type-bitnami.svg</exclude>
+                        <exclude>**/type-vertx.svg</exclude>
                         <exclude>**/type-zend.svg</exclude>
                     </excludes>
                 </configuration>
