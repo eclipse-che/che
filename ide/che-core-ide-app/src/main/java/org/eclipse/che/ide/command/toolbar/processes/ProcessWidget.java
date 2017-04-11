@@ -120,7 +120,10 @@ class ProcessWidget extends FlowPanel {
         safeHtmlBuilder.appendHtmlConstant(FontAwesome.STOP);
 
         final ActionButton button = new ActionButton(safeHtmlBuilder.toSafeHtml());
-        button.addClickHandler(event -> handler.onStopProcess(process));
+        button.addClickHandler(event -> {
+            event.stopPropagation(); // prevent dropdown list from opening/closing
+            handler.onStopProcess(process);
+        });
         button.ensureDebugId("dropdown-processes-stop");
 
         Tooltip.create((Element)button.getElement(), BOTTOM, MIDDLE, "Stop");
@@ -133,7 +136,10 @@ class ProcessWidget extends FlowPanel {
         safeHtmlBuilder.appendHtmlConstant(FontAwesome.REPEAT);
 
         final ActionButton button = new ActionButton(safeHtmlBuilder.toSafeHtml());
-        button.addClickHandler(event -> handler.onRerunProcess(process));
+        button.addClickHandler(event -> {
+            event.stopPropagation(); // prevent dropdown list from opening/closing
+            handler.onRerunProcess(process);
+        });
         button.ensureDebugId("dropdown-processes-rerun");
 
         Tooltip.create((Element)button.getElement(), BOTTOM, MIDDLE, "Re-run");
