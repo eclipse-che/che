@@ -191,7 +191,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.che.lib</groupId>
                                     <artifactId>che-terminal-client</artifactId>
-                                    <version>${project.version}</version>
+                                    <version>${che.lib.version}</version>
                                     <type>jar</type>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.outputDirectory}/org/eclipse/che/ide/extension/machine/public/term</outputDirectory>

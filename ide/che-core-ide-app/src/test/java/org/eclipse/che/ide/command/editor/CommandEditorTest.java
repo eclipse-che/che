@@ -11,7 +11,8 @@
 package org.eclipse.che.ide.command.editor;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -21,6 +22,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
@@ -42,6 +44,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
@@ -54,7 +57,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /** Tests for {@link CommandEditor}. */
-@RunWith(GwtMockitoTestRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class CommandEditorTest {
 
     private static final String EDITED_COMMAND_NAME = "build";
@@ -89,6 +92,8 @@ public class CommandEditorTest {
     private EditorMessages           editorMessages;
     @Mock
     private NodeFactory              nodeFactory;
+    @Mock
+    private EventBus                 eventBus;
 
     @InjectMocks
     private CommandEditor editor;
@@ -103,6 +108,8 @@ public class CommandEditorTest {
     private EditorAgent.OpenEditorCallback openEditorCallback;
 
     @Mock
+    private HandlerRegistration                     handlerRegistration;
+    @Mock
     private Promise<CommandImpl>                    commandPromise;
     @Captor
     private ArgumentCaptor<Operation<CommandImpl>>  operationCaptor;
@@ -111,6 +118,7 @@ public class CommandEditorTest {
 
     @Before
     public void setUp() throws Exception {
+        when(eventBus.addHandler(eq(CommandRemovedEvent.getType()), eq(editor))).thenReturn(handlerRegistration);
         when(editedCommand.getName()).thenReturn(EDITED_COMMAND_NAME);
         when(editedCommand.getApplicableContext()).thenReturn(mock(ApplicableContext.class));
         when(editedCommandFile.getData()).thenReturn(editedCommand);
@@ -122,7 +130,7 @@ public class CommandEditorTest {
     @Test
     public void shouldBeInitialized() throws Exception {
         verify(view).setDelegate(editor);
-        verify(commandManager).addCommandChangedListener(editor);
+        verify(eventBus).addHandler(CommandRemovedEvent.getType(), editor);
 
         verify(commandLinePage).setDirtyStateListener(any(DirtyStateListener.class));
         verify(goalPage).setDirtyStateListener(any(DirtyStateListener.class));
@@ -213,9 +221,12 @@ public class CommandEditorTest {
     public void shouldCloseEditorWhenEditedCommandRemoved() throws Exception {
         CommandImpl removedCommand = mock(CommandImpl.class);
         when(removedCommand.getName()).thenReturn(EDITED_COMMAND_NAME);
+        CommandRemovedEvent event = mock(CommandRemovedEvent.class);
+        when(event.getCommand()).thenReturn(removedCommand);
 
-        editor.onCommandRemoved(removedCommand);
+        editor.onCommandRemoved(event);
 
         verify(editorAgent).closeEditor(editor);
+        verify(handlerRegistration).removeHandler();
     }
 }

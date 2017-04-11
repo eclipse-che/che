@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import java.util.List;
 import java.util.Optional;
 
 /** Button with popup menu. */
@@ -110,10 +111,14 @@ public class MenuButton extends ButtonBase {
     }
 
     private void showMenu() {
-        menu = new ItemsList(itemsProvider.getItems(), itemsProvider, RESOURCES, null);
-        getActionHandler().ifPresent(actionHandler -> menu.setActionHandler(actionHandler));
-        menu.setPopupPosition(getAbsoluteLeft(), getAbsoluteTop() + getOffsetHeight());
-        menu.show();
+        final List<MenuItem> menuItems = itemsProvider.getItems();
+
+        if (!menuItems.isEmpty()) {
+            menu = new ItemsList(menuItems, itemsProvider, RESOURCES, null);
+            getActionHandler().ifPresent(actionHandler -> menu.setActionHandler(actionHandler));
+            menu.setPopupPosition(getAbsoluteLeft(), getAbsoluteTop() + getOffsetHeight());
+            menu.show();
+        }
     }
 
     public interface Resources extends ClientBundle {

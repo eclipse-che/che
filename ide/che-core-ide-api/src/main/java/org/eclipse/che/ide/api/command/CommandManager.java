@@ -18,11 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Facade for command management.
- *
- * @see CommandImpl
- */
+/** Facade for command management. */
 public interface CommandManager {
 
     /** Returns all commands. */
@@ -129,39 +125,4 @@ public interface CommandManager {
 
     /** Removes command with the specified {@code commandName}. */
     Promise<Void> removeCommand(String commandName);
-
-    void addCommandLoadedListener(CommandLoadedListener listener);
-
-    void removeCommandLoadedListener(CommandLoadedListener listener);
-
-    void addCommandChangedListener(CommandChangedListener listener);
-
-    void removeCommandChangedListener(CommandChangedListener listener);
-
-    /** Listener to notify when all commands have been loaded. */
-    interface CommandLoadedListener {
-
-        /** Called when all commands have been loaded. */
-        void onCommandsLoaded();
-    }
-
-    /** Listener to notify when command has been changed. */
-    interface CommandChangedListener {
-
-        /** Called when command has been added. */
-        void onCommandAdded(CommandImpl command);
-
-        /**
-         * Called when command has been updated.
-         *
-         * @param previousCommand
-         *         command before updating
-         * @param command
-         *         updated command
-         */
-        void onCommandUpdated(CommandImpl previousCommand, CommandImpl command);
-
-        /** Called when command has been removed. */
-        void onCommandRemoved(CommandImpl command);
-    }
 }

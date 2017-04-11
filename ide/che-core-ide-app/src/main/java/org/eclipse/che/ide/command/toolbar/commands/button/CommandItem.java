@@ -17,26 +17,15 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.ui.menubutton.MenuItem;
 
 /** A {@link MenuItem} represents {@link CommandImpl}. */
-public class CommandItem implements MenuItem {
-
-    private final CommandImpl command;
+public class CommandItem extends AbstractMenuItem {
 
     @Inject
     public CommandItem(@Assisted CommandImpl command) {
-        this.command = command;
+        super(command);
     }
 
     @Override
     public String getName() {
-        return command.getName();
-    }
-
-    @Override
-    public boolean isDisabled() {
-        return command.getApplicableContext().isWorkspaceApplicable();
-    }
-
-    public CommandImpl getCommand() {
-        return command;
+        return getCommand().getName();
     }
 }

@@ -12,21 +12,21 @@ package org.eclipse.che.ide.command.toolbar.previews;
 
 import org.eclipse.che.ide.api.mvp.View;
 
-/** View for displaying preview URLs. */
+/** View for displaying the preview URLs. */
 public interface PreviewsView extends View<PreviewsView.ActionDelegate> {
 
     /** Add preview URL to the view. */
-    void addUrl(PreviewUrl previewUrl);
+    void addUrl(PreviewUrlItem previewUrlItem);
 
     /** Remove preview URL from the view. */
-    void removeUrl(PreviewUrl previewUrl);
+    void removeUrl(PreviewUrlItem previewUrlItem);
 
     /** Remove all preview URLs from the view. */
-    void removeAll();
+    void removeAllURLs();
 
     interface ActionDelegate {
 
         /** Called when preview URL has been chosen. */
-        void onUrlChosen(PreviewUrl previewUrl);
+        void onUrlChosen(PreviewUrlItem previewUrlItem);
     }
 }

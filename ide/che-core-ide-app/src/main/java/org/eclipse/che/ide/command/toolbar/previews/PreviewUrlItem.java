@@ -12,13 +12,13 @@ package org.eclipse.che.ide.command.toolbar.previews;
 
 import java.util.Objects;
 
-/** Holds preview URL and it's name displaying in a 'Previews' list. */
-class PreviewUrl {
+/** Represents an item for displaying in the 'Previews' list. */
+class PreviewUrlItem {
 
     private final String url;
     private final String displayName;
 
-    PreviewUrl(String url, String displayName) {
+    PreviewUrlItem(String url, String displayName) {
         this.url = url;
         this.displayName = displayName;
     }
@@ -35,7 +35,7 @@ class PreviewUrl {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PreviewUrl that = (PreviewUrl)o;
+        PreviewUrlItem that = (PreviewUrlItem)o;
         return Objects.equals(url, that.url) &&
                Objects.equals(displayName, that.displayName);
     }

@@ -15,26 +15,26 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/** Tests for {@link PreviewUrl}. */
-public class PreviewUrlTest {
+/** Tests for {@link PreviewUrlItem}. */
+public class PreviewUrlItemTest {
 
     private static final String URL          = "http://preview.com";
     private static final String DISPLAY_NAME = "dev-machine:8080";
 
-    private PreviewUrl previewUrl;
+    private PreviewUrlItem previewUrlItem;
 
     @Before
     public void setUp() {
-        previewUrl = new PreviewUrl(URL, DISPLAY_NAME);
+        previewUrlItem = new PreviewUrlItem(URL, DISPLAY_NAME);
     }
 
     @Test
     public void testGetUrl() throws Exception {
-        assertEquals(URL, previewUrl.getUrl());
+        assertEquals(URL, previewUrlItem.getUrl());
     }
 
     @Test
     public void testGetDisplayName() throws Exception {
-        assertEquals(DISPLAY_NAME, previewUrl.getDisplayName());
+        assertEquals(DISPLAY_NAME, previewUrlItem.getDisplayName());
     }
 }
