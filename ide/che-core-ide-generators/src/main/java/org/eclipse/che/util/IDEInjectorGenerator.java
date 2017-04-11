@@ -47,22 +47,17 @@ public class IDEInjectorGenerator {
      * Entry point. --rootDir is the optional parameter.
      *
      * @param args
+     * @throws IOException 
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
-        try {
-            File rootFolder = GeneratorUtils.getRootFolder(args);
-            System.out.println(" ------------------------------------------------------------------------ ");
-            System.out.println(String.format("Searching for GinModules in %s", rootFolder.getAbsolutePath()));
-            System.out.println(" ------------------------------------------------------------------------ ");
-            // find all Extension FQNs
-            findGinModules(rootFolder);
-            generateExtensionManager(rootFolder);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-            // error
-            System.exit(1);//NOSONAR
-        }
+        File rootFolder = GeneratorUtils.getRootFolder(args);
+        System.out.println(" ------------------------------------------------------------------------ ");
+        System.out.println(String.format("Searching for GinModules in %s", rootFolder.getAbsolutePath()));
+        System.out.println(" ------------------------------------------------------------------------ ");
+        // find all Extension FQNs
+        findGinModules(rootFolder);
+        generateExtensionManager(rootFolder);
 
     }
 
