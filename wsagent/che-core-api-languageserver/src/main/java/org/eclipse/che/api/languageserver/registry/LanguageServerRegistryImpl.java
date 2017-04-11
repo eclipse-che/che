@@ -123,10 +123,6 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         return false;
     }
 
-    private LanguageServer doFindServer(LanguageServerLauncher launcher, String projectPath) {
-        return projectToServer.get(Pair.of(projectPath, launcher));
-    }
-
     private String getFileName(String path) {
         int lastSlash = path.lastIndexOf('/');
         if (lastSlash < 0) {
@@ -140,7 +136,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
     @Override
     public Collection<LanguageDescription> getSupportedLanguages() {
-        return knownLaunchers.stream().map(l->l.getLanguageDescription()).collect(Collectors.toSet());
+        return knownLaunchers.stream().filter(LanguageServerLauncher::isAbleToLaunch).map(l->l.getLanguageDescription()).collect(Collectors.toSet());
     }
 
     @Override
