@@ -15,8 +15,11 @@ import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
-import org.eclipse.che.api.workspace.server.ServerRewritingStrategy;
+import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
+import org.eclipse.che.api.workspace.server.URLRewriter;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,14 +32,14 @@ import java.util.Map;
  */
 public abstract class InternalRuntime implements Runtime {
 
-    private final RuntimeContext          context;
-    private final ServerRewritingStrategy serverRewritingStrategy;
-    private Map<String, Machine>    cachedExternalMachines;
+    private final RuntimeContext       context;
+    private final URLRewriter          urlRewriter;
+    private       Map<String, Machine> cachedExternalMachines;
     private final List<Warning> warnings = new ArrayList<>();
 
-    public InternalRuntime(RuntimeContext context, ServerRewritingStrategy serverRewritingStrategy) {
+    public InternalRuntime(RuntimeContext context, URLRewriter urlRewriter) {
         this.context = context;
-        this.serverRewritingStrategy = serverRewritingStrategy;
+        this.urlRewriter = urlRewriter;
     }
 
     public abstract Map<String, ? extends Machine> getInternalMachines();
@@ -65,13 +68,9 @@ public abstract class InternalRuntime implements Runtime {
             for(Map.Entry<String, ? extends Machine> entry : getInternalMachines().entrySet()) {
                 String key = entry.getKey();
                 Machine machine = entry.getValue();
-                ServerRewritingStrategy.Result result = serverRewritingStrategy.rewrite(context.getIdentity(), entry.getValue().getServers());
-                Map<String, Server> newServers = result.getServers();
+                Map<String, Server> newServers = rewriteExternalServers(machine.getServers());
                 MachineImpl newMachine = new MachineImpl(machine.getProperties(), newServers);
                 cachedExternalMachines.put(key, newMachine);
-                if(!result.getWarnings().isEmpty()) {
-                    warnings.addAll(result.getWarnings());
-                }
             }
 
         }
@@ -90,6 +89,39 @@ public abstract class InternalRuntime implements Runtime {
      */
     public final RuntimeContext getContext() {
         return context;
+    }
+
+    /**
+     * Convenient method to rewrite incoming external servers in a loop
+     * @param incoming servers
+     * @return rewriten Map of Servers (name -> Server)
+     */
+    private Map <String, Server> rewriteExternalServers(Map<String,? extends Server> incoming) {
+        Map <String, Server> outgoing = new HashMap<>();
+        for(Map.Entry<String, ? extends Server> entry : incoming.entrySet()) {
+            String name = entry.getKey();
+            String strUrl = entry.getValue().getUrl();
+            try {
+                URL url = new URL(strUrl);
+                ServerImpl server = new ServerImpl(urlRewriter.rewriteURL(context.getIdentity(), name, url).toString());
+                outgoing.put(name, server);
+            } catch (MalformedURLException e) {
+                warnings.add(new Warning() {
+                    @Override
+                    public int getCode() {
+                        return 101;
+                    }
+
+                    @Override
+                    public String getMessage() {
+                        return "Malformed URL for " + name + " : " + e.getMessage();
+                    }
+                });
+            }
+
+        }
+
+        return outgoing;
     }
 
 }
