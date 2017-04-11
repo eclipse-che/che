@@ -77,6 +77,20 @@
         <dependency>
             <groupId>org.eclipse.lsp4j</groupId>
             <artifactId>org.eclipse.lsp4j</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+                    <groupId>org.eclipse.xtext</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org.eclipse.xtend.lib</artifactId>
+                    <groupId>org.eclipse.xtend</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.xtext</groupId>
+            <artifactId>org.eclipse.xtext.xbase.lib.gwt</artifactId>
         </dependency>
         <dependency>
             <groupId>org.vectomatic</groupId>
@@ -188,6 +202,20 @@
                     <genClassName>org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls</genClassName>
                     <impl>client</impl>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <ignoredDependencies>
+                                <ignoredDependency>org.eclipse.xtext:org.eclipse.xtext.xbase.lib.gwt</ignoredDependency>
+                            </ignoredDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
