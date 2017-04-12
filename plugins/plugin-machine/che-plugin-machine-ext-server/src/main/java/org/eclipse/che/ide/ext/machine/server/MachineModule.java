@@ -24,6 +24,7 @@ public class MachineModule extends AbstractModule {
     protected void configure() {
         bind(KeysInjector.class).asEagerSingleton();
         bind(WorkspaceSshKeys.class).asEagerSingleton();
-        bind(RecipeScriptDownloadService.class);
+// FIXME: spi
+//        bind(RecipeScriptDownloadService.class);
     }
 }

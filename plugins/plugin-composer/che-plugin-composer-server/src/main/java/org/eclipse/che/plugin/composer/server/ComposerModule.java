@@ -30,7 +30,8 @@ import static com.google.inject.multibindings.Multibinder.newSetBinder;
  *
  * @author Kaloyan Raev
  */
-@DynaModule
+// FIXME: spi
+//@DynaModule
 public class ComposerModule extends AbstractModule {
 
     /** {@inheritDoc} */

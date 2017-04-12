@@ -71,15 +71,14 @@ public abstract class RuntimeContext {
      *
      * @param stopOptions
      * @throws StateException
-     *         when the context is already used or the context
-     *         can't be stopped because otherwise it would be in inconsistent state
+     *         when the context can't be stopped because otherwise it would be in inconsistent state
      *         (e.g. stop(interrupt) might not be allowed during start)
      * @throws InfrastructureException
      *         when any other error occurs
      */
     public final void stop(Map<String, String> stopOptions) throws InfrastructureException {
-        if (this.state != null)
-            throw new StateException("Context already used");
+        if (this.state != WorkspaceStatus.RUNNING)
+            throw new StateException("The environment must be running");
         state = WorkspaceStatus.STOPPING;
         internalStop(stopOptions);
         state = WorkspaceStatus.STOPPED;
