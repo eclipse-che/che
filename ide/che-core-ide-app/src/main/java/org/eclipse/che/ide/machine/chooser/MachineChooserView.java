@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.machine.chooser;
 
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.List;
+
 
 /**
  * Contract for the view of the machine chooser.

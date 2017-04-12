@@ -12,8 +12,8 @@ package org.eclipse.che.ide.machine.chooser;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
+import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.js.Executor;
@@ -24,6 +24,7 @@ import org.eclipse.che.api.promises.client.js.ResolveFunction;
 import org.eclipse.che.ide.api.app.AppContext;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Provides a simple mechanism for the user to choose a {@link Machine}.
@@ -59,16 +60,17 @@ public class MachineChooser implements MachineChooserView.ActionDelegate {
      * or rejected in case machine selection has been cancelled.
      */
     public Promise<Machine> show() {
-        final WorkspaceRuntime runtime = appContext.getWorkspace().getRuntime();
+        final Runtime runtime = appContext.getWorkspace().getRuntime();
 
         if (runtime != null) {
-            final List<? extends Machine> machines = runtime.getMachines();
+            final Map<String, ? extends Machine> machines = runtime.getMachines();
 
             if (machines.size() == 1) {
                 return promiseProvider.resolve(machines.get(0));
             }
 
-            view.setMachines(machines);
+// FIXME: spi
+//            view.setMachines(machines);
         }
 
         view.show();

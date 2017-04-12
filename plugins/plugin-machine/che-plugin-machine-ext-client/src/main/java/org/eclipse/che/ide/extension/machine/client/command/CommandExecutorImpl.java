@@ -12,8 +12,8 @@ package org.eclipse.che.ide.extension.machine.client.command;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.config.Command;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
@@ -63,15 +63,16 @@ public class CommandExecutorImpl implements CommandExecutor {
         macroProcessor.expandMacros(commandLine).then(expandedCommandLine -> {
             final CommandImpl expandedCommand = new CommandImpl(name, expandedCommandLine, type, attributes);
             final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
-            final String machineId = machine.getId();
-
-            processesPanelPresenter.addCommandOutput(machineId, console);
-
-            execAgentClient.startProcess(machineId, expandedCommand)
-                           .thenIfProcessStartedEvent(console.getProcessStartedOperation())
-                           .thenIfProcessDiedEvent(console.getProcessDiedOperation())
-                           .thenIfProcessStdOutEvent(console.getStdOutOperation())
-                           .thenIfProcessStdErrEvent(console.getStdErrOperation());
+// FIXME: spi
+//            final String machineId = machine.getId();
+//
+//            processesPanelPresenter.addCommandOutput(machineId, console);
+//
+//            execAgentClient.startProcess(machineId, expandedCommand)
+//                           .thenIfProcessStartedEvent(console.getProcessStartedOperation())
+//                           .thenIfProcessDiedEvent(console.getProcessDiedOperation())
+//                           .thenIfProcessStdOutEvent(console.getStdOutOperation())
+//                           .thenIfProcessStdErrEvent(console.getStdErrOperation());
         });
     }
 
@@ -82,10 +83,10 @@ public class CommandExecutorImpl implements CommandExecutor {
         if (selectedMachine != null) {
             executeCommand(command, selectedMachine);
         } else {
-            machineChooser.show().then(machine -> {
-                executeCommand(command, machine);
-            });
         }
+        machineChooser.show().then(machine -> {
+            executeCommand(command, machine);
+        });
     }
 
     /** Returns the currently selected machine or {@code null} if none. */

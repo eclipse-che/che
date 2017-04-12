@@ -12,7 +12,7 @@ package org.eclipse.che.ide.extension.machine.client.outputspanel.console;
 
 import com.google.inject.name.Named;
 
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.command.CommandImpl;
 

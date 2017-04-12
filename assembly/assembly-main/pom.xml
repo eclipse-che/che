@@ -22,11 +22,12 @@
     <packaging>pom</packaging>
     <name>Che IDE :: Assemblies Tomcat</name>
     <dependencies>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-ide-war</artifactId>
-            <type>war</type>
-        </dependency>
+        <!-- FIXME: spi -->
+        <!--<dependency>-->
+            <!--<groupId>org.eclipse.che</groupId>-->
+            <!--<artifactId>assembly-ide-war</artifactId>-->
+            <!--<type>war</type>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-wsagent-server</artifactId>
@@ -59,11 +60,12 @@
             <artifactId>che-core-ide-templates</artifactId>
             <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.dashboard</groupId>
-            <artifactId>che-dashboard-war</artifactId>
-            <type>war</type>
-        </dependency>
+        <!-- FIXME: spi -->
+        <!--<dependency>-->
+            <!--<groupId>org.eclipse.che.dashboard</groupId>-->
+            <!--<artifactId>che-dashboard-war</artifactId>-->
+            <!--<type>war</type>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che.docs</groupId>
             <artifactId>che-docs</artifactId>
