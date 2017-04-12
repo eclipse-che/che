@@ -15,24 +15,22 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.core.model.machine.ServerConf;
-import org.eclipse.che.api.environment.server.TypeSpecificEnvironmentParser;
-import org.eclipse.che.workspace.infrastructure.docker.old.MachineProviderImpl;
+import org.eclipse.che.workspace.infrastructure.docker.DockerServiceStarter;
 import org.eclipse.che.workspace.infrastructure.docker.old.config.ApiEndpointEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.docker.old.config.DockerExtraHostsFromPropertyProvider;
 
 import java.util.Set;
 
 /**
- * Module for components that are needed for {@link MachineProviderImpl}
+ * Module for components that are needed for {@link DockerServiceStarter}
  *
  * @author Alexander Garagatyi
  */
 public class DockerMachineModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(org.eclipse.che.workspace.infrastructure.docker.old.cleaner.DockerAbandonedResourcesCleaner.class);
-        bind(org.eclipse.che.workspace.infrastructure.docker.old.cleaner.RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class);
+//        bind(org.eclipse.che.workspace.infrastructure.docker.old.cleaner.DockerAbandonedResourcesCleaner.class);
+//        bind(org.eclipse.che.workspace.infrastructure.docker.old.cleaner.RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class);
 
         @SuppressWarnings("unused") Multibinder<String> devMachineEnvVars =
                 Multibinder.newSetBinder(binder(),
@@ -45,14 +43,14 @@ public class DockerMachineModule extends AbstractModule {
                                          Names.named("machine.docker.machine_env"))
                            .permitDuplicates();
 
-        @SuppressWarnings("unused") Multibinder<ServerConf> devMachineServers =
-                Multibinder.newSetBinder(binder(),
-                                         ServerConf.class,
-                                         Names.named("machine.docker.dev_machine.machine_servers"));
-        @SuppressWarnings("unused") Multibinder<ServerConf> machineServers =
-                Multibinder.newSetBinder(binder(),
-                                         ServerConf.class,
-                                         Names.named("machine.docker.machine_servers"));
+//        @SuppressWarnings("unused") Multibinder<ServerConf> devMachineServers =
+//                Multibinder.newSetBinder(binder(),
+//                                         ServerConf.class,
+//                                         Names.named("machine.docker.dev_machine.machine_servers"));
+//        @SuppressWarnings("unused") Multibinder<ServerConf> machineServers =
+//                Multibinder.newSetBinder(binder(),
+//                                         ServerConf.class,
+//                                         Names.named("machine.docker.machine_servers"));
 
         @SuppressWarnings("unused") Multibinder<String> devMachineVolumes =
                 Multibinder.newSetBinder(binder(),

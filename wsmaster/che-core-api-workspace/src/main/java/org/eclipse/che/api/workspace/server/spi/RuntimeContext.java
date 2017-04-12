@@ -25,7 +25,7 @@ import java.util.Map;
 public abstract class RuntimeContext {
 
     protected final Environment           environment;
-    protected final InternalRuntimeConfig internalRuntimeConfig;
+//    protected final InternalRuntimeConfig internalRuntimeConfig;
     protected final RuntimeIdentity       identity;
     protected final RuntimeInfrastructure infrastructure;
     // TODO other than WorkspaceStatus impl
@@ -37,7 +37,7 @@ public abstract class RuntimeContext {
         this.environment = environment;
         this.identity = identity;
         this.infrastructure = infrastructure;
-        this.internalRuntimeConfig = new InternalRuntimeConfig(environment, registryEndpoint);
+//        this.internalRuntimeConfig = new InternalRuntimeConfig(environment, registryEndpoint);
     }
 
 

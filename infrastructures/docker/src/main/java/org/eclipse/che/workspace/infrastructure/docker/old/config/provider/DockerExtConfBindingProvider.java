@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old.config.provider;
 
+import com.google.common.base.Strings;
+
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.inject.CheBootstrap;
-import org.eclipse.che.plugin.docker.machine.WindowsHostUtils;
+import org.eclipse.che.workspace.infrastructure.docker.old.extra.WindowsHostUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Strings;
 
 import javax.inject.Inject;
 import javax.inject.Named;

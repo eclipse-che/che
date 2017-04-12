@@ -8,15 +8,11 @@
  * Contributors:
  *   Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.che.workspace.infrastructure.docker.old.strategy;
 
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-
-import org.eclipse.che.plugin.docker.machine.local.LocalDockerModule;
-import org.eclipse.che.workspace.infrastructure.docker.old.DockerInstanceRuntimeInfo;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

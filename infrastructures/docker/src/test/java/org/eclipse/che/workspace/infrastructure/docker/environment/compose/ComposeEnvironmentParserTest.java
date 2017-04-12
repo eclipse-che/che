@@ -12,7 +12,6 @@ package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
 import com.google.common.collect.ImmutableMap;
 
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
@@ -146,7 +145,7 @@ public class ComposeEnvironmentParserTest {
     }
 
     @Test
-    public void shouldBeAbleToParseComposeEnvironmentWithApplicationByLocation() throws ServerException {
+    public void shouldBeAbleToParseComposeEnvironmentWithApplicationByLocation() throws Exception {
         // given
         when(recipe.getContentType()).thenReturn("text/yaml");
         when(recipeDownloader.getRecipe(TEXT)).thenReturn(COMPOSE_CONTENT);

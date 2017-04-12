@@ -10,85 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.api.core.model.machine.ServerConf;
-import org.eclipse.che.api.core.util.JsonRpcEndpointIdsHolder;
-import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.environment.server.model.CheServiceImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.server.util.RecipeRetriever;
-import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
-import org.eclipse.che.commons.subject.SubjectImpl;
-import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
-import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
-import org.eclipse.che.plugin.docker.client.ProgressMonitor;
-import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
-import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
-import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
-import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
-import org.eclipse.che.plugin.docker.client.json.ContainerState;
-import org.eclipse.che.plugin.docker.client.json.Volume;
-import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
-import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
-import org.eclipse.che.plugin.docker.client.params.PullParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
-import org.eclipse.che.plugin.docker.client.params.TagParams;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceStopDetector;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerMachineFactory;
-import org.eclipse.che.workspace.infrastructure.docker.old.local.node.DockerNode;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKER_FILE_TYPE;
-import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertEqualsNoOrder;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 @Listeners(MockitoTestNGListener.class)
 public class MachineProviderImplTest {
+    /*
     private static final String  CONTAINER_ID           = "containerId";
     private static final String  WORKSPACE_ID           = "wsId";
     private static final String  MACHINE_NAME           = "machineName";
@@ -1609,4 +1536,5 @@ public class MachineProviderImplTest {
                                            dnsResolvers);
         }
     }
+    */
 }

@@ -10,34 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old.provider;
 
-import com.google.inject.Provider;
-
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.plugin.docker.machine.WindowsHostUtils;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 @Listeners(value = {MockitoTestNGListener.class})
 public class LocalWorkspaceFolderPathProviderTest  {
-    private static final String WS_ID   = "testWsId";
+ /*   private static final String WS_ID   = "testWsId";
     private static final String WS_NAME = "testWsName";
 
     @Mock
@@ -251,5 +229,5 @@ public class LocalWorkspaceFolderPathProviderTest  {
         public WorkspaceManager get() {
             return workspaceManager;
         }
-    }
+    }*/
 }

@@ -60,7 +60,7 @@ public class InitialAuthConfig {
     @VisibleForTesting
     protected static final String VALID_DOCKER_PROPERTY_NAME_EXAMPLE = CONFIG_PREFIX + "registry_name.parameter_name";
 
-    /** For testing purposes */
+    @VisibleForTesting
     public InitialAuthConfig() {
     }
 

@@ -10,60 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
-import com.google.common.base.Joiner;
-
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
-import org.eclipse.che.api.environment.server.DefaultServicesStartStrategy;
-import org.eclipse.che.api.environment.server.EnvironmentParser;
-import org.eclipse.che.api.environment.server.model.CheServiceBuildContextImpl;
-import org.eclipse.che.api.environment.server.model.CheServiceImpl;
-import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
-import org.eclipse.che.api.machine.server.MachineInstanceProviders;
-import org.eclipse.che.api.machine.shared.dto.OldMachineConfigDto;
-import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
-import org.eclipse.che.api.machine.shared.dto.OldServerConfDto;
-import org.eclipse.che.api.workspace.server.DtoConverter;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
 
 /**
  * @author Alexander Garagatyi
  */
 @Listeners(MockitoTestNGListener.class)
 public class CheEnvironmentValidatorTest {
-    @Mock
+ /*   @Mock
     MachineInstanceProviders     machineInstanceProviders;
     @Mock
     EnvironmentParser            environmentParser;
@@ -654,5 +609,5 @@ public class CheEnvironmentValidatorTest {
 //        service.setVolumes(new ArrayList<>(singletonList("volume"))); Forbidden
 
         return service;
-    }
+    }*/
 }

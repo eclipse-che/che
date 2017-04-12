@@ -10,11 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
-import org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker;
+import org.eclipse.che.workspace.infrastructure.docker.old.config.DockerMachineTerminalChecker;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
-
 
 /**
  * @author Max Shaposhnik

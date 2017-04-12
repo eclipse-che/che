@@ -19,6 +19,8 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -54,7 +56,7 @@ public class DockerEnvironmentNormalizer {
         normalizeNames(dockerEnvironment);
     }
 
-    private void normalizeNames(DockerEnvironment dockerEnvironment) {
+    private void normalizeNames(DockerEnvironment dockerEnvironment) throws InfrastructureException {
         Map<String, DockerService> services = dockerEnvironment.getServices();
         for (Map.Entry<String, DockerService> serviceEntry : services.entrySet()) {
             DockerService service = serviceEntry.getValue();
@@ -86,28 +88,28 @@ public class DockerEnvironmentNormalizer {
      * @param services
      *         all services in environment
      */
-    private void normalizeLinks(DockerService serviceToNormalizeLinks, Map<String, DockerService> services) {
-        serviceToNormalizeLinks.setLinks(
-                serviceToNormalizeLinks.getLinks()
-                                       .stream()
-                                       .map(link -> {
-                                           // a link has format: 'name:alias' or 'name'
-                                           String serviceNameAndAliasToLink[] = link.split(":", 2);
-                                           String serviceName = serviceNameAndAliasToLink[0];
-                                           String serviceAlias = (serviceNameAndAliasToLink.length > 1) ?
-                                                                 serviceNameAndAliasToLink[1] : null;
-                                           DockerService serviceLinkTo = services.get(serviceName);
-                                           if (serviceLinkTo != null) {
-                                               String containerNameLinkTo = serviceLinkTo.getContainerName();
-                                               return (serviceAlias == null) ?
-                                                      containerNameLinkTo :
-                                                      containerNameLinkTo + ':' + serviceAlias;
-                                           } else {
-                                               // should never happens. Errors like this should be filtered by CheEnvironmentValidator
-                                               throw new IllegalArgumentException("Attempt to link non existing service " + serviceName +
-                                                                                  " to " + serviceToNormalizeLinks + " service.");
-                                           }
-                                       }).collect(toList()));
+    private void normalizeLinks(DockerService serviceToNormalizeLinks, Map<String, DockerService> services)
+            throws InfrastructureException {
+        List<String> normalizedLinks = new ArrayList<>();
+        for (String link : serviceToNormalizeLinks.getLinks()) {
+            // a link has format: 'name:alias' or 'name'
+            String serviceNameAndAliasToLink[] = link.split(":", 2);
+            String serviceName = serviceNameAndAliasToLink[0];
+            String serviceAlias = (serviceNameAndAliasToLink.length > 1) ?
+                                  serviceNameAndAliasToLink[1] : null;
+            DockerService serviceLinkTo = services.get(serviceName);
+            if (serviceLinkTo != null) {
+                String containerNameLinkTo = serviceLinkTo.getContainerName();
+                normalizedLinks.add((serviceAlias == null) ?
+                                    containerNameLinkTo :
+                                    containerNameLinkTo + ':' + serviceAlias);
+            } else {
+                // should never happens. Errors like this should be filtered by CheEnvironmentValidator
+                throw new InfrastructureException("Attempt to link non existing service " + serviceName +
+                                                  " to " + serviceToNormalizeLinks + " service.");
+            }
+        }
+        serviceToNormalizeLinks.setLinks(normalizedLinks);
     }
 
     private void normalize(String namespace,

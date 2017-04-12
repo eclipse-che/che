@@ -12,7 +12,6 @@ package org.eclipse.che.workspace.infrastructure.docker.environment.compose.dese
 
 import com.google.common.collect.ImmutableMap;
 
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.ComposeEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
@@ -48,7 +47,7 @@ public class EnvironmentDeserializerTest {
     private ComposeEnvironmentParser parser;
 
     @Test(dataProvider = "correctContentTestData")
-    public void testCorrectContentParsing(String content, Map<String, String> expected) throws ServerException {
+    public void testCorrectContentParsing(String content, Map<String, String> expected) throws Exception {
         ComposeEnvironment cheServicesEnvironment = parser.parse(content, "application/x-yaml");
 
         // then
@@ -127,7 +126,7 @@ public class EnvironmentDeserializerTest {
     }
 
     @Test(dataProvider = "incorrectContentTestData")
-    public void shouldThrowError(String content, String errorPattern) throws ServerException {
+    public void shouldThrowError(String content, String errorPattern) throws Exception {
         try {
             parser.parse(content, "application/x-yaml");
         } catch (IllegalArgumentException e) {

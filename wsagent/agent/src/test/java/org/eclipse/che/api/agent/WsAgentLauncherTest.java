@@ -10,41 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent;
 
-import org.eclipse.che.api.agent.server.WsAgentPingRequestFactory;
-import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.machine.Server;
-import org.eclipse.che.api.core.rest.HttpJsonRequest;
-import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.core.rest.HttpJsonResponse;
-import org.eclipse.che.api.environment.server.MachineProcessManager;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.shared.Constants;
-import org.eclipse.che.commons.test.mockito.answer.SelfReturningAnswer;
-import org.mockito.Matchers;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.util.Collections;
-
-import static org.eclipse.che.api.workspace.shared.Constants.WS_AGENT_PROCESS_NAME;
 
 @Listeners(MockitoTestNGListener.class)
 public class WsAgentLauncherTest {
+    /*
     private static final String               MACHINE_ID                   = "machineId";
     private static final String               WORKSPACE_ID                 = "testWorkspaceId";
     private static final String               WS_AGENT_PORT                = Constants.WS_AGENT_PORT;
@@ -215,5 +186,5 @@ public class WsAgentLauncherTest {
 
         wsAgentLauncher.launch(machine, agent);
     }
-
+*/
 }

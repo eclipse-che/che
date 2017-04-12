@@ -20,7 +20,6 @@ import org.testng.annotations.Test;
 
 import java.util.Optional;
 
-import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
 
@@ -50,7 +49,7 @@ public class DockerContainerNameGeneratorTest {
     public void machineNameShouldBeReturnedByGeneratedContainerName() {
         String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
 
-        Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(generatedName);
+        Optional<DockerContainerNameGenerator.ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(generatedName);
 
         assertEquals(containerNameInfoParser.get().getMachineId(), MACHINE_ID);
         assertEquals(containerNameInfoParser.get().getWorkspaceId(), WORKSPACE_ID);
@@ -139,7 +138,7 @@ public class DockerContainerNameGeneratorTest {
 
     @Test(dataProvider = "validContainerNames")
     public void testValidContainerNames(String containerName, Pair<String, String> expectedResult) {
-        Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(containerName);
+        Optional<DockerContainerNameGenerator.ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(containerName);
 
         assertEquals(containerNameInfoParser.get().getMachineId(), expectedResult.first);
         assertEquals(containerNameInfoParser.get().getWorkspaceId(), expectedResult.second);
@@ -191,7 +190,7 @@ public class DockerContainerNameGeneratorTest {
 
     @Test(dataProvider = "invalidContainerNames")
     public void testInvalidContainerNames(String containerName) {
-        Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(containerName);
+        Optional<DockerContainerNameGenerator.ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(containerName);
 
         assertFalse(containerNameInfoParser.isPresent());
     }

@@ -10,11 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
-import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerChecker;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
 
 /**
  * @author Max Shaposhnik
@@ -23,7 +20,7 @@ import org.testng.annotations.Test;
 
 @Listeners(value = {MockitoTestNGListener.class})
 public class DockerMachineExtServerCheckerTest {
-
+/*
 
     @Test(expectedExceptions = RuntimeException.class)
     public void shouldThrowRuntimeExceptionIfNoExtServerArchivePresent() {
@@ -31,4 +28,5 @@ public class DockerMachineExtServerCheckerTest {
 
         checker.start();
     }
+    */
 }

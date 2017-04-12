@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
+import org.eclipse.che.workspace.infrastructure.docker.old.extra.RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -42,7 +43,8 @@ public class RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriberTest {
     @Mock
     private Workspace             workspace;
 
-    private RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber removeWorkspaceFilesAfterRemoveWorkspaceEventSubscriber;
+    private RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber
+            removeWorkspaceFilesAfterRemoveWorkspaceEventSubscriber;
 
     @BeforeMethod
     public void setUp() {

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
@@ -42,7 +41,7 @@ public class BuildContextTest {
     private ComposeEnvironmentParser parser;
 
     @Test
-    public void shouldParseBuildArgsWhenProvided() throws ServerException {
+    public void shouldParseBuildArgsWhenProvided() throws Exception {
         // given
         String recipeContent = "services:\n" +
                                " dev-machine:\n" +
@@ -68,7 +67,7 @@ public class BuildContextTest {
     }
 
     @Test
-    public void shouldNotParseBuildArgsWhenNotProvided() throws ServerException {
+    public void shouldNotParseBuildArgsWhenNotProvided() throws Exception {
         // given
         String recipeContent = "services:\n" +
                                " dev-machine:\n" +

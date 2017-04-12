@@ -10,48 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
-import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
-import org.eclipse.che.plugin.docker.client.Exec;
-import org.eclipse.che.plugin.docker.client.LogMessage;
-import org.eclipse.che.plugin.docker.client.MessageProcessor;
-import org.eclipse.che.plugin.docker.client.ProgressMonitor;
-import org.eclipse.che.plugin.docker.client.params.CommitParams;
-import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
-import org.eclipse.che.plugin.docker.client.params.PushParams;
-import org.eclipse.che.plugin.docker.client.params.StartExecParams;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceProcessesCleaner;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceStopDetector;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerMachineFactory;
-import org.eclipse.che.workspace.infrastructure.docker.old.local.node.DockerNode;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import java.io.IOException;
-
-import static java.lang.String.format;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for {@link DockerInstance}.
@@ -60,6 +20,7 @@ import static org.testng.Assert.assertTrue;
  */
 @Listeners(MockitoTestNGListener.class)
 public class DockerInstanceTest {
+    /*
     private static final String        FILE_PATH    = "/tmp";
     private static final String        CONTAINER    = "container144";
     private static final String        OWNER        = "owner12";
@@ -261,5 +222,5 @@ public class DockerInstanceTest {
                                 .setSource(new MachineSourceImpl("docker").setLocation("location"))
                                 .setLimits(new MachineLimitsImpl(64))
                                 .build();
-    }
+    }*/
 }
