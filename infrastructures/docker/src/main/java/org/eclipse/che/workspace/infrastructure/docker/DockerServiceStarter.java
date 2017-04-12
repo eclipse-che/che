@@ -24,8 +24,8 @@ import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
@@ -52,13 +52,10 @@ import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
-import org.eclipse.che.workspace.infrastructure.docker.old.DockerInstance;
-import org.eclipse.che.workspace.infrastructure.docker.old.DockerInstanceRuntimeInfo;
 import org.eclipse.che.workspace.infrastructure.docker.old.DockerMachineSource;
 import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceStopDetector;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerMachineFactory;
 import org.eclipse.che.workspace.infrastructure.docker.old.extra.LogMessagePrinter;
-import org.eclipse.che.workspace.infrastructure.docker.old.local.node.DockerNode;
+import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategyProvider;
 import org.slf4j.Logger;
 
 import javax.inject.Named;
@@ -84,6 +81,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.CHE_WORKSPACE_ID;
 import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.LATEST_TAG;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -91,7 +89,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Alexander Garagatyi
  */
 public class DockerServiceStarter {
-    private static final Logger LOG = getLogger(DockerServiceStarter.class);
+    private static final Logger LOG                     = getLogger(DockerServiceStarter.class);
     /**
      * Prefix of image repository, used to identify that the image is a machine saved to snapshot.
      */
@@ -106,7 +104,6 @@ public class DockerServiceStarter {
     private final boolean                                       doForcePullOnBuild;
     private final boolean                                       privilegedMode;
     private final int                                           pidsLimit;
-    private final DockerMachineFactory                          dockerMachineFactory;
     private final List<String>                                  devMachinePortsToExpose;
     private final List<String>                                  commonMachinePortsToExpose;
     private final List<String>                                  devMachineSystemVolumes;
@@ -123,10 +120,10 @@ public class DockerServiceStarter {
     private final long                                          cpuQuota;
     private final WindowsPathEscaper                            windowsPathEscaper;
     private final String[]                                      dnsResolvers;
+    private       ServerEvaluationStrategyProvider              serverEvaluationStrategyProvider;
 
     public DockerServiceStarter(DockerConnector docker,
                                 UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
-                                DockerMachineFactory dockerMachineFactory,
                                 DockerInstanceStopDetector dockerInstanceStopDetector,
                                 @Named("machine.docker.dev_machine.machine_servers") Set<ServerConfig> devMachineServers,
                                 @Named("machine.docker.machine_servers") Set<ServerConfig> allMachinesServers,
@@ -146,10 +143,10 @@ public class DockerServiceStarter {
                                 @Named("che.docker.cpu_quota") long cpuQuota,
                                 WindowsPathEscaper windowsPathEscaper,
                                 @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
-                                @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers) {
+                                @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers,
+                                ServerEvaluationStrategyProvider serverEvaluationStrategyProvider) {
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;
-        this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
         this.doForcePullOnBuild = doForcePullOnBuild;
         this.privilegedMode = privilegedMode;
@@ -170,6 +167,7 @@ public class DockerServiceStarter {
         this.windowsPathEscaper = windowsPathEscaper;
         this.pidsLimit = pidsLimit;
         this.dnsResolvers = dnsResolvers;
+        this.serverEvaluationStrategyProvider = serverEvaluationStrategyProvider;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
@@ -239,8 +237,11 @@ public class DockerServiceStarter {
     }
 
     public DockerMachine startService(String networkName,
+                                      String machineName,
                                       DockerService service,
+                                      RuntimeIdentity identity,
                                       Map<String, String> startOptions) throws InfrastructureException {
+        String workspaceId = identity.getWorkspaceId();
         LineConsumer machineLogger = new ListLineConsumer();
 
         // copy to not affect/be affected by changes in origin
@@ -263,7 +264,7 @@ public class DockerServiceStarter {
 
             container = createContainer(workspaceId,
                                         machineName,
-                                        isDev,
+//                                        isDev,
                                         image,
                                         networkName,
                                         service);
@@ -278,17 +279,22 @@ public class DockerServiceStarter {
                                               service.getId(),
                                               machineLogger);
 
-            DockerNode node = dockerMachineFactory.createNode(workspaceId, container);
+//            DockerNode node = dockerMachineFactory.createNode(workspaceId, container);
 
             dockerInstanceStopDetector.startDetection(container,
                                                       service.getId(),
                                                       workspaceId);
 
-            return dockerMachineFactory.createInstance(machine,
-                                                       container,
-                                                       image,
-                                                       node,
-                                                       machineLogger);
+            return new DockerMachine(docker,
+                                     container,
+                                     image,
+                                     serverEvaluationStrategyProvider);
+
+//            return dockerMachineFactory.createInstance(machine,
+//                                                       container,
+//                                                       image,
+//                                                       node,
+//                                                       machineLogger);
         } catch (RuntimeException | ServerException | NotFoundException | IOException e) {
             cleanUpContainer(container);
             throw new InfrastructureException(e.getLocalizedMessage(), e);
@@ -419,7 +425,7 @@ public class DockerServiceStarter {
 
     private String createContainer(String workspaceId,
                                    String machineName,
-                                   boolean isDev,
+//                                   boolean isDev,
                                    String image,
                                    String networkName,
                                    DockerService service) throws IOException {
@@ -429,7 +435,7 @@ public class DockerServiceStarter {
                                  (long)(service.getMemLimit() * memorySwapMultiplier);
 
         addSystemWideContainerSettings(workspaceId,
-                                       isDev,
+//                                       isDev,
                                        service);
 
         EndpointConfig endpointConfig = new EndpointConfig().withAliases(machineName)
@@ -501,23 +507,23 @@ public class DockerServiceStarter {
     }
 
     private void addSystemWideContainerSettings(String workspaceId,
-                                                boolean isDev,
+//                                                boolean isDev,
                                                 DockerService composeService) throws IOException {
         List<String> portsToExpose;
         List<String> volumes;
         Map<String, String> env;
-        if (isDev) {
-            portsToExpose = devMachinePortsToExpose;
-            volumes = devMachineSystemVolumes;
-
-            env = new HashMap<>(devMachineEnvVariables);
-            env.put(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID, workspaceId);
-            env.put(DockerInstanceRuntimeInfo.USER_TOKEN, getUserToken(workspaceId));
-        } else {
-            portsToExpose = commonMachinePortsToExpose;
-            env = commonMachineEnvVariables;
-            volumes = commonMachineSystemVolumes;
-        }
+//        if (isDev) {
+        portsToExpose = devMachinePortsToExpose;
+        volumes = devMachineSystemVolumes;
+//
+        env = new HashMap<>(devMachineEnvVariables);
+        env.put(CHE_WORKSPACE_ID, workspaceId);
+//            env.put(USER_TOKEN, getUserToken(workspaceId));
+//        } else {
+//            portsToExpose = commonMachinePortsToExpose;
+//            env = commonMachineEnvVariables;
+//            volumes = commonMachineSystemVolumes;
+//        }
         composeService.getExpose().addAll(portsToExpose);
         composeService.getEnvironment().putAll(env);
         composeService.getVolumes().addAll(volumes);
@@ -613,9 +619,9 @@ public class DockerServiceStarter {
 
     // workspaceId parameter is required, because in case of separate storage for tokens
     // you need to know exactly which workspace and which user to apply the token.
-    protected String getUserToken(String wsId) {
-        return EnvironmentContext.getCurrent().getSubject().getToken();
-    }
+//    protected String getUserToken(String wsId) {
+//        return EnvironmentContext.getCurrent().getSubject().getToken();
+//    }
 
     /**
      * Escape paths for Windows system with boot@docker according to rules given here :

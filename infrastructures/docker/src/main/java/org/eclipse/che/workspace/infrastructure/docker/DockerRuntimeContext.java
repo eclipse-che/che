@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
@@ -26,7 +27,8 @@ import org.slf4j.Logger;
 
 import java.net.URL;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -49,12 +51,15 @@ public class DockerRuntimeContext extends RuntimeContext {
     private final DockerServiceStarter   serviceStarter;
 
     private final DockerEnvironment dockerEnvironment;
+    // Should not be used after runtime start
     private final Queue<String>     startQueue;
+    private final URLRewriter       urlRewriter;
 
     // synchronized, TODO consider reworking it into separate component
-    private ArrayList<DockerMachine> machines;
-    private Thread                   startThread;
-    private boolean                  stopIsCalled;
+    // TODO volatile or something else?
+    private volatile Map<String, DockerMachine> machines;
+    private volatile Thread                     startThread;
+    private volatile boolean                    stopIsCalled;
 
     public DockerRuntimeContext(DockerEnvironment dockerEnvironment,
                                 Environment environment,
@@ -63,14 +68,16 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 URL registryEndpoint,
                                 List<String> orderedServices,
                                 DockerNetworkLifecycle dockerNetworkLifecycle,
-                                DockerServiceStarter serviceStarter)
+                                DockerServiceStarter serviceStarter,
+                                URLRewriter urlRewriter)
             throws ValidationException, InfrastructureException {
         super(environment, identity, infrastructure, registryEndpoint);
         this.dockerEnvironment = dockerEnvironment;
         this.dockerNetworkLifecycle = dockerNetworkLifecycle;
         this.serviceStarter = serviceStarter;
         this.startQueue = new ArrayDeque<>(orderedServices);
-        this.machines = new ArrayList<>();
+        this.urlRewriter = urlRewriter;
+        this.machines = new HashMap<>();
         this.stopIsCalled = false;
     }
 
@@ -93,24 +100,36 @@ public class DockerRuntimeContext extends RuntimeContext {
             checkStartInterruption();
             dockerNetworkLifecycle.createNetwork(dockerEnvironment.getNetwork());
 
-            String machine = startQueue.peek();
-            while (machine != null) {
-                DockerService service = dockerEnvironment.getServices().get(machine);
+            String machineName = startQueue.peek();
+            DockerMachine dockerMachine;
+            while (machineName != null) {
+                DockerService service = dockerEnvironment.getServices().get(machineName);
                 checkStartInterruption();
-                DockerMachine machineRuntime = startMachine(service, startOptions);
-                machines.add(machineRuntime);
+                dockerMachine = startMachine(machineName, service, startOptions);
+                addMachine(machineName, dockerMachine);
                 // add agents start
                 startQueue.poll();
-                machine = startQueue.peek();
+                machineName = startQueue.peek();
             }
 
             return getInternalRuntime();
-        } catch (Exception e) {
+        } catch (InfrastructureException | RuntimeException e) {
+            // TODO remove starting machine if present
+            // TODO Check if interruption came from stop or because of another reason
+            // TODO if because of another reason stop environment
+            boolean runtimeDestroyingNeeded = true;
+            synchronized (this) {
+                if (stopIsCalled) {
+                    runtimeDestroyingNeeded = false;
+                }
+            }
             boolean interrupted = Thread.interrupted();
-            try {
-                destroyRuntime();
-            } catch (Exception destExc) {
-                LOG.error(destExc.getLocalizedMessage(), destExc);
+            if (runtimeDestroyingNeeded) {
+                try {
+                    destroyRuntime();
+                } catch (Exception destExc) {
+                    LOG.error(destExc.getLocalizedMessage(), destExc);
+                }
             }
             if (interrupted) {
                 // TODO throw that it is interrupted
@@ -136,42 +155,33 @@ public class DockerRuntimeContext extends RuntimeContext {
         destroyRuntime();
     }
 
-    private DockerMachine startMachine(DockerService service, Map<String, String> startOptions)
+    private DockerMachine startMachine(String name, DockerService service, Map<String, String> startOptions)
             throws InfrastructureException {
         if ("true".equals(startOptions.get("recover"))) {
             try {
-                return startFromSnapshot(service, startOptions);
+                return startFromSnapshot(name, service, startOptions);
             } catch (SourceNotFoundException e) {
                 // TODO what to do in that case?
-                // slip to no recovering option
+                // slip to start without recovering
             }
         }
-        return doStartMachine(service, startOptions);
+        DockerMachine dockerMachine = doStartMachine(name, service, startOptions);
+        startAgents(dockerMachine);
+        return dockerMachine;
     }
 
-    private DockerMachine doStartMachine(DockerService service, Map<String, String> startOptions)
-            throws InfrastructureException {
-        // TODO get machine source
-        normalizeServiceSource(service, null);
-        return serviceStarter.startService(dockerEnvironment.getNetwork(),
-                                           service,
-                                           startOptions);
-    }
-
-    private DockerMachine startFromSnapshot(DockerService service, Map<String, String> startOptions)
-            throws InfrastructureException {
-        // TODO set snapshot stuff
-        return doStartMachine(service, startOptions);
+    private void startAgents(DockerMachine dockerMachine) {
+        // TODO
     }
 
     private InternalRuntime getInternalRuntime() {
-        return null;
+        return new DockerInternalRuntime(this, urlRewriter, Collections.unmodifiableMap(machines));
     }
 
     private void destroyRuntime() throws InfrastructureException {
-        for (DockerMachine dockerMachine : unsetMachines()) {
+        for (Map.Entry<String, DockerMachine> machineEntry : unsetMachines().entrySet()) {
             try {
-                dockerMachine.destroy();
+                machineEntry.getValue().destroy();
             } catch (Exception e) {
                 // TODO
             }
@@ -179,24 +189,40 @@ public class DockerRuntimeContext extends RuntimeContext {
         dockerNetworkLifecycle.destroyNetwork(dockerEnvironment.getNetwork());
     }
 
-    synchronized private void addMachine(DockerMachine machine) throws InfrastructureException {
+    private DockerMachine startFromSnapshot(String name, DockerService service, Map<String, String> startOptions)
+            throws InfrastructureException {
+        // TODO set snapshot stuff
+        // TODO should snapshots data be stored in separate table of DB as it is done now?
+        return doStartMachine(name, service, startOptions);
+    }
+
+    private DockerMachine doStartMachine(String name, DockerService service, Map<String, String> startOptions)
+            throws InfrastructureException {
+        // TODO get machine source
+        normalizeServiceSource(service, null);
+        return serviceStarter.startService(dockerEnvironment.getNetwork(),
+                                           name,
+                                           service,
+                                           identity,
+                                           startOptions);
+    }
+
+    synchronized private void addMachine(String name, DockerMachine machine) throws InfrastructureException {
         if (machines != null) {
-            machines.add(machine);
+            machines.put(name, machine);
         } else {
             throw new InfrastructureException("");
         }
     }
 
-
-    synchronized private List<DockerMachine> unsetMachines() throws InfrastructureException {
+    synchronized private Map<String, DockerMachine> unsetMachines() throws InfrastructureException {
         if (machines != null) {
-            ArrayList<DockerMachine> machines = this.machines;
+            Map<String, DockerMachine> machines = this.machines;
             this.machines = null;
             return machines;
         }
         throw new InfrastructureException("");
     }
-
 
     synchronized private void setStartThread() throws InfrastructureException {
         if (startThread != null) {

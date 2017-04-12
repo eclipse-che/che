@@ -48,7 +48,7 @@ public class DockerInstanceProcessesCleaner implements EventSubscriber<MachinePr
 
         if (instance != null && (event.getEventType() == EventType.STOPPED ||
                                  event.getEventType() == EventType.ERROR)) {
-            ((DockerInstance)instance).removeProcess(event.getProcessId());
+//            ((DockerInstance)instance).removeProcess(event.getProcessId());
         }
     }
 

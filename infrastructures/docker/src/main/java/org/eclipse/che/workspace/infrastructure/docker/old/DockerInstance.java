@@ -10,56 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.inject.assistedinject.Assisted;
-
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.core.util.ListLineConsumer;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
-import org.eclipse.che.api.machine.server.model.impl.OldMachineConfigImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-import org.eclipse.che.api.machine.server.spi.impl.AbstractInstance;
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
-import org.eclipse.che.plugin.docker.client.Exec;
-import org.eclipse.che.plugin.docker.client.LogMessage;
-import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
-import org.eclipse.che.plugin.docker.client.params.CommitParams;
-import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
-import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
-import org.eclipse.che.plugin.docker.client.params.PushParams;
-import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.plugin.docker.client.params.StartExecParams;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceProcessesCleaner;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceStopDetector;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerMachineFactory;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.LogMessagePrinter;
-import org.eclipse.che.workspace.infrastructure.docker.old.local.node.DockerNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static java.lang.String.format;
 
 /**
  * Docker implementation of {@link Instance}
@@ -70,7 +21,7 @@ import static java.lang.String.format;
  * @author Mykola Morhun
  */
 public class DockerInstance {
-    public InstanceProcess getProcess(final int pid) throws NotFoundException, MachineException {
+    /*public InstanceProcess getProcess(final int pid) throws NotFoundException, MachineException {
         final InstanceProcess machineProcess = machineProcesses.get(pid);
         if (machineProcess != null) {
             try {
@@ -184,6 +135,7 @@ public class DockerInstance {
      * @throws MachineException
      *         if any error occurs with file reading
      */
+    /*
     public String readFileContent(String filePath, int startFrom, int limit) throws MachineException {
         if (limit <= 0 || startFrom <= 0) {
             throw new MachineException("Impossible to read file " + limit + " lines from " + startFrom + " line");
@@ -231,6 +183,7 @@ public class DockerInstance {
      *
      * {@inheritDoc}
      */
+    /*
     public void copy(String sourcePath, String targetPath) throws MachineException {
         throw new MachineException("Unsupported operation for docker machine implementation");
     }
@@ -243,5 +196,5 @@ public class DockerInstance {
         } catch (IOException x) {
             throw new MachineException(x.getMessage(), x);
         }
-    }
+    }*/
 }

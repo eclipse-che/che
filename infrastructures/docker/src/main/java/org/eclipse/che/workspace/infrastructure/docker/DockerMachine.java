@@ -12,40 +12,17 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.model.machine.OldMachineConfig;
-import org.eclipse.che.api.core.model.machine.OldServerConf;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
-import org.eclipse.che.api.machine.server.model.impl.OldMachineConfigImpl;
-import org.eclipse.che.api.machine.server.model.impl.OldServerConfImpl;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
-import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
-import org.eclipse.che.plugin.docker.client.params.PushParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.workspace.infrastructure.docker.old.DockerMachineSource;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceProcessesCleaner;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceStopDetector;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerMachineFactory;
-import org.eclipse.che.workspace.infrastructure.docker.old.local.node.DockerNode;
 import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategyProvider;
 
-import javax.inject.Named;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toMap;
 
 /**
  * @author Alexander Garagatyi
@@ -91,81 +68,85 @@ public class DockerMachine implements Machine {
     private final String                           container;
     private final DockerConnector                  docker;
     private final String                           image;
-    private final String                           registry;
-    private final String                           registryNamespace;
-    private final DockerNode                       node;
-    private final DockerInstanceStopDetector       dockerInstanceStopDetector;
-    private final boolean                          snapshotUseRegistry;
+//    private final String                           registry;
+//    private final String                           registryNamespace;
+//    private final DockerNode                       node;
+//    private final DockerInstanceStopDetector       dockerInstanceStopDetector;
+//    private final boolean                          snapshotUseRegistry;
     private final ContainerInfo                    info;
-    private final Map<String, OldServerConfImpl>   serversConf;
-    private final String                           internalHost;
     private final ServerEvaluationStrategyProvider provider;
+//    private final Map<String, OldServerConfImpl>   serversConf;
+//    private final String                           internalHost;
+//    private final ServerEvaluationStrategyProvider provider;
 
-    public DockerMachine(DockerConnectorProvider dockerProvider,
-                         @Named("che.docker.registry") String registry,
-                         @Named("che.docker.namespace") @Nullable String registryNamespace,
-                         DockerMachineFactory dockerMachineFactory,
-                         @Assisted Machine machine,
+    public DockerMachine(DockerConnector docker,
+//                         @Named("che.docker.registry") String registry,
+//                         @Named("che.docker.namespace") @Nullable String registryNamespace,
+//                         @Assisted Machine machine,
                          @Assisted("container") String container,
                          @Assisted("image") String image,
-                         @Assisted DockerNode node,
-                         @Assisted LineConsumer outputConsumer,
-                         DockerInstanceStopDetector dockerInstanceStopDetector,
-                         DockerInstanceProcessesCleaner processesCleaner,
-                         @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
-                         @Assisted ContainerInfo containerInfo,
-                         @Assisted OldMachineConfig machineConfig,
-                         @Assisted String internalHost,
-                         ServerEvaluationStrategyProvider provider,
-                         @Named("machine.docker.dev_machine.machine_servers") Set<OldServerConf> devMachineSystemServers,
-                         @Named("machine.docker.machine_servers") Set<OldServerConf> allMachinesSystemServers) {
+//                         @Assisted DockerNode node,
+//                         @Assisted LineConsumer outputConsumer,
+//                         DockerInstanceStopDetector dockerInstanceStopDetector,
+//                         DockerInstanceProcessesCleaner processesCleaner,
+//                         @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
+//                         @Assisted ContainerInfo containerInfo,
+//                         @Assisted OldMachineConfig machineConfig,
+//                         @Assisted String internalHost,
+                         ServerEvaluationStrategyProvider provider
+//                         @Named("machine.docker.dev_machine.machine_servers") Set<OldServerConf> devMachineSystemServers,
+//                         @Named("machine.docker.machine_servers") Set<OldServerConf> allMachinesSystemServers
+    ) throws InfrastructureException {
 //        this.dockerMachineFactory = dockerMachineFactory;
         this.container = container;
-        this.docker = dockerProvider.get();
+        this.docker = docker;
         this.image = image;
 //        this.outputConsumer = outputConsumer;
-        this.registry = registry;
-        this.registryNamespace = registryNamespace;
-        this.node = node;
-        this.dockerInstanceStopDetector = dockerInstanceStopDetector;
+//        this.registry = registry;
+//        this.registryNamespace = registryNamespace;
+//        this.node = node;
+//        this.dockerInstanceStopDetector = dockerInstanceStopDetector;
 //        processesCleaner.trackProcesses(this);
-        this.snapshotUseRegistry = snapshotUseRegistry;
+//        this.snapshotUseRegistry = snapshotUseRegistry;
 //        this.machineRuntime = doGetRuntime();
 //        this.workspace = workspace;
 //        this.envName = envName;
 //        this.owner = owner;
 //        this.id = id;
-        this.info = containerInfo;
-
-        Stream<OldServerConf> confStream = Stream.concat(machineConfig.getServers().stream(), allMachinesSystemServers.stream());
-        if (machineConfig.isDev()) {
-            confStream = Stream.concat(confStream, devMachineSystemServers.stream());
+        try {
+            this.info = docker.inspectContainer(container);
+        } catch (IOException e) {
+            throw new InfrastructureException(e.getLocalizedMessage(), e);
         }
+//        Stream<OldServerConf> confStream = Stream.concat(machineConfig.getServers().stream(), allMachinesSystemServers.stream());
+//        if (machineConfig.isDev()) {
+//            confStream = Stream.concat(confStream, devMachineSystemServers.stream());
+//        }
         // convert list to map for quick search and normalize port - add /tcp if missing
-        this.serversConf = confStream.collect(toMap(srvConf -> srvConf.getPort().contains("/") ?
-                                                               srvConf.getPort() :
-                                                               srvConf.getPort() + "/tcp",
-                                                    OldServerConfImpl::new));
-
-        this.internalHost = internalHost;
+//        this.serversConf = confStream.collect(toMap(srvConf -> srvConf.getPort().contains("/") ?
+//                                                               srvConf.getPort() :
+//                                                               srvConf.getPort() + "/tcp",
+//                                                    OldServerConfImpl::new));
+//
+//        this.internalHost = internalHost;
         this.provider = provider;
     }
 
     @Override
     public Map<String, String> getProperties() {
-        return null;
+        return Collections.emptyMap();
     }
 
     @Override
     public Map<String, ? extends Server> getServers() {
         ServerEvaluationStrategy strategy = provider.get();
-        return strategy.getServers(info, internalHost, serversConf);
+        return strategy.getServers(info, "localhost", Collections.emptyMap());
     }
 
     public void destroy() {
 
     }
-
+/*
     public MachineSource saveToSnapshot() throws MachineException {
         try {
             String image = generateRepository();
@@ -210,7 +191,7 @@ public class DockerMachine implements Machine {
         machineProcesses.put(pid, process);
         return process;
     }
-
+*/
     /**
      * Can be used for docker specific operations with machine
      */

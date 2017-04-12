@@ -12,17 +12,15 @@ package org.eclipse.che.workspace.infrastructure.docker.old.local;
 
 import com.google.common.base.Strings;
 
-import org.eclipse.che.api.core.util.SystemInfo;
-import org.eclipse.che.api.environment.server.AgentConfigApplier;
-import org.eclipse.che.api.environment.server.DefaultInfrastructureProvisioner;
-import org.eclipse.che.api.environment.server.exception.EnvironmentException;
-import org.eclipse.che.api.environment.server.model.CheServiceImpl;
-import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.inject.CheBootstrap;
+import org.eclipse.che.workspace.infrastructure.docker.DefaultInfrastructureProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
+import org.eclipse.che.workspace.infrastructure.docker.old.AgentConfigApplier;
 import org.eclipse.che.workspace.infrastructure.docker.old.config.provider.DockerExtConfBindingProvider;
 import org.eclipse.che.workspace.infrastructure.docker.old.config.provider.ExecAgentVolumeProvider;
 import org.eclipse.che.workspace.infrastructure.docker.old.config.provider.TerminalVolumeProvider;
@@ -31,12 +29,10 @@ import org.eclipse.che.workspace.infrastructure.docker.old.local.node.WorkspaceF
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static java.lang.String.format;
 import static org.eclipse.che.api.workspace.shared.Utils.getDevMachineName;
 
 /**
@@ -80,16 +76,16 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
     }
 
     @Override
-    public void provision(EnvironmentImpl envConfig, CheServicesEnvironmentImpl internalEnv)
-            throws EnvironmentException {
+    public void provision(Environment envConfig, DockerEnvironment internalEnv)
+            throws InfrastructureException {
         String devMachineName = getDevMachineName(envConfig);
         if (devMachineName == null) {
-            throw new EnvironmentException("ws-machine is not found on agents applying");
+            throw new InfrastructureException("ws-machine is not found on agents applying");
         }
 
-        CheServiceImpl devMachine = internalEnv.getServices().get(devMachineName);
+        DockerService devMachine = internalEnv.getServices().get(devMachineName);
 
-        for (CheServiceImpl machine : internalEnv.getServices().values()) {
+        for (DockerService machine : internalEnv.getServices().values()) {
             ArrayList<String> volumes = new ArrayList<>(machine.getVolumes());
             volumes.add(terminalVolumeProvider.get());
             volumes.add(execVolumeProvider.get());
@@ -97,18 +93,18 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         }
 
         // add bind-mount volume for projects in a workspace
-        String projectFolderVolume;
-        try {
-            projectFolderVolume = String.format("%s:%s%s",
-                                                workspaceFolderPathProvider.getPath(internalEnv.getWorkspaceId()),
-                                                projectFolderPath, projectsVolumeOptions);
-        } catch (IOException e) {
-            throw new EnvironmentException("Error occurred on resolving path to files of workspace " +
-                                           internalEnv.getWorkspaceId());
-        }
+//        String projectFolderVolume;
+//        try {
+//            projectFolderVolume = String.format("%s:%s%s",
+//                                                workspaceFolderPathProvider.getPath(internalEnv.getWorkspaceId()),
+//                                                projectFolderPath, projectsVolumeOptions);
+//        } catch (IOException e) {
+//            throw new EnvironmentException("Error occurred on resolving path to files of workspace " +
+//                                           internalEnv.getWorkspaceId());
+//        }
         List<String> devMachineVolumes = devMachine.getVolumes();
-        devMachineVolumes.add(SystemInfo.isWindows() ? pathEscaper.escapePath(projectFolderVolume)
-                                                     : projectFolderVolume);
+//        devMachineVolumes.add(SystemInfo.isWindows() ? pathEscaper.escapePath(projectFolderVolume)
+//                                                     : projectFolderVolume);
         // add volume with ws-agent archive
         devMachineVolumes.add(wsAgentVolumeProvider.get());
         // add volume and variable to setup ws-agent configuration
@@ -122,15 +118,5 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
 
         // apply basic infra (e.g. agents)
         super.provision(envConfig, internalEnv);
-    }
-
-    @Override
-    public void provision(ExtendedMachineImpl machineConfig, CheServiceImpl internalMachine)
-            throws EnvironmentException {
-        List<String> volumes = internalMachine.getVolumes();
-        volumes.add(terminalVolumeProvider.get());
-        volumes.add(execVolumeProvider.get());
-
-        super.provision(machineConfig, internalMachine);
     }
 }

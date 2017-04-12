@@ -11,23 +11,6 @@
 package org.eclipse.che.workspace.infrastructure.docker.old.local;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.TypeLiteral;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
-import com.google.inject.multibindings.MapBinder;
-import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Names;
-
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.machine.DockerInstance;
-import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
-import org.eclipse.che.plugin.docker.machine.DockerProcess;
-import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy;
-import org.eclipse.che.workspace.infrastructure.docker.old.local.node.DockerNode;
-import org.eclipse.che.plugin.openshift.client.OpenShiftConnector;
-
-import java.util.Set;
 
 /**
  * The Module for Local Docker components
@@ -41,7 +24,7 @@ public class LocalDockerModule extends AbstractModule {
 
     @Override
     protected void configure() {
-
+/*
         install(new FactoryModuleBuilder()
                         .implement(Instance.class, DockerInstance.class)
                         .implement(InstanceProcess.class, DockerProcess.class)
@@ -92,6 +75,6 @@ public class LocalDockerModule extends AbstractModule {
                                                                        Names.named("che.docker.extra_hosts"))
                                                          .permitDuplicates();
         extraHosts.addBinding()
-                  .toProvider(org.eclipse.che.workspace.infrastructure.docker.old.local.provider.CheDockerExtraHostProvider.class);
+                  .toProvider(org.eclipse.che.workspace.infrastructure.docker.old.local.provider.CheDockerExtraHostProvider.class);*/
     }
 }

@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old.config.provider;
 
-import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+
+import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.JAVA_OPTS_VARIABLE;
 
 /**
  * Add env variable to docker dev-machine with java opts
@@ -30,6 +30,6 @@ public class JavaOptsEnvVariableProvider implements Provider<String> {
 
     @Override
     public String get() {
-        return DockerInstanceRuntimeInfo.JAVA_OPTS_VARIABLE + '=' + javaOpts;
+        return JAVA_OPTS_VARIABLE + '=' + javaOpts;
     }
 }

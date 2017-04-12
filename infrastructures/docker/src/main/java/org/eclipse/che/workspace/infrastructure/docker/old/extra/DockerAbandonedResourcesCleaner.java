@@ -14,8 +14,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
@@ -23,8 +21,8 @@ import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.network.Network;
+import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.network.GetNetworksParams;
-import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.eclipse.che.workspace.infrastructure.docker.DockerContainerNameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +39,6 @@ import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
-import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
 
 /**
  * Job for periodically clean up abandoned docker containers and networks created by CHE.
@@ -62,19 +59,19 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
     private static final Pattern           CHE_NETWORK_PATTERN      = Pattern.compile(CHE_NETWORK_REGEX);
 
     // TODO replace with WorkspaceManager
-    private final CheEnvironmentEngine         environmentEngine;
+//    private final CheEnvironmentEngine         environmentEngine;
     private final DockerConnector              dockerConnector;
     private final DockerContainerNameGenerator nameGenerator;
     private final WorkspaceRuntimes            runtimes;
     private final Set<String>                  additionalNetworks;
 
     @Inject
-    public DockerAbandonedResourcesCleaner(CheEnvironmentEngine environmentEngine,
+    public DockerAbandonedResourcesCleaner(//CheEnvironmentEngine environmentEngine,
                                            DockerConnectorProvider dockerConnectorProvider,
                                            DockerContainerNameGenerator nameGenerator,
                                            WorkspaceRuntimes workspaceRuntimes,
                                            @Named("machine.docker.networks") Set<Set<String>> additionalNetworks) {
-        this.environmentEngine = environmentEngine;
+//        this.environmentEngine = environmentEngine;
         this.dockerConnector = dockerConnectorProvider.get();
         this.nameGenerator = nameGenerator;
         this.runtimes = workspaceRuntimes;
@@ -101,15 +98,15 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
         try {
             for (ContainerListEntry container : dockerConnector.listContainers()) {
                 String containerName = container.getNames()[0];
-                Optional<ContainerNameInfo> optional = nameGenerator.parse(containerName);
+                Optional<DockerContainerNameGenerator.ContainerNameInfo> optional = nameGenerator.parse(containerName);
                 if (optional.isPresent()) {
                     try {
                         // container is orphaned if not found exception is thrown
-                        environmentEngine.getMachine(optional.get().getWorkspaceId(),
-                                                     optional.get().getMachineId());
+//                        environmentEngine.getMachine(optional.get().getWorkspaceId(),
+//                                                     optional.get().getMachineId());
                         activeContainers.add(containerName);
-                    } catch (NotFoundException e) {
-                        cleanUpContainer(container);
+//                    } catch (NotFoundException e) {
+//                        cleanUpContainer(container);
                     } catch (Exception e) {
                         LOG.error(format("Failed to check activity for container with name '%s'. Cause: %s",
                                          containerName, e.getLocalizedMessage()), e);

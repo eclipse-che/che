@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old.config.provider;
 
-import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+
+import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.PROJECTS_ROOT_VARIABLE;
 
 /**
  * Add env variable to docker dev-machine with path to root folder of projects
@@ -30,6 +30,6 @@ public class ProjectsRootEnvVariableProvider implements Provider<String> {
 
     @Override
     public String get() {
-        return DockerInstanceRuntimeInfo.PROJECTS_ROOT_VARIABLE + '=' + projectFolderPath;
+        return PROJECTS_ROOT_VARIABLE + '=' + projectFolderPath;
     }
 }

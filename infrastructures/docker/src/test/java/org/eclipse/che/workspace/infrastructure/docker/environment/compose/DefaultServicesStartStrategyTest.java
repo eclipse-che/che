@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
-import org.eclipse.che.api.environment.server.DefaultServicesStartStrategy;
-import org.eclipse.che.api.environment.server.model.CheServiceImpl;
-import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.testng.annotations.Test;
 
 import java.util.List;

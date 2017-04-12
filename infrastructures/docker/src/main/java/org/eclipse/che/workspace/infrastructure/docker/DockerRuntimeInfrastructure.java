@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
@@ -43,8 +44,9 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     private final DockerServicesStartStrategy startStrategy;
     private final InfrastructureProvisioner   infrastructureProvisioner;
     private final DockerEnvironmentNormalizer environmentNormalizer;
-    private final DockerServiceStarter serviceStarter;
-    private final DockerNetworkLifecycle networkLifecycle;
+    private final DockerServiceStarter        serviceStarter;
+    private final DockerNetworkLifecycle      networkLifecycle;
+    private final URLRewriter                 urlRewriter;
 
     @Inject
     public DockerRuntimeInfrastructure(DockerEnvironmentParser dockerEnvironmentParser,
@@ -53,7 +55,8 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                        InfrastructureProvisioner infrastructureProvisioner,
                                        DockerEnvironmentNormalizer environmentNormalizer,
                                        DockerServiceStarter serviceStarter,
-                                       DockerNetworkLifecycle networkLifecycle) {
+                                       DockerNetworkLifecycle networkLifecycle,
+                                       URLRewriter urlRewriter) {
         super("docker", SUPPORTED_RECIPE_TYPES);
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
         this.dockerEnvironmentParser = dockerEnvironmentParser;
@@ -62,6 +65,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         this.environmentNormalizer = environmentNormalizer;
         this.serviceStarter = serviceStarter;
         this.networkLifecycle = networkLifecycle;
+        this.urlRewriter = urlRewriter;
     }
 
     @Override
@@ -81,14 +85,13 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                                                                             InfrastructureException {
         DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);
         dockerEnvironmentValidator.validate(environment, dockerEnvironment);
-        // check that order can be resolved
+        // check that services start order can be resolved
         List<String> orderedServices = startStrategy.order(dockerEnvironment);
-
+        // modify environment with everything needed to use docker machines on particular (cloud) infrastructure
         infrastructureProvisioner.provision(environment, dockerEnvironment);
-
+        //
         environmentNormalizer.normalize(environment, dockerEnvironment, identity);
 
-        // environment holder
         return new DockerRuntimeContext(dockerEnvironment,
                                         environment,
                                         identity,
@@ -96,17 +99,19 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                         null,
                                         orderedServices,
                                         networkLifecycle,
-                                        serviceStarter);
+                                        serviceStarter,
+                                        urlRewriter);
     }
-
 
     @Override
     public Set<RuntimeIdentity> getIdentities() throws UnsupportedOperationException {
+        // TODO
         throw new UnsupportedOperationException();
     }
 
     @Override
     public InternalRuntime getRuntime(RuntimeIdentity id) throws UnsupportedOperationException {
+        // TODO
         throw new UnsupportedOperationException();
     }
 }

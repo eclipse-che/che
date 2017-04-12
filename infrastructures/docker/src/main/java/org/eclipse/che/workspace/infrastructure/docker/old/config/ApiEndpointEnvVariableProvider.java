@@ -12,12 +12,12 @@ package org.eclipse.che.workspace.infrastructure.docker.old.config;
 
 import com.google.common.base.Strings;
 
-import org.eclipse.che.workspace.infrastructure.docker.old.DockerInstanceRuntimeInfo;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+
+import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.API_ENDPOINT_URL_VARIABLE;
 
 /**
  * Add env variable to docker dev-machine with url of Che API
@@ -32,11 +32,11 @@ public class ApiEndpointEnvVariableProvider implements Provider<String> {
 
     @Override
     public String get() {
-        String apiEndpointEnvVar = System.getenv(DockerInstanceRuntimeInfo.API_ENDPOINT_URL_VARIABLE);
+        String apiEndpointEnvVar = System.getenv(API_ENDPOINT_URL_VARIABLE);
         if (Strings.isNullOrEmpty(apiEndpoint) &&
             !Strings.isNullOrEmpty(apiEndpointEnvVar)) {
             apiEndpoint = apiEndpointEnvVar;
         }
-        return DockerInstanceRuntimeInfo.API_ENDPOINT_URL_VARIABLE + '=' + apiEndpoint;
+        return API_ENDPOINT_URL_VARIABLE + '=' + apiEndpoint;
     }
 }

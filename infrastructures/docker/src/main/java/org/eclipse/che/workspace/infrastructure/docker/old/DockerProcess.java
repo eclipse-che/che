@@ -10,34 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
-import com.google.inject.assistedinject.Assisted;
-
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.core.util.ListLineConsumer;
-import org.eclipse.che.api.core.util.ValueHolder;
-import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-import org.eclipse.che.api.machine.server.spi.impl.AbstractMachineProcess;
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
-import org.eclipse.che.plugin.docker.client.Exec;
-import org.eclipse.che.plugin.docker.client.LogMessage;
-import org.eclipse.che.plugin.docker.client.MessageProcessor;
-import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
-import org.eclipse.che.plugin.docker.client.params.StartExecParams;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.LogMessagePrinter;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.util.Arrays;
-
-import static com.google.common.base.MoreObjects.firstNonNull;
-import static java.lang.String.format;
 
 /**
  * Docker implementation of {@link InstanceProcess}
@@ -45,8 +18,8 @@ import static java.lang.String.format;
  * @author andrew00x
  * @author Alexander Garagatyi
  */
-public class DockerProcess extends AbstractMachineProcess implements InstanceProcess {
-    private final DockerConnector     docker;
+public class DockerProcess {
+    /*private final DockerConnector     docker;
     private final String              container;
     private final String              pidFilePath;
     private final String              commandLine;
@@ -191,5 +164,5 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
         } catch (IOException ignore) {
         }
         return errorMessage.toString();
-    }
+    }*/
 }
