@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import io.fabric8.openshift.api.model.DoneableRoute;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteFluent.SpecNested;
+import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 
 public class OpenShiftRouteCreator {
@@ -23,8 +24,7 @@ public class OpenShiftRouteCreator {
     private static final String TLS_TERMINATION_EDGE = "edge";
     private static final String REDIRECT_INSECURE_EDGE_TERMINATION_POLICY = "Redirect";
 
-    public static void createRoute (final OpenShiftClient openShiftClient,
-                                    final String namespace,
+    public static void createRoute (final String namespace,
                                     final String workspaceName,
                                     final String cheServerExternalAddress,
                                     final String serverRef, 
@@ -35,39 +35,41 @@ public class OpenShiftRouteCreator {
             throw new IllegalArgumentException("Property che.docker.ip.external must be set when using openshift.");
         }
 
-        String routeName = generateRouteName(workspaceName, serverRef);
-        String serviceHost = generateRouteHost(workspaceName, serverRef, cheServerExternalAddress);
-
-           SpecNested<DoneableRoute> routeSpec = openShiftClient
-                .routes()
-                .inNamespace(namespace)
-                .createNew()
-                .withNewMetadata()
-                .withName(routeName)
-                .addToLabels(OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL, serviceName)
-                .endMetadata()
-                .withNewSpec()
-                .withHost(serviceHost)
-                .withNewTo()
-                    .withKind("Service")
-                    .withName(serviceName)
-                .endTo()
-                .withNewPort()
-                    .withNewTargetPort()
-                        .withStrVal(serverRef)
-                    .endTargetPort()
-                .endPort();
-
-        if (enableTls) {
-            routeSpec.withNewTls()
-                         .withTermination(TLS_TERMINATION_EDGE)
-                         .withInsecureEdgeTerminationPolicy(REDIRECT_INSECURE_EDGE_TERMINATION_POLICY)
-                     .endTls();
+        try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
+            String routeName = generateRouteName(workspaceName, serverRef);
+            String serviceHost = generateRouteHost(workspaceName, serverRef, cheServerExternalAddress);
+    
+               SpecNested<DoneableRoute> routeSpec = openShiftClient
+                    .routes()
+                    .inNamespace(namespace)
+                    .createNew()
+                    .withNewMetadata()
+                    .withName(routeName)
+                    .addToLabels(OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL, serviceName)
+                    .endMetadata()
+                    .withNewSpec()
+                    .withHost(serviceHost)
+                    .withNewTo()
+                        .withKind("Service")
+                        .withName(serviceName)
+                    .endTo()
+                    .withNewPort()
+                        .withNewTargetPort()
+                            .withStrVal(serverRef)
+                        .endTargetPort()
+                    .endPort();
+    
+            if (enableTls) {
+                routeSpec.withNewTls()
+                             .withTermination(TLS_TERMINATION_EDGE)
+                             .withInsecureEdgeTerminationPolicy(REDIRECT_INSECURE_EDGE_TERMINATION_POLICY)
+                         .endTls();
+            }
+    
+            Route route = routeSpec.endSpec().done();
+    
+            LOG.info("OpenShift route {} created", route.getMetadata().getName());
         }
-
-        Route route = routeSpec.endSpec().done();
-
-        LOG.info("OpenShift route {} created", route.getMetadata().getName());
     }
 
     private static String generateRouteName(final String workspaceName, final String serverRef) {
