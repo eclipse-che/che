@@ -25,6 +25,9 @@ import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Action for previewing images in dedicated window.
  *
@@ -36,42 +39,20 @@ public class PreviewImageAction extends AbstractPerspectiveAction {
     private final WsAgentURLModifier wsAgentURLModifier;
     private final AppContext         appContext;
 
-    @Inject
-    @Named("PNGFileType")
-    private FileType pngFile;
-
-    @Inject
-    @Named("BMPFileType")
-    private FileType bmpFile;
-
-    @Inject
-    @Named("GIFFileType")
-    private FileType gifFile;
-
-    @Inject
-    @Named("ICOFileType")
-    private FileType iconFile;
-
-    @Inject
-    @Named("SVGFileType")
-    private FileType svgFile;
-
-    @Inject
-    @Named("JPEFileType")
-    private FileType jpeFile;
-
-    @Inject
-    @Named("JPEGFileType")
-    private FileType jpegFile;
-
-    @Inject
-    @Named("JPGFileType")
-    private FileType jpgFile;
+    private final List<String> extensions = new ArrayList<>();
 
     @Inject
     public PreviewImageAction(WsAgentURLModifier wsAgentURLModifier,
                              AppContext appContext,
-                              CoreLocalizationConstant constant) {
+                              CoreLocalizationConstant constant,
+                              @Named("PNGFileType") FileType pngFile,
+                              @Named("BMPFileType") FileType bmpFile,
+                              @Named("GIFFileType") FileType gifFile,
+                              @Named("ICOFileType") FileType iconFile,
+                              @Named("SVGFileType") FileType svgFile,
+                              @Named("JPEFileType") FileType jpeFile,
+                              @Named("JPEGFileType") FileType jpegFile,
+                              @Named("JPGFileType") FileType jpgFile) {
         super(singletonList(PROJECT_PERSPECTIVE_ID),
                 constant.actionPreviewImageTitle(),
                 constant.actionPreviewImageDescription(),
@@ -79,6 +60,15 @@ public class PreviewImageAction extends AbstractPerspectiveAction {
                 null);
         this.wsAgentURLModifier = wsAgentURLModifier;
         this.appContext = appContext;
+
+        extensions.add(pngFile.getExtension());
+        extensions.add(bmpFile.getExtension());
+        extensions.add(gifFile.getExtension());
+        extensions.add(iconFile.getExtension());
+        extensions.add(svgFile.getExtension());
+        extensions.add(jpeFile.getExtension());
+        extensions.add(jpegFile.getExtension());
+        extensions.add(jpgFile.getExtension());
     }
 
     @Override
@@ -88,19 +78,8 @@ public class PreviewImageAction extends AbstractPerspectiveAction {
             final Resource selectedResource = resources[0];
             if (Resource.FILE == selectedResource.getResourceType()) {
                 final String fileExtension = ((File)selectedResource).getExtension();
-
-                if (pngFile.getExtension().equals(fileExtension) ||
-                        bmpFile.getExtension().equals(fileExtension) ||
-                        gifFile.getExtension().equals(fileExtension) ||
-                        iconFile.getExtension().equals(fileExtension) ||
-                        svgFile.getExtension().equals(fileExtension) ||
-                        jpeFile.getExtension().equals(fileExtension) ||
-                        jpegFile.getExtension().equals(fileExtension) ||
-                        jpgFile.getExtension().equals(fileExtension)) {
-                    e.getPresentation().setEnabledAndVisible(true);
-                    return;
-                }
-
+                e.getPresentation().setEnabledAndVisible(extensions.contains(fileExtension));
+                return;
             }
         }
 
