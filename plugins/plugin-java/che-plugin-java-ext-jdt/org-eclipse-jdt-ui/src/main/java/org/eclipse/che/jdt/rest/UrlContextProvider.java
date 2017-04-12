@@ -11,18 +11,13 @@
 
 package org.eclipse.che.jdt.rest;
 
-import javax.ws.rs.core.UriBuilder;
-
 /**
  * @author Evgen Vidolob
  */
 public class UrlContextProvider {
 
-
-    private static UriBuilder builder;
-
-    public static String get(String wsId, String projectPath) {
-        return "jdt/" + wsId+"/javadoc/get?projectpath=" + projectPath +"&handle=";
+    public static String get(String projectPath) {
+        return "/api/java/javadoc/get?projectpath=" + projectPath +"&handle=";
     }
 
 }
