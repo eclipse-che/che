@@ -64,6 +64,8 @@
 }
 
 .processWidgetActionButton {
+    float: right;
+    outline: none;
     color: #4eabff;
 }
 

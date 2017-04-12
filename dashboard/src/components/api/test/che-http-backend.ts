@@ -19,7 +19,7 @@ export class CheHttpBackend {
   private httpBackend: ng.IHttpBackendService;
   private projectsPerWorkspace: Map<string, any>;
   private workspaces: Map<string, any>;
-  private profilesMap: any;
+  private profilesMap: Map<string, any>;
   private projectDetailsMap: Map<string, any>;
   private remoteGitUrlArraysMap: Map<string, any>;
   private localGitUrlsMap: Map<string, any>;
@@ -59,7 +59,12 @@ export class CheHttpBackend {
     this.workspaceAgentMap = new Map();
     this.stacks = [];
 
-    this.defaultUser = {};
+    this.defaultUser = {
+      id: '',
+      aliases: [],
+      name: '',
+      email: ''
+    };
     this.userIdMap = new Map();
     this.userEmailMap = new Map();
     this.factoriesMap = new Map();
@@ -294,7 +299,7 @@ export class CheHttpBackend {
    * @param profile
    */
   addProfileId(profile: any): void {
-    this.profilesMap.put(profile.id, profile);
+    this.profilesMap.set(profile.id, profile);
   }
 
 
@@ -426,7 +431,7 @@ export class CheHttpBackend {
   /**
    * Setup Backend for factories
    */
-  factoriesBackendSetup() {
+  factoriesBackendSetup(): void {
     this.setup();
 
     let allFactories = [];
@@ -446,7 +451,7 @@ export class CheHttpBackend {
       this.httpBackend.when('GET', '/api/user').respond(this.defaultUser);
 
       if (allFactories.length >  this.pageSkipCount) {
-        if(allFactories.length > this.pageSkipCount + this.pageMaxItem) {
+        if (allFactories.length > this.pageSkipCount + this.pageMaxItem) {
           pageFactories = allFactories.slice(this.pageSkipCount, this.pageSkipCount + this.pageMaxItem);
         } else {
           pageFactories = allFactories.slice(this.pageSkipCount);
@@ -457,10 +462,27 @@ export class CheHttpBackend {
   }
 
   /**
+   * Setup all users
+   */
+  usersBackendSetup(): void {
+    this.httpBackend.when('GET', '/api/user').respond(this.defaultUser);
+
+    let userIdKeys = this.userIdMap.keys();
+    for (let key of userIdKeys) {
+      this.httpBackend.when('GET', '/api/user/' + key).respond(this.userIdMap.get(key));
+    }
+
+    let userEmailKeys = this.userEmailMap.keys();
+    for (let key of userEmailKeys) {
+      this.httpBackend.when('GET', '/api/user/find?email=' + key).respond(this.userEmailMap.get(key));
+    }
+  }
+
+  /**
    * Add the given factory
    * @param factory
    */
-  addUserFactory(factory) {
+  addUserFactory(factory: any): void {
     this.factoriesMap.set(factory.id, factory);
   }
 
@@ -468,7 +490,7 @@ export class CheHttpBackend {
    * Sets max objects on response
    * @param pageMaxItem
    */
-  setPageMaxItem(pageMaxItem) {
+  setPageMaxItem(pageMaxItem: number): void {
     this.pageMaxItem = pageMaxItem;
   }
 
@@ -476,7 +498,7 @@ export class CheHttpBackend {
    * Sets skip count of values
    * @param pageSkipCount
    */
-  setPageSkipCount(pageSkipCount) {
+  setPageSkipCount(pageSkipCount: number): void  {
     this.pageSkipCount = pageSkipCount;
   }
 
@@ -484,7 +506,7 @@ export class CheHttpBackend {
    * Add the given user
    * @param user
    */
-  setDefaultUser(user) {
+  setDefaultUser(user: che.IUser): void {
     this.defaultUser = user;
   }
 
@@ -492,7 +514,7 @@ export class CheHttpBackend {
    * Add the given user to userIdMap
    * @param user
    */
-  addUserById(user) {
+  addUserById(user: che.IUser): void {
     this.userIdMap.set(user.id, user);
   }
 
@@ -500,7 +522,7 @@ export class CheHttpBackend {
    * Add the given user to userEmailMap
    * @param user
    */
-  addUserEmail(user) {
+  addUserEmail(user: che.IUser): void {
     this.userEmailMap.set(user.email, user);
   }
 }
