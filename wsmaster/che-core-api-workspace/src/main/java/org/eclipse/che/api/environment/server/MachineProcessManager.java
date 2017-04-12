@@ -121,8 +121,9 @@ public class MachineProcessManager {
         final InstanceProcess instanceProcess = machine.createProcess(command, outputChannel);
         final int pid = instanceProcess.getPid();
 
-        JsonRpcLineConsumer jsonRpcLineConsumer =
-                new JsonRpcLineConsumer("event:ws-agent-output:message", transmitter, endpointIdsHolder.getEndpointIds());
+        JsonRpcLineConsumer jsonRpcLineConsumer = new JsonRpcLineConsumer(transmitter,
+                                                                          "event:ws-agent-output:message",
+                                                                          () -> endpointIdsHolder.getEndpointIdsByWorkspaceId(workspaceId));
 
         LineConsumer processLogger = new CompositeLineConsumer(getProcessLogger(machineId, pid, outputChannel), jsonRpcLineConsumer);
 
