@@ -25,7 +25,6 @@ import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
-import org.eclipse.che.ide.workspace.MachineLogsRestorer;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.CREATING;
@@ -122,11 +121,9 @@ public class MachineStatusHandler implements MachineStatusChangedEvent.Handler {
         eventBus.fireEvent(new MachineStateEvent(machine, CREATING));
 
         String endpointId = "ws-master";
-        String subscribeById = "event:environment-output:subscribe-by-machine-id";
         String subscribeByName = "event:environment-output:subscribe-by-machine-name";
         String workspaceIdPlusMachineName = appContext.getWorkspaceId() + "::" + machine.getDisplayName();
 
-        transmitter.transmitStringToNone(endpointId, subscribeById, machine.getId());
         transmitter.transmitStringToNone(endpointId, subscribeByName, workspaceIdPlusMachineName);
 
     }

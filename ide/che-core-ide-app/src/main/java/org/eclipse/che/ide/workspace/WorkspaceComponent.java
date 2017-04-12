@@ -178,12 +178,10 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
             appContext.getActiveRuntime().getMachines().forEach(machine -> {
 
                 String endpointId = "ws-master";
-                String subscribeById = "event:environment-output:subscribe-by-machine-id";
                 String subscribeByName = "event:environment-output:subscribe-by-machine-name";
                 String workspaceIdPlusMachineName =
                         appContext.getWorkspaceId() + "::" + machine.getDisplayName();
 
-                transmitter.transmitStringToNone(endpointId, subscribeById, machine.getId());
                 transmitter.transmitStringToNone(endpointId, subscribeByName, workspaceIdPlusMachineName);
             });
         }
