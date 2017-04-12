@@ -2387,7 +2387,7 @@
   },
   {
   "name": "CentOS WildFly Swarm",
-  "id": "WildFly Swarm",
+  "id": "wildfly-swarm",
   "creator": "Dharmit Shah",
   "description": "Eclipse WildFly Swarm Stack on CentOS.",
   "scope": "advanced",
@@ -2416,6 +2416,7 @@
             "attributes": {
               "memoryLimitBytes": "2147483648"
             },
+
             "agents": [
               "org.eclipse.che.terminal",
               "org.eclipse.che.ws-agent",
@@ -2460,5 +2461,92 @@
       "version": "3.3.9"
     }
   ]
+},
+{
+  "name": "CentOS nodejs",
+  "id": "nodejs4",
+  "scope": "advanced",
+  "source": {
+    "type": "image",
+    "origin": "registry.centos.org/che-stacks/centos-nodejs"
+  },
+  "description": "CentOS Node Stack",
+  "tags": [
+    "CentOS",
+    "Git",
+    "Node.JS",
+    "NPM",
+    "Gulp",
+    "Bower",
+    "Grunt",
+    "Yeoman",
+    "Angular",
+    "Karma"
+  ],
+  "workspaceConfig": {
+    "name": "default",
+    "environments": {
+      "default": {
+        "recipe": {
+          "location": "registry.centos.org/che-stacks/centos-nodejs",
+          "type": "dockerimage"
+        },
+        "machines": {
+          "dev-machine": {
+            "attributes": {
+              "memoryLimitBytes": "2147483648"
+            },
+            "agents": [
+              "org.eclipse.che.terminal",
+              "org.eclipse.che.ws-agent",
+              "org.eclipse.che.ssh"
+            ],
+            "servers": {}
+          }
+        }
+      }
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "attributes": {
+          "goal": "Run",
+          "previewUrl": "http://${server.port.8080}"
+        },
+        "commandLine": "cd ${current.project.path} && scl enable rh-nodejs4 'node app.js'"
+      }
+    ],
+    "projects": [],
+    "defaultEnv": "default",
+    "links": []
+  },
+  "components": [
+    {
+      "name": "Node.JS",
+      "version": "---"
+    },
+    {
+      "name": "NPM",
+      "version": "---"
+    },
+    {
+      "name": "Gulp",
+      "version": "---"
+    },
+    {
+      "name": "Bower",
+      "version": "---"
+    },
+    {
+      "name": "Grunt",
+      "version": "---"
+    },
+    {
+      "name": "Yeoman",
+      "version": "---"
+    }
+  ],
+  "creator": "Dharmit Shah"
 }
 ]
