@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.spi;
 
-import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
@@ -18,7 +17,6 @@ import org.eclipse.che.api.core.rest.HttpRequestHelper;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 
 import javax.ws.rs.HttpMethod;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 
@@ -29,12 +27,12 @@ import java.util.Map;
 public class InternalRuntimeConfig {
 
     protected Map<String, InternalMachineConfig> internalMachines;
-    protected InternalRecipeConfig recipe;
+//    protected InternalRecipeConfig recipe;
     protected EnvironmentImpl config;
 
     public InternalRuntimeConfig(Environment environment, URL registryEndpoint) throws InfrastructureException {
 
-        this.recipe = new InternalRecipeConfig(environment.getRecipe());
+//        this.recipe = new InternalRecipeConfig(environment.getRecipe());
 
         Map<String, ? extends MachineConfig> effectiveMachines = environment.getMachines();
 

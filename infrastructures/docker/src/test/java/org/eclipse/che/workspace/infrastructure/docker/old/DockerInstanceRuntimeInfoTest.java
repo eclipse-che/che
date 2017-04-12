@@ -11,41 +11,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
-import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.api.core.model.machine.ServerConf;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
-import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
-import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
-import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategy;
-import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategyProvider;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toMap;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 /**
  * @author Angel Misevski <amisevsk@redhat.com>
@@ -53,6 +20,7 @@ import static org.testng.Assert.assertEquals;
  */
 @Listeners(MockitoTestNGListener.class)
 public class DockerInstanceRuntimeInfoTest {
+    /*
     private static final String DEFAULT_HOSTNAME         = "localhost";
 
     @Mock
@@ -254,5 +222,5 @@ public class DockerInstanceRuntimeInfoTest {
                                                       srvConf.getPort() :
                                                       srvConf.getPort() + "/tcp",
                                            ServerConfImpl::new));
-    }
+    }*/
 }

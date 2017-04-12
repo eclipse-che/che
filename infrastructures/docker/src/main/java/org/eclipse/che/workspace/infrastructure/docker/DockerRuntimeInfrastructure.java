@@ -13,14 +13,21 @@ package org.eclipse.che.workspace.infrastructure.docker;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.agent.server.AgentRegistry;
+import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.agent.server.impl.AgentSorter;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.workspace.server.URLRewriter;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerServicesStartStrategy;
@@ -28,6 +35,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure} that
@@ -47,6 +55,9 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     private final DockerServiceStarter        serviceStarter;
     private final DockerNetworkLifecycle      networkLifecycle;
     private final URLRewriter                 urlRewriter;
+    private final DockerConnector             dockerConnector;
+    private final AgentRegistry               agentRegistry;
+    private final AgentSorter                 agentSorter;
 
     @Inject
     public DockerRuntimeInfrastructure(DockerEnvironmentParser dockerEnvironmentParser,
@@ -56,7 +67,10 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                        DockerEnvironmentNormalizer environmentNormalizer,
                                        DockerServiceStarter serviceStarter,
                                        DockerNetworkLifecycle networkLifecycle,
-                                       URLRewriter urlRewriter) {
+                                       URLRewriter urlRewriter,
+                                       DockerConnector dockerConnector,
+                                       AgentRegistry agentRegistry,
+                                       AgentSorter agentSorter) {
         super("docker", SUPPORTED_RECIPE_TYPES);
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
         this.dockerEnvironmentParser = dockerEnvironmentParser;
@@ -66,6 +80,9 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         this.serviceStarter = serviceStarter;
         this.networkLifecycle = networkLifecycle;
         this.urlRewriter = urlRewriter;
+        this.dockerConnector = dockerConnector;
+        this.agentRegistry = agentRegistry;
+        this.agentSorter = agentSorter;
     }
 
     @Override
@@ -81,12 +98,23 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     }
 
     @Override
-    public RuntimeContext prepare(RuntimeIdentity identity, Environment environment) throws ValidationException,
+    public RuntimeContext prepare(RuntimeIdentity identity, Environment originEnv) throws ValidationException,
                                                                                             InfrastructureException {
+        // Copy to be able to change env and protect from env changes on the go
+        EnvironmentImpl environment = new EnvironmentImpl(originEnv);
         DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);
         dockerEnvironmentValidator.validate(environment, dockerEnvironment);
         // check that services start order can be resolved
         List<String> orderedServices = startStrategy.order(dockerEnvironment);
+        for (MachineConfigImpl machineConfig : environment.getMachines().values()) {
+            try {
+                List<AgentKey> agentKeys = agentSorter.sort(machineConfig.getAgents());
+                machineConfig.setAgents(agentKeys.stream().map(AgentKey::getId).collect(Collectors.toList()));
+            } catch (AgentException e) {
+                throw new InfrastructureException(e.getLocalizedMessage(), e);
+            }
+        }
+
         // modify environment with everything needed to use docker machines on particular (cloud) infrastructure
         infrastructureProvisioner.provision(environment, dockerEnvironment);
         //
@@ -100,7 +128,9 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                         orderedServices,
                                         networkLifecycle,
                                         serviceStarter,
-                                        urlRewriter);
+                                        urlRewriter,
+                                        dockerConnector,
+                                        agentRegistry);
     }
 
     @Override

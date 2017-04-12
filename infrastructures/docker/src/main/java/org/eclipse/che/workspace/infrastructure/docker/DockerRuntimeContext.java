@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
+import org.eclipse.che.api.agent.server.AgentRegistry;
+import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
@@ -19,12 +22,19 @@ import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.Exec;
+import org.eclipse.che.plugin.docker.client.LogMessage;
+import org.eclipse.che.plugin.docker.client.MessageProcessor;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Collections;
@@ -54,6 +64,8 @@ public class DockerRuntimeContext extends RuntimeContext {
     // Should not be used after runtime start
     private final Queue<String>     startQueue;
     private final URLRewriter       urlRewriter;
+    private final DockerConnector   docker;
+    private final AgentRegistry     agentRegistry;
 
     // synchronized, TODO consider reworking it into separate component
     // TODO volatile or something else?
@@ -69,7 +81,9 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 List<String> orderedServices,
                                 DockerNetworkLifecycle dockerNetworkLifecycle,
                                 DockerServiceStarter serviceStarter,
-                                URLRewriter urlRewriter)
+                                URLRewriter urlRewriter,
+                                DockerConnector docker,
+                                AgentRegistry agentRegistry)
             throws ValidationException, InfrastructureException {
         super(environment, identity, infrastructure, registryEndpoint);
         this.dockerEnvironment = dockerEnvironment;
@@ -77,6 +91,8 @@ public class DockerRuntimeContext extends RuntimeContext {
         this.serviceStarter = serviceStarter;
         this.startQueue = new ArrayDeque<>(orderedServices);
         this.urlRewriter = urlRewriter;
+        this.docker = docker;
+        this.agentRegistry = agentRegistry;
         this.machines = new HashMap<>();
         this.stopIsCalled = false;
     }
@@ -166,12 +182,28 @@ public class DockerRuntimeContext extends RuntimeContext {
             }
         }
         DockerMachine dockerMachine = doStartMachine(name, service, startOptions);
-        startAgents(dockerMachine);
+        startAgents(name, dockerMachine);
         return dockerMachine;
     }
 
-    private void startAgents(DockerMachine dockerMachine) {
-        // TODO
+    private void startAgents(String machineName, DockerMachine dockerMachine) throws InfrastructureException {
+        List<String> agents = environment.getMachines().get(machineName).getAgents();
+        for (String agent : agents) {
+            String agentScript;
+            try {
+                agentScript = agentRegistry.getAgent(new AgentKeyImpl(agent)).getScript();
+            } catch (AgentException e) {
+                throw new InfrastructureException(e.getLocalizedMessage(), e);
+            }
+            MessageProcessor<LogMessage> messageProcessor = message -> LOG.error(message.toString());
+            try {
+                Exec exec = docker.createExec(CreateExecParams.create(dockerMachine.getContainer(),
+                                                                      new String[] {"/bin/sh", "-c",  agentScript}));
+                docker.startExec(StartExecParams.create(exec.getId()), messageProcessor);
+            } catch (IOException e) {
+                throw new InfrastructureException(e.getLocalizedMessage(), e);
+            }
+        }
     }
 
     private InternalRuntime getInternalRuntime() {

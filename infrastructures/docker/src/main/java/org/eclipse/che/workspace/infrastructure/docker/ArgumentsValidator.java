@@ -31,14 +31,14 @@ public class ArgumentsValidator {
     }
 
     public static void checkArgument(boolean expression, String error) throws ValidationException {
-        if (expression) {
+        if (!expression) {
             throw new ValidationException(error);
         }
     }
 
     public static void checkArgument(boolean expression, String errorMessageTemplate, Object... errorMessageParams)
             throws ValidationException {
-        if (expression) {
+        if (!expression) {
             throw new ValidationException(format(errorMessageTemplate, errorMessageParams));
         }
     }

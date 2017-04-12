@@ -10,48 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old.cleaner;
 
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
-import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
-import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
-import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
-import org.eclipse.che.plugin.docker.client.json.network.ContainerInNetwork;
-import org.eclipse.che.plugin.docker.client.json.network.Network;
-import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
-import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
-import org.mockito.Matchers;
-import org.mockito.Mock;
+import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerAbandonedResourcesCleaner;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import static java.util.Arrays.asList;
-import static java.util.Optional.of;
-import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Test for {@link DockerAbandonedResourcesCleaner}
@@ -60,7 +21,7 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(MockitoTestNGListener.class)
 public class DockerAbandonedResourcesCleanerTest {
-
+/*
     private static final String machineId1   = "machineid1";
     private static final String workspaceId1 = "workspaceid1";
 
@@ -113,11 +74,11 @@ public class DockerAbandonedResourcesCleanerTest {
     private ContainerListEntry container3;
 
     @Mock
-    private ContainerNameInfo containerNameInfo1;
+    private DockerContainerNameGenerator.ContainerNameInfo containerNameInfo1;
     @Mock
-    private ContainerNameInfo containerNameInfo2;
+    private DockerContainerNameGenerator.ContainerNameInfo containerNameInfo2;
     @Mock
-    private ContainerNameInfo containerNameInfo3;
+    private DockerContainerNameGenerator.ContainerNameInfo containerNameInfo3;
 
     @Mock
     private Network abandonedNetwork;
@@ -426,5 +387,5 @@ public class DockerAbandonedResourcesCleanerTest {
         verify(dockerConnector).removeNetwork(abandonedNetworkId);
         verify(dockerConnector).removeNetwork(abandonedNetworkId);
     }
-
+*/
 }

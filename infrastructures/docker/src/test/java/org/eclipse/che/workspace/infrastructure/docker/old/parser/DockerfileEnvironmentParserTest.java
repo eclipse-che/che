@@ -10,26 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old.parser;
 
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.EnvironmentRecipe;
-import org.eclipse.che.api.environment.server.model.CheServiceBuildContextImpl;
-import org.eclipse.che.api.environment.server.model.CheServiceImpl;
-import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.Assert;
 import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonMap;
-import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * @author Alexander Garagatyi
@@ -37,14 +19,14 @@ import static org.testng.AssertJUnit.assertEquals;
  */
 @Listeners(MockitoTestNGListener.class)
 public class DockerfileEnvironmentParserTest {
-
+/*
     private static final String DEFAULT_MACHINE_NAME = "dev-machine";
     private static final String DEFAULT_DOCKERFILE   = "FROM codenvy/ubuntu_jdk8\n";
 
     @Mock
     private Environment environment;
     @Mock
-    private EnvironmentRecipe recipe;
+    private Recipe      recipe;
 
     @InjectMocks
     public DockerfileEnvironmentParser parser;
@@ -131,4 +113,5 @@ public class DockerfileEnvironmentParserTest {
                                                                         emptyMap(),
                                                                         emptyMap())));
     }
+    */
 }

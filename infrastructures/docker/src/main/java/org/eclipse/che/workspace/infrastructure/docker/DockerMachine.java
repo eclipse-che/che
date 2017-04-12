@@ -198,4 +198,15 @@ public class DockerMachine implements Machine {
     public String getContainer() {
         return container;
     }
+
+    @Override
+    public String toString() {
+        return "DockerMachine{" +
+               "container='" + container + '\'' +
+               ", docker=" + docker +
+               ", image='" + image + '\'' +
+               ", info=" + info +
+               ", provider=" + provider +
+               '}';
+    }
 }

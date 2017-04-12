@@ -10,32 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
-import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
-import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
-import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
-import org.eclipse.che.plugin.docker.client.json.PortBinding;
-import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategy;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy.SERVER_CONF_LABEL_PATH_KEY;
-import static org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy.SERVER_CONF_LABEL_PROTOCOL_KEY;
-import static org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy.SERVER_CONF_LABEL_REF_KEY;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 /**
  * @author Angel Misevski <amisevsk@redhat.com>
@@ -43,7 +19,7 @@ import static org.testng.Assert.assertEquals;
  */
 @Listeners(MockitoTestNGListener.class)
 public class ServerEvaluationStrategyTest {
-
+/*
     private static final String ALL_IP_ADDRESS   = "0.0.0.0";
     private static final String DEFAULT_HOSTNAME = "localhost";
 
@@ -398,4 +374,5 @@ public class ServerEvaluationStrategyTest {
             return null;
         }
     }
+    */
 }
