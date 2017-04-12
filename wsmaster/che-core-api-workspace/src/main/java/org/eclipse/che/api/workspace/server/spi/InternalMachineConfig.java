@@ -33,7 +33,7 @@ public class InternalMachineConfig {
 
     private final Map<String, String> attributes = new HashMap<>();
 
-    public InternalMachineConfig(MachineConfig originalConfig, URL agentRegistry) throws InfrastructureException, IOException {
+    public InternalMachineConfig(MachineConfig originalConfig, URL agentRegistry) throws InfrastructureException {
 
         initAgents(originalConfig.getAgents(), agentRegistry);
 
@@ -47,7 +47,7 @@ public class InternalMachineConfig {
     // TODO
     // Obtain scripts and organize correctly ordered list according to Agents configuration,
     // including dependencies and excluding duplicates
-    private void initAgents(List<String> agentIds, URL agentRegistry) throws InfrastructureException, IOException{
+    private void initAgents(List<String> agentIds, URL agentRegistry) throws InfrastructureException {
 
 //        List<String> ids = new ArrayList<>();
 //

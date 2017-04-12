@@ -14,7 +14,6 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 
@@ -34,7 +33,7 @@ public abstract class RuntimeContext {
 
     public RuntimeContext(Environment environment, RuntimeIdentity identity,
                           RuntimeInfrastructure infrastructure, URL registryEndpoint)
-            throws ValidationException, InfrastructureException, IOException {
+            throws ValidationException, InfrastructureException {
         this.environment = environment;
         this.identity = identity;
         this.infrastructure = infrastructure;
