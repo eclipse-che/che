@@ -88,8 +88,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Alexander Garagatyi
  */
-public class DockerServiceStarter {
-    private static final Logger LOG                     = getLogger(DockerServiceStarter.class);
+public class ServiceStarter {
+    private static final Logger LOG                     = getLogger(ServiceStarter.class);
     /**
      * Prefix of image repository, used to identify that the image is a machine saved to snapshot.
      */
@@ -122,29 +122,29 @@ public class DockerServiceStarter {
     private final String[]                                      dnsResolvers;
     private       ServerEvaluationStrategyProvider              serverEvaluationStrategyProvider;
 
-    public DockerServiceStarter(DockerConnector docker,
-                                UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
-                                DockerInstanceStopDetector dockerInstanceStopDetector,
-                                @Named("machine.docker.dev_machine.machine_servers") Set<ServerConfig> devMachineServers,
-                                @Named("machine.docker.machine_servers") Set<ServerConfig> allMachinesServers,
-                                @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
-                                @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
-                                @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
-                                @Named("che.docker.privileged") boolean privilegedMode,
-                                @Named("che.docker.pids_limit") int pidsLimit,
-                                @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
-                                @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
-                                @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
-                                @Named("che.docker.swap") double memorySwapMultiplier,
-                                @Named("machine.docker.networks") Set<Set<String>> additionalNetworks,
-                                @Nullable @Named("che.docker.parent_cgroup") String parentCgroup,
-                                @Nullable @Named("che.docker.cpuset_cpus") String cpusetCpus,
-                                @Named("che.docker.cpu_period") long cpuPeriod,
-                                @Named("che.docker.cpu_quota") long cpuQuota,
-                                WindowsPathEscaper windowsPathEscaper,
-                                @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
-                                @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers,
-                                ServerEvaluationStrategyProvider serverEvaluationStrategyProvider) {
+    public ServiceStarter(DockerConnector docker,
+                          UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
+                          DockerInstanceStopDetector dockerInstanceStopDetector,
+                          @Named("machine.docker.dev_machine.machine_servers") Set<ServerConfig> devMachineServers,
+                          @Named("machine.docker.machine_servers") Set<ServerConfig> allMachinesServers,
+                          @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
+                          @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
+                          @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
+                          @Named("che.docker.privileged") boolean privilegedMode,
+                          @Named("che.docker.pids_limit") int pidsLimit,
+                          @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
+                          @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
+                          @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
+                          @Named("che.docker.swap") double memorySwapMultiplier,
+                          @Named("machine.docker.networks") Set<Set<String>> additionalNetworks,
+                          @Nullable @Named("che.docker.parent_cgroup") String parentCgroup,
+                          @Nullable @Named("che.docker.cpuset_cpus") String cpusetCpus,
+                          @Named("che.docker.cpu_period") long cpuPeriod,
+                          @Named("che.docker.cpu_quota") long cpuQuota,
+                          WindowsPathEscaper windowsPathEscaper,
+                          @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
+                          @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers,
+                          ServerEvaluationStrategyProvider serverEvaluationStrategyProvider) {
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;

@@ -8,14 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent;
+package org.eclipse.che.workspace.infrastructure.docker.agents;
 
-import org.eclipse.che.api.agent.server.launcher.AbstractAgentLauncher;
-import org.eclipse.che.api.agent.server.launcher.ProcessIsLaunchedChecker;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -39,7 +37,7 @@ public class ExecAgentLauncher extends AbstractAgentLauncher {
     }
 
     @Override
-    public void launch(Instance machine, Agent agent) throws ServerException {
+    public void launch(DockerService machine, Agent agent) throws InfrastructureException {
         final AgentImpl agentCopy = new AgentImpl(agent);
         agentCopy.setScript(agent.getScript() + "\n" + runCommand);
         super.launch(machine, agentCopy);

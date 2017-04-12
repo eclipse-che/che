@@ -29,15 +29,15 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author Alexander Garagatyi
  */
-public class DockerEnvironmentNormalizer {
-    private final RecipeDownloader             recipeDownloader;
-    private final Pattern                      recipeApiPattern;
-    private final DockerContainerNameGenerator containerNameGenerator;
-    private final long                         defaultMachineMemorySizeBytes;
+public class EnvironmentNormalizer {
+    private final RecipeDownloader       recipeDownloader;
+    private final Pattern                recipeApiPattern;
+    private final ContainerNameGenerator containerNameGenerator;
+    private final long                   defaultMachineMemorySizeBytes;
 
-    public DockerEnvironmentNormalizer(RecipeDownloader recipeDownloader, Pattern recipeApiPattern,
-                                       DockerContainerNameGenerator containerNameGenerator,
-                                       long defaultMachineMemorySizeBytes) {
+    public EnvironmentNormalizer(RecipeDownloader recipeDownloader, Pattern recipeApiPattern,
+                                 ContainerNameGenerator containerNameGenerator,
+                                 long defaultMachineMemorySizeBytes) {
         this.recipeDownloader = recipeDownloader;
         this.recipeApiPattern = recipeApiPattern;
         this.containerNameGenerator = containerNameGenerator;

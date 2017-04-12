@@ -111,4 +111,12 @@ public class MachineImpl implements Machine {
 //            return this;
 //        }
     }
+
+    @Override
+    public String toString() {
+        return "MachineImpl{" +
+               "properties=" + properties +
+               ", servers=" + servers +
+               '}';
+    }
 }

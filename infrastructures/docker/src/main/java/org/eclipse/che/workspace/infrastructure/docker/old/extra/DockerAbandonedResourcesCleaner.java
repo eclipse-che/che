@@ -23,7 +23,7 @@ import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.network.GetNetworksParams;
-import org.eclipse.che.workspace.infrastructure.docker.DockerContainerNameGenerator;
+import org.eclipse.che.workspace.infrastructure.docker.ContainerNameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,15 +60,15 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
 
     // TODO replace with WorkspaceManager
 //    private final CheEnvironmentEngine         environmentEngine;
-    private final DockerConnector              dockerConnector;
-    private final DockerContainerNameGenerator nameGenerator;
-    private final WorkspaceRuntimes            runtimes;
-    private final Set<String>                  additionalNetworks;
+    private final DockerConnector        dockerConnector;
+    private final ContainerNameGenerator nameGenerator;
+    private final WorkspaceRuntimes      runtimes;
+    private final Set<String>            additionalNetworks;
 
     @Inject
     public DockerAbandonedResourcesCleaner(//CheEnvironmentEngine environmentEngine,
                                            DockerConnectorProvider dockerConnectorProvider,
-                                           DockerContainerNameGenerator nameGenerator,
+                                           ContainerNameGenerator nameGenerator,
                                            WorkspaceRuntimes workspaceRuntimes,
                                            @Named("machine.docker.networks") Set<Set<String>> additionalNetworks) {
 //        this.environmentEngine = environmentEngine;
@@ -98,7 +98,7 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
         try {
             for (ContainerListEntry container : dockerConnector.listContainers()) {
                 String containerName = container.getNames()[0];
-                Optional<DockerContainerNameGenerator.ContainerNameInfo> optional = nameGenerator.parse(containerName);
+                Optional<ContainerNameGenerator.ContainerNameInfo> optional = nameGenerator.parse(containerName);
                 if (optional.isPresent()) {
                     try {
                         // container is orphaned if not found exception is thrown

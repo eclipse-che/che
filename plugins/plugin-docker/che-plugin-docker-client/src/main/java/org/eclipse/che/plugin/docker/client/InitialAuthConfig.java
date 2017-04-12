@@ -64,6 +64,7 @@ public class InitialAuthConfig {
 
     @VisibleForTesting
     public InitialAuthConfig() {
+        authConfigs = newDto(AuthConfigs.class);
     }
 
     @Inject
