@@ -14,33 +14,27 @@ import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class JsonRpcLineConsumer implements LineConsumer {
     private static final Logger LOG = getLogger(JsonRpcLineConsumer.class);
 
-    private final String method;
-    private final RequestTransmitter transmitter;
-    private final Map<String, Set<String>> endpointIds;
+    private final String                    method;
+    private final RequestTransmitter        transmitter;
+    private final JsonRpcEndpointIdProvider jsonRpcEndpointIdProvider;
 
-    public JsonRpcLineConsumer(String method, RequestTransmitter transmitter, Map<String, Set<String>> endpointIds) {
+    public JsonRpcLineConsumer(RequestTransmitter transmitter, String method, JsonRpcEndpointIdProvider jsonRpcEndpointIdProvider) {
         this.method = method;
         this.transmitter = transmitter;
-        this.endpointIds = endpointIds;
+        this.jsonRpcEndpointIdProvider = jsonRpcEndpointIdProvider;
     }
 
     @Override
     public void writeLine(String line) throws IOException {
         try {
-            endpointIds.entrySet()
-                       .stream()
-                       .map(Map.Entry::getKey)
-                       .forEach(it -> transmitter.transmitStringToNone(it, method, line));
-        }
-        catch (IllegalStateException e){
+            jsonRpcEndpointIdProvider.get().forEach(it -> transmitter.transmitStringToNone(it, method, line));
+        } catch (IllegalStateException e) {
             LOG.error("Error trying to send a line: {}", line);
         }
     }
