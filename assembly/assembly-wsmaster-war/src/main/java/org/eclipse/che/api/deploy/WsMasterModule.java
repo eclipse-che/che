@@ -27,6 +27,10 @@ import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
+import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
+import org.eclipse.che.api.factory.server.FactoryCreateValidator;
+import org.eclipse.che.api.factory.server.FactoryEditValidator;
+import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigMessageBodyAdapter;
@@ -35,6 +39,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 import javax.sql.DataSource;
@@ -62,6 +67,18 @@ public class WsMasterModule extends AbstractModule {
         bind(SchemaInitializer.class).to(org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer.class);
         bind(org.eclipse.che.core.db.DBInitializer.class).asEagerSingleton();
         bind(PlaceholderReplacer.class).toProvider(org.eclipse.che.core.db.schema.impl.flyway.PlaceholderReplacerProvider.class);
+
+        //factory
+        bind(FactoryAcceptValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryAcceptValidatorImpl.class);
+        bind(FactoryCreateValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryCreateValidatorImpl.class);
+        bind(FactoryEditValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryEditValidatorImpl.class);
+        bind(org.eclipse.che.api.factory.server.FactoryService.class);
+        install(new org.eclipse.che.api.factory.server.jpa.FactoryJpaModule());
+
+        Multibinder<FactoryParametersResolver> factoryParametersResolverMultibinder =
+                Multibinder.newSetBinder(binder(), FactoryParametersResolver.class);
+        factoryParametersResolverMultibinder.addBinding()
+                                            .to(GithubFactoryParametersResolver.class);
 
         install(new org.eclipse.che.plugin.docker.compose.ComposeModule());
 

@@ -15,6 +15,7 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_S
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,8 +37,9 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.testing.shared.Failure;
+import org.eclipse.che.api.testing.shared.TestCase;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
@@ -50,33 +52,22 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.resources.File;
-import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
+import org.eclipse.che.ide.ext.java.shared.dto.Region;
+import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
+import org.eclipse.che.ide.ext.java.shared.dto.model.Method;
+import org.eclipse.che.ide.ext.java.shared.dto.model.Type;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.eclipse.che.plugin.testing.ide.view.navigation.TestClassNavigation;
 import org.eclipse.che.plugin.testing.ide.view.navigation.factory.TestResultNodeFactory;
 import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultClassNode;
 import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultGroupNode;
 import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultMethodNode;
-
-import com.google.common.base.Optional;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SplitLayoutPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 /**
  * Implementation for TestResult view. Uses tree for presenting test results.
@@ -85,40 +76,46 @@ import com.google.web.bindery.event.shared.EventBus;
  */
 @Singleton
 public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
-        implements TestResultView, TestClassNavigation {
+                                implements TestResultView, TestClassNavigation {
 
     interface TestResultViewImplUiBinder extends UiBinder<Widget, TestResultViewImpl> {
     }
 
-    private static final TestResultViewImplUiBinder UI_BINDER = GWT.create(TestResultViewImplUiBinder.class);
+    private static final TestResultViewImplUiBinder UI_BINDER        = GWT.create(TestResultViewImplUiBinder.class);
 
-    private final AppContext appContext;
-    private final EditorAgent editorAgent;
-    private final TestResultNodeFactory nodeFactory;
-    private TestResult lastTestResult;
-    private Tree resultTree;
-    private int lastWentLine = 0;
+    private final JavaNavigationService             javaNavigationService;
+    private final AppContext                        appContext;
+    private final EditorAgent                       editorAgent;
+    private final TestResultNodeFactory             nodeFactory;
+    private TestResult                              lastTestResult;
+    private Tree                                    resultTree;
+    private int                                     lastWentLine     = 0;
+    private boolean                                 showFailuresOnly = false;
 
     @UiField(provided = true)
-    SplitLayoutPanel splitLayoutPanel;
+    SplitLayoutPanel                                splitLayoutPanel;
 
     @UiField
-    Label outputResult;
+    Label                                           outputResult;
 
     @UiField
-    FlowPanel navigationPanel;
+    FlowPanel                                       navigationPanel;
 
     @Inject
-    public TestResultViewImpl(PartStackUIResources resources,
+    public TestResultViewImpl(TestResources testResources,
+                              PartStackUIResources resources,
+                              JavaNavigationService javaNavigationService,
                               EditorAgent editorAgent,
                               AppContext appContext,
                               TestResultNodeFactory nodeFactory) {
         super(resources);
+        this.javaNavigationService = javaNavigationService;
         this.editorAgent = editorAgent;
         this.appContext = appContext;
         this.nodeFactory = nodeFactory;
         splitLayoutPanel = new SplitLayoutPanel(1);
         setContentWidget(UI_BINDER.createAndBindUi(this));
+
         NodeUniqueKeyProvider idProvider = new NodeUniqueKeyProvider() {
             @NotNull
             @Override
@@ -134,7 +131,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
             public void onSelection(SelectionEvent<Node> event) {
                 Node methodNode = event.getSelectedItem();
                 if (methodNode instanceof TestResultMethodNode) {
-                    outputResult.setText(((TestResultMethodNode) methodNode).getStackTrace());
+                    outputResult.setText(((TestResultMethodNode)methodNode).getStackTrace());
                 }
             }
         });
@@ -147,7 +144,8 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
      * {@inheritDoc}
      */
     @Override
-    protected void focusView() {}
+    protected void focusView() {
+    }
 
     /**
      * {@inheritDoc}
@@ -163,16 +161,25 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     private void buildTree() {
         resultTree.getNodeStorage().clear();
         outputResult.setText("");
-        TestResultGroupNode root = nodeFactory.getTestResultGroupNode(lastTestResult);
-        HashMap<String, List<Node>> classNodeHashMap = new HashMap<>();
-        for (Failure failure : lastTestResult.getFailures()) {
-            if (!classNodeHashMap.containsKey(failure.getFailingClass())) {
-                List<Node> methodNodes = new ArrayList<>();
-                classNodeHashMap.put(failure.getFailingClass(), methodNodes);
+        TestResultGroupNode root = nodeFactory.getTestResultGroupNode(lastTestResult, showFailuresOnly, new Runnable() {
+            @Override
+            public void run() {
+                showFailuresOnly = !showFailuresOnly;
+                buildTree();
             }
-            classNodeHashMap.get(failure.getFailingClass())
-                    .add(nodeFactory.getTestResultMethodNodeNode(failure.getFailingMethod(), failure.getTrace(),
-                            failure.getMessage(), failure.getFailingLine(), this));
+        });
+        HashMap<String, List<Node>> classNodeHashMap = new LinkedHashMap<>();
+        for (TestCase testCase : lastTestResult.getTestCases()) {
+            if (!testCase.isFailed() && showFailuresOnly) {
+                continue;
+            }
+            if (!classNodeHashMap.containsKey(testCase.getClassName())) {
+                List<Node> methodNodes = new ArrayList<>();
+                classNodeHashMap.put(testCase.getClassName(), methodNodes);
+            }
+            classNodeHashMap.get(testCase.getClassName())
+                            .add(nodeFactory.getTestResultMethodNodeNode(!testCase.isFailed(), testCase.getMethod(), testCase.getTrace(),
+                                                                         testCase.getMessage(), testCase.getFailingLine(), this));
         }
         List<Node> classNodes = new ArrayList<>();
         for (Map.Entry<String, List<Node>> entry : classNodeHashMap.entrySet()) {
@@ -182,28 +189,62 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         }
         root.setChildren(classNodes);
         resultTree.getNodeStorage().add(root);
+        resultTree.expandAll();
     }
 
     @Override
-    public void gotoClass(String packagePath, int line) {
-        lastWentLine = line;
-        final Project project = appContext.getRootProject();
-        String testSrcPath = project.getPath() + "/" + DEFAULT_TEST_SOURCE_FOLDER;
-        appContext.getWorkspaceRoot().getFile(testSrcPath + packagePath).then(new Operation<Optional<File>>() {
-            @Override
-            public void apply(Optional<File> file) throws OperationException {
-                if (file.isPresent()) {
+    public void gotoClass(final String packagePath, String className, String methodName, int line) {
+        if (lastTestResult == null) {
+            return;
+        }
+        String projectPath = lastTestResult.getProjectPath();
+        if (projectPath == null) {
+            return;
+        }
 
-                    editorAgent.openEditor(file.get());
+        lastWentLine = line;
+        String testSrcPath = projectPath + "/" + DEFAULT_TEST_SOURCE_FOLDER;
+        appContext.getWorkspaceRoot().getFile(testSrcPath + "/" + packagePath).then(new Operation<Optional<File>>() {
+            @Override
+            public void apply(Optional<File> maybeFile) throws OperationException {
+                if (maybeFile.isPresent()) {
+                    File file = maybeFile.get();
+                    editorAgent.openEditor(file);
                     Timer t = new Timer() {
                         @Override
                         public void run() {
                             EditorPartPresenter editorPart = editorAgent.getActiveEditor();
-                            Document doc = ((TextEditor) editorPart).getDocument();
-                            doc.setCursorPosition(new TextPosition(lastWentLine - 1, 0));
+                            final Document doc = ((TextEditor)editorPart).getDocument();
+                            if (line == -1 &&
+                                className != null &&
+                                methodName != null) {
+                                Promise<CompilationUnit> cuPromise =
+                                                                   javaNavigationService.getCompilationUnit(file.getProject().getLocation(),
+                                                                                                            className, true);
+                                cuPromise.then(new Operation<CompilationUnit>() {
+                                    @Override
+                                    public void apply(CompilationUnit cu) throws OperationException {
+                                        for (Type type : cu.getTypes()) {
+                                            if (type.isPrimary()) {
+                                                for (Method m : type.getMethods()) {
+                                                    if (methodName.equals(m.getElementName())) {
+                                                        Region methodRegion = m.getFileRegion();
+                                                        if (methodRegion != null) {
+                                                            lastWentLine = doc.getLineAtOffset(methodRegion.getOffset());
+                                                            doc.setCursorPosition(new TextPosition(lastWentLine - 1, 0));
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            } else {
+                                doc.setCursorPosition(new TextPosition(lastWentLine - 1, 0));
+                            }
                         }
                     };
-                    t.schedule(500);
+                    t.schedule(1000);
                 }
             }
         }).catchError(new Operation<PromiseError>() {

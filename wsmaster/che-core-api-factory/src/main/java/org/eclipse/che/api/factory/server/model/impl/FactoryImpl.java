@@ -42,7 +42,7 @@ import java.util.Set;
  * @author Anton Korneta
  */
 @Entity(name = "Factory")
-@Table(name = "factory")
+@Table(name = "che_factory")
 // TODO fix after issue: https://github.com/eclipse/che/issues/2110
 //(uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "userId"})})
 public class FactoryImpl implements Factory {
@@ -55,7 +55,7 @@ public class FactoryImpl implements Factory {
     @Column(name = "id")
     private String id;
 
-    @Column(name = "name", nullable = true)
+    @Column(name = "name")
     private String name;
 
     @Column(name = "version", nullable = false)
@@ -71,7 +71,7 @@ public class FactoryImpl implements Factory {
     // Mapping exists for explicit constraints which allows
     // jpa backend to perform operations in correct order
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(insertable = false, updatable = false, name = "userid")
+    @JoinColumn(insertable = false, updatable = false, name = "user_id")
     private UserImpl userEntity;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -86,7 +86,7 @@ public class FactoryImpl implements Factory {
     private PoliciesImpl policies;
 
     @ElementCollection
-    @CollectionTable(name = "factory_images", joinColumns = @JoinColumn(name = "factory_id"))
+    @CollectionTable(name = "che_factory_image", joinColumns = @JoinColumn(name = "factory_id"))
     private Set<FactoryImage> images;
 
     public FactoryImpl() {}

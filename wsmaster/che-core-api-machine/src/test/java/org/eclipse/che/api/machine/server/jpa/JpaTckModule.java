@@ -46,16 +46,15 @@ public class JpaTckModule extends TckModule {
         H2DBTestServer server = H2DBTestServer.startDefault();
         install(new PersistTestModuleBuilder().setDriver(Driver.class)
                                               .runningOn(server)
-                                              .addEntityClasses(AccountImpl.class,
-                                                                OldRecipeImpl.class,
-                                                                MachineSourceImpl.class,
+                                              .addEntityClasses(RecipeImpl.class,
                                                                 SnapshotImpl.class,
+                                                                AccountImpl.class,
                                                                 TestWorkspaceEntity.class)
                                               .setExceptionHandler(H2ExceptionHandler.class)
                                               .build());
         bind(DBInitializer.class).asEagerSingleton();
-        bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
-        bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
+        bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(H2TestHelper.inMemoryDefault(), "che-schema"));
+        bind(TckResourcesCleaner.class).to(H2JpaCleaner.class);
 
         bind(new TypeLiteral<TckRepository<OldRecipeImpl>>() {}).toInstance(new JpaTckRepository<>(OldRecipeImpl.class));
         bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {}).toInstance(new JpaTckRepository<>(SnapshotImpl.class));

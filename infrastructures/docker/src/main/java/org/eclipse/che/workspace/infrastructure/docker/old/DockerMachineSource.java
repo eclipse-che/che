@@ -51,8 +51,6 @@ public class DockerMachineSource extends MachineSourceImpl {
      * @param machineSource the machine source used to parse data.
      */
     public DockerMachineSource(MachineSource machineSource) throws MachineException {
-        super();
-
         // check type
         if (!DockerInstanceProvider.DOCKER_IMAGE_TYPE.equals(machineSource.getType())) {
             throw new MachineException("Docker machine source can only be built with '" + DockerInstanceProvider.DOCKER_IMAGE_TYPE + "' type");
@@ -206,6 +204,16 @@ public class DockerMachineSource extends MachineSourceImpl {
             fullRepoId.append('@').append(getDigest());
         }
         return fullRepoId.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "DockerMachineSource{" +
+               "registry='" + registry + '\'' +
+               ", repository='" + repository + '\'' +
+               ", tag='" + tag + '\'' +
+               ", digest='" + digest + '\'' +
+               '}';
     }
 
 }

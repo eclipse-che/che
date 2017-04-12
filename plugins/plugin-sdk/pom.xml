@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.7.0-SNAPSHOT</version>
+        <version>5.8.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-sdk-parent</artifactId>
@@ -24,7 +24,6 @@
     <name>Che Plugin :: SDK :: Parent</name>
     <modules>
         <module>che-plugin-sdk-ext-plugins</module>
-        <module>che-plugin-sdk-env-local</module>
         <module>che-plugin-sdk-tools</module>
     </modules>
     <properties>

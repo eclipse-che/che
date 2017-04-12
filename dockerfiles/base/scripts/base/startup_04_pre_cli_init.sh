@@ -92,9 +92,10 @@ cli_verify_nightly() {
       update_image $CHE_IMAGE_FULLNAME
 
       local NEW_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
-
       if [[ "${CURRENT_DIGEST}" != "${NEW_DIGEST}" ]]; then
+        # Per CODENVY-1773 - removes orphaned nightly image
         warning "Pulled new 'nightly' image - please rerun CLI"
+        docker rmi -f $(docker images --filter "dangling=true" -q $CHE_IMAGE_NAME) 2>/dev/null
         return 2;
       fi
     fi 

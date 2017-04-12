@@ -26,7 +26,7 @@
 }
 
 .commandNodeText {
-    max-width: 65%;
+    max-width: literal("calc(100% - 100px)");
 }
 
 .commandGoalNode span:last-child svg,

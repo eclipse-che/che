@@ -27,7 +27,7 @@ public class AuthorImpl implements Author {
     @Column(name = "created")
     private Long created;
 
-    @Column(name = "userid")
+    @Column(name = "user_id")
     private String userId;
 
     public AuthorImpl() {}

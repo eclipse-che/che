@@ -17,13 +17,14 @@
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
     <ui:style>
         @eval textFieldBorderColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonActiveBorder();
+        @eval commandEditorProjectsTableHeaderColor org.eclipse.che.ide.api.theme.Style.getCommandEditorProjectsTableHeaderColor();
 
         .table {
             border: textFieldBorderColor;
         }
 
         .table-header {
-            background-color: #2E353B;
+            background-color: commandEditorProjectsTableHeaderColor;
         }
 
         .column-header {

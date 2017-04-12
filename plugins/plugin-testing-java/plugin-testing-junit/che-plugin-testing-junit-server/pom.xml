@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-testing-junit</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.7.0-SNAPSHOT</version>
+        <version>5.8.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-testing-junit-server</artifactId>
     <name>Che Plugin :: Java Testing :: JUnit Server</name>
@@ -32,10 +32,6 @@
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -65,23 +61,5 @@
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/**/AbstractTestListener.java</exclude>
-                        <exclude>**/**/OutputTestListener.java</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

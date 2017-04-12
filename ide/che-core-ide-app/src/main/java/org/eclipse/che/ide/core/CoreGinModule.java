@@ -22,6 +22,9 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 
 import org.eclipse.che.ide.actions.ActionApiModule;
+import org.eclipse.che.ide.api.ConnectionClosedInformer;
+import org.eclipse.che.ide.api.ProductInfoDataProvider;
+import org.eclipse.che.ide.api.ProductInfoDataProviderImpl;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
@@ -42,13 +45,14 @@ import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.ssh.SshServiceClientImpl;
 import org.eclipse.che.ide.api.user.AskCredentialsDialog;
+import org.eclipse.che.ide.client.ConnectionClosedInformerImpl;
 import org.eclipse.che.ide.clipboard.ClipboardModule;
 import org.eclipse.che.ide.command.CommandApiModule;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.debug.DebugApiModule;
 import org.eclipse.che.ide.editor.EditorApiModule;
 import org.eclipse.che.ide.editor.preferences.EditorPreferencesModule;
-import org.eclipse.che.ide.factory.FactoryApiModule;
+import org.eclipse.che.ide.factory.inject.FactoryGinModule;
 import org.eclipse.che.ide.filetypes.FileTypeApiModule;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
 import org.eclipse.che.ide.machine.MachineApiModule;
@@ -112,7 +116,7 @@ public class CoreGinModule extends AbstractGinModule {
         install(new ProjectImportModule());
         install(new OAuthApiModule());
         install(new WorkspaceEventsModule());
-        install(new FactoryApiModule());
+        install(new FactoryGinModule());
         install(new WorkspaceEventsModule());
 
         // configure miscellaneous core components
@@ -154,6 +158,9 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ExecAgentEventManager.class).to(JsonRpcExecAgentEventManager.class);
         bind(ConnectedEventHandler.class).asEagerSingleton();
         bind(AskCredentialsDialog.class).to(AskCredentialsDialogImpl.class);
+        bind(ProductInfoDataProvider.class).to(ProductInfoDataProviderImpl.class);
+        bind(WsAgentURLModifier.class).to(CheWsAgentLinksModifier.class);
+        bind(ConnectionClosedInformer.class).to(ConnectionClosedInformerImpl.class);
     }
 
     @Provides

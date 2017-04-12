@@ -108,23 +108,27 @@ public class CheCacheForcingFilterTest {
     private class MockFilterConfig implements FilterConfig {
         private final Map<String, String> filterParams = new HashMap<>();
 
-        public MockFilterConfig() {
+        MockFilterConfig() {
             this.filterParams.put("pattern1", "^.*\\.cache\\..*$");
             this.filterParams.put("pattern2", "^.*/_app/.*$");
         }
 
+        @Override
         public String getFilterName() {
             return this.getClass().getName();
         }
 
+        @Override
         public ServletContext getServletContext() {
             throw new UnsupportedOperationException("The method does not supported in " + this.getClass());
         }
 
+        @Override
         public String getInitParameter(String key) {
             return this.filterParams.get(key);
         }
 
+        @Override
         public Enumeration<String> getInitParameterNames() {
             return Collections.enumeration(filterParams.keySet());
         }

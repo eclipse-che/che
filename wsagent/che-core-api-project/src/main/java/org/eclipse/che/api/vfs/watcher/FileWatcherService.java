@@ -41,6 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 import static java.lang.Thread.currentThread;
+import static java.nio.file.Files.exists;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
@@ -206,18 +207,38 @@ public class FileWatcherService {
      * directory specified by the argument. If registration counter comes to
      * zero directory watching is totally cancelled.
      *
+     * If this method is called for not existing directory nothing happens.
+     *
+     * If this method is called for not registered directory nothing happens.
+     *
      * @param dir
      *         directory
      */
     void unRegister(Path dir) {
         LOG.debug("Canceling directory '{}' registration", dir);
 
+        Predicate<Entry<WatchKey, Path>> equalsDir = it -> it.getValue().equals(dir);
+
+        if (!exists(dir)) {
+            LOG.debug("Trying to unregister directory '{}' while it does not exist", dir);
+
+            registrations.remove(dir);
+
+            keys.entrySet().stream().filter(equalsDir).map(Entry::getKey).forEach(WatchKey::cancel);
+            keys.entrySet().removeIf(equalsDir);
+
+            return;
+        }
+
+        if (!registrations.containsKey(dir)) {
+            LOG.debug("Trying to unregister directory '{}' while it is not registered", dir);
+            return;
+        }
+
         int previous = registrations.get(dir);
         if (previous == 1) {
             LOG.debug("Stopping watching directory '{}'", dir);
             registrations.remove(dir);
-
-            Predicate<Entry<WatchKey, Path>> equalsDir = it -> it.getValue().equals(dir);
 
             keys.entrySet().stream().filter(equalsDir).map(Entry::getKey).forEach(WatchKey::cancel);
             keys.entrySet().removeIf(equalsDir);

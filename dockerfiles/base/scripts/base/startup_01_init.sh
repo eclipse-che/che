@@ -23,6 +23,7 @@ OPTIONAL DOCKER PARAMETERS:${ADDITIONAL_OPTIONAL_DOCKER_PARAMETERS}
   -v <LOCAL_PATH>:/chedir              Soure repository to convert into workspace with Chedir utility${ADDITIONAL_OPTIONAL_DOCKER_MOUNTS}  
     
 COMMANDS:
+  archetype                            Generate, build, and run custom assemblies of ${CHE_MINI_PRODUCT_NAME}
   action <action-name>                 Start action on ${CHE_MINI_PRODUCT_NAME} instance
   backup                               Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
   config                               Generates a ${CHE_MINI_PRODUCT_NAME} config from vars; run on any start / restart
@@ -166,6 +167,8 @@ init_global_vars() {
 
   DEFAULT_CHE_USER="root"
   CHE_USER="${CHE_USER:-${DEFAULT_CHE_USER}}"
+
+  CHE_USER_GROUPS=""
 }
 
 usage() {
@@ -241,8 +244,7 @@ cleanup() {
 }
 
 start() {
-  # pre_init is unique to each CLI assembly. This can be called before
-  # networking is established.
+  # pre_init is unique to each CLI assembly. This can be called before networking is established.
   source "/scripts/pre_init.sh"
   pre_init
 
@@ -286,6 +288,9 @@ start() {
 
   # Extract the value of --user from the docker command line
   init_check_user "$@"
+
+  # Extract the value of --group-add from the docker command line
+  init_check_groups "$@"
 
   # Only initialize after mounts have been established so we can write cli.log out to a mount folder
   init_logging "$@"

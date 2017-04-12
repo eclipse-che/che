@@ -32,6 +32,9 @@ mvn clean install \
  -pl "!:che-sample-plugin-wizard-ide" \
  -pl "!:che-sample-plugin-nativeaccess-ide" \
  -pl "!:che-sample-plugin-serverservice-ide" \
+ -pl "!:postgresql-tck" \
+ -pl "!:che-core-git-impl-jgit" \
+ -pl "!:che-plugin-pullrequest-ide" \
   $@
 
 

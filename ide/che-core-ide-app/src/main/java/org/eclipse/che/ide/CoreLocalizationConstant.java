@@ -943,4 +943,115 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("authentication.dialog.rejected.by.user")
     String authenticationDialogRejectedByUser();
 
+
+    /* Factories */
+    @Key("projects.import.configuring.cloning")
+    String cloningSource();
+
+    @Key("create.factory.action.title")
+    String createFactoryActionTitle();
+
+    @Key("create.factory.already.exist")
+    String createFactoryAlreadyExist();
+
+    @Key("create.factory.unable.create.from.current.workspace")
+    String createFactoryFromCurrentWorkspaceFailed();
+
+    @Key("create.factory.form.title")
+    String createFactoryTitle();
+
+    @Key("create.factory.label.name")
+    String createFactoryName();
+
+    @Key("create.factory.label.link")
+    String createFactoryLink();
+
+    @Key("create.factory.button.create")
+    String createFactoryButton();
+
+    @Key("create.factory.button.close")
+    String createFactoryButtonClose();
+
+    @Key("create.factory.configure.button.tooltip")
+    String createFactoryConfigureTooltip();
+
+    @Key("create.factory.launch.button.tooltip")
+    String createFactoryLaunchTooltip();
+
+
+    @Key("import.config.view.name")
+    String importFromConfigurationName();
+
+    @Key("import.config.view.description")
+    String importFromConfigurationDescription();
+
+    @Key("project.import.configured.cloned")
+    String clonedSource(String projectName);
+
+    @Key("import.config.form.button.import")
+    String importButton();
+
+    @Key("import.config.view.title")
+    String importFromConfigurationTitle();
+
+    @Key("import.config.form.prompt")
+    String configFileTitle();
+
+    @Key("project.already.imported")
+    String projectAlreadyImported(String projectName);
+
+    @Key("project.import.cloned.with.checkout")
+    String clonedSourceWithCheckout(String projectName, String repoName, String ref, String branch);
+
+    @Key("project.import.cloned.with.checkout.start.point")
+    String clonedWithCheckoutOnStartPoint(String projectName, String repoName, String startPoint, String branch);
+
+    @Key("project.import.configuring.cloning")
+    String cloningSource(String projectName);
+
+    @Key("project.import.ssh.key.upload.failed.title")
+    String cloningSourceSshKeyUploadFailedTitle();
+
+    @Key("project.import.ssh.key.upload.failed.text")
+    String cloningSourcesSshKeyUploadFailedText();
+
+    @Key("message.ssh.key.not.found.text")
+    String acceptSshNotFoundText();
+
+    @Key("project.import.cloning.failed.without.start.point")
+    String cloningSourceWithCheckoutFailed(String branch, String repoName);
+
+    @Key("project.import.cloning.failed.with.start.point")
+    String cloningSourceCheckoutFailed(String project, String branch);
+
+    @Key("project.import.cloning.failed.title")
+    String cloningSourceFailedTitle(String projectName);
+
+    @Key("project.import.configuring.failed")
+    String configuringSourceFailed(String projectName);
+
+    @Key("welcome.preferences.title")
+    String welcomePreferencesTitle();
+
+    @Key("export.config.view.name")
+    String exportConfigName();
+
+    @Key("export.config.view.description")
+    String exportConfigDescription();
+
+    @Key("export.config.error.message")
+    String exportConfigErrorMessage();
+
+    @Key("export.config.dialog.not.under.vcs.title")
+    String exportConfigDialogNotUnderVcsTitle();
+
+    @Key("export.config.dialog.not.under.vcs.text")
+    String exportConfigDialogNotUnderVcsText();
+
+    @Key("messages.server.failure")
+    String messagesServerFailure();
+
+    @Key("connection.closed.dialog.title")
+    String connectionClosedDialogTitle();
+
 }

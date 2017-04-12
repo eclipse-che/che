@@ -843,7 +843,7 @@ public class JavaNavigation {
     }
 
     private List<PackageFragmentRoot> toPackageRoots(IJavaProject javaProject, boolean includePackages) throws JavaModelException {
-        IPackageFragmentRoot[] packageFragmentRoots = javaProject.getPackageFragmentRoots();
+        IPackageFragmentRoot[] packageFragmentRoots = javaProject.getAllPackageFragmentRoots();
         List<PackageFragmentRoot> result = new ArrayList<>();
         for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRoots) {
             if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE &&

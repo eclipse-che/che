@@ -26,8 +26,9 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import org.eclipse.che.plugin.debugger.ide.debug.BasicActiveFileHandler;
 
@@ -53,10 +54,11 @@ public class GdbDebugger extends AbstractDebugger {
 
     @Inject
     public GdbDebugger(DebuggerServiceClient service,
+                       RequestTransmitter transmitter,
+                       RequestHandlerConfigurator configurator,
                        GdbLocalizationConstant locale,
                        DtoFactory dtoFactory,
                        LocalStorageProvider localStorageProvider,
-                       MessageBusProvider messageBusProvider,
                        EventBus eventBus,
                        BasicActiveFileHandler activeFileHandler,
                        DebuggerManager debuggerManager,
@@ -65,9 +67,10 @@ public class GdbDebugger extends AbstractDebugger {
                        AppContext appContext) {
 
         super(service,
+              transmitter,
+              configurator,
               dtoFactory,
               localStorageProvider,
-              messageBusProvider,
               eventBus,
               activeFileHandler,
               debuggerManager,

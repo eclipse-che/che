@@ -17,6 +17,7 @@ import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.api.machine.server.spi.Instance;
 
 import java.io.IOException;
 
@@ -36,7 +37,7 @@ public class DefaultAgentLauncher implements AgentLauncher {
     public DefaultAgentLauncher() { }
 
     @Override
-    public void launch(Runtime machine, Agent agent) throws ServerException {
+    public void launch(Instance machine, Agent agent) throws ServerException {
         if (isNullOrEmpty(agent.getScript())) {
             return;
         }

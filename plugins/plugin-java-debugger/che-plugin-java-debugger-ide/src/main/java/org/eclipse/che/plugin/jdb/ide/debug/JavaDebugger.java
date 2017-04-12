@@ -22,8 +22,9 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolver;
 import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
@@ -49,9 +50,10 @@ public class JavaDebugger extends AbstractDebugger {
 
     @Inject
     public JavaDebugger(DebuggerServiceClient service,
+                        RequestTransmitter transmitter,
                         DtoFactory dtoFactory,
+                        RequestHandlerConfigurator configurator,
                         LocalStorageProvider localStorageProvider,
-                        MessageBusProvider messageBusProvider,
                         EventBus eventBus,
                         FqnResolverFactory fqnResolverFactory,
                         JavaDebuggerFileHandler javaDebuggerFileHandler,
@@ -60,9 +62,10 @@ public class JavaDebugger extends AbstractDebugger {
                         FileTypeRegistry fileTypeRegistry,
                         BreakpointManager breakpointManager) {
         super(service,
+              transmitter,
+              configurator,
               dtoFactory,
               localStorageProvider,
-              messageBusProvider,
               eventBus,
               javaDebuggerFileHandler,
               debuggerManager,
@@ -76,7 +79,7 @@ public class JavaDebugger extends AbstractDebugger {
     @Override
     protected String fqnToPath(@NotNull Location location) {
         String resourcePath = location.getResourcePath();
-        return  resourcePath != null ? resourcePath : location.getTarget();
+        return resourcePath != null ? resourcePath : location.getTarget();
     }
 
     @Override

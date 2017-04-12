@@ -29,9 +29,4 @@ public class GuideItem implements MenuItem {
     public String getName() {
         return messages.guideItemLabel();
     }
-
-    @Override
-    public boolean isDisabled() {
-        return false;
-    }
 }
