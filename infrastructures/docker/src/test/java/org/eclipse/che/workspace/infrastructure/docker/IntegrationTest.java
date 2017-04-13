@@ -22,7 +22,6 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
-import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
@@ -37,9 +36,9 @@ import org.eclipse.che.plugin.docker.client.NoOpDockerRegistryDynamicAuthResolve
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.helper.DefaultNetworkFinder;
-import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentParser;
-import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentValidator;
-import org.eclipse.che.workspace.infrastructure.docker.environment.DockerServicesStartStrategy;
+import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentParser;
+import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentValidator;
+import org.eclipse.che.workspace.infrastructure.docker.environment.ServicesStartStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.old.AgentConfigApplier;
 import org.eclipse.che.workspace.infrastructure.docker.old.config.provider.DockerExtConfBindingProvider;
@@ -97,18 +96,18 @@ public class IntegrationTest {
     private RecipeDownloader recipeDownloader;
 
     // docker runtime
-    private DockerEnvironmentParser     parser;
-    private DockerEnvironmentValidator  validator;
-    private DockerServicesStartStrategy strategy;
-    private DockerEnvironmentNormalizer normalizer;
-    private DockerServiceStarter        starter;
-    private DockerNetworkLifecycle      networkLifecycle;
-    private InfrastructureProvisioner   provisioner;
+    private EnvironmentParser         parser;
+    private EnvironmentValidator      validator;
+    private ServicesStartStrategy     strategy;
+    private EnvironmentNormalizer     normalizer;
+    private ServiceStarter            starter;
+    private NetworkLifecycle          networkLifecycle;
+    private InfrastructureProvisioner provisioner;
 
     // desired class
     private DockerRuntimeInfrastructure infra;
 
-    private RuntimeContext context;
+    private DockerRuntimeContext context;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -130,47 +129,48 @@ public class IntegrationTest {
         agentConfigApplier = new AgentConfigApplier(agentSorter, agentRegistry);
 
         // other
-        urlRewriter = new TestURLRewriter();
+        urlRewriter = new TestURLRewriter();// TODO + module
         recipeDownloader = mock(RecipeDownloader.class);
         Pattern recipePattern = Pattern.compile(".*");
 
         // docker runtime
-        DockerContainerNameGenerator dockerContainerNameGenerator = new DockerContainerNameGenerator();
+        ContainerNameGenerator dockerContainerNameGenerator = new ContainerNameGenerator();
         DockerInstanceStopDetector stopDetector = mock(DockerInstanceStopDetector.class);
-        parser = new DockerEnvironmentParser(singletonMap("dockerimage", new DockerImageEnvironmentParser()));
-        validator = new DockerEnvironmentValidator();
-        strategy = new DockerServicesStartStrategy();
+        parser = new EnvironmentParser(singletonMap("dockerimage", new DockerImageEnvironmentParser()));
+        validator = new EnvironmentValidator();
+        strategy = new ServicesStartStrategy();
         ServerEvaluationStrategy serverEvaluationStrategy = new LocalDockerServerEvaluationStrategy("localhost", "localhost");
         ServerEvaluationStrategyProvider strategyProvider = new ServerEvaluationStrategyProvider(singletonMap("strategy1", serverEvaluationStrategy), "strategy1");
-        normalizer = new DockerEnvironmentNormalizer(recipeDownloader, recipePattern, dockerContainerNameGenerator, 2_000_000_000);
-        starter = new DockerServiceStarter(docker,
-                                           credentialsProvider,
-                                           stopDetector,
-                                           emptySet(),
-                                           emptySet(),
-                                           emptySet(),
-                                           emptySet(),
-                                           false,
-                                           false,
-                                           0,
-                                           emptySet(),
-                                           emptySet(),
-                                           false,
-                                           -1,
-                                           emptySet(),
-                                           null,
-                                           null,
-                                           0,
-                                           0,
-                                           new WindowsPathEscaper(),
-                                           emptySet(),
-                                           null,
-                                           strategyProvider);
-        networkLifecycle = new DockerNetworkLifecycle(docker, null);
+        normalizer = new EnvironmentNormalizer(recipeDownloader, recipePattern, dockerContainerNameGenerator, 2_000_000_000);
+        starter = new ServiceStarter(docker,
+                                     credentialsProvider,
+                                     stopDetector,
+                                     emptySet(),
+                                     emptySet(),
+                                     emptySet(),
+                                     emptySet(),
+                                     false,
+                                     false,
+                                     0,
+                                     emptySet(),
+                                     emptySet(),
+                                     false,
+                                     -1,
+                                     emptySet(),
+                                     null,
+                                     null,
+                                     0,
+                                     0,
+                                     new WindowsPathEscaper(),
+                                     emptySet(),
+                                     null,
+                                     strategyProvider);
+        networkLifecycle = new NetworkLifecycle(docker, null);
         WorkspaceFolderPathProvider workspaceFolderPathProvider = mock(WorkspaceFolderPathProvider.class);
-        WsAgentVolumeProvider wsAgentVolumeProvider = mock(WsAgentVolumeProvider.class);
-        TerminalVolumeProvider terminalVolumeProvider = mock(TerminalVolumeProvider.class);
-        ExecAgentVolumeProvider execAgentVolumeProvider = mock(ExecAgentVolumeProvider.class);
+        WsAgentVolumeProvider wsAgentVolumeProvider =
+                new WsAgentVolumeProvider(null, "/home/gaal/workspace/agents/ws-agent.tar.gz");
+        TerminalVolumeProvider terminalVolumeProvider = new TerminalVolumeProvider(null, "/home/gaal/workspace/agents");
+        ExecAgentVolumeProvider execAgentVolumeProvider = new ExecAgentVolumeProvider(null, "/home/gaal/workspace/agents");
         provisioner = new LocalCheInfrastructureProvisioner(agentConfigApplier,
                                                             workspaceFolderPathProvider,
                                                             new WindowsPathEscaper(),
@@ -180,6 +180,17 @@ public class IntegrationTest {
                                                             new DockerExtConfBindingProvider(),
                                                             terminalVolumeProvider,
                                                             execAgentVolumeProvider);
+
+        // TODO exec/terminal binaries are not found
+
+        DockerRuntimeContext.runCommands.put("org.eclipse.che.ws-agent", "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
+        DockerRuntimeContext.runCommands.put("org.eclipse.che.terminal", "$HOME/che/terminal/che-websocket-terminal " +
+                                                    "-addr :4411 " +
+                                                    "-cmd ${SHELL_INTERPRETER}");
+        DockerRuntimeContext.runCommands.put("org.eclipse.che.exec", "$HOME/che/exec-agent/che-exec-agent " +
+                                                "-addr :4412 " +
+                                                "-cmd ${SHELL_INTERPRETER} " +
+                                                "-logs-dir $HOME/che/exec-agent/logs");
 
         // desired class
         infra = new DockerRuntimeInfrastructure(parser,

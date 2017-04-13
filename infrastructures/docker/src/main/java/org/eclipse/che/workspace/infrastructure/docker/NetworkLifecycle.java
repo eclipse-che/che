@@ -25,14 +25,14 @@ import java.io.IOException;
 /**
  * @author Alexander Garagatyi
  */
-public class DockerNetworkLifecycle {
+public class NetworkLifecycle {
 
     private final DockerConnector docker;
     private final String          networkDriver;
 
     @Inject
-    public DockerNetworkLifecycle(DockerConnector docker,
-                                  @Nullable @Named("che.docker.network_driver") String networkDriver) {
+    public NetworkLifecycle(DockerConnector docker,
+                            @Nullable @Named("che.docker.network_driver") String networkDriver) {
         this.docker = docker;
         this.networkDriver = networkDriver;
     }

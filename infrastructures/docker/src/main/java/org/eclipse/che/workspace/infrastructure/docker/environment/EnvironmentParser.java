@@ -34,7 +34,7 @@ import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator
  * @author Alexander Garagatyi
  * @author Alexander Andrienko
  */
-public class DockerEnvironmentParser {
+public class EnvironmentParser {
 
     protected static final String SERVER_CONF_LABEL_PREFIX          = "che:server:";
     protected static final String SERVER_CONF_LABEL_REF_SUFFIX      = ":ref";
@@ -44,7 +44,7 @@ public class DockerEnvironmentParser {
     private final Map<String, TypeSpecificEnvironmentParser> environmentParsers;
 
     @Inject
-    public DockerEnvironmentParser(Map<String, TypeSpecificEnvironmentParser> environmentParsers) {
+    public EnvironmentParser(Map<String, TypeSpecificEnvironmentParser> environmentParsers) {
         this.environmentParsers = environmentParsers;
     }
 

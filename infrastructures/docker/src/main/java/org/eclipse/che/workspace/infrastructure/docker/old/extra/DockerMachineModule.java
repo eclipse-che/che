@@ -15,14 +15,14 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.workspace.infrastructure.docker.DockerServiceStarter;
+import org.eclipse.che.workspace.infrastructure.docker.ServiceStarter;
 import org.eclipse.che.workspace.infrastructure.docker.old.config.ApiEndpointEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.docker.old.config.DockerExtraHostsFromPropertyProvider;
 
 import java.util.Set;
 
 /**
- * Module for components that are needed for {@link DockerServiceStarter}
+ * Module for components that are needed for {@link ServiceStarter}
  *
  * @author Alexander Garagatyi
  */

@@ -17,25 +17,33 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategyProvider;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 /**
  * @author Alexander Garagatyi
  */
 public class DockerMachine implements Machine {
+
+    private static final Logger LOG = getLogger(DockerMachine.class);
+
     /**
      * Name of the latest tag used in Docker image.
      */
-    public static final String LATEST_TAG = "latest";
+    public static final  String LATEST_TAG             = "latest";
     /**
      * Env variable that points to root folder of projects in dev machine
      */
-    public static final String PROJECTS_ROOT_VARIABLE = "CHE_PROJECTS_ROOT";
+    public static final  String PROJECTS_ROOT_VARIABLE = "CHE_PROJECTS_ROOT";
 
     /**
      * Env variable for jvm settings
@@ -144,7 +152,16 @@ public class DockerMachine implements Machine {
     }
 
     public void destroy() {
+        // node unbind
+        try {
+            docker.removeContainer(RemoveContainerParams.create(this.container)
+                                                        .withRemoveVolumes(true)
+                                                        .withForce(true));
 
+            docker.removeImage(RemoveImageParams.create(this.image).withForce(false));
+        } catch (IOException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+        }
     }
 /*
     public MachineSource saveToSnapshot() throws MachineException {
@@ -179,17 +196,6 @@ public class DockerMachine implements Machine {
             Thread.currentThread().interrupt();
             throw new MachineException(e.getLocalizedMessage(), e);
         }
-    }
-
-    public InstanceProcess createProcess(Command command, String outputChannel) throws MachineException {
-        final Integer pid = pidSequence.getAndIncrement();
-        final InstanceProcess process = dockerMachineFactory.createProcess(command,
-                                                                           container,
-                                                                           outputChannel,
-                                                                           String.format(PID_FILE_TEMPLATE, pid),
-                                                                           pid);
-        machineProcesses.put(pid, process);
-        return process;
     }
 */
     /**

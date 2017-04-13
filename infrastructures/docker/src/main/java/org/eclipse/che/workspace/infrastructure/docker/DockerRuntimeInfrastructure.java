@@ -24,13 +24,12 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
-import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentParser;
-import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentValidator;
-import org.eclipse.che.workspace.infrastructure.docker.environment.DockerServicesStartStrategy;
+import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentParser;
+import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentValidator;
+import org.eclipse.che.workspace.infrastructure.docker.environment.ServicesStartStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import java.util.List;
@@ -47,26 +46,26 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     // TODO rework
     public static final Set<String> SUPPORTED_RECIPE_TYPES = ImmutableSet.of("dockerimage", "dockerfile", "compose");
 
-    private final DockerEnvironmentValidator  dockerEnvironmentValidator;
-    private final DockerEnvironmentParser     dockerEnvironmentParser;
-    private final DockerServicesStartStrategy startStrategy;
-    private final InfrastructureProvisioner   infrastructureProvisioner;
-    private final DockerEnvironmentNormalizer environmentNormalizer;
-    private final DockerServiceStarter        serviceStarter;
-    private final DockerNetworkLifecycle      networkLifecycle;
-    private final URLRewriter                 urlRewriter;
-    private final DockerConnector             dockerConnector;
-    private final AgentRegistry               agentRegistry;
-    private final AgentSorter                 agentSorter;
+    private final EnvironmentValidator      dockerEnvironmentValidator;
+    private final EnvironmentParser         dockerEnvironmentParser;
+    private final ServicesStartStrategy     startStrategy;
+    private final InfrastructureProvisioner infrastructureProvisioner;
+    private final EnvironmentNormalizer     environmentNormalizer;
+    private final ServiceStarter            serviceStarter;
+    private final NetworkLifecycle          networkLifecycle;
+    private final URLRewriter               urlRewriter;
+    private final DockerConnector           dockerConnector;
+    private final AgentRegistry             agentRegistry;
+    private final AgentSorter               agentSorter;
 
     @Inject
-    public DockerRuntimeInfrastructure(DockerEnvironmentParser dockerEnvironmentParser,
-                                       DockerEnvironmentValidator dockerEnvironmentValidator,
-                                       DockerServicesStartStrategy startStrategy,
+    public DockerRuntimeInfrastructure(EnvironmentParser dockerEnvironmentParser,
+                                       EnvironmentValidator dockerEnvironmentValidator,
+                                       ServicesStartStrategy startStrategy,
                                        InfrastructureProvisioner infrastructureProvisioner,
-                                       DockerEnvironmentNormalizer environmentNormalizer,
-                                       DockerServiceStarter serviceStarter,
-                                       DockerNetworkLifecycle networkLifecycle,
+                                       EnvironmentNormalizer environmentNormalizer,
+                                       ServiceStarter serviceStarter,
+                                       NetworkLifecycle networkLifecycle,
                                        URLRewriter urlRewriter,
                                        DockerConnector dockerConnector,
                                        AgentRegistry agentRegistry,
@@ -98,7 +97,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     }
 
     @Override
-    public RuntimeContext prepare(RuntimeIdentity identity, Environment originEnv) throws ValidationException,
+    public DockerRuntimeContext prepare(RuntimeIdentity identity, Environment originEnv) throws ValidationException,
                                                                                             InfrastructureException {
         // Copy to be able to change env and protect from env changes on the go
         EnvironmentImpl environment = new EnvironmentImpl(originEnv);

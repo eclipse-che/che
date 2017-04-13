@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
@@ -56,9 +58,12 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class DockerRuntimeContext extends RuntimeContext {
     private static final Logger LOG = getLogger(DockerRuntimeContext.class);
 
+    @VisibleForTesting
+    static final Map<String, String> runCommands = new HashMap<>();
+
     // dependencies
-    private final DockerNetworkLifecycle dockerNetworkLifecycle;
-    private final DockerServiceStarter   serviceStarter;
+    private final NetworkLifecycle dockerNetworkLifecycle;
+    private final ServiceStarter   serviceStarter;
 
     private final DockerEnvironment dockerEnvironment;
     // Should not be used after runtime start
@@ -79,8 +84,8 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 RuntimeInfrastructure infrastructure,
                                 URL registryEndpoint,
                                 List<String> orderedServices,
-                                DockerNetworkLifecycle dockerNetworkLifecycle,
-                                DockerServiceStarter serviceStarter,
+                                NetworkLifecycle dockerNetworkLifecycle,
+                                ServiceStarter serviceStarter,
                                 URLRewriter urlRewriter,
                                 DockerConnector docker,
                                 AgentRegistry agentRegistry)
@@ -186,23 +191,37 @@ public class DockerRuntimeContext extends RuntimeContext {
         return dockerMachine;
     }
 
+    // TODO rework to agent launchers
     private void startAgents(String machineName, DockerMachine dockerMachine) throws InfrastructureException {
+        MessageProcessor<LogMessage> messageProcessor = message -> {
+            LOG.error("Type:{}, Content:{}", message.getType(), message.getContent());
+        };
         List<String> agents = environment.getMachines().get(machineName).getAgents();
         for (String agent : agents) {
             String agentScript;
             try {
                 agentScript = agentRegistry.getAgent(new AgentKeyImpl(agent)).getScript();
+                if (runCommands.containsKey(agent)) {
+                    agentScript = agentScript + '\n' + runCommands.get(agent);
+                }
             } catch (AgentException e) {
                 throw new InfrastructureException(e.getLocalizedMessage(), e);
             }
-            MessageProcessor<LogMessage> messageProcessor = message -> LOG.error(message.toString());
-            try {
-                Exec exec = docker.createExec(CreateExecParams.create(dockerMachine.getContainer(),
-                                                                      new String[] {"/bin/sh", "-c",  agentScript}));
-                docker.startExec(StartExecParams.create(exec.getId()), messageProcessor);
-            } catch (IOException e) {
-                throw new InfrastructureException(e.getLocalizedMessage(), e);
-            }
+            String effectiveFinalScript = agentScript;
+            Thread thread = new Thread(() -> startExec(dockerMachine.getContainer(), effectiveFinalScript, messageProcessor));
+            thread.setDaemon(true);
+            thread.start();
+        }
+    }
+
+    private void startExec(String container, String script, MessageProcessor<LogMessage> messageProcessor) {
+        try {
+            Exec exec = docker.createExec(CreateExecParams.create(container,
+                                                                  new String[] {"/bin/sh", "-c", script})
+                                                          .withDetach(false));
+            docker.startExec(StartExecParams.create(exec.getId()), messageProcessor);
+        } catch (IOException e) {
+            LOG.error(e.getLocalizedMessage(), e);
         }
     }
 

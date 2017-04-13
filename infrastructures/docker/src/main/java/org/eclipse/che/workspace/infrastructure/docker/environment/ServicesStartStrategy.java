@@ -34,7 +34,7 @@ import static java.lang.String.format;
  * @author Alexander Garagatyi
  * @author Alexander Andrienko
  */
-public class DockerServicesStartStrategy {
+public class ServicesStartStrategy {
     /**
      * Resolves order of start for machines in an environment.
      *

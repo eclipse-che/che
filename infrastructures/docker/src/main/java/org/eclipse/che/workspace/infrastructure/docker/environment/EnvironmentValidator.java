@@ -36,7 +36,7 @@ import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator
 /**
  * @author Alexander Garagatyi
  */
-public class DockerEnvironmentValidator {
+public class EnvironmentValidator {
     /* machine name must contain only {a-zA-Z0-9_-} characters and it's needed for validation machine names */
     private static final String  MACHINE_NAME_REGEXP  = "[a-zA-Z0-9_-]+";
     private static final Pattern MACHINE_NAME_PATTERN = Pattern.compile("^" + MACHINE_NAME_REGEXP + "$");
@@ -69,7 +69,7 @@ public class DockerEnvironmentValidator {
             Pattern.compile("^(?<serviceName>" + MACHINE_NAME_REGEXP + ")(:(ro|rw))?$");
 
     @Inject
-    public DockerEnvironmentValidator() {
+    public EnvironmentValidator() {
 
     }
 
