@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import org.eclipse.che.api.core.ApiException;
+import com.google.common.collect.ImmutableMap;
+
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -33,11 +34,12 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.lang.concurrent.StripedLocks;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
@@ -51,7 +53,6 @@ import java.util.concurrent.Future;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE;
-import static org.slf4j.LoggerFactory.getLogger;
 
 // TODO: spi: deal with exceptions
 
@@ -60,80 +61,67 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * Defines an internal API for managing {@link RuntimeImpl} instances.
  *
- * <p>This component implements {@link WorkspaceStatus} contract.
- *
- * <p>All the operations performed by this component are synchronous.
- *
- * <p>The implementation is thread-safe and guarded by
- * eagerly initialized readwrite locks produced by {@link StripedLocks}.
- * The component doesn't expose any api for client-side locking.
- * All the instances produced by this component are copies of the real data.
- *
- * <p>The component doesn't check if the incoming objects are in application-valid state.
- * Which means that it is expected that if {start(Workspace, String, boolean)} method is called
- * then {@code WorkspaceImpl} argument is a application-valid object which contains
- * all the required data for performing start.
- *
  * @author Yevhenii Voevodin
  * @author Alexander Garagatyi
  */
 @Singleton
 public class WorkspaceRuntimes {
 
-    private static final Logger LOG = getLogger(WorkspaceRuntimes.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WorkspaceRuntimes.class);
 
-    private final Map<String, RuntimeInfrastructure> infraByRecipe;
+    private final ImmutableMap<String, RuntimeInfrastructure> infraByRecipe;
 
     private final ConcurrentMap<String, InternalRuntime> runtimes;
     private final EventService                           eventsService;
-    private final StripedLocks                           locks;
     private final WorkspaceSharedPool                    sharedPool;
 
     @Inject
     public WorkspaceRuntimes(EventService eventsService,
                              Set<RuntimeInfrastructure> infrastructures,
                              WorkspaceSharedPool sharedPool) {
-
-
-        this.eventsService = eventsService;
         this.runtimes = new ConcurrentHashMap<>();
+        this.eventsService = eventsService;
+        this.sharedPool = sharedPool;
 
-        this.infraByRecipe = new ConcurrentHashMap<>();
-
-        //TODO move it to post-create?
+        // TODO: consider extracting to a strategy interface(1. pick the last, 2. fail with conflict)
+        Map<String, RuntimeInfrastructure> tmp = new HashMap<>();
         for (RuntimeInfrastructure infra : infrastructures) {
+            for (String type : infra.getRecipeTypes()) {
+                LOG.info("Register infrastructure '{}' recipe type '{}'", infra.getName(), type);
+                RuntimeInfrastructure existingInfra = tmp.put(type, infra);
+                if (existingInfra != null) {
+                    LOG.warn("Both '{}' and '{}' infrastructures support recipe of type '{}', infrastructure '{}' will be used",
+                             infra.getName(),
+                             existingInfra.getName(),
+                             type,
+                             infra.getName());
+                }
+            }
+        }
+        infraByRecipe = ImmutableMap.copyOf(tmp);
+    }
 
-            // If several entries - last wins (TODO should we throw conflict exception?)
-            for (String type : infra.getRecipeTypes())
-                infraByRecipe.put(type, infra);
-
-            // try to recover from infrastructures
+    @PostConstruct
+    private void recover() {
+        for (RuntimeInfrastructure infra : infraByRecipe.values()) {
             try {
                 for (RuntimeIdentity id : infra.getIdentities()) {
                     runtimes.put(id.getWorkspaceId(), validate(infra.getRuntime(id)));
                 }
-            } catch (UnsupportedOperationException e) {
-                LOG.warn("Not recoverable infrastructure: " + infra.getName() + " Reason: " + e.getMessage());
+            } catch (UnsupportedOperationException x) {
+                LOG.warn("Not recoverable infrastructure: '{}'", infra.getName());
             } catch (InfrastructureException x) {
-                LOG.error("An error occurred while attempting to recover runtimes using infrastructure '{}'. Reason: '{}'",
+                LOG.error("An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
                           infra.getName(),
                           x.getMessage());
             }
         }
-        //
-
-        // 16 - experimental value for stripes count, it comes from default hash map size
-        this.locks = new StripedLocks(16);
-        this.sharedPool = sharedPool;
-
     }
-
 
     //TODO do we need some validation on start
     private InternalRuntime validate(InternalRuntime runtime) {
         return runtime;
     }
-
 
     public Environment estimate(Environment environment) throws NotFoundException, InfrastructureException, ValidationException {
         // TODO decide whether throw exception when dev machine not found

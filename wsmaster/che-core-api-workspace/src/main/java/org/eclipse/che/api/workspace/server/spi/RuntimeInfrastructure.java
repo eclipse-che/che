@@ -85,7 +85,7 @@ public abstract class RuntimeInfrastructure {
      *         if any other error occurred
      */
     public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("The implementation does not track runtimes");
     }
 
     /**
@@ -103,7 +103,7 @@ public abstract class RuntimeInfrastructure {
      *         if any other error occurred
      */
     public InternalRuntime getRuntime(RuntimeIdentity id) throws InfrastructureException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("The implementation does not track runtimes");
     }
 
     /**
