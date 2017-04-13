@@ -129,7 +129,7 @@ public class IntegrationTest {
         agentConfigApplier = new AgentConfigApplier(agentSorter, agentRegistry);
 
         // other
-        urlRewriter = new TestURLRewriter();
+        urlRewriter = new TestURLRewriter();// TODO + module
         recipeDownloader = mock(RecipeDownloader.class);
         Pattern recipePattern = Pattern.compile(".*");
 
@@ -181,9 +181,7 @@ public class IntegrationTest {
                                                             terminalVolumeProvider,
                                                             execAgentVolumeProvider);
 
-        // TODO agents in separate thread
         // TODO exec/terminal binaries are not found
-        // TODO che.api
 
         DockerRuntimeContext.runCommands.put("org.eclipse.che.ws-agent", "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
         DockerRuntimeContext.runCommands.put("org.eclipse.che.terminal", "$HOME/che/terminal/che-websocket-terminal " +
