@@ -41,13 +41,13 @@ public class EnvironmentNormalizer {
     public EnvironmentNormalizer(RecipeDownloader recipeDownloader,
                                  @Named("che.api") String apiEndpoint,
                                  ContainerNameGenerator containerNameGenerator,
-                                 @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeBytes) {
+                                 @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
         this.recipeDownloader = recipeDownloader;
         this.recipeApiPattern = Pattern.compile("(^https?" +
                                                 apiEndpoint.substring(apiEndpoint.indexOf(":")) +
                                                 "/recipe/.*$)|(^/recipe/.*$)");
         this.containerNameGenerator = containerNameGenerator;
-        this.defaultMachineMemorySizeBytes = defaultMachineMemorySizeBytes;
+        this.defaultMachineMemorySizeBytes = defaultMachineMemorySizeMB * 1_024 * 1_024;
     }
 
     public void normalize(Environment environment, DockerEnvironment dockerEnvironment, RuntimeIdentity identity)
