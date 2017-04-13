@@ -413,6 +413,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("messages.fileToOpenIsNotSpecified")
     String fileToOpenIsNotSpecified();
 
+    @Key("messages.fileToOpenLineIsNotANumber")
+    String fileToOpenLineIsNotANumber();
+
     @Key("messages.canNotOpenNodeWithoutParams")
     String canNotOpenNodeWithoutParams();
 
