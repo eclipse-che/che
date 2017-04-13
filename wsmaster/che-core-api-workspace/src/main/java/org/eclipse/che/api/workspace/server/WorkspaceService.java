@@ -376,7 +376,9 @@ public class WorkspaceService extends Service {
                                                                                    ServerException,
                                                                                    ConflictException {
         Map<String, String> options = new HashMap<>();
-        options.put("create-snapshot", createSnapshot.toString());
+        if (createSnapshot != null) {
+            options.put("create-snapshot", createSnapshot.toString());
+        }
         workspaceManager.stopWorkspace(id, options);
     }
 
