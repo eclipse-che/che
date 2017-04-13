@@ -2,7 +2,6 @@ mvn clean install \
  -Dmaven.test.skip=true \
  -Dskip-validate-sources \
  -Dmdep.analyze.skip=true \
- -pl "!:assembly-ide-war" \
  -pl "!:che-core-ide-api" \
  -pl "!:che-core-ide-app" \
  -pl "!:che-plugin-machine-ext-client" \

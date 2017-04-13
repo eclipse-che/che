@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableSet;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
@@ -30,7 +31,7 @@ public abstract class RuntimeInfrastructure {
     protected final Set<String> recipeTypes;
     protected final String      name;
 
-    public RuntimeInfrastructure(String name, Set<String> types) {
+    public RuntimeInfrastructure(String name, Collection<String> types) {
         Preconditions.checkArgument(!types.isEmpty());
         this.name = Objects.requireNonNull(name);
         this.recipeTypes = ImmutableSet.copyOf(types);

@@ -21,6 +21,7 @@ import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
+import org.eclipse.che.commons.test.db.H2TestHelper;
 import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
@@ -46,7 +47,7 @@ public class JpaTckModule extends TckModule {
         H2DBTestServer server = H2DBTestServer.startDefault();
         install(new PersistTestModuleBuilder().setDriver(Driver.class)
                                               .runningOn(server)
-                                              .addEntityClasses(RecipeImpl.class,
+                                              .addEntityClasses(OldRecipeImpl.class,
                                                                 SnapshotImpl.class,
                                                                 AccountImpl.class,
                                                                 TestWorkspaceEntity.class)

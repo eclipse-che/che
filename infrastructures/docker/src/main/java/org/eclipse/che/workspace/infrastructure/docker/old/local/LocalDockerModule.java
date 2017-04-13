@@ -25,6 +25,7 @@ public class LocalDockerModule extends AbstractModule {
     @Override
     protected void configure() {
 /*
+FIXME: spi
         install(new FactoryModuleBuilder()
                         .implement(Instance.class, DockerInstance.class)
                         .implement(InstanceProcess.class, DockerProcess.class)

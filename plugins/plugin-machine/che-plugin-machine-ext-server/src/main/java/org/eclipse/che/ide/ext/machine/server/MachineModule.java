@@ -12,12 +12,11 @@ package org.eclipse.che.ide.ext.machine.server;
 
 import com.google.inject.AbstractModule;
 
-import org.eclipse.che.api.workspace.server.RecipeScriptDownloadService;
 import org.eclipse.che.ide.ext.machine.server.ssh.KeysInjector;
 import org.eclipse.che.ide.ext.machine.server.ssh.WorkspaceSshKeys;
 import org.eclipse.che.inject.DynaModule;
 
-@DynaModule
+//@DynaModule
 public class MachineModule extends AbstractModule {
 
     @Override

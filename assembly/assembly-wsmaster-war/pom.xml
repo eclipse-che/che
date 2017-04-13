@@ -174,10 +174,11 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-docker-client</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-docker-compose</artifactId>
-        </dependency>
+        <!--FIXME: spi-->
+        <!--<dependency>-->
+            <!--<groupId>org.eclipse.che.plugin</groupId>-->
+            <!--<artifactId>che-plugin-docker-compose</artifactId>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-docker-machine</artifactId>
@@ -194,10 +195,11 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-github-shared</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-machine-ext-server</artifactId>
-        </dependency>
+        <!--FIXME: spi-->
+        <!--<dependency>-->
+            <!--<groupId>org.eclipse.che.plugin</groupId>-->
+            <!--<artifactId>che-plugin-machine-ext-server</artifactId>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-maven-wsmaster</artifactId>

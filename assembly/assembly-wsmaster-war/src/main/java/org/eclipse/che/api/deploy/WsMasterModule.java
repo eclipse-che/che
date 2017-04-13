@@ -31,12 +31,11 @@ import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
-import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.user.server.TokenValidator;
+import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceMessageBodyAdapter;
-import org.eclipse.che.api.workspace.server.WorkspaceValidator;
-import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
+import org.eclipse.che.api.workspace.server.spi.dummy.DummyInfrastructureModule;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
@@ -79,8 +78,8 @@ public class WsMasterModule extends AbstractModule {
                 Multibinder.newSetBinder(binder(), FactoryParametersResolver.class);
         factoryParametersResolverMultibinder.addBinding()
                                             .to(GithubFactoryParametersResolver.class);
-
-        install(new org.eclipse.che.plugin.docker.compose.ComposeModule());
+// FIXME: spi
+//        install(new org.eclipse.che.plugin.docker.compose.ComposeModule());
 
         bind(org.eclipse.che.api.user.server.CheUserCreator.class);
 
@@ -132,9 +131,6 @@ public class WsMasterModule extends AbstractModule {
                    .addBinding()
                    .toInstance("predefined-recipes.json");
 
-        bind(org.eclipse.che.api.workspace.server.WorkspaceValidator.class)
-                .to(WorkspaceValidator.class);
-
 // FIXME: spi
 //        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
 
@@ -173,20 +169,24 @@ public class WsMasterModule extends AbstractModule {
 
         bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
-        Multibinder<org.eclipse.che.api.machine.server.spi.InstanceProvider> machineImageProviderMultibinder =
-                Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
-        machineImageProviderMultibinder.addBinding().to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
+// FIXME: spi
+//        Multibinder<org.eclipse.che.api.machine.server.spi.InstanceProvider> machineImageProviderMultibinder =
+//                Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
+//        machineImageProviderMultibinder.addBinding().to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
 
 //        bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
 //                .to(org.eclipse.che.plugin.docker.machine.MachineProviderImpl.class);
 
         install(new org.eclipse.che.api.core.rest.CoreRestModule());
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
-        install(new org.eclipse.che.plugin.docker.machine.local.LocalDockerModule());
+// FIXME: spi
+//        install(new org.eclipse.che.plugin.docker.machine.local.LocalDockerModule());
         install(new org.eclipse.che.api.machine.server.MachineModule());
-        install(new org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule());
+// FIXME: spi
+//        install(new org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule());
         install(new org.eclipse.che.swagger.deploy.DocsModule());
-        install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
+// FIXME: spi
+//        install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
 // FIXME: spi
 //        install(new org.eclipse.che.workspace.infrastructure.docker.old.proxy.DockerProxyModule());
         install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
@@ -199,8 +199,8 @@ public class WsMasterModule extends AbstractModule {
         final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
         requestInjection(interceptor);
         bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
-        bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class);
 // FIXME: spi
+//        bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class);
 //                .to(org.eclipse.che.workspace.infrastructure.docker.old.cleaner.LocalWorkspaceFilesCleaner.class);
 //        bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
 //                .to(org.eclipse.che.plugin.docker.machine.local.LocalCheInfrastructureProvisioner.class);
@@ -211,7 +211,11 @@ public class WsMasterModule extends AbstractModule {
 // FIXME: spi
 //        install(new org.eclipse.che.workspace.infrastructure.docker.old.config.dns.DnsResolversModule());
 
-        bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
-        bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);
+// FIXME: spi
+//        bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
+//        bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);
+
+// FIXME: spi
+        install(new DummyInfrastructureModule());
     }
 }
