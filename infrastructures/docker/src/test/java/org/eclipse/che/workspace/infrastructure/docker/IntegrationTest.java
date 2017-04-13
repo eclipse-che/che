@@ -142,8 +142,8 @@ public class IntegrationTest {
         starter = new ServiceStarter(docker,
                                      credentialsProvider,
                                      stopDetector,
-                                     emptySet(),
-                                     emptySet(),
+//                                     emptySet(),
+//                                     emptySet(),
                                      emptySet(),
                                      emptySet(),
                                      false,
@@ -180,14 +180,14 @@ public class IntegrationTest {
 
         // TODO exec/terminal binaries are not found
 
-        DockerRuntimeContext.runCommands.put("org.eclipse.che.ws-agent", "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
+        /*DockerRuntimeContext.runCommands.put("org.eclipse.che.ws-agent", "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
         DockerRuntimeContext.runCommands.put("org.eclipse.che.terminal", "$HOME/che/terminal/che-websocket-terminal " +
                                                     "-addr :4411 " +
                                                     "-cmd ${SHELL_INTERPRETER}");
         DockerRuntimeContext.runCommands.put("org.eclipse.che.exec", "$HOME/che/exec-agent/che-exec-agent " +
                                                 "-addr :4412 " +
                                                 "-cmd ${SHELL_INTERPRETER} " +
-                                                "-logs-dir $HOME/che/exec-agent/logs");
+                                                "-logs-dir $HOME/che/exec-agent/logs");*/
 
         // desired class
         infra = new DockerRuntimeInfrastructure(parser,

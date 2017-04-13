@@ -59,7 +59,18 @@ public class DockerRuntimeContext extends RuntimeContext {
     private static final Logger LOG = getLogger(DockerRuntimeContext.class);
 
     @VisibleForTesting
+    // TODO move to agents resolving components
     static final Map<String, String> runCommands = new HashMap<>();
+    static {
+        runCommands.put("org.eclipse.che.ws-agent", "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
+        runCommands.put("org.eclipse.che.terminal", "$HOME/che/terminal/che-websocket-terminal " +
+                                                                         "-addr :4411 " +
+                                                                         "-cmd ${SHELL_INTERPRETER}");
+        runCommands.put("org.eclipse.che.exec", "$HOME/che/exec-agent/che-exec-agent " +
+                                                                     "-addr :4412 " +
+                                                                     "-cmd ${SHELL_INTERPRETER} " +
+                                                                     "-logs-dir $HOME/che/exec-agent/logs");
+    }
 
     // dependencies
     private final NetworkLifecycle dockerNetworkLifecycle;
