@@ -11,11 +11,10 @@
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import io.typefox.lsapi.InitializeResult;
-
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.AsyncEditorProvider;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorProvider;
@@ -36,15 +35,13 @@ import javax.inject.Inject;
  * Provide editor with LS support
  */
 public class LanguageServerEditorProvider implements AsyncEditorProvider, EditorProvider {
-
     private LanguageServerEditorConfigurationFactory editorConfigurationFactory;
     private final LanguageServerRegistry             registry;
-    private final LoaderFactory loaderFactory;
+    private final LoaderFactory                      loaderFactory;
 
     @Inject
     public LanguageServerEditorProvider(LanguageServerEditorConfigurationFactory editorConfigurationFactory,
-                                        LanguageServerRegistry registry,
-                                        LoaderFactory loaderFactory) {
+                                        LanguageServerRegistry registry, LoaderFactory loaderFactory) {
         this.editorConfigurationFactory = editorConfigurationFactory;
         this.registry = registry;
         this.loaderFactory = loaderFactory;
@@ -60,10 +57,8 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
         return "Code Editor";
     }
 
-
     @com.google.inject.Inject
     private EditorBuilder editorBuilder;
-
 
     @Override
     public TextEditor getEditor() {
@@ -81,25 +76,33 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
     @Override
     public Promise<EditorPartPresenter> createEditor(VirtualFile file) {
         if (file instanceof File) {
-            File resource = (File)file;
+            File resource = (File) file;
 
-            Promise<InitializeResult> promise =
-                    registry.getOrInitializeServer(resource.getRelatedProject().get().getPath(), resource.getExtension(), resource.getLocation().toString());
+            Promise<InitializeResult> promise = registry.getOrInitializeServer(resource.getProject().getPath(),
+                                                                               resource.getExtension(), resource.getLocation().toString());
             final MessageLoader loader = loaderFactory.newLoader("Initializing Language Server for " + resource.getExtension());
             loader.show();
-            return promise.thenPromise(new Function<InitializeResult, Promise<EditorPartPresenter>>() {
+            return promise.then(new Function<InitializeResult, EditorPartPresenter>() {
                 @Override
-                public Promise<EditorPartPresenter> apply(InitializeResult arg) throws FunctionException {
+                public EditorPartPresenter apply(InitializeResult arg) throws FunctionException {
                     loader.hide();
                     if (editorBuilder == null) {
                         Log.debug(AbstractTextEditorProvider.class, "No builder registered for default editor type - giving up.");
-                        return Promises.<EditorPartPresenter>resolve(null);
+                        return null;
                     }
 
                     final TextEditor editor = editorBuilder.buildEditor();
                     LanguageServerEditorConfiguration configuration = editorConfigurationFactory.build(editor, arg.getCapabilities());
                     editor.initialize(configuration);
-                    return Promises.<EditorPartPresenter>resolve(editor);
+                    return editor;
+                }
+            }, new Function<PromiseError, EditorPartPresenter>() {
+
+                @Override
+                public EditorPartPresenter apply(PromiseError arg) throws FunctionException {
+                    loader.hide();
+                    Log.error(LanguageServerEditorProvider.class, "Failed to initialize language server", arg.getCause());
+                    return null;
                 }
             });
 

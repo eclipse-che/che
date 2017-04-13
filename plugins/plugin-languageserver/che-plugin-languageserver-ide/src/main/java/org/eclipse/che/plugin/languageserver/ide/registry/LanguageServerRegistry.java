@@ -22,6 +22,8 @@ import org.eclipse.che.api.languageserver.shared.lsapi.InitializeResultDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.LanguageDescriptionDTO;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.languageserver.shared.model.impl.InitializeResultImpl;
+import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -89,14 +91,22 @@ public class LanguageServerRegistry {
             if (projectToInitResult.containsKey(key)) {
                 return promiseProvider.resolve(projectToInitResult.get(key));
             } else {
-                // call initialize service
-                client.initializeServer(filePath);
                 // wait for response
-                return CallbackPromiseHelper.createFromCallback(new CallbackPromiseHelper.Call<InitializeResult, Throwable>() {
+                Promise<InitializeResult> initializedPromise = CallbackPromiseHelper.createFromCallback(new CallbackPromiseHelper.Call<InitializeResult, Throwable>() {
                     @Override
                     public void makeCall(Callback<InitializeResult, Throwable> callback) {
                         callbackMap.put(key, callback);
                     }
+                });
+                // call initialize service
+                Promise<Void> initializeServer = client.initializeServer(filePath);
+                return initializeServer.thenPromise(new Function<Void, Promise<InitializeResult>>() {
+
+                    @Override
+                    public Promise<InitializeResult> apply(Void arg) throws FunctionException {
+                        return initializedPromise;
+                    }
+                    
                 });
             }
         }
