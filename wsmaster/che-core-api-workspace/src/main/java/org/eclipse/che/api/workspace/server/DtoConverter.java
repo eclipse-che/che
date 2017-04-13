@@ -62,14 +62,20 @@ public final class DtoConverter {
     /** Converts {@link Workspace} to {@link WorkspaceDto}. */
     public static WorkspaceDto asDto(Workspace workspace) {
         Subject subject = EnvironmentContext.getCurrent().getSubject();
-        RuntimeDto runtimeDto = asDto(workspace.getRuntime()).withUserToken(subject.getToken());
-        return newDto(WorkspaceDto.class).withId(workspace.getId())
-                                         .withStatus(workspace.getStatus())
-                                         .withNamespace(workspace.getNamespace())
-                                         .withTemporary(workspace.isTemporary())
-                                         .withAttributes(workspace.getAttributes())
-                                         .withConfig(asDto(workspace.getConfig()))
-                                         .withRuntime(runtimeDto);
+        WorkspaceDto workspaceDto = newDto(WorkspaceDto.class).withId(workspace.getId())
+                                                              .withStatus(workspace.getStatus())
+                                                              .withNamespace(workspace.getNamespace())
+                                                              .withTemporary(workspace.isTemporary())
+                                                              .withAttributes(workspace.getAttributes())
+                                                              .withConfig(asDto(workspace.getConfig()));
+
+        if (workspace.getRuntime() != null) {
+            RuntimeDto runtime = asDto(workspace.getRuntime());
+            runtime.setUserToken(subject.getToken());
+            workspaceDto.setRuntime(runtime);
+        }
+
+        return workspaceDto;
     }
 
     /** Converts {@link WorkspaceConfig} to {@link WorkspaceConfigDto}. */
@@ -205,19 +211,19 @@ public final class DtoConverter {
 //                                                                                .withRootFolder(runtime.getRootFolder());
 
 
-        Map <String, ? extends Machine> machines = runtime.getMachines();
-        Map <String, MachineDto> machineDtos = new HashMap<>();
-        for(Map.Entry <String, ? extends Machine> m : machines.entrySet()) {
+        Map<String, ? extends Machine> machines = runtime.getMachines();
+        Map<String, MachineDto> machineDtos = new HashMap<>();
+        for (Map.Entry<String, ? extends Machine> m : machines.entrySet()) {
 
-            Map <String, ServerDto>serverDtos = new HashMap<>();
-            for(Map.Entry <String, ? extends Server> s : m.getValue().getServers().entrySet()) {
+            Map<String, ServerDto> serverDtos = new HashMap<>();
+            for (Map.Entry<String, ? extends Server> s : m.getValue().getServers().entrySet()) {
                 ServerDto sDto = newDto(ServerDto.class).withUrl(s.getValue().getUrl());
-                        //.withAddress(s.getValue().getAddress())
-                        //                                .withProtocol(s.getValue().getProtocol())
-                        //                                .withRef(s.getValue().getRef())
-                        //                                .withUrl(s.getValue().getUrl());
+                //.withAddress(s.getValue().getAddress())
+                //                                .withProtocol(s.getValue().getProtocol())
+                //                                .withRef(s.getValue().getRef())
+                //                                .withUrl(s.getValue().getUrl());
                 // TODO properties?
-                                                        //.withProperties(s.getValue().getProperties());
+                //.withProperties(s.getValue().getProperties());
                 serverDtos.put(s.getKey(), sDto);
             }
 
