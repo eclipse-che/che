@@ -168,9 +168,9 @@ public class IntegrationTest {
         networkLifecycle = new NetworkLifecycle(docker, null);
         WorkspaceFolderPathProvider workspaceFolderPathProvider = mock(WorkspaceFolderPathProvider.class);
         WsAgentVolumeProvider wsAgentVolumeProvider =
-                new WsAgentVolumeProvider(null, "/home/gaal/workspace/che2/assembly/assembly-wsagent-server/target/ext-server-5.7.0-SNAPSHOT.tar.gz");
-        TerminalVolumeProvider terminalVolumeProvider = new TerminalVolumeProvider(null, "/home/gaal/workspace/che2/agents/terminal/target/terminal-agent-5.7.0-SNAPSHOT-linux_amd64.tar.gz");
-        ExecAgentVolumeProvider execAgentVolumeProvider = new ExecAgentVolumeProvider(null, "/home/gaal/workspace/che2/agents/exec/target/exec-agent-5.7.0-SNAPSHOT-linux_amd64.tar.gz");
+                new WsAgentVolumeProvider(null, "/home/gaal/workspace/agents/ws-agent.tar.gz");
+        TerminalVolumeProvider terminalVolumeProvider = new TerminalVolumeProvider(null, "/home/gaal/workspace/agents");
+        ExecAgentVolumeProvider execAgentVolumeProvider = new ExecAgentVolumeProvider(null, "/home/gaal/workspace/agents");
         provisioner = new LocalCheInfrastructureProvisioner(agentConfigApplier,
                                                             workspaceFolderPathProvider,
                                                             new WindowsPathEscaper(),
