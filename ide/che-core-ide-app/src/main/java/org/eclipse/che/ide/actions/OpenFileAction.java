@@ -107,12 +107,9 @@ public class OpenFileAction extends Action implements PromisableAction {
                             }
 
                             try {
-
                                 int lineNumber = Integer.parseInt(event.getParameters().get(LINE_PARAM_ID)) - 1;
-
                                 ((TextEditor)editor).getDocument()
                                                     .setCursorPosition(new TextPosition(lineNumber, 0));
-
                             } catch (NumberFormatException e) {
                                 Log.error(getClass(), localization.fileToOpenLineIsNotANumber());
                             }
