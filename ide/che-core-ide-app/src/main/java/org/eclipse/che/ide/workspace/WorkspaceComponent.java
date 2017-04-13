@@ -60,7 +60,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     private static final String WS_STATUS_ERROR_MSG       = "Tried to subscribe to workspace status events, but got error";
     private static final String WS_AGENT_OUTPUT_ERROR_MSG = "Tried to subscribe to workspace agent output, but got error";
     private static final String ENV_STATUS_ERROR_MSG      = "Tried to subscribe to environment status events, but got error";
-    private static final String ENV_OUTPUT_ERROR_MSG      = "Tried to subscribe to environment output, but got error";
 
     protected final WorkspaceServiceClient   workspaceServiceClient;
     protected final CoreLocalizationConstant locale;
@@ -76,7 +75,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
 
     private final EventBus            eventBus;
     private final LoaderPresenter     loader;
-    private final MachineLogsRestorer machineLogsRestorer;
     private final RequestTransmitter  transmitter;
 
     protected Callback<Component, Exception> callback;
@@ -95,7 +93,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                               PreferencesManager preferencesManager,
                               DtoFactory dtoFactory,
                               LoaderPresenter loader,
-                              MachineLogsRestorer machineLogsRestorer,
                               RequestTransmitter transmitter) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.createWorkspacePresenter = createWorkspacePresenter;
@@ -110,7 +107,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         this.preferencesManager = preferencesManager;
         this.dtoFactory = dtoFactory;
         this.loader = loader;
-        this.machineLogsRestorer = machineLogsRestorer;
         this.transmitter = transmitter;
 
         this.needToReloadComponents = true;
@@ -178,11 +174,16 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         subscribe(WS_AGENT_OUTPUT_ERROR_MSG, "event:ws-agent-output:subscribe", workspaceId);
         subscribe(ENV_STATUS_ERROR_MSG, "event:environment-status:subscribe", workspaceId);
 
-        if (appContext.getActiveRuntime() != null && appContext.getDevMachine() != null) {
-            subscribe(ENV_OUTPUT_ERROR_MSG, "event:environment-output:subscribe", appContext.getDevMachine().getId());
+        if (appContext.getActiveRuntime() != null) {
+            appContext.getActiveRuntime().getMachines().forEach(machine -> {
 
-            machineLogsRestorer.restore(appContext.getDevMachine());
+                String endpointId = "ws-master";
+                String subscribeByName = "event:environment-output:subscribe-by-machine-name";
+                String workspaceIdPlusMachineName =
+                        appContext.getWorkspaceId() + "::" + machine.getDisplayName();
 
+                transmitter.transmitStringToNone(endpointId, subscribeByName, workspaceIdPlusMachineName);
+            });
         }
 
         WorkspaceStatus workspaceStatus = workspace.getStatus();
@@ -191,8 +192,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                 loader.show(CREATING_WORKSPACE_SNAPSHOT);
                 break;
             case STARTING:
-                subscribe(ENV_OUTPUT_ERROR_MSG, "event:environment-output:subscribe", appContext.getDevMachine().getId());
-
                 eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
                 break;
             case RUNNING:

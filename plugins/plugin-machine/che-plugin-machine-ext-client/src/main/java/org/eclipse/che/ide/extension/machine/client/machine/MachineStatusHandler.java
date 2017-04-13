@@ -24,6 +24,7 @@ import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.CREATING;
@@ -46,6 +47,7 @@ public class MachineStatusHandler implements MachineStatusChangedEvent.Handler {
     private final WorkspaceServiceClient      workspaceServiceClient;
     private final NotificationManager         notificationManager;
     private final MachineLocalizationConstant locale;
+    private       RequestTransmitter          transmitter;
 
     @Inject
     MachineStatusHandler(final EventBus eventBus,
@@ -53,13 +55,15 @@ public class MachineStatusHandler implements MachineStatusChangedEvent.Handler {
                          final EntityFactory entityFactory,
                          final WorkspaceServiceClient workspaceServiceClient,
                          final NotificationManager notificationManager,
-                         final MachineLocalizationConstant locale) {
+                         final MachineLocalizationConstant locale,
+                         final RequestTransmitter transmitter) {
         this.eventBus = eventBus;
         this.appContext = appContext;
         this.entityFactory = entityFactory;
         this.workspaceServiceClient = workspaceServiceClient;
         this.notificationManager = notificationManager;
         this.locale = locale;
+        this.transmitter = transmitter;
 
         eventBus.addHandler(MachineStatusChangedEvent.TYPE, this);
     }
@@ -113,7 +117,15 @@ public class MachineStatusHandler implements MachineStatusChangedEvent.Handler {
         if (machine == null) {
             return;
         }
+
         eventBus.fireEvent(new MachineStateEvent(machine, CREATING));
+
+        String endpointId = "ws-master";
+        String subscribeByName = "event:environment-output:subscribe-by-machine-name";
+        String workspaceIdPlusMachineName = appContext.getWorkspaceId() + "::" + machine.getDisplayName();
+
+        transmitter.transmitStringToNone(endpointId, subscribeByName, workspaceIdPlusMachineName);
+
     }
 
     private void handleMachineRunning(final String machineId, final WorkspaceRuntimeDto workspaceRuntime) {

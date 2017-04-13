@@ -16,6 +16,8 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
 import java.util.List;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.CodeActionParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.CommandDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionListDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
@@ -305,6 +307,14 @@ public class TextDocumentServiceClient {
         return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)position).toJson()).send(unmarshaller);
     }
+    
+	public Promise<List<CommandDTO>> codeAction(CodeActionParamsDTO params) {
+        final String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/codeAction";
+        final Unmarshallable<List<CommandDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(CommandDTO.class);
+        return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
+                           .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)params).toJson()).send(unmarshaller);
+    }
+
     /**
      * Subscribes to websocket for 'textDocument/publishDiagnostics' notifications. 
      */

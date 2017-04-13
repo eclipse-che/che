@@ -78,7 +78,6 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
                                      DtoFactory dtoFactory,
                                      LoaderPresenter loader,
                                      QueryParameters queryParameters,
-                                     MachineLogsRestorer machineLogsRestorer,
                                      RequestTransmitter requestTransmitter) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
@@ -93,7 +92,6 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
               preferencesManager,
               dtoFactory,
               loader,
-              machineLogsRestorer,
               requestTransmitter);
         this.factoryServiceClient = factoryServiceClient;
         this.queryParameters = queryParameters;

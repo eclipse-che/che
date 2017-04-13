@@ -13,7 +13,6 @@ package org.eclipse.che.api.machine.server;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.machine.server.event.MachineProcessJsonRpcMessenger;
 import org.eclipse.che.api.machine.server.event.MachineProcessMessenger;
 import org.eclipse.che.api.machine.server.event.MachineStateJsonRpcMessenger;
 import org.eclipse.che.api.machine.server.event.MachineStateMessenger;
@@ -30,7 +29,6 @@ public class MachineModule extends AbstractModule {
         bind(MachineStateMessenger.class).asEagerSingleton();
         bind(MachineStateJsonRpcMessenger.class).asEagerSingleton();
         bind(MachineProcessMessenger.class).asEagerSingleton();
-        bind(MachineProcessJsonRpcMessenger.class).asEagerSingleton();
 
         bindConstant().annotatedWith(Names.named("machine.extension.api_port")).to(Constants.WS_AGENT_PORT);
     }
