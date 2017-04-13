@@ -1,0 +1,35 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.workspace.infrastructure.docker.config.env;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
+import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.JAVA_OPTS_VARIABLE;
+
+/**
+ * Add env variable to docker dev-machine with java opts
+ *
+ * @author Roman Iuvshyn
+ */
+@Singleton
+public class JavaOptsEnvVariableProvider implements Provider<String> {
+    @Inject
+    @Named("che.workspace.java.options")
+    private String javaOpts;
+
+    @Override
+    public String get() {
+        return JAVA_OPTS_VARIABLE + '=' + javaOpts;
+    }
+}

@@ -13,19 +13,20 @@ package org.eclipse.che.workspace.infrastructure.docker.old.local;
 import com.google.common.base.Strings;
 
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.inject.CheBootstrap;
 import org.eclipse.che.workspace.infrastructure.docker.DefaultInfrastructureProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.local.ExecAgentVolumeProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.TerminalVolumeProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.WorkspaceFolderPathProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.WsAgentVolumeProvider;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
-import org.eclipse.che.workspace.infrastructure.docker.old.AgentConfigApplier;
+import org.eclipse.che.workspace.infrastructure.docker.old.agents.AgentConfigApplier;
 import org.eclipse.che.workspace.infrastructure.docker.old.config.provider.DockerExtConfBindingProvider;
-import org.eclipse.che.workspace.infrastructure.docker.old.config.provider.ExecAgentVolumeProvider;
-import org.eclipse.che.workspace.infrastructure.docker.old.config.provider.TerminalVolumeProvider;
-import org.eclipse.che.workspace.infrastructure.docker.old.config.provider.WsAgentVolumeProvider;
-import org.eclipse.che.workspace.infrastructure.docker.old.local.node.WorkspaceFolderPathProvider;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -93,18 +94,18 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         }
 
         // add bind-mount volume for projects in a workspace
-//        String projectFolderVolume;
+        String projectFolderVolume = "/tmp:" + projectFolderPath;
 //        try {
 //            projectFolderVolume = String.format("%s:%s%s",
 //                                                workspaceFolderPathProvider.getPath(internalEnv.getWorkspaceId()),
 //                                                projectFolderPath, projectsVolumeOptions);
 //        } catch (IOException e) {
-//            throw new EnvironmentException("Error occurred on resolving path to files of workspace " +
+//            throw new InfrastructureException("Error occurred on resolving path to files of workspace " +
 //                                           internalEnv.getWorkspaceId());
 //        }
         List<String> devMachineVolumes = devMachine.getVolumes();
-//        devMachineVolumes.add(SystemInfo.isWindows() ? pathEscaper.escapePath(projectFolderVolume)
-//                                                     : projectFolderVolume);
+        devMachineVolumes.add(SystemInfo.isWindows() ? pathEscaper.escapePath(projectFolderVolume)
+                                                     : projectFolderVolume);
         // add volume with ws-agent archive
         devMachineVolumes.add(wsAgentVolumeProvider.get());
         // add volume and variable to setup ws-agent configuration

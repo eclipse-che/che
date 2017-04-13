@@ -64,6 +64,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
+            <artifactId>infrastructure-docker</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
             <artifactId>ls-csharp-agent</artifactId>
         </dependency>
         <dependency>
@@ -176,8 +180,8 @@
         </dependency>
         <!--FIXME: spi-->
         <!--<dependency>-->
-            <!--<groupId>org.eclipse.che.plugin</groupId>-->
-            <!--<artifactId>che-plugin-docker-compose</artifactId>-->
+        <!--<groupId>org.eclipse.che.plugin</groupId>-->
+        <!--<artifactId>che-plugin-docker-compose</artifactId>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -197,8 +201,8 @@
         </dependency>
         <!--FIXME: spi-->
         <!--<dependency>-->
-            <!--<groupId>org.eclipse.che.plugin</groupId>-->
-            <!--<artifactId>che-plugin-machine-ext-server</artifactId>-->
+        <!--<groupId>org.eclipse.che.plugin</groupId>-->
+        <!--<artifactId>che-plugin-machine-ext-server</artifactId>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

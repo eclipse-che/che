@@ -19,8 +19,8 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategy;
-import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategyProvider;
+import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategy;
+import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyProvider;
 import org.slf4j.Logger;
 
 import java.io.IOException;

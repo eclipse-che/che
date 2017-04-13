@@ -62,9 +62,9 @@
         </dependency>
         <!-- FIXME: spi -->
         <!--<dependency>-->
-            <!--<groupId>org.eclipse.che.dashboard</groupId>-->
-            <!--<artifactId>che-dashboard-war</artifactId>-->
-            <!--<type>war</type>-->
+        <!--<groupId>org.eclipse.che.dashboard</groupId>-->
+        <!--<artifactId>che-dashboard-war</artifactId>-->
+        <!--<type>war</type>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che.docs</groupId>

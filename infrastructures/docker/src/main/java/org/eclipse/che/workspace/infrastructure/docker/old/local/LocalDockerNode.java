@@ -15,7 +15,7 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.workspace.infrastructure.docker.old.local.node.DockerNode;
-import org.eclipse.che.workspace.infrastructure.docker.old.local.node.WorkspaceFolderPathProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.WorkspaceFolderPathProvider;
 
 import javax.inject.Inject;
 import java.io.IOException;

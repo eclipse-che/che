@@ -20,8 +20,8 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.WindowsHostUtils;
-import org.eclipse.che.workspace.infrastructure.docker.old.local.node.WorkspaceFolderPathProvider;
+import org.eclipse.che.workspace.infrastructure.docker.WindowsHostUtils;
+import org.eclipse.che.workspace.infrastructure.docker.local.WorkspaceFolderPathProvider;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Named;

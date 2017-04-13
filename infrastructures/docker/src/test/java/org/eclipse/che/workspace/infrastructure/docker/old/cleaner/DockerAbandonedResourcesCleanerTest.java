@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old.cleaner;
 
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerAbandonedResourcesCleaner;
+import org.eclipse.che.workspace.infrastructure.docker.cleaner.DockerAbandonedResourcesCleaner;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 

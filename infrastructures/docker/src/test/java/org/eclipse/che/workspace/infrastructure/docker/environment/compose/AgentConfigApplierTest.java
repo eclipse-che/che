@@ -19,7 +19,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
-import org.eclipse.che.workspace.infrastructure.docker.old.AgentConfigApplier;
+import org.eclipse.che.workspace.infrastructure.docker.old.agents.AgentConfigApplier;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;

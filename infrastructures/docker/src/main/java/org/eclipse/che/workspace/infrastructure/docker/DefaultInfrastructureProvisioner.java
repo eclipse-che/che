@@ -14,7 +14,7 @@ import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.old.AgentConfigApplier;
+import org.eclipse.che.workspace.infrastructure.docker.old.agents.AgentConfigApplier;
 
 import javax.inject.Inject;
 
@@ -23,6 +23,7 @@ import javax.inject.Inject;
  *
  * @author Alexander Garagatyi
  */
+// TODO think about passing here full Agents config
 public class DefaultInfrastructureProvisioner implements InfrastructureProvisioner {
     private final AgentConfigApplier agentConfigApplier;
 

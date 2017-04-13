@@ -21,7 +21,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,11 +66,6 @@ public class EnvironmentValidator {
 
     private static final Pattern VOLUME_FROM_PATTERN =
             Pattern.compile("^(?<serviceName>" + MACHINE_NAME_REGEXP + ")(:(ro|rw))?$");
-
-    @Inject
-    public EnvironmentValidator() {
-
-    }
 
     public void validate(Environment env, DockerEnvironment dockerEnvironment) throws ValidationException,
                                                                                       InfrastructureException {

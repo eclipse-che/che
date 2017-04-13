@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.inject.CheBootstrap;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.WindowsHostUtils;
+import org.eclipse.che.workspace.infrastructure.docker.WindowsHostUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

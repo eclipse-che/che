@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import com.google.inject.ImplementedBy;
+
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 
 import java.net.MalformedURLException;
@@ -21,6 +23,7 @@ import java.net.URL;
  *
  * @author gazarenkov
  */
+@ImplementedBy(NoopUrlRewriter.class)
 public interface URLRewriter {
 
     /**

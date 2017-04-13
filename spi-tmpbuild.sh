@@ -12,7 +12,6 @@ mvn clean install \
  -pl "!:che-plugin-java-plain-ide" \
  -pl "!:che-plugin-java-ext-lang-client" \
  -pl "!:che-plugin-java-debugger-ide" \
- -pl "!:infrastructure-docker" \
  -pl "!:che-plugin-git-ext-git" \
  -pl "!:che-plugin-testing-ide" \
  -pl "!:che-plugin-testing-junit-ide" \

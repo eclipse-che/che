@@ -40,17 +40,16 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentPa
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.docker.environment.ServicesStartStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentParser;
-import org.eclipse.che.workspace.infrastructure.docker.old.AgentConfigApplier;
+import org.eclipse.che.workspace.infrastructure.docker.local.ExecAgentVolumeProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.TerminalVolumeProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.WorkspaceFolderPathProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.WsAgentVolumeProvider;
+import org.eclipse.che.workspace.infrastructure.docker.old.agents.AgentConfigApplier;
 import org.eclipse.che.workspace.infrastructure.docker.old.config.provider.DockerExtConfBindingProvider;
-import org.eclipse.che.workspace.infrastructure.docker.old.config.provider.ExecAgentVolumeProvider;
-import org.eclipse.che.workspace.infrastructure.docker.old.config.provider.TerminalVolumeProvider;
-import org.eclipse.che.workspace.infrastructure.docker.old.config.provider.WsAgentVolumeProvider;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceStopDetector;
 import org.eclipse.che.workspace.infrastructure.docker.old.local.LocalCheInfrastructureProvisioner;
-import org.eclipse.che.workspace.infrastructure.docker.old.local.node.WorkspaceFolderPathProvider;
-import org.eclipse.che.workspace.infrastructure.docker.old.strategy.LocalDockerServerEvaluationStrategy;
-import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategy;
-import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategyProvider;
+import org.eclipse.che.workspace.infrastructure.docker.strategy.LocalDockerServerEvaluationStrategy;
+import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategy;
+import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyProvider;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +61,6 @@ import org.testng.annotations.Test;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.regex.Pattern;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
@@ -129,9 +127,8 @@ public class IntegrationTest {
         agentConfigApplier = new AgentConfigApplier(agentSorter, agentRegistry);
 
         // other
-        urlRewriter = new TestURLRewriter();// TODO + module
+        urlRewriter = new TestURLRewriter();
         recipeDownloader = mock(RecipeDownloader.class);
-        Pattern recipePattern = Pattern.compile(".*");
 
         // docker runtime
         ContainerNameGenerator dockerContainerNameGenerator = new ContainerNameGenerator();
@@ -141,7 +138,7 @@ public class IntegrationTest {
         strategy = new ServicesStartStrategy();
         ServerEvaluationStrategy serverEvaluationStrategy = new LocalDockerServerEvaluationStrategy("localhost", "localhost");
         ServerEvaluationStrategyProvider strategyProvider = new ServerEvaluationStrategyProvider(singletonMap("strategy1", serverEvaluationStrategy), "strategy1");
-        normalizer = new EnvironmentNormalizer(recipeDownloader, recipePattern, dockerContainerNameGenerator, 2_000_000_000);
+        normalizer = new EnvironmentNormalizer(recipeDownloader, "http://localhost:8080/", dockerContainerNameGenerator, 2_000_000_000);
         starter = new ServiceStarter(docker,
                                      credentialsProvider,
                                      stopDetector,

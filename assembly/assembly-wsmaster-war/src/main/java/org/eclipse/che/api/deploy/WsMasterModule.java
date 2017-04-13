@@ -32,6 +32,7 @@ import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.user.server.TokenValidator;
+import org.eclipse.che.api.workspace.server.RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber;
 import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceMessageBodyAdapter;
@@ -39,6 +40,8 @@ import org.eclipse.che.api.workspace.server.spi.dummy.DummyInfrastructureModule;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
+import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
+import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 import javax.sql.DataSource;
@@ -78,8 +81,6 @@ public class WsMasterModule extends AbstractModule {
                 Multibinder.newSetBinder(binder(), FactoryParametersResolver.class);
         factoryParametersResolverMultibinder.addBinding()
                                             .to(GithubFactoryParametersResolver.class);
-// FIXME: spi
-//        install(new org.eclipse.che.plugin.docker.compose.ComposeModule());
 
         bind(org.eclipse.che.api.user.server.CheUserCreator.class);
 
@@ -217,5 +218,8 @@ public class WsMasterModule extends AbstractModule {
 
 // FIXME: spi
         install(new DummyInfrastructureModule());
+        install(new DockerInfraModule());
+        install(new LocalDockerModule());
+        bind(RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class).asEagerSingleton();
     }
 }

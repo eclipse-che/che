@@ -19,6 +19,8 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,11 +37,15 @@ public class EnvironmentNormalizer {
     private final ContainerNameGenerator containerNameGenerator;
     private final long                   defaultMachineMemorySizeBytes;
 
-    public EnvironmentNormalizer(RecipeDownloader recipeDownloader, Pattern recipeApiPattern,
+    @Inject
+    public EnvironmentNormalizer(RecipeDownloader recipeDownloader,
+                                 @Named("che.api") String apiEndpoint,
                                  ContainerNameGenerator containerNameGenerator,
-                                 long defaultMachineMemorySizeBytes) {
+                                 @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeBytes) {
         this.recipeDownloader = recipeDownloader;
-        this.recipeApiPattern = recipeApiPattern;
+        this.recipeApiPattern = Pattern.compile("(^https?" +
+                                                apiEndpoint.substring(apiEndpoint.indexOf(":")) +
+                                                "/recipe/.*$)|(^/recipe/.*$)");
         this.containerNameGenerator = containerNameGenerator;
         this.defaultMachineMemorySizeBytes = defaultMachineMemorySizeBytes;
     }

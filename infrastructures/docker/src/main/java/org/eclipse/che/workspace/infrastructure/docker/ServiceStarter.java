@@ -16,7 +16,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
@@ -53,11 +52,10 @@ import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNet
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 import org.eclipse.che.workspace.infrastructure.docker.old.DockerMachineSource;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.DockerInstanceStopDetector;
-import org.eclipse.che.workspace.infrastructure.docker.old.extra.LogMessagePrinter;
-import org.eclipse.che.workspace.infrastructure.docker.old.strategy.ServerEvaluationStrategyProvider;
+import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyProvider;
 import org.slf4j.Logger;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
 import java.io.FileWriter;
@@ -104,8 +102,8 @@ public class ServiceStarter {
     private final boolean                                       doForcePullOnBuild;
     private final boolean                                       privilegedMode;
     private final int                                           pidsLimit;
-    private final List<String>                                  devMachinePortsToExpose;
-    private final List<String>                                  commonMachinePortsToExpose;
+//    private final List<String>                                  devMachinePortsToExpose;
+//    private final List<String>                                  commonMachinePortsToExpose;
     private final List<String>                                  devMachineSystemVolumes;
     private final List<String>                                  commonMachineSystemVolumes;
     private final Map<String, String>                           devMachineEnvVariables;
@@ -122,11 +120,12 @@ public class ServiceStarter {
     private final String[]                                      dnsResolvers;
     private       ServerEvaluationStrategyProvider              serverEvaluationStrategyProvider;
 
+    @Inject
     public ServiceStarter(DockerConnector docker,
                           UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                           DockerInstanceStopDetector dockerInstanceStopDetector,
-                          @Named("machine.docker.dev_machine.machine_servers") Set<ServerConfig> devMachineServers,
-                          @Named("machine.docker.machine_servers") Set<ServerConfig> allMachinesServers,
+//                          @Named("machine.docker.dev_machine.machine_servers") Set<ServerConfig> devMachineServers,
+//                          @Named("machine.docker.machine_servers") Set<ServerConfig> allMachinesServers,
                           @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
                           @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
                           @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
@@ -195,15 +194,15 @@ public class ServiceStarter {
         devMachineVolumes.addAll(devMachineSystemVolumes);
         this.devMachineSystemVolumes = devMachineVolumes;
 
-        this.devMachinePortsToExpose = new ArrayList<>(allMachinesServers.size() + devMachineServers.size());
-        this.commonMachinePortsToExpose = new ArrayList<>(allMachinesServers.size());
-        for (ServerConfig serverConf : devMachineServers) {
-            devMachinePortsToExpose.add(serverConf.getPort());
-        }
-        for (ServerConfig serverConf : allMachinesServers) {
-            commonMachinePortsToExpose.add(serverConf.getPort());
-            devMachinePortsToExpose.add(serverConf.getPort());
-        }
+//        this.devMachinePortsToExpose = new ArrayList<>(allMachinesServers.size() + devMachineServers.size());
+//        this.commonMachinePortsToExpose = new ArrayList<>(allMachinesServers.size());
+//        for (ServerConfig serverConf : devMachineServers) {
+//            devMachinePortsToExpose.add(serverConf.getPort());
+//        }
+//        for (ServerConfig serverConf : allMachinesServers) {
+//            commonMachinePortsToExpose.add(serverConf.getPort());
+//            devMachinePortsToExpose.add(serverConf.getPort());
+//        }
 
         allMachinesEnvVariables = removeEmptyAndNullValues(allMachinesEnvVariables);
         devMachineEnvVariables = removeEmptyAndNullValues(devMachineEnvVariables);
@@ -289,12 +288,6 @@ public class ServiceStarter {
                                      container,
                                      image,
                                      serverEvaluationStrategyProvider);
-
-//            return dockerMachineFactory.createInstance(machine,
-//                                                       container,
-//                                                       image,
-//                                                       node,
-//                                                       machineLogger);
         } catch (RuntimeException | ServerException | NotFoundException | IOException e) {
             cleanUpContainer(container);
             throw new InfrastructureException(e.getLocalizedMessage(), e);
@@ -509,11 +502,11 @@ public class ServiceStarter {
     private void addSystemWideContainerSettings(String workspaceId,
 //                                                boolean isDev,
                                                 DockerService composeService) throws IOException {
-        List<String> portsToExpose;
+//        List<String> portsToExpose;
         List<String> volumes;
         Map<String, String> env;
 //        if (isDev) {
-        portsToExpose = devMachinePortsToExpose;
+//        portsToExpose = devMachinePortsToExpose;
         volumes = devMachineSystemVolumes;
 //
         env = new HashMap<>(devMachineEnvVariables);
@@ -524,7 +517,7 @@ public class ServiceStarter {
 //            env = commonMachineEnvVariables;
 //            volumes = commonMachineSystemVolumes;
 //        }
-        composeService.getExpose().addAll(portsToExpose);
+//        composeService.getExpose().addAll(portsToExpose);
         composeService.getEnvironment().putAll(env);
         composeService.getVolumes().addAll(volumes);
         composeService.getNetworks().addAll(additionalNetworks);
