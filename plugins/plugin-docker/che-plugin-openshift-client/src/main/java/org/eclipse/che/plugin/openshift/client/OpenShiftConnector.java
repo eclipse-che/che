@@ -59,6 +59,7 @@ import org.eclipse.che.plugin.docker.client.json.ImageInfo;
 import org.eclipse.che.plugin.docker.client.json.NetworkCreated;
 import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
+import org.eclipse.che.plugin.docker.client.json.Version;
 import org.eclipse.che.plugin.docker.client.json.network.ContainerInNetwork;
 import org.eclipse.che.plugin.docker.client.json.network.Ipam;
 import org.eclipse.che.plugin.docker.client.json.network.IpamConfig;
@@ -96,6 +97,9 @@ import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -131,6 +135,8 @@ import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteList;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
+import io.fabric8.openshift.client.OpenShiftConfig;
+import okhttp3.OkHttpClient;
 
 /**
  * Client for OpenShift API.
@@ -203,6 +209,22 @@ public class OpenShiftConnector extends DockerConnector {
         this.cheWorkspaceMemoryRequest = cheWorkspaceMemoryRequest;
         this.cheWorkspaceMemoryLimit = cheWorkspaceMemoryLimit;
         this.secureRoutes = secureRoutes;
+    }
+
+    @Override
+    public Version getVersion() throws IOException {
+        @SuppressWarnings("resource")
+        final OpenShiftClientExtension client = new OpenShiftClientExtension(openShiftClient.adapt(OkHttpClient.class),
+                OpenShiftConfig.wrap(openShiftClient.getConfiguration()));
+        String versionString = client.getVersion();
+        if (versionString == null || versionString.isEmpty()) {
+            return null;
+        }
+        final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        OpenShiftVersion openShiftVersion = gson.fromJson(versionString, OpenShiftVersion.class);
+        Version version = openShiftVersion.getVersion();
+        version.setApiVersion(client.getApiVersion());
+        return version;
     }
 
     /**
