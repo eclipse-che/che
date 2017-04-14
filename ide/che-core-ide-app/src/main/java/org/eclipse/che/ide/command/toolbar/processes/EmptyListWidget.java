@@ -72,7 +72,7 @@ public class EmptyListWidget extends FlowPanel {
 
 
         // initialize widget for the state when there's no command
-        final Label hintLabel = new InlineHTML(messages.guideItemLabel());
+        final Label hintLabel = new InlineHTML(messages.guideItemLabel("run"));
         hintLabel.addStyleName(resources.commandToolbarCss().processWidgetText());
         hintLabel.addStyleName(resources.commandToolbarCss().processWidgetCommandNameLabel());
         hintLabel.addClickHandler(event -> commandCreationGuide.guide());

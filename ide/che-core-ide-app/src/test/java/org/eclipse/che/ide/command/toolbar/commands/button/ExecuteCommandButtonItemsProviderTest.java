@@ -99,7 +99,7 @@ public class ExecuteCommandButtonItemsProviderTest {
     @Test
     public void shouldProvideGuideItemOnlyWhenNoCommands() throws Exception {
         GuideItem guideItem = mock(GuideItem.class);
-        when(menuItemsFactory.newGuideItem()).thenReturn(guideItem);
+        when(menuItemsFactory.newGuideItem(goal)).thenReturn(guideItem);
 
         assertThat(provider.getItems()).hasSize(1).containsOnly(guideItem);
     }

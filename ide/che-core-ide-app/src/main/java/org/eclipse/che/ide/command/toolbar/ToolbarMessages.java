@@ -20,7 +20,7 @@ import com.google.gwt.i18n.client.Messages;
 public interface ToolbarMessages extends Messages {
 
     @Key("guide.label")
-    String guideItemLabel();
+    String guideItemLabel(String goalName);
 
     @Key("goal_button.tooltip.no_command")
     String goalButtonTooltipNoCommand(String goalId);
