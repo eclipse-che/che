@@ -11,13 +11,13 @@
 'use strict';
 
 interface IUsersResource<T> extends ng.resource.IResourceClass<T> {
-  findByID: any,
-  findByAlias: any,
-  findByName: any,
-  setPassword: any,
-  createUser: any,
-  getUsers: any,
-  removeUserById: any
+  findByID(data: { userId: string }): ng.resource.IResource<T>;
+  findByAlias(data: { alias: string }): ng.resource.IResource<T>;
+  findByName(data: { name: string }): ng.resource.IResource<T>;
+  setPassword(passwordExpression: string): ng.resource.IResource<T>;
+  createUser(user: { password: string; name: string; email?: string }): ng.resource.IResource<T>;
+  getUsers(data: { maxItems: number; skipCount: number }): ng.resource.IResource<T>;
+  removeUserById(data: { userId: string }): ng.resource.IResource<T>;
 }
 
 /**
@@ -92,10 +92,10 @@ export class CheUser {
     // page users by relative link
     this.userPagesMap = new Map();
 
-    //pages info
+    // pages info
     this.pageInfo = {};
 
-    //Current user has to be for sure fetched:
+    // current user has to be for sure fetched:
     this.fetchUser();
   }
 
@@ -107,31 +107,20 @@ export class CheUser {
    * @returns {*}
    */
   createUser(name: string, email: string, password: string): ng.IPromise<any> {
-    let data: {
-      password: string;
-      name: string;
-      email?: string;
-    };
-
-    data = {
-      password: password,
-      name: name
-    };
-
+    let data: { password: string; name: string; email?: string; } = {password: password, name: name};
     if (email) {
       data.email = email;
     }
 
     let promise = this.remoteUserAPI.createUser(data).$promise;
 
-    // check if was OK or not
-    promise.then((user: che.IUser) => {
-      //update users map
-      this.usersMap.set(user.id, user);//add user
-
+    return promise.then((user: che.IUser) => {
+      // update users map
+      this.usersMap.set(user.id, user);
+      return user;
+    }, (error: any) => {
+      return this.$q.reject(error);
     });
-
-    return promise;
   }
 
   _getPageFromResponse(data: any, headersLink: string): any {
@@ -141,8 +130,10 @@ export class CheUser {
     }
     let pattern = new RegExp('<([^>]+?)>.+?rel="([^"]+?)"', 'g');
     let result;
-    while (result = pattern.exec(headersLink)) { //look for pattern
-      links.set(result[2], result[1]);//add link
+    // look for pattern
+    while (result = pattern.exec(headersLink)) {
+      // add link
+      links.set(result[2], result[1]);
     }
     return {
       users: data,
@@ -179,7 +170,8 @@ export class CheUser {
       return;
     }
     pageData.users.forEach((user: che.IUser) => {
-      this.usersMap.set(user.id, user);//add user
+      // add user
+      this.usersMap.set(user.id, user);
     });
   }
 
@@ -189,7 +181,8 @@ export class CheUser {
       return;
     }
     users.forEach((user: che.IUser) => {
-      this.usersMap.set(user.id, user);//add user
+      // add user
+      this.usersMap.set(user.id, user);
     });
   }
 
@@ -259,22 +252,26 @@ export class CheUser {
   fetchUsers(maxItems: number, skipCount: number): ng.IPromise<any> {
     let promise = this.remoteUserAPI.getUsers({maxItems: maxItems, skipCount: skipCount}).$promise;
 
-    promise.then((data) => {
+    return promise.then((data: any) => {
       this.pageInfo.currentPageNumber = skipCount / maxItems + 1;
       this._updateCurrentPageUsers(data.users);
       this._updatePagesData(data);
+      return this.$q.when();
+    }, (error: any) => {
+      if (error && error.status === 304) {
+        return this.$q.when();
+      }
+      return this.$q.reject(error);
     });
-
-    return promise;
   }
 
   /**
    * Ask for loading the users page in asynchronous way
    * If there are no changes, it's not updated
-   * @param pageKey - the key of page ('first', 'prev', 'next', 'last'  or '1', '2', '3' ...)
-   * @returns {*} the promise
+   * @param pageKey {string} - the key of page ('first', 'prev', 'next', 'last'  or '1', '2', '3' ...)
+   * @returns {ng.IPromise<any>} the promise
    */
-  fetchUsersPage(pageKey): ng.IPromise<any> {
+  fetchUsersPage(pageKey: string): ng.IPromise<any> {
     let deferred = this.$q.defer();
     let pageNumber;
     if ('first' === pageKey) {
@@ -297,12 +294,12 @@ export class CheUser {
     if (pageData.link) {
       this.pageInfo.currentPageNumber = pageNumber;
       let promise = this.remoteUserAPI.getUsers(this._getPageParamByLink(pageData.link)).$promise;
-      promise.then((data) => {
+      promise.then((data: any) => {
         this._updatePagesData(data);
         pageData.users = data.users;
         this._updateCurrentPage();
         deferred.resolve(data);
-      }, (error) => {
+      }, (error: any) => {
         if (error && error.status === 304) {
           this._updateCurrentPage();
         }
@@ -324,16 +321,16 @@ export class CheUser {
 
   /**
    * Performs user deleting by the given user ID.
-   * @param userId the user id
-   * @returns {*} the promise
+   * @param userId {string} the user id
+   * @returns {ng.IPromise<any>} the promise
    */
   deleteUserById(userId: string): ng.IPromise<any> {
     let promise = this.remoteUserAPI.removeUserById({userId: userId}).$promise;
 
     // check if was OK or not
     promise.then(() => {
-      //update users map
-      this.usersMap.delete(userId);//remove user
+      // update users map
+      this.usersMap.delete(userId);
     });
 
     return promise;
@@ -341,7 +338,7 @@ export class CheUser {
 
   /**
    * Performs current user deletion.
-   * @returns {*} the promise
+   * @returns {ng.IPromise<any>} the promise
    */
   deleteCurrentUser(): ng.IPromise<any> {
     let userId = this.user.id;
@@ -351,7 +348,7 @@ export class CheUser {
 
   /**
    * Performs logout of current user.
-   * @returns {y.ResourceClass.prototype.$promise|*|$promise|T.$promise|S.$promise}
+   * @returns {ng.IPromise<any>}
    */
   logout(): ng.IPromise<any> {
     let data = {token: this.$cookies['session-access-key']};
@@ -361,14 +358,15 @@ export class CheUser {
 
   /**
    * Gets the user
-   * @return user
+   * @return user {che.IUser}
    */
-  getUser(): any {
+  getUser(): che.IUser {
     return this.user;
   }
 
   /**
    * Fetch the user
+   * @returns {ng.IPromise<any>}
    */
   fetchUser(): ng.IPromise<any> {
     let promise = this.remoteUserAPI.get().$promise;
@@ -386,11 +384,16 @@ export class CheUser {
 
   fetchUserId(userId: string): ng.IPromise<any> {
     let promise = this.remoteUserAPI.findByID({userId: userId}).$promise;
-    let parsedResultPromise = promise.then((user: che.IUser) => {
-      this.useridMap.set(userId, user);
-    });
 
-    return parsedResultPromise;
+    return promise.then((user: che.IUser) => {
+      this.useridMap.set(userId, user);
+      return user;
+    }, (error: any) => {
+      if (error && error.status === 304) {
+        return this.useridMap.get(userId);
+      }
+      return this.$q.reject(error);
+    });
   }
 
   getUserFromId(userId: string): any {
@@ -399,12 +402,17 @@ export class CheUser {
 
   fetchUserByAlias(alias: string): ng.IPromise<any> {
     let promise = this.remoteUserAPI.findByAlias({alias: alias}).$promise;
-    let parsedResultPromise = promise.then((user: che.IUser) => {
+
+    return  promise.then((user: che.IUser) => {
       this.useridMap.set(user.id, user);
       this.userAliasMap.set(alias, user);
+      return user;
+    }, (error: any) => {
+      if (error && error.status === 304) {
+        return this.userAliasMap.get(alias);
+      }
+      return this.$q.reject(error);
     });
-
-    return parsedResultPromise;
   }
 
   getUserByAlias(userAlias: string): any {
@@ -426,11 +434,11 @@ export class CheUser {
     return resultPromise;
   }
 
-  getUserByName(name: string): any {
+  getUserByName(name: string): che.IUser {
     return this.userNameMap.get(name);
   }
 
-  setPassword(password: any): ng.IPromise<any> {
+  setPassword(password: string): ng.IPromise<any> {
     return this.remoteUserAPI.setPassword('password=' + password).$promise;
   }
 }

@@ -27,8 +27,8 @@ import org.eclipse.che.ide.command.palette.CommandsPalettePresenter;
 import org.eclipse.che.ide.command.palette.PaletteMessages;
 import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
 import org.eclipse.che.ide.ui.Tooltip;
-import org.eclipse.che.ide.ui.menubutton.MenuButton;
 import org.eclipse.che.ide.ui.menubutton.ItemsProvider;
+import org.eclipse.che.ide.ui.menubutton.MenuButton;
 import org.eclipse.che.ide.ui.menubutton.MenuItem;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.dom.Elements;
@@ -38,6 +38,7 @@ import org.eclipse.che.ide.util.input.KeyMapUtil;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
@@ -62,7 +63,7 @@ class OpenCommandsPaletteButton extends MenuButton {
 
             @Override
             public List<MenuItem> getItems() {
-                return null;
+                return emptyList();
             }
 
             @Override

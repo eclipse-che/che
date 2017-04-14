@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,13 +28,13 @@ import javax.inject.Inject;
 
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
-import org.eclipse.che.api.testing.shared.Failure;
+import org.eclipse.che.api.testing.server.listener.AbstractTestListener;
+import org.eclipse.che.api.testing.server.listener.OutputTestListener;
+import org.eclipse.che.api.testing.shared.TestCase;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.testing.classpath.server.TestClasspathProvider;
 import org.eclipse.che.plugin.testing.classpath.server.TestClasspathRegistry;
-import org.eclipse.che.plugin.testing.junit.server.listener.AbstractTestListener;
-import org.eclipse.che.plugin.testing.junit.server.listener.OutputTestListener;
 
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
@@ -86,7 +87,8 @@ public class JUnitTestRunner implements TestRunner {
 
         ClassLoader currentClassLoader = this.getClass().getClassLoader();
         TestClasspathProvider classpathProvider = classpathRegistry.getTestClasspathProvider(projectType);
-        URLClassLoader providedClassLoader = (URLClassLoader)classpathProvider.getClassLoader(projectAbsolutePath, projectPath, updateClasspath);
+        URLClassLoader providedClassLoader = (URLClassLoader)classpathProvider.getClassLoader(projectAbsolutePath, projectPath,
+                                                                                              updateClasspath);
         projectClassLoader = new URLClassLoader(providedClassLoader.getURLs(), null) {
             @Override
             protected Class< ? > findClass(String name) throws ClassNotFoundException {
@@ -132,6 +134,7 @@ public class JUnitTestRunner implements TestRunner {
             } else {
                 testResult = useJUnitV3API ? runAll3x(projectAbsolutePath) : runAll4x(projectAbsolutePath);
             }
+            testResult.setProjectPath(projectPath);
             return testResult;
         } finally {
             System.setProperty("user.dir", currentWorkingDir);
@@ -184,7 +187,10 @@ public class JUnitTestRunner implements TestRunner {
         return false;
     }
 
-    private Object create4xTestListener(ClassLoader loader, Class< ? > listenerClass, AbstractTestListener delegate) throws Exception {
+    private Object create4xTestListener(ClassLoader loader,
+                                        Class< ? > listenerClass,
+                                        List<Object> allTests,
+                                        AbstractTestListener delegate) throws Exception {
         ProxyFactory f = new ProxyFactory();
         f.setSuperclass(listenerClass);
         f.setFilter(new MethodFilter() {
@@ -229,6 +235,7 @@ public class JUnitTestRunner implements TestRunner {
                 switch (methodName) {
                     case "testStarted":
                         delegate.startTest(testKey, testName);
+                        allTests.add(description);
                         break;
 
                     case "testFinished":
@@ -254,6 +261,8 @@ public class JUnitTestRunner implements TestRunner {
     private TestResult run4xTestClasses(Class< ? >... classes) throws Exception {
         ClassLoader classLoader = projectClassLoader;
         Class< ? > clsJUnitCore = Class.forName("org.junit.runner.JUnitCore", true, classLoader);
+        Class< ? > clsRequest = Class.forName("org.junit.runner.Request", true, classLoader);
+        Class< ? > clsRunner = Class.forName("org.junit.runner.Runner", true, classLoader);
         Class< ? > clsResult = Class.forName("org.junit.runner.Result", true, classLoader);
         Class< ? > clsFailure = Class.forName("org.junit.runner.notification.Failure", true, classLoader);
         Class< ? > clsDescription = Class.forName("org.junit.runner.Description", true, classLoader);
@@ -263,13 +272,18 @@ public class JUnitTestRunner implements TestRunner {
         Object jUnitCore = clsJUnitCore.getConstructor().newInstance();
 
         Object result;
+
+        List<Object> allRunTests = new ArrayList<Object>();
         try (OutputTestListener outputListener = new OutputTestListener(this.getClass().getName() + ".run4xTestClasses")) {
-            Object testListener = create4xTestListener(classLoader, clsTestRunner, outputListener);
+            Object testListener = create4xTestListener(classLoader, clsTestRunner, allRunTests, outputListener);
             ClassLoader tccl = Thread.currentThread().getContextClassLoader();
             try {
                 Thread.currentThread().setContextClassLoader(projectClassLoader);
                 clsJUnitCore.getMethod("addListener", clsTestRunner).invoke(jUnitCore, testListener);
-                result = clsJUnitCore.getMethod("run", Class[].class).invoke(jUnitCore, new Object[]{classes});
+                Object request = clsRequest.getMethod("classes", Class[].class).invoke(null, new Object[]{classes});
+                Object runner = clsRequest.getMethod("getRunner").invoke(request);
+                Object suiteDescription = clsRunner.getMethod("getDescription").invoke(runner);
+                result = clsJUnitCore.getMethod("run", clsRequest).invoke(jUnitCore, request);
             } finally {
                 Thread.currentThread().setContextClassLoader(tccl);
                 clsJUnitCore.getMethod("removeListener", clsTestRunner).invoke(jUnitCore, testListener);
@@ -278,41 +292,64 @@ public class JUnitTestRunner implements TestRunner {
 
         TestResult dtoResult = DtoFactory.getInstance().createDto(TestResult.class);
         boolean isSuccess = (Boolean)clsResult.getMethod("wasSuccessful").invoke(result);
+
+        Map<String, TestCase> testCases = new HashMap<>();
+
+        for (Object testDescription : allRunTests) {
+            String testKey = (String)clsDescription.getMethod("getDisplayName").invoke(testDescription);
+            TestCase dtoTestCase = DtoFactory.getInstance().createDto(TestCase.class);
+            String className = (String)clsDescription.getMethod("getClassName").invoke(testDescription);
+            String methodName = (String)clsDescription.getMethod("getMethodName").invoke(testDescription);
+            dtoTestCase.setClassName(className);
+            dtoTestCase.setMethod(methodName);
+            dtoTestCase.setFailingLine(-1);
+            dtoTestCase.setMessage("");
+            dtoTestCase.setTrace("");
+            testCases.put(testKey, dtoTestCase);
+        }
+
         List< ? > failures = (List< ? >)clsResult.getMethod("getFailures").invoke(result);
-        List<Failure> jUnitFailures = new ArrayList<>();
         for (Object failure : failures) {
-            Failure dtoFailure = DtoFactory.getInstance().createDto(Failure.class);
-            String message = (String)clsFailure.getMethod("getMessage").invoke(failure);
+            TestCase dtoFailure = DtoFactory.getInstance().createDto(TestCase.class);
             Object description = clsFailure.getMethod("getDescription").invoke(failure);
-            String failClassName = (String)clsDescription.getMethod("getClassName").invoke(description);
+            String testKey = (String)clsDescription.getMethod("getDisplayName").invoke(description);
+
+            String className = (String)clsDescription.getMethod("getClassName").invoke(description);
+            String methodName = (String)clsDescription.getMethod("getMethodName").invoke(description);
+
+            String message = (String)clsFailure.getMethod("getMessage").invoke(failure);
             Object exception = clsFailure.getMethod("getException").invoke(failure);
             Object stackTrace = clsThrowable.getMethod("getStackTrace").invoke(exception);
-            String failMethod = "";
             Integer failLine = null;
             if (stackTrace.getClass().isArray()) {
                 int length = Array.getLength(stackTrace);
                 for (int i = 0; i < length; i++) {
                     Object stackElement = Array.get(stackTrace, i);
                     String failClass = (String)clsStackTraceElement.getMethod("getClassName").invoke(stackElement);
-                    if (failClass.equals(failClassName)) {
-                        failMethod = (String)clsStackTraceElement.getMethod("getMethodName").invoke(stackElement);
+                    String failMethod = (String)clsStackTraceElement.getMethod("getMethodName").invoke(stackElement);
+                    if (failClass.equals(className) && failMethod.equals(methodName)) {
                         failLine = (Integer)clsStackTraceElement.getMethod("getLineNumber").invoke(stackElement);
                         break;
                     }
                 }
             }
             String trace = (String)clsFailure.getMethod("getTrace").invoke(failure);
-            dtoFailure.setFailingClass(failClassName);
-            dtoFailure.setFailingMethod(failMethod);
-            dtoFailure.setFailingLine(failLine);
+            dtoFailure.setClassName(className);
+            dtoFailure.setMethod(methodName);
+            dtoFailure.setFailed(true);
+            dtoFailure.setFailingLine(failLine == null ? -1 : failLine);
             dtoFailure.setMessage(message);
             dtoFailure.setTrace(trace);
-            jUnitFailures.add(dtoFailure);
+            testCases.put(testKey, dtoFailure);
         }
+
         dtoResult.setTestFramework("JUnit4x");
         dtoResult.setSuccess(isSuccess);
-        dtoResult.setFailureCount(jUnitFailures.size());
-        dtoResult.setFailures(jUnitFailures);
+        dtoResult.setFailureCount(failures.size());
+        dtoResult.setTestCaseCount(testCases.size());
+        List<TestCase> testList = new ArrayList<>(testCases.size());
+        testList.addAll(testCases.values());
+        dtoResult.setTestCases(testList);
         return dtoResult;
     }
 
@@ -349,7 +386,10 @@ public class JUnitTestRunner implements TestRunner {
         return superClass.isAssignableFrom(clazz);
     }
 
-    private Object create3xTestListener(ClassLoader loader, Class< ? > listenerClass, AbstractTestListener delegate) throws Exception {
+    private Object create3xTestListener(ClassLoader loader,
+                                        Class< ? > listenerClass,
+                                        List<Object> allRunTests,
+                                        AbstractTestListener delegate) throws Exception {
         ProxyFactory f = new ProxyFactory();
         f.setSuperclass(Object.class);
         f.setInterfaces(new Class< ? >[]{listenerClass});
@@ -369,9 +409,16 @@ public class JUnitTestRunner implements TestRunner {
         });
         Class< ? > c = f.createClass();
         MethodHandler mi = new MethodHandler() {
+            @Override
             public Object invoke(Object self, Method method, Method proceed, Object[] args) throws Throwable {
-                String testKey = args[0].getClass().toString();
-                String testName = args[0].getClass().getName();
+                Object testCaseObject = args[0];
+                allRunTests.add(testCaseObject);
+                Class< ? > testCaseClass = testCaseObject.getClass();
+                String testClassName = testCaseClass.getName();
+                String testMethodName = (String)testCaseClass.getMethod("getName").invoke(testCaseObject);
+
+                String testKey = testMethodName + "(" + testClassName + ")";
+                String testName = testKey;
                 String methodName = method.getName();
                 switch (methodName) {
                     case "startTest":
@@ -401,6 +448,7 @@ public class JUnitTestRunner implements TestRunner {
     private TestResult run3xTestClasses(Class< ? >... classes) throws Exception {
         ClassLoader classLoader = projectClassLoader;
         Class< ? > clsTestSuite = Class.forName("junit.framework.TestSuite", true, classLoader);
+        Class< ? > clsTestCase = Class.forName("junit.framework.TestCase", true, classLoader);
         Class< ? > clsTestResult = Class.forName("junit.framework.TestResult", true, classLoader);
         Class< ? > clsThrowable = Class.forName("java.lang.Throwable", true, classLoader);
         Class< ? > clsStackTraceElement = Class.forName("java.lang.StackTraceElement", true, classLoader);
@@ -409,8 +457,10 @@ public class JUnitTestRunner implements TestRunner {
         Object testResult = clsTestResult.getConstructor().newInstance();
         Class< ? > clsTestListener = Class.forName("junit.framework.TestListener", true, classLoader);
 
+        List<Object> allRunTests = new ArrayList<>();
+
         try (OutputTestListener outputListener = new OutputTestListener(this.getClass().getName() + ".run3xTestClasses")) {
-            Object testListener = create3xTestListener(classLoader, clsTestListener, outputListener);
+            Object testListener = create3xTestListener(classLoader, clsTestListener, allRunTests, outputListener);
             ClassLoader tccl = Thread.currentThread().getContextClassLoader();
             try {
                 Thread.currentThread().setContextClassLoader(projectClassLoader);
@@ -426,44 +476,70 @@ public class JUnitTestRunner implements TestRunner {
                                                                                   testResult, testListener);
             }
         }
-        TestResult dtoResult = DtoFactory.getInstance().createDto(TestResult.class);
+
         boolean isSuccess = (Boolean)clsTestResult.getMethod("wasSuccessful").invoke(testResult);
+
+        Map<String, TestCase> testCases = new HashMap<>();
+
+        TestResult dtoResult = DtoFactory.getInstance().createDto(TestResult.class);
         Enumeration< ? > failures = (Enumeration< ? >)clsTestResult.getMethod("failures").invoke(testResult);
-        List<Failure> jUnitFailures = new ArrayList<>();
+
+        for (Object testDescription : allRunTests) {
+            String className = testDescription.getClass().getName();
+            String methodName = (String)clsTestCase.getMethod("getName").invoke(testDescription);
+            String testKey = methodName + "(" + className + ")";
+            TestCase dtoTestCase = DtoFactory.getInstance().createDto(TestCase.class);
+            dtoTestCase.setClassName(className);
+            dtoTestCase.setMethod(methodName);
+            dtoTestCase.setFailingLine(-1);
+            dtoTestCase.setMessage("");
+            dtoTestCase.setTrace("");
+            testCases.put(testKey, dtoTestCase);
+        }
+
+        int failureCount = 0;
         while (failures.hasMoreElements()) {
-            Failure dtoFailure = DtoFactory.getInstance().createDto(Failure.class);
+            failureCount++;
+            TestCase dtoTestCase = DtoFactory.getInstance().createDto(TestCase.class);
             Object failure = failures.nextElement();
+            Object failClassObject = clsFailure.getMethod("failedTest").invoke(failure);
+            String className = failClassObject.getClass().getName();
+            String methodName = (String)clsTestCase.getMethod("getName").invoke(failClassObject);
+            String testFailureKey = methodName + "(" + className + ")";
+
             String message = (String)clsFailure.getMethod("exceptionMessage").invoke(failure);
             String trace = (String)clsFailure.getMethod("trace").invoke(failure);
-            Object failClassObject = clsFailure.getMethod("failedTest").invoke(failure);
-            String failClassName = failClassObject.getClass().getName();
             Object exception = clsFailure.getMethod("thrownException").invoke(failure);
             Object stackTrace = clsThrowable.getMethod("getStackTrace").invoke(exception);
-            String failMethod = "";
             Integer failLine = null;
             if (stackTrace.getClass().isArray()) {
                 int length = Array.getLength(stackTrace);
                 for (int i = 0; i < length; i++) {
                     Object arrayElement = Array.get(stackTrace, i);
                     String failClass = (String)clsStackTraceElement.getMethod("getClassName").invoke(arrayElement);
-                    if (failClass.equals(failClassName)) {
-                        failMethod = (String)clsStackTraceElement.getMethod("getMethodName").invoke(arrayElement);
+                    String failMethod = (String)clsStackTraceElement.getMethod("getMethodName").invoke(arrayElement);
+                    if (failClass.equals(className) && failMethod.equals(methodName)) {
                         failLine = (Integer)clsStackTraceElement.getMethod("getLineNumber").invoke(arrayElement);
                         break;
                     }
                 }
             }
-            dtoFailure.setFailingClass(failClassName);
-            dtoFailure.setFailingMethod(failMethod);
-            dtoFailure.setFailingLine(failLine);
-            dtoFailure.setMessage(message);
-            dtoFailure.setTrace(trace);
-            jUnitFailures.add(dtoFailure);
+            dtoTestCase.setClassName(className);
+            dtoTestCase.setMethod(methodName);
+            dtoTestCase.setFailed(true);
+            dtoTestCase.setFailingLine(failLine == null ? -1 : failLine);
+            dtoTestCase.setMessage(message);
+            dtoTestCase.setTrace(trace);
+            testCases.put(testFailureKey, dtoTestCase);
         }
+
         dtoResult.setTestFramework("JUnit3x");
         dtoResult.setSuccess(isSuccess);
-        dtoResult.setFailureCount(jUnitFailures.size());
-        dtoResult.setFailures(jUnitFailures);
+        dtoResult.setFailureCount(failureCount);
+        dtoResult.setTestCaseCount(testCases.size());
+        List<TestCase> testList = new ArrayList<>(testCases.size());
+        testList.addAll(testCases.values());
+        dtoResult.setTestCases(testList);
         return dtoResult;
     }
 }

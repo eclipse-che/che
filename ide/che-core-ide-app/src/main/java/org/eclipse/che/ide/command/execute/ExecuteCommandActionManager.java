@@ -13,14 +13,17 @@ package org.eclipse.che.ide.command.execute;
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
+import org.eclipse.che.ide.api.command.CommandAddedEvent;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
+import org.eclipse.che.ide.api.command.CommandRemovedEvent;
+import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 
 import java.util.HashMap;
@@ -36,7 +39,7 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
  * related {@link ExecuteCommandAction}s in the context menus.
  */
 @Singleton
-public class ExecuteCommandActionManager implements WsAgentComponent, CommandChangedListener {
+public class ExecuteCommandActionManager implements WsAgentComponent {
 
     private static final String COMMANDS_ACTION_GROUP_ID_PREFIX = "commandsActionGroup";
     private static final String COMMAND_ACTION_ID_PREFIX        = "command_";
@@ -48,6 +51,7 @@ public class ExecuteCommandActionManager implements WsAgentComponent, CommandCha
     private final GoalPopUpGroupFactory       goalPopUpGroupFactory;
     private final ExecuteCommandActionFactory commandActionFactory;
     private final CommandGoalRegistry         goalRegistry;
+    private final EventBus                    eventBus;
 
     /** Map of command's name to an appropriate {@link ExecuteCommandAction}. */
     private final Map<String, Action>             commandActions;
@@ -60,13 +64,15 @@ public class ExecuteCommandActionManager implements WsAgentComponent, CommandCha
                                        CommandsActionGroup commandsActionGroup,
                                        GoalPopUpGroupFactory goalPopUpGroupFactory,
                                        ExecuteCommandActionFactory commandActionFactory,
-                                       CommandGoalRegistry goalRegistry) {
+                                       CommandGoalRegistry goalRegistry,
+                                       EventBus eventBus) {
         this.commandManager = commandManager;
         this.actionManager = actionManager;
         this.commandsActionGroup = commandsActionGroup;
         this.goalPopUpGroupFactory = goalPopUpGroupFactory;
         this.commandActionFactory = commandActionFactory;
         this.goalRegistry = goalRegistry;
+        this.eventBus = eventBus;
 
         commandActions = new HashMap<>();
         goalPopUpGroups = new HashMap<>();
@@ -76,7 +82,12 @@ public class ExecuteCommandActionManager implements WsAgentComponent, CommandCha
     public void start(Callback<WsAgentComponent, Exception> callback) {
         callback.onSuccess(this);
 
-        commandManager.addCommandChangedListener(this);
+        eventBus.addHandler(CommandAddedEvent.getType(), e -> addAction(e.getCommand()));
+        eventBus.addHandler(CommandRemovedEvent.getType(), e -> removeAction(e.getCommand()));
+        eventBus.addHandler(CommandUpdatedEvent.getType(), e -> {
+            removeAction(e.getInitialCommand());
+            addAction(e.getUpdatedCommand());
+        });
 
         actionManager.registerAction(COMMANDS_ACTION_GROUP_ID_PREFIX, commandsActionGroup);
 
@@ -86,11 +97,6 @@ public class ExecuteCommandActionManager implements WsAgentComponent, CommandCha
         ((DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU)).add(commandsActionGroup);
 
         commandManager.getCommands().forEach(this::addAction);
-    }
-
-    @Override
-    public void onCommandAdded(CommandImpl command) {
-        addAction(command);
     }
 
     /**
@@ -129,17 +135,6 @@ public class ExecuteCommandActionManager implements WsAgentComponent, CommandCha
         }
 
         return commandGoalPopUpGroup;
-    }
-
-    @Override
-    public void onCommandUpdated(CommandImpl previousCommand, CommandImpl command) {
-        removeAction(previousCommand);
-        addAction(command);
-    }
-
-    @Override
-    public void onCommandRemoved(CommandImpl command) {
-        removeAction(command);
     }
 
     /**

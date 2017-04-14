@@ -16,6 +16,7 @@ import {UniqueWorkspaceNameValidator} from './unique-workspace-name-validator.di
 import {CustomValidator} from './custom-validator.directive';
 import {UniqueStackNameValidator} from './unique-stack-name-validator.directive';
 import {CityNameValidator} from './city-name-validator.directive';
+import {CustomAsyncValidator} from './custom-async-validator.directive';
 
 
 export class ValidatorConfig {
@@ -27,6 +28,7 @@ export class ValidatorConfig {
       .directive('uniqueProjectName', UniqueProjectNameValidator)
       .directive('uniqueWorkspaceName', UniqueWorkspaceNameValidator)
       .directive('customValidator', CustomValidator)
+      .directive('customAsyncValidator', CustomAsyncValidator)
       .directive('uniqueStackName', UniqueStackNameValidator);
   }
 }

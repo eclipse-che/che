@@ -360,6 +360,7 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
             }
         }
 
+        // restore perspective's active part
         if (state.hasKey("ACTIVE_PART")) {
             String activePart = state.getString("ACTIVE_PART");
             Provider<PartPresenter> provider = dynaProvider.getProvider(activePart);
@@ -384,6 +385,15 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
                         }
                     }
                 }
+            }
+        }
+
+        // restore part stack's active part
+        if (partStackJSON.hasKey("ACTIVE_PART")) {
+            String activePart = partStackJSON.getString("ACTIVE_PART");
+            Provider<PartPresenter> provider = dynaProvider.getProvider(activePart);
+            if (provider != null) {
+                partStack.setActivePart(provider.get());
             }
         }
 

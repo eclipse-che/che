@@ -43,7 +43,7 @@ public class DiagnosticAnnotation extends Annotation {
     private static JsElement fgErrorElement   = new SVGImage(RESOURCES.markError()).getElement().cast();
 
     private DiagnosticDTO diagnostic;
-    private Element imageElement = null;
+    private Element       imageElement = null;
 
     public DiagnosticAnnotation(DiagnosticDTO diagnostic) {
 
@@ -55,28 +55,32 @@ public class DiagnosticAnnotation extends Annotation {
             setType(ERROR_ANNOTATION_TYPE);
         } else {
             switch (severity) {
-                case Error:
-                    layer = ERROR_LAYER;
-                    setType(ERROR_ANNOTATION_TYPE);
-                    break;
-                case Warning:
-                    layer = WARNING_LAYER;
-                    setType(WARNING_ANNOTATION_TYPE);
-                    break;
-                case Information:
-                    layer = INFO_LAYER;
-                    setType(INFO_ANNOTATION_TYPE);
-                    break;
-                case Hint:
-                    layer = HINT_LAYER;
-                    setType(HINT_ANNOTATION_TYPE);
-                    break;
-                default:
-                    layer = ERROR_LAYER;
-                    setType(ERROR_ANNOTATION_TYPE);
-                    break;
+            case Error:
+                layer = ERROR_LAYER;
+                setType(ERROR_ANNOTATION_TYPE);
+                break;
+            case Warning:
+                layer = WARNING_LAYER;
+                setType(WARNING_ANNOTATION_TYPE);
+                break;
+            case Information:
+                layer = INFO_LAYER;
+                setType(INFO_ANNOTATION_TYPE);
+                break;
+            case Hint:
+                layer = HINT_LAYER;
+                setType(HINT_ANNOTATION_TYPE);
+                break;
+            default:
+                layer = ERROR_LAYER;
+                setType(ERROR_ANNOTATION_TYPE);
+                break;
             }
         }
+    }
+
+    public DiagnosticDTO getDiagnostic() {
+        return diagnostic;
     }
 
     @Override
@@ -84,9 +88,7 @@ public class DiagnosticAnnotation extends Annotation {
         return diagnostic.getMessage();
     }
 
-
     private void initializeImage() {
-
         imageElement = Elements.createDivElement();
         imageElement.setClassName(RESOURCES.css().markElement());
 
@@ -99,16 +101,16 @@ public class DiagnosticAnnotation extends Annotation {
     private Element getSelectedImageElement() {
         final String type = getType();
         switch (type) {
-            case HINT_ANNOTATION_TYPE:
-                return fgTaskElement;
-            case INFO_ANNOTATION_TYPE:
-                return fgInfoElement;
-            case WARNING_ANNOTATION_TYPE:
-                return fgWarningElement;
-            case ERROR_ANNOTATION_TYPE:
-                return fgErrorElement;
-            default:
-                return null;
+        case HINT_ANNOTATION_TYPE:
+            return fgTaskElement;
+        case INFO_ANNOTATION_TYPE:
+            return fgInfoElement;
+        case WARNING_ANNOTATION_TYPE:
+            return fgWarningElement;
+        case ERROR_ANNOTATION_TYPE:
+            return fgErrorElement;
+        default:
+            return null;
         }
     }
 

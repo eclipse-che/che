@@ -22,5 +22,5 @@ public interface TestClassNavigation {
      * @param packagePath
      * @param line
      */
-    void gotoClass(String packagePath, int line);
+    void gotoClass(String packagePath, String className, String methodName, int line);
 }

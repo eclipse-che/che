@@ -27,6 +27,7 @@ import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
+import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
+
+import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY_SYNONYMS;
 
 /**
  * Docker implementation of {@link InstanceProvider}
@@ -70,13 +73,18 @@ public class DockerInstanceProvider implements InstanceProvider {
      */
     public static final String MACHINE_SNAPSHOT_PREFIX = "machine_snapshot_";
 
+    public static final String DOCKER_HUB_BASE_URI = "index.docker.io";
+
     private final DockerConnector                               docker;
+    private final DockerRegistryAuthResolver                    authResolver;
     private final boolean                                       snapshotUseRegistry;
 
     @Inject
     public DockerInstanceProvider(DockerConnectorProvider dockerProvider,
+                                  DockerRegistryAuthResolver authResolver,
                                   @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) throws IOException {
         this.docker = dockerProvider.get();
+        this.authResolver = authResolver;
         this.snapshotUseRegistry = snapshotUseRegistry;
     }
 
@@ -147,21 +155,77 @@ public class DockerInstanceProvider implements InstanceProvider {
             LOG.error("Failed to remove instance snapshot: invalid machine source: {}", dockerMachineSource);
             throw new SnapshotException("Snapshot removing failed. Snapshot attributes are not valid");
         }
-        final String registry = (dockerMachineSource.getRegistry() == null) ? "index.docker.io" : dockerMachineSource.getRegistry();
 
+        if (DEFAULT_REGISTRY_SYNONYMS.contains(dockerMachineSource.getRegistry())) {
+            removeSnapshotFromDockerHub(repository);
+        } else {
+            removeSnapshotFromRegistry(dockerMachineSource);
+        }
+    }
+
+    /**
+     * Removes image from unsecured docker registry.
+     * This method removes only manifests from registry, but no blobs.
+     * To free disk space it is required to use garbage collection,
+     * see <a href="https://docs.docker.com/registry/garbage-collection/#how-garbage-collection-works">here</a>
+     *
+     * @param dockerMachineSource
+     *         contains information about snapshot that should be removed
+     * @throws SnapshotException
+     *         when an error occurs while deleting snapshot
+     */
+    private void removeSnapshotFromRegistry(final DockerMachineSource dockerMachineSource) throws SnapshotException {
         try {
-            URL url = UriBuilder.fromUri("http://" + registry) // TODO make possible to use https here
+            URL url = UriBuilder.fromUri("http://" + dockerMachineSource.getRegistry()) // TODO make possible to use https here
                                 .path("/v2/{repository}/manifests/{digest}")
-                                .build(repository, dockerMachineSource.getDigest())
+                                .build(dockerMachineSource.getRepository(), dockerMachineSource.getDigest())
                                 .toURL();
             final HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             try {
-                conn.setInstanceFollowRedirects(true);
                 conn.setConnectTimeout(30 * 1000);
                 conn.setRequestMethod("DELETE");
                 // TODO add auth header for secured registry
                 final int responseCode = conn.getResponseCode();
                 if ((responseCode / 100) != 2) {
+                    InputStream in = conn.getErrorStream();
+                    if (in == null) {
+                        in = conn.getInputStream();
+                    }
+                    LOG.error("An error occurred while deleting snapshot with url: {}\nError stream: {}",
+                              url,
+                              IoUtil.readAndCloseQuietly(in));
+                    throw new SnapshotException("Internal server error occurs. Can't remove snapshot");
+                }
+            } finally {
+                conn.disconnect();
+            }
+        } catch (IOException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    /**
+     * Removes snapshot repository from docker hub.
+     *
+     * @param repository
+     *         snapshot repository name
+     * @throws SnapshotException
+     *         when an error occurs while deleting snapshot
+     */
+    private void removeSnapshotFromDockerHub(String repository) throws SnapshotException {
+        try {
+            URL url = UriBuilder.fromUri("https://" + DOCKER_HUB_BASE_URI)
+                                // we use v1 here because docker hub doesn't provide open v2 REST API for repository deletion
+                                .path("/v1/repositories/{repository}/")
+                                .build(repository)
+                                .toURL();
+            final HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+            try {
+                conn.setConnectTimeout(30 * 1000);
+                conn.setRequestMethod("DELETE");
+                conn.setRequestProperty("Authorization", authResolver.getBasicAuthHeaderValue(DOCKER_HUB_BASE_URI, null));
+                final int responseCode = conn.getResponseCode();
+                if (responseCode != 202 && responseCode != 404) { // if snapshot is already deleted then just skip it
                     InputStream in = conn.getErrorStream();
                     if (in == null) {
                         in = conn.getInputStream();

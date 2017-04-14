@@ -121,9 +121,9 @@ export class ListStacksController {
   /**
    * Performs confirmation and deletion of pointed stack.
    *
-   * @param stack stack to delete
+   * @param stack {che.IStack} stack to delete
    */
-  deleteStack(stack: any): void {
+  deleteStack(stack: che.IStack): void {
     let confirmationPromise: ng.IPromise<any> = this.confirmStacksDeletion(1, stack.name);
     confirmationPromise.then(() => {
       this.loading = true;
@@ -143,14 +143,14 @@ export class ListStacksController {
   /**
    * Make a copy of pointed stack with new name.
    *
-   * @param stack stack to make copy of
+   * @param stack {che.IStack} stack to make copy of
    */
-  duplicateStack(stack: any): void {
+  duplicateStack(stack: che.IStack): void {
     let newStack: any = angular.copy(stack);
     delete newStack.links;
     delete newStack.creator;
     delete newStack.id;
-    newStack.name = this.generateStackName(stack.name + ' - Copy');
+    newStack.name = this.generateStackName(stack.name + '-copy');
     this.loading = true;
     this.cheStack.createStack(newStack).then(() => {
       this.getStacks();
@@ -168,20 +168,22 @@ export class ListStacksController {
    * @returns {string}
    */
   generateStackName(name: string): string {
+    /* tslint:disable */
+    name += '-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4));
+    /* tslint:enable */
     if (this.stacks.length === 0) {
       return name;
     }
     let existingNames = this.lodash.pluck(this.stacks, 'name');
-
     if (existingNames.indexOf(name) < 0) {
       return name;
     }
-
     let generatedName = name;
     let counter = 1;
-    while (existingNames.indexOf(generatedName) >= 0) {
+    while (existingNames.indexOf(generatedName) >= 0 && counter < 1000) {
       generatedName = name + counter++;
     }
+
     return generatedName;
   }
 

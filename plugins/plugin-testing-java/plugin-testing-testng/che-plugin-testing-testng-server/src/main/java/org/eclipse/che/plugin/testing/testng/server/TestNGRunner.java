@@ -16,22 +16,30 @@ import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import javax.inject.Inject;
 
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
-import org.eclipse.che.api.testing.shared.Failure;
+import org.eclipse.che.api.testing.server.listener.AbstractTestListener;
+import org.eclipse.che.api.testing.server.listener.OutputTestListener;
+import org.eclipse.che.api.testing.shared.TestCase;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.testing.classpath.server.TestClasspathProvider;
 import org.eclipse.che.plugin.testing.classpath.server.TestClasspathRegistry;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import javassist.util.proxy.MethodFilter;
+import javassist.util.proxy.MethodHandler;
+import javassist.util.proxy.ProxyFactory;
 
 /**
  * TestNG implementation for the test runner service.
@@ -47,15 +55,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
  * <em>testngXML</em> : Relative path to the testng.xml file. If this parameter is set, the TestNG test runner will
  *             execute given testng.xml test suite, otherwise all the test classes are get executed.
  *             (Note: If the <em>runClass</em> parameter is true then <em>testngXML</em> parameter gets ignored.)
- *
  * </pre>
  * 
  * @author Mirage Abeysekara
  */
 public class TestNGRunner implements TestRunner {
 
-    private ClassLoader projectClassLoader;
-    private ProjectManager projectManager;
+    private ClassLoader           projectClassLoader;
+    private ProjectManager        projectManager;
     private TestClasspathRegistry classpathRegistry;
 
     @Inject
@@ -78,8 +85,21 @@ public class TestNGRunner implements TestRunner {
         if (projectManager != null) {
             projectType = projectManager.getProject(projectPath).getType();
         }
+
+        ClassLoader currentClassLoader = this.getClass().getClassLoader();
         TestClasspathProvider classpathProvider = classpathRegistry.getTestClasspathProvider(projectType);
-        projectClassLoader = classpathProvider.getClassLoader(projectAbsolutePath, projectPath, updateClasspath);
+        URLClassLoader providedClassLoader = (URLClassLoader)classpathProvider.getClassLoader(projectAbsolutePath, projectPath,
+                                                                                              updateClasspath);
+        projectClassLoader = new URLClassLoader(providedClassLoader.getURLs(), null) {
+            @Override
+            protected Class< ? > findClass(String name) throws ClassNotFoundException {
+                if (name.startsWith("javassist.")) {
+                    return currentClassLoader.loadClass(name);
+                }
+                return super.findClass(name);
+            }
+        };
+
         TestResult testResult;
         if (runClass) {
             String fqn = testParameters.get("fqn");
@@ -91,6 +111,7 @@ public class TestNGRunner implements TestRunner {
                 testResult = runTestXML(projectAbsolutePath, ResourcesPlugin.getPathToWorkspace() + xmlPath);
             }
         }
+        testResult.setProjectPath(projectPath);
         return testResult;
     }
 
@@ -104,7 +125,7 @@ public class TestNGRunner implements TestRunner {
 
     private TestResult run(String projectAbsolutePath, String testClass) throws Exception {
         ClassLoader classLoader = projectClassLoader;
-        Class<?> clsTest = Class.forName(testClass, true, classLoader);
+        Class< ? > clsTest = Class.forName(testClass, true, classLoader);
         return runTestClasses(projectAbsolutePath, clsTest);
 
     }
@@ -122,7 +143,7 @@ public class TestNGRunner implements TestRunner {
         @SuppressWarnings("rawtypes")
         List<Class> testableClasses = new ArrayList<>();
         for (String className : testClassNames) {
-            Class<?> clazz = Class.forName(className, false, projectClassLoader);
+            Class< ? > clazz = Class.forName(className, false, projectClassLoader);
             if (isTestable(clazz)) {
                 testableClasses.add(clazz);
             }
@@ -131,7 +152,7 @@ public class TestNGRunner implements TestRunner {
 
     }
 
-    private boolean isTestable(Class<?> clazz) throws ClassNotFoundException {
+    private boolean isTestable(Class< ? > clazz) throws ClassNotFoundException {
         for (Method method : clazz.getDeclaredMethods()) {
             for (Annotation annotation : method.getAnnotations()) {
                 if (annotation.annotationType().getName().equals("org.testng.annotations.Test")) {
@@ -142,123 +163,191 @@ public class TestNGRunner implements TestRunner {
         return false;
     }
 
-    private TestResult runTestClasses(String projectAbsolutePath, Class<?>... classes) throws Exception {
-        ClassLoader classLoader = projectClassLoader;
-        Class<?> clsTestNG = Class.forName("org.testng.TestNG", true, classLoader);
-        Class<?> clsTestListner = Class.forName("org.testng.TestListenerAdapter", true, classLoader);
-        Class<?> clsITestListner = Class.forName("org.testng.ITestListener", true, classLoader);
-        Class<?> clsResult = Class.forName("org.testng.ITestResult", true, classLoader);
-        Class<?> clsIClass = Class.forName("org.testng.IClass", true, classLoader);
-        Class<?> clsThrowable = Class.forName("java.lang.Throwable", true, classLoader);
-        Class<?> clsStackTraceElement = Class.forName("java.lang.StackTraceElement", true, classLoader);
-        Object testNG = clsTestNG.newInstance();
-        Object testListner = clsTestListner.newInstance();
-        clsTestNG.getMethod("addListener", clsITestListner).invoke(testNG, testListner);
-        clsTestNG.getMethod("setTestClasses", Class[].class).invoke(testNG, new Object[] { classes });
-        clsTestNG.getMethod("setOutputDirectory", String.class).invoke(testNG,
-                Paths.get(projectAbsolutePath, "target", "testng-out").toString());
-        clsTestNG.getMethod("run").invoke(testNG);
-        List<?> failures = (List<?>) clsTestListner.getMethod("getFailedTests").invoke(testListner);
-        TestResult dtoResult = DtoFactory.getInstance().createDto(TestResult.class);
-        boolean isSuccess = (failures.size() == 0);
-        List<Failure> testNGFailures = new ArrayList<>();
-        for (Object failure : failures) {
-            Failure dtoFailure = DtoFactory.getInstance().createDto(Failure.class);
-            Object throwable = clsResult.getMethod("getThrowable").invoke(failure);
-            String message = (String) clsThrowable.getMethod("getMessage").invoke(throwable);
-            Object failingClass = clsResult.getMethod("getTestClass").invoke(failure);
-            String failClassName = (String) clsIClass.getMethod("getName").invoke(failingClass);
-            Object stackTrace = clsThrowable.getMethod("getStackTrace").invoke(throwable);
-            String failMethod = "";
-            Integer failLine = null;
-            if (stackTrace.getClass().isArray()) {
-                int length = Array.getLength(stackTrace);
-                for (int i = 0; i < length; i++) {
-                    Object arrayElement = Array.get(stackTrace, i);
-                    String failClass = (String) clsStackTraceElement.getMethod("getClassName").invoke(arrayElement);
-                    if (failClass.equals(failClassName)) {
-                        failMethod = (String) clsStackTraceElement.getMethod("getMethodName").invoke(arrayElement);
-                        failLine = (Integer) clsStackTraceElement.getMethod("getLineNumber").invoke(arrayElement);
+    private Object createTestListener(ClassLoader loader, Class< ? > listenerClass, AbstractTestListener delegate) throws Exception {
+        ProxyFactory f = new ProxyFactory();
+        f.setSuperclass(listenerClass);
+        f.setFilter(new MethodFilter() {
+            @Override
+            public boolean isHandled(Method m) {
+                String methodName = m.getName();
+                switch (methodName) {
+                    case "onTestStart":
+                    case "onTestSuccess":
+                    case "testFailure":
+                    case "onTestFailure":
+                        return true;
+                }
+                return false;
+            }
+        });
+        Class< ? > c = f.createClass();
+        MethodHandler mi = new MethodHandler() {
+            @Override
+            public Object invoke(Object self, Method m, Method method, Object[] args) throws Throwable {
+                String methodName = m.getName();
+                Object testResult = null;
+                Throwable throwable = null;
+
+                switch (methodName) {
+                    case "onTestStart":
+                    case "onTestSuccess":
+                        testResult = args[0];
+                        throwable = null;
                         break;
+                    case "onTestFailure":
+                        testResult = args[0];
+                        throwable = (Throwable)testResult.getClass().getMethod("getThrowable", new Class< ? >[0]).invoke(args[0]);
+                        break;
+                }
+
+                Object testClass = testResult.getClass().getMethod("getTestClass").invoke(testResult);
+                Object testMethod = testResult.getClass().getMethod("getMethod").invoke(testResult);
+                String testClassName = (String)testClass.getClass().getMethod("getName").invoke(testClass);
+                String testMethodName = (String)testMethod.getClass().getMethod("getMethodName").invoke(testMethod);
+
+                String testKey = new StringBuilder().append(testMethodName)
+                                                    .append('(').append(testClassName).append(')').toString();
+                String testName = testKey;
+                switch (methodName) {
+                    case "onTestStart":
+                        delegate.startTest(testKey, testName);
+                        break;
+
+                    case "onTestSuccess":
+                        delegate.endTest(testKey, testName);
+                        break;
+
+                    case "onTestFailure":
+                        delegate.addFailure(testKey, throwable);
+                        delegate.endTest(testKey, testName);
+                        break;
+
+                    default:
+
+                }
+                return method.invoke(self, args);
+            }
+        };
+        Object listener = c.getConstructor().newInstance();
+        ((javassist.util.proxy.Proxy)listener).setHandler(mi);
+        return listener;
+    }
+
+
+    private TestResult runTest(String projectAbsolutePath, BiConsumer<Class< ? >, Object> configure) throws Exception {
+        ClassLoader classLoader = projectClassLoader;
+        Class< ? > clsTestNG = Class.forName("org.testng.TestNG", true, classLoader);
+        Class< ? > clsTestListner = Class.forName("org.testng.TestListenerAdapter", true, classLoader);
+        Class< ? > clsITestListner = Class.forName("org.testng.ITestListener", true, classLoader);
+        Class< ? > clsResult = Class.forName("org.testng.ITestResult", true, classLoader);
+        Class< ? > clsIClass = Class.forName("org.testng.IClass", true, classLoader);
+        Class< ? > clsITestNGMethod = Class.forName("org.testng.ITestNGMethod", true, classLoader);
+        Class< ? > clsThrowable = Class.forName("java.lang.Throwable", true, classLoader);
+        Class< ? > clsStackTraceElement = Class.forName("java.lang.StackTraceElement", true, classLoader);
+        Object testNG = clsTestNG.newInstance();
+
+        Object testListner;
+        try (OutputTestListener outputListener = new OutputTestListener(this.getClass().getName() + ".runTest")) {
+            testListner = createTestListener(classLoader, clsTestListner, outputListener);
+            ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+            try {
+                Thread.currentThread().setContextClassLoader(projectClassLoader);
+
+                clsTestNG.getMethod("addListener", clsITestListner).invoke(testNG, testListner);
+
+                configure.accept(clsTestNG, testNG);
+
+                clsTestNG.getMethod("setOutputDirectory", String.class).invoke(testNG,
+                                                                               Paths.get(projectAbsolutePath, "target", "testng-out")
+                                                                                    .toString());
+                clsTestNG.getMethod("run").invoke(testNG);
+            } finally {
+                Thread.currentThread().setContextClassLoader(tccl);
+            }
+        }
+
+        List<Object> allTests = new ArrayList<>();
+        for (Object failure : (List< ? >)clsTestListner.getMethod("getFailedTests").invoke(testListner)) {
+            allTests.add(failure);
+        }
+        int failureCount = allTests.size();
+
+        for (Object success : (List< ? >)clsTestListner.getMethod("getPassedTests").invoke(testListner)) {
+            allTests.add(success);
+        }
+
+        TestResult dtoResult = DtoFactory.getInstance().createDto(TestResult.class);
+        boolean isSuccess = (failureCount == 0);
+        List<TestCase> testCases = new ArrayList<>();
+        for (Object test : allTests) {
+            TestCase dtoFailure = DtoFactory.getInstance().createDto(TestCase.class);
+            Object testClass = clsResult.getMethod("getTestClass").invoke(test);
+            Object testMethod = clsResult.getMethod("getMethod").invoke(test);
+            String testClassName = (String)clsIClass.getMethod("getName").invoke(testClass);
+            String testMethodName = (String)clsITestNGMethod.getMethod("getMethodName").invoke(testMethod);
+
+            dtoFailure.setClassName(testClassName);
+            dtoFailure.setMethod(testMethodName);
+
+            Object throwable = clsResult.getMethod("getThrowable").invoke(test);
+            if (throwable != null) {
+                String message = (String)clsThrowable.getMethod("getMessage").invoke(throwable);
+                Object stackTrace = clsThrowable.getMethod("getStackTrace").invoke(throwable);
+                Integer failLine = null;
+                if (stackTrace.getClass().isArray()) {
+                    int length = Array.getLength(stackTrace);
+                    for (int i = 0; i < length; i++) {
+                        Object arrayElement = Array.get(stackTrace, i);
+                        String failClass = (String)clsStackTraceElement.getMethod("getClassName").invoke(arrayElement);
+                        String failMethod = (String)clsStackTraceElement.getMethod("getMethodName").invoke(arrayElement);
+                        if (failClass.equals(testClassName) && failMethod.equals(testMethodName)) {
+                            failLine = (Integer)clsStackTraceElement.getMethod("getLineNumber").invoke(arrayElement);
+                            break;
+                        }
                     }
                 }
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                clsThrowable.getMethod("printStackTrace", PrintWriter.class).invoke(throwable, pw);
+                String trace = sw.toString();
+                dtoFailure.setFailingLine(failLine == null ? -1 : failLine);
+                dtoFailure.setMessage(message);
+                dtoFailure.setTrace(trace);
+                dtoFailure.setFailed(true);
+            } else {
+                dtoFailure.setFailingLine(-1);
+                dtoFailure.setFailed(false);
             }
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            clsThrowable.getMethod("printStackTrace", PrintWriter.class).invoke(throwable, pw);
-            String trace = sw.toString();
-            dtoFailure.setFailingClass(failClassName);
-            dtoFailure.setFailingMethod(failMethod);
-            dtoFailure.setFailingLine(failLine);
-            dtoFailure.setMessage(message);
-            dtoFailure.setTrace(trace);
-            testNGFailures.add(dtoFailure);
+            testCases.add(dtoFailure);
         }
+
         dtoResult.setTestFramework("TestNG");
         dtoResult.setSuccess(isSuccess);
-        dtoResult.setFailureCount(testNGFailures.size());
-        dtoResult.setFailures(testNGFailures);
+        dtoResult.setFailureCount(failureCount);
+        dtoResult.setTestCaseCount(testCases.size());
+        dtoResult.setTestCases(testCases);
         return dtoResult;
     }
 
     private TestResult runTestXML(String projectAbsolutePath, String xmlPath) throws Exception {
-        ClassLoader classLoader = projectClassLoader;
-        Class<?> clsTestNG = Class.forName("org.testng.TestNG", true, classLoader);
-        Class<?> clsTestListner = Class.forName("org.testng.TestListenerAdapter", true, classLoader);
-        Class<?> clsITestListner = Class.forName("org.testng.ITestListener", true, classLoader);
-        Class<?> clsResult = Class.forName("org.testng.ITestResult", true, classLoader);
-        Class<?> clsIClass = Class.forName("org.testng.IClass", true, classLoader);
-        Class<?> clsThrowable = Class.forName("java.lang.Throwable", true, classLoader);
-        Class<?> clsStackTraceElement = Class.forName("java.lang.StackTraceElement", true, classLoader);
-        Object testNG = clsTestNG.newInstance();
-        Object testListner = clsTestListner.newInstance();
-        clsTestNG.getMethod("addListener", clsITestListner).invoke(testNG, testListner);
-        List<String> testSuites = new ArrayList<>();
-        testSuites.add(xmlPath);
-        clsTestNG.getMethod("setTestSuites", List.class).invoke(testNG, testSuites);
-        clsTestNG.getMethod("setOutputDirectory", String.class).invoke(testNG,
-                Paths.get(projectAbsolutePath, "target", "testng-out").toString());
-        clsTestNG.getMethod("run").invoke(testNG);
-        List<?> failures = (List<?>) clsTestListner.getMethod("getFailedTests").invoke(testListner);
-        TestResult dtoResult = DtoFactory.getInstance().createDto(TestResult.class);
-        boolean isSuccess = (failures.size() == 0);
-        List<Failure> testNGFailures = new ArrayList<>();
-        for (Object failure : failures) {
-            Failure dtoFailure = DtoFactory.getInstance().createDto(Failure.class);
-            Object throwable = clsResult.getMethod("getThrowable").invoke(failure);
-            String message = (String) clsThrowable.getMethod("getMessage").invoke(throwable);
-            Object failingClass = clsResult.getMethod("getTestClass").invoke(failure);
-            String failClassName = (String) clsIClass.getMethod("getName").invoke(failingClass);
-            Object stackTrace = clsThrowable.getMethod("getStackTrace").invoke(throwable);
-            String failMethod = "";
-            Integer failLine = null;
-            if (stackTrace.getClass().isArray()) {
-                int length = Array.getLength(stackTrace);
-                for (int i = 0; i < length; i++) {
-                    Object arrayElement = Array.get(stackTrace, i);
-                    String failClass = (String) clsStackTraceElement.getMethod("getClassName").invoke(arrayElement);
-                    if (failClass.equals(failClassName)) {
-                        failMethod = (String) clsStackTraceElement.getMethod("getMethodName").invoke(arrayElement);
-                        failLine = (Integer) clsStackTraceElement.getMethod("getLineNumber").invoke(arrayElement);
-                        break;
-                    }
-                }
+        return runTest(projectAbsolutePath, (clsTestNG, testNG) -> {
+            try {
+                List<String> testSuites = new ArrayList<>();
+                testSuites.add(xmlPath);
+                clsTestNG.getMethod("setTestSuites", List.class).invoke(testNG, testSuites);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            clsThrowable.getMethod("printStackTrace", PrintWriter.class).invoke(throwable, pw);
-            String trace = sw.toString();
-            dtoFailure.setFailingClass(failClassName);
-            dtoFailure.setFailingMethod(failMethod);
-            dtoFailure.setFailingLine(failLine);
-            dtoFailure.setMessage(message);
-            dtoFailure.setTrace(trace);
-            testNGFailures.add(dtoFailure);
-        }
-        dtoResult.setTestFramework("TestNG");
-        dtoResult.setSuccess(isSuccess);
-        dtoResult.setFailureCount(testNGFailures.size());
-        dtoResult.setFailures(testNGFailures);
-        return dtoResult;
+        });
+    }
+
+    private TestResult runTestClasses(String projectAbsolutePath, Class< ? >... classes) throws Exception {
+        return runTest(projectAbsolutePath, (clsTestNG, testNG) -> {
+            try {
+                clsTestNG.getMethod("setTestClasses", Class[].class).invoke(testNG, new Object[]{classes});
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.manager;
 
+import com.google.gwt.json.client.JSONException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -23,6 +24,7 @@ import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,8 +55,13 @@ class ProjectCommandManagerDelegate {
 
         Map<String, CommandImpl> commands = new HashMap<>(attrValues.size());
         for (String commandJson : attrValues) {
-            CommandDto command = dtoFactory.createDtoFromJson(commandJson, CommandDto.class);
-            commands.put(command.getName(), new CommandImpl(command));
+            try {
+                CommandDto commandDto = dtoFactory.createDtoFromJson(commandJson, CommandDto.class);
+                commands.put(commandDto.getName(), new CommandImpl(commandDto));
+            } catch (JSONException e) {
+                Log.error(ProjectCommandManagerDelegate.class, "Unable to parse command of project '" +
+                                                               project.getPath() + "': " + commandJson + ". " + e.getMessage());
+            }
         }
 
         return new ArrayList<>(commands.values());

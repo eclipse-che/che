@@ -37,26 +37,18 @@ export class DashboardConfig {
         controller: 'DashboardController',
         controllerAs: 'dashboardController',
         resolve: {
-          check: ['$q', '$location', 'cheWorkspace', 'cheService', 'cheAdminService', ($q, $location, cheWorkspace, cheService, cheAdminService) => {
+          check: ['$q', '$location', 'cheWorkspace', 'cheService', ($q, $location, cheWorkspace, cheService) => {
             cheWorkspace.fetchWorkspaces().then(() => {
               if (cheWorkspace.getWorkspaces().length === 0) {
                 $location.path('/create-project');
               }
-            }, (error) => {
+            }, (error: any) => {
               if (error.status === 304 && cheWorkspace.getWorkspaces().length === 0) {
                 $location.path('/create-project');
               }
             });
 
-            var defer = $q.defer();
-            cheService.fetchServices().then(() => {
-              cheAdminService.fetchServices().then(() => {
-                defer.resolve();
-              }, () => {
-                defer.resolve();
-              });
-            });
-            return defer.promise;
+            return cheService.fetchServices();
           }]
         }
       });

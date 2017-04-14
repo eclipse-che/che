@@ -22,6 +22,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 
 import org.eclipse.che.ide.actions.ActionApiModule;
+import org.eclipse.che.ide.api.ConnectionClosedInformer;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.ProductInfoDataProviderImpl;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -46,6 +47,7 @@ import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.ssh.SshServiceClientImpl;
 import org.eclipse.che.ide.api.user.AskCredentialsDialog;
+import org.eclipse.che.ide.client.ConnectionClosedInformerImpl;
 import org.eclipse.che.ide.clipboard.ClipboardModule;
 import org.eclipse.che.ide.command.CommandApiModule;
 import org.eclipse.che.ide.context.AppContextImpl;
@@ -76,6 +78,7 @@ import org.eclipse.che.ide.user.AskCredentialsDialogImpl;
 import org.eclipse.che.ide.user.UserApiModule;
 import org.eclipse.che.ide.workspace.WorkspaceApiModule;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
+import org.eclipse.che.ide.workspace.events.WorkspaceEventsModule;
 import org.eclipse.che.providers.DynaProvider;
 import org.eclipse.che.providers.DynaProviderImpl;
 
@@ -114,7 +117,9 @@ public class CoreGinModule extends AbstractGinModule {
         install(new ProjectApiModule());
         install(new ProjectImportModule());
         install(new OAuthApiModule());
+        install(new WorkspaceEventsModule());
         install(new FactoryGinModule());
+        install(new WorkspaceEventsModule());
 
         // configure miscellaneous core components
         bind(StandardComponentInitializer.class).in(Singleton.class);
@@ -157,6 +162,7 @@ public class CoreGinModule extends AbstractGinModule {
         bind(AskCredentialsDialog.class).to(AskCredentialsDialogImpl.class);
         bind(ProductInfoDataProvider.class).to(ProductInfoDataProviderImpl.class);
         bind(WsAgentURLModifier.class).to(CheWsAgentLinksModifier.class);
+        bind(ConnectionClosedInformer.class).to(ConnectionClosedInformerImpl.class);
     }
 
     @Provides

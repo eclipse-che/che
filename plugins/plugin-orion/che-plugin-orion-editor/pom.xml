@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-orion-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.7.0-SNAPSHOT</version>
+        <version>5.9.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-orion-editor</artifactId>
@@ -35,8 +35,8 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <configuration>
                     <ignoredDependencies>
-                    <ignoredDependency>org.eclipse.che.core:che-core-orion-editor</ignoredDependency>
-                </ignoredDependencies>
+                        <ignoredDependency>org.eclipse.che.core:che-core-orion-editor</ignoredDependency>
+                    </ignoredDependencies>
                 </configuration>
             </plugin>
         </plugins>

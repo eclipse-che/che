@@ -60,6 +60,8 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
         install(new org.eclipse.che.api.machine.server.jpa.MachineJpaModule());
         install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
+        install(new org.eclipse.che.api.core.jsonrpc.JsonRpcModule());
+        install(new org.eclipse.che.api.core.websocket.WebSocketModule());
 
         // db configuration
         bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);
@@ -99,6 +101,7 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
         bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
         bind(org.eclipse.che.api.workspace.server.event.WorkspaceMessenger.class).asEagerSingleton();
+        bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class).asEagerSingleton();
         bind(org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerChecker.class);
         bind(org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker.class);
         bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);

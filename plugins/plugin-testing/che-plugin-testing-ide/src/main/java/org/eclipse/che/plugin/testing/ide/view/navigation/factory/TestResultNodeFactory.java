@@ -25,11 +25,14 @@ import com.google.inject.assistedinject.Assisted;
  */
 public interface TestResultNodeFactory {
 
-    TestResultGroupNode getTestResultGroupNode(TestResult result);
+    TestResultGroupNode getTestResultGroupNode(TestResult result,
+                                               boolean showFailuresOnly,
+                                               Runnable showOnlyFailuresDelegate);
 
     TestResultClassNode getTestResultClassNodeNode(String className);
 
-    TestResultMethodNode getTestResultMethodNodeNode(@Assisted("methodName") String methodName,
+    TestResultMethodNode getTestResultMethodNodeNode(boolean success,
+                                                     @Assisted("methodName") String methodName,
                                                      @Assisted("stackTrace") String stackTrace,
                                                      @Assisted("message") String message,
                                                      int lineNumber,

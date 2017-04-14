@@ -48,7 +48,7 @@ public class TestingExtension {
         runMenu.addSeparator();
         runMenu.add(testMainMenu);
         DefaultActionGroup explorerMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
-        DefaultActionGroup testContextMenu = new DefaultActionGroup(localization.actionGroupMenuName(), true,
+        DefaultActionGroup testContextMenu = new DefaultActionGroup(localization.contextActionGroupMenuName(), true,
                 actionManager);
         actionManager.registerAction("TestingContextGroup", testContextMenu);
         for (TestAction testAction : testActions) {
