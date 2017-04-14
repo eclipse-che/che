@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
@@ -23,7 +24,6 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
@@ -36,6 +36,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 import org.slf4j.Logger;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayDeque;
@@ -89,19 +90,20 @@ public class DockerRuntimeContext extends RuntimeContext {
     private volatile Thread                     startThread;
     private volatile boolean                    stopIsCalled;
 
-    public DockerRuntimeContext(DockerEnvironment dockerEnvironment,
-                                Environment environment,
-                                RuntimeIdentity identity,
-                                RuntimeInfrastructure infrastructure,
-                                URL registryEndpoint,
-                                List<String> orderedServices,
+    @Inject
+    public DockerRuntimeContext(@Assisted DockerRuntimeInfrastructure infrastructure,
+                                @Assisted RuntimeIdentity identity,
+                                @Assisted Environment environment,
+                                @Assisted DockerEnvironment dockerEnvironment,
+                                @Assisted List<String> orderedServices,
+//                                URL registryEndpoint,
                                 NetworkLifecycle dockerNetworkLifecycle,
                                 ServiceStarter serviceStarter,
                                 URLRewriter urlRewriter,
                                 DockerConnector docker,
                                 AgentRegistry agentRegistry)
             throws ValidationException, InfrastructureException {
-        super(environment, identity, infrastructure, registryEndpoint);
+        super(environment, identity, infrastructure, null);
         this.dockerEnvironment = dockerEnvironment;
         this.dockerNetworkLifecycle = dockerNetworkLifecycle;
         this.serviceStarter = serviceStarter;

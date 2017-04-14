@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
@@ -100,7 +101,8 @@ public class DockerInfraModule extends AbstractModule {
 
         bind(DockerRegistryDynamicAuthResolver.class).to(NoOpDockerRegistryDynamicAuthResolverImpl.class);
 
-        // TODO
-        // URL rewriter
+        install(new FactoryModuleBuilder()
+                        .implement(DockerRuntimeContext.class, DockerRuntimeContext.class)
+                        .build(RuntimeFactory.class));
     }
 }

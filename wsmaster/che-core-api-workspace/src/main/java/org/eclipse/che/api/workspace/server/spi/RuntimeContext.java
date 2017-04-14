@@ -25,11 +25,11 @@ import java.util.Map;
 public abstract class RuntimeContext {
 
     protected final Environment           environment;
-//    protected final InternalRuntimeConfig internalRuntimeConfig;
+    //    protected final InternalRuntimeConfig internalRuntimeConfig;
     protected final RuntimeIdentity       identity;
     protected final RuntimeInfrastructure infrastructure;
     // TODO other than WorkspaceStatus impl
-    protected       WorkspaceStatus       state;
+    private         WorkspaceStatus       state;
 
     public RuntimeContext(Environment environment, RuntimeIdentity identity,
                           RuntimeInfrastructure infrastructure, URL registryEndpoint)
@@ -39,7 +39,6 @@ public abstract class RuntimeContext {
         this.infrastructure = infrastructure;
 //        this.internalRuntimeConfig = new InternalRuntimeConfig(environment, registryEndpoint);
     }
-
 
     /**
      * Creates and starts Runtime.
@@ -55,8 +54,9 @@ public abstract class RuntimeContext {
      *         when any other error occurs
      */
     public final InternalRuntime start(Map<String, String> startOptions) throws InfrastructureException {
-        if (this.state != null)
+        if (this.state != null) {
             throw new StateException("Context already used");
+        }
         state = WorkspaceStatus.STARTING;
         InternalRuntime runtime = internalStart(startOptions);
         state = WorkspaceStatus.RUNNING;
@@ -77,8 +77,9 @@ public abstract class RuntimeContext {
      *         when any other error occurs
      */
     public final void stop(Map<String, String> stopOptions) throws InfrastructureException {
-        if (this.state != WorkspaceStatus.RUNNING)
+        if (this.state != WorkspaceStatus.RUNNING) {
             throw new StateException("The environment must be running");
+        }
         state = WorkspaceStatus.STOPPING;
         internalStop(stopOptions);
         state = WorkspaceStatus.STOPPED;
@@ -103,13 +104,15 @@ public abstract class RuntimeContext {
      * @return URL of the channels endpoint
      * @throws UnsupportedOperationException
      *         if implementation does not provide channel
+     * @throws InfrastructureException
      */
-    public abstract URL getOutputChannel() throws InfrastructureException;
+    public abstract URL getOutputChannel() throws InfrastructureException,
+                                                  UnsupportedOperationException;
 
 
     /**
-     * Runtime Identity contains information allowing uniquelly identify a Runtime
-     * It is not neccessary that all of this information is used for identifying
+     * Runtime Identity contains information allowing uniquely identify a Runtime
+     * It is not necessary that all of this information is used for identifying
      * Runtime outside of SPI framework (in practice workspace ID looks like enough)
      *
      * @return the RuntimeIdentity
