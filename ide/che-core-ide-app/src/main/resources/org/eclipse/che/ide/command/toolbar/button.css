@@ -8,24 +8,30 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ui.menubutton;
+.button {
+    width: 32px;
+    height: 22px;
+    color: #4990e2;
+    background: menuButtonBackground;
+    border: menuButtonBorder;
+    font-size: 17px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    text-align: center;
+    cursor: pointer;
+}
 
-/** Handles actions on {@link MenuItem}s. */
-public interface ActionHandler {
+.button:focus {
+    outline: none;
+}
 
-    /**
-     * Called when {@code item} has been selected.
-     *
-     * @param item
-     *         the selected item
-     */
-    void onSelection(MenuItem item);
+.button:hover {
+    color: #53a2ff;
+    background: hoveredMenuButtonBackground;
+}
 
-    /**
-     * Called when action on the {@code item} has been requested.
-     *
-     * @param item
-     *         the item on which action has been requested
-     */
-    void onAction(MenuItem item);
+.button:active {
+    color: #235c9e;
+    background: activeMenuButtonBackground;
 }

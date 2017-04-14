@@ -27,6 +27,8 @@ import org.eclipse.che.ide.command.goal.DebugGoal;
 import org.eclipse.che.ide.command.goal.RunGoal;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandView.ActionDelegate;
+import org.eclipse.che.ide.ui.menubutton.ActionHandler;
+import org.eclipse.che.ide.ui.menubutton.MenuItem;
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 
 /** Factory for {@link ExecuteCommandButton}s. */
@@ -82,21 +84,31 @@ public class ExecuteCommandButtonFactory {
                                                                      keyBindingAgent,
                                                                      keyBinding);
 
-        button.setActionHandler(item -> {
-            if (item instanceof CommandItem) {
-                final CommandImpl command = ((CommandItem)item).getCommand();
+        button.setActionHandler(new ActionHandler() {
+            @Override
+            public void onSelection(MenuItem item) {
+                if (item instanceof CommandItem) {
+                    itemsProvider.setDefaultItem(item);
+                    button.updateTooltip();
+                } else if (item instanceof MachineItem) {
+                    itemsProvider.setDefaultItem(item);
+                    button.updateTooltip();
+                } else if (item instanceof GuideItem) {
+                    delegate.onGuide(goal);
+                }
+            }
 
-                delegate.onCommandExecute(command);
-                itemsProvider.setDefaultItem(item);
-                button.updateTooltip();
-            } else if (item instanceof MachineItem) {
-                final MachineItem machinePopupItem = (MachineItem)item;
+            @Override
+            public void onAction(MenuItem item) {
+                if (item instanceof CommandItem) {
+                    final CommandImpl command = ((CommandItem)item).getCommand();
 
-                delegate.onCommandExecute(machinePopupItem.getCommand(), machinePopupItem.getMachine());
-                itemsProvider.setDefaultItem(item);
-                button.updateTooltip();
-            } else if (item instanceof GuideItem) {
-                delegate.onGuide(goal);
+                    delegate.onCommandExecute(command);
+                } else if (item instanceof MachineItem) {
+                    final MachineItem machinePopupItem = (MachineItem)item;
+
+                    delegate.onCommandExecute(machinePopupItem.getCommand(), machinePopupItem.getMachine());
+                }
             }
         });
 
