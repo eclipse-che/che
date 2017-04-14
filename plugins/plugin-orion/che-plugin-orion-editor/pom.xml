@@ -35,8 +35,8 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <configuration>
                     <ignoredDependencies>
-                    <ignoredDependency>org.eclipse.che.core:che-core-orion-editor</ignoredDependency>
-                </ignoredDependencies>
+                        <ignoredDependency>org.eclipse.che.core:che-core-orion-editor</ignoredDependency>
+                    </ignoredDependencies>
                 </configuration>
             </plugin>
         </plugins>
