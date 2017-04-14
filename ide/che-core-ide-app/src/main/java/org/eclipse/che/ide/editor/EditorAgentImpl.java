@@ -443,7 +443,7 @@ public class EditorAgentImpl implements EditorAgent,
 
     @Override
     @SuppressWarnings("unchecked")
-    public void loadState(@NotNull final JsonObject state) {
+    public void setState(@NotNull final JsonObject state) {
         if (state.hasKey("FILES")) {
             JsonObject files = state.getObject("FILES");
             EditorPartStack partStack = editorMultiPartStack.createRootPartStack();

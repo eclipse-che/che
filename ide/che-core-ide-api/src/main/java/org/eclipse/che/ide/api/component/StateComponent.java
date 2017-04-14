@@ -41,6 +41,6 @@ public interface StateComponent {
      *
      * @param state the component state object
      */
-    void loadState(@NotNull JsonObject state);
+    void setState(@NotNull JsonObject state);
 
 }

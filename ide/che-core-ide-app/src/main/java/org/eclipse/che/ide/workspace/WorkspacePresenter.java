@@ -163,15 +163,16 @@ public class WorkspacePresenter implements Presenter, WorkspaceView.ActionDelega
     }
 
     @Override
-    public void loadState(JsonObject state) {
+    public void setState(JsonObject state) {
         if (state.hasKey("perspectives")) {
             JsonObject perspectives = state.getObject("perspectives");
             Map<String, Perspective> perspectiveMap = perspectiveManagerProvider.get().getPerspectives();
             for (String key : perspectives.keys()) {
                 if (perspectiveMap.containsKey(key)) {
-                    perspectiveMap.get(key).loadState(perspectives.getObject(key));
+                    perspectiveMap.get(key).setState(perspectives.getObject(key));
                 }
             }
         }
     }
+
 }

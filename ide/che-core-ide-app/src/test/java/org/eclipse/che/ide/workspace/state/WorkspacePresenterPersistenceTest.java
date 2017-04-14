@@ -102,8 +102,9 @@ public class WorkspacePresenterPersistenceTest {
         JsonObject perspective1State = Json.createObject();
         perspectives.put("perspective1", perspective1State);
 
-        presenter.loadState(state);
+        presenter.setState(state);
 
-        verify(perspective1).loadState(perspective1State);
+        verify(perspective1).setState(perspective1State);
     }
+
 }

@@ -147,10 +147,11 @@ public class AppStateManagerTest {
         appStateManager.restoreWorkspaceState(WS_ID);
 
         ArgumentCaptor<JsonObject> stateCaptor = ArgumentCaptor.forClass(JsonObject.class);
-        verify(component1).loadState(stateCaptor.capture());
+        verify(component1).setState(stateCaptor.capture());
 
         JsonObject jsonObject = stateCaptor.getValue();
         assertThat(jsonObject.hasKey("key1")).isTrue();
         assertThat(jsonObject.getString("key1")).isEqualTo("value1");
     }
+
 }

@@ -177,7 +177,7 @@ public class AbstractPerspectivePersistenceTest {
             }
         });
 
-        perspective.loadState(state);
+        perspective.setState(state);
 
         verify(workBenchController).setSize(142d);
     }
@@ -194,7 +194,7 @@ public class AbstractPerspectivePersistenceTest {
 
                 partStack.put("HIDDEN", true);
 
-        perspective.loadState(state);
+        perspective.setState(state);
 
         verify(workBenchController).setHidden(true);
     }
@@ -216,7 +216,7 @@ public class AbstractPerspectivePersistenceTest {
         when(dynaProvider.<PartPresenter>getProvider(anyString())).thenReturn(partProvider);
         when(partProvider.get()).thenReturn(partPresenter);
 
-        perspective.loadState(state);
+        perspective.setState(state);
 
         verify(dynaProvider).getProvider("foo.Bar");
         verify(partProvider).get();
