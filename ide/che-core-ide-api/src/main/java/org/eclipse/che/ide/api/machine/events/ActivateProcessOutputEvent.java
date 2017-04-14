@@ -8,12 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.toolbar.processes;
+package org.eclipse.che.ide.api.machine.events;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-/** Event should be fired for activating particular process's output panel. */
+/** Event for activating particular process's output panel. */
 public class ActivateProcessOutputEvent extends GwtEvent<ActivateProcessOutputEvent.Handler> {
 
     public static final Type<ActivateProcessOutputEvent.Handler> TYPE = new Type<>();

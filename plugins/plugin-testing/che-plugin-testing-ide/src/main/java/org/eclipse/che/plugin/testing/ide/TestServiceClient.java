@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -31,6 +32,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.execagent.ExecAgentPromise;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.command.goal.TestGoal;
@@ -48,6 +50,8 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
+
 /**
  * Client for calling test services
  *
@@ -57,20 +61,20 @@ import com.google.inject.Singleton;
 @Singleton
 public class TestServiceClient {
 
-    private final static RegExp           mavenCleanBuildPattern =
+    private final static RegExp           mavenCleanBuildPattern            =
                                                                  RegExp.compile("(.*)mvn +clean +install +(\\-f +\\$\\{current\\.project\\.path\\}.*)");
 
-    public static final String PROJECT_BUILD_NOT_STARTED_MESSAGE = "The project build could not be started (see Build output). "
-        + "Test run is cancelled.\n"
-        + "You should probably check the settings of the 'test-compile' command.";
+    public static final String            PROJECT_BUILD_NOT_STARTED_MESSAGE = "The project build could not be started (see Build output). "
+                                                                              + "Test run is cancelled.\n"
+                                                                              + "You should probably check the settings of the 'test-compile' command.";
 
-    public static final String PROJECT_BUILD_FAILED_MESSAGE = "The project build failed (see Build output). "
-        + "Test run is cancelled.\n"
-        + "You might want to check the settings of the 'test-compile' command.";
-    
-    public static final String EXECUTING_TESTS_MESSAGE = "Executing test session.";
-    
-    
+    public static final String            PROJECT_BUILD_FAILED_MESSAGE      = "The project build failed (see Build output). "
+                                                                              + "Test run is cancelled.\n"
+                                                                              + "You might want to check the settings of the 'test-compile' command.";
+
+    public static final String            EXECUTING_TESTS_MESSAGE           = "Executing test session.";
+
+
     private final AppContext              appContext;
     private final AsyncRequestFactory     asyncRequestFactory;
     private final DtoUnmarshallerFactory  dtoUnmarshallerFactory;
@@ -109,6 +113,7 @@ public class TestServiceClient {
 
     public Promise<CommandImpl> getOrCreateTestCompileCommand() {
         List<CommandImpl> commands = commandManager.getCommands();
+
         for (CommandImpl command : commands) {
             if (command.getName() != null && command.getName().startsWith("test-compile") && "mvn".equals(command.getType())) {
                 return promiseProvider.resolve(command);
@@ -169,50 +174,56 @@ public class TestServiceClient {
                     macroProcessor.expandMacros(command.getCommandLine()).then(new Operation<String>() {
                         @Override
                         public void apply(String expandedCommandLine) throws OperationException {
+                            Map<String, String> attributes = new HashMap<>();
+                            attributes.putAll(command.getAttributes());
+                            attributes.remove(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
+
                             CommandImpl expandedCommand = new CommandImpl(command.getName(), expandedCommandLine,
-                                                                          command.getType(), command.getAttributes());
+                                                                          command.getType(), attributes);
 
                             final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
                             final String machineId = machine.getId();
 
                             processesPanelPresenter.addCommandOutput(machineId, console);
-                            execAgentCommandManager.startProcess(machineId, expandedCommand)
-                                                   .then(startResonse -> {
-                                                       if (!startResonse.getAlive()) {
-                                                           reject.apply(promiseFromThrowable(new Throwable(PROJECT_BUILD_NOT_STARTED_MESSAGE)));
-                                                       }
-                                                   })
-                                                   .thenIfProcessStartedEvent(console.getProcessStartedOperation())
-                                                   .thenIfProcessStdErrEvent(evt -> {
-                                                       if (evt.getText().contains("BUILD SUCCESS")) {
-                                                           compiled = true;
-                                                       }
-                                                       console.getStdErrOperation().apply(evt);
-                                                   })
-                                                   .thenIfProcessStdOutEvent(evt -> {
-                                                       if (evt.getText().contains("BUILD SUCCESS")) {
-                                                           compiled = true;
-                                                       }
-                                                       console.getStdOutOperation().apply(evt);
-                                                   })
-                                                   .thenIfProcessDiedEvent(evt -> {
-                                                       console.getProcessDiedOperation().apply(evt);
-                                                       if (compiled) {
-                                                           if (statusNotification != null) {
-                                                               statusNotification.setContent(EXECUTING_TESTS_MESSAGE);
-                                                           }
-                                                           sendTests(projectPath,
-                                                                     testFramework,
-                                                                     parameters).then(new Operation<TestResult>() {
-                                                                         @Override
-                                                                         public void apply(TestResult result) throws OperationException {
-                                                                             resolve.apply(result);
-                                                                         }
-                                                                     });
-                                                       } else {
-                                                           reject.apply(promiseFromThrowable(new Throwable(PROJECT_BUILD_FAILED_MESSAGE)));
-                                                       }
-                                                   });
+                            ExecAgentPromise<ProcessStartResponseDto> processPromise = execAgentCommandManager.startProcess(machineId,
+                                                                                                                            expandedCommand);
+                            processPromise.then(startResonse -> {
+                                if (!startResonse.getAlive()) {
+                                    reject.apply(promiseFromThrowable(new Throwable(PROJECT_BUILD_NOT_STARTED_MESSAGE)));
+                                }
+                            }).thenIfProcessStartedEvent(console.getProcessStartedOperation()).thenIfProcessStdErrEvent(evt -> {
+                                if (evt.getText().contains("BUILD SUCCESS")) {
+                                    compiled = true;
+                                }
+                                console.getStdErrOperation().apply(evt);
+                            }).thenIfProcessStdOutEvent(evt -> {
+                                if (evt.getText().contains("BUILD SUCCESS")) {
+                                    compiled = true;
+                                }
+                                console.getStdOutOperation().apply(evt);
+                            }).thenIfProcessDiedEvent(evt -> {
+                                console.getProcessDiedOperation().apply(evt);
+                                if (compiled) {
+                                    if (statusNotification != null) {
+                                        statusNotification.setContent(EXECUTING_TESTS_MESSAGE);
+                                    }
+                                    sendTests(projectPath,
+                                              testFramework,
+                                              parameters).then(new Operation<TestResult>() {
+                                                  @Override
+                                                  public void apply(TestResult result) throws OperationException {
+                                                      resolve.apply(result);
+                                                  }
+                                              }, new Operation<PromiseError>() {
+                                                  @Override
+                                                  public void apply(PromiseError error) throws OperationException {
+                                                      reject.apply(error);
+                                                  }
+                                              });
+                                } else {
+                                    reject.apply(promiseFromThrowable(new Throwable(PROJECT_BUILD_FAILED_MESSAGE)));
+                                }
+                            });
                         }
                     });
                 }

@@ -28,8 +28,9 @@ import static org.eclipse.che.ide.command.toolbar.previews.PreviewUrlItemRendere
 public class PreviewsViewImpl implements PreviewsView {
 
     /** Mapping of URL to list item. */
-    private final Map<PreviewUrl, BaseListItem<PreviewUrl>> listItems;
-    private final DropdownList                              dropdownList;
+    private final Map<PreviewUrlItem, BaseListItem<PreviewUrlItem>> listItems;
+
+    private final DropdownList dropdownList;
 
     private ActionDelegate delegate;
 
@@ -41,7 +42,7 @@ public class PreviewsViewImpl implements PreviewsView {
         dropdownList.setWidth("43px");
         dropdownList.ensureDebugId("dropdown-preview_url");
         dropdownList.setSelectionHandler(item -> {
-            for (Entry<PreviewUrl, BaseListItem<PreviewUrl>> entry : listItems.entrySet()) {
+            for (Entry<PreviewUrlItem, BaseListItem<PreviewUrlItem>> entry : listItems.entrySet()) {
                 if (item.equals(entry.getValue())) {
                     delegate.onUrlChosen(entry.getKey());
                     return;
@@ -61,21 +62,21 @@ public class PreviewsViewImpl implements PreviewsView {
     }
 
     @Override
-    public void addUrl(PreviewUrl previewUrl) {
-        if (listItems.containsKey(previewUrl)) {
+    public void addUrl(PreviewUrlItem previewUrlItem) {
+        if (listItems.containsKey(previewUrlItem)) {
             return; // no sense to add the equals URLs even if they belong to different commands
         }
 
-        BaseListItem<PreviewUrl> listItem = new BaseListItem<>(previewUrl);
+        BaseListItem<PreviewUrlItem> listItem = new BaseListItem<>(previewUrlItem);
         PreviewUrlItemRenderer renderer = new PreviewUrlItemRenderer(listItem);
 
-        listItems.put(previewUrl, listItem);
+        listItems.put(previewUrlItem, listItem);
         dropdownList.addItem(listItem, renderer);
     }
 
     @Override
-    public void removeUrl(PreviewUrl previewUrl) {
-        final BaseListItem<PreviewUrl> listItem = listItems.remove(previewUrl);
+    public void removeUrl(PreviewUrlItem previewUrlItem) {
+        final BaseListItem<PreviewUrlItem> listItem = listItems.remove(previewUrlItem);
 
         if (listItem != null) {
             dropdownList.removeItem(listItem);
@@ -83,7 +84,7 @@ public class PreviewsViewImpl implements PreviewsView {
     }
 
     @Override
-    public void removeAll() {
+    public void removeAllURLs() {
         listItems.clear();
         dropdownList.clear();
     }

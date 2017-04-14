@@ -28,6 +28,7 @@ import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.resources.tree.FileNode;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
+import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
@@ -83,22 +84,26 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
     @Override
     public void updateInPerspective(@NotNull ActionEvent e) {
         if ((appContext.getRootProject() == null)) {
-            e.getPresentation().setVisible(true);
-            e.getPresentation().setEnabled(false);
+            e.getPresentation().setEnabledAndVisible(false);
             return;
         }
         final Selection< ? > selection = selectionAgent.getSelection();
         if (selection == null || selection.isEmpty()) {
-            e.getPresentation().setEnabled(false);
+            e.getPresentation().setEnabledAndVisible(false);
             return;
         }
         if (selection.isMultiSelection()) {
-            e.getPresentation().setEnabled(false);
+            e.getPresentation().setEnabledAndVisible(false);
             return;
         }
         final Object possibleNode = selection.getHeadElement();
-        boolean enable = possibleNode instanceof FileNode
-                         && "java".equals(((FileNode)possibleNode).getData().getExtension());
+        if (!(possibleNode instanceof FileNode)) {
+            e.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+
+        e.getPresentation().setVisible(true);
+        boolean enable = "java".equals(((FileNode)possibleNode).getData().getExtension());
         e.getPresentation().setEnabled(enable);
     }
 
@@ -120,5 +125,11 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
     @Override
     public TestResultPresenter getPresenter() {
         return presenter;
+    }
+
+
+    @Override
+    public String getTestingFramework() {
+        return "junit";
     }
 }

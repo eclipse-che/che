@@ -11,11 +11,12 @@
 package org.eclipse.che.ide.command.editor;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -24,7 +25,8 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
+import org.eclipse.che.ide.api.command.CommandRemovedEvent;
+import org.eclipse.che.ide.api.command.CommandRemovedEvent.CommandRemovedHandler;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -53,7 +55,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WAR
 
 /** Presenter for command editor. */
 public class CommandEditor extends AbstractEditorPresenter implements CommandEditorView.ActionDelegate,
-                                                                      CommandChangedListener {
+                                                                      CommandRemovedHandler {
 
     private final CommandEditorView        view;
     private final WorkspaceAgent           workspaceAgent;
@@ -65,14 +67,18 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     private final CoreLocalizationConstant coreMessages;
     private final EditorMessages           messages;
     private final NodeFactory              nodeFactory;
+    private final EventBus                 eventBus;
 
     private final List<CommandEditorPage> pages;
 
     /** Edited command. */
     @VisibleForTesting
     protected CommandImpl editedCommand;
+
+    private HandlerRegistration commandRemovedHandlerRegistration;
+
     /** Initial (before any modification) name of the edited command. */
-    private   String      commandNameInitial;
+    private String initialCommandName;
 
     @Inject
     public CommandEditor(CommandEditorView view,
@@ -89,7 +95,8 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                          EditorAgent editorAgent,
                          CoreLocalizationConstant coreMessages,
                          EditorMessages messages,
-                         NodeFactory nodeFactory) {
+                         NodeFactory nodeFactory,
+                         EventBus eventBus) {
         this.view = view;
         this.workspaceAgent = workspaceAgent;
         this.iconRegistry = iconRegistry;
@@ -100,10 +107,9 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         this.coreMessages = coreMessages;
         this.messages = messages;
         this.nodeFactory = nodeFactory;
+        this.eventBus = eventBus;
 
         view.setDelegate(this);
-
-        commandManager.addCommandChangedListener(this);
 
         pages = new LinkedList<>();
         pages.add(previewUrlPage);
@@ -120,6 +126,8 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
     @Override
     protected void initializeEditor(EditorAgent.OpenEditorCallback callback) {
+        commandRemovedHandlerRegistration = eventBus.addHandler(CommandRemovedEvent.getType(), this);
+
         final VirtualFile file = getEditorInput().getFile();
 
         if (file instanceof CommandFileNode) {
@@ -136,7 +144,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
     /** Initialize editor's pages with the edited command. */
     private void initializePages() {
-        commandNameInitial = editedCommand.getName();
+        initialCommandName = editedCommand.getName();
 
         pages.forEach(page -> {
             page.edit(editedCommand);
@@ -210,7 +218,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
     @Override
     public void doSave(AsyncCallback<EditorInput> callback) {
-        commandManager.updateCommand(commandNameInitial, editedCommand).then(arg -> {
+        commandManager.updateCommand(initialCommandName, editedCommand).then(arg -> {
             updateDirtyState(false);
 
             // according to the CommandManager#updateCommand contract
@@ -218,7 +226,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
             // in order to prevent name duplication
             editedCommand.setName(arg.getName());
 
-            if (!commandNameInitial.equals(editedCommand.getName())) {
+            if (!initialCommandName.equals(editedCommand.getName())) {
                 input.setFile(nodeFactory.newCommandFileNode(editedCommand));
             }
 
@@ -288,18 +296,10 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     }
 
     @Override
-    public void onCommandAdded(CommandImpl command) {
-    }
-
-    @Override
-    public void onCommandUpdated(CommandImpl previousCommand, CommandImpl command) {
-    }
-
-    @Override
-    public void onCommandRemoved(CommandImpl command) {
-        if (command.getName().equals(editedCommand.getName())) {
+    public void onCommandRemoved(CommandRemovedEvent event) {
+        if (event.getCommand().getName().equals(editedCommand.getName())) {
             editorAgent.closeEditor(this);
-            Scheduler.get().scheduleDeferred(() -> commandManager.removeCommandChangedListener(this));
+            commandRemovedHandlerRegistration.removeHandler();
         }
     }
 }

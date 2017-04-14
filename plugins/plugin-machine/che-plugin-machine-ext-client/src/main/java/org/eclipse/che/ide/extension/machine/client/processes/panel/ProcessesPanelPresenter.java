@@ -59,7 +59,7 @@ import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.command.toolbar.processes.ActivateProcessOutputEvent;
+import org.eclipse.che.ide.api.machine.events.ActivateProcessOutputEvent;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessOutputClosedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -1164,7 +1164,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     private boolean isProcessLaunchedByCommandOfKnownType(String type) {
-        return commandTypeRegistry.getCommandTypeById(type) != null;
+        return commandTypeRegistry.getCommandTypeById(type).isPresent();
     }
 
     @Override

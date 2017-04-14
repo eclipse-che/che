@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.events.ActivateProcessOutputEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
@@ -32,7 +33,7 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Drives the UI for displaying list of running and stopped processes. */
+/** Drives the UI for displaying processes list. */
 @Singleton
 public class ProcessesListPresenter implements Presenter, ProcessesListView.ActionDelegate {
 
