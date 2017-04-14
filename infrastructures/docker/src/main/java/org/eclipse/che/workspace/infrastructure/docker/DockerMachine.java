@@ -16,9 +16,14 @@ import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.Exec;
+import org.eclipse.che.plugin.docker.client.LogMessage;
+import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyProvider;
 import org.slf4j.Logger;
@@ -149,6 +154,17 @@ public class DockerMachine implements Machine {
     public Map<String, ? extends Server> getServers() {
         ServerEvaluationStrategy strategy = provider.get();
         return strategy.getServers(info, "localhost", Collections.emptyMap());
+    }
+
+    public void exec(String script, MessageProcessor<LogMessage> messageProcessor) throws InfrastructureException {
+        try {
+            Exec exec = docker.createExec(CreateExecParams.create(container,
+                                                                  new String[] {"/bin/sh", "-c", script})
+                                                          .withDetach(false));
+            docker.startExec(StartExecParams.create(exec.getId()), messageProcessor);
+        } catch (IOException e) {
+            throw new InfrastructureException(e.getLocalizedMessage(), e);
+        }
     }
 
     public void destroy() {

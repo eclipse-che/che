@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
+package org.eclipse.che.workspace.infrastructure.docker;
 
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;

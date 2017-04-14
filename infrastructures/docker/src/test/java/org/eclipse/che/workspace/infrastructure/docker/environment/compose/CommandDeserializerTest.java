@@ -8,11 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer;
+package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
 import com.fasterxml.jackson.dataformat.yaml.snakeyaml.reader.ReaderException;
 
-import org.eclipse.che.workspace.infrastructure.docker.environment.compose.ComposeEnvironmentParser;
+import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.CommandDeserializer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 import org.mockito.InjectMocks;

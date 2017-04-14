@@ -8,12 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer;
+package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
-import org.eclipse.che.workspace.infrastructure.docker.environment.compose.ComposeEnvironmentParser;
+import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.EnvironmentDeserializer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 import org.mockito.InjectMocks;

@@ -81,7 +81,7 @@ public class CommandDeserializer extends JsonDeserializer<List<String>> {
      * @throws JsonProcessingException
      */
     @Override
-    public List<String> deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public List<String> deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException {
         TreeNode tree = jsonParser.readValueAsTree();
 
         if (tree.isArray()) {

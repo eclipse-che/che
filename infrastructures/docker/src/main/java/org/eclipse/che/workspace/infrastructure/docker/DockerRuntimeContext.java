@@ -10,12 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.agent.server.AgentRegistry;
-import org.eclipse.che.api.agent.server.exception.AgentException;
-import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
@@ -24,12 +20,6 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
-import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.Exec;
-import org.eclipse.che.plugin.docker.client.LogMessage;
-import org.eclipse.che.plugin.docker.client.MessageProcessor;
-import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
-import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
@@ -37,7 +27,6 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Collections;
@@ -46,49 +35,47 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import static java.lang.String.format;
+import static org.eclipse.che.plugin.docker.client.MessageProcessor.DEV_NULL;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Alexander Garagatyi
  */
-// TODO
-// workspace start interruption
-// snapshots
-// backups
-// containers monitoring
+// TODO workspace start interruption
+// TODO snapshots, create, remove
+// TODO backups
+// TODO containers monitoring
+// TODO consider reworking synchronized, it into separate component; volatile or something else?
+
+// TODO what should be thrown if start is interrupted in another thread, in current thread
+// TODO which error will be thrown if start fails because of something we don't control
+// and admin doesn't want to know about this problem
+// TODO if this thread is interrupted and stop is not called!
+// TODO interrupted exception, closedbyinteruptionexception
+// TODO add infrastructural things such as backup/restore
+// TODO simplify code ub start env method
+
+// TODO stop of starting WS - if not supported specific exception
+// TODO stop add warning on errors?
+// TODO stop in which cases to throw an exception?
+
+// TODO proper exception in case of interruption in start/stop threads
+
+// TODO exception on start
+// TODO remove starting machine if present
+// TODO Check if interruption came from stop or because of another reason
+// TODO if because of another reason stop environment
 public class DockerRuntimeContext extends RuntimeContext {
     private static final Logger LOG = getLogger(DockerRuntimeContext.class);
 
-    @VisibleForTesting
-    // TODO move to agents resolving components
-    static final Map<String, String> runCommands = new HashMap<>();
-    static {
-        runCommands.put("org.eclipse.che.ws-agent", "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
-        runCommands.put("org.eclipse.che.terminal", "$HOME/che/terminal/che-websocket-terminal " +
-                                                                         "-addr :4411 " +
-                                                                         "-cmd ${SHELL_INTERPRETER}");
-        runCommands.put("org.eclipse.che.exec", "$HOME/che/exec-agent/che-exec-agent " +
-                                                                     "-addr :4412 " +
-                                                                     "-cmd ${SHELL_INTERPRETER} " +
-                                                                     "-logs-dir $HOME/che/exec-agent/logs");
-    }
-
-    // dependencies
-    private final NetworkLifecycle dockerNetworkLifecycle;
-    private final ServiceStarter   serviceStarter;
-
+    private final NetworkLifecycle  dockerNetworkLifecycle;
+    private final ServiceStarter    serviceStarter;
     private final DockerEnvironment dockerEnvironment;
-    // Should not be used after runtime start
-    private final Queue<String>     startQueue;
     private final URLRewriter       urlRewriter;
-    private final DockerConnector   docker;
-    private final AgentRegistry     agentRegistry;
-
-    // synchronized, TODO consider reworking it into separate component
-    // TODO volatile or something else?
-    private volatile Map<String, DockerMachine> machines;
-    private volatile Thread                     startThread;
-    private volatile boolean                    stopIsCalled;
+    private final TempAgentStuff    tempAgentStuff;
+    private final Queue<String>     startQueue;
+    private final StartSynchronizer startSynchronizer;
 
     @Inject
     public DockerRuntimeContext(@Assisted DockerRuntimeInfrastructure infrastructure,
@@ -96,12 +83,10 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 @Assisted Environment environment,
                                 @Assisted DockerEnvironment dockerEnvironment,
                                 @Assisted List<String> orderedServices,
-//                                URL registryEndpoint,
                                 NetworkLifecycle dockerNetworkLifecycle,
                                 ServiceStarter serviceStarter,
                                 URLRewriter urlRewriter,
-                                DockerConnector docker,
-                                AgentRegistry agentRegistry)
+                                TempAgentStuff tempAgentStuff)
             throws ValidationException, InfrastructureException {
         super(environment, identity, infrastructure, null);
         this.dockerEnvironment = dockerEnvironment;
@@ -109,10 +94,8 @@ public class DockerRuntimeContext extends RuntimeContext {
         this.serviceStarter = serviceStarter;
         this.startQueue = new ArrayDeque<>(orderedServices);
         this.urlRewriter = urlRewriter;
-        this.docker = docker;
-        this.agentRegistry = agentRegistry;
-        this.machines = new HashMap<>();
-        this.stopIsCalled = false;
+        this.tempAgentStuff = tempAgentStuff;
+        this.startSynchronizer = new StartSynchronizer();
     }
 
     @Override
@@ -120,16 +103,9 @@ public class DockerRuntimeContext extends RuntimeContext {
         throw new UnsupportedOperationException();
     }
 
-    // TODO what should be thrown if start is interrupted in another thread, in current thread
-    // TODO which error will be thrown if start fails because of something we don't control
-    // and admin doesn't want to know about this problem
-    // TODO if this thread is interrupted and stop is not called!
-    // TODO interrupted exception, closedbyinteruptionexception
-    // TODO add infrastructural things such as backup/restore
-    // TODO simplify code
     @Override
     protected InternalRuntime internalStart(Map<String, String> startOptions) throws InfrastructureException {
-        setStartThread();
+        startSynchronizer.setStartThread();
         try {
             checkStartInterruption();
             dockerNetworkLifecycle.createNetwork(dockerEnvironment.getNetwork());
@@ -140,24 +116,16 @@ public class DockerRuntimeContext extends RuntimeContext {
                 DockerService service = dockerEnvironment.getServices().get(machineName);
                 checkStartInterruption();
                 dockerMachine = startMachine(machineName, service, startOptions);
-                addMachine(machineName, dockerMachine);
-                // add agents start
+                checkStartInterruption();
+                startSynchronizer.addMachine(machineName, dockerMachine);
                 startQueue.poll();
                 machineName = startQueue.peek();
             }
 
             return getInternalRuntime();
         } catch (InfrastructureException | RuntimeException e) {
-            // TODO remove starting machine if present
-            // TODO Check if interruption came from stop or because of another reason
-            // TODO if because of another reason stop environment
-            boolean runtimeDestroyingNeeded = true;
-            synchronized (this) {
-                if (stopIsCalled) {
-                    runtimeDestroyingNeeded = false;
-                }
-            }
             boolean interrupted = Thread.interrupted();
+            boolean runtimeDestroyingNeeded = !startSynchronizer.isStopCalled();
             if (runtimeDestroyingNeeded) {
                 try {
                     destroyRuntime();
@@ -166,7 +134,7 @@ public class DockerRuntimeContext extends RuntimeContext {
                 }
             }
             if (interrupted) {
-                // TODO throw that it is interrupted
+                // TODO throw StartInterruptedException
                 throw new InfrastructureException("");
             }
             try {
@@ -176,26 +144,22 @@ public class DockerRuntimeContext extends RuntimeContext {
             } catch (Exception wrap) {
                 throw new InfrastructureException(wrap.getLocalizedMessage(), wrap);
             }
-            // TODO InterruptedException | ClosedByInterruptException
         }
     }
 
-    // TODO stop of starting WS - if not supported specific exception
-    // TODO add warning on errors?
-    // TODO in which cases to throw an exception?
     @Override
     protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
-        interruptStartThread();
+        startSynchronizer.interruptStartThread();
         destroyRuntime();
     }
 
     private DockerMachine startMachine(String name, DockerService service, Map<String, String> startOptions)
             throws InfrastructureException {
+        // TODO property name
         if ("true".equals(startOptions.get("recover"))) {
             try {
                 return startFromSnapshot(name, service, startOptions);
             } catch (SourceNotFoundException e) {
-                // TODO what to do in that case?
                 // slip to start without recovering
             }
         }
@@ -204,52 +168,26 @@ public class DockerRuntimeContext extends RuntimeContext {
         return dockerMachine;
     }
 
-    // TODO rework to agent launchers
-    private void startAgents(String machineName, DockerMachine dockerMachine) throws InfrastructureException {
-        MessageProcessor<LogMessage> messageProcessor = message -> {
-            LOG.error("Type:{}, Content:{}", message.getType(), message.getContent());
-        };
-        List<String> agents = environment.getMachines().get(machineName).getAgents();
-        for (String agent : agents) {
-            String agentScript;
-            try {
-                agentScript = agentRegistry.getAgent(new AgentKeyImpl(agent)).getScript();
-                if (runCommands.containsKey(agent)) {
-                    agentScript = agentScript + '\n' + runCommands.get(agent);
-                }
-            } catch (AgentException e) {
-                throw new InfrastructureException(e.getLocalizedMessage(), e);
-            }
-            String effectiveFinalScript = agentScript;
-            Thread thread = new Thread(() -> startExec(dockerMachine.getContainer(), effectiveFinalScript, messageProcessor));
-            thread.setDaemon(true);
-            thread.start();
-        }
-    }
-
-    private void startExec(String container, String script, MessageProcessor<LogMessage> messageProcessor) {
-        try {
-            Exec exec = docker.createExec(CreateExecParams.create(container,
-                                                                  new String[] {"/bin/sh", "-c", script})
-                                                          .withDetach(false));
-            docker.startExec(StartExecParams.create(exec.getId()), messageProcessor);
-        } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-        }
-    }
-
     private InternalRuntime getInternalRuntime() {
-        return new DockerInternalRuntime(this, urlRewriter, Collections.unmodifiableMap(machines));
+        return new DockerInternalRuntime(this,
+                                         urlRewriter,
+                                         Collections.unmodifiableMap(startSynchronizer.getMachines()));
     }
 
     private void destroyRuntime() throws InfrastructureException {
-        for (Map.Entry<String, DockerMachine> machineEntry : unsetMachines().entrySet()) {
+        for (Map.Entry<String, DockerMachine> dockerMachineEntry : startSynchronizer.removeMachines().entrySet()) {
             try {
-                machineEntry.getValue().destroy();
-            } catch (Exception e) {
-                // TODO
+                // TODO snapshot
+                dockerMachineEntry.getValue().destroy();
+            } catch (RuntimeException e) {
+                LOG.error(format("Could not destroy docker machine '%s' of workspace '%s'. Container '%s'",
+                                 dockerMachineEntry.getKey(),
+                                 getIdentity().getWorkspaceId(),
+                                 dockerMachineEntry.getValue().getContainer()),
+                          e);
             }
         }
+        // TODO what happens when context throws exception here
         dockerNetworkLifecycle.destroyNetwork(dockerEnvironment.getNetwork());
     }
 
@@ -271,46 +209,21 @@ public class DockerRuntimeContext extends RuntimeContext {
                                            startOptions);
     }
 
-    synchronized private void addMachine(String name, DockerMachine machine) throws InfrastructureException {
-        if (machines != null) {
-            machines.put(name, machine);
-        } else {
-            throw new InfrastructureException("");
-        }
-    }
+    // TODO rework to agent launchers
+    private void startAgents(String machineName, DockerMachine dockerMachine) throws InfrastructureException {
+        List<String> agents = environment.getMachines().get(machineName).getAgents();
 
-    synchronized private Map<String, DockerMachine> unsetMachines() throws InfrastructureException {
-        if (machines != null) {
-            Map<String, DockerMachine> machines = this.machines;
-            this.machines = null;
-            return machines;
-        }
-        throw new InfrastructureException("");
-    }
-
-    synchronized private void setStartThread() throws InfrastructureException {
-        if (startThread != null) {
-            throw new InfrastructureException("Already started");
-        }
-        startThread = Thread.currentThread();
-    }
-
-    synchronized private void interruptStartThread() throws InfrastructureException {
-        if (startThread == null) {
-            // TODO specific exception
-            throw new InfrastructureException("Stop of non started context not allowed");
-        }
-        if (stopIsCalled) {
-            throw new InfrastructureException("Stop is called twice");
-        }
-        stopIsCalled = true;
-        startThread.interrupt();
-    }
-
-    // TODO proper exception
-    private void checkStartInterruption() throws InfrastructureException {
-        if (Thread.interrupted()) {
-            throw new InfrastructureException("Runtime start was interrupted");
+        for (String agent : agents) {
+            String agentScript = tempAgentStuff.getAgentScript(agent);
+            Thread thread = new Thread(() -> {
+                try {
+                    dockerMachine.exec(agentScript, DEV_NULL);
+                } catch (InfrastructureException e) {
+                    LOG.error(e.getLocalizedMessage(), e);
+                }
+            });
+            thread.setDaemon(true);
+            thread.start();
         }
     }
 
@@ -339,5 +252,68 @@ public class DockerRuntimeContext extends RuntimeContext {
             }
         }
         return serviceWithNormalizedSource;
+    }
+
+    private void checkStartInterruption() throws InfrastructureException {
+        if (Thread.interrupted()) {
+            // TODO throw StartInterruptedException
+            throw new InfrastructureException("Runtime start was interrupted");
+        }
+    }
+
+    static class StartSynchronizer {
+        private Thread                     startThread;
+        private boolean                    stopCalled;
+        private Map<String, DockerMachine> machines;
+
+        public StartSynchronizer() {
+            this.stopCalled = false;
+            this.machines = new HashMap<>();
+        }
+
+        public synchronized Map<String, DockerMachine> getMachines() {
+            return new HashMap<>(machines);
+        }
+
+        public synchronized void addMachine(String name, DockerMachine machine) throws InfrastructureException {
+            if (machines != null) {
+                machines.put(name, machine);
+            } else {
+                // TODO throw StartInterruptedException
+                throw new InfrastructureException("");
+            }
+        }
+
+        public synchronized Map<String, DockerMachine> removeMachines() throws InfrastructureException {
+            if (machines != null) {
+                Map<String, DockerMachine> machines = this.machines;
+                // unset to identify error if method called second time
+                this.machines = null;
+                return machines;
+            }
+            throw new InfrastructureException("");
+        }
+
+        public synchronized void setStartThread() throws InfrastructureException {
+            if (startThread != null) {
+                throw new InfrastructureException("Already started");
+            }
+            startThread = Thread.currentThread();
+        }
+
+        public synchronized void interruptStartThread() throws InfrastructureException {
+            if (startThread == null) {
+                throw new InfrastructureException("Stop of non started context not allowed");
+            }
+            if (stopCalled) {
+                throw new InfrastructureException("Stop is called twice");
+            }
+            stopCalled = true;
+            startThread.interrupt();
+        }
+
+        public synchronized boolean isStopCalled() {
+            return stopCalled;
+        }
     }
 }

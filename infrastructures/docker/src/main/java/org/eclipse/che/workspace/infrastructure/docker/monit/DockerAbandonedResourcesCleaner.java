@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.cleaner;
+package org.eclipse.che.workspace.infrastructure.docker.monit;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;

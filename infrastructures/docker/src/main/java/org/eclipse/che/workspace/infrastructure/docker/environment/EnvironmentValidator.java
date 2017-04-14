@@ -42,7 +42,7 @@ public class EnvironmentValidator {
     private static final Pattern SERVER_PORT          = Pattern.compile("^[1-9]+[0-9]*(/(tcp|udp))?$");
     private static final Pattern SERVER_PROTOCOL      = Pattern.compile("^[a-z][a-z0-9-+.]*$");
 
-    // CheService syntax patterns
+    // DockerService syntax patterns
     /**
      * Examples:
      * <ul>

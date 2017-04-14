@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
+package org.eclipse.che.workspace.infrastructure.docker;
 
 /**
  * @author Alexander Garagatyi

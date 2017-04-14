@@ -12,9 +12,6 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.agent.server.exception.AgentException;
-import org.eclipse.che.api.agent.server.impl.AgentSorter;
-import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
@@ -23,6 +20,7 @@ import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentNormalizer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.docker.environment.ServicesStartStrategy;
@@ -31,7 +29,6 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure} that
@@ -45,8 +42,8 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     private final ServicesStartStrategy     startStrategy;
     private final InfrastructureProvisioner infrastructureProvisioner;
     private final EnvironmentNormalizer     environmentNormalizer;
-    private final AgentSorter               agentSorter;
     private final RuntimeFactory            runtimeFactory;
+    private final TempAgentStuff            tempAgentStuff;
 
     @Inject
     public DockerRuntimeInfrastructure(EnvironmentParser dockerEnvironmentParser,
@@ -54,17 +51,17 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                        ServicesStartStrategy startStrategy,
                                        InfrastructureProvisioner infrastructureProvisioner,
                                        EnvironmentNormalizer environmentNormalizer,
-                                       AgentSorter agentSorter,
-                                       Map<String, TypeSpecificEnvironmentParser> environmentParser,
-                                       RuntimeFactory runtimeFactory) {
-        super("docker", environmentParser.keySet());
+                                       Map<String, TypeSpecificEnvironmentParser> environmentParsers,
+                                       RuntimeFactory runtimeFactory,
+                                       TempAgentStuff tempAgentStuff) {
+        super("docker", environmentParsers.keySet());
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
         this.dockerEnvironmentParser = dockerEnvironmentParser;
         this.startStrategy = startStrategy;
         this.infrastructureProvisioner = infrastructureProvisioner;
         this.environmentNormalizer = environmentNormalizer;
-        this.agentSorter = agentSorter;
         this.runtimeFactory = runtimeFactory;
+        this.tempAgentStuff = tempAgentStuff;
     }
 
     @Override
@@ -74,13 +71,8 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         dockerEnvironmentValidator.validate(environment, dockerEnvironment);
         // check that order can be resolved
         startStrategy.order(dockerEnvironment);
-        // TODO rething agent stuff
         for (MachineConfig machineConfig : environment.getMachines().values()) {
-            try {
-                agentSorter.sort(machineConfig.getAgents());
-            } catch (AgentException e) {
-                throw new ValidationException(e.getLocalizedMessage(), e);
-            }
+            tempAgentStuff.sortAgents(machineConfig);
         }
         // TODO add an actual estimation of what is missing in the environment
         // memory
@@ -98,14 +90,8 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         dockerEnvironmentValidator.validate(environment, dockerEnvironment);
         // check that services start order can be resolved
         List<String> orderedServices = startStrategy.order(dockerEnvironment);
-        // TODO rething agent stuff
         for (MachineConfigImpl machineConfig : environment.getMachines().values()) {
-            try {
-                List<AgentKey> agentKeys = agentSorter.sort(machineConfig.getAgents());
-                machineConfig.setAgents(agentKeys.stream().map(AgentKey::getId).collect(Collectors.toList()));
-            } catch (AgentException e) {
-                throw new ValidationException(e.getLocalizedMessage(), e);
-            }
+            machineConfig.setAgents(tempAgentStuff.sortAgents(machineConfig));
         }
 
         // modify environment with everything needed to use docker machines on particular (cloud) infrastructure

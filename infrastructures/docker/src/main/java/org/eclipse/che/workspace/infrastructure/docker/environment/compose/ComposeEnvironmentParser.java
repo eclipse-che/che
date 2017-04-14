@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
@@ -70,10 +71,9 @@ public class ComposeEnvironmentParser implements TypeSpecificEnvironmentParser {
      *         compose file to parse
      * @throws ValidationException
      *         when environment or environment recipe is invalid
-     * @throws InfrastructureException
-     *         when environment recipe can not be retrieved
      */
-    public ComposeEnvironment parse(String recipeContent, String contentType)
+    @VisibleForTesting
+    ComposeEnvironment parse(String recipeContent, String contentType)
             throws ValidationException {
         checkNotNull(recipeContent, "Recipe content should not be null");
         checkNotNull(contentType, "Recipe content type should not be null");

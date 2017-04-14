@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker;
+package org.eclipse.che.workspace.infrastructure.docker.monit;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

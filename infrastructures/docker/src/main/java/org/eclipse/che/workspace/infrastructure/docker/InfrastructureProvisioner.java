@@ -19,6 +19,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  *
  * @author Alexander Garagatyi
  */
+// TODO rename to not interfere with main class
 public interface InfrastructureProvisioner {
     /**
      * Modifies environment config and internal environment representation with everything needed for infrastructure of workspace.
