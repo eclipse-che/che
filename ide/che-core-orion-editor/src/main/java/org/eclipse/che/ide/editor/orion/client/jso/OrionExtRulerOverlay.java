@@ -29,6 +29,39 @@ public class OrionExtRulerOverlay extends JavaScriptObject {
     }
 
     /**
+     * Factory to create a ruler.
+     *
+     * @param annotationModel
+     *      the annotation model for the ruler
+     * @param style
+     *      the style for the ruler
+     * @param location
+     *      the location for the ruler
+     *      {@link org.eclipse.che.ide.editor.orion.client.jso.OrionExtRulerOverlay.RulerLocation}
+     * @param overview
+     *      the overview for the ruler
+     *      {@link org.eclipse.che.ide.editor.orion.client.jso.OrionExtRulerOverlay.RulerOverview}
+     */
+    public static native void create(OrionAnnotationModelOverlay annotationModel,
+                                     OrionStyleOverlay style,
+                                     String location,
+                                     String overview,
+                                     Consumer<OrionExtRulerOverlay> callback) /*-{
+        $wnd.require(['orion/editor/rulers'], function (rulers) {
+            var rul = new rulers.Ruler(annotationModel, location, overview, style);
+            callback.@java.util.function.Consumer::accept(*)(rul);
+        });
+    }-*/;
+
+    /**
+     * @return style of the ruler
+     */
+    public final native OrionStyleOverlay getStyle() /*-{
+        return this.getRulerStyle();
+    }-*/;
+
+
+    /**
      * @return location of the ruler. Possible values: "left", "right"
      */
     public final native String getLocation() /*-{
@@ -181,7 +214,8 @@ public class OrionExtRulerOverlay extends JavaScriptObject {
      * @param useCapture
      *         the use capture
      */
-    public final native <T extends OrionEventOverlay> void addEventListener(String eventType, EventHandler<T> handler, boolean useCapture) /*-{
+    public final native <T extends OrionEventOverlay> void addEventListener(String eventType, EventHandler<T> handler,
+                                                                            boolean useCapture) /*-{
         var func = function (param) {
             handler.@org.eclipse.che.ide.editor.orion.client.jso.OrionExtRulerOverlay.EventHandler::onEvent(*)(param);
         };
@@ -212,5 +246,43 @@ public class OrionExtRulerOverlay extends JavaScriptObject {
          *         the parameter
          */
         void onEvent(T parameter);
+    }
+
+    /**
+     * The ruler location, which is either "left" or "right" or "margin".
+     */
+    public enum RulerLocation {
+        LEFT("left"),
+        MARGIN("margin"),
+        RIGHT("right");
+
+        final String location;
+
+        RulerLocation(String location) {
+            this.location = location;
+        }
+
+        public String getLocation() {
+            return location;
+        }
+    }
+
+    /**
+     * The overview type, which is either "page" or "document" or "fixed".
+     */
+    public enum RulerOverview {
+        PAGE("page"),
+        DOCUMENT("document"),
+        FIXED("fixed");
+
+        final String overview;
+
+        RulerOverview(String overview) {
+            this.overview = overview;
+        }
+
+        public String getOverview() {
+            return overview;
+        }
     }
 }
