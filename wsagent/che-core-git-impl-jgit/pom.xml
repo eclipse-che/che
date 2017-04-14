@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-agent-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.8.0-SNAPSHOT</version>
+        <version>5.9.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-git-impl-jgit</artifactId>
     <packaging>jar</packaging>
@@ -94,10 +94,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-inject</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
