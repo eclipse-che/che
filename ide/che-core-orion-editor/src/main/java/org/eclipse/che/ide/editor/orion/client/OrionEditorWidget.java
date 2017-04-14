@@ -747,6 +747,9 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
         return editorOverlay.getAnnotationModel();
     }
 
+    /**
+     * Returns {@link OrionEditorOverlay}.
+     */
     public OrionEditorOverlay getEditor() {
         return editorOverlay;
     }
