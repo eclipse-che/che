@@ -426,8 +426,8 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
         }
 
         // restore part stack's active part
-        if (partStackJSON.hasKey("ACTIVE_PART")) {
-            String activePart = partStackJSON.getString("ACTIVE_PART");
+        if (partStackState.hasKey("ACTIVE_PART")) {
+            String activePart = partStackState.getString("ACTIVE_PART");
             Provider<PartPresenter> provider = dynaProvider.getProvider(activePart);
             if (provider != null) {
                 partStack.setActivePart(provider.get());
