@@ -95,4 +95,19 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <!-- Exclude files until #3281 is resolved -->
+                        <exclude>**/WorkspaceIdleFilter.java</exclude>
+                        <!-- End excluded files -->
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
