@@ -53,8 +53,6 @@ public class WorkspaceIdleFilter implements Filter {
             this.httpJsonRequestFactory = httpJsonRequestFactory;
             this.executor = Executors.newSingleThreadScheduledExecutor();
             this.future = executor.schedule(this::sendEvent, timeout, TimeUnit.MILLISECONDS);
-            LOG.info("Idling workspace " + WorkspaceIdProvider.getWorkspaceId() + " scheduled [timeout="
-                    + timeout / 1000 + " seconds]");
             this.stopped.set(false);
         } else {
             this.stopped.set(true);
@@ -71,8 +69,6 @@ public class WorkspaceIdleFilter implements Filter {
         if (!stopped.get()) {
             future.cancel(true);
             future = executor.schedule(this::sendEvent, timeout, TimeUnit.MILLISECONDS);
-            LOG.info("Idling workspace " + WorkspaceIdProvider.getWorkspaceId() + " scheduled [timeout="
-                    + timeout / 1000 + " seconds]");
         }
         chain.doFilter(request, response);
     }
@@ -82,7 +78,8 @@ public class WorkspaceIdleFilter implements Filter {
             httpJsonRequestFactory.fromUrl(apiEndpoint + "/workspace/" + WorkspaceIdProvider.getWorkspaceId() + "/runtime")
                                   .useDeleteMethod()
                                   .request();
-            LOG.info("Workspace " + WorkspaceIdProvider.getWorkspaceId() + " has been stopped.");
+            LOG.info("Stopping workspace " + WorkspaceIdProvider.getWorkspaceId() + " after "
+                                  + timeout / 1000 + " seconds of inactivity.");
         } catch (Exception e) {
             LOG.error("Cannot stop workspace " + WorkspaceIdProvider.getWorkspaceId(), e);
         } finally {
