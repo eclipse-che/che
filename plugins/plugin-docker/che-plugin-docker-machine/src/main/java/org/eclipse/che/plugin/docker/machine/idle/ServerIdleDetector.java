@@ -44,7 +44,7 @@ public class ServerIdleDetector implements EventSubscriber<WorkspaceStatusEvent>
     @Inject
     public ServerIdleDetector(WorkspaceManager workspaceManager,
                                  EventService eventService,
-                                 @Named("che.docker.server.inactive.stop.timeout.ms") long timeout) {
+                                 @Named("che.openshift.server.inactive.stop.timeout.ms") long timeout) {
         this.timeout = timeout;
         this.eventService = eventService;
         this.workspaceManager = workspaceManager;
