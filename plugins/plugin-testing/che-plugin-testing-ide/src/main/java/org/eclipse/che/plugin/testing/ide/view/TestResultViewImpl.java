@@ -156,6 +156,8 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     @Override
     @Deprecated
     public void showResults(TestResult result) {
+        clear();
+        lastTestResult = result;
         setTitle("Test Results (Framework: " + result.getTestFramework() + ")");
         fillNavigationPanel(result);
         focusView();
