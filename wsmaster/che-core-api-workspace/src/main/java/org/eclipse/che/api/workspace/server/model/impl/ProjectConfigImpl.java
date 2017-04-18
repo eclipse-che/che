@@ -27,6 +27,7 @@ import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -250,6 +251,15 @@ public class ProjectConfigImpl implements ProjectConfig {
         attributes = dbAttributes.values()
                                  .stream()
                                  .collect(toMap(attr -> attr.name, attr -> attr.values));
+    }
+
+    @PostPersist
+    private void postPersistAttributes() {
+        if (dbAttributes != null) {
+            getAttributes().putAll(dbAttributes.values()
+                                               .stream()
+                                               .collect(toMap(attr -> attr.name, attr -> attr.values)));
+        }
     }
 
     @Entity(name = "ProjectAttribute")
