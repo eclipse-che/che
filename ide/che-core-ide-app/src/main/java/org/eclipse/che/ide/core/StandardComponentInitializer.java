@@ -73,6 +73,7 @@ import org.eclipse.che.ide.command.editor.CommandEditorProvider;
 import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
 import org.eclipse.che.ide.connection.WsConnectionListener;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
+import org.eclipse.che.ide.imageviewer.PreviewImageAction;
 import org.eclipse.che.ide.macro.ServerHostNameMacro;
 import org.eclipse.che.ide.macro.ServerMacro;
 import org.eclipse.che.ide.macro.ServerPortMacro;
@@ -149,7 +150,8 @@ public class StandardComponentInitializer {
 
     public static final String NAVIGATE_TO_FILE      = "navigateToFile";
     public static final String FULL_TEXT_SEARCH      = "fullTextSearch";
-    public static final String FIND_ACTION           = "findActionAction";
+    public static final String PREVIEW_IMAGE         = "previewImage";
+    public static final String FIND_ACTION           = "findAction";
     public static final String FORMAT                = "format";
     public static final String COPY                  = "copy";
     public static final String CUT                   = "cut";
@@ -196,6 +198,9 @@ public class StandardComponentInitializer {
 
     @Inject
     private ShowPreferencesAction showPreferencesAction;
+
+    @Inject
+    private PreviewImageAction previewImageAction;
 
     @Inject
     private FindActionAction findActionAction;
@@ -614,6 +619,9 @@ public class StandardComponentInitializer {
         // Assistant (New Menu)
         DefaultActionGroup assistantGroup = (DefaultActionGroup)actionManager.getAction(GROUP_ASSISTANT);
 
+        actionManager.registerAction(PREVIEW_IMAGE, previewImageAction);
+        assistantGroup.add(previewImageAction);
+
         actionManager.registerAction(FIND_ACTION, findActionAction);
         assistantGroup.add(findActionAction);
 
@@ -654,6 +662,7 @@ public class StandardComponentInitializer {
         actionManager.registerAction("refreshPathAction", refreshPathAction);
         actionManager.registerAction("linkWithEditor", linkWithEditorAction);
         resourceOperation.addSeparator();
+        resourceOperation.add(previewImageAction);
         resourceOperation.add(showReferenceAction);
         resourceOperation.add(goIntoAction);
         resourceOperation.add(editFileAction);
