@@ -94,10 +94,12 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
                     Thread.sleep(agentPingDelayMs);
                 }
             }
+            LOG.error(format("Fail launching agent '%s' in '%s' workspace due to timeout",
+                             agent.getName(), machine.getWorkspaceId()));
 
             process.kill();
         } catch (MachineException e) {
-            logAsErrorAgentStartLogs(agent.getName(), agentLogger.getText());
+            logAsErrorAgentStartLogs(machine, agent.getName(), agentLogger.getText());
             throw new ServerException(e.getServiceError());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -110,6 +112,7 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
             agentLogger.close();
         }
 
+        logAsErrorAgentStartLogs(machine, agent.getName(), agentLogger.getText());
         throw new AgentStartException(format("Fail launching agent %s. Workspace ID:%s",
                                              agent.getName(), machine.getWorkspaceId()));
     }
@@ -141,13 +144,21 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
     }
 
     @VisibleForTesting
-    void logAsErrorAgentStartLogs(String agentName, String logs) {
+    void logAsErrorAgentStartLogs(Instance machine, String agentName, String logs) {
         if (!logs.isEmpty()) {
-            LOG.error("An error occurs while starting '{}' agent. Detailed log:\n{}",
+            LOG.error("An error occurs while starting '{}' agent in '{}' workspace in '{}' machine on '{}' node. Detailed log:\n{}",
                       agentName,
+                      machine.getWorkspaceId(),
+                      machine.getId(),
+                      machine.getNode(),
                       logs);
         } else {
-            LOG.error("An error occurs while starting '{}' agent. The agent didn't produce any logs.", agentName);
+            LOG.error("An error occurs while starting '{}' agent in '{}' workspace in '{}' machine on '{}' node. " +
+                      "The agent didn't produce any logs.",
+                      agentName,
+                      machine.getWorkspaceId(),
+                      machine.getId(),
+                      machine.getNode());
         }
     }
 
