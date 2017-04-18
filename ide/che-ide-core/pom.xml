@@ -92,10 +92,6 @@
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-orion-editor</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-machine-ext-client</artifactId>
-        </dependency>
     </dependencies>
     <build>
         <plugins>

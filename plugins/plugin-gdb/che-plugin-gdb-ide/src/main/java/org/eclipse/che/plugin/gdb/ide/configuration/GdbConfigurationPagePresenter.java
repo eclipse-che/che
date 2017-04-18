@@ -20,8 +20,8 @@ import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
-import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
+import org.eclipse.che.ide.api.machine.MachineEntityImpl;
+import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +43,6 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
 
     private final GdbConfigurationPageView view;
     private final AppContext               appContext;
-    private final EntityFactory            entityFactory;
     private final CurrentProjectPathMacro  currentProjectPathMacro;
 
     private DebugConfiguration editedConfiguration;
@@ -55,11 +54,9 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
     @Inject
     public GdbConfigurationPagePresenter(GdbConfigurationPageView view,
                                          AppContext appContext,
-                                         EntityFactory entityFactory,
                                          CurrentProjectPathMacro currentProjectPathMacro) {
         this.view = view;
         this.appContext = appContext;
-        this.entityFactory = entityFactory;
         this.currentProjectPathMacro = currentProjectPathMacro;
 
         view.setDelegate(this);
@@ -133,7 +130,7 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
         List<Machine> machines = new ArrayList<>(runtimeMachines.size());
         for (Machine currentMachine : runtimeMachines) {
             if (currentMachine instanceof MachineDto) {
-                Machine machine = entityFactory.createMachine((MachineDto)currentMachine);
+                Machine machine = new MachineEntityImpl(currentMachine);
                 machines.add(machine);
             }
         }
