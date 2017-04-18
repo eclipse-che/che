@@ -36,7 +36,7 @@ public abstract class RuntimeContext {
     protected final RuntimeInfrastructure infrastructure;
     // TODO other than WorkspaceStatus impl
     private         WorkspaceStatus       state;
-    protected final String recipeScript;
+    protected final InternalRecipe recipe;
     protected final Map<String, InternalMachineConfig> internalMachines = new HashMap<>();
 
     public RuntimeContext(Environment environment, RuntimeIdentity identity,
@@ -45,7 +45,7 @@ public abstract class RuntimeContext {
         this.environment = environment;
         this.identity = identity;
         this.infrastructure = infrastructure;
-        this.recipeScript = resolveRecipe(environment.getRecipe());
+        this.recipe = resolveRecipe(environment.getRecipe());
 
         Map<String, ? extends MachineConfig> effectiveMachines = environment.getMachines();
         for(Map.Entry<String, ? extends MachineConfig> entry : effectiveMachines.entrySet()) {
@@ -155,27 +155,55 @@ public abstract class RuntimeContext {
 //    }
 
 
-    private String resolveRecipe(Recipe recipe) throws InfrastructureException {
+    private InternalRecipe resolveRecipe(Recipe recipe) throws InfrastructureException {
         if(recipe.getContent() != null && !recipe.getContent().isEmpty()) {
-            return recipe.getContent();
+            return new InternalRecipe(recipe, recipe.getContent());
         } else if(recipe.getLocation() != null && !recipe.getLocation().isEmpty()) {
 
             try {
                 URL recipeUrl = new URL(recipe.getLocation());
                 if(recipeUrl.getProtocol().startsWith("http")) {
-                    return HttpRequestHelper.requestString(recipe.getLocation(), HttpMethod.GET, null, null);
+                    String script = HttpRequestHelper.requestString(recipe.getLocation(), HttpMethod.GET, null, null);
+                    return new InternalRecipe(recipe, script);
                 } else {
-                    return recipe.getLocation();
+                    return new InternalRecipe(recipe, recipe.getLocation());
                 }
             } catch (MalformedURLException e) {
-                return recipe.getLocation();
+                return new InternalRecipe(recipe, recipe.getLocation());
             } catch (Exception x) {
                 throw new InfrastructureException(x);
             }
 
         } else {
-            return "";
+            return new InternalRecipe(recipe, "");
         }
     }
+
+    private class InternalRecipe {
+
+        private final String content;
+        private final String type;
+        private final String contentType;
+
+        public InternalRecipe(Recipe recipe, String content) {
+            this.content = content;
+            this.type = recipe.getType();
+            this.contentType = recipe.getContentType();
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getContentType() {
+            return contentType;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+    }
+
 
 }
