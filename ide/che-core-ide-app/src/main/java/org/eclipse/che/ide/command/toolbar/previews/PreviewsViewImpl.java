@@ -12,10 +12,12 @@ package org.eclipse.che.ide.command.toolbar.previews;
 
 import elemental.dom.Element;
 
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
@@ -41,13 +43,13 @@ public class PreviewsViewImpl implements PreviewsView {
     private ActionDelegate delegate;
 
     @Inject
-    public PreviewsViewImpl(ToolbarMessages messages) {
-
+    public PreviewsViewImpl(ToolbarMessages messages, DialogFactory dialogFactory) {
         listItems = new HashMap<>();
 
         dropdownList = new DropdownList(HEADER_WIDGET);
         dropdownList.setWidth("43px");
         dropdownList.ensureDebugId("dropdown-preview_url");
+
         dropdownList.setSelectionHandler(item -> {
             for (Entry<PreviewUrlItem, BaseListItem<PreviewUrlItem>> entry : listItems.entrySet()) {
                 if (item.equals(entry.getValue())) {
@@ -56,6 +58,12 @@ public class PreviewsViewImpl implements PreviewsView {
                 }
             }
         });
+
+        dropdownList.addDomHandler(e -> {
+            if (dropdownList.getItems().isEmpty()) {
+                dialogFactory.createMessageDialog(messages.previewsTooltip(), messages.previewsNoPreviews(), null).show();
+            }
+        }, ClickEvent.getType());
 
         Tooltip.create((Element)dropdownList.getElement(), BOTTOM, MIDDLE, messages.previewsTooltip());
     }

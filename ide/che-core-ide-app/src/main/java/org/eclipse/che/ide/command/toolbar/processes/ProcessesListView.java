@@ -37,5 +37,8 @@ public interface ProcessesListView extends View<ProcessesListView.ActionDelegate
 
         /** Called when stopping process is requested. */
         void onStopProcess(Process process);
+
+        /** Called when new command creation is requested. */
+        void onCreateCommand();
     }
 }

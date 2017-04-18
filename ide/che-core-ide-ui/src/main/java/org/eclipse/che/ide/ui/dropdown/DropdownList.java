@@ -27,6 +27,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.gwt.user.client.ui.PopupPanel.AnimationType.ROLL_DOWN;
 
@@ -43,8 +44,8 @@ public class DropdownList extends Composite {
 
     private static final int DEFAULT_WIDGET_WIDTH_PX = 200;
 
-    private final PopupPanel dropdownPopupPanel;
-    private final FlowPanel  dropdownContentPanel;
+    private final PopupPanel dropdownMenu;
+    private final FlowPanel  dropdownMenuContentPanel;
     private final Widget     emptyStateWidget;
 
     private final Map<DropdownListItem, Widget> itemListWidgets;
@@ -53,12 +54,12 @@ public class DropdownList extends Composite {
     @UiField
     SimplePanel selectedItemPanel;
     @UiField
-    SimplePanel dropButtonPanel;
+    SimplePanel dropdownMenuButton;
 
     private SelectionHandler selectionHandler;
     private DropdownListItem selectedItem;
 
-    /** Stores true if dropdown panels's width should be always synchronized with the list header's width. */
+    /** Stores true if dropdown menu's width should be always synchronized with the dropdown header's width. */
     private boolean widthsSynced;
 
     /** Creates new dropdown widget. */
@@ -86,20 +87,21 @@ public class DropdownList extends Composite {
 
         initWidget(UI_BINDER.createAndBindUi(this));
 
-        dropButtonPanel.getElement().appendChild(RESOURCES.expansionImage().getSvg().getElement());
+        dropdownMenuButton.getElement().appendChild(RESOURCES.expansionImage().getSvg().getElement());
 
-        dropdownContentPanel = new FlowPanel();
-        dropdownContentPanel.ensureDebugId("dropdown-list-content-panel");
+        dropdownMenuContentPanel = new FlowPanel();
+        dropdownMenuContentPanel.ensureDebugId("dropdown-list-content-panel");
 
-        dropdownPopupPanel = new PopupPanel(true);
-        dropdownPopupPanel.removeStyleName("gwt-PopupPanel");
-        dropdownPopupPanel.addStyleName(RESOURCES.dropdownListCss().itemsPanel());
-        dropdownPopupPanel.setAnimationEnabled(true);
-        dropdownPopupPanel.addAutoHidePartner(getElement());
-        dropdownPopupPanel.setAnimationType(ROLL_DOWN);
-        dropdownPopupPanel.add(new ScrollPanel(dropdownContentPanel));
+        dropdownMenu = new PopupPanel(true);
+        dropdownMenu.removeStyleName("gwt-PopupPanel");
+        dropdownMenu.addStyleName(RESOURCES.dropdownListCss().itemsPanel());
+        dropdownMenu.setAnimationEnabled(true);
+        dropdownMenu.addAutoHidePartner(getElement());
+        dropdownMenu.setAnimationType(ROLL_DOWN);
+        dropdownMenu.add(new ScrollPanel(dropdownMenuContentPanel));
 
-        attachEventHandlers();
+        addDomHandler(e -> toggleMenuVisibility(), ClickEvent.getType());
+
         setSelectedItem(null);
 
         setWidth(DEFAULT_WIDGET_WIDTH_PX + "px");
@@ -108,9 +110,9 @@ public class DropdownList extends Composite {
     /**
      * {@inheritDoc}
      * <p><b>Note:</b> this method sets the list header's width only.
-     * Use {@link #setDropdownPanelWidth(String)} to set the dropdown panels's width.
+     * Use {@link #setDropdownMenuWidth(String)} to set the dropdown menu's width.
      *
-     * @see #setDropdownPanelWidth(String)
+     * @see #setDropdownMenuWidth(String)
      */
     @Override
     public void setWidth(String width) {
@@ -118,21 +120,21 @@ public class DropdownList extends Composite {
     }
 
     /**
-     * Sets the dropdown panels's width.
+     * Sets the dropdown menu's width.
      * If it's not set explicitly then it will be calculated depending on the children width.
      *
      * @param width
-     *         the dropdown panels's new width, in CSS units (e.g. "10px", "1em")
+     *         the dropdown menu's width, in CSS units (e.g. "10px", "1em")
      * @see #setWidth(String)
      */
-    public void setDropdownPanelWidth(String width) {
-        dropdownPopupPanel.setWidth(width);
+    public void setDropdownMenuWidth(String width) {
+        dropdownMenu.setWidth(width);
     }
 
-    /** Set the dropdown panels's width should be always synchronized with the list header's width. */
+    /** Set the dropdown menu's width should be always synchronized with the dropdown's width. */
     public void syncWidths() {
         widthsSynced = true;
-        Window.addResizeHandler(e -> setDropdownPanelWidth(getElement().getClientWidth() + "px"));
+        Window.addResizeHandler(e -> setDropdownMenuWidth(getElement().getClientWidth() + "px"));
     }
 
     /** Adapts dropdown panel's height depending on the amount of child items. */
@@ -140,23 +142,17 @@ public class DropdownList extends Composite {
         final int visibleRowsCount = Math.min(MAX_VISIBLE_ITEMS, itemListWidgets.size());
         final int dropdownPanelHeight = ITEM_WIDGET_HEIGHT * visibleRowsCount;
 
-        dropdownPopupPanel.setHeight(dropdownPanelHeight + "px");
+        dropdownMenu.setHeight(dropdownPanelHeight + "px");
     }
 
-    private void attachEventHandlers() {
-        selectedItemPanel.addDomHandler(e -> toggleListVisibility(), ClickEvent.getType());
-        emptyStateWidget.addDomHandler(e -> toggleListVisibility(), ClickEvent.getType());
-        dropButtonPanel.addDomHandler(e -> toggleListVisibility(), ClickEvent.getType());
-    }
-
-    private void toggleListVisibility() {
-        if (dropdownPopupPanel.isShowing()) {
-            dropdownPopupPanel.hide();
+    private void toggleMenuVisibility() {
+        if (dropdownMenu.isShowing()) {
+            dropdownMenu.hide();
         } else {
-            dropdownPopupPanel.showRelativeTo(this);
+            dropdownMenu.showRelativeTo(this);
 
             if (widthsSynced) {
-                setDropdownPanelWidth(getElement().getClientWidth() + "px");
+                setDropdownMenuWidth(getElement().getClientWidth() + "px");
             }
         }
     }
@@ -167,7 +163,7 @@ public class DropdownList extends Composite {
         }
     }
 
-    /** Sets the given {@code handler} to notify it about changing selected item. */
+    /** Sets the given {@link SelectionHandler}. */
     public void setSelectionHandler(SelectionHandler handler) {
         selectionHandler = handler;
     }
@@ -178,7 +174,7 @@ public class DropdownList extends Composite {
         return selectedItem;
     }
 
-    /** Set the given item as currently selected. Sets empty state widget if {@code null} were provided. */
+    /** Set the given item as currently selected. Sets empty state widget if {@code null} provided. */
     private void setSelectedItem(@Nullable DropdownListItem item) {
         selectedItem = item;
         selectedItemPanel.setWidget(item != null ? itemHeaderWidgets.get(item) : emptyStateWidget);
@@ -199,19 +195,19 @@ public class DropdownList extends Composite {
         itemHeaderWidgets.put(item, headerWidget);
         itemListWidgets.put(item, listWidget);
 
-        headerWidget.addHandler(e -> toggleListVisibility(), ClickEvent.getType());
+        headerWidget.addHandler(e -> toggleMenuVisibility(), ClickEvent.getType());
 
         listWidget.addStyleName(RESOURCES.dropdownListCss().listItem());
         listWidget.addDomHandler(e -> {
             setSelectedItem(item);
-            dropdownPopupPanel.hide();
+            dropdownMenu.hide();
 
             if (selectionHandler != null) {
                 selectionHandler.onItemSelected(item);
             }
         }, ClickEvent.getType());
 
-        dropdownContentPanel.insert(listWidget, 0);
+        dropdownMenuContentPanel.insert(listWidget, 0);
         adaptDropDownPanelHeight();
         setSelectedItem(item);
     }
@@ -236,7 +232,7 @@ public class DropdownList extends Composite {
         final Widget widget = itemListWidgets.remove(item);
 
         if (widget != null) {
-            dropdownContentPanel.remove(widget);
+            dropdownMenuContentPanel.remove(widget);
         }
 
         itemHeaderWidgets.remove(item);
@@ -251,11 +247,16 @@ public class DropdownList extends Composite {
         adaptDropDownPanelHeight();
     }
 
+    /** Returns all list's items. */
+    public Set<DropdownListItem> getItems() {
+        return itemListWidgets.keySet();
+    }
+
     /** Clear the list. */
     public void clear() {
         itemListWidgets.clear();
         itemHeaderWidgets.clear();
-        dropdownContentPanel.clear();
+        dropdownMenuContentPanel.clear();
 
         adaptDropDownPanelHeight();
         checkListEmptiness();
