@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.previews;
 
+import elemental.dom.Element;
+
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
+import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 import org.eclipse.che.ide.ui.dropdown.DropdownList;
 
@@ -22,6 +26,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static org.eclipse.che.ide.command.toolbar.previews.PreviewUrlItemRenderer.HEADER_WIDGET;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /** Implementation of {@link PreviewsView} that displays preview URLs in a dropdown list. */
 @Singleton
@@ -35,7 +41,8 @@ public class PreviewsViewImpl implements PreviewsView {
     private ActionDelegate delegate;
 
     @Inject
-    public PreviewsViewImpl() {
+    public PreviewsViewImpl(ToolbarMessages messages) {
+
         listItems = new HashMap<>();
 
         dropdownList = new DropdownList(HEADER_WIDGET);
@@ -49,6 +56,8 @@ public class PreviewsViewImpl implements PreviewsView {
                 }
             }
         });
+
+        Tooltip.create((Element)dropdownList.getElement(), BOTTOM, MIDDLE, messages.previewsTooltip());
     }
 
     @Override
