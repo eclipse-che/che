@@ -26,38 +26,38 @@ public class OpenShiftRouteCreator {
 
     public static void createRoute (final String namespace,
                                     final String workspaceName,
-                                    final String cheServerExternalAddress,
-                                    final String serverRef, 
+                                    final String openShiftNamespaceExternalAddress,
+                                    final String serverRef,
                                     final String serviceName,
                                     final boolean enableTls) {
 
-        if (cheServerExternalAddress == null) {
+        if (openShiftNamespaceExternalAddress == null) {
             throw new IllegalArgumentException("Property che.docker.ip.external must be set when using openshift.");
         }
 
         try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
             String routeName = generateRouteName(workspaceName, serverRef);
-            String serviceHost = generateRouteHost(workspaceName, serverRef, cheServerExternalAddress);
+            String serviceHost = generateRouteHost(routeName, openShiftNamespaceExternalAddress);
     
                SpecNested<DoneableRoute> routeSpec = openShiftClient
                     .routes()
                     .inNamespace(namespace)
                     .createNew()
                     .withNewMetadata()
-                    .withName(routeName)
-                    .addToLabels(OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL, serviceName)
+                      .withName(routeName)
+                      .addToLabels(OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL, serviceName)
                     .endMetadata()
                     .withNewSpec()
-                    .withHost(serviceHost)
-                    .withNewTo()
+                      .withHost(serviceHost)
+                      .withNewTo()
                         .withKind("Service")
                         .withName(serviceName)
-                    .endTo()
-                    .withNewPort()
+                      .endTo()
+                      .withNewPort()
                         .withNewTargetPort()
-                            .withStrVal(serverRef)
+                          .withStrVal(serverRef)
                         .endTargetPort()
-                    .endPort();
+                      .endPort();
     
             if (enableTls) {
                 routeSpec.withNewTls()
@@ -73,11 +73,10 @@ public class OpenShiftRouteCreator {
     }
 
     private static String generateRouteName(final String workspaceName, final String serverRef) {
-        return OpenShiftConnector.CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceName + "-" + serverRef;
+        return serverRef + "-" + workspaceName;
     }
 
-    private static String generateRouteHost(final String workspaceName, final String serverRef, final String cheServerExternalAddress) {
-        return serverRef + "-" + workspaceName + "-" + cheServerExternalAddress;
+    private static String generateRouteHost(final String routeName, final String openShiftNamespaceExternalAddress) {
+        return routeName + "-"  + openShiftNamespaceExternalAddress;
     }
-
 }
