@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,23 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-
-package org.eclipse.che.jdt.rest;
-
-import org.eclipse.che.JavadocUrlProvider;
-
-import javax.inject.Inject;
+package org.eclipse.che;
 
 /**
- * Provide URL for Javadoc service for JDT classes
+ * Provide URL for Javadoc service
  */
-public class UrlContextProvider {
+public interface JavadocUrlProvider {
 
-    @Inject
-    private static JavadocUrlProvider provider;
-
-    public static String get(String projectPath) {
-        return provider.getJavadocUrl(projectPath);
-    }
-
+    String getJavadocUrl(String projectPath);
 }
