@@ -11,7 +11,7 @@
 package org.eclipse.che.api.project.server;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
@@ -26,8 +26,8 @@ import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.eclipse.che.commons.lang.IoUtil;
 
 import java.io.File;

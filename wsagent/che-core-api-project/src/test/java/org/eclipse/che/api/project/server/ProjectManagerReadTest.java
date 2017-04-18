@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
