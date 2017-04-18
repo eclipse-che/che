@@ -354,6 +354,12 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.projectConfiguration.title")
     String actionProjectConfigurationTitle();
 
+    @Key("action.previewImage.description")
+    String actionPreviewImageDescription();
+
+    @Key("action.previewImage.title")
+    String actionPreviewImageTitle();
+
     @Key("action.findAction.description")
     String actionFindActionDescription();
 
