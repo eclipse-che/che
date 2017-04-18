@@ -174,7 +174,9 @@ public class WsMasterModule extends AbstractModule {
         requestInjection(interceptor);
         bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
         bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class)
-                .to(org.eclipse.che.plugin.docker.machine.cleaner.LocalWorkspaceFilesCleaner.class);
+                  .to(org.eclipse.che.plugin.openshift.client.OpenShiftWorkspaceFilesCleaner.class);
+//                .to(org.eclipse.che.plugin.docker.machine.cleaner.LocalWorkspaceFilesCleaner.class);
+
         bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
                 .to(org.eclipse.che.plugin.docker.machine.local.LocalCheInfrastructureProvisioner.class);
 
