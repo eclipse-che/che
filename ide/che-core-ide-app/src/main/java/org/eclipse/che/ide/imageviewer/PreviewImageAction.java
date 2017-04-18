@@ -1,0 +1,98 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.ide.imageviewer;
+
+import com.google.gwt.user.client.Window;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import static java.util.Collections.singletonList;
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
+import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Resource;
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Action for previewing images in dedicated window.
+ *
+ * @author Vitaliy Guliy
+ */
+@Singleton
+public class PreviewImageAction extends AbstractPerspectiveAction {
+
+    private final WsAgentURLModifier wsAgentURLModifier;
+    private final AppContext         appContext;
+
+    private final List<String> extensions = new ArrayList<>();
+
+    @Inject
+    public PreviewImageAction(WsAgentURLModifier wsAgentURLModifier,
+                             AppContext appContext,
+                              CoreLocalizationConstant constant,
+                              @Named("PNGFileType") FileType pngFile,
+                              @Named("BMPFileType") FileType bmpFile,
+                              @Named("GIFFileType") FileType gifFile,
+                              @Named("ICOFileType") FileType iconFile,
+                              @Named("SVGFileType") FileType svgFile,
+                              @Named("JPEFileType") FileType jpeFile,
+                              @Named("JPEGFileType") FileType jpegFile,
+                              @Named("JPGFileType") FileType jpgFile) {
+        super(singletonList(PROJECT_PERSPECTIVE_ID),
+                constant.actionPreviewImageTitle(),
+                constant.actionPreviewImageDescription(),
+                null,
+                null);
+        this.wsAgentURLModifier = wsAgentURLModifier;
+        this.appContext = appContext;
+
+        extensions.add(pngFile.getExtension());
+        extensions.add(bmpFile.getExtension());
+        extensions.add(gifFile.getExtension());
+        extensions.add(iconFile.getExtension());
+        extensions.add(svgFile.getExtension());
+        extensions.add(jpeFile.getExtension());
+        extensions.add(jpegFile.getExtension());
+        extensions.add(jpgFile.getExtension());
+    }
+
+    @Override
+    public void updateInPerspective(ActionEvent e) {
+        final Resource[] resources = appContext.getResources();
+        if (resources != null && resources.length == 1) {
+            final Resource selectedResource = resources[0];
+            if (Resource.FILE == selectedResource.getResourceType()) {
+                final String fileExtension = ((File)selectedResource).getExtension();
+                e.getPresentation().setEnabledAndVisible(extensions.contains(fileExtension));
+                return;
+            }
+        }
+
+        e.getPresentation().setEnabledAndVisible(false);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        final Resource selectedResource = appContext.getResource();
+        if (Resource.FILE == selectedResource.getResourceType()) {
+            final String contentUrl = ((File)selectedResource).getContentUrl();
+            Window.open(wsAgentURLModifier.modify(contentUrl), "_blank", null);
+        }
+    }
+
+}
