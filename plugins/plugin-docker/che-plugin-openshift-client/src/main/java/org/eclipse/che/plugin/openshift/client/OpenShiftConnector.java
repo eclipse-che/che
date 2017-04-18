@@ -1123,45 +1123,45 @@ public class OpenShiftConnector extends DockerConnector {
         Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
 
         LOG.info("Adding container {} to OpenShift deployment {}", sanitizedContainerName, deploymentName);
-        String[] command;
-        String workspaceDir = getWorkspaceDir(volumes);
-        if (workspaceDir != null) {
-            command = new String[3];
-            command[0] = "sh";
-            command[1] = "-c";
-            command[2] = "mkdir -p " + workspaceDir + ";tail -f /dev/null";
-        } else {
-            command = null;
-        }
-        if (command != null) {
-            Deployment deployment = createOpenShiftDeploymentInternal(workspaceID,
-                                                                      imageName,
-                                                                      sanitizedContainerName,
-                                                                      exposedPorts,
-                                                                      envVariables,
-                                                                      volumes,
-                                                                      deploymentName,
-                                                                      selector,
-                                                                      command,
-                                                                      false,
-                                                                      resourceLimits,
-                                                                      resourceRequests);
-            try {
-                waitAndRetrieveContainerID(deploymentName);
-            } catch (IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
-
-            try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
-                openShiftClient.extensions()
-                               .deployments()
-                               .inNamespace(this.openShiftCheProjectName)
-                               .delete(deployment);
-                if (!isDeleted(deploymentName)) {
-                    LOG.warn("OpenShift deployment {} hasn't been deleted", deploymentName);
-                }
-            }
-        }
+//        String[] command;
+//        String workspaceDir = getWorkspaceDir(volumes);
+//        if (workspaceDir != null) {
+//            command = new String[3];
+//            command[0] = "sh";
+//            command[1] = "-c";
+//            command[2] = "mkdir -p " + workspaceDir + ";tail -f /dev/null";
+//        } else {
+//            command = null;
+//        }
+//        if (command != null) {
+//            Deployment deployment = createOpenShiftDeploymentInternal(workspaceID,
+//                                                                      imageName,
+//                                                                      sanitizedContainerName,
+//                                                                      exposedPorts,
+//                                                                      envVariables,
+//                                                                      volumes,
+//                                                                      deploymentName,
+//                                                                      selector,
+//                                                                      command,
+//                                                                      false,
+//                                                                      resourceLimits,
+//                                                                      resourceRequests);
+//            try {
+//                waitAndRetrieveContainerID(deploymentName);
+//            } catch (IOException e) {
+//                LOG.error(e.getMessage(), e);
+//            }
+//
+//            try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
+//                openShiftClient.extensions()
+//                               .deployments()
+//                               .inNamespace(this.openShiftCheProjectName)
+//                               .delete(deployment);
+//                if (!isDeleted(deploymentName)) {
+//                    LOG.warn("OpenShift deployment {} hasn't been deleted", deploymentName);
+//                }
+//            }
+//        }
         Deployment deployment = createOpenShiftDeploymentInternal(workspaceID,
                                                        imageName,
                                                        sanitizedContainerName,
@@ -1226,7 +1226,7 @@ public class OpenShiftConnector extends DockerConnector {
                                     .endSecurityContext()
                                     .withLivenessProbe(getLivenessProbeFrom(exposedPorts))
                                     .withCommand(command)
-                                    .withVolumeMounts(getVolumeMountsFrom(volumes, workspaceID, withSubpath))
+//                                    .withVolumeMounts(getVolumeMountsFrom(volumes, workspaceID, withSubpath))
                                     .withNewResources()
                                         .withLimits(resourceLimits)
                                         .withRequests(resourceRequests)
@@ -1235,7 +1235,7 @@ public class OpenShiftConnector extends DockerConnector {
 
         PodSpec podSpec = new PodSpecBuilder()
                                  .withContainers(container)
-                                 .withVolumes(getVolumesFrom(volumes, workspaceID))
+//                               .withVolumes(getVolumesFrom(volumes, workspaceID))
                                  .build();
 
         Deployment deployment = new DeploymentBuilder()
