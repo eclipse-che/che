@@ -13,7 +13,6 @@ package org.eclipse.che.api.workspace.server.spi;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,32 +20,51 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * "pre-processed" OldMachine Config. Form useful for
+ * "pre-processed" Machine Config. To use inside infrastructure
  * @author gazarenkov
  */
-public class InternalMachineConfig {
+class InternalMachineConfig {
 
     // ordered agent scripts to launch on start
-    private final EffectiveAgents           agents  = new EffectiveAgents();
-    // set of servers
+    private final List<String>           agents  = new ArrayList<>();
+    // set of servers including ones configured by agents
     private final Map<String, ServerConfig> servers = new HashMap<>();
 
     private final Map<String, String> attributes = new HashMap<>();
 
     public InternalMachineConfig(MachineConfig originalConfig, URL agentRegistry) throws InfrastructureException {
 
-        initAgents(originalConfig.getAgents(), agentRegistry);
-
         this.servers.putAll(originalConfig.getServers());
-        this.servers.putAll(agents.getAllServers());
-
+        initAgents(originalConfig.getAgents(), agentRegistry);
         this.attributes.putAll(originalConfig.getAttributes());
-
     }
+
+    /**
+     * @return servers
+     */
+    public Map<String, ServerConfig> getServers() {
+        return servers;
+    }
+
+    /**
+     * @return agent scripts
+     */
+    public List <String> getAgentScripts() {
+        return this.agents;
+    }
+
+    /**
+     * @return attributes
+     */
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
 
     // TODO
     // Obtain scripts and organize correctly ordered list according to Agents configuration,
     // including dependencies and excluding duplicates
+    // add servers defined by agents
     private void initAgents(List<String> agentIds, URL agentRegistry) throws InfrastructureException {
 
 //        List<String> ids = new ArrayList<>();
@@ -66,27 +84,5 @@ public class InternalMachineConfig {
 
 
     }
-
-    /**
-     *
-     * @return
-     */
-    public Map<String, ServerConfig> getServers() {
-        return servers;
-    }
-
-    public List <String> getAgentScripts() {
-        return this.agents.agentScripts;
-    }
-
-    private class EffectiveAgents {
-        private List <String> agentScripts = new ArrayList<>();
-
-        private Map <String, ServerConfig> getAllServers() {
-            return null;
-        }
-    }
-
-
 
 }

@@ -13,8 +13,14 @@ package org.eclipse.che.api.workspace.server.spi;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.config.Recipe;
+import org.eclipse.che.api.core.rest.HttpRequestHelper;
 
+import javax.ws.rs.HttpMethod;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -30,14 +36,21 @@ public abstract class RuntimeContext {
     protected final RuntimeInfrastructure infrastructure;
     // TODO other than WorkspaceStatus impl
     private         WorkspaceStatus       state;
+    protected final String recipeScript;
+    protected final Map<String, InternalMachineConfig> internalMachines = new HashMap<>();
 
     public RuntimeContext(Environment environment, RuntimeIdentity identity,
-                          RuntimeInfrastructure infrastructure, URL registryEndpoint)
+                          RuntimeInfrastructure infrastructure, URL agentRegistry)
             throws ValidationException, InfrastructureException {
         this.environment = environment;
         this.identity = identity;
         this.infrastructure = infrastructure;
-//        this.internalRuntimeConfig = new InternalRuntimeConfig(environment, registryEndpoint);
+        this.recipeScript = resolveRecipe(environment.getRecipe());
+
+        Map<String, ? extends MachineConfig> effectiveMachines = environment.getMachines();
+        for(Map.Entry<String, ? extends MachineConfig> entry : effectiveMachines.entrySet()) {
+            internalMachines.put(entry.getKey(), new InternalMachineConfig(entry.getValue(), agentRegistry));
+        }
     }
 
     /**
@@ -141,5 +154,28 @@ public abstract class RuntimeContext {
 //        return effectiveEnv;
 //    }
 
+
+    private String resolveRecipe(Recipe recipe) throws InfrastructureException {
+        if(recipe.getContent() != null && !recipe.getContent().isEmpty()) {
+            return recipe.getContent();
+        } else if(recipe.getLocation() != null && !recipe.getLocation().isEmpty()) {
+
+            try {
+                URL recipeUrl = new URL(recipe.getLocation());
+                if(recipeUrl.getProtocol().startsWith("http")) {
+                    return HttpRequestHelper.requestString(recipe.getLocation(), HttpMethod.GET, null, null);
+                } else {
+                    return recipe.getLocation();
+                }
+            } catch (MalformedURLException e) {
+                return recipe.getLocation();
+            } catch (Exception x) {
+                throw new InfrastructureException(x);
+            }
+
+        } else {
+            return "";
+        }
+    }
 
 }
