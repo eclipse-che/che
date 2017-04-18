@@ -13,20 +13,15 @@ package org.eclipse.che.wsagent.server;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.servlet.ServletModule;
 
-import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.inject.DynaModule;
-import org.everrest.guice.servlet.GuiceEverrestServlet;
-import org.everrest.websockets.WSConnectionTracker;
 
-/** @author andrew00x */
+/** @author Sergii Kabashniuk */
 @DynaModule
-public class WsAgentServletModule extends ServletModule {
+public class SwaggerServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
-        getServletContext().addListener(new WSConnectionTracker());
-        filter("/*").through(CheCorsFilter.class);
-        serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
         bind(io.swagger.jaxrs.config.DefaultJaxrsConfig.class).asEagerSingleton();
+        install(new org.eclipse.che.swagger.deploy.DocsModule());
         serve("/swaggerinit").with(io.swagger.jaxrs.config.DefaultJaxrsConfig.class, ImmutableMap
                 .of("api.version", "1.0",
                     "swagger.api.title", "Eclipse Che",

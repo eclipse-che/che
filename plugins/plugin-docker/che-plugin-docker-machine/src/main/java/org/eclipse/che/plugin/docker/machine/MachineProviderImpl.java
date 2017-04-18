@@ -23,7 +23,7 @@ import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.CompositeLineConsumer;
 import org.eclipse.che.api.core.util.FileCleaner;
-import org.eclipse.che.api.core.util.JsonRpcEndpointIdsHolder;
+import org.eclipse.che.api.core.util.JsonRpcEndpointToMachineNameHolder;
 import org.eclipse.che.api.core.util.JsonRpcMessageConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.SystemInfo;
@@ -119,7 +119,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final ExecutorService                               executor;
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
     private final RequestTransmitter                            transmitter;
-    private final JsonRpcEndpointIdsHolder                      endpointIdsHolder;
+    private final JsonRpcEndpointToMachineNameHolder            jsonRpcEndpointToMachineNameHolder;
     private final boolean                                       doForcePullOnBuild;
     private final boolean                                       privilegedMode;
     private final int                                           pidsLimit;
@@ -148,7 +148,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                DockerMachineFactory dockerMachineFactory,
                                DockerInstanceStopDetector dockerInstanceStopDetector,
                                RequestTransmitter transmitter,
-                               JsonRpcEndpointIdsHolder endpointIdsHolder,
+                               JsonRpcEndpointToMachineNameHolder jsonRpcEndpointToMachineNameHolder,
                                @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
                                @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
                                @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
@@ -175,7 +175,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
         this.transmitter = transmitter;
-        this.endpointIdsHolder = endpointIdsHolder;
         this.doForcePullOnBuild = doForcePullOnBuild;
         this.privilegedMode = privilegedMode;
         this.snapshotUseRegistry = snapshotUseRegistry;
@@ -188,6 +187,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         //  according to docker docs field  memorySwap should be equal to memory+swap
         //  we calculate this field as memorySwap=memory * (1 + multiplier) so we just add 1 to multiplier
         this.memorySwapMultiplier = memorySwapMultiplier == -1 ? -1 : memorySwapMultiplier + 1;
+        this.jsonRpcEndpointToMachineNameHolder = jsonRpcEndpointToMachineNameHolder;
         this.networkDriver = networkDriver;
         this.parentCgroup = parentCgroup;
         this.cpusetCpus = cpusetCpus;
@@ -277,8 +277,10 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         service = new CheServiceImpl(service);
 
         JsonRpcMessageConsumer<MachineLogMessage> messageConsumer =
-                new JsonRpcMessageConsumer<>("event:environment-output:message", transmitter, endpointIdsHolder.getEndpointIds());
-
+                new JsonRpcMessageConsumer<>("event:environment-output:message",
+                                             transmitter,
+                                             () -> jsonRpcEndpointToMachineNameHolder
+                                                     .getEndpointIdsByWorkspaceIdPlusMachineName(workspaceId + "::" + machineName));
         LineConsumer logger = new CompositeLineConsumer(machineLogger, new AbstractLineConsumer() {
             @Override
             public void writeLine(String line) throws IOException {

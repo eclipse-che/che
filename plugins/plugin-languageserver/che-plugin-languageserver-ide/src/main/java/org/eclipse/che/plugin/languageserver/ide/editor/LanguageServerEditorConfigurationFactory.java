@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+
 import io.typefox.lsapi.ServerCapabilities;
 
 /**
@@ -17,5 +19,5 @@ import io.typefox.lsapi.ServerCapabilities;
  */
 public interface LanguageServerEditorConfigurationFactory {
 
-    LanguageServerEditorConfiguration build(ServerCapabilities capabilities);
+    LanguageServerEditorConfiguration build(TextEditor editor, ServerCapabilities capabilities);
 }

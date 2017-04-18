@@ -53,7 +53,6 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
                                      LoaderPresenter loader,
-                                     MachineLogsRestorer restorer,
                                      RequestTransmitter transmitter,
                                      WorkspaceEventsHandler handler) {
         super(workspaceServiceClient,
@@ -69,7 +68,6 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
               preferencesManager,
               dtoFactory,
               loader,
-              restorer,
               transmitter);
     }
 

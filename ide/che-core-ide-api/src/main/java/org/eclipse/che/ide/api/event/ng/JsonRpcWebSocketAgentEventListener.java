@@ -15,18 +15,23 @@ import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
 import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
+
+import java.util.function.Consumer;
 
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
@@ -39,16 +44,23 @@ import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOp
 public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
     private final JsonRpcInitializer initializer;
     private final AppContext         appContext;
+    private final EventBus           eventBus;
     private final RequestTransmitter requestTransmitter;
     private final DtoFactory         dtoFactory;
+    private final ExecAgentCommandManager execAgentCommandManager;
 
     @Inject
-    public JsonRpcWebSocketAgentEventListener(JsonRpcInitializer initializer, AppContext appContext, EventBus eventBus,
-                                              RequestTransmitter requestTransmitter, DtoFactory dtoFactory) {
+    public JsonRpcWebSocketAgentEventListener(JsonRpcInitializer initializer,
+                                              AppContext appContext, EventBus eventBus,
+                                              RequestTransmitter requestTransmitter,
+                                              DtoFactory dtoFactory,
+                                              ExecAgentCommandManager execAgentCommandManager) {
         this.appContext = appContext;
         this.initializer = initializer;
+        this.eventBus = eventBus;
         this.requestTransmitter = requestTransmitter;
         this.dtoFactory = dtoFactory;
+        this.execAgentCommandManager = execAgentCommandManager;
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
     }
@@ -89,6 +101,23 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
         for(MachineEntity machineEntity : appContext.getActiveRuntime().getMachines()) {
             if (!machineEntity.isDev()) {
                 initializer.initialize(machineEntity.getId(), singletonMap("url", machineEntity.getExecAgentUrl()));
+                execAgentCommandManager.getProcesses(machineEntity.getId(), false)
+                                       .then(processes -> {
+                                           Consumer<Integer> pidConsumer = pid -> execAgentCommandManager
+                                                   .getProcessLogs(machineEntity.getId(), pid, null, null, 50, 0)
+                                                   .then(logs -> {
+                                                       logs.forEach(log -> {
+                                                           String fixedLog = log.getText().replaceAll("\\[STDOUT\\] ", "");
+                                                           String machineName = machineEntity.getDisplayName();
+                                                           eventBus.fireEvent(new EnvironmentOutputEvent(fixedLog, machineName));
+                                                       });
+                                                   });
+
+                                           processes.stream()
+                                                    .filter(it -> "CheWsAgent".equals(it.getName()))
+                                                    .map(DtoWithPid::getPid)
+                                                    .forEach(pidConsumer);
+                                       });
             }
         }
     }

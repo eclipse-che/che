@@ -30,6 +30,8 @@ import org.eclipse.che.ide.api.action.PromisableAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -52,6 +54,8 @@ public class OpenFileAction extends Action implements PromisableAction {
 
     /** ID of the parameter to specify file path to open. */
     public static final String FILE_PARAM_ID = "file";
+
+    public static final String LINE_PARAM_ID = "line";
 
     private final EventBus                 eventBus;
     private final CoreLocalizationConstant localization;
@@ -95,7 +99,32 @@ public class OpenFileAction extends Action implements PromisableAction {
                         actionCompletedCallback.onSuccess(null);
                     }
 
-                    editorAgent.openEditor(optionalFile.get());
+                    editorAgent.openEditor(optionalFile.get(), new EditorAgent.OpenEditorCallback() {
+                        @Override
+                        public void onEditorOpened(EditorPartPresenter editor) {
+                            if (!(editor instanceof TextEditor)) {
+                                return;
+                            }
+
+                            try {
+                                int lineNumber = Integer.parseInt(event.getParameters().get(LINE_PARAM_ID)) - 1;
+                                ((TextEditor)editor).getDocument()
+                                                    .setCursorPosition(new TextPosition(lineNumber, 0));
+                            } catch (NumberFormatException e) {
+                                Log.error(getClass(), localization.fileToOpenLineIsNotANumber());
+                            }
+
+                        }
+
+                        @Override
+                        public void onInitializationFailed() {
+                        }
+
+                        @Override
+                        public void onEditorActivated(EditorPartPresenter editor) {
+                        }
+                    });
+
                 } else {
                     if (actionCompletedCallback != null) {
                         actionCompletedCallback.onFailure(null);
