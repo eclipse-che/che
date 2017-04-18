@@ -17,7 +17,7 @@ import com.google.inject.name.Names;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 
 /**
- * @author Valeriy Svydenko
+ * GIN module for configuring command consoles.
  */
 public class ConsoleGinModule extends AbstractGinModule {
     @Override

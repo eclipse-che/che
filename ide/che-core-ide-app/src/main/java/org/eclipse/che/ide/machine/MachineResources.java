@@ -16,7 +16,7 @@ import com.google.gwt.resources.client.CssResource;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
- * @author Valeriy Svydenko
+ * Interface for machine resources
  */
 public interface MachineResources extends ClientBundle {
     @Source({"machine.css", "org/eclipse/che/ide/api/ui/style.css"})

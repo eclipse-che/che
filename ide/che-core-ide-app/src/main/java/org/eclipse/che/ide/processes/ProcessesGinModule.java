@@ -19,7 +19,7 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelView;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelViewImpl;
 
 /**
- * @author Valeriy Svydenko
+ * GIN module for configuring process panel.
  */
 public class ProcessesGinModule extends AbstractGinModule {
     @Override
