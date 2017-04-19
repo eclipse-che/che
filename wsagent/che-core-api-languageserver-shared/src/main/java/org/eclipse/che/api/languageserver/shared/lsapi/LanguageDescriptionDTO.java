@@ -28,9 +28,14 @@ public interface LanguageDescriptionDTO extends LanguageDescription {
    void setMimeTypes(List<String> mimeTypes);
     
     /**
-     * The fileExtension this language is associated with. At least one extension must be provided.
+     * The fileExtension this language is associated with.
      */
     void setFileExtensions(List<String> fileExtension);
+    
+    /**
+     * The filename patterns this language is associated with.
+     */
+    void setFileNamePatterns(final List<String> filenamePatterns);
     
     /**
      * The optional highlighting configuration to support client side syntax highlighting.

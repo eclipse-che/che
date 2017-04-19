@@ -55,8 +55,6 @@ public class ServerInitializerImplTest {
     private LanguageServerLauncher              launcher;
     @Mock
     private LanguageServer                      server;
-    @Mock
-    private CompletableFuture<InitializeResult> completableFuture;
 
     private ServerInitializerImpl initializer;
 
@@ -68,8 +66,8 @@ public class ServerInitializerImplTest {
     @Test
     public void initializerShouldNotifyObservers() throws Exception {
         when(languageDescription.getLanguageId()).thenReturn("languageId");
+        CompletableFuture<InitializeResult> completableFuture= CompletableFuture.completedFuture(mock(InitializeResult.class));
         when(server.initialize(any(InitializeParams.class))).thenReturn(completableFuture);
-        when(completableFuture.get()).thenReturn(mock(InitializeResult.class));
 
         when(launcher.getLanguageDescription()).thenReturn(languageDescription);
         when(launcher.launch(anyString())).thenReturn(server);

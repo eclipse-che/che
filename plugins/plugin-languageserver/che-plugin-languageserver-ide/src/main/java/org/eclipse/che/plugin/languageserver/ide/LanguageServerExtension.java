@@ -28,8 +28,8 @@ import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
@@ -95,12 +95,12 @@ public class LanguageServerExtension {
 
             @Override
             public void onFileOperation(final FileEvent event) {
-                Path location = event.getFile().getLocation();
-                if (location.getFileExtension() == null || !fileTypeRegister.hasLSForExtension(location.getFileExtension())) {
+                VirtualFile file = event.getFile();
+                if (!fileTypeRegister.hasLSForFile(file)) {
                     return;
                 }
                 final TextDocumentIdentifierDTO documentId = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
-                documentId.setUri(location.toString());
+                documentId.setUri(file.getLocation().toString());
                 switch (event.getOperationType()) {
                     case OPEN:
                         onOpen(event, dtoFactory, serviceClient, fileTypeRegister);
@@ -143,7 +143,7 @@ public class LanguageServerExtension {
                 documentItem.setUri(event.getFile().getLocation().toString());
                 documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
                 documentItem.setText(text);
-                documentItem.setLanguageId(fileTypeRegister.findLangId(event.getFile().getLocation().getFileExtension()));
+                documentItem.setLanguageId(fileTypeRegister.findLangId(event.getFile()));
 
                 DidOpenTextDocumentParamsDTO openEvent = dtoFactory.createDto(DidOpenTextDocumentParamsDTO.class);
                 openEvent.setTextDocument(documentItem);

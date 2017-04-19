@@ -29,9 +29,13 @@ public class LanguageDescriptionImpl implements LanguageDescription {
      */
     private List<String> mimeTypes;
     /**
-     * The fileExtension this language is associated with. At least one extension must be provided.
+     * The fileExtension this language is associated with. 
      */
     private List<String> fileExtensions;
+    /**
+     * The optional file name patterns for this language.
+     */
+    private List<String> fileNamePatterns;
     /**
      * The optional highlighting configuration to support client side syntax highlighting.
      * The format is client (editor) dependent.
@@ -65,6 +69,15 @@ public class LanguageDescriptionImpl implements LanguageDescription {
         this.fileExtensions = fileExtensions;
     }
 
+    @Override
+    public List<String> getFileNamePatterns() {
+        return fileNamePatterns;
+    }
+    
+    public void setFilenamePatterns(List<String> patterns) {
+        this.fileNamePatterns= patterns;
+    }
+    
     @Override
     public String getHighlightingConfiguration() {
         return this.highlightingConfiguration;

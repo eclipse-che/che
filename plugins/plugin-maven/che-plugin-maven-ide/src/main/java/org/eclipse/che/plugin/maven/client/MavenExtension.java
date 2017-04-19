@@ -107,9 +107,9 @@ public class MavenExtension {
                                   MavenResources mavenResources,
                                   EditorRegistry editorRegistry,
                                   PomEditorProvider editorProvider) {
-        FileType pomFile = new FileType(mavenResources.maven(), "pom.xml", "pom\\.xml");
-        fileTypeRegistry.registerFileType(pomFile);
-        editorRegistry.register(pomFile, editorProvider);
+        //FileType pomFile = new FileType(mavenResources.maven(), "pom.xml", "pom\\.xml");
+        //fileTypeRegistry.registerFileType(pomFile);
+        //editorRegistry.register(pomFile, editorProvider);
     }
 
 }
