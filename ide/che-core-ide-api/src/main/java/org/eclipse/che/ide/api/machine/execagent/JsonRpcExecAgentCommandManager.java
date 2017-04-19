@@ -12,7 +12,7 @@ package org.eclipse.che.ide.api.machine.execagent;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsRequestDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessRequestDto;

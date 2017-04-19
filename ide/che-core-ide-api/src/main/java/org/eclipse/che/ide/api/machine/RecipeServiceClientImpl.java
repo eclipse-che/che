@@ -12,9 +12,9 @@ package org.eclipse.che.ide.api.machine;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.machine.shared.dto.recipe.NewRecipe;
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
+import org.eclipse.che.api.machine.shared.dto.recipe.NewOldRecipe;
+import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeDescriptor;
+import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeUpdate;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -58,12 +58,12 @@ public class RecipeServiceClientImpl implements RecipeServiceClient {
     }
 
     @Override
-    public Promise<RecipeDescriptor> createRecipe(@NotNull final NewRecipe newRecipe) {
+    public Promise<OldRecipeDescriptor> createRecipe(@NotNull final NewOldRecipe newRecipe) {
         return asyncRequestFactory.createPostRequest(baseHttpUrl, newRecipe)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Creating recipe..."))
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(RecipeDescriptor.class));
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(OldRecipeDescriptor.class));
     }
 
     @Override
@@ -75,20 +75,20 @@ public class RecipeServiceClientImpl implements RecipeServiceClient {
     }
 
     @Override
-    public Promise<RecipeDescriptor> getRecipe(@NotNull final String id) {
+    public Promise<OldRecipeDescriptor> getRecipe(@NotNull final String id) {
         return asyncRequestFactory.createGetRequest(baseHttpUrl + '/' + id)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Getting recipe..."))
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(RecipeDescriptor.class));
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(OldRecipeDescriptor.class));
     }
 
     @Override
-    public Promise<List<RecipeDescriptor>> getAllRecipes() {
+    public Promise<List<OldRecipeDescriptor>> getAllRecipes() {
         return searchRecipes(Collections.<String>emptyList(), null, 0, 0);
     }
 
     @Override
-    public Promise<List<RecipeDescriptor>> searchRecipes(@NotNull final List<String> tags,
+    public Promise<List<OldRecipeDescriptor>> searchRecipes(@NotNull final List<String> tags,
                                                          @Nullable final String type,
                                                          final int skipCount,
                                                          final int maxItems) {
@@ -108,16 +108,16 @@ public class RecipeServiceClientImpl implements RecipeServiceClient {
         return asyncRequestFactory.createGetRequest(url)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Searching recipes..."))
-                                  .send(dtoUnmarshallerFactory.newListUnmarshaller(RecipeDescriptor.class));
+                                  .send(dtoUnmarshallerFactory.newListUnmarshaller(OldRecipeDescriptor.class));
     }
 
     @Override
-    public Promise<RecipeDescriptor> updateRecipe(@NotNull final RecipeUpdate recipeUpdate) {
+    public Promise<OldRecipeDescriptor> updateRecipe(@NotNull final OldRecipeUpdate recipeUpdate) {
         return asyncRequestFactory.createRequest(PUT, baseHttpUrl, recipeUpdate, false)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Updating recipe..."))
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(RecipeDescriptor.class));
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(OldRecipeDescriptor.class));
     }
 
     @Override

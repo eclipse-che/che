@@ -12,9 +12,9 @@ package org.eclipse.che.ide.api.project;
 
 import com.google.common.annotations.Beta;
 
-import org.eclipse.che.api.core.model.project.NewProjectConfig;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
-import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.project.shared.NewProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 
 import java.util.List;

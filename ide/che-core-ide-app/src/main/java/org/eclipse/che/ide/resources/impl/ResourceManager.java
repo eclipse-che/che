@@ -16,7 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.project.NewProjectConfig;
+import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
@@ -27,7 +27,7 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
+import org.eclipse.che.api.project.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;

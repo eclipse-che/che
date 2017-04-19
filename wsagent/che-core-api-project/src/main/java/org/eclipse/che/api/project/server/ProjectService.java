@@ -43,7 +43,7 @@ import org.eclipse.che.api.vfs.search.QueryExpression;
 import org.eclipse.che.api.vfs.search.SearchResult;
 import org.eclipse.che.api.vfs.search.SearchResultEntry;
 import org.eclipse.che.api.vfs.search.Searcher;
-import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
+import org.eclipse.che.api.project.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.commons.env.EnvironmentContext;

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.project;
+package org.eclipse.che.api.project.shared;
 
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 

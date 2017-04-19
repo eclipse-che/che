@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine;
 
-import org.eclipse.che.api.machine.shared.dto.recipe.NewRecipe;
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
+import org.eclipse.che.api.machine.shared.dto.recipe.NewOldRecipe;
+import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeDescriptor;
+import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeUpdate;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -32,9 +32,9 @@ public interface RecipeServiceClient {
      *
      * @param newRecipe
      *         describer of the recipe
-     * @return a promise that resolves to the {@link RecipeDescriptor}, or rejects with an error
+     * @return a promise that resolves to the {@link OldRecipeDescriptor}, or rejects with an error
      */
-    Promise<RecipeDescriptor> createRecipe(@NotNull final NewRecipe newRecipe);
+    Promise<OldRecipeDescriptor> createRecipe(@NotNull final NewOldRecipe newRecipe);
 
     /**
      * Get recipe script by recipe's ID.
@@ -50,16 +50,16 @@ public interface RecipeServiceClient {
      *
      * @param id
      *         recipe's ID
-     * @return a promise that resolves to the {@link RecipeDescriptor}, or rejects with an error
+     * @return a promise that resolves to the {@link OldRecipeDescriptor}, or rejects with an error
      */
-    Promise<RecipeDescriptor> getRecipe(@NotNull String id);
+    Promise<OldRecipeDescriptor> getRecipe(@NotNull String id);
 
     /**
      * Get all recipes.
      *
-     * @return a promise that will provide a list of {@link RecipeDescriptor}s, or rejects with an error
+     * @return a promise that will provide a list of {@link OldRecipeDescriptor}s, or rejects with an error
      */
-    Promise<List<RecipeDescriptor>> getAllRecipes();
+    Promise<List<OldRecipeDescriptor>> getAllRecipes();
 
     /**
      * Search for recipes which type is equal to the specified {@code type}
@@ -73,18 +73,18 @@ public interface RecipeServiceClient {
      *         count of items which should be skipped
      * @param maxItems
      *         max count of items to fetch
-     * @return a promise that will provide a list of {@link RecipeDescriptor}s, or rejects with an error
+     * @return a promise that will provide a list of {@link OldRecipeDescriptor}s, or rejects with an error
      */
-    Promise<List<RecipeDescriptor>> searchRecipes(@NotNull List<String> tags, @Nullable String type, int skipCount, int maxItems);
+    Promise<List<OldRecipeDescriptor>> searchRecipes(@NotNull List<String> tags, @Nullable String type, int skipCount, int maxItems);
 
     /**
      * Update recipe.
      *
      * @param recipeUpdate
      *         describer of the recipe updater
-     * @return a promise that resolves to the {@link RecipeDescriptor}, or rejects with an error
+     * @return a promise that resolves to the {@link OldRecipeDescriptor}, or rejects with an error
      */
-    Promise<RecipeDescriptor> updateRecipe(@NotNull RecipeUpdate recipeUpdate);
+    Promise<OldRecipeDescriptor> updateRecipe(@NotNull OldRecipeUpdate recipeUpdate);
 
     /**
      * Remove recipe with the given ID.

@@ -13,13 +13,13 @@ package org.eclipse.che.ide.projecttype.wizard.categoriespage;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.project.NewProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
-import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
-import org.eclipse.che.ide.api.project.NewProjectConfigImpl;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
@@ -223,15 +223,15 @@ public class CategoriesPagePresenter extends AbstractWizardPage<MutableProjectCo
     }
 
     private void updateProjectConfigs(String newProjectPath, ProjectTemplateDescriptor projectTemplate) {
-        final List<NewProjectConfigDto> configDtoList = projectTemplate.getProjects();
+        final List<ProjectConfigDto> configDtoList = projectTemplate.getProjects();
         if (newProjectPath.equals("/")) {
             return;
         }
 
         final String templatePath = projectTemplate.getPath();
-        final List<NewProjectConfig> updatedConfigs = new ArrayList<>(configDtoList.size());
-        for (NewProjectConfigDto configDto : configDtoList) {
-            final NewProjectConfig newConfig = new NewProjectConfigImpl(configDto);
+        final List<ProjectConfig> updatedConfigs = new ArrayList<>(configDtoList.size());
+        for (ProjectConfigDto configDto : configDtoList) {
+            final ProjectConfig newConfig = new ProjectConfigImpl(configDto);
             final String projectPath = configDto.getPath();
             if (projectPath.startsWith(templatePath)) {
                 final String path = projectPath.replaceFirst(templatePath, newProjectPath);

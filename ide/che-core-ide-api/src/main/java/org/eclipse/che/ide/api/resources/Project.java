@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.resources;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;

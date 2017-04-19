@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
-import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
+import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.vfs.Path;
 
 import java.util.ArrayList;

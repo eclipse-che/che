@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
+
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.Runtime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,15 +21,15 @@ import java.util.List;
  * @author Vitalii Parfonov
  */
 
-public class ActiveRuntime implements WorkspaceRuntime {
+public class ActiveRuntime {
 
-    protected WorkspaceRuntime workspaceRuntime;
+    protected Runtime workspaceRuntime;
     private String id;
     private String rootFolder;
     private DevMachine devMachine;
     private List<MachineEntity> machines;
 
-    public ActiveRuntime(WorkspaceRuntime workspaceRuntime) {
+    public ActiveRuntime(Runtime workspaceRuntime) {
         this.workspaceRuntime = workspaceRuntime;
         if (workspaceRuntime != null) {
             id = workspaceRuntime.getActiveEnv();
@@ -42,22 +43,21 @@ public class ActiveRuntime implements WorkspaceRuntime {
     }
 
 
-    @Override
+
     public String getActiveEnv() {
         return id;
     }
 
-    @Override
     public String getRootFolder() {
         return rootFolder;
     }
 
-    @Override
+
     public DevMachine getDevMachine() {
         return devMachine;
     }
 
-    @Override
+
     public List<MachineEntity> getMachines() {
         return machines;
     }

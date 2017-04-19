@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.project.NewProjectConfig;
+import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.project.server.NewProjectConfigImpl;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;

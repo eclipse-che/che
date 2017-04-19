@@ -12,11 +12,10 @@ package org.eclipse.che.ide.api.machine;
 
 import com.google.common.base.Strings;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.api.core.model.machine.Server;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.Constants;
@@ -28,13 +27,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+//import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
+
 /**
  * @author Vitalii Parfonov
  */
 
 public class MachineEntityImpl implements MachineEntity {
 
-    protected final Machine machineDescriptor;
+    protected final Machine       machineDescriptor;
     protected final MachineConfig machineConfig;
 
     protected final Map<String, MachineServer> servers;

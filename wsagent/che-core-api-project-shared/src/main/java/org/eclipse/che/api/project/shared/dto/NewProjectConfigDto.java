@@ -8,11 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.shared.dto;
+package org.eclipse.che.api.project.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.project.shared.NewProjectConfig;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
+import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
@@ -39,7 +42,7 @@ public interface NewProjectConfigDto extends ProjectConfigDto, NewProjectConfig 
     @FactoryParameter(obligation = OPTIONAL)
     SourceStorageDto getSource();
 
-    @Override
+
     @FactoryParameter(obligation = OPTIONAL)
     Map<String, String> getOptions();
 

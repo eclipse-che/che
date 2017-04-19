@@ -13,7 +13,8 @@ package org.eclipse.che.ide.api.machine.events;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+
 
 /**
  * @author Dmitry Shnurenko
