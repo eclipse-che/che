@@ -33,6 +33,7 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
+import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.ApplyTextEditAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.declaration.FindDefinitionAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.references.FindReferencesAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.GoToSymbolAction;
@@ -59,11 +60,13 @@ public class LanguageServerExtension {
                                   GoToSymbolAction goToSymbolAction,
                                   FindSymbolAction findSymbolAction,
                                   FindDefinitionAction findDefinitionAction,
-                                  FindReferencesAction findReferencesAction) {
+                                  FindReferencesAction findReferencesAction,
+                                  ApplyTextEditAction applyTextEditAction) {
         actionManager.registerAction("LSGoToSymbolAction", goToSymbolAction);
         actionManager.registerAction("LSFindSymbolAction", findSymbolAction);
         actionManager.registerAction("LSFindDefinitionAction", findDefinitionAction);
         actionManager.registerAction("LSFindReferencesAction", findReferencesAction);
+        actionManager.registerAction("lsp.applyTextEdit", applyTextEditAction);
 
         DefaultActionGroup assistantGroup = (DefaultActionGroup)actionManager.getAction(GROUP_ASSISTANT);
         assistantGroup.add(goToSymbolAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));

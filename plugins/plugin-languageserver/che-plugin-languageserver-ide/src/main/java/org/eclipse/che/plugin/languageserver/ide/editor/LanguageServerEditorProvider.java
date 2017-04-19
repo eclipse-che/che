@@ -22,7 +22,6 @@ import org.eclipse.che.ide.api.editor.EditorProvider;
 import org.eclipse.che.ide.api.editor.defaulteditor.AbstractTextEditorProvider;
 import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
 import org.eclipse.che.ide.api.editor.editorconfig.AutoSaveTextEditorConfiguration;
-import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -68,18 +67,15 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
 
     @Override
     public TextEditor getEditor() {
-        return createEditor(new AutoSaveTextEditorConfiguration());
-    }
-
-    private TextEditor createEditor(TextEditorConfiguration configuration) {
         if (editorBuilder == null) {
             Log.debug(AbstractTextEditorProvider.class, "No builder registered for default editor type - giving up.");
             return null;
         }
 
         final TextEditor editor = editorBuilder.buildEditor();
-        editor.initialize(configuration);
+        editor.initialize(new AutoSaveTextEditorConfiguration());
         return editor;
+
     }
 
     @Override
@@ -95,7 +91,15 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
                 @Override
                 public Promise<EditorPartPresenter> apply(InitializeResult arg) throws FunctionException {
                     loader.hide();
-                    return Promises.<EditorPartPresenter>resolve(createEditor(editorConfigurationFactory.build(arg.getCapabilities())));
+                    if (editorBuilder == null) {
+                        Log.debug(AbstractTextEditorProvider.class, "No builder registered for default editor type - giving up.");
+                        return Promises.<EditorPartPresenter>resolve(null);
+                    }
+
+                    final TextEditor editor = editorBuilder.buildEditor();
+                    LanguageServerEditorConfiguration configuration = editorConfigurationFactory.build(editor, arg.getCapabilities());
+                    editor.initialize(configuration);
+                    return Promises.<EditorPartPresenter>resolve(editor);
                 }
             });
 

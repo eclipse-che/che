@@ -15,7 +15,7 @@ import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.ServerConf;
-import org.eclipse.che.api.core.util.JsonRpcEndpointIdsHolder;
+import org.eclipse.che.api.core.util.JsonRpcEndpointToMachineNameHolder;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
@@ -112,7 +112,7 @@ public class MachineProviderImplTest {
     private RequestTransmitter transmitter;
 
     @Mock
-    private JsonRpcEndpointIdsHolder endpointIdsHolder;
+    private JsonRpcEndpointToMachineNameHolder jsonRpcEndpointToMachineNameHolder;
 
     @Mock
     private DockerNode dockerNode;
@@ -1609,7 +1609,7 @@ public class MachineProviderImplTest {
                                            dockerMachineFactory,
                                            dockerInstanceStopDetector,
                                            transmitter,
-                                           endpointIdsHolder,
+                                           jsonRpcEndpointToMachineNameHolder,
                                            devMachineServers,
                                            allMachineServers,
                                            devMachineVolumes,
