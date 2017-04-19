@@ -9,7 +9,6 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-
 export interface INamespace {
   id: string;
   label: string;
@@ -25,6 +24,9 @@ export class CheNamespaceRegistry {
   private $q: ng.IQService;
   private fetchPromise: ng.IPromise<any>;
   private namespaces : INamespace[];
+  private emptyMessage: string;
+  private caption: string;
+  private getAdditionalInfoFunction: Function;
 
   /**
    * Default constructor that is using resource
@@ -33,6 +35,8 @@ export class CheNamespaceRegistry {
   constructor($q: ng.IQService) {
     this.$q = $q;
     this.namespaces = [];
+
+    this.caption = 'Namespace';
   }
 
   /**
@@ -75,5 +79,59 @@ export class CheNamespaceRegistry {
    */
   getNamespaces() : INamespace[] {
     return this.namespaces;
+  }
+
+  /**
+   * Set empty message (message is displayed, when no namespaces).
+   *
+   * @param message empty message
+   */
+  setEmptyMessage(message: string): void {
+    this.emptyMessage = message;
+  }
+
+  /**
+   * Returns empty message to display, when no namespaces.
+   *
+   * @returns {string}
+   */
+  getEmptyMessage(): string {
+    return this.emptyMessage ? this.emptyMessage : null;
+  }
+
+  /**
+   * Set display caption of the namespaces.
+   *
+   * @param caption namespaces caption
+   */
+  setCaption(caption: string): void {
+    this.caption = caption;
+  }
+
+  /**
+   * Returns the caption of the namespaces.
+   *
+   * @returns {string} namepsaces caption
+   */
+  getCaption(): string {
+    return this.caption;
+  }
+
+  /**
+   * Sets the function for retrieving available RAM for the namespaces.
+   *
+   * @param getAdditionalInfo additional information function
+   */
+  setGetAdditionalInfo(getAdditionalInfo: Function): void {
+    this.getAdditionalInfoFunction = getAdditionalInfo;
+  }
+
+  /**
+   * Returns function, that returns promise.
+   *
+   * @returns {Function}
+   */
+  getAdditionalInfo(): Function {
+    return this.getAdditionalInfoFunction;
   }
 }
