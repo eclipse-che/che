@@ -354,6 +354,12 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.projectConfiguration.title")
     String actionProjectConfigurationTitle();
 
+    @Key("action.previewImage.description")
+    String actionPreviewImageDescription();
+
+    @Key("action.previewImage.title")
+    String actionPreviewImageTitle();
+
     @Key("action.findAction.description")
     String actionFindActionDescription();
 
@@ -415,6 +421,9 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("messages.fileToOpenIsNotSpecified")
     String fileToOpenIsNotSpecified();
+
+    @Key("messages.fileToOpenLineIsNotANumber")
+    String fileToOpenLineIsNotANumber();
 
     @Key("messages.canNotOpenNodeWithoutParams")
     String canNotOpenNodeWithoutParams();

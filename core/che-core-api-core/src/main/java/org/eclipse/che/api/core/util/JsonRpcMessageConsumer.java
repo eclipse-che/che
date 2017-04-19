@@ -14,31 +14,26 @@ import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class JsonRpcMessageConsumer<T> implements MessageConsumer<T> {
     private static final Logger LOG = getLogger(JsonRpcMessageConsumer.class);
 
-    private final String                   method;
-    private final RequestTransmitter       transmitter;
-    private final Map<String, Set<String>> endpointIds;
+    private final String                    method;
+    private final RequestTransmitter        transmitter;
+    private final JsonRpcEndpointIdProvider jsonRpcEndpointIdProvider;
 
-    public JsonRpcMessageConsumer(String method, RequestTransmitter transmitter, Map<String, Set<String>> endpointIds) {
+    public JsonRpcMessageConsumer(String method, RequestTransmitter transmitter, JsonRpcEndpointIdProvider jsonRpcEndpointIdProvider) {
         this.method = method;
         this.transmitter = transmitter;
-        this.endpointIds = endpointIds;
+        this.jsonRpcEndpointIdProvider = jsonRpcEndpointIdProvider;
     }
 
     @Override
     public void consume(T message) throws IOException {
         try {
-            endpointIds.entrySet()
-                       .stream()
-                       .map(Map.Entry::getKey)
-                       .forEach(it -> transmitter.transmitOneToNone(it, method, message));
+            jsonRpcEndpointIdProvider.get().forEach(it -> transmitter.transmitOneToNone(it, method, message));
         } catch (IllegalStateException e) {
             LOG.error("Error trying send line {}", message);
         }

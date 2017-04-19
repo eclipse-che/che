@@ -36,7 +36,6 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.context.BrowserAddress;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.start.StartWorkspaceNotification;
@@ -71,8 +70,6 @@ public class WorkspaceEventsHandler implements WorkspaceStatusChangedEvent.Handl
     private final StartWorkspaceNotification startWorkspaceNotification;
     private final LoaderPresenter            loader;
     private final AppContext                 appContext;
-    private final MachineLogsRestorer        machineLogsRestorer;
-    private final RequestTransmitter         transmitter;
     private final BrowserAddress             browserAddress;
 
     private DelayedTask wsStartedNotification;
@@ -87,8 +84,6 @@ public class WorkspaceEventsHandler implements WorkspaceStatusChangedEvent.Handl
                            StartWorkspaceNotification startWorkspaceNotification,
                            LoaderPresenter loader,
                            AppContext appContext,
-                           MachineLogsRestorer machineLogsRestorer,
-                           RequestTransmitter transmitter,
                            BrowserAddress browserAddress) {
         this.eventBus = eventBus;
         this.locale = locale;
@@ -99,8 +94,6 @@ public class WorkspaceEventsHandler implements WorkspaceStatusChangedEvent.Handl
         this.startWorkspaceNotification = startWorkspaceNotification;
         this.loader = loader;
         this.appContext = appContext;
-        this.machineLogsRestorer = machineLogsRestorer;
-        this.transmitter = transmitter;
         this.browserAddress = browserAddress;
 
         eventBus.addHandler(WorkspaceStatusChangedEvent.TYPE, this);
@@ -116,19 +109,21 @@ public class WorkspaceEventsHandler implements WorkspaceStatusChangedEvent.Handl
                     @Override
                     public void apply(WorkspaceDto workspace) throws OperationException {
                         if (appContext.getActiveRuntime() != null && appContext.getDevMachine() != null) {
-                            String id = appContext.getDevMachine().getId();
                             Operation<PromiseError> failedWorkspaceGetOperation =
                                     it -> Log.error(WorkspaceEventsHandler.this.getClass(),
                                                     "Tried to subscribe to environment status events, but got error" + ": " +
                                                     it.getMessage());
 
+
                             Operation<WorkspaceDto> successfulWorkspaceGetOperation =
-                                    it -> transmitter.transmitStringToNone("ws-master", "event:environment-output:subscribe", id);
+                                    it -> {
+                                    };
+
 
                             workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
                                                   .then(successfulWorkspaceGetOperation)
                                                   .catchError(failedWorkspaceGetOperation);
-                            machineLogsRestorer.restore(appContext.getDevMachine());
+
                         }
 
                         appContext.setWorkspace(workspace);
