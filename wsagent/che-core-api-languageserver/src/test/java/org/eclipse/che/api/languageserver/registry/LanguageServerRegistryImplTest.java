@@ -10,15 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import io.typefox.lsapi.InitializeParams;
-import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.ServerCapabilities;
-import io.typefox.lsapi.services.LanguageServer;
-import io.typefox.lsapi.services.TextDocumentService;
-import io.typefox.lsapi.services.WindowService;
-
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.lsp4j.InitializeParams;
+import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.services.LanguageServer;
+import org.eclipse.lsp4j.services.TextDocumentService;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -38,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+
 
 /**
  * @author Anatoliy Bazko
@@ -78,7 +77,6 @@ public class LanguageServerRegistryImplTest {
         when(languageDescription.getMimeTypes()).thenReturn(Collections.singletonList("plain/text"));
 
         when(languageServer.getTextDocumentService()).thenReturn(mock(TextDocumentService.class));
-        when(languageServer.getWindowService()).thenReturn(mock(WindowService.class));
         when(languageServer.initialize(any(InitializeParams.class))).thenReturn(completableFuture);
 
         registry = spy(new LanguageServerRegistryImpl(Collections.singleton(languageServerLauncher),

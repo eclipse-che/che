@@ -60,32 +60,32 @@ public class QuickOpenEntryGroup extends QuickOpenEntry {
 
     @Override
     public String getDetail() {
-        return entry!= null ? entry.getDetail() : super.getDetail();
+        return entry != null ? entry.getDetail() : super.getDetail();
     }
 
     @Override
     public SVGResource getIcon() {
-        return entry!= null ?entry.getIcon(): super.getIcon();
+        return entry != null ? entry.getIcon() : super.getIcon();
     }
 
     @Override
     public String getDescription() {
-        return entry!= null ? entry.getDescription(): super.getDescription();
+        return entry != null ? entry.getDescription() : super.getDescription();
     }
 
     @Override
     public String getURI() {
-        return entry!= null ? entry.getURI() :super.getURI();
+        return entry != null ? entry.getURI() : super.getURI();
     }
 
     @Override
     public String getAdditionalClass() {
-        return entry!= null ? entry.getAdditionalClass() : super.getAdditionalClass();
+        return entry != null ? entry.getAdditionalClass() : super.getAdditionalClass();
     }
 
     @Override
     public boolean isHidden() {
-        return entry!= null ? entry.isHidden() : super.isHidden();
+        return entry != null ? entry.isHidden() : super.isHidden();
     }
 
     @Override
@@ -98,6 +98,11 @@ public class QuickOpenEntryGroup extends QuickOpenEntry {
     }
 
     @Override
+    public List<Match> getHighlights() {
+        return entry != null ? entry.getHighlights() : super.getHighlights();
+    }
+
+    @Override
     public void setHighlights(List<Match> highlights) {
         if (entry != null) {
             entry.setHighlights(highlights);
@@ -107,12 +112,7 @@ public class QuickOpenEntryGroup extends QuickOpenEntry {
     }
 
     @Override
-    public List<Match> getHighlights() {
-        return entry!= null ? entry.getHighlights() : super.getHighlights();
-    }
-
-    @Override
     public boolean run(Mode mode) {
-        return entry!= null ? entry.run(mode): super.run(mode);
+        return entry != null ? entry.run(mode) : super.run(mode);
     }
 }

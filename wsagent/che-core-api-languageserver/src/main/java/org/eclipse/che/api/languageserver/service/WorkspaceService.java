@@ -10,18 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.service;
 
-import io.typefox.lsapi.Location;
-import io.typefox.lsapi.SymbolInformation;
-import io.typefox.lsapi.impl.LocationImpl;
-import io.typefox.lsapi.services.LanguageServer;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
-import org.eclipse.che.api.languageserver.shared.lsapi.WorkspaceSymbolParamsDTO;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SymbolInformationDto;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceSymbolParams;
+import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.services.LanguageServer;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -30,6 +29,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 
@@ -53,9 +53,10 @@ public class WorkspaceService {
     @Path("symbol")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends SymbolInformation> documentSymbol(WorkspaceSymbolParamsDTO workspaceSymbolParams) throws ExecutionException,
-                                                                                                                   InterruptedException,
-                                                                                                                   LanguageServerException {
+    public List<? extends SymbolInformationDto> documentSymbol(ExtendedWorkspaceSymbolParams workspaceSymbolParams)
+            throws ExecutionException,
+                   InterruptedException,
+                   LanguageServerException {
         LanguageServer server = getServer(TextDocumentService.prefixURI(workspaceSymbolParams.getFileUri()));
         if (server == null) {
             return emptyList();
@@ -64,11 +65,9 @@ public class WorkspaceService {
         List<? extends SymbolInformation> informations = server.getWorkspaceService().symbol(workspaceSymbolParams).get();
         informations.forEach(o -> {
             Location location = o.getLocation();
-            if (location instanceof LocationImpl) {
-                ((LocationImpl)location).setUri(TextDocumentService.removePrefixUri(location.getUri()));
-            }
+            location.setUri(TextDocumentService.removePrefixUri(location.getUri()));
         });
-        return informations;
+        return informations.stream().map(o -> new SymbolInformationDto(o)).collect(Collectors.toList());
     }
 
     private LanguageServer getServer(String uri) throws LanguageServerException {
