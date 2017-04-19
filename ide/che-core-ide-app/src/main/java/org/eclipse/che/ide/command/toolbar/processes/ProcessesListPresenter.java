@@ -155,10 +155,8 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
 
     @Override
     public void onReRunProcess(Process process) {
-        commandManager.getCommand(process.getName()).ifPresent(command -> {
-            view.removeProcess(process);
-            commandExecutorProvider.get().executeCommand(command, process.getMachine());
-        });
+        commandManager.getCommand(process.getName())
+                      .ifPresent(command -> commandExecutorProvider.get().executeCommand(command, process.getMachine()));
     }
 
     @Override
