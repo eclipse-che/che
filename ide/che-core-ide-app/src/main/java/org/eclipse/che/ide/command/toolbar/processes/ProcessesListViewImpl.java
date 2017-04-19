@@ -52,7 +52,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
         final Label label = new Label("EXEC");
         label.addStyleName(resources.commandToolbarCss().processesListLabel());
 
-        dropdownList = new DropdownList();
+        dropdownList = new DropdownList(emptyListWidget);
         dropdownList.setWidth("100%");
         dropdownList.ensureDebugId("dropdown-processes");
         dropdownList.syncWidths();
@@ -78,7 +78,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
     /** Ensures that item for creating command added to the empty list or removed from non empty list. */
     private void checkCreateCommandItem() {
-        if (dropdownList.getItems().isEmpty()) {
+        if (listItems.isEmpty()) {
             dropdownList.addItem(createCommandItem, createCommandItemRenderer);
         } else {
             dropdownList.removeItem(createCommandItem);
