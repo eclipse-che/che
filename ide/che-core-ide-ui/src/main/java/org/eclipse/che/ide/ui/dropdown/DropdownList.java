@@ -138,7 +138,7 @@ public class DropdownList extends Composite {
     }
 
     /** Adapts dropdown panel's height depending on the amount of child items. */
-    private void adaptDropDownPanelHeight() {
+    private void adaptDropdownMenuHeight() {
         final int visibleRowsCount = Math.min(MAX_VISIBLE_ITEMS, itemListWidgets.size());
         final int dropdownPanelHeight = ITEM_WIDGET_HEIGHT * visibleRowsCount;
 
@@ -208,7 +208,7 @@ public class DropdownList extends Composite {
         }, ClickEvent.getType());
 
         dropdownMenuContentPanel.insert(listWidget, 0);
-        adaptDropDownPanelHeight();
+        adaptDropdownMenuHeight();
         setSelectedItem(item);
     }
 
@@ -231,20 +231,21 @@ public class DropdownList extends Composite {
     public void removeItem(DropdownListItem item) {
         final Widget widget = itemListWidgets.remove(item);
 
-        if (widget != null) {
-            dropdownMenuContentPanel.remove(widget);
+        if (widget == null) {
+            return;
         }
+
+        dropdownMenuContentPanel.remove(widget);
 
         itemHeaderWidgets.remove(item);
 
-        if (!itemListWidgets.isEmpty()) {
-            // set any available item as currently selected
-            setSelectedItem(itemListWidgets.entrySet().iterator().next().getKey());
-        } else {
+        if (itemListWidgets.isEmpty()) {
             checkListEmptiness();
+        } else if (item.equals(getSelectedItem())) {
+            setSelectedItem(itemListWidgets.keySet().iterator().next());
         }
 
-        adaptDropDownPanelHeight();
+        adaptDropdownMenuHeight();
     }
 
     /** Returns all list's items. */
@@ -258,7 +259,7 @@ public class DropdownList extends Composite {
         itemHeaderWidgets.clear();
         dropdownMenuContentPanel.clear();
 
-        adaptDropDownPanelHeight();
+        adaptDropdownMenuHeight();
         checkListEmptiness();
     }
 
