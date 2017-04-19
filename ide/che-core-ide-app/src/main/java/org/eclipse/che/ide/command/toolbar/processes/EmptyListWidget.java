@@ -29,19 +29,15 @@ class EmptyListWidget extends FlowPanel {
 
     @Inject
     EmptyListWidget(CommandResources resources) {
+        addStyleName(resources.commandToolbarCss().processWidgetText());
+
         final Label commandNameLabel = new InlineHTML("Ready");
-        commandNameLabel.addStyleName(resources.commandToolbarCss().processWidgetText());
         commandNameLabel.addStyleName(resources.commandToolbarCss().processWidgetCommandNameLabel());
 
         final Label machineNameLabel = new InlineHTML("&nbsp; - start command");
-        machineNameLabel.addStyleName(resources.commandToolbarCss().processWidgetText());
         machineNameLabel.addStyleName(resources.commandToolbarCss().processWidgetMachineNameLabel());
 
-        final FlowPanel noProcessWidget = new FlowPanel();
-        noProcessWidget.addStyleName(resources.commandToolbarCss().processWidgetText());
-        noProcessWidget.add(commandNameLabel);
-        noProcessWidget.add(machineNameLabel);
-
-        add(noProcessWidget);
+        add(commandNameLabel);
+        add(machineNameLabel);
     }
 }
