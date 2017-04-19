@@ -12,6 +12,7 @@ package org.eclipse.che.wsagent.server;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import java.io.IOException;
-import java.util.Collection;
+import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
@@ -58,14 +59,10 @@ public class WsAgentURLProvider implements Provider<String> {
                                                              .request()
                                                              .asDto(WorkspaceDto.class);
                 if (workspace.getRuntime() != null) {
-                    final Collection<ServerDto> servers = workspace.getRuntime()
-                                                                   .getDevMachine()
-                                                                   .getRuntime()
-                                                                   .getServers()
-                                                                   .values();
-                    for (ServerDto server : servers) {
-                        if (WSAGENT_REFERENCE.equals(server.getRef())) {
-                            cachedAgentUrl = server.getUrl();
+                    MachineDto machineDto = workspace.getRuntime().getMachines().get("org.eclipse.che.ws-agent");
+                    for (Map.Entry<String, ServerDto> serverEntry : machineDto.getServers().entrySet()) {
+                        if (WSAGENT_REFERENCE.equals(serverEntry.getKey())) {
+                            cachedAgentUrl = serverEntry.getValue().getUrl();
                             return cachedAgentUrl;
                         }
                     }

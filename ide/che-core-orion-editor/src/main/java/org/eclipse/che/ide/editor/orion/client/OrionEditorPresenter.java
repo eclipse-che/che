@@ -585,9 +585,9 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     @Override
     public void doSave(final AsyncCallback<EditorInput> callback) {
         //If the workspace is stopped we shouldn't try to save a file
-        if (appContext.getDevMachine() == null) {
-            return;
-        }
+//        if (appContext.getDevMachine() == null) {
+//            return;
+//        }
         this.documentStorage.saveDocument(getEditorInput(), this.document, false, new AsyncCallback<EditorInput>() {
             @Override
             public void onSuccess(EditorInput editorInput) {
