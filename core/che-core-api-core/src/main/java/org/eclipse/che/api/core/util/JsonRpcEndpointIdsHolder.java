@@ -11,17 +11,15 @@
 package org.eclipse.che.api.core.util;
 
 import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
-import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
-import static org.slf4j.LoggerFactory.getLogger;
 
 @Singleton
 public class JsonRpcEndpointIdsHolder {
@@ -58,7 +56,11 @@ public class JsonRpcEndpointIdsHolder {
                     });
     }
 
-    public Map<String, Set<String>> getEndpointIds() {
-        return Collections.unmodifiableMap(endpointIds);
+    public Set<String> getEndpointIdsByWorkspaceId(String workspaceId) {
+        return endpointIds.entrySet()
+                          .stream()
+                          .filter(it -> it.getValue().contains(workspaceId))
+                          .map(Map.Entry::getKey)
+                          .collect(Collectors.toSet());
     }
 }

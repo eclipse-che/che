@@ -150,6 +150,7 @@ public class TextDocumentService {
         return locations.stream().map(o -> new LocationDto(o)).collect(Collectors.toList());
     }
 
+
     @POST
     @Path("completionItem/resolve")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -303,6 +304,7 @@ public class TextDocumentService {
         }
         return null;
     }
+
 
     private LanguageServer getServer(String uri) throws LanguageServerException {
         return languageServerRegistry.findServer(uri);

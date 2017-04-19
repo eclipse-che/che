@@ -23,44 +23,49 @@ export class CheUserBuilder {
    * Default constructor.
    */
   constructor() {
-    this.user = {};
+    this.user = {
+      email: '',
+      name: '',
+      aliases: [],
+      id: ''
+    };
   }
 
   /**
    * Sets the email of the user
-   * @param email the email to use
+   * @param {string} email the email to use
    * @returns {CodenvyUserBuilder}
    */
-  withEmail(email) {
+  withEmail(email: string): CheUserBuilder {
     this.user.email = email;
     return this;
   }
 
   /**
    * Sets the id of the user
-   * @param id the id to use
+   * @param {string} id the id to use
    * @returns {CodenvyUserBuilder}
    */
-  withId(id) {
+  withId(id: string): CheUserBuilder {
     this.user.id = id;
     return this;
   }
 
   /**
    * Sets the aliases of the user
-   * @param aliases the aliases to use
+   * @param {any[]} aliases the aliases to use
    * @returns {CodenvyUserBuilder}
    */
-  withAliases(aliases) {
+  withAliases(aliases: any[]): CheUserBuilder {
     this.user.aliases = aliases;
     return this;
   }
 
   /**
    * Build the user
-   * @returns {CodenvyUserBuilder.user|*}
+   * @returns {che.IUser}
    */
-  build() {
+  build(): che.IUser {
     return this.user;
   }
 }

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.8.0-SNAPSHOT</version>
+        <version>5.9.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-auth</artifactId>
     <packaging>jar</packaging>
@@ -42,6 +42,10 @@
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client-jackson2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.oauth-client</groupId>

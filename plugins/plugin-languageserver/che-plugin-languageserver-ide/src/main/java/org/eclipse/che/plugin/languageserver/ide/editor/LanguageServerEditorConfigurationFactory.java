@@ -11,11 +11,13 @@
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+
 
 /**
  * @author Evgen Vidolob
  */
 public interface LanguageServerEditorConfigurationFactory {
 
-    LanguageServerEditorConfiguration build(ServerCapabilities capabilities);
+    LanguageServerEditorConfiguration build(TextEditor editor, ServerCapabilities capabilities);
 }

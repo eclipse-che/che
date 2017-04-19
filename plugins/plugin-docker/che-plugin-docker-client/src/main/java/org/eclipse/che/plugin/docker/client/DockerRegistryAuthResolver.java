@@ -64,18 +64,7 @@ public class DockerRegistryAuthResolver {
      * @return base64 encoded X-Registry-Auth header value
      */
     public String getXRegistryAuthHeaderValue(@Nullable String registry, @Nullable AuthConfigs paramAuthConfigs) {
-        String normalizedRegistry = DEFAULT_REGISTRY_SYNONYMS.contains(registry) ? DEFAULT_REGISTRY : registry;
-
-        AuthConfig authConfig = null;
-        if (paramAuthConfigs != null && paramAuthConfigs.getConfigs() != null) {
-            authConfig = normalizeDockerHubRegistryUrl(paramAuthConfigs.getConfigs()).get(normalizedRegistry);
-        }
-        if (authConfig == null) {
-            authConfig = normalizeDockerHubRegistryUrl(initialAuthConfig.getAuthConfigs().getConfigs()).get(normalizedRegistry);
-        }
-        if (authConfig == null) {
-            authConfig = dynamicAuthResolver.getXRegistryAuth(registry);
-        }
+        AuthConfig authConfig = getAuthConfigForRegistry(registry, paramAuthConfigs);
 
         String authConfigJson;
         if (authConfig == null) {
@@ -108,6 +97,52 @@ public class DockerRegistryAuthResolver {
         authConfigs = normalizeDockerHubRegistryUrl(authConfigs);
 
         return Base64.getEncoder().encodeToString(JsonHelper.toJson(authConfigs).getBytes());
+    }
+
+    /**
+     * Returns authorization header value for basic auth method for given registry.
+     * If registry is not configured empty string will be returned.
+     *
+     * @param registry
+     *         registry to which auth config should be found
+     * @param paramAuthConfigs
+     *          additional auth configs per this request
+     * @return authorization header value for basic auth method or empty string if registry isn't configured
+     */
+    public String getBasicAuthHeaderValue(@Nullable String registry,  @Nullable AuthConfigs paramAuthConfigs) {
+        AuthConfig authConfig = getAuthConfigForRegistry(registry, paramAuthConfigs);
+
+        if (authConfig != null) {
+            return "Basic " + Base64.getEncoder().encodeToString((authConfig.getUsername() + ':' + authConfig.getPassword()).getBytes());
+        }
+        return "";
+    }
+
+    /**
+     * Looks for auth configuration for given registry.
+     * If given registry is not configured then null will be returned.
+     *
+     * @param registry
+     *         registry to which auth config should be found
+     * @param paramAuthConfigs
+     *         additional auth configs
+     * @return auth config for given registry or null is it isn't configured
+     */
+    private AuthConfig getAuthConfigForRegistry(@Nullable String registry, @Nullable AuthConfigs paramAuthConfigs) {
+        String normalizedRegistry = DEFAULT_REGISTRY_SYNONYMS.contains(registry) ? DEFAULT_REGISTRY : registry;
+
+        AuthConfig authConfig = null;
+        if (paramAuthConfigs != null && paramAuthConfigs.getConfigs() != null) {
+            authConfig = normalizeDockerHubRegistryUrl(paramAuthConfigs.getConfigs()).get(normalizedRegistry);
+        }
+        if (authConfig == null) {
+            authConfig = normalizeDockerHubRegistryUrl(initialAuthConfig.getAuthConfigs().getConfigs()).get(normalizedRegistry);
+        }
+        if (authConfig == null) {
+            authConfig = dynamicAuthResolver.getXRegistryAuth(registry);
+        }
+
+        return authConfig;
     }
 
     private Map<String, AuthConfig> normalizeDockerHubRegistryUrl(Map<String, AuthConfig> authConfigs) {

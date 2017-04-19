@@ -548,6 +548,34 @@ public class DockerRegistryAuthResolverTest {
                                           jsonToAuthConfigs(REGISTRY_WITH_DYNAMIC_PASSWORD_X_AUTH_CONFIG_VALUE));
     }
 
+    @Test
+    public void shouldGetBasicAuthHeaderValueFromInitialConfig() {
+        assertEquals(authResolver.getBasicAuthHeaderValue(INITIAL_REGISTRY2_URL, null),
+                     "Basic " + Base64.getEncoder()
+                                      .encodeToString((INITIAL_REGISTRY2_USERNAME + ':' + INITIAL_REGISTRY2_PASSWORD).getBytes()));
+    }
+
+    @Test
+    public void shouldGetBasicAuthHeaderValueFromCustomConfig() {
+        assertEquals(authResolver.getBasicAuthHeaderValue(REGISTRY2_URL, customAuthConfigs),
+                     "Basic " + Base64.getEncoder().encodeToString((REGISTRY2_USERNAME + ':' + REGISTRY2_PASSWORD).getBytes()));
+    }
+
+    @Test
+    public void shouldGetBasicAuthHeaderValueFromDynamicConfig() {
+        when(dynamicAuthResolver.getXRegistryAuth(REGISTRY_WITH_DYNAMIC_PASSWORD_URL))
+                .thenReturn(dynamicAuthConfigs.getConfigs().get(REGISTRY_WITH_DYNAMIC_PASSWORD_URL));
+
+        assertEquals(authResolver.getBasicAuthHeaderValue(REGISTRY_WITH_DYNAMIC_PASSWORD_URL, customAuthConfigs),
+                     "Basic " + Base64.getEncoder().encodeToString((REGISTRY_WITH_DYNAMIC_PASSWORD_USERNAME + ':' +
+                                                                    REGISTRY_WITH_DYNAMIC_PASSWORD_PASSWORD).getBytes()));
+    }
+
+    @Test
+    public void shouldReturnEmptyStringIfRegistryNotConfigured() {
+        assertEquals(authResolver.getBasicAuthHeaderValue("unconfigured.registry.com:5000", customAuthConfigs), "");
+    }
+
     private AuthConfig base64ToAuthConfig(String base64decodedJson) {
         return jsonToAuthConfig(new String(Base64.getDecoder().decode(base64decodedJson.getBytes())));
     }

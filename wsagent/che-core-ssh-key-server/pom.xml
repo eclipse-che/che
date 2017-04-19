@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-agent-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.8.0-SNAPSHOT</version>
+        <version>5.9.0-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che.plugin</groupId>
     <artifactId>che-plugin-ssh-key-server</artifactId>
@@ -30,6 +30,10 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-multibindings</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

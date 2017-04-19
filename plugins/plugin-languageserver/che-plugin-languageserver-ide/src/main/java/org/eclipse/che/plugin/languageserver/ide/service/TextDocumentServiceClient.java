@@ -32,6 +32,8 @@ import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.plugin.languageserver.ide.editor.PublishDiagnosticsProcessor;
 import org.eclipse.che.plugin.languageserver.ide.editor.ShowMessageProcessor;
+import org.eclipse.lsp4j.CodeActionParams;
+import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
@@ -304,6 +306,15 @@ public class TextDocumentServiceClient {
         final Unmarshallable<DocumentHighlight> unmarshaller = unmarshallerFactory.newUnmarshaller(DocumentHighlight.class);
         return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)position).toJson()).send(unmarshaller);
+    }
+
+
+
+    public Promise<List<Command>> codeAction(CodeActionParams params) {
+        final String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/codeAction";
+        final Unmarshallable<List<Command>> unmarshaller = unmarshallerFactory.newListUnmarshaller(Command.class);
+        return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)params).toJson()).send(unmarshaller);
     }
 
     /**

@@ -79,6 +79,10 @@ public class DiagnosticAnnotation extends Annotation {
         }
     }
 
+    public Diagnostic getDiagnostic() {
+        return diagnostic;
+    }
+
     @Override
     public String getText() {
         return diagnostic.getMessage();

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-languageserver-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.8.0-SNAPSHOT</version>
+        <version>5.9.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>che-plugin-languageserver-ide</artifactId>
@@ -137,6 +137,10 @@
                         <exclude>**/EitherUtil.java</exclude>
                         <exclude>**/JsonUtil.java</exclude>
                         <exclude>**/JsonSerializable.java</exclude>
+                        <exclude>**/ApplyTextEditAction.java</exclude>
+                        <exclude>**/QuickassistActionEvent.java</exclude>
+                        <exclude>**/LanguageServerQuickAssistProcessorFactory.java</exclude>
+                        <exclude>**/LanguageServerQuickAssistProcessor.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
