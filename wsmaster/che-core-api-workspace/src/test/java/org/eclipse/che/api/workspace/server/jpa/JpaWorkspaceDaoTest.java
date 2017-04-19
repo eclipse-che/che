@@ -144,11 +144,11 @@ public class JpaWorkspaceDaoTest {
         manager.clear();
 
         // check it's okay
-        assertEquals(result  .getConfig()
-                             .getProjects()
-                             .get(0)
-                             .getAttributes()
-                             .size(), 3);
+        assertEquals(result.getConfig()
+                           .getProjects()
+                           .get(0)
+                           .getAttributes()
+                           .size(), 3);
     }
 
     private long asLong(String query) {
