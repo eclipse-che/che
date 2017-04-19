@@ -30,6 +30,7 @@ import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.machine.MachineStatusHandler;
+import org.eclipse.che.ide.macro.ServerAddressMacroRegistrar;
 import org.eclipse.che.lib.terminal.client.TerminalResources;
 import org.eclipse.che.requirejs.RequireJsLoader;
 
@@ -46,6 +47,7 @@ public class TerminalInitializer {
                                final EventBus eventBus,
                                final PerspectiveManager perspectiveManager,
                                final Provider<MachineStatusHandler> machineStatusHandlerProvider,
+                               final Provider<ServerAddressMacroRegistrar> machinePortProvider,
                                final AppContext appContext,
                                final TerminalInitializePromiseHolder terminalModule,
                                final RequireJsLoader requireJsLoader) {
@@ -57,6 +59,7 @@ public class TerminalInitializer {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
                 restoreTerminal();
+                machinePortProvider.get();
             }
 
             @Override
