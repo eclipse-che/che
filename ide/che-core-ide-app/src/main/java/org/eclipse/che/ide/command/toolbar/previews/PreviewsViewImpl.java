@@ -12,20 +12,18 @@ package org.eclipse.che.ide.command.toolbar.previews;
 
 import elemental.dom.Element;
 
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 import org.eclipse.che.ide.ui.dropdown.DropdownList;
+import org.eclipse.che.ide.ui.dropdown.StringItemRenderer;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import static org.eclipse.che.ide.command.toolbar.previews.PreviewUrlItemRenderer.HEADER_WIDGET;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
@@ -38,34 +36,41 @@ public class PreviewsViewImpl implements PreviewsView {
     /** Mapping of URL to list item. */
     private final Map<PreviewUrlItem, BaseListItem<PreviewUrlItem>> listItems;
 
-    private final DropdownList dropdownList;
+    private final DropdownList           dropdownList;
+    private final NoPreviewsItem         noPreviewsItem;
+    private final NoPreviewsItemRenderer noPreviewsItemRenderer;
+    private final ToolbarMessages        messages;
 
     private ActionDelegate delegate;
 
     @Inject
-    public PreviewsViewImpl(ToolbarMessages messages, DialogFactory dialogFactory) {
+    public PreviewsViewImpl(ToolbarMessages messages) {
+        this.messages = messages;
         listItems = new HashMap<>();
 
         dropdownList = new DropdownList(HEADER_WIDGET);
         dropdownList.setWidth("43px");
         dropdownList.ensureDebugId("dropdown-preview_url");
 
-        dropdownList.setSelectionHandler(item -> {
-            for (Entry<PreviewUrlItem, BaseListItem<PreviewUrlItem>> entry : listItems.entrySet()) {
-                if (item.equals(entry.getValue())) {
-                    delegate.onUrlChosen(entry.getKey());
-                    return;
-                }
-            }
-        });
+        dropdownList.setSelectionHandler(item -> listItems.entrySet()
+                                                          .stream()
+                                                          .filter(entry -> item.equals(entry.getValue()))
+                                                          .findAny()
+                                                          .ifPresent(entry -> delegate.onUrlChosen(entry.getKey())));
 
-        dropdownList.addDomHandler(e -> {
-            if (dropdownList.getItems().isEmpty()) {
-                dialogFactory.createMessageDialog(messages.previewsTooltip(), messages.previewsNoPreviews(), null).show();
-            }
-        }, ClickEvent.getType());
+        noPreviewsItem = new NoPreviewsItem();
+        noPreviewsItemRenderer = new NoPreviewsItemRenderer();
+        checkNoPreviewsItem();
 
         Tooltip.create((Element)dropdownList.getElement(), BOTTOM, MIDDLE, messages.previewsTooltip());
+    }
+
+    private void checkNoPreviewsItem() {
+        if (listItems.isEmpty()) {
+            dropdownList.addItem(noPreviewsItem, noPreviewsItemRenderer);
+        } else {
+            dropdownList.removeItem(noPreviewsItem);
+        }
     }
 
     @Override
@@ -89,6 +94,8 @@ public class PreviewsViewImpl implements PreviewsView {
 
         listItems.put(previewUrlItem, listItem);
         dropdownList.addItem(listItem, renderer);
+
+        checkNoPreviewsItem();
     }
 
     @Override
@@ -97,6 +104,8 @@ public class PreviewsViewImpl implements PreviewsView {
 
         if (listItem != null) {
             dropdownList.removeItem(listItem);
+
+            checkNoPreviewsItem();
         }
     }
 
@@ -104,5 +113,24 @@ public class PreviewsViewImpl implements PreviewsView {
     public void removeAllURLs() {
         listItems.clear();
         dropdownList.clear();
+
+        checkNoPreviewsItem();
+    }
+
+    private class NoPreviewsItem extends BaseListItem<String> {
+        NoPreviewsItem() {
+            super(messages.previewsNoPreviews());
+        }
+    }
+
+    private class NoPreviewsItemRenderer extends StringItemRenderer {
+        NoPreviewsItemRenderer() {
+            super(noPreviewsItem);
+        }
+
+        @Override
+        public Widget renderHeaderWidget() {
+            return HEADER_WIDGET;
+        }
     }
 }

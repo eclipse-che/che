@@ -14,14 +14,6 @@ package org.eclipse.che.ide.ui.menubutton;
 public interface ActionHandler {
 
     /**
-     * Called when {@code item} has been selected.
-     *
-     * @param item
-     *         the selected item
-     */
-    void onSelection(MenuItem item);
-
-    /**
      * Called when action on the {@code item} has been requested.
      *
      * @param item

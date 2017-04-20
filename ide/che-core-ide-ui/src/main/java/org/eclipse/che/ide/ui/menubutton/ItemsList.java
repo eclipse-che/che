@@ -126,7 +126,7 @@ class ItemsList extends PopupPanel {
 
                 hide(true);
 
-                getActionHandler().ifPresent(actionHandler -> actionHandler.onSelection(item));
+                getActionHandler().ifPresent(actionHandler -> actionHandler.onAction(item));
             }, ClickEvent.getType());
         }
 
