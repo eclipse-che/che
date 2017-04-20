@@ -352,5 +352,4 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
 
     interface SubPanelViewImplUiBinder extends UiBinder<Widget, SubPanelViewImpl> {
     }
-
 }
