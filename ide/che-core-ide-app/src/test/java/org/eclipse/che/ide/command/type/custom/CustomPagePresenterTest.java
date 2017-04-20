@@ -8,14 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.custom;
+package org.eclipse.che.ide.command.type.custom;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.command.custom.CustomPagePresenter;
-import org.eclipse.che.ide.command.custom.CustomPageView;
+import org.eclipse.che.ide.command.type.custom.CustomPagePresenter;
+import org.eclipse.che.ide.command.type.custom.CustomPageView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

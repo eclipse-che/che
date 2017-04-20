@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.custom;
+package org.eclipse.che.ide.command.type.custom;
 
 import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.icon.IconRegistry;

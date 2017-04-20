@@ -28,7 +28,7 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.filetypes.FileType;
-import org.eclipse.che.ide.command.custom.CustomCommandType;
+import org.eclipse.che.ide.command.type.custom.CustomCommandType;
 import org.eclipse.che.ide.command.editor.CommandEditorView;
 import org.eclipse.che.ide.command.editor.CommandEditorViewImpl;
 import org.eclipse.che.ide.command.editor.page.goal.GoalPageView;
