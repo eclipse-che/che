@@ -23,12 +23,12 @@ import java.util.List;
  */
 class SymbolEntry extends EditorQuickOpenEntry {
 
-    private String    name;
-    private String    parameters;
-    private String    description;
-    private String    filePath;
-    private String    type;
-    private TextRange range;
+    private String      name;
+    private String      parameters;
+    private String      description;
+    private String      filePath;
+    private String      type;
+    private TextRange   range;
     private SVGResource icon;
 
     public SymbolEntry(String name,
@@ -70,7 +70,7 @@ class SymbolEntry extends EditorQuickOpenEntry {
         return icon;
     }
 
-    public String getType(){
+    public String getType() {
         return type;
     }
 
