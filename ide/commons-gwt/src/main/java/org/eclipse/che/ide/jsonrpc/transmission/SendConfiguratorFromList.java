@@ -201,14 +201,15 @@ public class SendConfiguratorFromList<P> {
     }
 
     private void transmitNotification() {
-        JsonRpcParams params = factory.createParams(pListValue);
+        JsonRpcParams params = factory.createParamsList(pListValue);
         JsonRpcRequest request = factory.createRequest(method, params);
         transmitter.transmit(endpointId, request.toString());
     }
 
     private String transmitRequest() {
-        JsonRpcParams params = factory.createParams(pListValue);
         String requestId = Integer.valueOf(MethodNameConfigurator.id.incrementAndGet()).toString();
+
+        JsonRpcParams params = factory.createParamsList(pListValue);
         JsonRpcRequest request = factory.createRequest(requestId, method, params);
         transmitter.transmit(endpointId, request.toString());
         return requestId;

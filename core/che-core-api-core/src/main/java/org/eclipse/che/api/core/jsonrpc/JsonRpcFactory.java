@@ -187,4 +187,15 @@ public interface JsonRpcFactory {
      * @return JSON RPC params
      */
     JsonRpcParams createParams(@Assisted("params") Object params);
+
+    /**
+     * Create a JSON RPC params instance by passing corresponding values.
+     * Params should be represented by a list of objects.
+     *
+     * @param params
+     *         params list
+     *
+     * @return JSON RPC params
+     */
+    JsonRpcParams createParamsList(@Assisted("params") List<?> params);
 }
