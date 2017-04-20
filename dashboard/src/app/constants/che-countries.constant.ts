@@ -186,9 +186,6 @@ export class CheCountriesConfig {
         name: 'Croatia',
         code: 'HR'
       }, {
-        name: 'Cuba',
-        code: 'CU'
-      }, {
         name: 'Curaçao',
         code: 'CW'
       }, {
@@ -327,9 +324,6 @@ export class CheCountriesConfig {
         name: 'Indonesia',
         code: 'ID'
       }, {
-        name: 'Iran',
-        code: 'IR'
-      }, {
         name: 'Iraq',
         code: 'IQ'
       }, {
@@ -365,9 +359,6 @@ export class CheCountriesConfig {
       }, {
         name: 'Kiribati',
         code: 'KI'
-      }, {
-        name: 'Korea, North',
-        code: 'KP'
       }, {
         name: 'Korea, South',
         code: 'KR'
@@ -639,17 +630,11 @@ export class CheCountriesConfig {
         name: 'South Georgia and South Sandwich Islands',
         code: 'GS'
       }, {
-        name: 'South Sudan',
-        code: 'SS'
-      }, {
         name: 'Spain',
         code: 'ES'
       }, {
         name: 'Sri Lanka',
         code: 'LK'
-      }, {
-        name: 'Sudan',
-        code: 'SD'
       }, {
         name: 'Suriname',
         code: 'SR'
@@ -665,9 +650,6 @@ export class CheCountriesConfig {
       }, {
         name: 'Switzerland',
         code: 'CH'
-      }, {
-        name: 'Syria',
-        code: 'SY'
       }, {
         name: 'Taiwan',
         code: 'TW'
