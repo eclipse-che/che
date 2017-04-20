@@ -12,12 +12,12 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import elemental.dom.Element;
 import elemental.js.dom.JsElement;
-import io.typefox.lsapi.DiagnosticSeverity;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.DiagnosticDTO;
 import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
@@ -42,10 +42,10 @@ public class DiagnosticAnnotation extends Annotation {
     private static JsElement fgWarningElement = new SVGImage(RESOURCES.markWarning()).getElement().cast();
     private static JsElement fgErrorElement   = new SVGImage(RESOURCES.markError()).getElement().cast();
 
-    private DiagnosticDTO diagnostic;
-    private Element       imageElement = null;
+    private Diagnostic diagnostic;
+    private Element imageElement = null;
 
-    public DiagnosticAnnotation(DiagnosticDTO diagnostic) {
+    public DiagnosticAnnotation(Diagnostic diagnostic) {
 
         this.diagnostic = diagnostic;
 
@@ -55,31 +55,31 @@ public class DiagnosticAnnotation extends Annotation {
             setType(ERROR_ANNOTATION_TYPE);
         } else {
             switch (severity) {
-            case Error:
-                layer = ERROR_LAYER;
-                setType(ERROR_ANNOTATION_TYPE);
-                break;
-            case Warning:
-                layer = WARNING_LAYER;
-                setType(WARNING_ANNOTATION_TYPE);
-                break;
-            case Information:
-                layer = INFO_LAYER;
-                setType(INFO_ANNOTATION_TYPE);
-                break;
-            case Hint:
-                layer = HINT_LAYER;
-                setType(HINT_ANNOTATION_TYPE);
-                break;
-            default:
-                layer = ERROR_LAYER;
-                setType(ERROR_ANNOTATION_TYPE);
-                break;
+                case Error:
+                    layer = ERROR_LAYER;
+                    setType(ERROR_ANNOTATION_TYPE);
+                    break;
+                case Warning:
+                    layer = WARNING_LAYER;
+                    setType(WARNING_ANNOTATION_TYPE);
+                    break;
+                case Information:
+                    layer = INFO_LAYER;
+                    setType(INFO_ANNOTATION_TYPE);
+                    break;
+                case Hint:
+                    layer = HINT_LAYER;
+                    setType(HINT_ANNOTATION_TYPE);
+                    break;
+                default:
+                    layer = ERROR_LAYER;
+                    setType(ERROR_ANNOTATION_TYPE);
+                    break;
             }
         }
     }
 
-    public DiagnosticDTO getDiagnostic() {
+    public Diagnostic getDiagnostic() {
         return diagnostic;
     }
 
@@ -88,7 +88,9 @@ public class DiagnosticAnnotation extends Annotation {
         return diagnostic.getMessage();
     }
 
+
     private void initializeImage() {
+
         imageElement = Elements.createDivElement();
         imageElement.setClassName(RESOURCES.css().markElement());
 
@@ -101,16 +103,16 @@ public class DiagnosticAnnotation extends Annotation {
     private Element getSelectedImageElement() {
         final String type = getType();
         switch (type) {
-        case HINT_ANNOTATION_TYPE:
-            return fgTaskElement;
-        case INFO_ANNOTATION_TYPE:
-            return fgInfoElement;
-        case WARNING_ANNOTATION_TYPE:
-            return fgWarningElement;
-        case ERROR_ANNOTATION_TYPE:
-            return fgErrorElement;
-        default:
-            return null;
+            case HINT_ANNOTATION_TYPE:
+                return fgTaskElement;
+            case INFO_ANNOTATION_TYPE:
+                return fgInfoElement;
+            case WARNING_ANNOTATION_TYPE:
+                return fgWarningElement;
+            case ERROR_ANNOTATION_TYPE:
+                return fgErrorElement;
+            default:
+                return null;
         }
     }
 

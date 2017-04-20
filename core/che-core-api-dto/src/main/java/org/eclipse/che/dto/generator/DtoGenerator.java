@@ -15,7 +15,6 @@ package org.eclipse.che.dto.generator;
 
 import org.eclipse.che.dto.server.DtoFactoryVisitor;
 import org.eclipse.che.dto.shared.DTO;
-
 import org.eclipse.che.dto.shared.DTOImpl;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
@@ -50,8 +49,39 @@ public class DtoGenerator {
     /** Flag: A pattern we can use to search an absolute path and find the start of the package definition.") */
     private String packageBase = "java.";
 
+    public static void main(String[] args) {
+        DtoGenerator generator = new DtoGenerator();
+        for (String arg : args) {
+            if (arg.startsWith("--dto_packages=")) {
+                generator.setDtoPackages(arg.substring("--dto_packages=".length()));
+            } else if (arg.startsWith("--gen_file_name=")) {
+                generator.setGenFileName(arg.substring("--gen_file_name=".length()));
+            } else if (arg.startsWith("--impl=")) {
+                generator.setImpl(arg.substring("--impl=".length()));
+            } else if (arg.startsWith("--package_base=")) {
+                generator.setPackageBase(arg.substring("--package_base=".length()));
+            } else {
+                throw new RuntimeException("Unknown flag: " + arg);
+                //System.exit(1);
+            }
+        }
+        generator.generate();
+    }
+
+    private static Set<URL> getClasspathForPackages(String[] packages) {
+        Set<URL> urls = new HashSet<>();
+        for (String pack : packages) {
+            urls.addAll(ClasspathHelper.forPackage(pack));
+        }
+        return urls;
+    }
+
     public String[] getDtoPackages() {
         return dtoPackages;
+    }
+
+    private void setDtoPackages(String packagesParam) {
+        setDtoPackages(packagesParam.split(","));
     }
 
     public void setDtoPackages(String[] dtoPackages) {
@@ -83,29 +113,6 @@ public class DtoGenerator {
         this.packageBase = packageBase;
     }
 
-    public static void main(String[] args) {
-        DtoGenerator generator = new DtoGenerator();
-        for (String arg : args) {
-            if (arg.startsWith("--dto_packages=")) {
-                generator.setDtoPackages(arg.substring("--dto_packages=".length()));
-            } else if (arg.startsWith("--gen_file_name=")) {
-                generator.setGenFileName(arg.substring("--gen_file_name=".length()));
-            } else if (arg.startsWith("--impl=")) {
-                generator.setImpl(arg.substring("--impl=".length()));
-            } else if (arg.startsWith("--package_base=")) {
-                generator.setPackageBase(arg.substring("--package_base=".length()));
-            } else {
-                System.err.println("Unknown flag: " + arg);
-                System.exit(1);
-            }
-        }
-        generator.generate();
-    }
-
-    private void setDtoPackages(String packagesParam) {
-        setDtoPackages(packagesParam.split(","));
-    }
-
     public void generate() {
 
         Set<URL> urls = getClasspathForPackages(dtoPackages);
@@ -129,8 +136,9 @@ public class DtoGenerator {
 
         try {
             DtoTemplate dtoTemplate = new DtoTemplate(packageName, className, impl);
-            Reflections reflection = new Reflections(new ConfigurationBuilder().setUrls(urls).setScanners(new SubTypesScanner(), new TypeAnnotationsScanner()));
-            
+            Reflections reflection = new Reflections(
+                    new ConfigurationBuilder().setUrls(urls).setScanners(new SubTypesScanner(), new TypeAnnotationsScanner()));
+
             List<Class<?>> dtos = new ArrayList<>(reflection.getTypesAnnotatedWith(DTO.class));
 
             // We sort alphabetically to ensure deterministic order of routing types.
@@ -145,7 +153,8 @@ public class DtoGenerator {
             }
 
             reflection = new Reflections(
-                    new ConfigurationBuilder().setUrls(ClasspathHelper.forClassLoader()).setScanners(new SubTypesScanner(), new TypeAnnotationsScanner()));
+                    new ConfigurationBuilder().setUrls(ClasspathHelper.forClassLoader())
+                                              .setScanners(new SubTypesScanner(), new TypeAnnotationsScanner()));
             List<Class<?>> dtosDependencies = new ArrayList<>(reflection.getTypesAnnotatedWith(DTO.class));
             dtosDependencies.removeAll(dtos);
 
@@ -156,11 +165,11 @@ public class DtoGenerator {
                 for (Class impl : reflection.getSubTypesOf(clazz)) {
                     if (!(impl.isInterface() || urls.contains(impl.getProtectionDomain().getCodeSource().getLocation()))) {
                         if ("client".equals(dtoTemplate.getImplType())) {
-                           if (isClientImpl(impl))  {
-                               dtoTemplate.addImplementation(clazz, impl);
-                           }
+                            if (isClientImpl(impl)) {
+                                dtoTemplate.addImplementation(clazz, impl);
+                            }
                         } else if ("server".equals(dtoTemplate.getImplType())) {
-                            if (isServerImpl(impl))  {
+                            if (isServerImpl(impl)) {
                                 dtoTemplate.addImplementation(clazz, impl);
                             }
                         }
@@ -195,14 +204,6 @@ public class DtoGenerator {
     private boolean isServerImpl(Class<?> impl) {
         DTOImpl a = impl.getAnnotation(DTOImpl.class);
         return a != null && "server".equals(a.value());
-    }
-
-    private static Set<URL> getClasspathForPackages(String[] packages) {
-        Set<URL> urls = new HashSet<>();
-        for (String pack : packages) {
-            urls.addAll(ClasspathHelper.forPackage(pack));
-        }
-        return urls;
     }
 
     private static class ClassesComparator implements Comparator<Class> {

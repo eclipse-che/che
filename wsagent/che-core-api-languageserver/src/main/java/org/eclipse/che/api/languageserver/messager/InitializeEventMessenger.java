@@ -10,17 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.messager;
 
-import io.typefox.lsapi.ServerCapabilities;
-import io.typefox.lsapi.services.LanguageServer;
-
-import com.google.gson.Gson;
-
-import org.eclipse.che.api.languageserver.DtoConverter;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.api.languageserver.registry.ServerInitializer;
 import org.eclipse.che.api.languageserver.registry.ServerInitializerObserver;
-import org.eclipse.che.api.languageserver.shared.event.LanguageServerInitializeEventDto;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.LanguageServerInitializeEventDto;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.services.LanguageServer;
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;
@@ -32,8 +29,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.websocket.EncodeException;
 import java.io.IOException;
-
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * @author Anatolii Bazko
@@ -55,9 +50,9 @@ public class InitializeEventMessenger implements ServerInitializerObserver {
                                     LanguageDescription languageDescription,
                                     String projectPath) {
 
-        LanguageServerInitializeEventDto initializeEventDto = newDto(LanguageServerInitializeEventDto.class);
-        initializeEventDto.setSupportedLanguages(DtoConverter.asDto(languageDescription));
-        initializeEventDto.setServerCapabilities(DtoConverter.asDto(serverCapabilities));
+        LanguageServerInitializeEventDto initializeEventDto = new DtoServerImpls.LanguageServerInitializeEventDto();
+        initializeEventDto.setSupportedLanguages(new DtoServerImpls.LanguageDescriptionDto(languageDescription));
+        initializeEventDto.setServerCapabilities(new DtoServerImpls.ServerCapabilitiesDto(serverCapabilities));
         initializeEventDto.setProjectPath(projectPath.substring(LanguageServerRegistryImpl.PROJECT_FOLDER_PATH.length()));
 
         send(initializeEventDto);
@@ -77,7 +72,7 @@ public class InitializeEventMessenger implements ServerInitializerObserver {
         try {
             final ChannelBroadcastMessage bm = new ChannelBroadcastMessage();
             bm.setChannel("languageserver");
-            bm.setBody(new Gson().toJson(message));
+            bm.setBody(message.toJson());
             WSConnectionContext.sendMessage(bm);
         } catch (EncodeException | IOException e) {
             LOG.error(e.getMessage(), e);

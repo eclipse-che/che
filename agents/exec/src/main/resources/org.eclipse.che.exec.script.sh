@@ -45,6 +45,8 @@ MACHINE_TYPE=$(uname -m)
 SHELL_INTERPRETER="/bin/sh"
 
 mkdir -p ${CHE_DIR}
+${SUDO} mkdir -p /projects
+${SUDO} sh -c "chown $(id -u -n) /projects"
 
 ########################
 ### Install packages ###
