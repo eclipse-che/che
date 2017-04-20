@@ -10,26 +10,28 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.quickassist;
 
-import java.util.List;
+import com.google.gwt.json.client.JSONValue;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.TextEditDTOImpl;
+import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.TextEdit;
 
-import com.google.gwt.json.client.JSONValue;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.List;
 
-import io.typefox.lsapi.Position;
-import io.typefox.lsapi.Range;
-import io.typefox.lsapi.TextEdit;
 
 /**
- * Applies a list of {@link TextEdit} changes to the current editor.
+ * Applies a list of {@link org.eclipse.lsp4j.TextEdit} changes to the current editor.
  * 
  * @author Thomas Mäder
  *
@@ -37,11 +39,15 @@ import io.typefox.lsapi.TextEdit;
 @Singleton
 public class ApplyTextEditAction extends Action {
 	private EditorAgent editorAgent;
+	private DtoFactory dtoFactory;
 
 	@Inject
-	public ApplyTextEditAction(EditorAgent editorAgent) {
+	public ApplyTextEditAction(EditorAgent editorAgent,
+                               DtoFactory dtoFactory,
+                               DtoBuildHelper dtoBuildHelper) {
 		super("Apply Text Edit");
 		this.editorAgent = editorAgent;
+		this.dtoFactory = dtoFactory;
 	}
 
 	@Override
@@ -55,7 +61,7 @@ public class ApplyTextEditAction extends Action {
 		List<Object> arguments = ((QuickassistActionEvent) e).getArguments();
 		for (Object arg : arguments) {
 			if ((arg instanceof JSONValue)) {
-				TextEditDTOImpl edit = TextEditDTOImpl.fromJsonObject((JSONValue) arg);
+				TextEdit edit = DtoClientImpls.TextEditDto.fromJson((JSONValue) arg);
 				Range range = edit.getRange();
 				Position start = range.getStart();
 				Position end = range.getEnd();

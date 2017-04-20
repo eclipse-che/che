@@ -18,6 +18,7 @@ import java.util.List;
 /**
  * Matcher the wey to match some string.
  * S
+ *
  * @author Evgen Vidolob
  */
 public interface Matcher {
@@ -25,8 +26,8 @@ public interface Matcher {
     @Nullable
     List<Match> match(String word, String wordToMatch);
 
-    class MatcherUtil{
-      public static Matcher or(final Matcher... matchers) {
+    class MatcherUtil {
+        public static Matcher or(final Matcher... matchers) {
             return new Matcher() {
                 @Override
                 public List<Match> match(String word, String wordToMatch) {
@@ -42,7 +43,7 @@ public interface Matcher {
             };
         }
 
-      public static Matcher and(final Matcher... matchers) {
+        public static Matcher and(final Matcher... matchers) {
             return new Matcher() {
                 @Override
                 public List<Match> match(String word, String wordToMatch) {

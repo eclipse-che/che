@@ -177,6 +177,8 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
 
                     if (node instanceof ExecutableCommandNode) {
                         delegate.onCommandExecute(((ExecutableCommandNode)node).getData());
+                    } else if (node instanceof CommandGoalNode) {
+                        tree.setExpanded(node, !tree.isExpanded(node));
                     }
                 }
                 break;

@@ -108,7 +108,7 @@ public interface LanguageServerResources extends ClientBundle {
         String codeassistantHighlight();
     }
 
-    interface QuickOpenListCss extends SimpleList.Css{
+    interface QuickOpenListCss extends SimpleList.Css {
         int menuListBorderPx();
 
         String listItem();

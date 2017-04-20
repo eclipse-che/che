@@ -22,10 +22,7 @@ import java.util.Map;
 
 import static org.eclipse.che.ide.filters.Matcher.MatcherUtil.or;
 
-
 /**
- * Fuzzy logic to match some string
- *
  * @author Evgen Vidolob
  */
 @Singleton

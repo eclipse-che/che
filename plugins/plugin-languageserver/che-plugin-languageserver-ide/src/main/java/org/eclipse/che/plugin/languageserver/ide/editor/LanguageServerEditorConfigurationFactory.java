@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
+import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
-import io.typefox.lsapi.ServerCapabilities;
 
 /**
  * @author Evgen Vidolob

@@ -10,13 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.declaration;
 
-import io.typefox.lsapi.ServerCapabilities;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -32,6 +28,9 @@ import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenter;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
+import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -69,7 +68,7 @@ public class FindDefinitionAction extends AbstractPerspectiveAction {
             if (configuration instanceof LanguageServerEditorConfiguration) {
                 ServerCapabilities capabilities = ((LanguageServerEditorConfiguration)configuration).getServerCapabilities();
                 event.getPresentation()
-                     .setEnabledAndVisible(capabilities.isDefinitionProvider() != null && capabilities.isDefinitionProvider());
+                     .setEnabledAndVisible(capabilities.getDefinitionProvider() != null && capabilities.getDefinitionProvider());
                 return;
             }
         }
@@ -82,12 +81,12 @@ public class FindDefinitionAction extends AbstractPerspectiveAction {
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
 
         TextEditor textEditor = ((TextEditor)activeEditor);
-        TextDocumentPositionParamsDTO paramsDTO = dtoBuildHelper.createTDPP(textEditor.getDocument(), textEditor.getCursorPosition());
+        TextDocumentPositionParams paramsDTO = dtoBuildHelper.createTDPP(textEditor.getDocument(), textEditor.getCursorPosition());
 
-        final Promise<List<LocationDTO>> promise = client.definition(paramsDTO);
-        promise.then(new Operation<List<LocationDTO>>() {
+        final Promise<List<Location>> promise = client.definition(paramsDTO);
+        promise.then(new Operation<List<Location>>() {
             @Override
-            public void apply(List<LocationDTO> arg) throws OperationException {
+            public void apply(List<Location> arg) throws OperationException {
                 if (arg.size() == 1) {
                     presenter.onLocationSelected(arg.get(0));
                 } else {

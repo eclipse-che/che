@@ -13,8 +13,6 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.DiagnosticDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModelImpl;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
@@ -24,6 +22,8 @@ import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.EditorResources;
 import org.eclipse.che.ide.editor.orion.client.OrionAnnotationSeverityProvider;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.Range;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +36,7 @@ import java.util.Map;
 public class LanguageServerAnnotationModel extends AnnotationModelImpl implements DiagnosticCollector, OrionAnnotationSeverityProvider {
     private final LanguageServerResources.LSCss lsCss;
     private final EditorResources.EditorCss     editorCss;
-    private       List<DiagnosticDTO>           diagnostics;
+    private       List<Diagnostic>              diagnostics;
     private List<DiagnosticAnnotation> generatedAnnotations = new ArrayList<>();
 
     @AssistedInject
@@ -48,10 +48,10 @@ public class LanguageServerAnnotationModel extends AnnotationModelImpl implement
         this.editorCss = editorResources.editorCss();
     }
 
-    protected Position createPositionFromDiagnostic(final DiagnosticDTO diagnostic) {
+    protected Position createPositionFromDiagnostic(final Diagnostic diagnostic) {
         DocumentHandle documentHandle = getDocumentHandle();
         Document document = documentHandle.getDocument();
-        RangeDTO range = diagnostic.getRange();
+        Range range = diagnostic.getRange();
         int start = document.getIndexFromPosition(new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()));
         int end = document.getIndexFromPosition(new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
 
@@ -75,7 +75,7 @@ public class LanguageServerAnnotationModel extends AnnotationModelImpl implement
     }
 
     @Override
-    public void acceptDiagnostic(final DiagnosticDTO problem) {
+    public void acceptDiagnostic(final Diagnostic problem) {
         diagnostics.add(problem);
     }
 
@@ -100,7 +100,7 @@ public class LanguageServerAnnotationModel extends AnnotationModelImpl implement
 
         if (diagnostics != null && !diagnostics.isEmpty()) {
 
-            for (final DiagnosticDTO diagnostic : diagnostics) {
+            for (final Diagnostic diagnostic : diagnostics) {
                 final Position position = createPositionFromDiagnostic(diagnostic);
 
                 if (position != null) {
