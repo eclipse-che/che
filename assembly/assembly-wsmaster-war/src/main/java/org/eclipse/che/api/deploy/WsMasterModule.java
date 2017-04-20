@@ -31,6 +31,10 @@ import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
+import org.eclipse.che.api.recipe.JpaRecipeDao;
+import org.eclipse.che.api.recipe.RecipeDao;
+import org.eclipse.che.api.recipe.RecipeLoader;
+import org.eclipse.che.api.recipe.RecipeService;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.workspace.server.RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber;
 import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
@@ -42,6 +46,8 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
 import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.JpaSnapshotDao;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 import javax.sql.DataSource;
@@ -59,7 +65,10 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.account.api.AccountModule());
         install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());
         install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
-        install(new org.eclipse.che.api.machine.server.jpa.MachineJpaModule());
+//        install(new org.eclipse.che.api.machine.server.jpa.MachineJpaModule());
+        bind(RecipeDao.class).to(JpaRecipeDao.class);
+        // TODO spi move into docker infra impl
+        bind(SnapshotDao.class).to(JpaSnapshotDao.class);
         install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
         install(new org.eclipse.che.api.core.jsonrpc.JsonRpcModule());
         install(new org.eclipse.che.api.core.websocket.WebSocketModule());
@@ -91,7 +100,7 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.project.server.template.ProjectTemplateRegistry.class);
         bind(org.eclipse.che.api.project.server.template.ProjectTemplateService.class);
         bind(org.eclipse.che.api.ssh.server.SshService.class);
-        bind(org.eclipse.che.api.machine.server.recipe.RecipeService.class);
+        bind(RecipeService.class);
         bind(org.eclipse.che.api.user.server.UserService.class);
         bind(org.eclipse.che.api.user.server.ProfileService.class);
         bind(org.eclipse.che.api.user.server.PreferencesService.class);
@@ -127,7 +136,7 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.agent.server.WsAgentHealthChecker.class)
                 .to(org.eclipse.che.api.agent.server.WsAgentHealthCheckerImpl.class);
 
-        bind(org.eclipse.che.api.machine.server.recipe.RecipeLoader.class);
+        bind(RecipeLoader.class);
         Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"))
                    .addBinding()
                    .toInstance("predefined-recipes.json");
@@ -182,7 +191,7 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
 // FIXME: spi
 //        install(new org.eclipse.che.plugin.docker.machine.local.LocalDockerModule());
-        install(new org.eclipse.che.api.machine.server.MachineModule());
+//        install(new org.eclipse.che.api.machine.server.MachineModule());
 // FIXME: spi
 //        install(new org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule());
         install(new org.eclipse.che.swagger.deploy.DocsModule());

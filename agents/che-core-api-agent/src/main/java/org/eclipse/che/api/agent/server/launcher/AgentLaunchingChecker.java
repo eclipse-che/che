@@ -10,17 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.launcher;
 
-import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-
 /**
  * Indicates if agent finished working.
  *
  * @author Anatoliy Bazko
  */
-@FunctionalInterface
+//@FunctionalInterface
 public interface AgentLaunchingChecker {
 
     /**
@@ -35,7 +30,7 @@ public interface AgentLaunchingChecker {
      * @throws MachineException
      *      if unexpected error is occurred
      */
-    boolean isLaunched(Agent agent, InstanceProcess process, Instance machine) throws MachineException;
-
-    AgentLaunchingChecker DEFAULT = (agent, process, machine) -> !process.isAlive();
+//    boolean isLaunched(Agent agent, InstanceProcess process, Instance machine) throws MachineException;
+//
+//    AgentLaunchingChecker DEFAULT = (agent, process, machine) -> !process.isAlive();
 }

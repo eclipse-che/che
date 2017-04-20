@@ -33,10 +33,10 @@
         <class>org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl</class>
 
-        <class>org.eclipse.che.api.machine.server.model.impl.CommandImpl</class>
-        <class>org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl</class>
-        <class>org.eclipse.che.api.machine.server.model.impl.SnapshotImpl</class>
-        <class>org.eclipse.che.api.machine.server.recipe.OldRecipeImpl</class>
+        <class>org.eclipse.che.api.workspace.server.model.impl.CommandImpl</class>
+        <class>org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl</class>
+        <class>org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl</class>
+        <class>org.eclipse.che.api.recipe.OldRecipeImpl</class>
 
         <class>org.eclipse.che.api.factory.server.model.impl.FactoryImpl</class>
         <class>org.eclipse.che.api.factory.server.model.impl.OnAppClosedImpl</class>

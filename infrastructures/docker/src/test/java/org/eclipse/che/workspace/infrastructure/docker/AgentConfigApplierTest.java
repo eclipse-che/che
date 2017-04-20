@@ -16,7 +16,6 @@ import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
 import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
 import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 import org.eclipse.che.workspace.infrastructure.docker.old.agents.AgentConfigApplier;
@@ -47,8 +46,8 @@ public class AgentConfigApplierTest {
 
     @Mock
     private AgentSorter          sorter;
-    @Mock
-    private Instance             machine;
+//    @Mock
+//    private Instance             machine;
     @Mock
     private AgentImpl            agent1;
     @Mock

@@ -20,8 +20,7 @@ import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
-import org.eclipse.che.api.machine.server.spi.InstanceNode;
+import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
@@ -154,9 +153,9 @@ public class SshMachineInstance  {
         sshClient.stop();
     }
 
-    public InstanceNode getNode() {
-        return null;// todo
-    }
+//    public InstanceNode getNode() {
+//        return null;// todo
+//    }
 
     public MachineStatus getStatus() {
         return status;

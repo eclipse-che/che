@@ -11,9 +11,9 @@
 package org.eclipse.che.workspace.infrastructure.docker.strategy;
 
 import org.eclipse.che.api.core.model.machine.ServerProperties;
-import org.eclipse.che.api.machine.server.model.impl.OldServerConfImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
+import org.eclipse.che.api.workspace.server.model.impl.OldServerConfImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerPropertiesImpl;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
 

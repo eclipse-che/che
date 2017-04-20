@@ -22,7 +22,7 @@ import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.UnsupportedRecipeException;
-import org.eclipse.che.api.machine.server.util.RecipeDownloader;
+import org.eclipse.che.api.workspace.server.RecipeDownloader;
 
 import javax.inject.Inject;
 import java.io.IOException;

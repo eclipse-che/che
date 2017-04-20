@@ -23,7 +23,6 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -504,9 +503,10 @@ public class WorkspaceManager {
                     removeWorkspaceQuietly(workspace);
                 }
                 for (Throwable cause : getCausalChain(ex)) {
-                    if (cause instanceof SourceNotFoundException) {
-                        return;
-                    }
+                    // TODO spi
+//                    if (cause instanceof SourceNotFoundException) {
+//                        return;
+//                    }
                 }
                 LOG.error(ex.getLocalizedMessage(), ex);
             }

@@ -10,11 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.launcher;
 
-import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,7 +36,7 @@ public class CompositeAgentLaunchingChecker implements AgentLaunchingChecker {
         this.agentLaunchingCheckers = Arrays.asList(agentLaunchingCheckers);
     }
 
-    @Override
+    /*@Override
     public boolean isLaunched(Agent agent, InstanceProcess process, Instance machine) throws MachineException {
         for (AgentLaunchingChecker agentLaunchingChecker : agentLaunchingCheckers) {
             if (!agentLaunchingChecker.isLaunched(agent, process, machine)) {
@@ -49,5 +44,5 @@ public class CompositeAgentLaunchingChecker implements AgentLaunchingChecker {
             }
         }
         return true;
-    }
+    }*/
 }

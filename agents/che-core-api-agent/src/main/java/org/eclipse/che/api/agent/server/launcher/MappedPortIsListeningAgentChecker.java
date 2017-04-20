@@ -10,12 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.launcher;
 
-import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-
 /**
  * Verifies that agent was started successfully by checking that specified local port is listened in a machine.
  *
@@ -28,7 +22,7 @@ public class MappedPortIsListeningAgentChecker implements AgentLaunchingChecker 
         // normalize port/transport value
         this.exposedPort = exposedPort.contains("/") ? exposedPort : exposedPort + "/tcp";
     }
-
+/*
     @Override
     public boolean isLaunched(Agent agent, InstanceProcess process, Instance machine) throws MachineException {
         Server server = machine.getRuntime().getServers().get(exposedPort);
@@ -45,5 +39,5 @@ public class MappedPortIsListeningAgentChecker implements AgentLaunchingChecker 
 //            }
 //        }
         return false;
-    }
+    }*/
 }

@@ -10,19 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.launcher;
 
-import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-
 /**
  * Agent launching checker that does nothing. Useful when agent does not run in a machine as daemon.
  *
  * @author Alexander Garagatyi
  */
 public class NoOpAgentLaunchingChecker implements AgentLaunchingChecker {
-    @Override
+    /*@Override
     public boolean isLaunched(Agent agent, InstanceProcess process, Instance machine) throws MachineException {
         return true;
-    }
+    }*/
 }

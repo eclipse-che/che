@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker.strategy;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;

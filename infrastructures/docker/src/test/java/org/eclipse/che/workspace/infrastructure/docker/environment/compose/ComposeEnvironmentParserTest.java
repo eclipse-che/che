@@ -14,7 +14,7 @@ import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
-import org.eclipse.che.api.machine.server.util.RecipeDownloader;
+import org.eclipse.che.api.workspace.server.RecipeDownloader;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;

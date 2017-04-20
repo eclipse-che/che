@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.plugin.docker.client.DockerFileException;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.parser.DockerImageIdentifier;
@@ -50,10 +50,10 @@ public class DockerMachineSource extends MachineSourceImpl {
      * Build a dedicated docker image source based on a given machine source object.
      * @param machineSource the machine source used to parse data.
      */
-    public DockerMachineSource(MachineSource machineSource) throws MachineException {
+    public DockerMachineSource(MachineSource machineSource) throws ServerException {
         // check type
         if (!DockerInstanceProvider.DOCKER_IMAGE_TYPE.equals(machineSource.getType())) {
-            throw new MachineException("Docker machine source can only be built with '" + DockerInstanceProvider.DOCKER_IMAGE_TYPE + "' type");
+            throw new ServerException("Docker machine source can only be built with '" + DockerInstanceProvider.DOCKER_IMAGE_TYPE + "' type");
         }
         setType(DockerInstanceProvider.DOCKER_IMAGE_TYPE);
 
@@ -62,7 +62,7 @@ public class DockerMachineSource extends MachineSourceImpl {
         try {
             dockerImageIdentifier = DockerImageIdentifierParser.parse(machineSource.getLocation());
         } catch (DockerFileException e) {
-            throw new MachineException("Try to build a docker machine source with an invalid location/content. It is not in the expected format", e);
+            throw new ServerException("Try to build a docker machine source with an invalid location/content. It is not in the expected format", e);
         }
 
         // populate

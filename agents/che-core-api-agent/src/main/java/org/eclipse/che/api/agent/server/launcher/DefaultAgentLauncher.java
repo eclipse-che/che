@@ -13,16 +13,6 @@ package org.eclipse.che.api.agent.server.launcher;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.util.AbstractLineConsumer;
-import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.machine.server.spi.Instance;
-
-import java.io.IOException;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
-
 /**
  * Launches agent and waits while it is finished.
  *
@@ -36,7 +26,7 @@ public class DefaultAgentLauncher implements AgentLauncher {
     @Inject
     public DefaultAgentLauncher() { }
 
-    @Override
+    /*@Override
     public void launch(Instance machine, Agent agent) throws ServerException {
         if (isNullOrEmpty(agent.getScript())) {
             return;
@@ -69,7 +59,7 @@ public class DefaultAgentLauncher implements AgentLauncher {
 //            }
 //        }
     }
-
+*/
     @Override
     public String getAgentId() {
         return "any";

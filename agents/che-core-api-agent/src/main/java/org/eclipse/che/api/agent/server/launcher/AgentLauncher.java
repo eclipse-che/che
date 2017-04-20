@@ -13,7 +13,6 @@ package org.eclipse.che.api.agent.server.launcher;
 import org.eclipse.che.api.agent.server.exception.AgentStartException;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.server.spi.Instance;
 
 /**
  * Launches {@link Agent#getScript()} on the {@link Instance}.
@@ -48,5 +47,5 @@ public interface AgentLauncher {
      * @throws ServerException
      *      if script execution failed
      */
-    void launch(Instance machine, Agent agent) throws ServerException, AgentStartException;
+//    void launch(Instance machine, Agent agent) throws ServerException, AgentStartException;
 }

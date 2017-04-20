@@ -20,8 +20,7 @@ import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.core.util.SystemInfo;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -324,7 +323,7 @@ public class ServiceStarter {
                               String machineImageName,
                               boolean doForcePullOnBuild,
                               ProgressMonitor progressMonitor)
-            throws MachineException {
+            throws ServerException {
 
         File workDir = null;
         try {
@@ -356,7 +355,7 @@ public class ServiceStarter {
 
             docker.buildImage(buildImageParams, progressMonitor);
         } catch (IOException e) {
-            throw new MachineException(e.getLocalizedMessage(), e);
+            throw new ServerException(e.getLocalizedMessage(), e);
         } finally {
             if (workDir != null) {
                 FileCleaner.addFile(workDir);
@@ -375,16 +374,16 @@ public class ServiceStarter {
      *         consumer of output
      * @throws SourceNotFoundException
      *         if image for pulling not found
-     * @throws MachineException
+     * @throws ServerException
      *         if any other error occurs
      */
     protected void pullImage(DockerService service,
                              String machineImageName,
-                             ProgressMonitor progressMonitor) throws MachineException, SourceNotFoundException {
+                             ProgressMonitor progressMonitor) throws ServerException, SourceNotFoundException {
         DockerMachineSource dockerMachineSource = new DockerMachineSource(
                 new MachineSourceImpl("image").setLocation(service.getImage()));
         if (dockerMachineSource.getRepository() == null) {
-            throw new MachineException(
+            throw new ServerException(
                     format("Machine creation failed. Machine source is invalid. No repository is defined. Found '%s'.",
                            dockerMachineSource));
         }
@@ -413,7 +412,7 @@ public class ServiceStarter {
                 docker.removeImage(RemoveImageParams.create(fullNameOfPulledImage).withForce(false));
             }
         } catch (IOException e) {
-            throw new MachineException("Can't create machine from image. Cause: " + e.getLocalizedMessage(), e);
+            throw new ServerException("Can't create machine from image. Cause: " + e.getLocalizedMessage(), e);
         }
     }
 

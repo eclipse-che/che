@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
-import org.eclipse.che.api.machine.server.spi.Instance;
-
 /**
- * Docker implementation of {@link Instance}
+ * Docker implementation of {@link }
  *
  * @author andrew00x
  * @author Alexander Garagatyi

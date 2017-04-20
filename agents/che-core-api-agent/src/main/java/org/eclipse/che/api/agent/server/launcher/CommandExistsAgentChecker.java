@@ -10,15 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.launcher;
 
-import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.model.workspace.config.Command;
-import org.eclipse.che.api.core.util.ListLineConsumer;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-
 import static java.lang.String.format;
 
 /**
@@ -37,7 +28,7 @@ public class CommandExistsAgentChecker implements AgentLaunchingChecker {
         this.checkingCommand = format(CHECK_COMMAND, commandToCheck);
     }
 
-    @Override
+    /*@Override
     public boolean isLaunched(Agent agent, InstanceProcess process, Instance machine) throws MachineException {
         Command command = new CommandImpl(format("Wait for %s, try %d", agent.getId(), ++counter),
                                           checkingCommand,
@@ -50,5 +41,5 @@ public class CommandExistsAgentChecker implements AgentLaunchingChecker {
         } catch (ConflictException e) {
             throw new MachineException(e.getServiceError());
         }
-    }
+    }*/
 }

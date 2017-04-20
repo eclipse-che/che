@@ -10,17 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import org.eclipse.che.api.machine.server.MachineInstanceProviders;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
-import org.eclipse.che.api.machine.server.util.RecipeDownloader;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
-
-import java.util.concurrent.ExecutorService;
-
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Alexander Garagatyi

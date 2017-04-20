@@ -10,17 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.launcher;
 
-import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.model.workspace.config.Command;
-import org.eclipse.che.api.core.util.ListLineConsumer;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-
-import static java.lang.String.format;
-
 /**
  * Verifies if agent started a process with specific name.
  * It is an indicator that process had been finished.
@@ -41,7 +30,7 @@ public class ProcessIsLaunchedChecker implements AgentLaunchingChecker {
         this.processNameToWait = processNameToWait;
     }
 
-    @Override
+    /*@Override
     public boolean isLaunched(Agent agent, InstanceProcess process, Instance machine) throws MachineException {
             Command command = new CommandImpl(format("Wait for %s, try %d", agent.getId(), ++counter),
                                           format(CHECK_COMMAND, processNameToWait),
@@ -54,5 +43,5 @@ public class ProcessIsLaunchedChecker implements AgentLaunchingChecker {
         } catch (ConflictException e) {
             throw new MachineException(e.getServiceError());
         }
-    }
+    }*/
 }

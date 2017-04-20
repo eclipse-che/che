@@ -11,14 +11,13 @@
 package org.eclipse.che.workspace.infrastructure.docker.old.local.node;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.server.spi.InstanceNode;
 
 /**
  * Provides access to operation machines need but not supported by the Docker
  *
  * @author Alexander Garagatyi
  */
-public interface DockerNode extends InstanceNode {
+public interface DockerNode {
     /**
      * Bind the whole workspace on the Node.
      *
@@ -35,7 +34,6 @@ public interface DockerNode extends InstanceNode {
      */
     void unbindWorkspace() throws ServerException;
 
-    @Override
     String getHost();
 
     /**

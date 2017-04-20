@@ -15,19 +15,12 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
-import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.exception.SnapshotException;
-import org.eclipse.che.api.machine.server.exception.UnsupportedRecipeException;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,14 +34,13 @@ import java.net.URL;
 import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY_SYNONYMS;
 
 /**
- * Docker implementation of {@link InstanceProvider}
  *
  * @author andrew00x
  * @author Alexander Garagatyi
  * @author Roman Iuvshyn
  * @author Mykola Morhun
  *
- * @deprecated use {@link MachineProviderImpl} instead
+ * @deprecated use {@link } instead
  */
 @Deprecated
 @Singleton
@@ -93,7 +85,7 @@ public class DockerInstanceProvider {
      *         machine description
      * @param creationLogsOutput
      *         output for instance creation logs
-     * @return newly created {@link Instance}
+     * @return newly created {@link }
      * @throws UnsupportedRecipeException
      *         if specified {@code recipe} is not supported
      * @throws InvalidRecipeException
@@ -103,11 +95,11 @@ public class DockerInstanceProvider {
      * @throws MachineException
      *         if other error occurs
      */
-    public Instance createInstance(Machine machine,
+    /*public Instance createInstance(Machine machine,
                                    LineConsumer creationLogsOutput) throws NotFoundException,
-                                                                           MachineException {
+                                                                           Exception {
         throw new UnsupportedOperationException("This machine provider is deprecated.");
-    }
+    }*/
 
     /**
      * Removes snapshot of the instance in implementation specific way.
@@ -123,7 +115,7 @@ public class DockerInstanceProvider {
         final DockerMachineSource dockerMachineSource;
         try {
             dockerMachineSource = new DockerMachineSource(machineSource);
-        } catch (MachineException e) {
+        } catch (Exception e) {
             throw new SnapshotException(e);
         }
 

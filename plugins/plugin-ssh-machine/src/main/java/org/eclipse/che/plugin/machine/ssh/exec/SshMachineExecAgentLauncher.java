@@ -17,12 +17,11 @@ import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.plugin.machine.ssh.SshMachineInstance;
@@ -111,7 +110,7 @@ public class SshMachineExecAgentLauncher  {
             final String errMsg = format("Fail launching agent %s. Workspace ID:%s", agent.getName(), machine.getWorkspaceId());
             LOG.error(errMsg);
             throw new ServerException(errMsg);
-        } catch (MachineException e) {
+        } catch (ServerException e) {
             throw new ServerException(e.getServiceError());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -122,7 +121,7 @@ public class SshMachineExecAgentLauncher  {
         }
     }
 
-    private String detectArchitecture(SshMachineInstance machine) throws ConflictException, MachineException {
+    private String detectArchitecture(SshMachineInstance machine) throws ConflictException, ServerException {
         // uname -sm shows OS and CPU architecture
         // Examples of output:
         // Windows 10 amd64
@@ -191,7 +190,7 @@ public class SshMachineExecAgentLauncher  {
             try {
                 countDownLatch.countDown();
                 process.start(lineConsumer);
-            } catch (ConflictException | MachineException e) {
+            } catch (ConflictException e) {
                 try {
                     machine.getLogger().writeLine(format("[ERROR] %s", e.getMessage()));
                 } catch (IOException ignored) {

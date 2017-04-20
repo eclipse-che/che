@@ -21,10 +21,6 @@ import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.slf4j.Logger;
@@ -69,7 +65,7 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
         this.agentLaunchingChecker = agentLaunchingChecker;
     }
 
-    @Override
+    /*@Override
     public void launch(Instance machine, Agent agent) throws ServerException, AgentStartException {
         if (isNullOrEmpty(agent.getScript())) {
             return;
@@ -160,6 +156,6 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
                       machine.getId(),
                       machine.getNode());
         }
-    }
+    }*/
 
 }
