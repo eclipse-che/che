@@ -68,14 +68,14 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
         panel.setWidth("24px");
         panel.setHeight("24px");
 
-        arrow = DOM.createAnchor();
-        arrow.setClassName(resources.dashboardCSS().dashboardArrow());
-        panel.getElement().appendChild(arrow);
-
         /**
          * Show button Expanded by default if IDE is loaded in frame.
          */
         if (isInFrame()) {
+            arrow = DOM.createDiv();
+            arrow.setClassName(resources.dashboardCSS().dashboardArrow());
+            panel.getElement().appendChild(arrow);
+
             tooltip = Tooltip.create((elemental.dom.Element) arrow,
                     BOTTOM,
                     LEFT,
@@ -91,6 +91,10 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
             });
             DOM.sinkEvents(arrow, Event.ONMOUSEDOWN);
         } else {
+            arrow = DOM.createAnchor();
+            arrow.setClassName(resources.dashboardCSS().dashboardArrow());
+            panel.getElement().appendChild(arrow);
+
             tooltip = Tooltip.create((elemental.dom.Element) arrow,
                     BOTTOM,
                     LEFT,
