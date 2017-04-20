@@ -167,7 +167,7 @@ public class SendConfiguratorFromMany<P> {
     }
 
     private void transmitNotification() {
-        JsonRpcParams params = factory.createParams(pListValue);
+        JsonRpcParams params = factory.createParamsList(pListValue);
         JsonRpcRequest request = factory.createRequest(method, params);
         transmitter.transmit(endpointId, request.toString());
     }
@@ -176,7 +176,7 @@ public class SendConfiguratorFromMany<P> {
         Integer id = MethodNameConfigurator.id.incrementAndGet();
         String requestId = id.toString();
 
-        JsonRpcParams params = factory.createParams(pListValue);
+        JsonRpcParams params = factory.createParamsList(pListValue);
         JsonRpcRequest request = factory.createRequest(requestId, method, params);
         transmitter.transmit(endpointId, request.toString());
         return requestId;
