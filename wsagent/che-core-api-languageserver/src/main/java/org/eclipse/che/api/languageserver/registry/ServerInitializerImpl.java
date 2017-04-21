@@ -10,12 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.ServerCapabilities;
-import io.typefox.lsapi.impl.ClientCapabilitiesImpl;
-import io.typefox.lsapi.impl.InitializeParamsImpl;
-import io.typefox.lsapi.services.LanguageServer;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -24,6 +18,15 @@ import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsMessenger;
 import org.eclipse.che.api.languageserver.messager.ShowMessageMessenger;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.lsp4j.ClientCapabilities;
+import org.eclipse.lsp4j.InitializeParams;
+import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.ShowMessageRequestParams;
+import org.eclipse.lsp4j.services.LanguageClient;
+import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +39,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 /**
  * @author Anatoliy Bazko
@@ -48,21 +50,47 @@ public class ServerInitializerImpl implements ServerInitializer {
     private static final int    PROCESS_ID  = getProcessId();
     private static final String CLIENT_NAME = "EclipseChe";
 
-    private final List<ServerInitializerObserver>   observers;
-    private final PublishDiagnosticsParamsMessenger publishDiagnosticsParamsMessenger;
-    private final ShowMessageMessenger showMessageMessenger;
-    
-    private final ConcurrentHashMap<String, LanguageServer>           languageIdToServers;
+    private final List<ServerInitializerObserver> observers;
+
+    private final ConcurrentHashMap<String, LanguageServer>                    languageIdToServers;
     private final ConcurrentHashMap<LanguageServer, LanguageServerDescription> serversToInitResult;
+
+    private LanguageClient languageClient;
 
     @Inject
     public ServerInitializerImpl(final PublishDiagnosticsParamsMessenger publishDiagnosticsParamsMessenger,
-    		final ShowMessageMessenger showMessageMessenger) {
+                                 final ShowMessageMessenger showMessageMessenger) {
         this.observers = new ArrayList<>();
         this.languageIdToServers = new ConcurrentHashMap<>();
         this.serversToInitResult = new ConcurrentHashMap<>();
-        this.publishDiagnosticsParamsMessenger = publishDiagnosticsParamsMessenger;
-        this.showMessageMessenger = showMessageMessenger;
+        languageClient = new LanguageClient() {
+
+            @Override
+            public void telemetryEvent(Object object) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public CompletableFuture<Void> showMessageRequest(ShowMessageRequestParams requestParams) {
+                return CompletableFuture.completedFuture(null);
+            }
+
+            @Override
+            public void showMessage(MessageParams messageParams) {
+                showMessageMessenger.onEvent(messageParams);
+            }
+
+            @Override
+            public void publishDiagnostics(PublishDiagnosticsParams diagnostics) {
+                publishDiagnosticsParamsMessenger.onEvent(diagnostics);
+            }
+
+            @Override
+            public void logMessage(MessageParams message) {
+                LOG.error(message.getType() + " " + message.getMessage());
+            }
+        };
     }
 
     private static int getProcessId() {
@@ -102,7 +130,8 @@ public class ServerInitializerImpl implements ServerInitializer {
                 server = doInitialize(launcher, projectPath);
                 languageIdToServers.put(languageId, server);
             }
-            onServerInitialized(server, serversToInitResult.get(server).getInitializeResult().getCapabilities(), launcher.getLanguageDescription(), projectPath);
+            onServerInitialized(server, serversToInitResult.get(server).getInitializeResult().getCapabilities(),
+                                launcher.getLanguageDescription(), projectPath);
             return server;
         }
     }
@@ -114,11 +143,11 @@ public class ServerInitializerImpl implements ServerInitializer {
 
     protected LanguageServer doInitialize(LanguageServerLauncher launcher, String projectPath) throws LanguageServerException {
         String languageId = launcher.getLanguageDescription().getLanguageId();
-        InitializeParamsImpl initializeParams = prepareInitializeParams(projectPath);
+        InitializeParams initializeParams = prepareInitializeParams(projectPath);
 
         LanguageServer server;
         try {
-            server = launcher.launch(projectPath);
+            server = launcher.launch(projectPath, languageClient);
         } catch (LanguageServerException e) {
             throw new LanguageServerException(
                     "Can't initialize Language Server " + languageId + " on " + projectPath + ". " + e.getMessage(), e);
@@ -141,21 +170,17 @@ public class ServerInitializerImpl implements ServerInitializer {
     }
 
     protected void registerCallbacks(LanguageServer server) {
-        server.getTextDocumentService().onPublishDiagnostics(publishDiagnosticsParamsMessenger::onEvent);
-		server.getWindowService().onLogMessage(messageParams -> LOG.error(messageParams.getType() + " " + messageParams.getMessage()));
-		server.getWindowService().onShowMessage(showMessageMessenger::onEvent);
-        server.onTelemetryEvent(o -> LOG.error(o.toString()));
-        
+
         if (server instanceof ServerInitializerObserver) {
-            addObserver((ServerInitializerObserver) server);
+            addObserver((ServerInitializerObserver)server);
         }
     }
 
-    protected InitializeParamsImpl prepareInitializeParams(String projectPath) {
-        InitializeParamsImpl initializeParams = new InitializeParamsImpl();
+    protected InitializeParams prepareInitializeParams(String projectPath) {
+        InitializeParams initializeParams = new InitializeParams();
         initializeParams.setProcessId(PROCESS_ID);
         initializeParams.setRootPath(projectPath);
-        initializeParams.setCapabilities(new ClientCapabilitiesImpl());
+        initializeParams.setCapabilities(new ClientCapabilities());
         initializeParams.setClientName(CLIENT_NAME);
         return initializeParams;
     }

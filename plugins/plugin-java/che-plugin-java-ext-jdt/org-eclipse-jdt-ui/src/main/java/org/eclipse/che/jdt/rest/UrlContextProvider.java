@@ -11,18 +11,20 @@
 
 package org.eclipse.che.jdt.rest;
 
-import javax.ws.rs.core.UriBuilder;
+import org.eclipse.che.JavadocUrlProvider;
+
+import javax.inject.Inject;
 
 /**
- * @author Evgen Vidolob
+ * Provide URL for Javadoc service for JDT classes
  */
 public class UrlContextProvider {
 
+    @Inject
+    private static JavadocUrlProvider provider;
 
-    private static UriBuilder builder;
-
-    public static String get(String wsId, String projectPath) {
-        return "jdt/" + wsId+"/javadoc/get?projectpath=" + projectPath +"&handle=";
+    public static String get(String projectPath) {
+        return provider.getJavadocUrl(projectPath);
     }
 
 }

@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -41,6 +42,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * @author Alexander Garagatyi
@@ -265,10 +267,15 @@ public class AbstractAgentLauncherTest {
         doReturn(process).when(launcher).start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
 
         // when
-        launcher.launch(machine, agent);
-
-        // then
-        verify(launcher).logAsErrorAgentStartLogs(anyString(), anyString());
+        try {
+            launcher.launch(machine, agent);
+            fail("Should throw AgentStartException");
+        } catch (AgentStartException e) {
+            // then
+            verify(launcher).logAsErrorAgentStartLogs(anyObject(), anyString(), anyString());
+            // rethrow exception to verify message
+            throw e;
+        }
     }
 
     @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "An error on agent start")
@@ -278,10 +285,15 @@ public class AbstractAgentLauncherTest {
                 .when(launcher).start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
 
         // when
-        launcher.launch(machine, agent);
-
-        // then
-        verify(launcher).logAsErrorAgentStartLogs(anyString(), anyString());
+        try {
+            launcher.launch(machine, agent);
+            fail("Should throw ServerException");
+        } catch (ServerException e) {
+            // then
+            verify(launcher).logAsErrorAgentStartLogs(anyObject(), anyString(), anyString());
+            // rethrow exception to verify message
+            throw e;
+        }
     }
 
     @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "An error on process kill")
@@ -296,10 +308,15 @@ public class AbstractAgentLauncherTest {
         doThrow(new MachineException("An error on process kill")).when(process).kill();
 
         // when
-        launcher.launch(machine, agent);
-
-        // then
-        verify(launcher).logAsErrorAgentStartLogs(anyString(), anyString());
+        try {
+            launcher.launch(machine, agent);
+            fail("Should throw ServerException");
+        } catch (ServerException e) {
+            // then
+            verify(launcher).logAsErrorAgentStartLogs(anyObject(), anyString(), anyString());
+            // rethrow exception to verify message
+            throw e;
+        }
     }
 
     private static class TestAgentLauncher extends AbstractAgentLauncher {

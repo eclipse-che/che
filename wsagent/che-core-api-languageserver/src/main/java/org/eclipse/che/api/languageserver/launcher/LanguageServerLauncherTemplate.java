@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.launcher;
 
-import io.typefox.lsapi.services.LanguageServer;
-
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
+import org.eclipse.lsp4j.services.LanguageClient;
+import org.eclipse.lsp4j.services.LanguageServer;
 
 /**
  * @author Anatolii Bazko
@@ -20,12 +20,13 @@ import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 public abstract class LanguageServerLauncherTemplate implements LanguageServerLauncher {
 
     @Override
-    public final LanguageServer launch(String projectPath) throws LanguageServerException {
+    public final LanguageServer launch(String projectPath, LanguageClient client) throws LanguageServerException {
         Process languageServerProcess = startLanguageServerProcess(projectPath);
-        return connectToLanguageServer(languageServerProcess);
+        return connectToLanguageServer(languageServerProcess, client);
     }
 
     abstract protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException;
 
-    abstract protected LanguageServer connectToLanguageServer(Process languageServerProcess) throws LanguageServerException;
+    abstract protected LanguageServer connectToLanguageServer(Process languageServerProcess, LanguageClient client)
+            throws LanguageServerException;
 }

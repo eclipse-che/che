@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.quickopen;
 
+import elemental.dom.Element;
+import elemental.html.SpanElement;
+
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -27,8 +30,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
-import elemental.dom.Element;
-import elemental.html.SpanElement;
+
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.autocomplete.AutoCompleteResources;
 import org.eclipse.che.ide.filters.Match;
@@ -48,93 +50,86 @@ import java.util.List;
 public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
 
     private final AutoCompleteResources.Css css;
-
-    @UiField
-    TextBox         nameField;
-
-    @UiField
-    DockLayoutPanel layoutPanel;
-
-    @UiField
-    FlowPanel       actionsPanel;
-
-    @UiField
-    HTML            actionsContainer;
-
-    private ActionDelegate                  delegate;
-    private Resources                       resources;
     private final LanguageServerResources   languageServerResources;
-    private SimpleList<QuickOpenEntry>      list;
-
     private final SimpleList.ListItemRenderer<QuickOpenEntry> listItemRenderer =
-        new SimpleList.ListItemRenderer<QuickOpenEntry>() {
-            @Override
-            public void render(Element itemElement, QuickOpenEntry itemData) {
-                Element label = Elements.createSpanElement(css.proposalLabel());
-                Element icon = Elements.createSpanElement(css.proposalIcon());
-                Element group = Elements.createSpanElement(css.proposalGroup());
+            new SimpleList.ListItemRenderer<QuickOpenEntry>() {
+                @Override
+                public void render(Element itemElement, QuickOpenEntry itemData) {
+                    Element label = Elements.createSpanElement(css.proposalLabel());
+                    Element icon = Elements.createSpanElement(css.proposalIcon());
+                    Element group = Elements.createSpanElement(css.proposalGroup());
 
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                List<Match> highlights = itemData.getHighlights();
-                String text = itemData.getLabel();
-                int pos = 0;
-                SpanElement spanElement = Elements.createSpanElement();
-                for (Match highlight : highlights) {
-                    if (highlight.getStart() == highlight.getEnd()) {
-                        continue;
+                    SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                    List<Match> highlights = itemData.getHighlights();
+                    String text = itemData.getLabel();
+                    int pos = 0;
+                    SpanElement spanElement = Elements.createSpanElement();
+                    for (Match highlight : highlights) {
+                        if (highlight.getStart() == highlight.getEnd()) {
+                            continue;
+                        }
+
+                        if (pos < highlight.getStart()) {
+                            builder.appendHtmlConstant("<span>");
+                            builder.appendEscaped(text.substring(pos, highlight.getStart()));
+                            builder.appendHtmlConstant("</span>");
+                        }
+
+                        builder.appendHtmlConstant("<span class=\"" + languageServerResources.quickOpenListCss().searchMatch() + "\">");
+                        builder.appendEscaped(text.substring(highlight.getStart(), highlight.getEnd()));
+                        builder.appendHtmlConstant("</span>");
+                        pos = highlight.getEnd();
                     }
 
-                    if (pos < highlight.getStart()) {
+                    if (pos < text.length()) {
                         builder.appendHtmlConstant("<span>");
-                        builder.appendEscaped(text.substring(pos, highlight.getStart()));
+                        builder.appendEscaped(text.substring(pos));
                         builder.appendHtmlConstant("</span>");
                     }
-
-                    builder.appendHtmlConstant("<span class=\""+languageServerResources.quickOpenListCss().searchMatch()+"\">");
-                    builder.appendEscaped(text.substring(highlight.getStart(), highlight.getEnd()));
-                    builder.appendHtmlConstant("</span>");
-                    pos = highlight.getEnd();
-                }
-
-                if (pos < text.length()) {
-                    builder.appendHtmlConstant("<span>");
-                    builder.appendEscaped(text.substring(pos));
-                    builder.appendHtmlConstant("</span>");
-                }
-                spanElement.setInnerHTML(builder.toSafeHtml().asString());
-                label.getStyle().setPaddingLeft("5px");
-                label.getStyle().setPaddingRight("5px");
-                if (itemData.getIcon() != null) {
-                    SVGImage svgImage = new SVGImage(itemData.getIcon());
-                    icon.appendChild((elemental.dom.Node)svgImage.getElement());
-                    itemElement.appendChild(icon);
-                }
-                if(itemData instanceof QuickOpenEntryGroup) {
-                    QuickOpenEntryGroup entryGroup = (QuickOpenEntryGroup)itemData;
-                    if(entryGroup.isWithBorder()) {
-                        Elements.addClassName(languageServerResources.quickOpenListCss().groupSeparator(), itemElement);
+                    spanElement.setInnerHTML(builder.toSafeHtml().asString());
+                    label.getStyle().setPaddingLeft("5px");
+                    label.getStyle().setPaddingRight("5px");
+                    if (itemData.getIcon() != null) {
+                        SVGImage svgImage = new SVGImage(itemData.getIcon());
+                        icon.appendChild((elemental.dom.Node)svgImage.getElement());
+                        itemElement.appendChild(icon);
                     }
-                    if (entryGroup.getGroupLabel() != null) {
-                        group.setInnerText(entryGroup.getGroupLabel());
+                    if (itemData instanceof QuickOpenEntryGroup) {
+                        QuickOpenEntryGroup entryGroup = (QuickOpenEntryGroup)itemData;
+                        if (entryGroup.isWithBorder()) {
+                            Elements.addClassName(languageServerResources.quickOpenListCss().groupSeparator(), itemElement);
+                        }
+                        if (entryGroup.getGroupLabel() != null) {
+                            group.setInnerText(entryGroup.getGroupLabel());
+                        }
+                    } else {
+                        if (itemData.getDescription() != null) {
+                            group.setInnerText(itemData.getDescription());
+                        }
                     }
-                } else {
-                    if (itemData.getDescription() != null) {
-                        group.setInnerText(itemData.getDescription());
-                    }
+
+                    label.appendChild(spanElement);
+                    itemElement.appendChild(label);
+                    itemElement.appendChild(group);
                 }
 
-                label.appendChild(spanElement);
-                itemElement.appendChild(label);
-                itemElement.appendChild(group);
-            }
-
-            @Override
-            public Element createElement() {
-                return Elements.createDivElement();
-            }
-        };
-
-    private QuickOpenModel model;
+                @Override
+                public Element createElement() {
+                    return Elements.createDivElement();
+                }
+            };
+    @UiField
+    TextBox         nameField;
+    @UiField
+    DockLayoutPanel layoutPanel;
+    @UiField
+    FlowPanel       actionsPanel;
+    @UiField
+    HTML            actionsContainer;
+    private ActionDelegate             delegate;
+    private Resources                  resources;
+    private SimpleList<QuickOpenEntry> list;
+    private QuickOpenModel             model;
 
     private final SimpleList.ListEventDelegate<QuickOpenEntry> eventDelegate = new SimpleList.ListEventDelegate<QuickOpenEntry>() {
         @Override
@@ -192,7 +187,7 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
         setPopupPositionAndShow(new PositionCallback() {
             @Override
             public void setPosition(int offsetWidth, int offsetHeight) {
-                setPopupPosition((Window.getClientWidth() / 2) - (offsetWidth/2), 60);
+                setPopupPosition((Window.getClientWidth() / 2) - (offsetWidth / 2), 60);
             }
         });
 
@@ -211,7 +206,7 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
         actionsContainer.getElement().setInnerHTML("");
         Element itemHolder = Elements.createDivElement();
         itemHolder.setClassName(css.items());
-        actionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element) itemHolder));
+        actionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element)itemHolder));
 
         list = SimpleList.create((SimpleList.View)actionsContainer.getElement().cast(), (Element)actionsContainer.getElement(), itemHolder,
                                  languageServerResources.quickOpenListCss(), listItemRenderer, eventDelegate);
@@ -221,7 +216,7 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
         layoutPanel.setWidgetHidden(actionsPanel, false);
         layoutPanel.setHeight("200px");
 
-        if(!nameField.getValue().isEmpty()){
+        if (!nameField.getValue().isEmpty()) {
             list.getSelectionModel().setSelectedItem(0);
             run(list.getSelectionModel().getSelectedItem(), false);
         }

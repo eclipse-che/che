@@ -10,19 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.registry;
 
-import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.ServerCapabilities;
-
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.languageserver.shared.ProjectExtensionKey;
-import org.eclipse.che.api.languageserver.shared.event.LanguageServerInitializeEventDto;
-import org.eclipse.che.api.languageserver.shared.lsapi.InitializeResultDTO;
+import org.eclipse.che.api.languageserver.shared.event.LanguageServerInitializeEvent;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedInitializeResult;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.eclipse.che.api.languageserver.shared.model.impl.InitializeResultImpl;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -40,6 +36,7 @@ import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
+import org.eclipse.lsp4j.ServerCapabilities;
 
 import java.util.HashMap;
 import java.util.List;
@@ -56,8 +53,8 @@ public class LanguageServerRegistry {
     private final EventBus                            eventBus;
     private final LanguageServerRegistryServiceClient client;
 
-    private final Map<ProjectExtensionKey, InitializeResult>                      projectToInitResult;
-    private final Map<ProjectExtensionKey, Callback<InitializeResult, Throwable>> callbackMap;
+    private final Map<ProjectExtensionKey, ExtendedInitializeResult>                      projectToInitResult;
+    private final Map<ProjectExtensionKey, Callback<ExtendedInitializeResult, Throwable>> callbackMap;
 
     @Inject
     public LanguageServerRegistry(EventBus eventBus,
@@ -72,19 +69,19 @@ public class LanguageServerRegistry {
      * Registers language server description and capabilities.
      */
     protected void register(String projectPath, LanguageDescription languageDescription, ServerCapabilities capabilities) {
-        InitializeResult initializeResult = new InitializeResultImpl(capabilities, languageDescription);
+        ExtendedInitializeResult initializeResult = new ExtendedInitializeResult(projectPath, capabilities, languageDescription);
         for (String ext : languageDescription.getFileExtensions()) {
             ProjectExtensionKey key = createProjectKey(projectPath, ext);
             projectToInitResult.put(key, initializeResult);
 
             if (callbackMap.containsKey(key)) {
-                Callback<InitializeResult, Throwable> callback = callbackMap.remove(key);
+                Callback<ExtendedInitializeResult, Throwable> callback = callbackMap.remove(key);
                 callback.onSuccess(initializeResult);
             }
         }
     }
 
-    public Promise<InitializeResult> getOrInitializeServer(String projectPath, String ext, String filePath) {
+    public Promise<ExtendedInitializeResult> getOrInitializeServer(String projectPath, String ext, String filePath) {
         final ProjectExtensionKey key = createProjectKey(projectPath, ext);
         if (projectToInitResult.containsKey(key)) {
             return Promises.resolve(projectToInitResult.get(key));
@@ -92,9 +89,9 @@ public class LanguageServerRegistry {
             //call initialize service
             client.initializeServer(filePath);
             //wait for response
-            return CallbackPromiseHelper.createFromCallback(new CallbackPromiseHelper.Call<InitializeResult, Throwable>() {
+            return CallbackPromiseHelper.createFromCallback(new CallbackPromiseHelper.Call<ExtendedInitializeResult, Throwable>() {
                 @Override
-                public void makeCall(Callback<InitializeResult, Throwable> callback) {
+                public void makeCall(Callback<ExtendedInitializeResult, Throwable> callback) {
                     callbackMap.put(key, callback);
                 }
             });
@@ -106,12 +103,12 @@ public class LanguageServerRegistry {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
-                Promise<List<InitializeResultDTO>> registeredLanguages = client.getRegisteredLanguages();
+                Promise<List<ExtendedInitializeResult>> registeredLanguages = client.getRegisteredLanguages();
 
-                registeredLanguages.then(new Operation<List<InitializeResultDTO>>() {
+                registeredLanguages.then(new Operation<List<ExtendedInitializeResult>>() {
                     @Override
-                    public void apply(List<InitializeResultDTO> initialResults) throws OperationException {
-                        for (InitializeResultDTO initializeResultDTO : initialResults) {
+                    public void apply(List<ExtendedInitializeResult> initialResults) throws OperationException {
+                        for (ExtendedInitializeResult initializeResultDTO : initialResults) {
                             for (LanguageDescription languageDescription : initializeResultDTO.getSupportedLanguages()) {
                                 register(initializeResultDTO.getProject(),
                                          languageDescription,
@@ -123,7 +120,8 @@ public class LanguageServerRegistry {
             }
 
             @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) { }
+            public void onWsAgentStopped(WsAgentStateEvent event) {
+            }
         });
     }
 
@@ -136,13 +134,13 @@ public class LanguageServerRegistry {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
                 MessageBus messageBus = messageBusProvider.getMachineMessageBus();
-                Unmarshallable<LanguageServerInitializeEventDto> unmarshaller =
-                        unmarshallerFactory.newWSUnmarshaller(LanguageServerInitializeEventDto.class);
+                Unmarshallable<LanguageServerInitializeEvent> unmarshaller =
+                        unmarshallerFactory.newWSUnmarshaller(LanguageServerInitializeEvent.class);
 
                 try {
-                    messageBus.subscribe("languageserver", new SubscriptionHandler<LanguageServerInitializeEventDto>(unmarshaller) {
+                    messageBus.subscribe("languageserver", new SubscriptionHandler<LanguageServerInitializeEvent>(unmarshaller) {
                         @Override
-                        protected void onMessageReceived(LanguageServerInitializeEventDto initializeEvent) {
+                        protected void onMessageReceived(LanguageServerInitializeEvent initializeEvent) {
                             register(initializeEvent.getProjectPath(),
                                      initializeEvent.getSupportedLanguages(),
                                      initializeEvent.getServerCapabilities());
