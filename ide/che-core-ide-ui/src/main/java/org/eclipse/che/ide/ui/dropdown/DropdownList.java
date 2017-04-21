@@ -14,12 +14,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -29,24 +25,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.gwt.user.client.ui.PopupPanel.AnimationType.ROLL_DOWN;
-
 /** Dropdown list widget. */
 public class DropdownList extends Composite {
 
     private static final DropdownListUiBinder  UI_BINDER = GWT.create(DropdownListUiBinder.class);
     private static final DropdownListResources RESOURCES = GWT.create(DropdownListResources.class);
 
-    /** Maximum amount of items that should visible in dropdown list without scrolling. */
-    private static final int MAX_VISIBLE_ITEMS  = 7;
-    /** Amount of pixels reserved for displaying one item in the dropdown list. */
-    private static final int ITEM_WIDGET_HEIGHT = 22;
+    /** Default width of this widget. */
+    private static final int DEFAULT_WIDTH_PX = 200;
 
-    private static final int DEFAULT_WIDGET_WIDTH_PX = 200;
-
-    private final PopupPanel dropdownMenu;
-    private final FlowPanel  dropdownMenuContentPanel;
-    private final Widget     emptyStateWidget;
+    private final DropdownMenu menu;
+    private final Widget       emptyStateWidget;
 
     private final Map<DropdownListItem, Widget> itemListWidgets;
     private final Map<DropdownListItem, Widget> itemHeaderWidgets;
@@ -59,52 +48,51 @@ public class DropdownList extends Composite {
     private SelectionHandler selectionHandler;
     private DropdownListItem selectedItem;
 
-    /** Stores true if dropdown menu's width should be always synchronized with the dropdown header's width. */
-    private boolean widthsSynced;
-
-    /** Creates new dropdown widget. */
-    public DropdownList() {
-        this(new Label("---"));
+    /**
+     * Creates new dropdown list widget.
+     *
+     * @param syncWidths
+     *         specifies whether the dropdown menu's width always should be the same as this dropdown list's width
+     */
+    public DropdownList(boolean syncWidths) {
+        this(new Label("---"), syncWidths);
     }
 
     /**
-     * Creates new dropdown widget.
-     * Uses the given {@code emptyStateText} for displaying an empty list's state.
+     * Creates new dropdown list widget.
+     *
+     * @param emptyStateText
+     *         text that should be used for displaying an empty list's state
+     * @param syncWidths
+     *         specifies whether the dropdown menu's width always should be the same as this dropdown list's width
      */
-    public DropdownList(String emptyStateText) {
-        this(new Label(emptyStateText));
+    public DropdownList(String emptyStateText, boolean syncWidths) {
+        this(new Label(emptyStateText), syncWidths);
     }
 
     /**
-     * Creates new dropdown widget.
-     * Uses the given {@code emptyStateWidget} for displaying an empty list's state.
+     * Creates new dropdown list widget.
+     *
+     * @param emptyStateWidget
+     *         widget that should be used for displaying an empty list's state
+     * @param syncWidths
+     *         specifies whether the dropdown menu's width always should be the same as this dropdown list's width
      */
-    public DropdownList(Widget emptyStateWidget) {
+    public DropdownList(Widget emptyStateWidget, boolean syncWidths) {
+        this.emptyStateWidget = emptyStateWidget;
         itemListWidgets = new HashMap<>();
         itemHeaderWidgets = new HashMap<>();
 
-        this.emptyStateWidget = emptyStateWidget;
-
         initWidget(UI_BINDER.createAndBindUi(this));
 
+        setWidth(DEFAULT_WIDTH_PX + "px");
+
+        menu = new DropdownMenu(this, syncWidths);
         dropdownMenuButton.getElement().appendChild(RESOURCES.expansionImage().getSvg().getElement());
 
-        dropdownMenuContentPanel = new FlowPanel();
-        dropdownMenuContentPanel.ensureDebugId("dropdown-list-content-panel");
-
-        dropdownMenu = new PopupPanel(true);
-        dropdownMenu.removeStyleName("gwt-PopupPanel");
-        dropdownMenu.addStyleName(RESOURCES.dropdownListCss().itemsPanel());
-        dropdownMenu.setAnimationEnabled(true);
-        dropdownMenu.addAutoHidePartner(getElement());
-        dropdownMenu.setAnimationType(ROLL_DOWN);
-        dropdownMenu.add(new ScrollPanel(dropdownMenuContentPanel));
-
-        addDomHandler(e -> toggleMenuVisibility(), ClickEvent.getType());
+        addDomHandler(e -> menu.toggleMenuVisibility(), ClickEvent.getType());
 
         setSelectedItem(null);
-
-        setWidth(DEFAULT_WIDGET_WIDTH_PX + "px");
     }
 
     /**
@@ -127,34 +115,8 @@ public class DropdownList extends Composite {
      *         the dropdown menu's width, in CSS units (e.g. "10px", "1em")
      * @see #setWidth(String)
      */
-    private void setDropdownMenuWidth(String width) {
-        dropdownMenu.setWidth(width);
-    }
-
-    /** Set the dropdown menu's width should be always synchronized with the dropdown's width. */
-    public void syncWidths() {
-        widthsSynced = true;
-        Window.addResizeHandler(e -> setDropdownMenuWidth(getElement().getClientWidth() + "px"));
-    }
-
-    /** Adapts dropdown panel's height depending on the amount of child items. */
-    private void adaptDropdownMenuHeight() {
-        final int visibleRowsCount = Math.min(MAX_VISIBLE_ITEMS, itemListWidgets.size());
-        final int dropdownPanelHeight = ITEM_WIDGET_HEIGHT * visibleRowsCount;
-
-        dropdownMenu.setHeight(dropdownPanelHeight + "px");
-    }
-
-    private void toggleMenuVisibility() {
-        if (dropdownMenu.isShowing()) {
-            dropdownMenu.hide();
-        } else {
-            if (widthsSynced) {
-                setDropdownMenuWidth(getElement().getClientWidth() + "px");
-            }
-
-            dropdownMenu.showRelativeTo(this);
-        }
+    public void setDropdownMenuWidth(String width) {
+        menu.setWidth(width);
     }
 
     private void checkListEmptiness() {
@@ -195,20 +157,20 @@ public class DropdownList extends Composite {
         itemHeaderWidgets.put(item, headerWidget);
         itemListWidgets.put(item, listWidget);
 
-        headerWidget.addHandler(e -> toggleMenuVisibility(), ClickEvent.getType());
+        headerWidget.addHandler(e -> menu.toggleMenuVisibility(), ClickEvent.getType());
 
         listWidget.addStyleName(RESOURCES.dropdownListCss().listItem());
         listWidget.addDomHandler(e -> {
             setSelectedItem(item);
-            dropdownMenu.hide();
+            menu.hide();
 
             if (selectionHandler != null) {
                 selectionHandler.onItemSelected(item);
             }
         }, ClickEvent.getType());
 
-        dropdownMenuContentPanel.insert(listWidget, 0);
-        adaptDropdownMenuHeight();
+        menu.addWidget(listWidget);
+
         setSelectedItem(item);
     }
 
@@ -235,7 +197,7 @@ public class DropdownList extends Composite {
             return;
         }
 
-        dropdownMenuContentPanel.remove(widget);
+        menu.removeWidget(widget);
 
         itemHeaderWidgets.remove(item);
 
@@ -244,8 +206,6 @@ public class DropdownList extends Composite {
         } else if (item.equals(getSelectedItem())) {
             setSelectedItem(itemListWidgets.keySet().iterator().next());
         }
-
-        adaptDropdownMenuHeight();
     }
 
     /** Returns all list's items. */
@@ -257,9 +217,9 @@ public class DropdownList extends Composite {
     public void clear() {
         itemListWidgets.clear();
         itemHeaderWidgets.clear();
-        dropdownMenuContentPanel.clear();
 
-        adaptDropdownMenuHeight();
+        menu.removeAllWidgets();
+
         checkListEmptiness();
     }
 

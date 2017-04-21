@@ -48,7 +48,7 @@ public class PreviewsViewImpl implements PreviewsView {
         this.messages = messages;
         listItems = new HashMap<>();
 
-        dropdownList = new DropdownList(HEADER_WIDGET);
+        dropdownList = new DropdownList(HEADER_WIDGET, false);
         dropdownList.setWidth("43px");
         dropdownList.ensureDebugId("dropdown-preview_url");
 

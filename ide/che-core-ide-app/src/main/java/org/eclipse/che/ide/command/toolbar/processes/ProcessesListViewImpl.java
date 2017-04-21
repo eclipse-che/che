@@ -52,10 +52,9 @@ public class ProcessesListViewImpl implements ProcessesListView {
         final Label label = new Label("EXEC");
         label.addStyleName(resources.commandToolbarCss().processesListLabel());
 
-        dropdownList = new DropdownList(emptyListWidget);
+        dropdownList = new DropdownList(emptyListWidget, true);
         dropdownList.setWidth("100%");
         dropdownList.ensureDebugId("dropdown-processes");
-        dropdownList.syncWidths();
         dropdownList.setSelectionHandler(item -> {
             if (item instanceof CreateCommandItem) {
                 delegate.onCreateCommand();
