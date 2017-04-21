@@ -12,21 +12,21 @@ package org.eclipse.che.wsagent.server;
 
 import com.google.inject.servlet.ServletModule;
 
-import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.inject.DynaModule;
-import org.everrest.websockets.WSConnectionTracker;
+import org.everrest.guice.servlet.GuiceEverrestServlet;
 
 /**
- * General binding that may be reused by other basic assembly
+ * Add che specific servlet binding.
+ * General binding that may be reused by other basic assembly should go into @{@link WsAgentServletModule}
+ * <p>
+ * Other basic assembly may override this file by excluding it from packaging.
  *
- * @author Sergii Kabashiuk
+ * @author Sergii Kabashniuk
  */
 @DynaModule
-public class WsAgentServletModule extends ServletModule {
+public class CheWsAgentServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
-        getServletContext().addListener(new WSConnectionTracker());
-        filter("/*").through(CheCorsFilter.class);
-
+        serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
     }
 }

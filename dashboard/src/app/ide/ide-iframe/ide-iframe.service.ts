@@ -22,11 +22,12 @@ class IdeIFrameSvc {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($timeout, $compile, $rootScope, $location, $window, cheUIElementsInjectorService) {
+  constructor ($timeout, $compile, $rootScope, $location, $window, $mdSidenav, cheUIElementsInjectorService) {
     this.cheUIElementsInjectorService = cheUIElementsInjectorService;
     this.$timeout = $timeout;
     this.$compile = $compile;
     this.$location = $location;
+    this.$mdSidenav = $mdSidenav;
 
     $window.addEventListener("message", (event) => {
       if ("show-ide" === event.data) {
@@ -37,11 +38,21 @@ class IdeIFrameSvc {
             $rootScope.hideLoader = true;
           });
         }
-      } else if ("show-workspaces" === event.data){
+
+      } else if ("show-workspaces" === event.data) {
         $rootScope.$apply(() => {
           $location.path('/workspaces');
         });
+
+      } else if ("show-navbar" === event.data) {
+        $rootScope.hideNavbar = false;
+        $mdSidenav('left').toggle();
+
+      } else if ("hide-navbar" === event.data) {
+        $rootScope.hideNavbar = true;
+        $mdSidenav('left').close();
       }
+
     }, false);
   }
 
