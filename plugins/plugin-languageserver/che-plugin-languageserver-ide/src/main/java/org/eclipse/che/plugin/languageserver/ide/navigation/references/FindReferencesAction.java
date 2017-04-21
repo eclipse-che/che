@@ -10,15 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.references;
 
-import io.typefox.lsapi.ServerCapabilities;
-
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.PositionDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.ReferenceContextDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.ReferenceParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -31,6 +24,12 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConf
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenter;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.ReferenceContext;
+import org.eclipse.lsp4j.ReferenceParams;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -66,7 +65,7 @@ public class FindReferencesAction extends AbstractPerspectiveAction {
             if (configuration instanceof LanguageServerEditorConfiguration) {
                 ServerCapabilities capabilities = ((LanguageServerEditorConfiguration)configuration).getServerCapabilities();
                 event.getPresentation()
-                     .setEnabledAndVisible(capabilities.isReferencesProvider() != null && capabilities.isReferencesProvider());
+                     .setEnabledAndVisible(capabilities.getReferencesProvider() != null && capabilities.getReferencesProvider());
                 return;
             }
         }
@@ -83,23 +82,23 @@ public class FindReferencesAction extends AbstractPerspectiveAction {
         }
         TextEditor textEditor = ((TextEditor)activeEditor);
         String path = activeEditor.getEditorInput().getFile().getLocation().toString();
-        ReferenceParamsDTO paramsDTO = dtoFactory.createDto(ReferenceParamsDTO.class);
+        ReferenceParams paramsDTO = dtoFactory.createDto(ReferenceParams.class);
 
-        PositionDTO positionDTO = dtoFactory.createDto(PositionDTO.class);
-        positionDTO.setLine(textEditor.getCursorPosition().getLine());
-        positionDTO.setCharacter(textEditor.getCursorPosition().getCharacter());
+        Position Position = dtoFactory.createDto(Position.class);
+        Position.setLine(textEditor.getCursorPosition().getLine());
+        Position.setCharacter(textEditor.getCursorPosition().getCharacter());
 
-        TextDocumentIdentifierDTO identifierDTO = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
+        TextDocumentIdentifier identifierDTO = dtoFactory.createDto(TextDocumentIdentifier.class);
         identifierDTO.setUri(path);
 
-        ReferenceContextDTO contextDTO = dtoFactory.createDto(ReferenceContextDTO.class);
+        ReferenceContext contextDTO = dtoFactory.createDto(ReferenceContext.class);
         contextDTO.setIncludeDeclaration(true);
 
         paramsDTO.setUri(path);
-        paramsDTO.setPosition(positionDTO);
+        paramsDTO.setPosition(Position);
         paramsDTO.setTextDocument(identifierDTO);
         paramsDTO.setContext(contextDTO);
-        Promise<List<LocationDTO>> promise = client.references(paramsDTO);
+        Promise<List<Location>> promise = client.references(paramsDTO);
         presenter.openLocation(promise);
     }
 }

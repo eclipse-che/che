@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import io.typefox.lsapi.ServerCapabilities;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
@@ -30,6 +28,7 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.LanguageServerQuickAssistProcessor;
 import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.LanguageServerQuickAssistProcessorFactory;
 import org.eclipse.che.plugin.languageserver.ide.editor.signature.LanguageServerSignatureHelpFactory;
+import org.eclipse.lsp4j.ServerCapabilities;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +49,8 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
     private final LanguageServerQuickAssistProcessor       quickAssistProcessor;
 
     @Inject
-    public LanguageServerEditorConfiguration(@Assisted TextEditor editor, LanguageServerCodeassistProcessorFactory codeAssistProcessor,
+    public LanguageServerEditorConfiguration(@Assisted TextEditor editor,
+                                             LanguageServerCodeassistProcessorFactory codeAssistProcessor,
                                              LanguageServerQuickAssistProcessorFactory quickAssistProcessorFactory,
                                              Provider<DocumentPositionMap> docPositionMapProvider,
                                              LanguageServerAnnotationModelFactory annotationModelFactory,
@@ -60,13 +60,12 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
                                              @Assisted ServerCapabilities serverCapabilities) {
         codeAssistProcessorFactory = codeAssistProcessor;
         quickAssistProcessor = quickAssistProcessorFactory.create(editor);
-        if ((serverCapabilities.isDocumentFormattingProvider() != null && serverCapabilities.isDocumentFormattingProvider())
-                        || (serverCapabilities.isDocumentRangeFormattingProvider() != null
-                                        && serverCapabilities.isDocumentRangeFormattingProvider())
-                        || serverCapabilities.getDocumentOnTypeFormattingProvider() != null) {
+        if ((serverCapabilities.getDocumentFormattingProvider() != null && serverCapabilities.getDocumentFormattingProvider())
+            || (serverCapabilities.getDocumentRangeFormattingProvider() != null && serverCapabilities.getDocumentRangeFormattingProvider())
+            || serverCapabilities.getDocumentOnTypeFormattingProvider() != null) {
             this.formatter = formatterFactory.create(serverCapabilities);
         } else {
-            this.formatter= null;
+            this.formatter = null;
         }
         this.serverCapabilities = serverCapabilities;
         DocumentPositionMap documentPositionMap = docPositionMapProvider.get();
@@ -96,10 +95,7 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
 
     @Override
     public QuickAssistProcessor getQuickAssistProcessor() {
-        if (serverCapabilities.isCodeActionProvider()) {
-            return quickAssistProcessor;
-        }
-        return null;
+        return quickAssistProcessor;
     }
 
     @Override
