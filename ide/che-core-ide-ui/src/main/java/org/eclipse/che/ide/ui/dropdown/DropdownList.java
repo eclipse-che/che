@@ -121,13 +121,13 @@ public class DropdownList extends Composite {
 
     /**
      * Sets the dropdown menu's width.
-     * If it's not set explicitly then it will be calculated depending on the children width.
+     * If it's not set explicitly then it will be calculated depending on the content's width.
      *
      * @param width
      *         the dropdown menu's width, in CSS units (e.g. "10px", "1em")
      * @see #setWidth(String)
      */
-    public void setDropdownMenuWidth(String width) {
+    private void setDropdownMenuWidth(String width) {
         dropdownMenu.setWidth(width);
     }
 
@@ -149,11 +149,11 @@ public class DropdownList extends Composite {
         if (dropdownMenu.isShowing()) {
             dropdownMenu.hide();
         } else {
-            dropdownMenu.showRelativeTo(this);
-
             if (widthsSynced) {
                 setDropdownMenuWidth(getElement().getClientWidth() + "px");
             }
+
+            dropdownMenu.showRelativeTo(this);
         }
     }
 
