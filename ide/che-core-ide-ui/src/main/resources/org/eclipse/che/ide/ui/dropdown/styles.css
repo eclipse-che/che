@@ -16,11 +16,12 @@
 }
 
 .listItem {
+    float: left;
     width: literal("calc(100% - 27px)");
-    height: 22px;
     padding: 0 22px 0 5px;
     cursor: pointer;
     line-height: 22px;
+    white-space: nowrap;
 }
 
 .listItem:hover {

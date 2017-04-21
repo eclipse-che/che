@@ -42,10 +42,6 @@
             float: left;
             width: literal("calc(100% - 27px)");
             padding-left: 5px;
-            color: inherit;
-            font-size: inherit;
-            overflow: hidden;
-            text-overflow: ellipsis;
             line-height: 21px;
         }
 
