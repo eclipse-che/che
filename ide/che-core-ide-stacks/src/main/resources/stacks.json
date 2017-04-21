@@ -977,7 +977,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "com.redhat.bayesian.lsp"
               ],
               "servers": {},
               "attributes" : {
@@ -2100,7 +2100,8 @@
                     "dev-machine": {
                         "agents": [
                             "org.eclipse.che.terminal",
-                            "org.eclipse.che.ws-agent"
+                            "org.eclipse.che.ws-agent",
+                            "com.redhat.bayesian.lsp"
                         ],
                         "servers": {},
                         "attributes": {
@@ -2180,7 +2181,8 @@
             "dev-machine": {
               "agents": [
                 "org.eclipse.che.terminal",
-                "org.eclipse.che.ws-agent"
+                "org.eclipse.che.ws-agent",
+                "com.redhat.bayesian.lsp"
               ],
               "attributes": {
                 "memoryLimitBytes": "2147483648"
@@ -2248,7 +2250,8 @@
             },
             "agents": [
               "org.eclipse.che.terminal",
-              "org.eclipse.che.ws-agent"
+              "org.eclipse.che.ws-agent",
+              "com.redhat.bayesian.lsp"
             ],
             "servers": {}
           }
@@ -2345,7 +2348,8 @@
             "dev-machine": {
               "agents": [
                 "org.eclipse.che.terminal",
-                "org.eclipse.che.ws-agent"
+                "org.eclipse.che.ws-agent",
+                "com.redhat.bayesian.lsp"
               ],
               "servers": {},
               "attributes": {
