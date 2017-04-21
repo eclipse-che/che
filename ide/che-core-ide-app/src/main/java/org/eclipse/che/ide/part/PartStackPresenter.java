@@ -114,7 +114,6 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
         if (workBenchPartController != null) {
             this.workBenchPartController.setSize(DEFAULT_PART_SIZE);
-            this.workBenchPartController.setMinSize(MIN_PART_SIZE);
         }
 
         currentSize = DEFAULT_PART_SIZE;
@@ -216,7 +215,6 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
             }
 
             workBenchPartController.setSize(currentSize);
-            workBenchPartController.setMinSize(MIN_PART_SIZE);
             workBenchPartController.setHidden(false);
 
         } else if (state == State.COLLAPSED) {
@@ -228,7 +226,6 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
         } else if (state == State.NORMAL) {
             if (workBenchPartController.getSize() < MIN_PART_SIZE) {
-                workBenchPartController.setMinSize(MIN_PART_SIZE);
                 workBenchPartController.setSize(DEFAULT_PART_SIZE);
             }
 
@@ -432,7 +429,6 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
             }
 
             workBenchPartController.setSize(currentSize);
-            workBenchPartController.setMinSize(MIN_PART_SIZE);
             workBenchPartController.setHidden(false);
         }
 
