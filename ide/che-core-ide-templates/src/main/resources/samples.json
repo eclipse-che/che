@@ -908,7 +908,7 @@
   {
     "name": "aspnet-web-simple",
     "displayName": "aspnet-web-simple",
-    "path": "/aspnet-mvc-simple",
+    "path": "/aspnet-web-simple",
     "description": "A simple ASP.net web sample.",
     "projectType": "blank",
     "mixins": [],
