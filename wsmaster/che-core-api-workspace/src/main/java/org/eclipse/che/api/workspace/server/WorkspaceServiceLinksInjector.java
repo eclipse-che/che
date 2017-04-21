@@ -13,10 +13,8 @@ package org.eclipse.che.api.workspace.server;
 import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
-import org.eclipse.che.api.environment.server.MachineLinksInjector;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
@@ -51,12 +49,6 @@ public class WorkspaceServiceLinksInjector {
 
     //TODO: we need keep IDE context in some property to have possibility configure it because context is different in Che and Hosted packaging
     //TODO: not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
-    private final MachineLinksInjector machineLinksInjector;
-
-    @Inject
-    public WorkspaceServiceLinksInjector(MachineLinksInjector machineLinksInjector) {
-        this.machineLinksInjector = machineLinksInjector;
-    }
 
     public WorkspaceDto injectLinks(WorkspaceDto workspace, ServiceContext serviceContext) {
         final UriBuilder uriBuilder = serviceContext.getServiceUriBuilder();

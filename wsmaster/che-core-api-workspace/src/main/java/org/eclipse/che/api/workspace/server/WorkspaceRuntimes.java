@@ -301,12 +301,15 @@ public class WorkspaceRuntimes {
         requireNonNull(environment.getRecipe().getType(), "OldRecipe type should not be null " + workspaceId);
 
         RuntimeInfrastructure infra = infraByRecipe.get(environment.getRecipe().getType());
-        if (infra == null)
+        if (infra == null) {
             throw new NotFoundException("No infrastructure found of type: " + environment.getRecipe().getType() +
                                         " for workspace: " + workspaceId);
+        }
 
-        if (runtimes.containsKey(workspaceId))
-            throw new ConflictException("Could not start workspace '" + workspaceId + "' because its status is 'RUNNING'");
+        if (runtimes.containsKey(workspaceId)) {
+            throw new ConflictException("Could not start workspace '" + workspaceId +
+                                        "' because its status is 'RUNNING'");
+        }
 
         eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                         .withWorkspaceId(workspaceId)
@@ -317,8 +320,9 @@ public class WorkspaceRuntimes {
 
         // Start environment
         //MessageConsumer<MachineLogMessage> logger = getEnvironmentLogger(workspaceId);
-        if (options == null)
+        if (options == null) {
             options = new HashMap<>();
+        }
 
         Subject subject = EnvironmentContext.getCurrent().getSubject();
         RuntimeIdentity runtimeId = new RuntimeIdentity(workspaceId, envName, subject.getUserName());
