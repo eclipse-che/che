@@ -14,7 +14,7 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
+import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
 import org.eclipse.che.plugin.maven.client.MavenResources;
 import org.junit.Test;
 import org.junit.runner.RunWith;

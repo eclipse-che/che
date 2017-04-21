@@ -30,8 +30,8 @@ import org.eclipse.che.ide.editor.orion.client.signature.SignatureHelpResources;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.plugin.requirejs.ide.RequireJsLoader;
-import org.eclipse.che.plugin.requirejs.ide.RequirejsErrorHandler.RequireError;
+import org.eclipse.che.requirejs.RequireJsLoader;
+import org.eclipse.che.requirejs.RequirejsErrorHandler.RequireError;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
