@@ -46,11 +46,11 @@ class IdeIFrameSvc {
 
       } else if ("show-navbar" === event.data) {
         $rootScope.hideNavbar = false;
-        $rootScope.$apply();
+        $mdSidenav('left').toggle();
 
       } else if ("hide-navbar" === event.data) {
         $rootScope.hideNavbar = true;
-        $rootScope.$apply();
+        $mdSidenav('left').close();
       }
 
     }, false);
