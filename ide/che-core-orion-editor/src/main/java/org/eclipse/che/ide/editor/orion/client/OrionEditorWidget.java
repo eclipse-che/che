@@ -102,7 +102,7 @@ import org.eclipse.che.ide.editor.preferences.keymaps.KeyMapsPreferencePresenter
 import org.eclipse.che.ide.status.message.StatusMessageReporter;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.plugin.requirejs.ide.ModuleHolder;
+import org.eclipse.che.requirejs.ModuleHolder;
 
 import java.util.ArrayList;
 import java.util.List;
