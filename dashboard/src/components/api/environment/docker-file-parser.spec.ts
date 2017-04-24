@@ -77,6 +77,8 @@ FROM codenvy/ubuntu_jdk8`;
       const result = parser.parse(dockerfile);
 
       const expectedResult = [{
+        emptyLine: true
+      }, {
         comment: '# escape=\\'
       }, {
         instruction: 'FROM',
@@ -320,6 +322,8 @@ ENV myVal=\\\\\\ \\\\\\\\`;
     const expectedResult = [{
       directive: '# escape=\\'
     }, {
+      emptyLine: true
+    }, {
       instruction: 'FROM',
       argument: 'codenvy/ubuntu_jdk8'
     }, {
@@ -343,6 +347,8 @@ ENV myVal=\\\\\\ \\\\\\\\`;
   it('should stringify an object into a dockerfile', () => {
     const instructions = [{
       directive: '# escape=\\'
+    }, {
+      emptyLine: true
     }, {
       instruction: 'FROM',
       argument: 'codenvy/ubuntu_jdk8'

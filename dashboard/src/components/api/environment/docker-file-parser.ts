@@ -20,6 +20,7 @@ interface IRecipeLine {
   argument?: string | string[];
   comment?: string;
   directive?: string;
+  emptyLine?: boolean;
 }
 
 export class DockerfileParser {
@@ -177,6 +178,8 @@ export class DockerfileParser {
         const parts = this.splitBySymbolAtIndex(recipeContent, this.getSplitIndex(recipeContent, '\n'));
         recipeContent = parts[1];
 
+        instructions.push({emptyLine: true});
+
         continue;
       }
 
@@ -230,14 +233,13 @@ export class DockerfileParser {
     let content = '';
 
     instructions.forEach((line: IRecipeLine) => {
-      if (line.directive) {
+      if (line.emptyLine) {
+        content += '\n';
+      } else if (line.directive) {
         content += line.directive + '\n';
       } else if (line.comment) {
         content += line.comment + '\n';
       } else {
-        if (line.instruction === 'FROM') {
-          content += '\n';
-        }
         content += line.instruction + ' ' + this.stringifyArgument(line) + '\n';
       }
     });
