@@ -23,9 +23,10 @@
   with your toolchain.
 </che-description>
 <md-content md-scroll-y flex layout="column" md-theme="maincontent-theme" class="factories-list-factories">
-  <md-progress-linear md-mode="indeterminate" class="factories-list-factories-progress"
-                      ng-if="listFactoriesCtrl.isLoading"></md-progress-linear>
-  <md-content flex class="md-maincontent-theme-theme" ng-show="!listFactoriesCtrl.isLoading">
+  <div class="progress-line">
+    <md-progress-linear ng-show="listFactoriesCtrl.isLoading" md-mode="indeterminate"></md-progress-linear>
+  </div>
+  <md-content flex class="md-maincontent-theme-theme">
     <che-list-header che-input-placeholder="Search"
                      che-search-model="listFactoriesCtrl.factoriesFilter.name"
                      che-hide-search="listFactoriesCtrl.factories.length === 0"
