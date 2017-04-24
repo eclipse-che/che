@@ -22,10 +22,6 @@ import org.eclipse.che.ide.api.debug.Breakpoint;
 @DTO
 public interface StorableBreakpointDto {
 
-    void setActive(boolean active);
-
-    boolean isActive();
-
     void setLineNumber(int lineNumber);
 
     int getLineNumber();
