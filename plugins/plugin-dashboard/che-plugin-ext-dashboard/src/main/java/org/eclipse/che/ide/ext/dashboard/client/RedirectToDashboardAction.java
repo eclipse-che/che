@@ -12,6 +12,8 @@ package org.eclipse.che.ide.ext.dashboard.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -25,7 +27,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.ui.Tooltip;
-import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.RIGHT;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.LEFT;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /**
@@ -41,6 +43,7 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
     private final AppContext                    appContext;
 
     private Element                             arrow;
+    private Tooltip                             tooltip;
 
     @Inject
     public RedirectToDashboardAction(DashboardLocalizationConstant constant,
@@ -65,18 +68,43 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
         panel.setWidth("24px");
         panel.setHeight("24px");
 
-        arrow = DOM.createAnchor();
-        arrow.setClassName(resources.dashboardCSS().dashboardArrow());
-        arrow.setInnerHTML("<i class=\"fa fa-chevron-right\" />");
-        panel.getElement().appendChild(arrow);
+        /**
+         * Show button Expanded by default if IDE is loaded in frame.
+         */
+        if (isInFrame()) {
+            arrow = DOM.createDiv();
+            arrow.setClassName(resources.dashboardCSS().dashboardArrow());
+            panel.getElement().appendChild(arrow);
 
-        arrow.setAttribute("href", constant.openDashboardUrlWorkspace(appContext.getWorkspace().getConfig().getName()));
-        arrow.setAttribute("target", "_blank");
+            tooltip = Tooltip.create((elemental.dom.Element) arrow,
+                    BOTTOM,
+                    LEFT,
+                    constant.hideDashboardNavBarToolbarButtonTitle());
 
-        Tooltip.create((elemental.dom.Element) arrow,
-                BOTTOM,
-                RIGHT,
-                constant.openDashboardToolbarButtonTitle());
+            showExpanded();
+
+            DOM.setEventListener(arrow, new EventListener() {
+                @Override
+                public void onBrowserEvent(Event event) {
+                    onArrowClicked();
+                }
+            });
+            DOM.sinkEvents(arrow, Event.ONMOUSEDOWN);
+        } else {
+            arrow = DOM.createAnchor();
+            arrow.setClassName(resources.dashboardCSS().dashboardArrow());
+            panel.getElement().appendChild(arrow);
+
+            tooltip = Tooltip.create((elemental.dom.Element) arrow,
+                    BOTTOM,
+                    LEFT,
+                    constant.openDashboardToolbarButtonTitle());
+
+            showCollapsed();
+
+            arrow.setAttribute("href", constant.openDashboardUrlWorkspace(appContext.getWorkspace().getConfig().getName()));
+            arrow.setAttribute("target", "_blank");
+        }
 
         return panel;
     }
@@ -94,5 +122,81 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
             arrow.setAttribute("href", constant.openDashboardUrlWorkspaces());
         }
     }
+
+    /**
+     * Determines whether the IDE is loaded inside frame.
+     * @return <b>true</b> if IDE is loaded in frame
+     */
+    private native boolean isInFrame() /*-{
+        if ($wnd == $wnd.parent) {
+            return false;
+        }
+
+        return true;
+    }-*/;
+
+    /**
+     * Makes arrow left-oriented.
+     * Dashboard navigation bar should be visible.
+     */
+    private native void showExpanded() /*-{
+        var elem = this.@org.eclipse.che.ide.ext.dashboard.client.RedirectToDashboardAction::arrow;
+        if (!elem) {
+            return;
+        }
+
+        elem.innerHTML = "<i class=\"fa fa-chevron-left\" />";
+        elem.expanded = true;
+
+        var tooltip = this.@org.eclipse.che.ide.ext.dashboard.client.RedirectToDashboardAction::tooltip;
+        if (!tooltip) {
+            return;
+        }
+
+        var constant = this.@org.eclipse.che.ide.ext.dashboard.client.RedirectToDashboardAction::constant;
+        var message = constant.@org.eclipse.che.ide.ext.dashboard.client.DashboardLocalizationConstant::hideDashboardNavBarToolbarButtonTitle()();
+        tooltip.@org.eclipse.che.ide.ui.Tooltip::setTitle(*)(message);
+    }-*/;
+
+    /**
+     * Makes arrow right-oriented.
+     * Dashboard navigation bar should be hidden.
+     */
+    private native void showCollapsed() /*-{
+        var elem = this.@org.eclipse.che.ide.ext.dashboard.client.RedirectToDashboardAction::arrow;
+        if (!elem) {
+            return;
+        }
+
+        elem.innerHTML = "<i class=\"fa fa-chevron-right\" />";
+        elem.expanded = false;
+
+        var tooltip = this.@org.eclipse.che.ide.ext.dashboard.client.RedirectToDashboardAction::tooltip;
+        if (!tooltip) {
+            return;
+        }
+
+        var constant = this.@org.eclipse.che.ide.ext.dashboard.client.RedirectToDashboardAction::constant;
+        var message = constant.@org.eclipse.che.ide.ext.dashboard.client.DashboardLocalizationConstant::showDashboardNavBarToolbarButtonTitle()();
+        tooltip.@org.eclipse.che.ide.ui.Tooltip::setTitle(*)(message);
+    }-*/;
+
+    /**
+     * Handles clicking on the arrow.
+     */
+    private native void onArrowClicked() /*-{
+        var elem = this.@org.eclipse.che.ide.ext.dashboard.client.RedirectToDashboardAction::arrow;
+        if (!elem) {
+            return;
+        }
+
+        if (elem.expanded) {
+            $wnd.parent.postMessage("hide-navbar", "*");
+            this.@org.eclipse.che.ide.ext.dashboard.client.RedirectToDashboardAction::showCollapsed()();
+        } else {
+            $wnd.parent.postMessage("show-navbar", "*");
+            this.@org.eclipse.che.ide.ext.dashboard.client.RedirectToDashboardAction::showExpanded()();
+        }
+    }-*/;
 
 }

@@ -10,34 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.service;
 
-import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-import java.util.List;
-
-import org.eclipse.che.api.languageserver.shared.lsapi.CodeActionParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.CommandDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.CompletionListDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DocumentFormattingParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DocumentHighlightDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DocumentOnTypeFormattingParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DocumentRangeFormattingParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.HoverDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.PublishDiagnosticsParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.ReferenceParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.ShowMessageRequestParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.SignatureHelpDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.SymbolInformationDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextEditDTO;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -55,11 +32,33 @@ import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.plugin.languageserver.ide.editor.PublishDiagnosticsProcessor;
 import org.eclipse.che.plugin.languageserver.ide.editor.ShowMessageProcessor;
+import org.eclipse.lsp4j.CodeActionParams;
+import org.eclipse.lsp4j.Command;
+import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.DidChangeTextDocumentParams;
+import org.eclipse.lsp4j.DidCloseTextDocumentParams;
+import org.eclipse.lsp4j.DidOpenTextDocumentParams;
+import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.DocumentFormattingParams;
+import org.eclipse.lsp4j.DocumentHighlight;
+import org.eclipse.lsp4j.DocumentOnTypeFormattingParams;
+import org.eclipse.lsp4j.DocumentRangeFormattingParams;
+import org.eclipse.lsp4j.DocumentSymbolParams;
+import org.eclipse.lsp4j.Hover;
+import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.ReferenceParams;
+import org.eclipse.lsp4j.ShowMessageRequestParams;
+import org.eclipse.lsp4j.SignatureHelp;
+import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
+import org.eclipse.lsp4j.TextEdit;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.List;
 
-import io.typefox.lsapi.CompletionItem;
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
+import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
 
 /**
@@ -105,9 +104,9 @@ public class TextDocumentServiceClient {
      * @param position
      * @return
      */
-    public Promise<CompletionListDTO> completion(TextDocumentPositionParamsDTO position) {
+    public Promise<ExtendedCompletionList> completion(TextDocumentPositionParams position) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/completion";
-        Unmarshallable<CompletionListDTO> unmarshaller = unmarshallerFactory.newUnmarshaller(CompletionListDTO.class);
+        Unmarshallable<ExtendedCompletionList> unmarshaller = unmarshallerFactory.newUnmarshaller(ExtendedCompletionList.class);
         return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)position).toJson()).send(unmarshaller);
     }
@@ -118,9 +117,9 @@ public class TextDocumentServiceClient {
      * @param completionItem
      * @return
      */
-    public Promise<CompletionItemDTO> resolveCompletionItem(CompletionItemDTO completionItem) {
+    public Promise<ExtendedCompletionItem> resolveCompletionItem(CompletionItem completionItem) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/completionItem/resolve";
-        Unmarshallable<CompletionItemDTO> unmarshaller = unmarshallerFactory.newUnmarshaller(CompletionItemDTO.class);
+        Unmarshallable<ExtendedCompletionItem> unmarshaller = unmarshallerFactory.newUnmarshaller(ExtendedCompletionItem.class);
         return asyncRequestFactory.createPostRequest(requestUrl, completionItem)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON).send(unmarshaller);
@@ -132,9 +131,9 @@ public class TextDocumentServiceClient {
      * @param params
      * @return
      */
-    public Promise<List<SymbolInformationDTO>> documentSymbol(DocumentSymbolParamsDTO params) {
+    public Promise<List<SymbolInformation>> documentSymbol(DocumentSymbolParams params) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/documentSymbol";
-        Unmarshallable<List<SymbolInformationDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(SymbolInformationDTO.class);
+        Unmarshallable<List<SymbolInformation>> unmarshaller = unmarshallerFactory.newListUnmarshaller(SymbolInformation.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -147,9 +146,9 @@ public class TextDocumentServiceClient {
      * @param params
      * @return
      */
-    public Promise<List<LocationDTO>> references(ReferenceParamsDTO params) {
+    public Promise<List<Location>> references(ReferenceParams params) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/references";
-        Unmarshallable<List<LocationDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(LocationDTO.class);
+        Unmarshallable<List<Location>> unmarshaller = unmarshallerFactory.newListUnmarshaller(Location.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -162,9 +161,9 @@ public class TextDocumentServiceClient {
      * @param params
      * @return
      */
-    public Promise<List<LocationDTO>> definition(TextDocumentPositionParamsDTO params) {
+    public Promise<List<Location>> definition(TextDocumentPositionParams params) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/definition";
-        Unmarshallable<List<LocationDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(LocationDTO.class);
+        Unmarshallable<List<Location>> unmarshaller = unmarshallerFactory.newListUnmarshaller(Location.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -177,9 +176,9 @@ public class TextDocumentServiceClient {
      * @param params
      * @return
      */
-    public Promise<HoverDTO> hover(TextDocumentPositionParamsDTO params) {
+    public Promise<Hover> hover(TextDocumentPositionParams params) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/hover";
-        Unmarshallable<HoverDTO> unmarshaller = unmarshallerFactory.newUnmarshaller(HoverDTO.class);
+        Unmarshallable<Hover> unmarshaller = unmarshallerFactory.newUnmarshaller(Hover.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -192,9 +191,9 @@ public class TextDocumentServiceClient {
      * @param params
      * @return
      */
-    public Promise<SignatureHelpDTO> signatureHelp(TextDocumentPositionParamsDTO params) {
+    public Promise<SignatureHelp> signatureHelp(TextDocumentPositionParams params) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/signatureHelp";
-        Unmarshallable<SignatureHelpDTO> unmarshaller = unmarshallerFactory.newUnmarshaller(SignatureHelpDTO.class);
+        Unmarshallable<SignatureHelp> unmarshaller = unmarshallerFactory.newUnmarshaller(SignatureHelp.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -207,9 +206,9 @@ public class TextDocumentServiceClient {
      * @param params
      * @return
      */
-    public Promise<List<TextEditDTO>> formatting(DocumentFormattingParamsDTO params) {
+    public Promise<List<TextEdit>> formatting(DocumentFormattingParams params) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/formatting";
-        Unmarshallable<List<TextEditDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(TextEditDTO.class);
+        Unmarshallable<List<TextEdit>> unmarshaller = unmarshallerFactory.newListUnmarshaller(TextEdit.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -222,9 +221,9 @@ public class TextDocumentServiceClient {
      * @param params
      * @return
      */
-    public Promise<List<TextEditDTO>> rangeFormatting(DocumentRangeFormattingParamsDTO params) {
+    public Promise<List<TextEdit>> rangeFormatting(DocumentRangeFormattingParams params) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/rangeFormatting";
-        Unmarshallable<List<TextEditDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(TextEditDTO.class);
+        Unmarshallable<List<TextEdit>> unmarshaller = unmarshallerFactory.newListUnmarshaller(TextEdit.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -237,9 +236,9 @@ public class TextDocumentServiceClient {
      * @param params
      * @return
      */
-    public Promise<List<TextEditDTO>> onTypeFormatting(DocumentOnTypeFormattingParamsDTO params) {
+    public Promise<List<TextEdit>> onTypeFormatting(DocumentOnTypeFormattingParams params) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/onTypeFormatting";
-        Unmarshallable<List<TextEditDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(TextEditDTO.class);
+        Unmarshallable<List<TextEdit>> unmarshaller = unmarshallerFactory.newListUnmarshaller(TextEdit.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -252,7 +251,7 @@ public class TextDocumentServiceClient {
      * @param change
      * @return
      */
-    public void didChange(DidChangeTextDocumentParamsDTO change) {
+    public void didChange(DidChangeTextDocumentParams change) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didChange";
         asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)change).toJson()).send();
@@ -264,7 +263,7 @@ public class TextDocumentServiceClient {
      * @param openEvent
      * @return
      */
-    public void didOpen(DidOpenTextDocumentParamsDTO openEvent) {
+    public void didOpen(DidOpenTextDocumentParams openEvent) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didOpen";
         asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)openEvent).toJson()).send();
@@ -276,7 +275,7 @@ public class TextDocumentServiceClient {
      * @param closeEvent
      * @return
      */
-    public void didClose(DidCloseTextDocumentParamsDTO closeEvent) {
+    public void didClose(DidCloseTextDocumentParams closeEvent) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didClose";
         asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)closeEvent).toJson()).send();
@@ -288,44 +287,47 @@ public class TextDocumentServiceClient {
      * @param saveEvent
      * @return
      */
-    public void didSave(DidSaveTextDocumentParamsDTO saveEvent) {
+    public void didSave(DidSaveTextDocumentParams saveEvent) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didSave";
         asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)saveEvent).toJson()).send();
     }
 
-   
+
     /**
-     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#documentHighlight(io.typefox.lsapi.TextDocumentPositionParams position)}
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#documentHighlight(io.typefox.lsapi.TextDocumentPositionParams
+     * position)}
      *
      * @param position
      * @return a {@link Promise} of an array of {@link DocumentHighlightDTO} which will be computed by the language server.
      */
-    public Promise<DocumentHighlightDTO> documentHighlight(TextDocumentPositionParamsDTO position) {
+    public Promise<DocumentHighlight> documentHighlight(TextDocumentPositionParams position) {
         final String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/documentHighlight";
-        final Unmarshallable<DocumentHighlightDTO> unmarshaller = unmarshallerFactory.newUnmarshaller(DocumentHighlightDTO.class);
+        final Unmarshallable<DocumentHighlight> unmarshaller = unmarshallerFactory.newUnmarshaller(DocumentHighlight.class);
         return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
-                           .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)position).toJson()).send(unmarshaller);
+                                  .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)position).toJson()).send(unmarshaller);
     }
-    
-	public Promise<List<CommandDTO>> codeAction(CodeActionParamsDTO params) {
+
+
+
+    public Promise<List<Command>> codeAction(CodeActionParams params) {
         final String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/codeAction";
-        final Unmarshallable<List<CommandDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(CommandDTO.class);
+        final Unmarshallable<List<Command>> unmarshaller = unmarshallerFactory.newListUnmarshaller(Command.class);
         return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
-                           .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)params).toJson()).send(unmarshaller);
+                                  .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)params).toJson()).send(unmarshaller);
     }
 
     /**
-     * Subscribes to websocket for 'textDocument/publishDiagnostics' notifications. 
+     * Subscribes to websocket for 'textDocument/publishDiagnostics' notifications.
      */
     private void subscribeToPublishDiagnostics(final MessageBus messageBus) {
-        org.eclipse.che.ide.websocket.rest.Unmarshallable<PublishDiagnosticsParamsDTO> unmarshaller =
-                unmarshallerFactory.newWSUnmarshaller(PublishDiagnosticsParamsDTO.class);
+        org.eclipse.che.ide.websocket.rest.Unmarshallable<PublishDiagnosticsParams> unmarshaller =
+                unmarshallerFactory.newWSUnmarshaller(PublishDiagnosticsParams.class);
         try {
             messageBus.subscribe("languageserver/textDocument/publishDiagnostics",
-                                 new SubscriptionHandler<PublishDiagnosticsParamsDTO>(unmarshaller) {
+                                 new SubscriptionHandler<PublishDiagnosticsParams>(unmarshaller) {
                                      @Override
-                                     protected void onMessageReceived(PublishDiagnosticsParamsDTO statusEvent) {
+                                     protected void onMessageReceived(PublishDiagnosticsParams statusEvent) {
                                          publishDiagnosticsProcessor.processDiagnostics(statusEvent);
                                      }
 
@@ -341,17 +343,17 @@ public class TextDocumentServiceClient {
     }
 
     /**
-     * Subscribes to websocket for 'window/showMessage' notifications. 
+     * Subscribes to websocket for 'window/showMessage' notifications.
      */
     private void subscribeToShowMessages(final MessageBus messageBus) {
-        final org.eclipse.che.ide.websocket.rest.Unmarshallable<ShowMessageRequestParamsDTO> unmarshaller =
-                unmarshallerFactory.newWSUnmarshaller(ShowMessageRequestParamsDTO.class);
+        final org.eclipse.che.ide.websocket.rest.Unmarshallable<ShowMessageRequestParams> unmarshaller =
+                unmarshallerFactory.newWSUnmarshaller(ShowMessageRequestParams.class);
         try {
             messageBus.subscribe("languageserver/window/showMessage",
-                                 new SubscriptionHandler<ShowMessageRequestParamsDTO>(unmarshaller) {
+                                 new SubscriptionHandler<ShowMessageRequestParams>(unmarshaller) {
                                      @Override
-                                     protected void onMessageReceived(ShowMessageRequestParamsDTO showMessageRequestParamsDTO) {
-                                         showMessageProcessor.processNotification(showMessageRequestParamsDTO);
+                                     protected void onMessageReceived(ShowMessageRequestParams ShowMessageRequestParams) {
+                                         showMessageProcessor.processNotification(ShowMessageRequestParams);
                                      }
 
                                      @Override

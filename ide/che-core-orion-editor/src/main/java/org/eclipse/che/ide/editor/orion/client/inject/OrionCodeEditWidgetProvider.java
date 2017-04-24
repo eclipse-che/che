@@ -18,7 +18,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.editor.orion.client.jso.OrionCodeEditWidgetOverlay;
-import org.eclipse.che.plugin.requirejs.ide.ModuleHolder;
+import org.eclipse.che.requirejs.ModuleHolder;
 
 import java.util.HashSet;
 import java.util.Set;

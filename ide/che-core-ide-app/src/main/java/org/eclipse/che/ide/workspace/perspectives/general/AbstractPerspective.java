@@ -25,7 +25,6 @@ import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackType;
-import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveView;
@@ -41,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 import static org.eclipse.che.ide.api.parts.PartStackType.INFORMATION;
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 import static org.eclipse.che.ide.api.parts.PartStackType.TOOLING;
@@ -412,7 +412,7 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
             double size = partStackJSON.getNumber("SIZE");
 
             // Size of the part must not be less 100 pixels.
-            if (size < MIN_PART_SIZE) {
+            if (size <= MIN_PART_SIZE) {
                 size = DEFAULT_PART_SIZE;
             }
 

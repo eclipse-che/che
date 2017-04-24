@@ -13,13 +13,14 @@ package org.eclipse.che.plugin.languageserver.ide.service;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.SymbolInformationDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.WorkspaceSymbolParamsDTO;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
+import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.WorkspaceSymbolParams;
+
 import java.util.List;
 
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
@@ -32,15 +33,15 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 @Singleton
 public class WorkspaceServiceClient {
     private final DtoUnmarshallerFactory unmarshallerFactory;
-    private final AppContext appContext;
-    private final AsyncRequestFactory asyncRequestFactory;
-    
-    
+    private final AppContext             appContext;
+    private final AsyncRequestFactory    asyncRequestFactory;
+
+
     @Inject
     public WorkspaceServiceClient(final DtoUnmarshallerFactory unmarshallerFactory,
                                   final AppContext appContext,
                                   final AsyncRequestFactory asyncRequestFactory
-                                  ) {
+                                 ) {
         this.unmarshallerFactory = unmarshallerFactory;
         this.appContext = appContext;
         this.asyncRequestFactory = asyncRequestFactory;
@@ -52,13 +53,13 @@ public class WorkspaceServiceClient {
      * @param params
      * @return
      */
-    public Promise<List<SymbolInformationDTO>> symbol(WorkspaceSymbolParamsDTO params) {
+    public Promise<List<SymbolInformation>> symbol(WorkspaceSymbolParams params) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/workspace/symbol";
-        Unmarshallable<List<SymbolInformationDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(SymbolInformationDTO.class);
+        Unmarshallable<List<SymbolInformation>> unmarshaller = unmarshallerFactory.newListUnmarshaller(SymbolInformation.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
                                   .send(unmarshaller);
     }
-    
+
 }

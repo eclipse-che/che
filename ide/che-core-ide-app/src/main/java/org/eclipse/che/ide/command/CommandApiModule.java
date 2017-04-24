@@ -19,6 +19,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.command.CommandManager;
@@ -27,6 +28,7 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.command.type.custom.CustomCommandType;
 import org.eclipse.che.ide.command.editor.CommandEditorView;
 import org.eclipse.che.ide.command.editor.CommandEditorViewImpl;
 import org.eclipse.che.ide.command.editor.page.goal.GoalPageView;
@@ -37,6 +39,7 @@ import org.eclipse.che.ide.command.editor.page.project.ProjectsPageView;
 import org.eclipse.che.ide.command.editor.page.project.ProjectsPageViewImpl;
 import org.eclipse.che.ide.command.editor.page.text.PageWithTextEditorView;
 import org.eclipse.che.ide.command.editor.page.text.PageWithTextEditorViewImpl;
+import org.eclipse.che.ide.command.execute.CommandExecutorImpl;
 import org.eclipse.che.ide.command.execute.ExecuteCommandActionFactory;
 import org.eclipse.che.ide.command.execute.ExecuteCommandActionManager;
 import org.eclipse.che.ide.command.execute.GoalPopUpGroupFactory;
@@ -132,6 +135,9 @@ public class CommandApiModule extends AbstractGinModule {
 
         install(new GinFactoryModuleBuilder().build(ToolbarButtonsFactory.class));
         install(new GinFactoryModuleBuilder().build(MenuItemsFactory.class));
+
+        bind(CommandExecutor.class).to(CommandExecutorImpl.class).in(Singleton.class);
+        GinMultibinder.newSetBinder(binder(), CommandType.class).addBinding().to(CustomCommandType.class);
     }
 
     @Provides

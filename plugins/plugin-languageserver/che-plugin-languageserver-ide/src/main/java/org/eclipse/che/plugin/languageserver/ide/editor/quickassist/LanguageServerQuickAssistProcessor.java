@@ -12,17 +12,7 @@ package org.eclipse.che.plugin.languageserver.ide.editor.quickassist;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
-import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.CodeActionContextDTOImpl;
-import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.CodeActionParamsDTOImpl;
-import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.PositionDTOImpl;
-import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.RangeDTOImpl;
-import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.TextDocumentIdentifierDTOImpl;
-import org.eclipse.che.api.languageserver.shared.lsapi.CodeActionContextDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.CodeActionParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.CommandDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DiagnosticDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.PositionDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
+
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -35,13 +25,19 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistInvocationContext;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
-import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.plugin.languageserver.ide.editor.DiagnosticAnnotation;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.lsp4j.CodeActionContext;
+import org.eclipse.lsp4j.CodeActionParams;
+import org.eclipse.lsp4j.Command;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
 
 import javax.inject.Inject;
 
@@ -65,10 +61,10 @@ public class LanguageServerQuickAssistProcessor implements QuickAssistProcessor 
     private PerspectiveManager        perspectiveManager;
 
     private final class ActionCompletionProposal implements CompletionProposal {
-        private final CommandDTO command;
-        private final Action     action;
+        private final Command command;
+        private final Action  action;
 
-        private ActionCompletionProposal(CommandDTO command, Action action) {
+        private ActionCompletionProposal(Command command, Action action) {
             this.command = command;
             this.action = action;
         }
@@ -121,30 +117,31 @@ public class LanguageServerQuickAssistProcessor implements QuickAssistProcessor 
         QueryAnnotationsEvent.QueryCallback annotationCallback = new QueryAnnotationsEvent.QueryCallback() {
 
             @Override
-            public void respond(Map<Annotation, Position> annotations) {
-                List<DiagnosticDTO> diagnostics = new ArrayList<>();
+            public void respond(Map<Annotation, org.eclipse.che.ide.api.editor.text.Position> annotations) {
+                List<Diagnostic> diagnostics = new ArrayList<>();
                 // iteration with range never returns anything; need to filter ourselves.
                 // https://github.com/eclipse/che/issues/4338
                 annotations.entrySet().stream().filter((e) -> e.getValue().overlapsWith(range.getStartOffset(), range.getLength()))
                                 .map(Entry::getKey).map(a -> (DiagnosticAnnotation) a).map(DiagnosticAnnotation::getDiagnostic)
                                 .collect(Collectors.toList());
 
-                CodeActionContextDTO context = CodeActionContextDTOImpl.make().withDiagnostics(diagnostics);
-                CodeActionParamsDTO params = CodeActionParamsDTOImpl.make().withContext(context);
-                params.setTextDocument(TextDocumentIdentifierDTOImpl.make().withUri(document.getFile().getLocation().toString()));
+                CodeActionContext context = new CodeActionContext(diagnostics);
 
                 TextPosition start = document.getPositionFromIndex(range.getStartOffset());
                 TextPosition end = document.getPositionFromIndex(range.getStartOffset() + range.getLength());
-                PositionDTO rangeStart = toPositionDto(start);
-                PositionDTO rangeEnd = toPositionDto(end);
-                RangeDTO rangeParam = RangeDTOImpl.make().withStart(rangeStart);
+                Position rangeStart = new Position(start.getLine(), start.getCharacter());
+                Position rangeEnd = new Position(end.getLine(), end.getCharacter());
+                Range rangeParam = new Range(rangeStart, rangeEnd);
                 rangeParam.setEnd(rangeEnd);
-                params.setRange(rangeParam);
 
-                Promise<List<CommandDTO>> codeAction = textDocumentService.codeAction(params);
+                TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(document.getFile().getLocation().toString());
+
+                CodeActionParams params = new CodeActionParams(textDocumentIdentifier, rangeParam, context);
+
+                Promise<List<Command>> codeAction = textDocumentService.codeAction(params);
                 List<CompletionProposal> proposals = new ArrayList<>();
                 codeAction.then((commands) -> {
-                    for (CommandDTO command : commands) {
+                    for (Command command : commands) {
                         Action action = actionManager.getAction(command.getCommand());
                         if (action != null) {
                             proposals.add(new ActionCompletionProposal(command, action));
@@ -153,12 +150,6 @@ public class LanguageServerQuickAssistProcessor implements QuickAssistProcessor 
                     ;
                     callback.proposalComputed(proposals);
                 });
-            }
-
-            private PositionDTO toPositionDto(TextPosition start) {
-                PositionDTO rangeStart = PositionDTOImpl.make().withLine(start.getLine());
-                rangeStart.setCharacter(start.getCharacter());
-                return rangeStart;
             }
         };
         QueryAnnotationsEvent event = new QueryAnnotationsEvent.Builder().withFilter(a -> a instanceof DiagnosticAnnotation)

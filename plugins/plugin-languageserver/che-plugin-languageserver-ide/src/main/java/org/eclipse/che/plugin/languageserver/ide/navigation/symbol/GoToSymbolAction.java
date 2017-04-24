@@ -12,11 +12,7 @@ package org.eclipse.che.plugin.languageserver.ide.navigation.symbol;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import io.typefox.lsapi.ServerCapabilities;
-import org.eclipse.che.api.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.SymbolInformationDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
+
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -41,6 +37,11 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConf
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.lsp4j.DocumentSymbolParams;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -61,18 +62,18 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
 
     public static final String SCOPE_PREFIX = ":";
     private final LanguageServerLocalization
-                                             localization;
-    private final TextDocumentServiceClient  client;
-    private final EditorAgent                editorAgent;
-    private final DtoFactory                 dtoFactory;
-    private final NotificationManager        notificationManager;
-    private final FuzzyMatches fuzzyMatches;
-    private final SymbolKindHelper           symbolKindHelper;
-    private       QuickOpenPresenter         presenter;
-    private       List<SymbolInformationDTO> cachedItems;
-    private       LinearRange                selectedLinearRange;
-    private       TextEditor                 activeEditor;
-    private       TextPosition               cursorPosition;
+                                            localization;
+    private final TextDocumentServiceClient client;
+    private final EditorAgent               editorAgent;
+    private final DtoFactory                dtoFactory;
+    private final NotificationManager       notificationManager;
+    private final FuzzyMatches              fuzzyMatches;
+    private final SymbolKindHelper          symbolKindHelper;
+    private       QuickOpenPresenter        presenter;
+    private       List<SymbolInformation>   cachedItems;
+    private       LinearRange               selectedLinearRange;
+    private       TextEditor                activeEditor;
+    private       TextPosition              cursorPosition;
 
     @Inject
     public GoToSymbolAction(QuickOpenPresenter presenter,
@@ -97,16 +98,16 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        DocumentSymbolParamsDTO paramsDTO = dtoFactory.createDto(DocumentSymbolParamsDTO.class);
-        TextDocumentIdentifierDTO identifierDTO = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
+        DocumentSymbolParams paramsDTO = dtoFactory.createDto(DocumentSymbolParams.class);
+        TextDocumentIdentifier identifierDTO = dtoFactory.createDto(TextDocumentIdentifier.class);
         identifierDTO.setUri(editorAgent.getActiveEditor().getEditorInput().getFile().getLocation().toString());
         paramsDTO.setTextDocument(identifierDTO);
         activeEditor = (TextEditor)editorAgent.getActiveEditor();
         cursorPosition = activeEditor.getDocument().getCursorPosition();
-        client.documentSymbol(paramsDTO).then(new Operation<List<SymbolInformationDTO>>() {
+        client.documentSymbol(paramsDTO).then(new Operation<List<SymbolInformation>>() {
 
             @Override
-            public void apply(List<SymbolInformationDTO> arg) throws OperationException {
+            public void apply(List<SymbolInformation> arg) throws OperationException {
 
                 cachedItems = arg;
                 presenter.run(GoToSymbolAction.this);
@@ -128,7 +129,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
             if (configuration instanceof LanguageServerEditorConfiguration) {
                 ServerCapabilities capabilities = ((LanguageServerEditorConfiguration)configuration).getServerCapabilities();
                 event.getPresentation()
-                     .setEnabledAndVisible(capabilities.isDocumentSymbolProvider() != null && capabilities.isDocumentSymbolProvider());
+                     .setEnabledAndVisible(capabilities.getDocumentSymbolProvider() != null && capabilities.getDocumentSymbolProvider());
                 return;
             }
 
@@ -141,14 +142,14 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
         return Promises.resolve(new QuickOpenModel(toQuickOpenEntries(cachedItems, value)));
     }
 
-    private List<SymbolEntry> toQuickOpenEntries(List<SymbolInformationDTO> items, final String value) {
+    private List<SymbolEntry> toQuickOpenEntries(List<SymbolInformation> items, final String value) {
         List<SymbolEntry> result = new ArrayList<>();
         String normalValue = value;
         if (value.startsWith(SCOPE_PREFIX)) {
             normalValue = normalValue.substring(SCOPE_PREFIX.length());
         }
 
-        for (SymbolInformationDTO item : items) {
+        for (SymbolInformation item : items) {
             String label = item.getName().trim();
 
             List<Match> highlights = fuzzyMatches.fuzzyMatch(normalValue, label);
@@ -158,7 +159,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
                     description = item.getContainerName();
                 }
 
-                RangeDTO range = item.getLocation().getRange();
+                Range range = item.getLocation().getRange();
                 TextRange textRange = new TextRange(new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()),
                                                     new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
                 //TODO add icons

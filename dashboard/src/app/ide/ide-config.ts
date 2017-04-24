@@ -19,9 +19,6 @@ import IdeIFrameCtrl from './ide-iframe/ide-iframe.controller';
 import IdeIFrame from './ide-iframe/ide-iframe.directive';
 import IdeIFrameSvc from './ide-iframe/ide-iframe.service';
 
-import IdeIFrameButtonLinkCtrl from './ide-iframe-button-link/ide-iframe-button-link.controller';
-import IdeIFrameButtonLink from './ide-iframe-button-link/ide-iframe-button-link.directive';
-
 export class IdeConfig {
 
   constructor(register) {
@@ -31,9 +28,6 @@ export class IdeConfig {
     register.service('ideIFrameSvc', IdeIFrameSvc);
     register.controller('IdeIFrameCtrl', IdeIFrameCtrl);
     register.directive('ideIframe', IdeIFrame);
-
-    register.controller('IdeIFrameButtonLinkCtrl', IdeIFrameButtonLinkCtrl);
-    register.directive('ideIframeButtonLink', IdeIFrameButtonLink);
 
     let ideProvider = {
       title: (params) => {return params.workspaceName},

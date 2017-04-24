@@ -10,15 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import io.typefox.lsapi.InitializeParams;
-import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.ServerCapabilities;
-import io.typefox.lsapi.services.LanguageServer;
-
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsMessenger;
 import org.eclipse.che.api.languageserver.messager.ShowMessageMessenger;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.lsp4j.InitializeParams;
+import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.services.LanguageServer;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -48,7 +47,7 @@ public class ServerInitializerImplTest {
     @Mock
     private PublishDiagnosticsParamsMessenger   publishDiagnosticsParamsMessenger;
     @Mock
-    private ShowMessageMessenger          showMessageParamsMessenger;
+    private ShowMessageMessenger                showMessageParamsMessenger;
     @Mock
     private LanguageDescription                 languageDescription;
     @Mock
@@ -72,7 +71,7 @@ public class ServerInitializerImplTest {
         when(completableFuture.get()).thenReturn(mock(InitializeResult.class));
 
         when(launcher.getLanguageDescription()).thenReturn(languageDescription);
-        when(launcher.launch(anyString())).thenReturn(server);
+        when(launcher.launch(anyString(), any())).thenReturn(server);
         doNothing().when(initializer).registerCallbacks(server);
 
         initializer.addObserver(observer);

@@ -11,13 +11,14 @@
 package org.eclipse.che.ide.command.toolbar.commands.button;
 
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.ui.menubutton.MenuItem;
 
 /** Factory for {@link MenuItem}s for {@link ExecuteCommandButton}. */
 public interface MenuItemsFactory {
 
-    GuideItem newGuideItem();
+    GuideItem newGuideItem(CommandGoal goal);
 
     CommandItem newCommandItem(CommandImpl command);
 
