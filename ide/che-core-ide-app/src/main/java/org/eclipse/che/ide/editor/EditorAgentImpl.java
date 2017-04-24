@@ -140,6 +140,7 @@ public class EditorAgentImpl implements EditorAgent,
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
         eventBus.addHandler(SelectionChangedEvent.TYPE, this);
         eventBus.addHandler(WindowActionEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
     @Override
