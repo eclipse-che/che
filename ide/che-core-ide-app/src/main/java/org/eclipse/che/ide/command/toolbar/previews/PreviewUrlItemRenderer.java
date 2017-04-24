@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.previews;
 
-import elemental.dom.Element;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Label;
@@ -19,14 +17,10 @@ import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.command.CommandResources;
-import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
-import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 import org.eclipse.che.ide.ui.dropdown.DropdownListItemRenderer;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
-import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
-import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /**
  * Renders widgets for the 'Previews' list. Always returns the same
@@ -62,7 +56,6 @@ class PreviewUrlItemRenderer implements DropdownListItemRenderer {
     private static class HeaderWidget extends Label {
 
         private static final CommandResources RESOURCES = GWT.create(CommandResources.class);
-        private static final ToolbarMessages  MESSAGES  = GWT.create(ToolbarMessages.class);
 
         HeaderWidget() {
             super();
@@ -72,8 +65,6 @@ class PreviewUrlItemRenderer implements DropdownListItemRenderer {
             final SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
             safeHtmlBuilder.appendHtmlConstant(FontAwesome.BULLSEYE);
             getElement().setInnerSafeHtml(safeHtmlBuilder.toSafeHtml());
-
-            Tooltip.create((Element)getElement(), BOTTOM, MIDDLE, MESSAGES.previewsTooltip());
         }
     }
 }

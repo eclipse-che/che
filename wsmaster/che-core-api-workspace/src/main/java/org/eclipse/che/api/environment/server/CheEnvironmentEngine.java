@@ -764,7 +764,7 @@ public class CheEnvironmentEngine {
                 try (@SuppressWarnings("unused") Unlocker u = stripedLocks.readLock(workspaceId)) {
                     EnvironmentHolder environmentHolder = environments.get(workspaceId);
                     if (environmentHolder == null) {
-                        throw new ServerException("Environment start is interrupted.");
+                        throw new EnvironmentStartInterruptedException(workspaceId, envName);
                     }
                     service = environmentHolder.environment.getServices().get(machineName);
                     extendedMachine = environmentHolder.environmentConfig.getMachines().get(machineName);
@@ -868,7 +868,7 @@ public class CheEnvironmentEngine {
 
                 machineName = queuePeekOrFail(workspaceId);
             }
-        } catch (RuntimeException | ServerException | EnvironmentStartInterruptedException e) {
+        } catch (Exception e) {
             boolean interrupted = Thread.interrupted();
             EnvironmentHolder env;
             try (@SuppressWarnings("unused") Unlocker u = stripedLocks.writeLock(workspaceId)) {
@@ -886,7 +886,7 @@ public class CheEnvironmentEngine {
             }
             try {
                 throw e;
-            } catch (ServerException | EnvironmentStartInterruptedException rethrow) {
+            } catch (ServerException | EnvironmentException | AgentException rethrow) {
                 throw rethrow;
             } catch (Exception wrap) {
                 throw new ServerException(wrap.getMessage(), wrap);

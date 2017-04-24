@@ -11,6 +11,7 @@
 package org.eclipse.che.api.environment.server;
 
 import org.eclipse.che.api.agent.server.AgentRegistry;
+import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.ConflictException;
@@ -82,6 +83,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -1287,6 +1289,189 @@ public class CheEnvironmentEngineTest {
         }
     }
 
+    @Test
+    public void shouldBeAbleToRestartEnvironmentAfterServerException() throws Exception {
+        // given
+        EnvironmentImpl env = createEnv();
+        String envName = "env-1";
+        String workspaceId = "wsId";
+        String testServerExcMessage = "test exception";
+        when(machineProvider.startService(anyString(),
+                                          eq(workspaceId),
+                                          eq(envName),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenThrow(new ServerException(testServerExcMessage));
+        when(environmentParser.parse(env)).thenReturn(createCheServicesEnv());
+
+        // when
+        // env start must fails because of server exception
+        try {
+            engine.start(workspaceId,
+                         envName,
+                         env,
+                         false,
+                         messageConsumer,
+                         startedHandler);
+            fail("Server exception should be thrown");
+        } catch (ServerException e) {
+            assertEquals(e.getMessage(), testServerExcMessage);
+        }
+
+        when(machineProvider.startService(anyString(),
+                                          eq(workspaceId),
+                                          eq(envName),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenAnswer(invocationOnMock -> {
+                    Object[] arguments = invocationOnMock.getArguments();
+                    String machineName = (String)arguments[3];
+                    boolean isDev = (boolean)arguments[4];
+                    CheServiceImpl service = (CheServiceImpl)arguments[6];
+                    Machine machine = createMachine(workspaceId,
+                                                    envName,
+                                                    service,
+                                                    machineName,
+                                                    isDev);
+                    return new NoOpMachineInstance(machine);
+                });
+
+        // then
+        // env start succeeds
+        engine.start(workspaceId,
+                     envName,
+                     env,
+                     false,
+                     messageConsumer,
+                     startedHandler);
+    }
+
+    @Test
+    public void shouldBeAbleToRestartEnvironmentAfterRuntimeException() throws Exception {
+        // given
+        EnvironmentImpl env = createEnv();
+        String envName = "env-1";
+        String workspaceId = "wsId";
+        String testEnvExcMessage = "test exception";
+        when(machineProvider.startService(anyString(),
+                                          eq(workspaceId),
+                                          eq(envName),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenThrow(new RuntimeException(testEnvExcMessage));
+        when(environmentParser.parse(env)).thenReturn(createCheServicesEnv());
+
+        // when
+        // env start must fails because of exception
+        try {
+            engine.start(workspaceId,
+                         envName,
+                         env,
+                         false,
+                         messageConsumer,
+                         startedHandler);
+            fail("Environment exception should be thrown");
+        } catch (ServerException e) {
+            assertEquals(e.getMessage(), testEnvExcMessage);
+        }
+
+        when(machineProvider.startService(anyString(),
+                                          eq(workspaceId),
+                                          eq(envName),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenAnswer(invocationOnMock -> {
+                    Object[] arguments = invocationOnMock.getArguments();
+                    String machineName = (String)arguments[3];
+                    boolean isDev = (boolean)arguments[4];
+                    CheServiceImpl service = (CheServiceImpl)arguments[6];
+                    Machine machine = createMachine(workspaceId,
+                                                    envName,
+                                                    service,
+                                                    machineName,
+                                                    isDev);
+                    return new NoOpMachineInstance(machine);
+                });
+
+        // then
+        // env start succeeds
+        engine.start(workspaceId,
+                     envName,
+                     env,
+                     false,
+                     messageConsumer,
+                     startedHandler);
+    }
+
+    @Test
+    public void shouldBeAbleToRestartEnvironmentAfterAgentException() throws Exception {
+        // given
+        EnvironmentImpl env = createEnv();
+        String envName = "env-1";
+        String workspaceId = "wsId";
+        when(machineProvider.startService(anyString(),
+                                          eq(workspaceId),
+                                          eq(envName),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenAnswer(invocationOnMock -> {
+                    Object[] arguments = invocationOnMock.getArguments();
+                    String machineName = (String)arguments[3];
+                    boolean isDev = (boolean)arguments[4];
+                    CheServiceImpl service = (CheServiceImpl)arguments[6];
+                    Machine machine = createMachine(workspaceId,
+                                                    envName,
+                                                    service,
+                                                    machineName,
+                                                    isDev);
+                    return new NoOpMachineInstance(machine);
+                });
+        when(environmentParser.parse(env)).thenReturn(createCheServicesEnv());
+        String testAgentExcMessage = "test agent exception";
+        doThrow(new AgentException(testAgentExcMessage)).when(startedHandler)
+                                                        .started(any(Instance.class), any(ExtendedMachine.class));
+
+        // when
+        // env start must fails because of agent exception
+        try {
+            engine.start(workspaceId,
+                         envName,
+                         env,
+                         false,
+                         messageConsumer,
+                         startedHandler);
+            fail("Agent exception should be thrown");
+        } catch (AgentException e) {
+            assertEquals(e.getMessage(), testAgentExcMessage);
+        }
+
+        doNothing().when(startedHandler).started(any(Instance.class), any(ExtendedMachine.class));
+
+        // then
+        // env start succeeds
+        engine.start(workspaceId,
+                     envName,
+                     env,
+                     false,
+                     messageConsumer,
+                     startedHandler);
+    }
+
     private List<Instance> startEnv() throws Exception {
         EnvironmentImpl env = createEnv();
         CheServicesEnvironmentImpl cheServicesEnv = createCheServicesEnv();
@@ -1372,7 +1557,8 @@ public class CheEnvironmentEngineTest {
         CheServicesEnvironmentImpl cheServicesEnvironment = new CheServicesEnvironmentImpl();
         Map<String, CheServiceImpl> services = new HashMap<>();
 
-        services.put("dev-machine", new CheServiceImpl().withBuild(new CheServiceBuildContextImpl().withContext("image")));
+        services.put("dev-machine",
+                     new CheServiceImpl().withBuild(new CheServiceBuildContextImpl().withContext("image")));
         services.put("machine2", new CheServiceImpl().withBuild(new CheServiceBuildContextImpl().withContext("image")));
 
         cheServicesEnvironment.setServices(services);

@@ -18,6 +18,7 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessResponseDto;
@@ -37,7 +38,7 @@ import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -98,7 +99,7 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
 
         if (runtime != null) {
             runtime.getMachines().forEach(machine -> execAgentClient.getProcesses(machine.getId(), false).then(processes -> {
-                processes.forEach(process -> getPreviewUrl(process.getPid(), machine).then(view::addUrl));
+                processes.forEach(process -> getPreviewUrl(process.getPid(), machine).then(view::addUrl).catchError(ignore -> {}));
             }));
         }
     }
@@ -132,11 +133,19 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
 
     private Optional<String> getPreviewUrlDisplayName(String previewUrl) {
         final DevMachine devMachine = appContext.getDevMachine();
-        final Map<String, ? extends Server> servers = devMachine.getRuntime().getServers();
+        final MachineRuntimeInfo devMachineRuntime = devMachine.getRuntime();
 
-        for (Map.Entry<String, ? extends Server> entry : servers.entrySet()) {
+        if (devMachineRuntime == null) {
+            return Optional.empty();
+        }
+
+        for (Entry<String, ? extends Server> entry : devMachineRuntime.getServers().entrySet()) {
             Server server = entry.getValue();
             String serverUrl = server.getUrl();
+
+            if (serverUrl == null) {
+                continue;
+            }
 
             if (previewUrl.startsWith(serverUrl)) {
                 String displayName = previewUrl.replace(serverUrl, devMachine.getDisplayName() + ':' + entry.getKey());
