@@ -27,6 +27,7 @@ import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.mvp.Presenter;
+import org.eclipse.che.ide.command.toolbar.CommandCreationGuide;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -43,6 +44,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
     private final AppContext                appContext;
     private final CommandManager            commandManager;
     private final Provider<CommandExecutor> commandExecutorProvider;
+    private final CommandCreationGuide      commandCreationGuide;
 
     private final Map<Integer, Process> runningProcesses;
 
@@ -52,13 +54,15 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
                                   final ExecAgentCommandManager execAgentClient,
                                   final AppContext appContext,
                                   CommandManager commandManager,
-                                  Provider<CommandExecutor> commandExecutorProvider) {
+                                  Provider<CommandExecutor> commandExecutorProvider,
+                                  CommandCreationGuide commandCreationGuide) {
         this.view = view;
         this.eventBus = eventBus;
         this.execAgentClient = execAgentClient;
         this.appContext = appContext;
         this.commandManager = commandManager;
         this.commandExecutorProvider = commandExecutorProvider;
+        this.commandCreationGuide = commandCreationGuide;
 
         view.setDelegate(this);
 
@@ -162,5 +166,10 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
     @Override
     public void onStopProcess(Process process) {
         execAgentClient.killProcess(process.getMachine().getId(), process.getPid());
+    }
+
+    @Override
+    public void onCreateCommand() {
+        commandCreationGuide.guide();
     }
 }

@@ -48,6 +48,7 @@ import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.client.ConnectionClosedInformerImpl;
 import org.eclipse.che.ide.clipboard.ClipboardModule;
 import org.eclipse.che.ide.command.CommandApiModule;
+import org.eclipse.che.ide.console.ConsoleGinModule;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.debug.DebugApiModule;
 import org.eclipse.che.ide.editor.EditorApiModule;
@@ -61,6 +62,7 @@ import org.eclipse.che.ide.notification.NotificationApiModule;
 import org.eclipse.che.ide.oauth.OAuthApiModule;
 import org.eclipse.che.ide.part.PartApiModule;
 import org.eclipse.che.ide.preferences.PreferencesApiModule;
+import org.eclipse.che.ide.processes.ProcessesGinModule;
 import org.eclipse.che.ide.project.ProjectApiModule;
 import org.eclipse.che.ide.projectimport.ProjectImportModule;
 import org.eclipse.che.ide.resources.ResourceApiModule;
@@ -69,6 +71,8 @@ import org.eclipse.che.ide.rest.RestContextProvider;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
 import org.eclipse.che.ide.selection.SelectionAgentImpl;
 import org.eclipse.che.ide.statepersistance.PersistenceApiModule;
+import org.eclipse.che.ide.terminal.TerminalFactory;
+import org.eclipse.che.ide.terminal.TerminalInitializer;
 import org.eclipse.che.ide.theme.ThemeApiModule;
 import org.eclipse.che.ide.ui.loaders.PopupLoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
@@ -112,6 +116,8 @@ public class CoreGinModule extends AbstractGinModule {
         install(new WorkspaceApiModule());
         install(new MachineApiModule());
         install(new CommandApiModule());
+        install(new ConsoleGinModule());
+        install(new ProcessesGinModule());
         install(new ProjectApiModule());
         install(new ProjectImportModule());
         install(new OAuthApiModule());
@@ -121,6 +127,8 @@ public class CoreGinModule extends AbstractGinModule {
 
         // configure miscellaneous core components
         bind(StandardComponentInitializer.class).in(Singleton.class);
+
+        bind(TerminalInitializer.class).in(Singleton.class);
 
         GinMapBinder<String, Component> componentsBinder = GinMapBinder.newMapBinder(binder(), String.class, Component.class);
         componentsBinder.addBinding("Standard components").to(StandardComponent.class);
@@ -142,6 +150,7 @@ public class CoreGinModule extends AbstractGinModule {
         bind(AppContext.class).to(AppContextImpl.class);
 
         install(new GinFactoryModuleBuilder().build(FindResultNodeFactory.class));
+        install(new GinFactoryModuleBuilder().build(TerminalFactory.class));
 
         // clients for the REST services
         bind(GitServiceClient.class).to(GitServiceClientImpl.class).in(Singleton.class);

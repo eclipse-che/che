@@ -8,12 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
+.menuButton {
+    border: menuButtonBorder;
+}
+
 .button {
-    width: 32px;
     height: 22px;
     color: #4990e2;
     background: menuButtonBackground;
-    border: menuButtonBorder;
     font-size: 17px;
     font-weight: normal;
     font-style: normal;
@@ -36,6 +38,17 @@
     background: activeMenuButtonBackground;
 }
 
+.mainButton {
+    float: left;
+    width: 22px;
+}
+
+.dropButton {
+    float: right;
+    width: 13px;
+    margin-left: 1px;
+}
+
 .popupPanel {
     background-color: openedFilesDropdownListBackgroundColor;
     border: 1px solid openedFilesDropdownListBorderColor;
@@ -52,7 +65,6 @@
 
 .expandedImage {
     transform: scaleY(0.6) rotate(90deg);
-    margin-left: 1px;
     margin-top: 6px;
     float: right;
 }

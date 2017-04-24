@@ -1063,4 +1063,134 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("connection.closed.dialog.title")
     String connectionClosedDialogTitle();
 
+    @Key("macro.current.project.path.description")
+    String macroCurrentProjectPathDescription();
+
+    @Key("macro.current.project.relpath.description")
+    String macroCurrentProjectRelpathDescription();
+
+    @Key("macro.machine.dev.hostname.description")
+    String macroMachineDevHostnameDescription();
+
+    @Key("failed.to.connect.the.terminal")
+    String failedToConnectTheTerminal();
+
+    @Key("connection.failed.with.terminal")
+    String connectionFailedWithTerminal();
+
+    @Key("terminal.error.connection")
+    String terminalErrorConnection();
+
+    @Key("terminal.can.not.load.script")
+    String terminalCanNotLoadScript();
+
+    @Key("terminal.restart.trying")
+    String terminalTryRestarting();
+
+    @Key("terminal.error.start")
+    String terminalErrorStart();
+
+    @Key("view.processes.title")
+    String viewProcessesTitle();
+
+    @Key("view.processes.tooltip")
+    String viewProcessesTooltip();
+
+    @Key("messages.machine.not.found")
+    String machineNotFound(String machineId);
+
+    @Key("ssh.connect.info")
+    String sshConnectInfo(String machineName, String machineHost, String machinePort, String workspaceName, String userName, String sshKeyDetails);
+
+    @Key("ssh.connect.ssh.key.available")
+    String sshConnectInfoPrivateKey(String privateKey);
+
+    @Key("ssh.connect.ssh.key.not.available")
+    String sshConnectInfoNoPrivateKey();
+
+    @Key("failed.to.execute.command")
+    String failedToExecuteCommand();
+
+    /* OutputsContainerView */
+    @Key("view.outputsConsole.stopProcessConfirmation")
+    String outputsConsoleViewStopProcessConfirmation(String processName);
+
+    @Key("view.processes.terminal.node.title")
+    String viewProcessesTerminalNodeTitle(String terminalIndex);
+
+    @Key("failed.to.get.processes")
+    String failedToGetProcesses(String machineId);
+
+    @Key("control.devMachine.category")
+    String devMachineCategory();
+
+    @Key("control.runCommand.empty.params")
+    String runCommandEmptyParamsMessage();
+
+    @Key("control.runCommand.empty.name")
+    String runCommandEmptyNameMessage();
+
+    @Key("control.terminal.new")
+    String newTerminal();
+
+    @Key("control.terminal.create.description")
+    String newTerminalDescription();
+
+    @Key("control.connect.ssh")
+    String connectViaSSH();
+
+    @Key("action.showConsoleTree.title")
+    String actionShowConsoleTreeTitle();
+
+    @Key("control.rerun.title")
+    String reRunControlTitle();
+
+    @Key("control.rerun.description")
+    String reRunControlDescription();
+
+    @Key("control.stop.title")
+    String stopControlTitle();
+
+    @Key("control.stop.description")
+    String stopControlDescription();
+
+    @Key("control.close.title")
+    String closeControlTitle();
+
+    @Key("control.close.description")
+    String closeControlDescription();
+
+    @Key("consoles.reRunButton.tooltip")
+    String consolesReRunButtonTooltip();
+
+    @Key("consoles.stopButton.tooltip")
+    String consolesStopButtonTooltip();
+
+    @Key("consoles.clearOutputsButton.tooltip")
+    String consolesClearOutputsButtonTooltip();
+
+    @Key("consoles.wrapTextButton.tooltip")
+    String consolesWrapTextButtonTooltip();
+
+    @Key("consoles.autoScrollButton.tooltip")
+    String consolesAutoScrollButtonTooltip();
+
+    @Key("view.processes.command.title")
+    String viewProcessesCommandTitle();
+
+    @Key("view.stop.process.tooltip")
+    String viewStropProcessTooltip();
+
+    @Key("view.new.terminal.tooltip")
+    String viewNewTerminalTooltip();
+
+    @Key("view.machine.running.tooltip")
+    String viewMachineRunningTooltip();
+
+    @Key("view.close.processOutput.tooltip")
+    String viewCloseProcessOutputTooltip();
+
+    @Key("failed.to.find.machine")
+    String failedToFindMachine(String machineId);
+
 }

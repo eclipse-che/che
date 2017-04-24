@@ -26,4 +26,10 @@ public interface DashboardLocalizationConstant extends Messages {
     @Key("open.dashboard.url.workspaces")
     String openDashboardUrlWorkspaces();
 
+    @Key("show.dashboard.navbar.toolbar-button.title")
+    String showDashboardNavBarToolbarButtonTitle();
+
+    @Key("hide.dashboard.navbar.toolbar-button.title")
+    String hideDashboardNavBarToolbarButtonTitle();
+
 }
