@@ -11,7 +11,9 @@
 package org.eclipse.che.ide.command.toolbar.commands.button;
 
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.ui.menubutton.MenuItem;
 
@@ -19,14 +21,16 @@ import org.eclipse.che.ide.ui.menubutton.MenuItem;
 public class GuideItem implements MenuItem {
 
     private final ToolbarMessages messages;
+    private final CommandGoal     goal;
 
     @Inject
-    public GuideItem(ToolbarMessages messages) {
+    public GuideItem(ToolbarMessages messages, @Assisted CommandGoal goal) {
         this.messages = messages;
+        this.goal = goal;
     }
 
     @Override
     public String getName() {
-        return messages.guideItemLabel();
+        return messages.guideItemLabel(goal.getId());
     }
 }

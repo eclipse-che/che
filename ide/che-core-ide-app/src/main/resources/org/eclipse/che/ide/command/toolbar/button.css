@@ -8,22 +8,30 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-.menu {
-    background-color: openedFilesDropdownListBackgroundColor;
-    border: 1px solid openedFilesDropdownListBorderColor;
-    box-shadow: 0 2px 2px 0 openedFilesDropdownListShadowColor;
-    border-radius: 0 0 3px 3px;
-}
-
-.listItem {
-    float: left;
-    width: literal("calc(100% - 27px)");
-    padding: 0 22px 0 5px;
+.button {
+    width: 32px;
+    height: 22px;
+    color: #4990e2;
+    background: menuButtonBackground;
+    border: menuButtonBorder;
+    font-size: 17px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    text-align: center;
     cursor: pointer;
-    line-height: 22px;
-    white-space: nowrap;
 }
 
-.listItem:hover {
-    background-color: hoverBackgroundColor;
+.button:focus {
+    outline: none;
+}
+
+.button:hover {
+    color: #53a2ff;
+    background: hoveredMenuButtonBackground;
+}
+
+.button:active {
+    color: #235c9e;
+    background: activeMenuButtonBackground;
 }
