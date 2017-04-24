@@ -44,6 +44,6 @@ public class ProjectOutputLineConsumerFactory implements LineConsumerFactory {
 
     @Override
     public LineConsumer newLineConsumer() {
-        return new ProjectImportOutputWSLineConsumer(projectName, workspaceId, delay);
+        return new ProjectImportOutputWSLineConsumer(projectName, delay);
     }
 }

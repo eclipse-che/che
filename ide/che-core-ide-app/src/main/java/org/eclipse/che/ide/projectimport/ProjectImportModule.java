@@ -23,7 +23,7 @@ import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.projectimport.wizard.ImportWizardFactory;
 import org.eclipse.che.ide.projectimport.wizard.ImportWizardRegistryImpl;
-import org.eclipse.che.ide.projectimport.wizard.ProjectNotificationSubscriberImpl;
+import org.eclipse.che.ide.projectimport.wizard.ProjectImportOutputJsonRpcNotifier;
 import org.eclipse.che.ide.projectimport.zip.ZipImportWizardRegistrar;
 
 /**
@@ -43,9 +43,8 @@ public class ProjectImportModule extends AbstractGinModule {
 
         install(new GinFactoryModuleBuilder().build(ImportWizardFactory.class));
 
-        bind(ProjectNotificationSubscriber.class).to(ProjectNotificationSubscriberImpl.class).in(Singleton.class);
         install(new GinFactoryModuleBuilder()
-                        .implement(ProjectNotificationSubscriber.class, ProjectNotificationSubscriberImpl.class)
+                        .implement(ProjectNotificationSubscriber.class, ProjectImportOutputJsonRpcNotifier.class)
                         .build(ImportProjectNotificationSubscriberFactory.class));
     }
 }
