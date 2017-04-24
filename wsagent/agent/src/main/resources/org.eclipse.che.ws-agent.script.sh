@@ -52,8 +52,8 @@ INSTALL_JDK=false
 command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
     INSTALL_JDK=true;
 } && {
-    java_version=$(${JAVA_HOME}/bin/java -version 2>&1 | sed 's/.* version "\\(.*\\)\\.\\(.*\\)\\..*"/\\1\\2/; 1q')
-    if [ ! -z "${java_version##*[!0-9]*}" ] && [ "${java_version}" -lt "18" ]; then
+    java_version=$(${JAVA_HOME}/bin/java -version 2>&1 | grep version  | awk '{print $NF}' | sed 's/"//g' | cut -d '.' -f2)
+    if [ ! "${java_version}" -eq "8" ]; then
         INSTALL_JDK=true;
     fi
 }

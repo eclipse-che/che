@@ -24,7 +24,7 @@ import org.eclipse.che.ide.ext.git.client.add.AddToIndexPresenter;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 
 import java.util.List;

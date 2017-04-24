@@ -17,9 +17,9 @@ import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
-import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectRelativePathMacro;
-import org.eclipse.che.ide.extension.machine.client.command.macros.ServerAddressMacroRegistrar;
+import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
+import org.eclipse.che.ide.macro.CurrentProjectRelativePathMacro;
+import org.eclipse.che.ide.macro.ServerAddressMacroRegistrar;
 import org.eclipse.che.plugin.maven.client.MavenResources;
 
 import java.util.LinkedList;

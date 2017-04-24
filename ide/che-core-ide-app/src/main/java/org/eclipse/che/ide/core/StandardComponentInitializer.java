@@ -39,16 +39,19 @@ import org.eclipse.che.ide.actions.ProjectConfigurationAction;
 import org.eclipse.che.ide.actions.RedoAction;
 import org.eclipse.che.ide.actions.RefreshPathAction;
 import org.eclipse.che.ide.actions.RenameItemAction;
+import org.eclipse.che.ide.actions.RunCommandAction;
 import org.eclipse.che.ide.actions.SaveAction;
 import org.eclipse.che.ide.actions.SaveAllAction;
+import org.eclipse.che.ide.actions.ShowConsoleTreeAction;
 import org.eclipse.che.ide.actions.ShowHiddenFilesAction;
 import org.eclipse.che.ide.actions.ShowPreferencesAction;
 import org.eclipse.che.ide.actions.ShowReferenceAction;
 import org.eclipse.che.ide.actions.SignatureHelpAction;
+import org.eclipse.che.ide.actions.SoftWrapAction;
+import org.eclipse.che.ide.actions.StopWorkspaceAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;
-import org.eclipse.che.ide.actions.SoftWrapAction;
 import org.eclipse.che.ide.actions.common.MaximizePartAction;
 import org.eclipse.che.ide.actions.common.MinimizePartAction;
 import org.eclipse.che.ide.actions.common.RestorePartAction;
@@ -74,6 +77,7 @@ import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
 import org.eclipse.che.ide.connection.WsConnectionListener;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.imageviewer.PreviewImageAction;
+import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.macro.ServerHostNameMacro;
 import org.eclipse.che.ide.macro.ServerMacro;
 import org.eclipse.che.ide.macro.ServerPortMacro;
@@ -94,10 +98,15 @@ import org.eclipse.che.ide.part.editor.recent.ClearRecentListAction;
 import org.eclipse.che.ide.part.editor.recent.OpenRecentFilesAction;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
 import org.eclipse.che.ide.part.explorer.project.synchronize.ProjectConfigSynchronized;
+import org.eclipse.che.ide.processes.NewTerminalAction;
+import org.eclipse.che.ide.processes.actions.CloseConsoleAction;
+import org.eclipse.che.ide.processes.actions.ReRunProcessAction;
+import org.eclipse.che.ide.processes.actions.StopProcessAction;
 import org.eclipse.che.ide.resources.action.CopyResourceAction;
 import org.eclipse.che.ide.resources.action.CutResourceAction;
 import org.eclipse.che.ide.resources.action.PasteResourceAction;
 import org.eclipse.che.ide.resources.action.RevealResourceAction;
+import org.eclipse.che.ide.terminal.TerminalInitializer;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoaderResources;
 import org.eclipse.che.ide.ui.popup.PopupResources;
 import org.eclipse.che.ide.ui.toolbar.MainToolbar;
@@ -119,6 +128,7 @@ import static org.eclipse.che.ide.actions.EditorActions.SPLIT_HORIZONTALLY;
 import static org.eclipse.che.ide.actions.EditorActions.SPLIT_VERTICALLY;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDIT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU;
@@ -169,6 +179,7 @@ public class StandardComponentInitializer {
     public static final String RENAME                = "renameResource";
     public static final String SHOW_REFERENCE        = "showReference";
     public static final String SHOW_COMMANDS_PALETTE = "showCommandsPalette";
+    public static final String NEW_TERMINAL          = "newTerminal";
 
     public interface ParserResource extends ClientBundle {
         @Source("org/eclipse/che/ide/blank.svg")
@@ -381,6 +392,27 @@ public class StandardComponentInitializer {
     private SoftWrapAction softWrapAction;
 
     @Inject
+    private StopWorkspaceAction stopWorkspaceAction;
+
+    @Inject
+    private RunCommandAction runCommandAction;
+
+    @Inject
+    private NewTerminalAction newTerminalAction;
+
+    @Inject
+    private ReRunProcessAction reRunProcessAction;
+
+    @Inject
+    private StopProcessAction stopProcessAction;
+
+    @Inject
+    private CloseConsoleAction closeConsoleAction;
+
+    @Inject
+    private ShowConsoleTreeAction showConsoleTreeAction;
+
+    @Inject
     private PerspectiveManager perspectiveManager;
 
     @Inject
@@ -437,7 +469,7 @@ public class StandardComponentInitializer {
     @Named("CommandFileType")
     private FileType              commandFileType;
     @Inject
-    private WsConnectionListener wsConnectionListener;
+    private WsConnectionListener  wsConnectionListener;
 
     @Inject
     private ProjectConfigSynchronized projectConfigSynchronized;
@@ -458,12 +490,18 @@ public class StandardComponentInitializer {
     @Inject
     private ServerPortMacro serverPortMacro;
 
+    @Inject
+    private TerminalInitializer terminalInitializer;
+
 
     /** Instantiates {@link StandardComponentInitializer} an creates standard content. */
     @Inject
     public StandardComponentInitializer(IconRegistry iconRegistry,
+                                        MachineResources machineResources,
                                         StandardComponentInitializer.ParserResource parserResource) {
         iconRegistry.registerIcon(new Icon(BLANK_CATEGORY + ".samples.category.icon", parserResource.samplesCategoryBlank()));
+        iconRegistry.registerIcon(new Icon("che.machine.icon", machineResources.devMachine()));
+        machineResources.getCss().ensureInjected();
     }
 
     public void initialize() {
@@ -519,6 +557,7 @@ public class StandardComponentInitializer {
         workspaceGroup.add(downloadWsAction);
 
         workspaceGroup.addSeparator();
+        workspaceGroup.add(stopWorkspaceAction);
 
         // Project (New Menu)
         DefaultActionGroup projectGroup = (DefaultActionGroup)actionManager.getAction(GROUP_PROJECT);
@@ -656,6 +695,11 @@ public class StandardComponentInitializer {
         DefaultActionGroup helpGroup = (DefaultActionGroup)actionManager.getAction(GROUP_HELP);
         helpGroup.addSeparator();
 
+        // Processes panel actions
+        actionManager.registerAction("stopWorkspace", stopWorkspaceAction);
+        actionManager.registerAction("runCommand", runCommandAction);
+        actionManager.registerAction("newTerminal", newTerminalAction);
+
         // Compose main context menu
         DefaultActionGroup resourceOperation = new DefaultActionGroup(actionManager);
         actionManager.registerAction("resourceOperation", resourceOperation);
@@ -689,6 +733,7 @@ public class StandardComponentInitializer {
         partMenuGroup.add(maximizePartAction);
         partMenuGroup.add(minimizePartAction);
         partMenuGroup.add(restorePartAction);
+        partMenuGroup.add(showConsoleTreeAction);
 
         actionManager.registerAction("expandEditor", expandEditorAction);
         DefaultActionGroup rightMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_MAIN_MENU);
@@ -724,6 +769,12 @@ public class StandardComponentInitializer {
         DefaultActionGroup rightToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_TOOLBAR);
         toolbarPresenter.bindRightGroup(rightToolbarGroup);
 
+        // Consoles tree context menu group
+        DefaultActionGroup consolesTreeContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU);
+        consolesTreeContextMenu.add(reRunProcessAction);
+        consolesTreeContextMenu.add(stopProcessAction);
+        consolesTreeContextMenu.add(closeConsoleAction);
+
         //Editor context menu group
         DefaultActionGroup editorTabContextMenu =
                 (DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU);
@@ -750,6 +801,8 @@ public class StandardComponentInitializer {
         actionManager.registerAction(SHOW_COMMANDS_PALETTE, showCommandsPaletteAction);
         DefaultActionGroup runGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RUN);
         runGroup.add(showCommandsPaletteAction);
+        runGroup.add(newTerminalAction, FIRST);
+        runGroup.addSeparator();
 
         DefaultActionGroup editorContextMenuGroup = new DefaultActionGroup(actionManager);
         actionManager.registerAction(GROUP_EDITOR_CONTEXT_MENU, editorContextMenuGroup);
@@ -779,6 +832,7 @@ public class StandardComponentInitializer {
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('e').build(), OPEN_RECENT_FILES);
         keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.DELETE).build(), DELETE_ITEM);
         keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('w').build(), SOFT_WRAP);
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F12).build(), NEW_TERMINAL);
 
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('N').build(), NEW_FILE);
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('x').build(), CREATE_PROJECT);
@@ -797,24 +851,24 @@ public class StandardComponentInitializer {
 
         final Map<String, Perspective> perspectives = perspectiveManager.getPerspectives();
         if (perspectives.size() > 1) { //if registered perspectives will be more then 2 Main Menu -> Window
-                                       // will appears and contains all of them as sub-menu
+            // will appears and contains all of them as sub-menu
             final DefaultActionGroup windowMenu = new DefaultActionGroup("Window", true, actionManager);
             actionManager.registerAction("Window", windowMenu);
             final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
             mainMenu.add(windowMenu);
-            for(Perspective perspective : perspectives.values()) {
+            for (Perspective perspective : perspectives.values()) {
                 final Action action = new Action(perspective.getPerspectiveName()) {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         perspectiveManager.setPerspectiveId(perspective.getPerspectiveId());
                     }
-            };
-            actionManager.registerAction(perspective.getPerspectiveId(), action);
-            windowMenu.add(action);
+                };
+                actionManager.registerAction(perspective.getPerspectiveId(), action);
+                windowMenu.add(action);
+            }
+
         }
 
     }
-
-}
 
 }

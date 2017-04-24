@@ -79,7 +79,7 @@ public interface SubPanel {
 
     /**
      * Set the listener to be notified when some widget on
-     * this panel or on any child sub-panel was double clicked.
+     * this panel or on any child sub-panel has been double clicked.
      */
     void setDoubleClickListener(DoubleClickListener listener);
 
@@ -97,13 +97,14 @@ public interface SubPanel {
     }
 
     interface FocusListener {
+
         /** Invoked when a {@code widget} on a {@code panel} gains the focus. */
         void focusGained(SubPanel panel, IsWidget widget);
     }
 
     interface DoubleClickListener {
 
-        /** Invoked when a {@code widget} on a {@code panel} was double clicked. */
+        /** Invoked when a {@code widget} on a {@code panel} has been double clicked. */
         void onDoubleClicked(SubPanel panel, IsWidget widget);
     }
 }
