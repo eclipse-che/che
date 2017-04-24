@@ -52,7 +52,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
  *
  * @author amisevsk
  */
-final class OpenShiftPvcHelper {
+public class OpenShiftPvcHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpenShiftPvcHelper.class);
 
