@@ -93,7 +93,8 @@ public class EditorAgentImpl implements EditorAgent,
                                         ActivePartChangedHandler,
                                         SelectionChangedHandler,
                                         WindowActionHandler,
-                                        StateComponent, WorkspaceStoppedEvent.Handler {
+                                        StateComponent,
+                                        WorkspaceStoppedEvent.Handler {
 
     private final EventBus                 eventBus;
     private final WorkspaceAgent           workspaceAgent;
