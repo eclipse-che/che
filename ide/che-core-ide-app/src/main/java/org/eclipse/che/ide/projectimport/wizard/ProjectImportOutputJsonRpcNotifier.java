@@ -63,7 +63,7 @@ public class ProjectImportOutputJsonRpcNotifier implements ProjectNotificationSu
                 subscriber.unSubscribeForImportOutputEvents();
 
                 singletonNotification.setStatus(FAIL);
-                singletonNotification.setContent("ws agent stopped");
+                singletonNotification.setContent("");
             }
         });
     }
