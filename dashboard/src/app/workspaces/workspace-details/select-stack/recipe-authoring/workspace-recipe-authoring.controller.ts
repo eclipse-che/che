@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {DockerfileParser} from '../../../../../components/api/environment/docker-file-parser';
 
 /**
  * @ngdoc controller
@@ -19,6 +20,9 @@
  */
 export class WorkspaceRecipeAuthoringController {
   $timeout: ng.ITimeoutService;
+
+  dockerfileParser: DockerfileParser;
+  recipeValidationError: string;
 
   editingTimeoutPromise: ng.IPromise<any>;
 
@@ -42,6 +46,8 @@ export class WorkspaceRecipeAuthoringController {
    */
   constructor($scope: ng.IScope, $timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;
+
+    this.dockerfileParser = new DockerfileParser();
 
     this.editorOptions = {
       lineWrapping: true,
@@ -81,6 +87,7 @@ export class WorkspaceRecipeAuthoringController {
 
     this.editingTimeoutPromise = this.$timeout(() => {
       this.detectFormat(content);
+      this.validateRecipe(content);
     }, 100);
   }
 
@@ -98,7 +105,16 @@ export class WorkspaceRecipeAuthoringController {
     }
   }
 
-  onRecipeChange() {
+  validateRecipe(content: string): void {
+    this.recipeValidationError = '';
+    try {
+      this.dockerfileParser.parse(content);
+    } catch (e) {
+      this.recipeValidationError = e.message;
+    }
+  }
+
+  onRecipeChange(): void {
     this.$timeout(() => {
       this.detectFormat(this.recipeScriptCopy);
       this.recipeChange({
