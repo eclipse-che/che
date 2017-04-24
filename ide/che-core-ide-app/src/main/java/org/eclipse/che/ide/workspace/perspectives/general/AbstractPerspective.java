@@ -345,7 +345,7 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
     }
 
     @Override
-    public void setState(@NotNull JsonObject state) {
+    public void loadState(@NotNull JsonObject state) {
         if (state.hasKey("PART_STACKS")) {
             JsonObject partStacksState = state.getObject("PART_STACKS");
 
@@ -356,13 +356,13 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
                 JsonObject partStackState = partStacksState.getObject(partStackType);
                 switch (PartStackType.valueOf(partStackType)) {
                     case INFORMATION:
-                        setPartStackState(partStacks.get(INFORMATION), belowPartController, partStackState, perspectiveMaximized);
+                        loadPartStackState(partStacks.get(INFORMATION), belowPartController, partStackState, perspectiveMaximized);
                         break;
                     case NAVIGATION:
-                        setPartStackState(partStacks.get(NAVIGATION), leftPartController, partStackState, perspectiveMaximized);
+                        loadPartStackState(partStacks.get(NAVIGATION), leftPartController, partStackState, perspectiveMaximized);
                         break;
                     case TOOLING:
-                        setPartStackState(partStacks.get(TOOLING), rightPartController, partStackState, perspectiveMaximized);
+                        loadPartStackState(partStacks.get(TOOLING), rightPartController, partStackState, perspectiveMaximized);
                         break;
                 }
             }
@@ -403,7 +403,7 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
      * @param partStackState
      * @param skipRestoreDimensions
      */
-    private void setPartStackState(PartStack partStack,
+    private void loadPartStackState(PartStack partStack,
                                    WorkBenchPartController controller,
                                    JsonObject partStackState,
                                    boolean skipRestoreDimensions) {

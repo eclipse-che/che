@@ -85,7 +85,7 @@ public class AppStateManager {
                 for (String key : workspace.keys()) {
                     if (persistenceComponents.containsKey(key)) {
                         StateComponent component = persistenceComponents.get(key);
-                        component.setState(workspace.getObject(key));
+                        component.loadState(workspace.getObject(key));
                     }
                 }
             }
