@@ -102,7 +102,7 @@ import org.eclipse.che.ide.editor.preferences.keymaps.KeyMapsPreferencePresenter
 import org.eclipse.che.ide.status.message.StatusMessageReporter;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.plugin.requirejs.ide.ModuleHolder;
+import org.eclipse.che.requirejs.ModuleHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -745,6 +745,13 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
 
     public OrionAnnotationModelOverlay getAnnotationModel() {
         return editorOverlay.getAnnotationModel();
+    }
+
+    /**
+     * Returns {@link OrionEditorOverlay}.
+     */
+    public OrionEditorOverlay getEditor() {
+        return editorOverlay;
     }
 
     @Override

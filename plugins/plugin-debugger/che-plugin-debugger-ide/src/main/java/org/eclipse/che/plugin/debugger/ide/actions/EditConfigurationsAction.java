@@ -15,9 +15,9 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.configuration.EditDebugConfigurationsPresenter;
-import org.eclipse.che.ide.extension.machine.client.MachineResources;
 
 import java.util.Collections;
 

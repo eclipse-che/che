@@ -17,6 +17,7 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.promises.client.Function;
@@ -24,11 +25,15 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandAddedEvent;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
+import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
+import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -38,12 +43,10 @@ import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
@@ -58,11 +61,11 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
     private final ProjectCommandManagerDelegate   projectCommandManager;
     private final WorkspaceCommandManagerDelegate workspaceCommandManager;
     private final SelectionAgent                  selectionAgent;
+    private final EventBus                        eventBus;
+    private final CommandNameGenerator            commandNameGenerator;
 
     /** Map of the commands' names to the commands. */
-    private final Map<String, CommandImpl>    commands;
-    private final Set<CommandLoadedListener>  commandLoadedListeners;
-    private final Set<CommandChangedListener> commandChangedListeners;
+    private final Map<String, CommandImpl> commands;
 
     @Inject
     public CommandManagerImpl(AppContext appContext,
@@ -70,17 +73,19 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
                               CommandTypeRegistry commandTypeRegistry,
                               ProjectCommandManagerDelegate projectCommandManagerDelegate,
                               WorkspaceCommandManagerDelegate workspaceCommandManagerDelegate,
-                              SelectionAgent selectionAgent) {
+                              SelectionAgent selectionAgent,
+                              EventBus eventBus,
+                              CommandNameGenerator commandNameGenerator) {
         this.appContext = appContext;
         this.promiseProvider = promiseProvider;
         this.commandTypeRegistry = commandTypeRegistry;
         this.projectCommandManager = projectCommandManagerDelegate;
         this.workspaceCommandManager = workspaceCommandManagerDelegate;
         this.selectionAgent = selectionAgent;
+        this.eventBus = eventBus;
+        this.commandNameGenerator = commandNameGenerator;
 
         commands = new HashMap<>();
-        commandLoadedListeners = new HashSet<>();
-        commandChangedListeners = new HashSet<>();
     }
 
     @Override
@@ -169,6 +174,7 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
         }
 
         final Resource currentResource = appContext.getResource();
+
         if (currentResource != null) {
             final Project currentProject = currentResource.getProject();
             if (currentProject != null) {
@@ -210,18 +216,18 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
                                               @Nullable String commandLine,
                                               Map<String, String> attributes,
                                               ApplicableContext context) {
-        final CommandType commandType = commandTypeRegistry.getCommandTypeById(typeId);
+        final Optional<CommandType> commandType = commandTypeRegistry.getCommandTypeById(typeId);
 
-        if (commandType == null) {
+        if (!commandType.isPresent()) {
             return promiseProvider.reject(new Exception("Unknown command type: '" + typeId + "'"));
         }
 
         final Map<String, String> attr = new HashMap<>(attributes);
-        attr.put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, commandType.getPreviewUrlTemplate());
+        attr.put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, commandType.get().getPreviewUrlTemplate());
         attr.put(COMMAND_GOAL_ATTRIBUTE_NAME, goalId);
 
-        return createCommand(new CommandImpl(getUniqueCommandName(typeId, name),
-                                             commandLine != null ? commandLine : commandType.getCommandLineTemplate(),
+        return createCommand(new CommandImpl(commandNameGenerator.generate(typeId, name),
+                                             commandLine != null ? commandLine : commandType.get().getCommandLineTemplate(),
                                              typeId,
                                              attr,
                                              context));
@@ -245,13 +251,13 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
             return promiseProvider.reject(new Exception("Command has to be applicable to the workspace or at least one project"));
         }
 
-        final CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
-        if (commandType == null) {
+        final Optional<CommandType> commandType = commandTypeRegistry.getCommandTypeById(command.getType());
+        if (!commandType.isPresent()) {
             return promiseProvider.reject(new Exception("Unknown command type: '" + command.getType() + "'"));
         }
 
         final CommandImpl newCommand = new CommandImpl(command);
-        newCommand.setName(getUniqueCommandName(command.getType(), command.getName()));
+        newCommand.setName(commandNameGenerator.generate(command.getType(), command.getName()));
 
         final ArrayOf<Promise<?>> commandPromises = Collections.arrayOf();
 
@@ -334,12 +340,7 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
         final ArrayOf<Promise<?>> commandPromises = Collections.arrayOf();
 
         if (context.isWorkspaceApplicable()) {
-            final Promise<Void> p = workspaceCommandManager.removeCommand(name).then((Function<Void, Void>)aVoid -> {
-                command.getApplicableContext().setWorkspaceApplicable(false);
-                return null;
-            });
-
-            commandPromises.push(p);
+            commandPromises.push(workspaceCommandManager.removeCommand(name));
         }
 
         for (final String projectPath : context.getApplicableProjects()) {
@@ -349,12 +350,7 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
                 continue;
             }
 
-            final Promise<Void> p = projectCommandManager.removeCommand(project, name).then((Function<Void, Void>)aVoid -> {
-                command.getApplicableContext().removeProject(projectPath);
-                return null;
-            });
-
-            commandPromises.push(p);
+            commandPromises.push(projectCommandManager.removeCommand(project, name));
         }
 
         return promiseProvider.all2(commandPromises)
@@ -375,71 +371,19 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
         return null;
     }
 
-    @Override
-    public void addCommandLoadedListener(CommandLoadedListener listener) {
-        commandLoadedListeners.add(listener);
-    }
-
-    @Override
-    public void removeCommandLoadedListener(CommandLoadedListener listener) {
-        commandLoadedListeners.remove(listener);
-    }
-
-    @Override
-    public void addCommandChangedListener(CommandChangedListener listener) {
-        commandChangedListeners.add(listener);
-    }
-
-    @Override
-    public void removeCommandChangedListener(CommandChangedListener listener) {
-        commandChangedListeners.remove(listener);
-    }
-
     private void notifyCommandsLoaded() {
-        commandLoadedListeners.forEach(CommandLoadedListener::onCommandsLoaded);
+        eventBus.fireEvent(new CommandsLoadedEvent());
     }
 
     private void notifyCommandAdded(CommandImpl command) {
-        commandChangedListeners.forEach(listener -> listener.onCommandAdded(command));
+        eventBus.fireEvent(new CommandAddedEvent(command));
     }
 
     private void notifyCommandRemoved(CommandImpl command) {
-        commandChangedListeners.forEach(listener -> listener.onCommandRemoved(command));
+        eventBus.fireEvent(new CommandRemovedEvent(command));
     }
 
     private void notifyCommandUpdated(CommandImpl prevCommand, CommandImpl command) {
-        commandChangedListeners.forEach(listener -> listener.onCommandUpdated(prevCommand, command));
-    }
-
-    /**
-     * Returns {@code customName} if it's unique within the given {@code commandTypeId}
-     * or newly generated name if it isn't unique within the given {@code commandTypeId}.
-     */
-    private String getUniqueCommandName(String commandTypeId, @Nullable String customName) {
-        final CommandType commandType = commandTypeRegistry.getCommandTypeById(commandTypeId);
-        final Set<String> commandNames = commands.keySet();
-
-        final String newCommandName;
-
-        if (isNullOrEmpty(customName)) {
-            newCommandName = "new" + commandType.getDisplayName();
-        } else {
-            if (!commandNames.contains(customName)) {
-                return customName;
-            }
-            newCommandName = customName + " copy";
-        }
-
-        if (!commandNames.contains(newCommandName)) {
-            return newCommandName;
-        }
-
-        for (int count = 1; count < 1000; count++) {
-            if (!commandNames.contains(newCommandName + "-" + count)) {
-                return newCommandName + "-" + count;
-            }
-        }
-
-        return newCommandName;
+        eventBus.fireEvent(new CommandUpdatedEvent(prevCommand, command));
     }
 }

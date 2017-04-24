@@ -146,8 +146,6 @@
 /projects/che-plugins/plugin-orion/che-plugin-orion-compare/src/main/resources:\
 /projects/che-plugins/plugin-orion/che-plugin-orion-editor/src/main/java:\
 /projects/che-plugins/plugin-orion/che-plugin-orion-editor/src/main/resources:\
-/projects/che-plugins/plugin-sdk/che-plugin-sdk-env-local/src/main/java:\
-/projects/che-plugins/plugin-sdk/che-plugin-sdk-env-local/src/main/resources:\
 /projects/che-plugins/plugin-sdk/che-plugin-sdk-ext-plugins/src/main/java:\
 /projects/che-plugins/plugin-sdk/che-plugin-sdk-ext-plugins/src/main/resources:\
 /projects/che-plugins/plugin-web/che-plugin-web-ext-web/src/main/java:\
@@ -281,7 +279,6 @@
 /projects/che-plugins/plugin-machine/che-plugin-machine-ssh-client/target/classes:\
 /projects/che-plugins/plugin-orion/che-plugin-orion-compare/target/classes:\
 /projects/che-plugins/plugin-orion/che-plugin-orion-editor/target/classes:\
-/projects/che-plugins/plugin-sdk/che-plugin-sdk-env-local/target/classes:\
 /projects/che-plugins/plugin-sdk/che-plugin-sdk-ext-plugins/target/classes:\
 /projects/che-plugins/plugin-web/che-plugin-web-ext-web/target/classes:\
 /home/user/.m2/repository/org/eclipse/che/swagger/che-swagger-module/4.0.0-beta-12-SNAPSHOT/che-swagger-module-4.0.0-beta-12-20160117.063216-1.jar:\

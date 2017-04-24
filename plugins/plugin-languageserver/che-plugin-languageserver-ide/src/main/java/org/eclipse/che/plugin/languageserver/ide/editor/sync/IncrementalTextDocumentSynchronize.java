@@ -12,16 +12,17 @@ package org.eclipse.che.plugin.languageserver.ide.editor.sync;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.PositionDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentContentChangeEventDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.VersionedTextDocumentIdentifierDTO;
+
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.lsp4j.DidChangeTextDocumentParams;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
+import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 
 import java.util.Collections;
 
@@ -53,25 +54,25 @@ class IncrementalTextDocumentSynchronize implements TextDocumentSynchronize {
             endPosition = new TextPosition(startPosition.getLine(), startPosition.getCharacter());
         }
 
-        DidChangeTextDocumentParamsDTO changeDTO = dtoFactory.createDto(DidChangeTextDocumentParamsDTO.class);
+        DidChangeTextDocumentParams changeDTO = dtoFactory.createDto(DidChangeTextDocumentParams.class);
         String uri = document.getFile().getLocation().toString();
         changeDTO.setUri(uri);
-        VersionedTextDocumentIdentifierDTO versionedDocId = dtoFactory.createDto(VersionedTextDocumentIdentifierDTO.class);
+        VersionedTextDocumentIdentifier versionedDocId = dtoFactory.createDto(VersionedTextDocumentIdentifier.class);
         versionedDocId.setUri(uri);
         versionedDocId.setVersion(version);
         changeDTO.setTextDocument(versionedDocId);
 
-        RangeDTO range = dtoFactory.createDto(RangeDTO.class);
-        PositionDTO start = dtoFactory.createDto(PositionDTO.class);
+        Range range = dtoFactory.createDto(Range.class);
+        Position start = dtoFactory.createDto(Position.class);
         start.setLine(startPosition.getLine());
         start.setCharacter(startPosition.getCharacter());
-        PositionDTO end = dtoFactory.createDto(PositionDTO.class);
+        Position end = dtoFactory.createDto(Position.class);
         end.setLine(endPosition.getLine());
         end.setCharacter(endPosition.getCharacter());
         range.setStart(start);
         range.setEnd(end);
 
-        TextDocumentContentChangeEventDTO actualChange = dtoFactory.createDto(TextDocumentContentChangeEventDTO.class);
+        TextDocumentContentChangeEvent actualChange = dtoFactory.createDto(TextDocumentContentChangeEvent.class);
         actualChange.setRange(range);
         actualChange.setText(event.getText());
 

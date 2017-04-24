@@ -30,7 +30,6 @@ import org.eclipse.che.ide.command.toolbar.processes.ProcessItemRenderer.StopPro
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 
-import static com.google.gwt.dom.client.Style.Float.RIGHT;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
@@ -120,7 +119,10 @@ class ProcessWidget extends FlowPanel {
         safeHtmlBuilder.appendHtmlConstant(FontAwesome.STOP);
 
         final ActionButton button = new ActionButton(safeHtmlBuilder.toSafeHtml());
-        button.addClickHandler(event -> handler.onStopProcess(process));
+        button.addClickHandler(event -> {
+            event.stopPropagation(); // prevent dropdown list from opening/closing
+            handler.onStopProcess(process);
+        });
         button.ensureDebugId("dropdown-processes-stop");
 
         Tooltip.create((Element)button.getElement(), BOTTOM, MIDDLE, "Stop");
@@ -133,7 +135,10 @@ class ProcessWidget extends FlowPanel {
         safeHtmlBuilder.appendHtmlConstant(FontAwesome.REPEAT);
 
         final ActionButton button = new ActionButton(safeHtmlBuilder.toSafeHtml());
-        button.addClickHandler(event -> handler.onRerunProcess(process));
+        button.addClickHandler(event -> {
+            event.stopPropagation(); // prevent dropdown list from opening/closing
+            handler.onRerunProcess(process);
+        });
         button.ensureDebugId("dropdown-processes-rerun");
 
         Tooltip.create((Element)button.getElement(), BOTTOM, MIDDLE, "Re-run");
@@ -159,7 +164,6 @@ class ProcessWidget extends FlowPanel {
         ActionButton(SafeHtml content) {
             super(Document.get().createDivElement());
 
-            getElement().getStyle().setFloat(RIGHT);
             getElement().setInnerSafeHtml(content);
             asWidget().addStyleName(RESOURCES.commandToolbarCss().processWidgetActionButton());
         }
