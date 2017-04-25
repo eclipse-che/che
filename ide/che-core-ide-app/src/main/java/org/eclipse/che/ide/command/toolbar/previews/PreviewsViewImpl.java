@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
@@ -34,18 +35,21 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
 public class PreviewsViewImpl implements PreviewsView {
 
     /** Mapping of URL to list item. */
-    private final Map<PreviewUrlItem, BaseListItem<PreviewUrlItem>> listItems;
+    private final Map<String, BaseListItem<PreviewUrl>> listItems;
 
     private final DropdownList           dropdownList;
     private final NoPreviewsItem         noPreviewsItem;
     private final NoPreviewsItemRenderer noPreviewsItemRenderer;
     private final ToolbarMessages        messages;
+    private final AppContext             appContext;
 
     private ActionDelegate delegate;
 
     @Inject
-    public PreviewsViewImpl(ToolbarMessages messages) {
+    public PreviewsViewImpl(ToolbarMessages messages, AppContext appContext) {
         this.messages = messages;
+        this.appContext = appContext;
+
         listItems = new HashMap<>();
 
         dropdownList = new DropdownList(HEADER_WIDGET, false);
@@ -84,23 +88,24 @@ public class PreviewsViewImpl implements PreviewsView {
     }
 
     @Override
-    public void addUrl(PreviewUrlItem previewUrlItem) {
-        if (listItems.containsKey(previewUrlItem)) {
-            return; // no sense to add the equals URLs even if they belong to different commands
+    public void addUrl(String previewUrl) {
+        if (listItems.containsKey(previewUrl)) {
+            return;
         }
 
-        BaseListItem<PreviewUrlItem> listItem = new BaseListItem<>(previewUrlItem);
-        PreviewUrlItemRenderer renderer = new PreviewUrlItemRenderer(listItem);
+        final PreviewUrl displayablePreviewUrl = new PreviewUrl(previewUrl, appContext);
+        final BaseListItem<PreviewUrl> listItem = new BaseListItem<>(displayablePreviewUrl);
+        final PreviewUrlItemRenderer renderer = new PreviewUrlItemRenderer(listItem);
 
-        listItems.put(previewUrlItem, listItem);
+        listItems.put(previewUrl, listItem);
         dropdownList.addItem(listItem, renderer);
 
         checkNoPreviewsItem();
     }
 
     @Override
-    public void removeUrl(PreviewUrlItem previewUrlItem) {
-        final BaseListItem<PreviewUrlItem> listItem = listItems.remove(previewUrlItem);
+    public void removeUrl(String previewUrl) {
+        final BaseListItem<PreviewUrl> listItem = listItems.remove(previewUrl);
 
         if (listItem != null) {
             dropdownList.removeItem(listItem);
