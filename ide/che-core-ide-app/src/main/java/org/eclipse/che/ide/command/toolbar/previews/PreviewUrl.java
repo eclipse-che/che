@@ -64,11 +64,10 @@ class PreviewUrl {
             if (previewUrl.startsWith(serverUrl)) {
                 String port = entry.getKey();
 
-                // cut protocol from display name
-                // 8080/tcp
-                final int protocolIndex = port.lastIndexOf('/');
-                if (protocolIndex > -1) {
-                    port = port.substring(0, protocolIndex);
+                // server's port may be in form of '8080/tcp' so need to cut protocol name
+                final int slashIndex = port.lastIndexOf('/');
+                if (slashIndex > -1) {
+                    port = port.substring(0, slashIndex);
                 }
 
                 return previewUrl.replace(serverUrl, devMachine.getDisplayName() + ':' + port);
