@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.security.oauth.oauth1;
 
-import org.eclipse.che.api.auth.oauth.OAuthAuthorizationHeaderProvider;
+import org.eclipse.che.security.oauth.shared.OAuthAuthorizationHeaderProvider;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

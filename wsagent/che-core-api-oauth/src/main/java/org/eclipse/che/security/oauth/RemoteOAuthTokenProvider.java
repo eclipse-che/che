@@ -11,7 +11,7 @@
 package org.eclipse.che.security.oauth;
 
 
-import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
+import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;

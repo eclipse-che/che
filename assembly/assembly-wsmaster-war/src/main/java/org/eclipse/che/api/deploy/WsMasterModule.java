@@ -41,6 +41,7 @@ import org.eclipse.che.api.workspace.server.stack.StackMessageBodyAdapter;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
+import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 import javax.sql.DataSource;
@@ -110,7 +111,7 @@ public class WsMasterModule extends AbstractModule {
 
         bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)
                 .to(org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl.class);
-        bind(org.eclipse.che.api.auth.oauth.OAuthTokenProvider.class)
+        bind(OAuthTokenProvider.class)
                 .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
         bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
