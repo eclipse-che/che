@@ -4,9 +4,9 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * <p>
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ * Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.spi;
 
@@ -14,9 +14,9 @@ import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
-import org.eclipse.che.api.workspace.server.URLRewriter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -30,18 +30,21 @@ import java.util.Map;
  * Important to notice - no states in here, it is always RUNNING
  * @author gazarenkov
  */
-public abstract class InternalRuntime implements Runtime {
+public abstract class InternalRuntime <T extends RuntimeContext> implements Runtime {
 
-    private final RuntimeContext       context;
+    private final T                    context;
     private final URLRewriter          urlRewriter;
     private       Map<String, Machine> cachedExternalMachines;
     private final List<Warning> warnings = new ArrayList<>();
 
-    public InternalRuntime(RuntimeContext context, URLRewriter urlRewriter) {
+    public InternalRuntime(T context, URLRewriter urlRewriter) {
         this.context = context;
         this.urlRewriter = urlRewriter;
     }
 
+    /**
+     * @return Map name -> Machine. Implementation should not return null
+     */
     public abstract Map<String, ? extends Machine> getInternalMachines();
 
 
@@ -63,9 +66,11 @@ public abstract class InternalRuntime implements Runtime {
     @Override
     public Map<String, ? extends Machine> getMachines() {
 
-        if(cachedExternalMachines == null) {
+        if (cachedExternalMachines == null) {
             cachedExternalMachines = new HashMap<>();
-            for(Map.Entry<String, ? extends Machine> entry : getInternalMachines().entrySet()) {
+            // should not be null, replace with empty map in this case
+            Map<String, ? extends Machine> internalMachines = getInternalMachines() == null ? new HashMap<>() : getInternalMachines();
+            for (Map.Entry<String, ? extends Machine> entry : internalMachines.entrySet()) {
                 String key = entry.getKey();
                 Machine machine = entry.getValue();
                 Map<String, Server> newServers = rewriteExternalServers(machine.getServers());
@@ -82,7 +87,7 @@ public abstract class InternalRuntime implements Runtime {
     /**
      * @return some implementation specific properties if any
      */
-    public abstract Map <String, String> getProperties();
+    public abstract Map<String, String> getProperties();
 
     /**
      * @return the Context
@@ -96,9 +101,9 @@ public abstract class InternalRuntime implements Runtime {
      * @param incoming servers
      * @return rewriten Map of Servers (name -> Server)
      */
-    private Map <String, Server> rewriteExternalServers(Map<String,? extends Server> incoming) {
-        Map <String, Server> outgoing = new HashMap<>();
-        for(Map.Entry<String, ? extends Server> entry : incoming.entrySet()) {
+    private Map<String, Server> rewriteExternalServers(Map<String, ? extends Server> incoming) {
+        Map<String, Server> outgoing = new HashMap<>();
+        for (Map.Entry<String, ? extends Server> entry : incoming.entrySet()) {
             String name = entry.getKey();
             String strUrl = entry.getValue().getUrl();
             try {
