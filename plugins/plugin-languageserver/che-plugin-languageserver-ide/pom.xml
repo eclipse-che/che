@@ -116,7 +116,7 @@
                 <directory>src/main/resources</directory>
             </resource>
             <resource>
-                <directory>${generated.sources.directory}</directory>
+                <directory>${dto-generator-out-directory}</directory>
             </resource>
         </resources>
         <testResources>
