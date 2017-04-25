@@ -183,7 +183,7 @@
                 <version>${project.version}</version>
                 <executions>
                     <execution>
-                        <phase>generate-sources</phase>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
