@@ -46,6 +46,7 @@ MACHINE_TYPE=$(uname -m)
 mkdir -p ${CHE_DIR}
 ${SUDO} mkdir -p /projects
 ${SUDO} sh -c "chown -R $(id -u -n) /projects"
+${SUDO} chmod 755 /projects
 
 
 INSTALL_JDK=false
