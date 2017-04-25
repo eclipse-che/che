@@ -62,13 +62,23 @@
             </div>
           </che-label-container>
           <!-- Namespace -->
-          <che-label-container che-label-name="Team"
-                               ng-if="workspaceDetailsController.getNamespaces().length > 0">
-            <che-filter-selector che-values="workspaceDetailsController.namespaceLabels"
-                                 ng-if="workspaceDetailsController.isCreationFlow"
-                                 ng-model="workspaceDetailsController.namespaceLabel"
-                                 che-on-change="workspaceDetailsController.onNamespaceChanged"></che-filter-selector>
-            <che-button-default ng-if="!workspaceDetailsController.isCreationFlow"
+          <che-label-container che-label-name="{{workspaceDetailsController.getNamespaceCaption()}}"
+                               ng-if="workspaceDetailsController.getNamespaces().length > 0 || workspaceDetailsController.getNamespaceEmptyMessage()">
+
+            <div ng-if="workspaceDetailsController.isCreationFlow && workspaceDetailsController.getNamespaces().length > 0"
+                 layout="row" layout-align="start center">
+              <che-filter-selector che-values="workspaceDetailsController.namespaceLabels"
+                                   ng-model="workspaceDetailsController.namespaceLabel"
+                                   che-on-change="workspaceDetailsController.onNamespaceChanged"></che-filter-selector>
+              <span class="namespace-additional-info" ng-if="workspaceDetailsController.namespaceInfo">
+                {{workspaceDetailsController.namespaceInfo}}
+              </span>
+            </div>
+            <div ng-if="workspaceDetailsController.getNamespaces().length === 0 && workspaceDetailsController.getNamespaceEmptyMessage()" class="empty-namespace-label">
+              <i class="fa-exclamation-triangle fa fa-2x"></i>
+              {{workspaceDetailsController.getNamespaceEmptyMessage()}}
+            </div>
+            <che-button-default ng-if="!workspaceDetailsController.isCreationFlow && workspaceDetailsController.getNamespaces().length > 0"
                                 che-button-title="{{workspaceDetailsController.getNamespaceLabel(workspaceDetailsController.namespaceId)}}"
                                 ng-disabled="!workspaceDetailsController.getNamespace(workspaceDetailsController.namespaceId) || !workspaceDetailsController.getNamespace(workspaceDetailsController.namespaceId).location"
                                 ng-click="workspaceDetailsController.namespaceOnClick(workspaceDetailsController.namespaceId)"

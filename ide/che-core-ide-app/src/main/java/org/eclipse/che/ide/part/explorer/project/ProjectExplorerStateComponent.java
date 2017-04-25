@@ -86,7 +86,6 @@ public class ProjectExplorerStateComponent implements StateComponent {
 
     @Override
     public void loadState(@NotNull JsonObject state) {
-
         if (state.hasKey(SHOW_HIDDEN_FILES)) {
             projectExplorer.showHiddenFiles(state.getBoolean(SHOW_HIDDEN_FILES));
         }

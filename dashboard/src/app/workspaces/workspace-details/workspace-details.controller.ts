@@ -51,6 +51,7 @@ export class WorkspaceDetailsController {
   namespaceId: string = '';
   namespaceLabel: string;
   namespaceLabels: Array<string>;
+  namespaceInfo: String;
   onNamespaceChanged: Function;
   workspaceId: string = '';
   workspaceName: string = '';
@@ -188,12 +189,14 @@ export class WorkspaceDetailsController {
         this.namespaceId = namespace ?  namespace.id : (this.getNamespaces().length ? this.getNamespaces()[0].id : undefined);
         this.namespaceLabel = namespace ?  namespace.label : (this.getNamespaces().length ? this.getNamespaces()[0].label : undefined);
         this.namespaceLabels = this.getNamespaces().length ? this.lodash.pluck(this.getNamespaces(), 'label') : [];
+        this.fetchNamespaceInfo();
 
         this.onNamespaceChanged = (label: string) => {
           let namespace = this.getNamespaces().find((namespace: any) => {
             return namespace.label === label;
           });
           this.namespaceId = namespace ? namespace.id : this.namespaceId;
+          this.fetchNamespaceInfo();
         }
       });
     }
@@ -268,7 +271,7 @@ export class WorkspaceDetailsController {
    */
   getWorkspaceStatus(): string {
     if (this.isCreationFlow) {
-      return 'CREATING';
+      return 'New';
     }
 
     let unknownStatus = 'unknown';
@@ -310,6 +313,17 @@ export class WorkspaceDetailsController {
     } else {
       return namespaceId;
     }
+  }
+
+  fetchNamespaceInfo() {
+    if (!this.cheNamespaceRegistry.getAdditionalInfo()) {
+      this.namespaceInfo = null;
+      return;
+    }
+
+    this.cheNamespaceRegistry.getAdditionalInfo()(this.namespaceId).then((info: string) => {
+      this.namespaceInfo = info;
+    });
   }
 
   /**
@@ -657,7 +671,7 @@ export class WorkspaceDetailsController {
 
     return tabs.some((tabIndex: number) => {
       return this.checkFormsNotValid(tabIndex);
-    });
+    }) || this.isDisableWorkspaceCreation();
   }
 
   /**
@@ -687,5 +701,41 @@ export class WorkspaceDetailsController {
     }
   }
 
+  /**
+   * Returns namespaces empty message if set.
+   *
+   * @returns {string}
+   */
+  getNamespaceEmptyMessage(): string {
+    return this.cheNamespaceRegistry.getEmptyMessage();
+  }
+
+  /**
+   * Returns namespaces caption.
+   *
+   * @returns {string}
+   */
+  getNamespaceCaption(): string {
+    return this.cheNamespaceRegistry.getCaption();
+  }
+
+  /**
+   * Returns namespaces additional information.
+   *
+   * @returns {()=>Function}
+   */
+  getNamespaceAdditionalInfo(): Function {
+    return this.cheNamespaceRegistry.getAdditionalInfo;
+  }
+
+  /**
+   * Returns whether workspace creation should be disabled based on namespaces.
+   *
+   * @returns {boolean|string}
+   */
+  isDisableWorkspaceCreation(): boolean {
+    let namespaces = this.cheNamespaceRegistry.getNamespaces();
+    return (this.isCreationFlow && (!namespaces || namespaces.length === 0) && this.cheNamespaceRegistry.getEmptyMessage());
+  }
 }
 
