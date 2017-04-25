@@ -4,7 +4,6 @@ mvn clean install \
  -Dmdep.analyze.skip=true \
  -pl "!:che-core-ide-api" \
  -pl "!:che-core-ide-app" \
- -pl "!:che-plugin-machine-ext-client" \
  -pl "!:che-plugin-machine-ext-server" \
  -pl "!:che-plugin-debugger-ide" \
  -pl "!:che-plugin-java-ext-lang-server" \
@@ -37,3 +36,4 @@ mvn clean install \
 
 
 
+# -pl "!:che-plugin-machine-ext-client" \
