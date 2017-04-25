@@ -14,9 +14,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -43,7 +41,6 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     private final InfrastructureProvisioner infrastructureProvisioner;
     private final EnvironmentNormalizer     environmentNormalizer;
     private final RuntimeFactory            runtimeFactory;
-    private final TempAgentStuff            tempAgentStuff;
 
     @Inject
     public DockerRuntimeInfrastructure(EnvironmentParser dockerEnvironmentParser,
@@ -52,8 +49,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                        InfrastructureProvisioner infrastructureProvisioner,
                                        EnvironmentNormalizer environmentNormalizer,
                                        Map<String, TypeSpecificEnvironmentParser> environmentParsers,
-                                       RuntimeFactory runtimeFactory,
-                                       TempAgentStuff tempAgentStuff) {
+                                       RuntimeFactory runtimeFactory) {
         super("docker", environmentParsers.keySet());
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
         this.dockerEnvironmentParser = dockerEnvironmentParser;
@@ -61,7 +57,6 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         this.infrastructureProvisioner = infrastructureProvisioner;
         this.environmentNormalizer = environmentNormalizer;
         this.runtimeFactory = runtimeFactory;
-        this.tempAgentStuff = tempAgentStuff;
     }
 
     @Override
@@ -71,9 +66,6 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         dockerEnvironmentValidator.validate(environment, dockerEnvironment);
         // check that order can be resolved
         startStrategy.order(dockerEnvironment);
-        for (MachineConfig machineConfig : environment.getMachines().values()) {
-            tempAgentStuff.sortAgents(machineConfig);
-        }
         // TODO add an actual estimation of what is missing in the environment
         // memory
         // machines
@@ -90,9 +82,6 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         dockerEnvironmentValidator.validate(environment, dockerEnvironment);
         // check that services start order can be resolved
         List<String> orderedServices = startStrategy.order(dockerEnvironment);
-        for (MachineConfigImpl machineConfig : environment.getMachines().values()) {
-            machineConfig.setAgents(tempAgentStuff.sortAgents(machineConfig));
-        }
 
         // modify environment with everything needed to use docker machines on particular (cloud) infrastructure
         infrastructureProvisioner.provision(environment, dockerEnvironment);

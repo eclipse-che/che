@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.spi;
 
+import org.eclipse.che.api.agent.server.AgentRegistry;
+import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
@@ -35,11 +37,14 @@ public abstract class RuntimeContext {
     protected final RuntimeInfrastructure infrastructure;
     // TODO other than WorkspaceStatus impl
     private         WorkspaceStatus       state;
-    protected final InternalRecipe recipe;
+    protected final InternalRecipe        recipe;
     protected final Map<String, InternalMachineConfig> internalMachines = new HashMap<>();
 
-    public RuntimeContext(Environment environment, RuntimeIdentity identity,
-                          RuntimeInfrastructure infrastructure, URL agentRegistry)
+    public RuntimeContext(Environment environment,
+                          RuntimeIdentity identity,
+                          RuntimeInfrastructure infrastructure,
+                          AgentSorter agentSorter,
+                          AgentRegistry agentRegistry)
             throws ValidationException, InfrastructureException {
         this.environment = environment;
         this.identity = identity;
@@ -48,7 +53,7 @@ public abstract class RuntimeContext {
 
         Map<String, ? extends MachineConfig> effectiveMachines = environment.getMachines();
         for(Map.Entry<String, ? extends MachineConfig> entry : effectiveMachines.entrySet()) {
-            internalMachines.put(entry.getKey(), new InternalMachineConfig(entry.getValue(), agentRegistry));
+            internalMachines.put(entry.getKey(), new InternalMachineConfig(entry.getValue(), agentRegistry, agentSorter));
         }
     }
 

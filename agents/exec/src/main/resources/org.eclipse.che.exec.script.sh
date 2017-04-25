@@ -212,3 +212,4 @@ fi
 #####################################################
 ### exec-agent run command will be added here ###
 #####################################################
+$HOME/che/exec-agent/che-exec-agent -addr :4412 -cmd ${SHELL_INTERPRETER} -logs-dir $HOME/che/exec-agent/logs

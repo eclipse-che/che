@@ -265,3 +265,4 @@ fi
 ### ws-agent run command will be added here ###
 ### ~/che/ws-agent/bin/catalina.sh run      ###
 ###############################################
+export JPDA_ADDRESS="4403" && ~/che/ws-agent/bin/catalina.sh jpda run

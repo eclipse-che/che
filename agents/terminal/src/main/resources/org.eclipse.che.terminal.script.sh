@@ -211,3 +211,4 @@ fi
 #####################################################
 ### terminal-agent run command will be added here ###
 #####################################################
+$HOME/che/terminal/che-websocket-terminal -addr :4411 -cmd ${SHELL_INTERPRETER}

@@ -12,11 +12,14 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.api.agent.server.AgentRegistry;
+import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
@@ -73,7 +76,6 @@ public class DockerRuntimeContext extends RuntimeContext {
     private final ServiceStarter    serviceStarter;
     private final DockerEnvironment dockerEnvironment;
     private final URLRewriter       urlRewriter;
-    private final TempAgentStuff    tempAgentStuff;
     private final Queue<String>     startQueue;
     private final StartSynchronizer startSynchronizer;
 
@@ -86,15 +88,15 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 NetworkLifecycle dockerNetworkLifecycle,
                                 ServiceStarter serviceStarter,
                                 URLRewriter urlRewriter,
-                                TempAgentStuff tempAgentStuff)
+                                AgentSorter agentSorter,
+                                AgentRegistry agentRegistry)
             throws ValidationException, InfrastructureException {
-        super(environment, identity, infrastructure, null);
+        super(environment, identity, infrastructure, agentSorter, agentRegistry);
         this.dockerEnvironment = dockerEnvironment;
         this.dockerNetworkLifecycle = dockerNetworkLifecycle;
         this.serviceStarter = serviceStarter;
         this.startQueue = new ArrayDeque<>(orderedServices);
         this.urlRewriter = urlRewriter;
-        this.tempAgentStuff = tempAgentStuff;
         this.startSynchronizer = new StartSynchronizer();
     }
 
@@ -211,13 +213,14 @@ public class DockerRuntimeContext extends RuntimeContext {
 
     // TODO rework to agent launchers
     private void startAgents(String machineName, DockerMachine dockerMachine) throws InfrastructureException {
-        List<String> agents = environment.getMachines().get(machineName).getAgents();
-
-        for (String agent : agents) {
-            String agentScript = tempAgentStuff.getAgentScript(agent);
+        InternalMachineConfig machineConfig = internalMachines.get(machineName);
+        if (machineConfig == null) {
+            throw new InfrastructureException("Machine %s is not found in internal machines config of RuntimeContext");
+        }
+        for (InternalMachineConfig.ResolvedAgent resolvedAgent : machineConfig.getAgents()) {
             Thread thread = new Thread(() -> {
                 try {
-                    dockerMachine.exec(agentScript, DEV_NULL);
+                    dockerMachine.exec(resolvedAgent.getScript(), DEV_NULL);
                 } catch (InfrastructureException e) {
                     LOG.error(e.getLocalizedMessage(), e);
                 }
