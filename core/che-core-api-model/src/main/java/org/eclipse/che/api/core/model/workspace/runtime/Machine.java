@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.model.workspace.runtime;
 
-import org.eclipse.che.api.core.model.machine.OldServer;
-
 import java.util.Map;
 
 /**
@@ -28,15 +26,13 @@ public interface Machine {
 
 
     /**
-     * Returns mapping of exposed ports to {@link OldServer}.
+     * Returns mapping of exposed ports to {@link Server}.
      *
-     * <p>Key consist of port number and transport protocol - tcp or udp with slash between these parts.
+     * <p>Key is a symbolic server name
      * <br>Example:
      * <pre>
      * {
-     *     8080/tcp : {
-     *         "ref" : "server_reference",
-     *         "address" : "server-with-machines.com",
+     *     server1 : {
      *         "url" : "http://server-with-machines.com:8080"
      *     }
      * }

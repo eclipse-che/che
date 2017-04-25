@@ -11,10 +11,14 @@
 package org.eclipse.che.api.core.model.workspace.runtime;
 
 /**
+ * Server Runtime exposed by URL
  * @author gazarenkov
  */
 public interface Server {
 
+    /**
+     * @return URL exposing the server
+     */
     String getUrl();
 
 }
