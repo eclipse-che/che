@@ -61,7 +61,7 @@ public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate 
         try {
             return processBuilder.start();
         } catch (IOException e) {
-            throw new LanguageServerException("Can't start CSharp language server", e);
+            throw new LanguageServerException("Can't start Python language server", e);
         }
     }
 
