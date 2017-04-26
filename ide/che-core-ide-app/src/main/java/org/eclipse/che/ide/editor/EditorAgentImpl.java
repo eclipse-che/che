@@ -64,6 +64,7 @@ import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
@@ -92,7 +93,8 @@ public class EditorAgentImpl implements EditorAgent,
                                         ActivePartChangedHandler,
                                         SelectionChangedHandler,
                                         WindowActionHandler,
-                                        StateComponent {
+                                        StateComponent,
+                                        WorkspaceStoppedEvent.Handler {
 
     private final EventBus                 eventBus;
     private final WorkspaceAgent           workspaceAgent;
@@ -138,6 +140,7 @@ public class EditorAgentImpl implements EditorAgent,
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
         eventBus.addHandler(SelectionChangedEvent.TYPE, this);
         eventBus.addHandler(WindowActionEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
     @Override
@@ -619,6 +622,13 @@ public class EditorAgentImpl implements EditorAgent,
         PartPresenter partPresenter = activePartStack.getPartByPath(selectedResourceLocation);
         if (partPresenter != null) {
             workspaceAgent.setActivePart(partPresenter, EDITING);
+        }
+    }
+
+    @Override
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+        for (EditorPartPresenter editor : getOpenedEditors()) {
+            closeEditor(editor);
         }
     }
 
