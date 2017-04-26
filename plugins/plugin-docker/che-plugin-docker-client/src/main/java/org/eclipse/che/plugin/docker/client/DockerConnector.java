@@ -19,9 +19,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
 import org.eclipse.che.api.core.util.FileCleaner;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.TarUtils;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
 import org.eclipse.che.plugin.docker.client.connection.CloseConnectionInputStream;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnection;
@@ -269,6 +269,8 @@ public class DockerConnector {
      * Gets detailed information about docker image.
      *
      * @return detailed information about {@code image}
+     * @throws ImageNotFoundException
+     *          when docker api return 404 status
      * @throws IOException
      *          when a problem occurs with docker api calls
      */
@@ -277,7 +279,11 @@ public class DockerConnector {
                                                             .method("GET")
                                                             .path(apiVersionPathPrefix + "/images/" + params.getImage() + "/json")) {
             final DockerResponse response = connection.request();
-            if (OK.getStatusCode() != response.getStatus()) {
+            final int status = response.getStatus();
+            if (status == NOT_FOUND.getStatusCode()) {
+                throw new ImageNotFoundException(readAndCloseQuietly(response.getInputStream()));
+            }
+            if (OK.getStatusCode() != status) {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ImageInfo.class);
@@ -404,6 +410,8 @@ public class DockerConnector {
      * Gets detailed information about docker container.
      *
      * @return detailed information about {@code container}
+     * @throws ContainerNotFoundException
+     *          when container not found by docker (docker api returns 404)
      * @throws IOException
      *          when a problem occurs with docker api calls
      */
@@ -414,7 +422,11 @@ public class DockerConnector {
                                                                   "/json")) {
             addQueryParamIfNotNull(connection, "size", params.isReturnContainerSize());
             final DockerResponse response = connection.request();
-            if (OK.getStatusCode() != response.getStatus()) {
+            final int status = response.getStatus();
+            if (status == NOT_FOUND.getStatusCode()) {
+                throw new ContainerNotFoundException(readAndCloseQuietly(response.getInputStream()));
+            }
+            if (OK.getStatusCode() != status) {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerInfo.class);
