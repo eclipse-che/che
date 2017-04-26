@@ -29,6 +29,7 @@ import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.exception.ExecNotFoundException;
+import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
@@ -441,6 +442,17 @@ public class DockerConnectorTest {
         verify(dockerResponse).getStatus();
     }
 
+    @Test(expectedExceptions = ImageNotFoundException.class, expectedExceptionsMessageRegExp = ERROR_MESSAGE)
+    public void shouldThrowImageNotFoundExceptionOnGettingImageInfoIfResponseCodeIs404() throws IOException {
+        InspectImageParams inspectImageParams = InspectImageParams.create(IMAGE);
+
+        when(dockerResponse.getStatus()).thenReturn(RESPONSE_NOT_FOUND_CODE);
+
+        dockerConnector.inspectImage(inspectImageParams);
+
+        verify(dockerResponse).getStatus();
+    }
+
     @Test
     public void shouldBeAbleToStopContainer() throws IOException {
         StopContainerParams stopContainerParams = StopContainerParams.create(CONTAINER);
@@ -621,6 +633,17 @@ public class DockerConnectorTest {
         InspectContainerParams inspectContainerParams = InspectContainerParams.create(CONTAINER);
 
         when(dockerResponse.getStatus()).thenReturn(RESPONSE_ERROR_CODE);
+
+        dockerConnector.inspectContainer(inspectContainerParams);
+
+        verify(dockerResponse).getStatus();
+    }
+
+    @Test(expectedExceptions = ContainerNotFoundException.class, expectedExceptionsMessageRegExp = ERROR_MESSAGE)
+    public void shouldThrowContainerNotFoundExceptionOnInspectingContainerIfResponseCodeIs404() throws IOException {
+        InspectContainerParams inspectContainerParams = InspectContainerParams.create(CONTAINER);
+
+        when(dockerResponse.getStatus()).thenReturn(RESPONSE_NOT_FOUND_CODE);
 
         dockerConnector.inspectContainer(inspectContainerParams);
 

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.json;
 
+import java.util.Objects;
+
 /** @author andrew00x */
 public class ContainerState {
     private boolean running;
@@ -23,6 +25,7 @@ public class ContainerState {
     private boolean dead;
     private boolean oOMKilled;
     private String  error;
+    private String  status;
 
     public boolean isRunning() {
         return running;
@@ -102,6 +105,39 @@ public class ContainerState {
 
     public void setError(String error) {
         this.error = error;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ContainerState)) return false;
+        ContainerState that = (ContainerState)o;
+        return isRunning() == that.isRunning() &&
+               getPid() == that.getPid() &&
+               getExitCode() == that.getExitCode() &&
+               isPaused() == that.isPaused() &&
+               isRestarting() == that.isRestarting() &&
+               isDead() == that.isDead() &&
+               oOMKilled == that.oOMKilled &&
+               Objects.equals(getStartedAt(), that.getStartedAt()) &&
+               Objects.equals(getFinishedAt(), that.getFinishedAt()) &&
+               Objects.equals(getError(), that.getError()) &&
+               Objects.equals(getStatus(), that.getStatus());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects
+                .hash(isRunning(), getPid(), getExitCode(), getStartedAt(), getFinishedAt(), isPaused(), isRestarting(),
+                      isDead(), oOMKilled, getError(), getStatus());
     }
 
     @Override
