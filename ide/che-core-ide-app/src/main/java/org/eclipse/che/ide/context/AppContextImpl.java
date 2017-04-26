@@ -259,6 +259,13 @@ public class AppContextImpl implements AppContext,
                         break;
                     }
                 }
+            } else if (resource.getLocation().segmentCount() == 1 && resource.isProject()) {
+                boolean exists = rootProjects.stream().anyMatch(it -> it.getLocation().equals(resource.getLocation()));
+
+                if (!exists) {
+                    rootProjects.add(resource.asProject());
+                    rootProjects.sort(ResourcePathComparator.getInstance());
+                }
             }
         } else if (delta.getKind() == REMOVED) {
 
