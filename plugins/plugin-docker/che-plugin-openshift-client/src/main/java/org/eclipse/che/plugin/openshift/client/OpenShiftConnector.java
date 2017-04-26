@@ -107,6 +107,8 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.DoneableEndpoints;
 import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimList;
@@ -1148,6 +1150,7 @@ public class OpenShiftConnector extends DockerConnector {
                                     .withName(sanitizedContainerName)
                                     .withImage(imageName)
                                     .withEnv(KubernetesEnvVar.getEnvFrom(envVariables))
+                                    .addToEnv(getAdditionalEnvVars())
                                     .withPorts(KubernetesContainer.getContainerPortsFrom(exposedPorts))
                                     .withImagePullPolicy(OPENSHIFT_IMAGE_PULL_POLICY_IFNOTPRESENT)
                                     .withNewSecurityContext()
@@ -1194,6 +1197,27 @@ public class OpenShiftConnector extends DockerConnector {
 
         LOG.info("OpenShift deployment {} created", deploymentName);
         return deployment.getMetadata().getName();
+    }
+
+    private EnvVar[] getAdditionalEnvVars() {
+        try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
+            if (openShiftClient.secrets()
+                               .inNamespace(openShiftCheProjectName)
+                               .withName("che-recommender-api-token")
+                               .get() != null) {
+                EnvVar envVar = new EnvVarBuilder().withName("RECOMMENDER_API_TOKEN")
+                                                   .withNewValueFrom()
+                                                       .withNewSecretKeyRef()
+                                                           .withName("che-recommender-api-token")
+                                                           .withKey("token")
+                                                       .endSecretKeyRef()
+                                                   .endValueFrom()
+                                                   .build();
+                LOG.info("Adding RECOMMENDER_API_TOKEN env var to workspace container");
+                return new EnvVar[] {envVar};
+            }
+            return new EnvVar[0];
+        }
     }
 
     /**
