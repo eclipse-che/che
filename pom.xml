@@ -243,11 +243,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-api-oauth</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-git</artifactId>
                 <version>${che.version}</version>
                 <classifier>tests</classifier>
@@ -296,6 +291,11 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-model</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-oauth</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

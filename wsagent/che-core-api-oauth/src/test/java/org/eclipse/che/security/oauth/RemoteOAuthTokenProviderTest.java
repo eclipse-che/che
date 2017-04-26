@@ -20,9 +20,7 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.commons.test.mockito.answer.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -30,6 +28,12 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 @Listeners(value = {MockitoTestNGListener.class})
 public class RemoteOAuthTokenProviderTest {
@@ -46,8 +50,8 @@ public class RemoteOAuthTokenProviderTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        httpJsonRequest = Mockito.mock(HttpJsonRequest.class, new SelfReturningAnswer());
-        Mockito.when(httpJsonRequestFactory.fromLink(Matchers.any())).thenReturn(httpJsonRequest);
+        httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
+        when(httpJsonRequestFactory.fromLink(any())).thenReturn(httpJsonRequest);
         tokenProvider = new RemoteOAuthTokenProvider("http://dev.box.com/api", httpJsonRequestFactory);
     }
 
@@ -55,35 +59,35 @@ public class RemoteOAuthTokenProviderTest {
     public void shouldReturnToken() throws Exception {
         //given
         OAuthToken expected = DtoFactory.newDto(OAuthToken.class).withScope("scope").withToken("token");
-        Mockito.when(httpJsonResponse.asDto(Matchers.any(Class.class))).thenReturn(expected);
-        Mockito.when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
+        when(httpJsonResponse.asDto(any(Class.class))).thenReturn(expected);
+        when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
         //when
         OAuthToken actual = tokenProvider.getToken("google", "id");
         //then
-        Assert.assertEquals(actual, expected);
+        assertEquals(actual, expected);
     }
 
     @Test
     public void shouldConstructCorrectUrl() throws Exception {
         //given
         OAuthToken expected = DtoFactory.newDto(OAuthToken.class).withScope("scope").withToken("token");
-        Mockito.when(httpJsonResponse.asDto(Matchers.any(Class.class))).thenReturn(expected);
-        Mockito.when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
+        when(httpJsonResponse.asDto(any(Class.class))).thenReturn(expected);
+        when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
         //when
         tokenProvider.getToken("google", "id");
         //then
         ArgumentCaptor<Link> argumentCaptor = ArgumentCaptor.forClass(Link.class);
-        Mockito.verify(httpJsonRequestFactory).fromLink(argumentCaptor.capture());
+        verify(httpJsonRequestFactory).fromLink(argumentCaptor.capture());
         Link link = argumentCaptor.getValue();
-        Assert.assertEquals(link.getMethod(), "GET");
-        Assert.assertEquals(link.getHref(), "http://dev.box.com/api/oauth/token?oauth_provider=google");
-        Assert.assertEquals(link.getParameters().size(), 0);
+        assertEquals(link.getMethod(), "GET");
+        assertEquals(link.getHref(), "http://dev.box.com/api/oauth/token?oauth_provider=google");
+        assertEquals(link.getParameters().size(), 0);
     }
 
     @Test
     public void shouldReturnNollForNotExistedProvider() throws Exception {
         //given
-        Mockito.when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
+        when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
         //when
         //then
         Assert.assertNull(tokenProvider.getToken("smoogle", "id"));
@@ -92,7 +96,7 @@ public class RemoteOAuthTokenProviderTest {
     @Test
     public void shouldReturnNullOnNotFoundException() throws Exception {
         //given
-        Mockito.when(httpJsonRequest.request()).thenThrow(NotFoundException.class);
+        when(httpJsonRequest.request()).thenThrow(NotFoundException.class);
         //when
         //then
         Assert.assertNull(tokenProvider.getToken("google", "id"));
@@ -109,7 +113,7 @@ public class RemoteOAuthTokenProviderTest {
     @Test(expectedExceptions = IOException.class)
     public void shouldThrowIoExceptionOnIoException() throws Exception {
         //given
-        Mockito.when(httpJsonRequest.request()).thenThrow(IOException.class);
+        when(httpJsonRequest.request()).thenThrow(IOException.class);
         //when
         //then
         Assert.assertNull(tokenProvider.getToken("google", "id"));

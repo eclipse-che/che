@@ -25,7 +25,6 @@
     <packaging>pom</packaging>
     <name>Che Agent Parent</name>
     <modules>
-        <module>che-core-api-oauth</module>
         <module>che-core-api-project-shared</module>
         <module>che-core-api-project</module>
         <module>che-core-ssh-key-ide</module>
