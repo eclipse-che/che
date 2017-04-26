@@ -8,22 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.server.execution;
-
-import java.util.EventListener;
+package org.eclipse.che.commons.lang.execution;
 
 /**
- * Listener for {@link ProcessHandler}
+ * Contains native OS process output types
  *
  * @author Evgen Vidolob
  */
-public interface ProcessListener extends EventListener {
-
-    void onStart(ProcessEvent event);
-
-    void onText(ProcessEvent event, ProcessOutputType outputType);
-
-    void onProcessTerminated(ProcessEvent event);
-
-    void onProcessWillTerminate(ProcessEvent event);
+public enum ProcessOutputType {
+    SYSTEM, STDOUT, STDERR
 }

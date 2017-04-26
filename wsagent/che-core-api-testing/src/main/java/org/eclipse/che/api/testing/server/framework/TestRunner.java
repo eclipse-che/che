@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.testing.server.framework;
 
-import java.util.Map;
-
+import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.che.commons.lang.execution.ProcessHandler;
+
+import java.util.Map;
 
 /**
  * Interface for defining test frameworks for the test runner. All test
@@ -35,8 +37,13 @@ public interface TestRunner {
      * @return the test results.
      * @throws Exception
      *             when test runner execution fails.
+     * @deprecated use {@link TestRunner#execute(TestExecutionContext)} instead
      */
+    @Deprecated
     TestResult execute(Map<String, String> testParameters) throws Exception;
+
+
+    ProcessHandler execute(TestExecutionContext context);
 
     /**
      * The test runner framework will call this method to get the framework name

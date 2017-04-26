@@ -11,12 +11,12 @@
 package org.eclipse.che.plugin.maven.server.rmi;
 
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.plugin.maven.server.execution.ExecutionException;
-import org.eclipse.che.plugin.maven.server.execution.ProcessEvent;
-import org.eclipse.che.plugin.maven.server.execution.ProcessExecutor;
-import org.eclipse.che.plugin.maven.server.execution.ProcessHandler;
-import org.eclipse.che.plugin.maven.server.execution.ProcessListener;
-import org.eclipse.che.plugin.maven.server.execution.ProcessOutputType;
+import org.eclipse.che.commons.lang.execution.ExecutionException;
+import org.eclipse.che.commons.lang.execution.ProcessEvent;
+import org.eclipse.che.commons.lang.execution.ProcessExecutor;
+import org.eclipse.che.commons.lang.execution.ProcessHandler;
+import org.eclipse.che.commons.lang.execution.ProcessListener;
+import org.eclipse.che.commons.lang.execution.ProcessOutputType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -8,23 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.testing.server.inject;
+package org.eclipse.che.commons.lang.execution;
 
-import com.google.inject.AbstractModule;
-import org.eclipse.che.api.testing.server.framework.TestRunner;
-import org.eclipse.che.inject.DynaModule;
-
-import static com.google.inject.multibindings.Multibinder.newSetBinder;
+import java.util.concurrent.Future;
 
 /**
- * @author Mirage Abeysekara
+ * Executor for asynchronous execution.
+ *
+ * @author Evgen Vidolob
  */
-@DynaModule
-public class TestGuiceModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        newSetBinder(binder(), TestRunner.class);
-//        bind(TestingService.class);
+public interface Executor {
 
-    }
+    Future<?> execute(Runnable runnable);
 }

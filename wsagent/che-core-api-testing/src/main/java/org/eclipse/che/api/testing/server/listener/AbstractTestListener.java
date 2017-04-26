@@ -17,6 +17,7 @@ import java.util.HashMap;
  *
  * @author David Festal
  */
+@Deprecated
 public abstract class AbstractTestListener {
     static public class TestSummary {
         private int errors;

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.server.execution;
+package org.eclipse.che.commons.lang.execution;
 
 import java.util.EventObject;
 

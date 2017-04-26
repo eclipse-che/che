@@ -17,7 +17,10 @@ package org.eclipse.che.api.testing.shared;
 public class Constants {
 
     /** Name of WebSocket channel for the Testing output */
+    @Deprecated
     public final static String TESTING_OUTPUT_CHANNEL_NAME    = "testing:output";
+
+    public static final String TESTING_RPC_METHOD_NAME = "testing/message";
 
     private Constants() {
     }

@@ -10,6 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.junit.server;
 
+import javassist.util.proxy.MethodFilter;
+import javassist.util.proxy.MethodHandler;
+import javassist.util.proxy.ProxyFactory;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.testing.server.framework.TestRunner;
+import org.eclipse.che.api.testing.server.listener.AbstractTestListener;
+import org.eclipse.che.api.testing.server.listener.OutputTestListener;
+import org.eclipse.che.api.testing.shared.TestCase;
+import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.plugin.testing.classpath.server.TestClasspathProvider;
+import org.eclipse.che.plugin.testing.classpath.server.TestClasspathRegistry;
+
+import javax.inject.Inject;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -23,22 +37,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.inject.Inject;
-
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.testing.server.framework.TestRunner;
-import org.eclipse.che.api.testing.server.listener.AbstractTestListener;
-import org.eclipse.che.api.testing.server.listener.OutputTestListener;
-import org.eclipse.che.api.testing.shared.TestCase;
-import org.eclipse.che.api.testing.shared.TestResult;
-import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.plugin.testing.classpath.server.TestClasspathProvider;
-import org.eclipse.che.plugin.testing.classpath.server.TestClasspathRegistry;
-
-import javassist.util.proxy.MethodFilter;
-import javassist.util.proxy.MethodHandler;
-import javassist.util.proxy.ProxyFactory;
 
 /**
  * JUnit implementation for the test runner service.
@@ -56,6 +54,7 @@ import javassist.util.proxy.ProxyFactory;
  * @author Mirage Abeysekara
  * @author David Festal
  */
+@Deprecated
 public class JUnitTestRunner implements TestRunner {
 
     private static final String   JUNIT4X_RUNNER_CLASS = "org.junit.runner.JUnitCore";

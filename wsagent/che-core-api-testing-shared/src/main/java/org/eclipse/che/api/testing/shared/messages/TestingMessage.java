@@ -8,15 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.server.execution;
+package org.eclipse.che.api.testing.shared.messages;
+
+import javax.validation.constraints.NotNull;
+import java.util.Map;
 
 /**
- * External process executor
+ * Data interface represents all testing messages.
  *
- * @author Evgen Vidolob
+ * Base format of messages is:
+ *
+ * <pre>
+ *  {"name":"message_name","attributes":{"attribute":"value"}}
+ * </pre>
  */
-public interface ProcessExecutor {
+public interface TestingMessage {
 
-    ProcessHandler execute() throws ExecutionException;
+    @NotNull
+    TestingMessageName getName();
+
+    @NotNull
+    Map<String, String> getAttributes();
 
 }

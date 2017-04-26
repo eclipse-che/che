@@ -8,16 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.server.execution;
+package org.eclipse.che.commons.lang.execution;
 
-import java.util.concurrent.Future;
+import java.util.EventListener;
 
 /**
- * Executor for asynchronous execution.
+ * Listener for {@link ProcessHandler}
  *
  * @author Evgen Vidolob
  */
-public interface Executor {
+public interface ProcessListener extends EventListener {
 
-    Future<?> execute(Runnable runnable);
+    void onStart(ProcessEvent event);
+
+    void onText(ProcessEvent event, ProcessOutputType outputType);
+
+    void onProcessTerminated(ProcessEvent event);
+
+    void onProcessWillTerminate(ProcessEvent event);
 }

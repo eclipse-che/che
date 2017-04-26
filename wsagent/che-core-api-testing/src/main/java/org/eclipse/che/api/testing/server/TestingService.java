@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.testing.server;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import org.eclipse.che.api.testing.server.framework.TestFrameworkRegistry;
+import org.eclipse.che.api.testing.server.framework.TestRunner;
+import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -25,16 +29,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
-import org.eclipse.che.api.testing.server.framework.TestFrameworkRegistry;
-import org.eclipse.che.api.testing.server.framework.TestRunner;
-import org.eclipse.che.api.testing.shared.TestResult;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Service for handling Che unit test frameworks.
@@ -43,6 +41,7 @@ import io.swagger.annotations.ApiResponses;
  */
 @Api(value = "/che-testing")
 @Path("che/testing")
+@Deprecated
 public class TestingService {
 
     private final TestFrameworkRegistry frameworkRegistry;

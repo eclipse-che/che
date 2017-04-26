@@ -15,6 +15,7 @@ import org.eclipse.che.api.testing.shared.TestingOutput;
 /**
  * @author David Festal
  */
+@Deprecated
 public class TestingOutputImpl implements TestingOutput {
 
     public TestingOutputImpl(String output, LineType lineType) {
