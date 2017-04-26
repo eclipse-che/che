@@ -10,6 +10,8 @@
  */
 'use strict';
 import {CheHttpBackend} from './test/che-http-backend';
+import {CheAPIBuilder} from './builder/che-api-builder.factory';
+import {CheFactory} from './che-factory.factory';
 
 /**
  * Test of the Codenvy Factory API
@@ -45,7 +47,7 @@ describe('CheFactory', () => {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject((cheFactory, cheAPIBuilder, cheHttpBackend: CheHttpBackend) => {
+  beforeEach(inject((cheFactory: CheFactory, cheAPIBuilder: CheAPIBuilder, cheHttpBackend: CheHttpBackend) => {
 
     factory = cheFactory;
     apiBuilder = cheAPIBuilder;

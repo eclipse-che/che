@@ -12,7 +12,8 @@
 
 interface IProfileResource<T> extends ng.resource.IResourceClass<T> {
   getById(data: { userId: string }): ng.resource.IResource<T>;
-  setAttributes(data: { attributes: che.IProfileAttributes }): ng.resource.IResource<T>;
+  setAttributes(data: che.IProfileAttributes): ng.resource.IResource<T>;
+  setAttributesById(params: { userId: string }, data: che.IProfileAttributes): ng.resource.IResource<T>;
 }
 
 /**
@@ -52,7 +53,8 @@ export class CheProfile {
     // remote call
     this.remoteProfileAPI = <IProfileResource<che.IProfile>>this.$resource('/api/profile', {}, {
       getById: {method: 'GET', url: '/api/profile/:userId'},
-      setAttributes: {method: 'PUT', url: '/api/profile/attributes'}
+      setAttributes: {method: 'PUT', url: '/api/profile/attributes'},
+      setAttributesById: {method: 'PUT', url: '/api/profile/:userId/attributes'}
     });
 
     this.profileIdMap = new Map();
@@ -61,6 +63,17 @@ export class CheProfile {
     this.fetchProfile();
   }
 
+  /**
+   * Gets the full name if it possible
+   * @returns {string} full name
+   */
+  getFullName(attr: che.IProfileAttributes): string {
+    if (!angular.isObject(attr)) {
+      return '';
+    }
+    const {firstName, lastName} = attr;
+    return `${firstName || ''} ${lastName || ''}`.trim();
+  }
 
   /**
    * Gets the profile
@@ -76,7 +89,7 @@ export class CheProfile {
    */
   fetchProfile(): ng.IPromise<che.IProfile> {
     if (this.profile && !this.profile.$resolved) {
-      return this.$q.when(this.profile);
+      return this.profile;
     }
     let profile = this.remoteProfileAPI.get();
     // if we don't yet have data
@@ -104,18 +117,26 @@ export class CheProfile {
    * @param attributes {che.IProfileAttributes}
    * @returns {ng.IPromise<any>} the promise
    */
-  setAttributes(attributes: che.IProfileAttributes): ng.IPromise<any> {
-    let promise = this.remoteProfileAPI.setAttributes(attributes).$promise;
+  setAttributes(attributes: che.IProfileAttributes, userId?: string): ng.IPromise<any> {
+    if (angular.isUndefined(userId)) {
+      return this.remoteProfileAPI.setAttributes(attributes).$promise;
+    }
+    let promise = this.remoteProfileAPI.setAttributesById({userId: userId}, attributes).$promise;
 
-    return promise;
+    return promise.then((profile: che.IProfile) => {
+      if (profile && profile.userId) {
+        this.profileIdMap.set(profile.userId, profile);
+      }
+      this.$q.when(profile);
+    });
   }
 
   /**
-   * Fetch the profile from the given userId
-   * @param userId the user for which we will call remote api and get promise
-   * @returns {ng.IPromise<che.IProfile>} the promise
+   * Fetch the profile by the given userId
+   * @param userId {string}
+   * @returns {ng.IPromise<che.IProfile>}
    */
-  fetchProfileId(userId: string): ng.IPromise<che.IProfile> {
+  fetchProfileById(userId: string): ng.IPromise<che.IProfile> {
     let promise = this.remoteProfileAPI.getById({userId: userId}).$promise;
 
     return promise.then((profile: che.IProfile) => {
@@ -129,7 +150,7 @@ export class CheProfile {
     });
   }
 
-  getProfileFromId(userId: string): che.IProfile {
+  getProfileById(userId: string): che.IProfile {
     return this.profileIdMap.get(userId);
   }
 }

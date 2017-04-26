@@ -253,4 +253,16 @@ declare namespace _che {
     button?: any;
     policies?: any;
   }
+
+  interface IRequestData {
+    userId?: string;
+    maxItems?: string;
+    skipCount?: string;
+    [param: string]: string;
+  }
+
+  interface IPageInfo {
+    countPages: number;
+    currentPageNumber: number;
+  }
 }
