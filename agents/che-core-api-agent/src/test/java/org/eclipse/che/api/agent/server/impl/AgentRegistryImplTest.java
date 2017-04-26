@@ -39,7 +39,7 @@ public class AgentRegistryImplTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        registry = new AgentRegistryImpl(new HashSet<Agent>() {{
+        registry = new LocalAgentRegistry(new HashSet<Agent>() {{
             add(DtoFactory.newDto(AgentDto.class).withId("id1").withVersion("v1").withName("id1:v1"));
             add(DtoFactory.newDto(AgentDto.class).withId("id1").withVersion("v2").withName("id1:v2"));
             add(DtoFactory.newDto(AgentDto.class).withId("id2").withName("id2:latest"));
@@ -50,7 +50,7 @@ public class AgentRegistryImplTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void shouldNotRegisterAgentWithSameIdAndVersion() throws Exception {
-        new AgentRegistryImpl(new HashSet<Agent>() {{
+        new LocalAgentRegistry(new HashSet<Agent>() {{
             add(DtoFactory.newDto(AgentDto.class).withId("id1").withVersion("v1").withScript("s1"));
             add(DtoFactory.newDto(AgentDto.class).withId("id1").withVersion("v1").withScript("s2"));
         }});

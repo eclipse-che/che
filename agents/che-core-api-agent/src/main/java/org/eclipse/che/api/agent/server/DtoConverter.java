@@ -11,7 +11,9 @@
 package org.eclipse.che.api.agent.server;
 
 import org.eclipse.che.api.agent.shared.dto.AgentDto;
+import org.eclipse.che.api.agent.shared.dto.AgentKeyDto;
 import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -28,6 +30,10 @@ public class DtoConverter {
                                      .withProperties(agent.getProperties())
                                      .withScript(agent.getScript())
                                      .withDependencies(agent.getDependencies());
+    }
+
+    public static AgentKeyDto asDto(AgentKey key) {
+        return newDto(AgentKeyDto.class).withName(key.getId()).withVersion(key.getVersion());
     }
 
     private DtoConverter() { }

@@ -44,6 +44,10 @@ public class WorkspaceJsonRpcMessenger implements EventSubscriber<WorkspaceStatu
 
     @Override
     public void onEvent(WorkspaceStatusEvent event) {
+        send(event);
+    }
+
+    public void send(WorkspaceStatusEvent event) {
         String id = event.getWorkspaceId();
         endpointIds.entrySet()
                    .stream()

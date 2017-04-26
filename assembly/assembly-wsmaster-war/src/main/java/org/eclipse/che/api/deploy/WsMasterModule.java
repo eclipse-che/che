@@ -22,6 +22,7 @@ import org.eclipse.che.api.agent.LSTypeScriptAgent;
 import org.eclipse.che.api.agent.SshAgent;
 import org.eclipse.che.api.agent.UnisonAgent;
 import org.eclipse.che.api.agent.WsAgent;
+import org.eclipse.che.api.agent.server.impl.LocalAgentRegistry;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
@@ -145,7 +146,7 @@ public class WsMasterModule extends AbstractModule {
 //        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
 
         // agents
-        bind(org.eclipse.che.api.agent.server.AgentRegistry.class).to(org.eclipse.che.api.agent.server.impl.AgentRegistryImpl.class);
+        bind(org.eclipse.che.api.agent.server.AgentRegistry.class).to(LocalAgentRegistry.class);
         Multibinder<Agent> agents = Multibinder.newSetBinder(binder(), Agent.class);
         agents.addBinding().to(SshAgent.class);
         agents.addBinding().to(UnisonAgent.class);

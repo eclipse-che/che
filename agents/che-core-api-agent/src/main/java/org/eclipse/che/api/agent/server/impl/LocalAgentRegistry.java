@@ -40,14 +40,14 @@ import static java.util.Collections.unmodifiableCollection;
  * @author Anatoliy Bazko
  */
 @Singleton
-public class AgentRegistryImpl implements AgentRegistry {
+public class LocalAgentRegistry implements AgentRegistry {
 
-    protected static final Logger LOG = LoggerFactory.getLogger(AgentRegistryImpl.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(LocalAgentRegistry.class);
 
     private final Map<AgentKey, Agent> agents;
 
     /**
-     * AgentRegistryImpl constructor.
+     * LocalAgentRegistry constructor.
      *
      * @param agents
      *      list of agents to register
@@ -55,7 +55,7 @@ public class AgentRegistryImpl implements AgentRegistry {
      *      if there are several agents with same id and version
      */
     @Inject
-    public AgentRegistryImpl(Set<Agent> agents) throws IllegalArgumentException {
+    public LocalAgentRegistry(Set<Agent> agents) throws IllegalArgumentException {
         this.agents = new HashMap<>(agents.size());
         for (Agent agent : agents) {
             AgentKeyImpl key = new AgentKeyImpl(agent);
@@ -82,6 +82,12 @@ public class AgentRegistryImpl implements AgentRegistry {
     @Override
     public Collection<Agent> getAgents() throws AgentException {
         return unmodifiableCollection(agents.values());
+    }
+
+    @Override
+    public List<Agent> getOrderedAgents(List<AgentKey> keys) {
+        //TODO implement it
+        throw new RuntimeException("Not implemented method: LocalAgentRegistry.getOrderedAgents()");
     }
 
     private Agent doGetAgent(AgentKey key) throws AgentException {

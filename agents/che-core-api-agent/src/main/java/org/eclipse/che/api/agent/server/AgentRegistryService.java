@@ -20,9 +20,10 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
-import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.dto.AgentDto;
 import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
+import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -32,7 +33,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-
 import java.util.Collection;
 import java.util.List;
 
@@ -124,5 +124,10 @@ public class AgentRegistryService extends Service {
         } catch (AgentException e) {
             throw new ServerException(e.getMessage(), e);
         }
+    }
+
+    // TODO
+    public List <Agent> getOrderedAgents(List <AgentKey> keys) {
+        return agentRegistry.getOrderedAgents(keys);
     }
 }

@@ -63,4 +63,12 @@ public interface AgentRegistry {
      *      if unexpected error occurred
      */
     Collection<Agent> getAgents() throws AgentException;
+
+    /**
+     * Traverses dependencies of all listed agents and
+     * returns properly ordered list of non-duplicated Agent descriptions
+     * @param keys keys of interesting agents
+     * @return list of agents
+     */
+    List <Agent> getOrderedAgents(List <AgentKey> keys);
 }

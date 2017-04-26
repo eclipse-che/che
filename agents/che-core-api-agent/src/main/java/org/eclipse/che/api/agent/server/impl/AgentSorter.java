@@ -32,6 +32,7 @@ import java.util.Set;
  * @author Anatolii Bazko
  */
 @Singleton
+// TODO not a standalone component, use this logic inside AgentRegistry.getOrderedAgents(List <AgentKey> keys) method
 public class AgentSorter {
 
     private final AgentRegistry agentRegistry;
