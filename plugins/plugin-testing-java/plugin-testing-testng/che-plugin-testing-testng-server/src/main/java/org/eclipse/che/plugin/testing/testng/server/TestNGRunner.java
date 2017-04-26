@@ -40,6 +40,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
+import jnr.posix.POSIX;
+import jnr.posix.POSIXFactory;
 
 /**
  * TestNG implementation for the test runner service.
@@ -100,19 +102,27 @@ public class TestNGRunner implements TestRunner {
             }
         };
 
-        TestResult testResult;
-        if (runClass) {
-            String fqn = testParameters.get("fqn");
-            testResult = run(projectAbsolutePath, fqn);
-        } else {
-            if (xmlPath == null) {
-                testResult = runAll(projectAbsolutePath);
+        String currentWorkingDir = System.getProperty("user.dir");
+        POSIX posix = POSIXFactory.getPOSIX();
+        String posixCwd = posix.getcwd();
+        try {
+            TestResult testResult;
+            if (runClass) {
+                String fqn = testParameters.get("fqn");
+                testResult = run(projectAbsolutePath, fqn);
             } else {
-                testResult = runTestXML(projectAbsolutePath, ResourcesPlugin.getPathToWorkspace() + xmlPath);
+                if (xmlPath == null) {
+                    testResult = runAll(projectAbsolutePath);
+                } else {
+                    testResult = runTestXML(projectAbsolutePath, ResourcesPlugin.getPathToWorkspace() + xmlPath);
+                }
             }
+            testResult.setProjectPath(projectPath);
+            return testResult;
+        } finally {
+            System.setProperty("user.dir", currentWorkingDir);
+            posix.chdir(posixCwd);
         }
-        testResult.setProjectPath(projectPath);
-        return testResult;
     }
 
     /**

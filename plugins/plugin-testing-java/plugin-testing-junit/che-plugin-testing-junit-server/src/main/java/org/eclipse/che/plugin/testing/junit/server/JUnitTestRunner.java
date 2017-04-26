@@ -39,6 +39,8 @@ import org.eclipse.che.plugin.testing.classpath.server.TestClasspathRegistry;
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
+import jnr.posix.POSIX;
+import jnr.posix.POSIXFactory;
 
 /**
  * JUnit implementation for the test runner service.
@@ -125,8 +127,12 @@ public class JUnitTestRunner implements TestRunner {
         }
 
         String currentWorkingDir = System.getProperty("user.dir");
+        POSIX posix = POSIXFactory.getPOSIX();
+        String posixCwd = posix.getcwd();
         try {
+            
             System.setProperty("user.dir", projectAbsolutePath);
+            posix.chdir(projectAbsolutePath);
             TestResult testResult;
             if (runClass) {
                 String fqn = testParameters.get("fqn");
@@ -138,6 +144,7 @@ public class JUnitTestRunner implements TestRunner {
             return testResult;
         } finally {
             System.setProperty("user.dir", currentWorkingDir);
+            posix.chdir(posixCwd);
         }
     }
 
