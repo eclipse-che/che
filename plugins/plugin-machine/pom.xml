@@ -16,14 +16,13 @@
     <parent>
         <artifactId>che-plugin-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.9.0-SNAPSHOT</version>
+        <version>5.10.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-machine-parent</artifactId>
     <packaging>pom</packaging>
     <name>Che Plugin :: Machine :: Parent</name>
     <modules>
-        <module>che-plugin-machine-ext-client</module>
         <module>che-plugin-machine-ext-server</module>
         <module>che-plugin-machine-ssh-client</module>
     </modules>

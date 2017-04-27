@@ -14,7 +14,6 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -61,7 +60,7 @@ public class ApplyTextEditAction extends Action {
 		List<Object> arguments = ((QuickassistActionEvent) e).getArguments();
 		for (Object arg : arguments) {
 			if ((arg instanceof JSONValue)) {
-				TextEdit edit = DtoClientImpls.TextEditDto.fromJson((JSONValue) arg);
+				TextEdit edit = dtoFactory.createDtoFromJson(arg.toString(), TextEdit.class);
 				Range range = edit.getRange();
 				Position start = range.getStart();
 				Position end = range.getEnd();

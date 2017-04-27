@@ -18,8 +18,8 @@ import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.ext.gwt.client.GwtResources;
-import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
-import org.eclipse.che.ide.extension.machine.client.command.macros.DevMachineHostNameMacro;
+import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
+import org.eclipse.che.ide.macro.DevMachineHostNameMacro;
 
 import java.util.LinkedList;
 import java.util.List;

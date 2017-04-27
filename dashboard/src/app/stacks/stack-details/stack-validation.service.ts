@@ -9,6 +9,8 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {DockerfileParser} from '../../../components/api/environment/docker-file-parser';
+
 
 const COMPOSE = 'compose';
 const DOCKERFILE = 'dockerfile';
@@ -20,6 +22,12 @@ const DOCKERIMAGE = 'dockerimage';
  * @author Oleksii Orel
  */
 export class StackValidationService {
+
+  dockerfileParser: DockerfileParser;
+
+  constructor() {
+    this.dockerfileParser = new DockerfileParser();
+  }
 
   /**
    * Return result of recipe validation.
@@ -247,9 +255,13 @@ export class StackValidationService {
         if (!recipe.content) {
           isValid = false;
           errors.push('Unknown recipe content.');
-        } else if (!/^FROM\s+\w+/m.test(recipe.content)) {
-          isValid = false;
-          errors.push('The dockerfile is invalid.');
+        } else {
+          try {
+            this.dockerfileParser.parse(recipe.content);
+          } catch (e) {
+            isValid = false;
+            errors.push(e.message);
+          }
         }
       }
       if (!recipe.contentType) {

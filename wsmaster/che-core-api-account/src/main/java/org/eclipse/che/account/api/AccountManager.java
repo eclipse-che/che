@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.account.api;
 
+import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,11 +32,13 @@ import static java.util.Objects.requireNonNull;
 @Singleton
 public class AccountManager {
 
-    private final AccountDao accountDao;
+    private final AccountDao   accountDao;
+    private final EventService eventService;
 
     @Inject
-    public AccountManager(AccountDao accountDao) {
+    public AccountManager(AccountDao accountDao, EventService eventService) {
         this.accountDao = accountDao;
+        this.eventService = eventService;
     }
 
     /**
@@ -121,6 +125,12 @@ public class AccountManager {
      */
     public void remove(String id) throws ServerException {
         requireNonNull(id, "Required non-null account id");
-        accountDao.remove(id);
+        try {
+            AccountImpl toRemove = accountDao.getById(id);
+            eventService.publish(new BeforeAccountRemovedEvent(toRemove)).propagateException();
+            accountDao.remove(id);
+        } catch (NotFoundException ignored) {
+            //account is already removed
+        }
     }
 }

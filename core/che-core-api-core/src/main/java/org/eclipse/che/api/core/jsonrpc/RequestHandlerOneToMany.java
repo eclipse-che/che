@@ -53,11 +53,7 @@ public class RequestHandlerOneToMany<P, R> implements RequestHandler {
 
         LOG.debug("Handling request from: {}, with params: {}", endpointId, params);
 
-        P paramsObject = pClass.equals(String.class) ||
-                         pClass.equals(Boolean.class) ||
-                         pClass.equals(Double.class) ? params.getAsListOf(pClass).get(0)
-                                                     : params.getAs(pClass);
-
+        P paramsObject = params.getAs(pClass);
         LOG.debug("Created raw params object: {}", paramsObject);
         List<R> resultList = function.apply(endpointId, paramsObject);
         LOG.debug("Received result list: {}", resultList);

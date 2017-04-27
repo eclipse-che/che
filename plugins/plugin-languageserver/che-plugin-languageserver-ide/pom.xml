@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-languageserver-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.9.0-SNAPSHOT</version>
+        <version>5.10.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>che-plugin-languageserver-ide</artifactId>
@@ -108,7 +108,6 @@
         </dependency>
     </dependencies>
     <build>
-        <outputDirectory>target/classes</outputDirectory>
         <resources>
             <resource>
                 <directory>src/main/java</directory>
@@ -145,6 +144,36 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-languageserver-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.eclipse.che.core</groupId>
+                        <artifactId>che-core-api-languageserver-shared</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <dtoPackages>
+                        <package>org.eclipse.lsp4j</package>
+                        <package>org.eclipse.che.api.languageserver.shared.event</package>
+                        <package>org.eclipse.che.api.languageserver.shared.model</package>
+                    </dtoPackages>
+                    <outputDirectory>${dto-generator-out-directory}</outputDirectory>
+                    <genClassName>org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls</genClassName>
+                    <impl>client</impl>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
@@ -177,36 +206,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-api-languageserver-maven-plugin</artifactId>
-                <version>${project.version}</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>${project.groupId}</groupId>
-                        <artifactId>${project.artifactId}</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <dtoPackages>
-                        <package>org.eclipse.lsp4j</package>
-                        <package>org.eclipse.che.api.languageserver.shared.event</package>
-                        <package>org.eclipse.che.api.languageserver.shared.model</package>
-                    </dtoPackages>
-                    <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                    <genClassName>org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls</genClassName>
-                    <impl>client</impl>
-                </configuration>
-            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>

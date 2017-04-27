@@ -45,7 +45,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.js.JsPromise;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -159,17 +158,22 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                     String info = debuggerInfo.getName() + " " + debuggerInfo.getVersion();
                     String address = debuggerInfo.getHost() + ":" + debuggerInfo.getPort();
                     DebuggerDescriptor debuggerDescriptor = new DebuggerDescriptor(info, address);
-                    JsPromise<Void> promise1 = Promises.resolve(null);
 
                     for (DebuggerObserver observer : observers) {
-                        observer.onDebuggerAttached(debuggerDescriptor, promise1);
+                        observer.onDebuggerAttached(debuggerDescriptor, Promises.resolve(null));
+                    }
+
+                    for (BreakpointDto breakpoint : debugSessionDto.getBreakpoints()) {
+                        onBreakpointActivated(breakpoint.getLocation());
+                    }
+
+                    if (currentLocation != null) {
+                        openCurrentFile();
                     }
 
                     startCheckingEvents();
                 }).catchError(error -> {
-                    if (!isConnected()) {
-                        invalidateDebugSession();
-                    }
+                    disconnect();
                 });
             }
 

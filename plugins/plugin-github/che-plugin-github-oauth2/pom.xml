@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-github-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.9.0-SNAPSHOT</version>
+        <version>5.10.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-github-oauth2</artifactId>
     <packaging>jar</packaging>
@@ -49,6 +49,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-auth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-auth-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

@@ -119,7 +119,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
         refreshView();
 
-        eventBus.addHandler(CommandAddedEvent.getType(), e -> refreshView());
+        eventBus.addHandler(CommandAddedEvent.getType(), e -> refreshViewAndSelectCommand(e.getCommand()));
         eventBus.addHandler(CommandRemovedEvent.getType(), e -> refreshView());
         eventBus.addHandler(CommandUpdatedEvent.getType(), e -> refreshView());
     }
