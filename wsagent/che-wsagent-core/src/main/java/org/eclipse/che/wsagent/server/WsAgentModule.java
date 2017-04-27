@@ -30,7 +30,7 @@ public class WsAgentModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(ApiInfoService.class);
-        install(new org.eclipse.che.api.auth.client.OAuthAgentModule());
+        install(new org.eclipse.che.security.oauth.OAuthAgentModule());
         install(new org.eclipse.che.api.core.rest.CoreRestModule());
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
         install(new org.eclipse.che.api.project.server.ProjectApiModule());

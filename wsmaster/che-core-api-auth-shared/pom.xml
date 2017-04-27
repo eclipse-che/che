@@ -11,43 +11,24 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-plugin-github-parent</artifactId>
-        <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.10.0-SNAPSHOT</version>
+        <artifactId>che-master-parent</artifactId>
+        <groupId>org.eclipse.che.core</groupId>
+        <version>5.9.0-SNAPSHOT</version>
     </parent>
-    <artifactId>che-plugin-github-server</artifactId>
+    <artifactId>che-core-api-auth-shared</artifactId>
     <packaging>jar</packaging>
-    <name>Che Plugin :: Github :: Server</name>
+    <name>Che Core :: API :: Authentication :: Shared</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
+        <findbugs.failonerror>false</findbugs.failonerror>
     </properties>
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-multibindings</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-auth-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -56,46 +37,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-dto</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-git</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-project</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-ssh-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-json</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-github-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-ssh-key-server</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.kohsuke</groupId>
-            <artifactId>github-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -107,17 +48,9 @@
                 <directory>src/main/resources</directory>
             </resource>
             <resource>
-                <directory>${project.build.directory}/generated-sources/dto/</directory>
+                <directory>${dto-generator-out-directory}</directory>
             </resource>
         </resources>
-        <testResources>
-            <testResource>
-                <directory>src/test/java</directory>
-            </testResource>
-            <testResource>
-                <directory>src/test/resources</directory>
-            </testResource>
-        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -170,28 +103,33 @@
                 <version>${project.version}</version>
                 <executions>
                     <execution>
-                        <id>generate-server-dto</id>
+                        <id>server</id>
                         <phase>process-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
+                        <configuration>
+                            <dtoPackages>
+                                <package>org.eclipse.che.api.auth.shared.dto</package>
+                            </dtoPackages>
+                            <outputDirectory>${dto-generator-out-directory}</outputDirectory>
+                            <genClassName>org.eclipse.che.api.auth.shared.dto.server.DtoServerImpls</genClassName>
+                            <impl>server</impl>
+                        </configuration>
                     </execution>
                 </executions>
                 <dependencies>
                     <dependency>
-                        <groupId>org.eclipse.che.plugin</groupId>
-                        <artifactId>che-plugin-github-shared</artifactId>
+                        <groupId>org.eclipse.che.core</groupId>
+                        <artifactId>che-core-api-auth-shared</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.eclipse.che.core</groupId>
+                        <artifactId>che-core-api-model</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>
-                <configuration>
-                    <dtoPackages>
-                        <package>org.eclipse.che.plugin.github.shared</package>
-                    </dtoPackages>
-                    <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                    <genClassName>org.eclipse.che.plugin.github.server.dto.DtoServerImpls</genClassName>
-                    <impl>server</impl>
-                </configuration>
             </plugin>
         </plugins>
     </build>
