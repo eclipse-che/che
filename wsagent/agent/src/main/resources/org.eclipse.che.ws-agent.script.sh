@@ -77,7 +77,7 @@ if echo ${LINUX_TYPE} | grep -qi "rhel"; then
     fi
 
     test "${PACKAGES}" = "" || {
-        ${SUDO} yum install ${PACKAGES};
+        ${SUDO} yum install -y ${PACKAGES};
     }
 
     if [ ${INSTALL_JDK} = true ]; then
@@ -214,7 +214,7 @@ elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
     fi
 
     test "${PACKAGES}" = "" || {
-        ${SUDO} yum install ${PACKAGES};
+        ${SUDO} yum install -y ${PACKAGES};
     }
 
     if [ ${INSTALL_JDK} = true ]; then
