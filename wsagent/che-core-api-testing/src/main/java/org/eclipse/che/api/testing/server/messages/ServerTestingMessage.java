@@ -54,7 +54,11 @@ public class ServerTestingMessage implements TestingMessage {
 
     protected ServerTestingMessage(TestingMessageName messageName, Map<String, String> attributes) {
         this.messageName = messageName;
-        if(attributes != null) {
+        setAttributes(attributes);
+    }
+
+    protected void setAttributes(Map<String, String> attributes) {
+        if (attributes != null) {
             this.attributes.putAll(attributes);
         }
     }

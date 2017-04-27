@@ -31,7 +31,8 @@ public enum TestingMessageName {
     SUITE_TREE_NODE("suiteTreeNode"),
     BUILD_TREE_ENDED("treeEnded"),
     TESTING_STARTED("testingStarted"),
-    FINISH_TESTING("finishTesting");
+    FINISH_TESTING("finishTesting"),
+    UNCAPTURED_OUTPUT("uncapturedOutput");
 
 
     private String name;

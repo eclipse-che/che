@@ -214,4 +214,12 @@ public class ClasspathEntryHelper {
     public void setSourcePath(Path sources) {
         this.sourcePath = sources;
     }
+
+    public void setOutputLocation(IPath outputLocation) {
+        this.outputLocation = outputLocation;
+    }
+
+    public IPath getOutputLocation() {
+        return outputLocation;
+    }
 }

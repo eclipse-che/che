@@ -12,6 +12,7 @@ package org.eclipse.che.api.testing.server.framework;
 
 import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.testing.server.messages.ServerTestingMessage;
+import org.eclipse.che.api.testing.server.messages.UncapturedOutputMessage;
 import org.eclipse.che.api.testing.shared.Constants;
 import org.eclipse.che.commons.lang.execution.ProcessEvent;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
@@ -25,12 +26,15 @@ public class TestMessagesOutputTransmitter {
 
     private final RequestTransmitter requestTransmitter;
     private final String endpoint;
+    private final LineSplitter lineSplitter;
     private ProcessHandler processHandler;
 
     public TestMessagesOutputTransmitter(ProcessHandler processHandler, RequestTransmitter requestTransmitter, String endpoint) {
         this.processHandler = processHandler;
         this.requestTransmitter = requestTransmitter;
         this.endpoint = endpoint;
+
+        lineSplitter = new LineSplitter(this::processLine);
 
         processHandler.addProcessListener(new ProcessListener() {
             @Override
@@ -55,12 +59,34 @@ public class TestMessagesOutputTransmitter {
         });
     }
 
+    private void processLine(String line, ProcessOutputType outputType) {
+        if (!processTestingMessage(line)) {
+            sendOutput(line, outputType);
+        }
+    }
+
+    private void sendOutput(String text, ProcessOutputType outputType) {
+        UncapturedOutputMessage message = new UncapturedOutputMessage(text, outputType);
+        requestTransmitter.transmitStringToNone(endpoint, Constants.TESTING_RPC_METHOD_NAME, message.asJsonString());
+
+    }
+
+    private boolean processTestingMessage(String line) {
+        ServerTestingMessage message = ServerTestingMessage.parse(line.trim());
+        if (message != null) {
+            requestTransmitter.transmitStringToNone(endpoint, Constants.TESTING_RPC_METHOD_NAME, message.asJsonString());
+            return true;
+        }
+        return false;
+    }
+
     private void processTestingStopped() {
+        lineSplitter.flush();
         requestTransmitter.transmitStringToNone(endpoint, Constants.TESTING_RPC_METHOD_NAME, ServerTestingMessage.FINISH_TESTING.asJsonString());
     }
 
     private void process(String text, ProcessOutputType outputType) {
-        //TODO
+        lineSplitter.process(text, outputType);
     }
 
     private void processStartTesting() {

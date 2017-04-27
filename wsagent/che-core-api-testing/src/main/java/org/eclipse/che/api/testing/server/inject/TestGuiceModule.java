@@ -11,6 +11,7 @@
 package org.eclipse.che.api.testing.server.inject;
 
 import com.google.inject.AbstractModule;
+import org.eclipse.che.api.testing.server.TestingRPCService;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.inject.DynaModule;
 
@@ -24,7 +25,7 @@ public class TestGuiceModule extends AbstractModule {
     @Override
     protected void configure() {
         newSetBinder(binder(), TestRunner.class);
-//        bind(TestingService.class);
+        bind(TestingRPCService.class);
 
     }
 }
