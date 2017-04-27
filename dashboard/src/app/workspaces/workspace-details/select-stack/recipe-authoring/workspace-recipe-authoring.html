@@ -16,6 +16,10 @@
           <div ng-message="required">The recipe is required.</div>
         </che-error-messages>
       </che-input>
+      <div class="errors-container"
+           ng-if="workspaceRecipeAuthoringController.recipeValidationError">
+        {{workspaceRecipeAuthoringController.recipeValidationError}}
+      </div>
       <div class="recipe-docs-link">
         <a href="https://www.eclipse.org/che/docs/workspace/stacks/index.html#stack-administration" target="_blank">Custom stack documentation</a>
       </div>

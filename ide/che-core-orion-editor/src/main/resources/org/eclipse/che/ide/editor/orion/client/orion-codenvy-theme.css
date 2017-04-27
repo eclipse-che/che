@@ -198,7 +198,7 @@
 }
 
 .textViewTooltipOnHover {
-    overflow: visible;
+    overflow: auto;
 }
 
 .orionCodenvy .textViewFind {

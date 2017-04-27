@@ -37,8 +37,6 @@
 .processWidgetText {
     font-family: mainFontFamily;
     font-size: fontSize;
-    color: selectCommandActionColor;
-    margin: 0 0 0 0;
 }
 
 .processWidgetMachineNameLabel {

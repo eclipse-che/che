@@ -16,6 +16,8 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.project.shared.dto.event.FileStateUpdateDto;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.ExternalResourceDelta;
@@ -25,7 +27,9 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
+import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
@@ -44,14 +48,19 @@ public class EditorFileStatusNotificationOperation implements JsonRpcRequestBiOp
 
     private final EventBus               eventBus;
     private final DeletedFilesController deletedFilesController;
+    private final Provider<EditorAgent>  editorAgentProvider;
     private final AppContext             appContext;
 
     private NotificationManager notificationManager;
 
     @Inject
-    public EditorFileStatusNotificationOperation(EventBus eventBus, DeletedFilesController deletedFilesController, AppContext appContext) {
+    public EditorFileStatusNotificationOperation(EventBus eventBus,
+                                                 DeletedFilesController deletedFilesController,
+                                                 Provider<EditorAgent> editorAgentProvider,
+                                                 AppContext appContext) {
         this.eventBus = eventBus;
         this.deletedFilesController = deletedFilesController;
+        this.editorAgentProvider = editorAgentProvider;
         this.appContext = appContext;
     }
 
@@ -88,9 +97,20 @@ public class EditorFileStatusNotificationOperation implements JsonRpcRequestBiOp
                 appContext.getWorkspaceRoot().synchronize(new ExternalResourceDelta(path, path, REMOVED));
                 if (notificationManager != null && !deletedFilesController.remove(stringPath)) {
                     notificationManager.notify("External operation", "File '" + name + "' is removed", SUCCESS, EMERGE_MODE);
+                    closeOpenedEditor(path);
                 }
 
                 break;
+            }
+        }
+    }
+
+    private void closeOpenedEditor(Path path) {
+        final EditorAgent editorAgent = editorAgentProvider.get();
+        final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
+        for (EditorPartPresenter openEditor : openedEditors) {
+            if (openEditor.getEditorInput().getFile().getLocation().equals(path)) {
+                editorAgent.closeEditor(openEditor);
             }
         }
     }

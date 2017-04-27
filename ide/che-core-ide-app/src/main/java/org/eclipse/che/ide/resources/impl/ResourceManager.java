@@ -544,7 +544,9 @@ public final class ResourceManager {
         checkArgument(!source.getLocation().isRoot(), "Workspace root is not allowed to be copied");
 
         return findResource(destination, true).thenPromise(resource -> {
-            checkState(!resource.isPresent() || force, "Cannot create '" + destination.toString() + "'. Resource already exists.");
+            if (resource.isPresent() && !force){
+                return promises.reject(new IllegalStateException("Cannot create '" + destination.toString() + "'. Resource already exists."));
+            }
 
             return ps.copy(source.getLocation(), destination.parent(), destination.lastSegment(), force)
                      .thenPromise(ignored -> findResource(destination, false)

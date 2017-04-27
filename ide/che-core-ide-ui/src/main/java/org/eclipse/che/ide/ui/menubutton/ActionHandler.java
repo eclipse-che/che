@@ -14,10 +14,10 @@ package org.eclipse.che.ide.ui.menubutton;
 public interface ActionHandler {
 
     /**
-     * Called when action (mouse click) on the {@code item} has been performed.
+     * Called when action on the {@code item} has been requested.
      *
      * @param item
-     *         the item on which action has been performed
+     *         the item on which action has been requested
      */
     void onAction(MenuItem item);
 }

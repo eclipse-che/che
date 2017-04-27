@@ -73,7 +73,9 @@ public class ExecuteCommandButtonFactory {
      * @return {@link ExecuteCommandButton}
      */
     public ExecuteCommandButton newButton(CommandGoal goal, ActionDelegate delegate, @Nullable CharCodeWithModifiers keyBinding) {
-        final ExecuteCommandButtonItemsProvider itemsProvider = new ExecuteCommandButtonItemsProvider(appContext, menuItemsFactory);
+        final ExecuteCommandButtonItemsProvider itemsProvider = new ExecuteCommandButtonItemsProvider(appContext,
+                                                                                                      menuItemsFactory,
+                                                                                                      goal);
         final ExecuteCommandButton button = new ExecuteCommandButton(goal,
                                                                      getIconForGoal(goal),
                                                                      itemsProvider,
