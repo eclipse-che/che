@@ -114,7 +114,7 @@ public class ContributionMixinProvider {
         });
     }
 
-    void processCurrentProject() {
+    private void processCurrentProject() {
         final Project rootProject = appContext.getRootProject();
 
         if (lastSelected != null && lastSelected.equals(rootProject)) {
@@ -124,7 +124,6 @@ public class ContributionMixinProvider {
         final PartStack toolingPartStack = workspaceAgent.getPartStack(TOOLING);
 
         if (rootProject == null) {
-
             if (toolingPartStack.containsPart(contributePart)) {
                 invalidateContext(lastSelected);
                 hidePart();

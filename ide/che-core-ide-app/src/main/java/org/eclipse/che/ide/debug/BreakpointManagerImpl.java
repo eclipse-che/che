@@ -279,8 +279,6 @@ public class BreakpointManagerImpl implements BreakpointManager,
         if (breakpointRenderer != null) {
             breakpointRenderer.setLineActive(lineNumber, true);
         }
-
-        preserveBreakpoints();
     }
 
     @Override
@@ -311,8 +309,6 @@ public class BreakpointManagerImpl implements BreakpointManager,
 
             currentBreakpoint = null;
         }
-
-        preserveBreakpoints();
     }
 
     @Nullable
@@ -502,10 +498,6 @@ public class BreakpointManagerImpl implements BreakpointManager,
             List<StorableBreakpointDto> allDtoBreakpoints = new LinkedList<StorableBreakpointDto>();
 
             List<Breakpoint> allBreakpoints = getBreakpointList();
-            if (currentBreakpoint != null) {
-                allBreakpoints.add(currentBreakpoint);
-            }
-
             for (Breakpoint breakpoint : allBreakpoints) {
                 StorableBreakpointDto dto = dtoFactory.createDto(StorableBreakpointDto.class);
                 dto.setType(breakpoint.getType());
@@ -525,9 +517,6 @@ public class BreakpointManagerImpl implements BreakpointManager,
                         dto.setFileProjectConfig(projectDto); //TODO need to think to change argument type from dto to model interface
                     }
                 }
-
-                dto.setActive(breakpoint.isActive());
-
                 allDtoBreakpoints.add(dto);
             }
 
@@ -558,17 +547,12 @@ public class BreakpointManagerImpl implements BreakpointManager,
                     return appContext.getWorkspaceRoot().getFile(dto.getPath()).then(new Function<Optional<File>, Void>() {
                         @Override
                         public Void apply(Optional<File> file) throws FunctionException {
-                            if (!file.isPresent()) {
-                                return null;
-                            }
-                            if (dto.getType() == Type.CURRENT) {
-                                doSetCurrentBreakpoint(file.get(), dto.getLineNumber());
-                            } else {
+                            if (file.isPresent() && dto.getType() == Type.BREAKPOINT) {
                                 addBreakpoint(new Breakpoint(dto.getType(),
                                                              dto.getLineNumber(),
                                                              dto.getPath(),
                                                              file.get(),
-                                                             dto.isActive()));
+                                                             false));
                             }
 
                             return null;
@@ -672,12 +656,10 @@ public class BreakpointManagerImpl implements BreakpointManager,
     }
 
     @Override
-    public void onBreakpointDeleted(Breakpoint breakpoint) {
-    }
+    public void onBreakpointDeleted(Breakpoint breakpoint) { }
 
     @Override
-    public void onAllBreakpointsDeleted() {
-    }
+    public void onAllBreakpointsDeleted() { }
 
     @Override
     public void onPreStepInto() {

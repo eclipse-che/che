@@ -8,14 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.auth.client;
+package org.eclipse.che.security.oauth;
 
 import com.google.inject.AbstractModule;
 
-import org.eclipse.che.api.auth.oauth.OAuthAuthorizationHeaderProvider;
-import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
-import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
-import org.eclipse.che.security.oauth1.RemoteOAuthAuthorizationHeaderProvider;
+import org.eclipse.che.security.oauth.shared.OAuthAuthorizationHeaderProvider;
+import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
+import org.eclipse.che.security.oauth.oauth1.RemoteOAuthAuthorizationHeaderProvider;
 
 /**
  * Represent single guice module

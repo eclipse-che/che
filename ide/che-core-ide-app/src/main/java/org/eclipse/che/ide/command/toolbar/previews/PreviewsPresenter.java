@@ -17,18 +17,13 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
-import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
-import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessResponseDto;
-import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
@@ -38,11 +33,9 @@ import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 
-import java.util.Map.Entry;
-import java.util.Optional;
+import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
 /** Drives the UI for displaying preview URLs of the running processes. */
 @Singleton
@@ -91,76 +84,37 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
         eventBus.addHandler(ProcessFinishedEvent.TYPE, event -> updateView());
     }
 
-    /** Updates view with preview URLs of all running processes. */
+    /** Updates view with the preview URLs of running processes. */
     private void updateView() {
         view.removeAllURLs();
 
         final WorkspaceRuntime runtime = appContext.getActiveRuntime();
 
         if (runtime != null) {
-            runtime.getMachines().forEach(machine -> execAgentClient.getProcesses(machine.getId(), false).then(processes -> {
-                processes.forEach(process -> getPreviewUrl(process.getPid(), machine).then(view::addUrl).catchError(ignore -> {}));
-            }));
+            runtime.getMachines().forEach(machine -> {
+                Promise<List<GetProcessesResponseDto>> machineProcesses = execAgentClient.getProcesses(machine.getId(), false);
+                machineProcesses.then(processes -> {
+                    processes.forEach(process -> getPreviewUrl(process).then(view::addUrl).catchError(ignore -> {
+                    }));
+                });
+            });
         }
     }
 
     /**
-     * Returns promise that resolves preview URL of the command which has launched
-     * the process with the given {@code pid} on the specified {@code machine}.
+     * Returns promise that resolves preview URL for the given process.
      * Returns promise that rejects with an error if preview URL isn't available.
      */
-    private Promise<PreviewUrlItem> getPreviewUrl(int pid, Machine machine) {
-        return execAgentClient.getProcess(machine.getId(), pid)
-                              // get command's preview URL
-                              .then((Function<GetProcessResponseDto, String>)process -> {
-                                  final Optional<CommandImpl> commandOptional = commandManager.getCommand(process.getName());
+    private Promise<String> getPreviewUrl(GetProcessesResponseDto process) {
+        final String previewUrl = commandManager.getCommand(process.getName())
+                                                .map(CommandImpl::getPreviewURL)
+                                                .orElse(null);
 
-                                  return commandOptional.map(command -> command.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME))
-                                                        .orElse(null);
-                              })
-                              // expand macros used in preview URL
-                              .thenPromise(previewUrl -> {
-                                  if (!isNullOrEmpty(previewUrl)) {
-                                      return macroProcessorProvider.get().expandMacros(previewUrl);
-                                  }
-                                  return promiseProvider.reject(new Exception(messages.previewsNotAvailableError()));
-                              })
-                              // compose preview URL's display name
-                              .then((Function<String, PreviewUrlItem>)previewUrl -> new PreviewUrlItem(previewUrl,
-                                                                                                       getPreviewUrlDisplayName(previewUrl)
-                                                                                                               .orElse(previewUrl)));
-    }
-
-    private Optional<String> getPreviewUrlDisplayName(String previewUrl) {
-        final DevMachine devMachine = appContext.getDevMachine();
-        final MachineRuntimeInfo devMachineRuntime = devMachine.getRuntime();
-
-        if (devMachineRuntime == null) {
-            return Optional.empty();
+        if (!isNullOrEmpty(previewUrl)) {
+            return macroProcessorProvider.get().expandMacros(previewUrl);
         }
 
-        for (Entry<String, ? extends Server> entry : devMachineRuntime.getServers().entrySet()) {
-            Server server = entry.getValue();
-            String serverUrl = server.getUrl();
-
-            if (serverUrl == null) {
-                continue;
-            }
-
-            if (previewUrl.startsWith(serverUrl)) {
-                String displayName = previewUrl.replace(serverUrl, devMachine.getDisplayName() + ':' + entry.getKey());
-
-                // cut protocol from display name
-                final int protocolIndex = displayName.lastIndexOf('/');
-                if (protocolIndex > -1) {
-                    displayName = displayName.substring(0, protocolIndex);
-                }
-
-                return Optional.of(displayName);
-            }
-        }
-
-        return Optional.empty();
+        return promiseProvider.reject(new Exception(messages.previewsNotAvailableError()));
     }
 
     @Override
@@ -169,7 +123,7 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
     }
 
     @Override
-    public void onUrlChosen(PreviewUrlItem previewUrlItem) {
-        Window.open(previewUrlItem.getUrl(), "_blank", null);
+    public void onUrlChosen(String previewUrl) {
+        Window.open(previewUrl, "_blank", null);
     }
 }

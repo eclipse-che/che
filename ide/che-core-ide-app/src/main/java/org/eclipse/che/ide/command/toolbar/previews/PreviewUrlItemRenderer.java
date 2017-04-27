@@ -24,17 +24,17 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
  * Renders widgets for the 'Previews' list. Always returns the same
- * instance of the header widget which is shared among all {@link PreviewUrlItem}s.
+ * instance of the header widget which is shared among all {@link PreviewUrl}s.
  */
 class PreviewUrlItemRenderer implements DropdownListItemRenderer {
 
     static final HeaderWidget HEADER_WIDGET = new HeaderWidget();
 
-    private final BaseListItem<PreviewUrlItem> item;
+    private final BaseListItem<PreviewUrl> item;
 
     private Widget listWidget;
 
-    PreviewUrlItemRenderer(BaseListItem<PreviewUrlItem> item) {
+    PreviewUrlItemRenderer(BaseListItem<PreviewUrl> item) {
         this.item = item;
     }
 

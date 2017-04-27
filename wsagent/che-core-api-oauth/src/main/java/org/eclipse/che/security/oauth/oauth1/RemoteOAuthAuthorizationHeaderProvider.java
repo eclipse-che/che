@@ -8,9 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.security.oauth1;
+package org.eclipse.che.security.oauth.oauth1;
 
-import org.eclipse.che.api.auth.oauth.OAuthAuthorizationHeaderProvider;
+import org.eclipse.che.security.oauth.shared.OAuthAuthorizationHeaderProvider;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +48,7 @@ public class RemoteOAuthAuthorizationHeaderProvider implements OAuthAuthorizatio
             return null;
         }
         UriBuilder uriBuilder = UriBuilder.fromUri(apiEndpoint)
-                                          .path(OAuthAuthenticationService.class)
-                                          .path(OAuthAuthenticationService.class, "signature")
+                                          .path("/oauth/signature")
                                           .queryParam("user_id", userId)
                                           .queryParam("oauth_provider", oauthProviderName)
                                           .queryParam("request_method", requestType)

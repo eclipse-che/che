@@ -153,4 +153,5 @@ public class AppStateManagerTest {
         assertThat(jsonObject.hasKey("key1")).isTrue();
         assertThat(jsonObject.getString("key1")).isEqualTo("value1");
     }
+
 }

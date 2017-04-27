@@ -28,7 +28,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
-import static org.eclipse.che.api.factory.shared.Constants.ACCEPTED_REL_ATT;
 import static org.eclipse.che.api.factory.shared.Constants.FACTORY_ACCEPTANCE_REL_ATT;
 import static org.eclipse.che.api.factory.shared.Constants.IMAGE_REL_ATT;
 import static org.eclipse.che.api.factory.shared.Constants.NAMED_FACTORY_ACCEPTANCE_REL_ATT;
@@ -127,16 +126,6 @@ public class FactoryLinksHelper {
                                                     TEXT_HTML,
                                                     FACTORY_ACCEPTANCE_REL_ATT);
             links.add(createWorkspace);
-            // creation of links for analytics
-            links.add(createLink(HttpMethod.GET,
-                                 uriBuilder.clone()
-                                           .path("analytics")
-                                           .path("public-metric/factory_used")
-                                           .queryParam("factory", createWorkspace.getHref())
-                                           .toString(),
-                                 null,
-                                 TEXT_PLAIN,
-                                 ACCEPTED_REL_ATT));
         }
 
         if (!Strings.isNullOrEmpty(factory.getName()) && !Strings.isNullOrEmpty(userName)) {

@@ -21,6 +21,7 @@ import java.util.Objects;
 
 import static java.util.Collections.unmodifiableList;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
 /** Data object for {@link Command}. */
 public class CommandImpl implements Command {
@@ -121,6 +122,18 @@ public class CommandImpl implements Command {
     /** Sets command's goal ID. */
     public void setGoal(String goalId) {
         getAttributes().put(COMMAND_GOAL_ATTRIBUTE_NAME, goalId);
+    }
+
+
+    /** Returns command's preview URL or {@code null} if none. */
+    @Nullable
+    public String getPreviewURL() {
+        return getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
+    }
+
+    /** Sets command's preview URL. */
+    public void setPreviewURL(String previewURL) {
+        getAttributes().put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, previewURL);
     }
 
     /** Returns command's applicable context. */

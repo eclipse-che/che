@@ -321,13 +321,17 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
     private JsonObject getPartStackState(PartStack partStack, WorkBenchPartController partController) {
         JsonObject state = Json.createObject();
         state.put("SIZE", partController.getSize());
+        state.put("STATE", partStack.getPartStackState().name());
+
         if (partStack.getParts().isEmpty()) {
             state.put("HIDDEN", true);
         } else {
             if (partStack.getActivePart() != null) {
                 state.put("ACTIVE_PART", partStack.getActivePart().getClass().getName());
             }
+
             state.put("HIDDEN", partController.isHidden());
+
             JsonArray parts = Json.createArray();
             state.put("PARTS", parts);
             int i = 0;
@@ -343,18 +347,22 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
     @Override
     public void loadState(@NotNull JsonObject state) {
         if (state.hasKey("PART_STACKS")) {
-            JsonObject part_stacks = state.getObject("PART_STACKS");
-            for (String partStackType : part_stacks.keys()) {
-                JsonObject partStack = part_stacks.getObject(partStackType);
+            JsonObject partStacksState = state.getObject("PART_STACKS");
+
+            // Don't restore part dimensions if perspective is maximized.
+            boolean perspectiveMaximized = isPerspectiveMaximized(partStacksState);
+
+            for (String partStackType : partStacksState.keys()) {
+                JsonObject partStackState = partStacksState.getObject(partStackType);
                 switch (PartStackType.valueOf(partStackType)) {
                     case INFORMATION:
-                        restorePartController(partStacks.get(INFORMATION), belowPartController, partStack);
+                        loadPartStackState(partStacks.get(INFORMATION), belowPartController, partStackState, perspectiveMaximized);
                         break;
                     case NAVIGATION:
-                        restorePartController(partStacks.get(NAVIGATION), leftPartController, partStack);
+                        loadPartStackState(partStacks.get(NAVIGATION), leftPartController, partStackState, perspectiveMaximized);
                         break;
                     case TOOLING:
-                        restorePartController(partStacks.get(TOOLING), rightPartController, partStack);
+                        loadPartStackState(partStacks.get(TOOLING), rightPartController, partStackState, perspectiveMaximized);
                         break;
                 }
             }
@@ -370,9 +378,38 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
         }
     }
 
-    private void restorePartController(PartStack partStack, WorkBenchPartController controller, JsonObject partStackJSON) {
-        if (partStackJSON.hasKey("PARTS")) {
-            JsonArray parts = partStackJSON.get("PARTS");
+    /**
+     * Determines whether perspective is maximized.
+     *
+     * @param partStacksState part stack state
+     * @return <b>true</b> is perspective has maximized part stack
+     */
+    private boolean isPerspectiveMaximized(JsonObject partStacksState) {
+        for (String partStackType : partStacksState.keys()) {
+            JsonObject partStackState = partStacksState.getObject(partStackType);
+            if (partStackState.hasKey("STATE") && PartStack.State.MAXIMIZED.name().equals(partStackState.getString("STATE"))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Set part stack state.
+     *
+     * @param partStack
+     * @param controller
+     * @param partStackState
+     * @param skipRestoreDimensions
+     */
+    private void loadPartStackState(PartStack partStack,
+                                   WorkBenchPartController controller,
+                                   JsonObject partStackState,
+                                   boolean skipRestoreDimensions) {
+        if (partStackState.hasKey("PARTS")) {
+            JsonArray parts = partStackState.get("PARTS");
+
             for (int i = 0; i < parts.length(); i++) {
                 JsonObject value = parts.get(i);
                 if (value.hasKey("CLASS")) {
@@ -389,8 +426,8 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
         }
 
         // restore part stack's active part
-        if (partStackJSON.hasKey("ACTIVE_PART")) {
-            String activePart = partStackJSON.getString("ACTIVE_PART");
+        if (partStackState.hasKey("ACTIVE_PART")) {
+            String activePart = partStackState.getString("ACTIVE_PART");
             Provider<PartPresenter> provider = dynaProvider.getProvider(activePart);
             if (provider != null) {
                 partStack.setActivePart(provider.get());
@@ -403,13 +440,17 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
             return;
         }
 
-        if (partStackJSON.hasKey("HIDDEN") && partStackJSON.getBoolean("HIDDEN")) {
+        if (skipRestoreDimensions) {
+            return;
+        }
+
+        if (partStackState.hasKey("HIDDEN") && partStackState.getBoolean("HIDDEN")) {
             partStack.minimize();
             return;
         }
 
-        if (partStackJSON.hasKey("SIZE")) {
-            double size = partStackJSON.getNumber("SIZE");
+        if (partStackState.hasKey("SIZE")) {
+            double size = partStackState.getNumber("SIZE");
 
             // Size of the part must not be less 100 pixels.
             if (size <= MIN_PART_SIZE) {

@@ -11,19 +11,29 @@
 package org.eclipse.che.api.auth.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Authentication token.
- *
  * @author gazarenkov
  */
 @DTO
-public interface Token {
-    @ApiModelProperty(value = "Authentication token obtained after login", required = true)
-    String getValue();
+public interface Credentials {
 
-    void setValue(String value);
+    String getRealm();
 
-    Token withValue(String value);
+    void setRealm(String realm);
+
+    Credentials withRealm(String realm);
+
+    String getUsername();
+
+    void setUsername(String name);
+
+    Credentials withUsername(String name);
+
+    String getPassword();
+
+    void setPassword(String password);
+
+    Credentials withPassword(String password);
+
 }

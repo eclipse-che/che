@@ -11,7 +11,7 @@
 package org.eclipse.che.security.oauth;
 
 
-import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
+import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -58,8 +58,7 @@ public class RemoteOAuthTokenProvider implements OAuthTokenProvider {
         }
         try {
             UriBuilder ub = UriBuilder.fromUri(apiEndpoint)
-                                      .path(OAuthAuthenticationService.class)
-                                      .path(OAuthAuthenticationService.class, "token")
+                                      .path("/oauth/token")
                                       .queryParam("oauth_provider", oauthProviderName);
             Link getTokenLink = DtoFactory.newDto(Link.class).withHref(ub.build().toString()).withMethod("GET");
             return httpJsonRequestFactory.fromLink(getTokenLink)
