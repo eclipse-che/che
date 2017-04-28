@@ -47,7 +47,7 @@ public final class KubernetesService {
 
             int portNumber = Integer.parseInt(port);
             String portName = CheServicePorts.get().get(portNumber);
-            portName = isNullOrEmpty(portName) ? exposedPort.replace("/", "-") : portName;
+            portName = isNullOrEmpty(portName) ? "server-" + exposedPort.replace("/", "-") : portName;
 
             int targetPortNumber = portNumber;
             ServicePort servicePort = new ServicePort();

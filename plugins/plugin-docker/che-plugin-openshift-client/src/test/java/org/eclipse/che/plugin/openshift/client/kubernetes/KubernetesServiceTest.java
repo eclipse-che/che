@@ -102,7 +102,7 @@ public class KubernetesServiceTest {
         exposedPorts.put("55/tcp",null);
 
         Set<String> expectedPortNames = new HashSet<>();
-        expectedPortNames.add("55-tcp");
+        expectedPortNames.add("server-55-tcp");
 
         // When
         List<ServicePort> servicePorts = KubernetesService.getServicePortsFrom(exposedPorts.keySet());
