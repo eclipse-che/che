@@ -22,7 +22,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import java.io.IOException;
-import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
@@ -59,11 +58,10 @@ public class WsAgentURLProvider implements Provider<String> {
                                                              .request()
                                                              .asDto(WorkspaceDto.class);
                 if (workspace.getRuntime() != null) {
-                    MachineDto machineDto = workspace.getRuntime().getMachines().get("dev-machine");
-                    for (Map.Entry<String, ServerDto> serverEntry : machineDto.getServers().entrySet()) {
-                        if (WSAGENT_REFERENCE.equals(serverEntry.getKey())) {
-                            cachedAgentUrl = serverEntry.getValue().getUrl();
-                            return cachedAgentUrl;
+                    for (MachineDto machine : workspace.getRuntime().getMachines().values()) {
+                        ServerDto wsAgent = machine.getServers().get(WSAGENT_REFERENCE);
+                        if (wsAgent != null) {
+                            cachedAgentUrl = wsAgent.getUrl();
                         }
                     }
                 }

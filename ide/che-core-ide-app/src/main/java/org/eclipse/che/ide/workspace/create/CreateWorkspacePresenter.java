@@ -244,7 +244,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
 
         EnvironmentDto environment = dtoFactory.createDto(EnvironmentDto.class)
                                                .withRecipe(recipe)
-                                               .withMachines(singletonMap("dev-machine", machine));
+                                               .withMachines(singletonMap(WS_MACHINE_NAME, machine));
 
         return dtoFactory.createDto(WorkspaceConfigDto.class)
                          .withName(wsName)
