@@ -59,7 +59,7 @@ public class WsAgentURLProvider implements Provider<String> {
                                                              .request()
                                                              .asDto(WorkspaceDto.class);
                 if (workspace.getRuntime() != null) {
-                    MachineDto machineDto = workspace.getRuntime().getMachines().get("org.eclipse.che.ws-agent");
+                    MachineDto machineDto = workspace.getRuntime().getMachines().get("dev-machine");
                     for (Map.Entry<String, ServerDto> serverEntry : machineDto.getServers().entrySet()) {
                         if (WSAGENT_REFERENCE.equals(serverEntry.getKey())) {
                             cachedAgentUrl = serverEntry.getValue().getUrl();
