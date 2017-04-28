@@ -21,10 +21,10 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
+import org.eclipse.che.ide.debug.DebuggerStateManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
-import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolver;
 import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
@@ -53,11 +53,11 @@ public class JavaDebugger extends AbstractDebugger {
                         RequestTransmitter transmitter,
                         DtoFactory dtoFactory,
                         RequestHandlerConfigurator configurator,
-                        LocalStorageProvider localStorageProvider,
                         EventBus eventBus,
                         FqnResolverFactory fqnResolverFactory,
                         JavaDebuggerFileHandler javaDebuggerFileHandler,
                         DebuggerManager debuggerManager,
+                        DebuggerStateManager debuggerStateManager,
                         NotificationManager notificationManager,
                         FileTypeRegistry fileTypeRegistry,
                         BreakpointManager breakpointManager) {
@@ -65,10 +65,10 @@ public class JavaDebugger extends AbstractDebugger {
               transmitter,
               configurator,
               dtoFactory,
-              localStorageProvider,
               eventBus,
               javaDebuggerFileHandler,
               debuggerManager,
+              debuggerStateManager,
               notificationManager,
               breakpointManager,
               ID);

@@ -51,6 +51,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerObserver;
+import org.eclipse.che.ide.debug.DebuggerStateManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
@@ -121,6 +122,8 @@ public class DebuggerTest extends BaseTest {
     @Mock
     private DebuggerManager            debuggerManager;
     @Mock
+    private DebuggerStateManager       debuggerStateManager;
+    @Mock
     private NotificationManager        notificationManager;
     @Mock
     private BreakpointManager          breakpointManager;
@@ -181,13 +184,12 @@ public class DebuggerTest extends BaseTest {
         doReturn(locationDto).when(breakpointDto).getLocation();
 
         doReturn(localStorage).when(localStorageProvider).get();
-        doReturn(DEBUG_INFO).when(localStorage).getItem(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_SESSION_KEY);
         doReturn(debugSessionDto).when(dtoFactory).createDtoFromJson(anyString(), eq(DebugSessionDto.class));
 
         doReturn(Path.valueOf(PATH)).when(file).getLocation();
 
-        debugger = new TestDebugger(service, transmitter, configurator, dtoFactory, localStorageProvider, eventBus,
-                                    activeFileHandler, debuggerManager, notificationManager, "id");
+        debugger = new TestDebugger(service, transmitter, configurator, dtoFactory, eventBus,
+                                    activeFileHandler, debuggerManager, debuggerStateManager, notificationManager, "id");
         doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
         doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
@@ -243,7 +245,6 @@ public class DebuggerTest extends BaseTest {
         verify(observer).onDebuggerAttached(debuggerDescriptor, promiseVoid);
 
         assertTrue(debugger.isConnected());
-        verify(localStorage).setItem(eq(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_SESSION_KEY), eq(debugSessionJson));
     }
 
     @Test
@@ -263,7 +264,6 @@ public class DebuggerTest extends BaseTest {
         debugger.disconnect();
 
         assertFalse(debugger.isConnected());
-        verify(localStorage).setItem(eq(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_SESSION_KEY), eq(""));
 
         verify(promiseVoid).then(operationVoidCaptor.capture());
         verify(promiseVoid).catchError(operationPromiseErrorCaptor.capture());
@@ -596,20 +596,20 @@ public class DebuggerTest extends BaseTest {
                             RequestTransmitter transmitter,
                             RequestHandlerConfigurator configurator,
                             DtoFactory dtoFactory,
-                            LocalStorageProvider localStorageProvider,
                             EventBus eventBus,
                             ActiveFileHandler activeFileHandler,
                             DebuggerManager debuggerManager,
+                            DebuggerStateManager debuggerStateManager,
                             NotificationManager notificationManager,
                             String id) {
             super(service,
                   transmitter,
                   configurator,
                   dtoFactory,
-                  localStorageProvider,
                   eventBus,
                   activeFileHandler,
                   debuggerManager,
+                  debuggerStateManager,
                   notificationManager,
                   breakpointManager,
                   id);

@@ -20,10 +20,10 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
+import org.eclipse.che.ide.debug.DebuggerStateManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
-import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import org.eclipse.che.plugin.debugger.ide.debug.BasicActiveFileHandler;
 import org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType;
@@ -45,20 +45,20 @@ public class ZendDebugger extends AbstractDebugger {
                         RequestTransmitter transmitter,
                         RequestHandlerConfigurator configurator,
                         DtoFactory dtoFactory,
-                        LocalStorageProvider localStorageProvider,
                         EventBus eventBus,
                         BasicActiveFileHandler activeFileHandler,
                         NotificationManager notificationManager,
                         DebuggerManager debuggerManager,
+                        DebuggerStateManager debuggerStateManager,
                         BreakpointManager breakpointManager) {
         super(service,
               transmitter,
               configurator,
               dtoFactory,
-              localStorageProvider,
               eventBus,
               activeFileHandler,
               debuggerManager,
+              debuggerStateManager,
               notificationManager,
               breakpointManager,
               ID);

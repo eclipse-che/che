@@ -16,6 +16,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
+import org.eclipse.che.api.debug.shared.dto.DebugSessionStateDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
@@ -62,12 +63,11 @@ import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerObservable;
 import org.eclipse.che.ide.debug.DebuggerObserver;
+import org.eclipse.che.ide.debug.DebuggerStateManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.util.storage.LocalStorage;
-import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -83,14 +83,13 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  * @author Anatoliy Bazko
  */
 public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
+
     private static final String EVENT_DEBUGGER_MESSAGE_BREAKPOINT = "event:debugger:breakpoint";
     private static final String EVENT_DEBUGGER_MESSAGE_DISCONNECT = "event:debugger:disconnect";
     private static final String EVENT_DEBUGGER_MESSAGE_SUSPEND    = "event:debugger:suspend";
     private static final String EVENT_DEBUGGER_UN_SUBSCRIBE       = "event:debugger:un-subscribe";
     private static final String EVENT_DEBUGGER_SUBSCRIBE          = "event:debugger:subscribe";
 
-    public static final String LOCAL_STORAGE_DEBUGGER_SESSION_KEY = "che-debugger-session";
-    public static final String LOCAL_STORAGE_DEBUGGER_STATE_KEY   = "che-debugger-state";
     public static final String WS_AGENT_ENDPOINT                  = "ws-agent";
 
     protected final DtoFactory             dtoFactory;
@@ -100,25 +99,25 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     private final RequestTransmitter         transmitter;
     private final RequestHandlerConfigurator configurator;
     private final DebuggerServiceClient      service;
-    private final LocalStorageProvider       localStorageProvider;
     private final EventBus                   eventBus;
     private final ActiveFileHandler          activeFileHandler;
     private final DebuggerManager            debuggerManager;
+    private final DebuggerStateManager       debuggerStateManager;
     private final BreakpointManager          breakpointManager;
     private final String                     debuggerType;
 
-    private DebugSessionDto debugSessionDto;
-    private Location        currentLocation;
-
+    private DebugSessionStateDto             debugSessionStateDto;
+    private DebugSessionDto                  debugSessionDto;
+    private LocationDto                      currentLocation;
 
     public AbstractDebugger(DebuggerServiceClient service,
                             RequestTransmitter transmitter,
                             RequestHandlerConfigurator configurator,
                             DtoFactory dtoFactory,
-                            LocalStorageProvider localStorageProvider,
                             EventBus eventBus,
                             ActiveFileHandler activeFileHandler,
                             DebuggerManager debuggerManager,
+                            DebuggerStateManager debuggerStateManager,
                             NotificationManager notificationManager,
                             BreakpointManager breakpointManager,
                             String type) {
@@ -126,10 +125,10 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         this.transmitter = transmitter;
         this.configurator = configurator;
         this.dtoFactory = dtoFactory;
-        this.localStorageProvider = localStorageProvider;
         this.eventBus = eventBus;
         this.activeFileHandler = activeFileHandler;
         this.debuggerManager = debuggerManager;
+        this.debuggerStateManager = debuggerStateManager;
         this.notificationManager = notificationManager;
         this.breakpointManager = breakpointManager;
         this.observers = new ArrayList<>();
@@ -138,7 +137,6 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         restoreDebuggerState();
         addHandlers();
     }
-
 
     private void addHandlers() {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
@@ -446,7 +444,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         }
 
         invalidateDebugSession();
-        preserveDebuggerState();
+        cleanDebuggerState();
 
         disconnect.then(it -> {
             for (DebuggerObserver observer : observers) {
@@ -617,23 +615,11 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
      * Preserves debugger information into the local storage.
      */
     protected void preserveDebuggerState() {
-        LocalStorage localStorage = localStorageProvider.get();
-
-        if (localStorage == null) {
-            return;
-        }
-
-        if (!isConnected()) {
-            localStorage.setItem(LOCAL_STORAGE_DEBUGGER_SESSION_KEY, "");
-            localStorage.setItem(LOCAL_STORAGE_DEBUGGER_STATE_KEY, "");
-        } else {
-            localStorage.setItem(LOCAL_STORAGE_DEBUGGER_SESSION_KEY, dtoFactory.toJson(debugSessionDto));
-            if (currentLocation == null) {
-                localStorage.setItem(LOCAL_STORAGE_DEBUGGER_STATE_KEY, "");
-            } else {
-                localStorage.setItem(LOCAL_STORAGE_DEBUGGER_STATE_KEY, dtoFactory.toJson(currentLocation));
-            }
-        }
+        debugSessionStateDto = dtoFactory.createDto(DebugSessionStateDto.class)
+                .withDebuggerType(debuggerType)
+                .withDebugSession(debugSessionDto)
+                .withLocation(currentLocation);
+        debuggerStateManager.setDebuggerState(debugSessionStateDto);
     }
 
     /**
@@ -641,26 +627,16 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
      */
     protected void restoreDebuggerState() {
         invalidateDebugSession();
-
-        LocalStorage localStorage = localStorageProvider.get();
-        if (localStorage == null) {
-            return;
+        debugSessionStateDto = debuggerStateManager.getDebuggerState(debuggerType);
+        if (debugSessionStateDto != null) {
+            setDebugSession(debugSessionStateDto.getDebugSession());
+            currentLocation = debugSessionStateDto.getLocation();
         }
+    }
 
-        String data = localStorage.getItem(LOCAL_STORAGE_DEBUGGER_SESSION_KEY);
-        if (data != null && !data.isEmpty()) {
-            DebugSessionDto debugSessionDto = dtoFactory.createDtoFromJson(data, DebugSessionDto.class);
-            if (!debugSessionDto.getType().equals(getDebuggerType())) {
-                return;
-            }
-
-            setDebugSession(debugSessionDto);
-        }
-
-        data = localStorage.getItem(LOCAL_STORAGE_DEBUGGER_STATE_KEY);
-        if (data != null && !data.isEmpty()) {
-            currentLocation = dtoFactory.createDtoFromJson(data, LocationDto.class);
-        }
+    protected void cleanDebuggerState() {
+        debuggerStateManager.removeDebuggerState(debuggerType);
+        debugSessionStateDto = null;
     }
 
     private VariableDto asDto(Variable variable) {
