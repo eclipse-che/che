@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.model.machine.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
@@ -81,19 +81,20 @@ public class JavaDebugConfigurationPagePresenter implements JavaDebugConfigurati
     /** Extracts list of ports available for connecting to the remote debugger. */
     private List<Pair<String, String>> extractPortsList(final MachineEntity machine) {
         List<Pair<String, String>> ports = new ArrayList<>();
-        if (machine == null || machine.getRuntime() == null) {
+        if (machine == null) {
             return ports;
         }
 
-        Map<String, ? extends Server> servers = machine.getRuntime().getServers();
+        Map<String, ? extends Server> servers = machine.getServers();
         for (Map.Entry<String, ? extends Server> entry : servers.entrySet()) {
             String port = entry.getKey();
             if (port.endsWith("/tcp")) {
                 String portWithoutTcp = port.substring(0, port.length() - 4);
-                String description = portWithoutTcp + " (" + entry.getValue().getRef() + ")";
-                Pair<String, String> pair = new Pair<>(description, portWithoutTcp);
+                // FIXME: spi
+//                String description = portWithoutTcp + " (" + entry.getValue().getRef() + ")";
+//                Pair<String, String> pair = new Pair<>(description, portWithoutTcp);
 
-                ports.add(pair);
+//                ports.add(pair);
             }
         }
 

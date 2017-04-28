@@ -14,13 +14,14 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.ActivateProcessOutputEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
@@ -106,10 +107,10 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
         view.clearList();
         runningProcesses.clear();
 
-        final WorkspaceRuntime runtime = appContext.getActiveRuntime();
+        final ActiveRuntime runtime = appContext.getActiveRuntime();
 
         if (runtime != null) {
-            for (Machine machine : runtime.getMachines()) {
+            for (MachineEntity machine : runtime.getMachines()) {
                 execAgentClient.getProcesses(machine.getId(), false).then(processes -> {
                     for (GetProcessesResponseDto p : processes) {
                         final Process process = new ProcessImpl(p.getName(),
@@ -135,7 +136,8 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
      *         machine where process were run or currently running
      */
     private void addProcessToList(int pid, Machine machine) {
-        execAgentClient.getProcess(machine.getId(), pid).then(processDto -> {
+        // FIXME: spi
+        execAgentClient.getProcess(""/*machine.getId()*/, pid).then(processDto -> {
             final Process process = new ProcessImpl(processDto.getName(),
                                                     processDto.getCommandLine(),
                                                     processDto.getPid(),
@@ -165,7 +167,8 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
 
     @Override
     public void onStopProcess(Process process) {
-        execAgentClient.killProcess(process.getMachine().getId(), process.getPid());
+        // FIXME: spi
+        execAgentClient.killProcess(""/*process.getMachine().getId()*/, process.getPid());
     }
 
     @Override

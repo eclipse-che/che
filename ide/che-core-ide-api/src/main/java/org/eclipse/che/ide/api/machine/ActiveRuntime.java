@@ -10,53 +10,46 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine;
 
-
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.workspace.shared.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * @author Vitalii Parfonov
  */
-
 public class ActiveRuntime {
 
-    protected Runtime workspaceRuntime;
-    private String id;
-    private String rootFolder;
-    private DevMachine devMachine;
+    private DevMachine          devMachine;
     private List<MachineEntity> machines;
 
-    public ActiveRuntime(Runtime workspaceRuntime) {
-        this.workspaceRuntime = workspaceRuntime;
-        if (workspaceRuntime != null) {
-            id = workspaceRuntime.getActiveEnv();
-            rootFolder = workspaceRuntime.getRootFolder();
-            devMachine = new DevMachine(workspaceRuntime.getDevMachine());
-            machines = new ArrayList<>();
-            for(Machine machine : workspaceRuntime.getMachines()) {
-                machines.add(new MachineEntityImpl(machine));
-            }
+    public ActiveRuntime(Workspace workspace) {
+        Runtime workspaceRuntime = workspace.getRuntime();
+
+        WorkspaceConfig workspaceConfig = workspace.getConfig();
+        String defaultEnv = workspaceConfig.getDefaultEnv();
+        Environment defEnvironment = workspaceConfig.getEnvironments().get(defaultEnv);
+
+        String devMachineName = Utils.getDevMachineName(defEnvironment);
+        Machine devMachine = workspaceRuntime.getMachines().get(devMachineName);
+
+        this.devMachine = new DevMachine(devMachineName, devMachine);
+        machines = new ArrayList<>();
+
+        for (Entry<String, ? extends Machine> entry : workspaceRuntime.getMachines().entrySet()) {
+            machines.add(new MachineEntityImpl(entry.getKey(), entry.getValue()));
         }
     }
-
-
-
-    public String getActiveEnv() {
-        return id;
-    }
-
-    public String getRootFolder() {
-        return rootFolder;
-    }
-
 
     public DevMachine getDevMachine() {
         return devMachine;
     }
-
 
     public List<MachineEntity> getMachines() {
         return machines;

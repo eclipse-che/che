@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
@@ -40,7 +40,8 @@ public class MachineLogsRestorer {
             return;
         }
 
-        String machineId = machine.getId();
+        // FIXME: spi
+        String machineId = ""/*machine.getId()*/;
 
         execAgentCommandManager.getProcesses(machineId, false)
                                .then(processes -> {
@@ -49,7 +50,8 @@ public class MachineLogsRestorer {
                                            .then(logs -> {
                                                logs.forEach(log -> {
                                                    String fixedLog = log.getText().replaceAll("\\[STDOUT\\] ", "");
-                                                   String machineName = machine.getConfig().getName();
+                                                   // FIXME: spi
+                                                   String machineName = ""/*machine.getConfig().getName()*/;
                                                    eventBus.fireEvent(new EnvironmentOutputEvent(fixedLog, machineName));
                                                });
                                            });

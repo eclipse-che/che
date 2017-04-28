@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessKillResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessSubscribeResponseDto;
@@ -221,7 +221,8 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
     @Override
     public void stop() {
-        execAgentCommandManager.killProcess(machine.getId(), pid);
+        // FIXME: spi
+        execAgentCommandManager.killProcess(""/*machine.getId()*/, pid);
     }
 
     @Override
@@ -239,7 +240,8 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         if (isFinished()) {
             commandExecutor.executeCommand(command, machine);
         } else {
-            execAgentCommandManager.killProcess(machine.getId(), pid).then(new Operation<ProcessKillResponseDto>() {
+            // FIXME: spi
+            execAgentCommandManager.killProcess(""/*machine.getId()*/, pid).then(new Operation<ProcessKillResponseDto>() {
                 @Override
                 public void apply(ProcessKillResponseDto arg) throws OperationException {
                     commandExecutor.executeCommand(command, machine);

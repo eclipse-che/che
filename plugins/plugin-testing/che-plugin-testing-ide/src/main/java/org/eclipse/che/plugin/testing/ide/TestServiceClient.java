@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -182,7 +182,8 @@ public class TestServiceClient {
                                                                           command.getType(), attributes);
 
                             final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
-                            final String machineId = machine.getId();
+                            // FIXME: spi
+                            final String machineId = ""/*machine.getId()*/;
 
                             processesPanelPresenter.addCommandOutput(machineId, console);
                             ExecAgentPromise<ProcessStartResponseDto> processPromise = execAgentCommandManager.startProcess(machineId,

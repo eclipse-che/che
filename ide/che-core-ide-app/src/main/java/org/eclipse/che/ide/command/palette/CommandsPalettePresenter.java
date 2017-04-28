@@ -13,8 +13,8 @@ package org.eclipse.che.ide.command.palette;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
+import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.machine.chooser.MachineChooser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
@@ -97,10 +98,10 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
     }
 
     private List<? extends Machine> getMachines() {
-        final WorkspaceRuntime runtime = appContext.getWorkspace().getRuntime();
+        final Runtime runtime = appContext.getWorkspace().getRuntime();
 
         if (runtime != null) {
-            return runtime.getMachines();
+            return new ArrayList<>(runtime.getMachines().values());
         }
 
         return emptyList();

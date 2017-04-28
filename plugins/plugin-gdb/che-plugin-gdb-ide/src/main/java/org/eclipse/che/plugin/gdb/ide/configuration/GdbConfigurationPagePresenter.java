@@ -14,13 +14,11 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.MachineEntityImpl;
 import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
 
 import java.util.ArrayList;
@@ -108,13 +106,13 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
     private void setHosts(List<Machine> machines) {
         Map<String, String> hosts = new HashMap<>();
         for (Machine machine : machines) {
-            String host = machine.getRuntime().getProperties().get("network.ipAddress");
+            String host = machine.getProperties().get("network.ipAddress");
             if (host == null) {
                 continue;
             }
-
-            String description = host + " (" + machine.getConfig().getName() + ")";
-            hosts.put(host, description);
+// FIXME: spi
+//            String description = host + " (" + machine.getConfig().getName() + ")";
+//            hosts.put(host, description);
         }
 
         view.setHostsList(hosts);
@@ -126,14 +124,15 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
             return emptyList();
         }
 
-        List<? extends Machine> runtimeMachines = workspace.getRuntime().getMachines();
+        Map<String, ? extends Machine> runtimeMachines = workspace.getRuntime().getMachines();
         List<Machine> machines = new ArrayList<>(runtimeMachines.size());
-        for (Machine currentMachine : runtimeMachines) {
-            if (currentMachine instanceof MachineDto) {
-                Machine machine = new MachineEntityImpl(currentMachine);
-                machines.add(machine);
-            }
-        }
+// FIXME: spi
+//        for (Machine currentMachine : runtimeMachines.entrySet()) {
+//            if (currentMachine instanceof MachineDto) {
+//                Machine machine = new MachineEntityImpl(currentMachine);
+//                machines.add(machine);
+//            }
+//        }
         return machines;
     }
 

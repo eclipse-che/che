@@ -26,7 +26,8 @@ public class MachineItem extends MachineEntityImpl {
 
     @Inject
     public MachineItem(@Assisted MachineDto descriptor) {
-        super(descriptor);
+        // FIXME: spi
+        super("", descriptor);
     }
 
 }

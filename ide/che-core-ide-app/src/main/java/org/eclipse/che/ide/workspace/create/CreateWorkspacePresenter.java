@@ -17,14 +17,14 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
+import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
-import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
+import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -51,17 +51,15 @@ import static org.eclipse.che.api.machine.shared.Constants.WS_MACHINE_NAME;
 @Singleton
 public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDelegate {
 
+    protected static final String MEMORY_LIMIT_BYTES = Long.toString(2000L * 1024L * 1024L);
+    static final           String RECIPE_TYPE        = "docker";
+    static final           int    SKIP_COUNT         = 0;
+    static final           int    MAX_COUNT          = 100;
+    static final           int    MAX_NAME_LENGTH    = 20;
+    static final           int    MIN_NAME_LENGTH    = 3;
     private static final   RegExp FILE_NAME          = RegExp.compile("^[A-Za-z0-9_\\s-\\.]+$");
     private static final   String URL_PATTERN        = "^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$";
     private static final   RegExp URL                = RegExp.compile(URL_PATTERN);
-    protected static final String MEMORY_LIMIT_BYTES = Long.toString(2000L * 1024L * 1024L);
-
-    static final String RECIPE_TYPE     = "docker";
-    static final int    SKIP_COUNT      = 0;
-    static final int    MAX_COUNT       = 100;
-    static final int    MAX_NAME_LENGTH = 20;
-    static final int    MIN_NAME_LENGTH = 3;
-
     private final CreateWorkspaceView                 view;
     private final DtoFactory                          dtoFactory;
     private final WorkspaceServiceClient              workspaceClient;
@@ -71,7 +69,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
     private final BrowserAddress                      browserAddress;
 
     private Callback<Component, Exception> callback;
-    private List<RecipeDescriptor>         recipes;
+    private List<OldRecipeDescriptor>      recipes;
     private List<String>                   workspacesNames;
 
     @Inject
@@ -110,11 +108,11 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
             workspacesNames.add(workspace.getConfig().getName());
         }
 
-        Promise<List<RecipeDescriptor>> recipes = recipeService.getAllRecipes();
+        Promise<List<OldRecipeDescriptor>> recipes = recipeService.getAllRecipes();
 
-        recipes.then(new Operation<List<RecipeDescriptor>>() {
+        recipes.then(new Operation<List<OldRecipeDescriptor>>() {
             @Override
-            public void apply(List<RecipeDescriptor> recipeDescriptors) throws OperationException {
+            public void apply(List<OldRecipeDescriptor> recipeDescriptors) throws OperationException {
                 CreateWorkspacePresenter.this.recipes = recipeDescriptors;
             }
         });
@@ -157,7 +155,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
 
         String recipeUrl = view.getRecipeUrl();
 
-        boolean urlIsIncorrect = !Strings.isNullOrEmpty(recipeUrl) && !URL.test(recipeUrl) ;
+        boolean urlIsIncorrect = !Strings.isNullOrEmpty(recipeUrl) && !URL.test(recipeUrl);
 
         view.setVisibleUrlError(urlIsIncorrect);
 
@@ -179,9 +177,9 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
     /** {@inheritDoc} */
     @Override
     public void onTagsChanged(final HidePopupCallBack callBack) {
-        recipeService.searchRecipes(view.getTags(), RECIPE_TYPE, SKIP_COUNT, MAX_COUNT).then(new Operation<List<RecipeDescriptor>>() {
+        recipeService.searchRecipes(view.getTags(), RECIPE_TYPE, SKIP_COUNT, MAX_COUNT).then(new Operation<List<OldRecipeDescriptor>>() {
             @Override
-            public void apply(List<RecipeDescriptor> recipes) throws OperationException {
+            public void apply(List<OldRecipeDescriptor> recipes) throws OperationException {
                 boolean isRecipesEmpty = recipes.isEmpty();
 
                 if (isRecipesEmpty) {
@@ -229,17 +227,24 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
     private WorkspaceConfigDto getWorkspaceConfig() {
         String wsName = view.getWorkspaceName();
 
-        EnvironmentRecipeDto recipe = dtoFactory.createDto(EnvironmentRecipeDto.class)
-                                                .withType("dockerimage")
-                                                .withLocation(view.getRecipeUrl());
+        RecipeDto recipe = dtoFactory.createDto(RecipeDto.class)
+                                     .withType("dockerimage")
+                                     .withLocation("eclipse/ubuntu_jdk8");
 
-        ExtendedMachineDto machine = dtoFactory.createDto(ExtendedMachineDto.class)
-                                               .withAgents(singletonList("org.eclipse.che.ws-agent"))
-                                               .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
+
+        List<String> agents = new ArrayList<>();
+        agents.add("org.eclipse.che.exec");
+        agents.add("org.eclipse.che.terminal");
+        agents.add("org.eclipse.che.ws-agent");
+        agents.add("org.eclipse.che.ssh");
+
+        MachineConfigDto machine = dtoFactory.createDto(MachineConfigDto.class)
+                                             .withAgents(agents)
+                                             .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
         EnvironmentDto environment = dtoFactory.createDto(EnvironmentDto.class)
                                                .withRecipe(recipe)
-                                               .withMachines(singletonMap(WS_MACHINE_NAME, machine));
+                                               .withMachines(singletonMap("dev-machine", machine));
 
         return dtoFactory.createDto(WorkspaceConfigDto.class)
                          .withName(wsName)

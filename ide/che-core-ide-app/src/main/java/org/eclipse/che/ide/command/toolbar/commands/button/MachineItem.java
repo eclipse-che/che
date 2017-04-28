@@ -13,7 +13,7 @@ package org.eclipse.che.ide.command.toolbar.commands.button;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.command.CommandImpl;
 
 /** Item contains {@link CommandImpl} and {@link Machine}. */
@@ -21,13 +21,13 @@ public class MachineItem extends AbstractMenuItem {
 
     private final Machine machine;
     private final String  name;
-
+    // FIXME: spi
     @AssistedInject
     public MachineItem(@Assisted CommandImpl command, @Assisted Machine machine) {
         super(command);
 
         this.machine = machine;
-        this.name = machine.getConfig().getName();
+        this.name = ""/*machine.getConfig().getName()*/;
     }
 
     @AssistedInject
@@ -35,7 +35,7 @@ public class MachineItem extends AbstractMenuItem {
         super(item.getCommand());
 
         this.machine = item.machine;
-        this.name = getCommand().getName() + " on " + machine.getConfig().getName();
+        this.name = getCommand().getName() + " on "/* + machine.getConfig().getName()*/;
     }
 
     @Override

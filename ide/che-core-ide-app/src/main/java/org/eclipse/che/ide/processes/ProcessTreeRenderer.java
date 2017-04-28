@@ -19,7 +19,6 @@ import elemental.html.SpanElement;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -122,12 +121,14 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
     private SpanElement createMachineElement(final ProcessTreeNode node) {
         final MachineEntity machine = (MachineEntity)node.getData();
-        final String machineId = machine.getId();
-        final MachineConfig machineConfig = machine.getConfig();
-        final String machineCategory = machineConfig.isDev() ? locale.devMachineCategory() : machineConfig.getType();
+        // FIXME: spi
+//        final String machineId = machine.getId();
+//        final MachineConfig machineConfig = machine.getConfig();
+//        final String machineCategory = machineConfig.isDev() ? locale.devMachineCategory() : machineConfig.getType();
 
         SpanElement root = Elements.createSpanElement();
-        root.appendChild(createMachineLabel(machineCategory));
+        // FIXME: spi
+//        root.appendChild(createMachineLabel(machineCategory));
 
         Element statusElement = Elements.createSpanElement(resources.getCss().machineStatus());
         root.appendChild(statusElement);
@@ -167,7 +168,8 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                     event.preventDefault();
 
                     if (addTerminalClickHandler != null) {
-                        addTerminalClickHandler.onAddTerminalClick(machineId);
+                        // FIXME: spi
+//                        addTerminalClickHandler.onAddTerminalClick(machineId);
                     }
                 }
             }, true);
@@ -206,7 +208,8 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                 @Override
                 public void handleEvent(Event event) {
                     if (previewSshClickHandler != null) {
-                        previewSshClickHandler.onPreviewSshClick(machineId);
+                        // FIXME: spi
+//                        previewSshClickHandler.onPreviewSshClick(machineId);
                     }
                 }
             }, true);
@@ -220,15 +223,17 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         Element monitorsElement = Elements.createSpanElement(resources.getCss().machineMonitors());
         root.appendChild(monitorsElement);
 
-        Node monitorNode = (Node)machineMonitors.getMonitorWidget(machineId, this).getElement();
-        monitorsElement.appendChild(monitorNode);
+        // FIXME: spi
+//        Node monitorNode = (Node)machineMonitors.getMonitorWidget(machineId, this).getElement();
+//        monitorsElement.appendChild(monitorNode);
 
         Element nameElement = Elements.createSpanElement(resources.getCss().nameLabel());
-        nameElement.setTextContent(machineConfig.getName());
-        Tooltip.create(nameElement,
-                       BOTTOM,
-                       MIDDLE,
-                       machineConfig.getName());
+        // FIXME: spi
+//        nameElement.setTextContent(machineConfig.getName());
+//        Tooltip.create(nameElement,
+//                       BOTTOM,
+//                       MIDDLE,
+//                       machineConfig.getName());
         root.appendChild(nameElement);
 
         return root;

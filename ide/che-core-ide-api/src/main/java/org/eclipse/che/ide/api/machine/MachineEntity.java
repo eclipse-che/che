@@ -12,9 +12,7 @@ package org.eclipse.che.ide.api.machine;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.api.core.rest.shared.dto.Link;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,8 +25,10 @@ public interface MachineEntity extends Machine {
     /** Returns {@code true} when the machine entity is development machine and {@code false} otherwise */
     boolean isDev();
 
-    /** Machine type (i.e. "docker"). */
-    String getType();
+    String getId();
+
+    /** Returns current machine's display name */
+    String getName();
 
     /** Returns current machine's display name */
     String getDisplayName();
@@ -48,11 +48,11 @@ public interface MachineEntity extends Machine {
     /** Returns {@link Server} by reference or null if it not exists. */
     Server getServer(String ref);
 
-    List<Link> getMachineLinks();
-
-    Link getMachineLink(String ref);
-
-    Map<String, String> getEnvVariables();
+//    List<Link> getMachineLinks();
+//
+//    Link getMachineLink(String ref);
+//
+//    Map<String, String> getEnvVariables();
 
     /** Returns {@link Machine descriptor} */
     Machine getDescriptor();

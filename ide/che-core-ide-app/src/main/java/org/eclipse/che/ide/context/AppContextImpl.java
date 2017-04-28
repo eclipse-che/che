@@ -140,7 +140,7 @@ public class AppContextImpl implements AppContext,
         if (workspace != null) {
             userWorkspace = workspace;
             if (workspace.getRuntime() != null) {
-                runtime = new ActiveRuntime(workspace.getRuntime());
+                runtime = new ActiveRuntime(workspace);
             }
         } else {
             userWorkspace = null;

@@ -18,7 +18,6 @@ import org.eclipse.che.ide.util.loging.Log;
 import javax.validation.constraints.NotNull;
 
 /**
- *
  * Describe development machine instance.
  * Must contains all information that need to communicate with dev machine such as links, type, environment variable and etc.
  *
@@ -26,10 +25,8 @@ import javax.validation.constraints.NotNull;
  */
 public class DevMachine extends MachineEntityImpl {
 
-
-
-    public DevMachine(@NotNull Machine devMachineDescriptor) {
-        super(devMachineDescriptor);
+    public DevMachine(String name, @NotNull Machine devMachineDescriptor) {
+        super(name, devMachineDescriptor);
     }
 
     public String getWsAgentWebSocketUrl() {
@@ -43,8 +40,6 @@ public class DevMachine extends MachineEntityImpl {
         Log.error(getClass(), message);
         throw new RuntimeException(message);
     }
-
-
 
     /**
      *
@@ -65,12 +60,4 @@ public class DevMachine extends MachineEntityImpl {
             throw new RuntimeException(message);
         }
     }
-
-
-    /** Returns address (protocol://host:port) of the Workspace Agent. */
-    public String getAddress() {
-        final MachineServer server = getServer(Constants.WSAGENT_REFERENCE);
-        return server.getProtocol() + "://" + server.getAddress();
-    }
-
 }

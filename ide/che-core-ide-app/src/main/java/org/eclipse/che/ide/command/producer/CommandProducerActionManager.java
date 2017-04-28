@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -157,25 +157,26 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler,
 
     /** Creates actions for the given {@link CommandProducer}. */
     private void createActionsForProducer(CommandProducer producer) {
-        Action action;
+        // FIXME: spi
+//        Action action;
 
-        if (producer.getMachineTypes().isEmpty()) {
-            action = commandProducerActionFactory.create(producer.getName(), producer, appContext.getDevMachine().getDescriptor());
+//        if (producer.getMachineTypes().isEmpty()) {
+//            action = commandProducerActionFactory.create(producer.getName(), producer, appContext.getDevMachine().getDescriptor());
+//
+//            actionManager.registerAction(producer.getName(), action);
+//        } else {
+//            action = new DefaultActionGroup(producer.getName(), true, actionManager);
+//
+//            producersToActionGroups.put(producer, (DefaultActionGroup)action);
+//
+//            actionManager.registerAction(producer.getName(), action);
+//
+//            for (Machine machine : machines) {
+//                createActionsForMachine(machine);
+//            }
+//        }
 
-            actionManager.registerAction(producer.getName(), action);
-        } else {
-            action = new DefaultActionGroup(producer.getName(), true, actionManager);
-
-            producersToActionGroups.put(producer, (DefaultActionGroup)action);
-
-            actionManager.registerAction(producer.getName(), action);
-
-            for (Machine machine : machines) {
-                createActionsForMachine(machine);
-            }
-        }
-
-        commandActionsPopUpGroup.add(action);
+//        commandActionsPopUpGroup.add(action);
     }
 
     /**
@@ -183,24 +184,25 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler,
      * which are applicable for the given machine's type.
      */
     private void createActionsForMachine(Machine machine) {
-        for (CommandProducer commandProducer : commandProducers) {
-            if (commandProducer.getMachineTypes().contains(machine.getConfig().getType())) {
-                CommandProducerAction machineAction = commandProducerActionFactory.create(machine.getConfig().getName(),
-                                                                                          commandProducer,
-                                                                                          machine);
-                final List<Action> actionList = actionsByMachines.computeIfAbsent(machine, key -> new ArrayList<>());
-                actionList.add(machineAction);
-
-                actionManager.registerAction(machine.getConfig().getName(), machineAction);
-
-                DefaultActionGroup actionGroup = producersToActionGroups.get(commandProducer);
-                if (actionGroup != null) {
-                    actionGroup.add(machineAction);
-
-                    actionsToActionGroups.put(machineAction, actionGroup);
-                }
-            }
-        }
+        // FIXME: spi
+//        for (CommandProducer commandProducer : commandProducers) {
+//            if (commandProducer.getMachineTypes().contains(machine.getConfig().getType())) {
+//                CommandProducerAction machineAction = commandProducerActionFactory.create(machine.getConfig().getName(),
+//                                                                                          commandProducer,
+//                                                                                          machine);
+//                final List<Action> actionList = actionsByMachines.computeIfAbsent(machine, key -> new ArrayList<>());
+//                actionList.add(machineAction);
+//
+//                actionManager.registerAction(machine.getConfig().getName(), machineAction);
+//
+//                DefaultActionGroup actionGroup = producersToActionGroups.get(commandProducer);
+//                if (actionGroup != null) {
+//                    actionGroup.add(machineAction);
+//
+//                    actionsToActionGroups.put(machineAction, actionGroup);
+//                }
+//            }
+//        }
     }
 
     private void removeActionsForMachine(Machine machine) {

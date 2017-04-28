@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.machine;
 
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.promises.client.Promise;
 
 /**

@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 
 import java.util.HashMap;
 import java.util.List;
@@ -125,8 +125,9 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
         machinesById.clear();
 
         machines.forEach(machine -> {
-            machinesById.put(machine.getId(), machine);
-            machinesList.addItem(machine.getConfig().getName(), machine.getId());
+// FIXME: spi
+//            machinesById.put(machine.getId(), machine);
+//            machinesList.addItem(machine.getConfig().getName(), machine.getId());
         });
 
         machinesList.setVisibleItemCount(machines.size());

@@ -14,7 +14,7 @@ import com.google.gwt.http.client.URL;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.machine.shared.dto.OldMachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
@@ -32,7 +32,6 @@ import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Map;
 
 import static com.google.gwt.http.client.RequestBuilder.PUT;
@@ -238,7 +237,7 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
-    public Promise<Void> createMachine(final String wsId, final MachineConfigDto machineConfig) {
+    public Promise<Void> createMachine(final String wsId, final OldMachineConfigDto machineConfig) {
         String url = baseHttpUrl + '/' + wsId + "/machine";
         return asyncRequestFactory.createPostRequest(url, machineConfig)
                                   .header(ACCEPT, APPLICATION_JSON)

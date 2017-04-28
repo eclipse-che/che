@@ -17,13 +17,13 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
@@ -88,11 +88,11 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
     private void updateView() {
         view.removeAllURLs();
 
-        final WorkspaceRuntime runtime = appContext.getActiveRuntime();
+        final ActiveRuntime runtime = appContext.getActiveRuntime();
 
         if (runtime != null) {
             runtime.getMachines().forEach(machine -> {
-                Promise<List<GetProcessesResponseDto>> machineProcesses = execAgentClient.getProcesses(machine.getId(), false);
+                Promise<List<GetProcessesResponseDto>> machineProcesses = execAgentClient.getProcesses(machine.getName(), false);
                 machineProcesses.then(processes -> {
                     processes.forEach(process -> getPreviewUrl(process).then(view::addUrl).catchError(ignore -> {
                     }));

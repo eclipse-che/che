@@ -12,8 +12,6 @@ package org.eclipse.che.ide.api.machine;
 
 import com.google.common.base.Strings;
 
-import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
@@ -35,91 +33,56 @@ import java.util.Objects;
 
 public class MachineEntityImpl implements MachineEntity {
 
-    protected final Machine       machineDescriptor;
-    protected final MachineConfig machineConfig;
+    private final String name;
+    protected final Machine machineDescriptor;
+//    protected final MachineConfig machineConfig;
 
     protected final Map<String, MachineServer> servers;
     protected final Map<String, String>        runtimeProperties;
-    protected final Map<String, String>        envVariables;
+//    protected final Map<String, String>        envVariables;
     protected final List<Link>                 machineLinks;
 
 
-    public MachineEntityImpl(@NotNull Machine machineDescriptor) {
+    public MachineEntityImpl(String name, @NotNull Machine machineDescriptor) {
+        this.name = name;
         this.machineDescriptor = machineDescriptor;
-        this.machineConfig = machineDescriptor != null ? machineDescriptor.getConfig() : null;
+//        this.machineConfig = machineDescriptor != null ? machineDescriptor.getConfig() : null;
         this.machineLinks = machineDescriptor instanceof Hyperlinks ? ((Hyperlinks)machineDescriptor).getLinks() : null;
 
-        if (machineDescriptor == null || machineDescriptor.getRuntime() == null) {
-            servers = null;
-            runtimeProperties = null;
-            envVariables = null;
-        } else {
-            MachineRuntimeInfo machineRuntime = machineDescriptor.getRuntime();
-            Map<String, ? extends Server> serverDtoMap = machineRuntime.getServers();
+//        if (machineDescriptor == null || machineDescriptor.getRuntime() == null) {
+//            servers = null;
+//            runtimeProperties = null;
+//            envVariables = null;
+//        } else {
+//            MachineRuntimeInfo machineRuntime = machineDescriptor.getRuntime();
+            Map<String, ? extends Server> serverDtoMap = machineDescriptor.getServers();
             servers = new HashMap<>(serverDtoMap.size());
             for (String s : serverDtoMap.keySet()) {
-                servers.put(s, new MachineServer(serverDtoMap.get(s)));
+                servers.put(s, new MachineServer(s, serverDtoMap.get(s)));
             }
-            runtimeProperties = machineRuntime.getProperties();
-            envVariables = machineRuntime.getEnvVariables();
-        }
-
-
-
-    }
-
-
-    public String getWorkspace() {
-        return machineDescriptor.getWorkspaceId();
-    }
-
-    @Override
-    public MachineConfig getConfig() {
-        return machineConfig;
-    }
-
-    public String getId() {
-        return machineDescriptor.getId();
-    }
-
-    @Override
-    public String getWorkspaceId() {
-        return machineDescriptor.getWorkspaceId();
-    }
-
-    @Override
-    public String getEnvName() {
-        return machineDescriptor.getEnvName();
-    }
-
-    @Override
-    public String getOwner() {
-        return machineDescriptor.getOwner();
-    }
-
-    @Override
-    public MachineStatus getStatus() {
-        return machineDescriptor.getStatus();
-    }
-
-    @Override
-    public MachineRuntimeInfo getRuntime() {
-        return machineDescriptor.getRuntime();
+            runtimeProperties = machineDescriptor.getProperties();
+//            envVariables = machineRuntime.getEnvVariables();
+//        }
     }
 
     @Override
     public boolean isDev() {
-        return machineDescriptor.getConfig().isDev();
+//        return machineDescriptor.getConfig().isDev();
+        return true;
+    }
+
+    public String getId() {
+        return name;
     }
 
     @Override
-    public String getType() {
-        return machineConfig.getType();
+    public String getName() {
+        return name;
     }
 
     @Override
     public String getDisplayName() {
-        return machineConfig.getName();
+        return name;
     }
 
     @Override
@@ -127,6 +90,7 @@ public class MachineEntityImpl implements MachineEntity {
         return runtimeProperties;
     }
 
+    @Override
     public String getTerminalUrl() {
         for (Link link : machineLinks) {
             if (Constants.TERMINAL_REFERENCE.equals(link.getRel())) {
@@ -134,11 +98,12 @@ public class MachineEntityImpl implements MachineEntity {
             }
         }
         //should not be
-        final String message = "Reference " + Constants.TERMINAL_REFERENCE + " not found in " + machineConfig.getName()  + " description";
+        final String message = "Reference " + Constants.TERMINAL_REFERENCE + " not found in " + name  + " description";
         Log.error(getClass(), message);
         throw new RuntimeException(message);
     }
 
+    @Override
     public String getExecAgentUrl() {
         for (Link link :machineLinks) {
             if (Constants.EXEC_AGENT_REFERENCE.equals(link.getRel())) {
@@ -146,7 +111,7 @@ public class MachineEntityImpl implements MachineEntity {
             }
         }
         //should not be
-        final String message = "Reference " + Constants.EXEC_AGENT_REFERENCE + " not found in " +  machineConfig.getName() + " description";
+        final String message = "Reference " + Constants.EXEC_AGENT_REFERENCE + " not found in " +  name + " description";
         Log.error(getClass(), message);
         throw new RuntimeException(message);
     }
@@ -168,28 +133,6 @@ public class MachineEntityImpl implements MachineEntity {
         return null;
     }
 
-    @Override
-    public List<Link> getMachineLinks() {
-        return machineLinks;
-    }
-
-    @Override
-    public Link getMachineLink(String ref) {
-        if (!Strings.isNullOrEmpty(ref)) {
-            for (Link link : machineLinks) {
-                if (ref.equals(link.getRel())) {
-                    return link;
-                }
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public Map<String, String> getEnvVariables() {
-        return envVariables;
-    }
-
     /** Returns {@link Machine descriptor} of the Workspace Agent. */
     @Override
     public Machine getDescriptor() {
@@ -203,12 +146,12 @@ public class MachineEntityImpl implements MachineEntity {
 
         MachineEntityImpl otherMachine = (MachineEntityImpl)other;
 
-        return Objects.equals(getId(), otherMachine.getId());
+        return Objects.equals(getName(), otherMachine.getName());
 
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return Objects.hashCode(getName());
     }
 }

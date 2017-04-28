@@ -75,9 +75,11 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
     @Override
     public void start(final Callback<Component, Exception> callback) {
         this.callback = callback;
+        // FIXME: spi
+        callback.onSuccess(this);
         workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
                               .then(workspaceDto -> {
-                                  handleWorkspaceEvents(workspaceDto, callback, null);
+                                  handleWorkspaceEvents(new WorkspaceImpl(workspaceDto), callback, null);
                               })
                               .catchError(error -> {
                                   needToReloadComponents = true;

@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.workspace;
 
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 
 import java.util.Map;
@@ -25,7 +25,7 @@ import java.util.Map;
 public class WorkspaceImpl implements Workspace {
 
     private final String              id;
-    private final WorkspaceRuntime    workspaceRuntime;
+    private final Runtime             workspaceRuntime;
     private final String              namespace;
     private final WorkspaceStatus     status;
     private final Map<String, String> attributes;
@@ -75,7 +75,7 @@ public class WorkspaceImpl implements Workspace {
     }
 
     @Override
-    public WorkspaceRuntime getRuntime() {
+    public Runtime getRuntime() {
         return workspaceRuntime;
     }
 }

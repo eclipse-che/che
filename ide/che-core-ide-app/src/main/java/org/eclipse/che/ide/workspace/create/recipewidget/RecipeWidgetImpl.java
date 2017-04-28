@@ -23,7 +23,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
+import org.eclipse.che.api.core.model.workspace.config.Recipe;
+import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeDescriptor;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
@@ -37,7 +38,7 @@ public class RecipeWidgetImpl extends Composite implements RecipeWidget, ClickHa
 
     private static final TagEntryUiBinder UI_BINDER = GWT.create(TagEntryUiBinder.class);
 
-    private final RecipeDescriptor descriptor;
+    private final OldRecipeDescriptor descriptor;
 
     private ActionDelegate delegate;
 
@@ -51,7 +52,7 @@ public class RecipeWidgetImpl extends Composite implements RecipeWidget, ClickHa
     FlowPanel   main;
 
     @Inject
-    public RecipeWidgetImpl(org.eclipse.che.ide.Resources resources, @Assisted RecipeDescriptor descriptor) {
+    public RecipeWidgetImpl(org.eclipse.che.ide.Resources resources, @Assisted OldRecipeDescriptor descriptor) {
         this.descriptor = descriptor;
 
         initWidget(UI_BINDER.createAndBindUi(this));

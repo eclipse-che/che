@@ -16,17 +16,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.macro.BaseMacro;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
-import org.eclipse.che.ide.api.machine.DevMachine;
 
-import java.util.Map;
 import java.util.Set;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Macro which is responsible for the retrieving the address of the registered server.
@@ -36,7 +31,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  * @author Vlad Zhukovskyi
  * @see AbstractServerMacro
  * @see DevMachine
- * @see Server#getAddress()
  * @since 4.7.0
  */
 @Beta
@@ -57,28 +51,29 @@ public class ServerMacro extends AbstractServerMacro {
     public Set<Macro> getMacros(DevMachine devMachine) {
         final Set<Macro> macros = Sets.newHashSet();
 
-        for (Map.Entry<String, ? extends Server> entry : devMachine.getDescriptor().getRuntime().getServers().entrySet()) {
-
-            final String prefix = isNullOrEmpty(entry.getValue().getProtocol()) ? "" : entry.getValue().getProtocol() + "://";
-            final String value = prefix + entry.getValue().getAddress() + (isNullOrEmpty(prefix) ? "" : "/");
-
-            Macro macro = new BaseMacro(KEY.replace("%", entry.getKey()),
-                                        value,
-                                        "Returns protocol, hostname and port of an internal server");
-
-            macros.add(macro);
-
-            // register port without "/tcp" suffix
-            if (entry.getKey().endsWith("/tcp")) {
-                final String port = entry.getKey().substring(0, entry.getKey().length() - 4);
-
-                Macro shortMacro = new BaseMacro(KEY.replace("%", port),
-                                                 value,
-                                                 "Returns protocol, hostname and port of an internal server");
-
-                macros.add(shortMacro);
-            }
-        }
+        // FIXME: spi
+//        for (Map.Entry<String, ? extends Server> entry : devMachine.getDescriptor().getRuntime().getServers().entrySet()) {
+//
+//            final String prefix = isNullOrEmpty(entry.getValue().getProtocol()) ? "" : entry.getValue().getProtocol() + "://";
+//            final String value = prefix + entry.getValue().getAddress() + (isNullOrEmpty(prefix) ? "" : "/");
+//
+//            Macro macro = new BaseMacro(KEY.replace("%", entry.getKey()),
+//                                        value,
+//                                        "Returns protocol, hostname and port of an internal server");
+//
+//            macros.add(macro);
+//
+//            // register port without "/tcp" suffix
+//            if (entry.getKey().endsWith("/tcp")) {
+//                final String port = entry.getKey().substring(0, entry.getKey().length() - 4);
+//
+//                Macro shortMacro = new BaseMacro(KEY.replace("%", port),
+//                                                 value,
+//                                                 "Returns protocol, hostname and port of an internal server");
+//
+//                macros.add(shortMacro);
+//            }
+//        }
 
         return macros;
     }

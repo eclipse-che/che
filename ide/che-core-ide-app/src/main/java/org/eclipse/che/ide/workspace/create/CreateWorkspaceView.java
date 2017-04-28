@@ -12,7 +12,7 @@ package org.eclipse.che.ide.workspace.create;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
+import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeDescriptor;
 import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.List;
@@ -31,14 +31,6 @@ interface CreateWorkspaceView extends View<CreateWorkspaceView.ActionDelegate> {
     /** Hides dialog window. */
     void hide();
 
-    /**
-     * Sets name for workspace in special place on view
-     *
-     * @param name
-     *         name which will be set
-     */
-    void setWorkspaceName(String name);
-
     /** Returns special recipe url to get docker image. */
     String getRecipeUrl();
 
@@ -49,12 +41,20 @@ interface CreateWorkspaceView extends View<CreateWorkspaceView.ActionDelegate> {
     String getWorkspaceName();
 
     /**
+     * Sets name for workspace in special place on view
+     *
+     * @param name
+     *         name which will be set
+     */
+    void setWorkspaceName(String name);
+
+    /**
      * Sets list of recipes found by tag to special place on view.
      *
      * @param recipes
      *         recipes which will be shown
      */
-    void showFoundByTagRecipes(List<RecipeDescriptor> recipes);
+    void showFoundByTagRecipes(List<OldRecipeDescriptor> recipes);
 
     /**
      * Sets list of predefined recipes to special place on view.
@@ -62,7 +62,7 @@ interface CreateWorkspaceView extends View<CreateWorkspaceView.ActionDelegate> {
      * @param recipes
      *         recipes which will be shown
      */
-    void showPredefinedRecipes(List<RecipeDescriptor> recipes);
+    void showPredefinedRecipes(List<OldRecipeDescriptor> recipes);
 
     /**
      * Changes visibility of error message for recipe url.

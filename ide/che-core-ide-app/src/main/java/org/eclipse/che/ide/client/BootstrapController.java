@@ -28,6 +28,8 @@ import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.workspace.shared.Utils;
+import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
@@ -107,14 +109,20 @@ public class BootstrapController {
                 workspaceService.getWorkspace(event.getWorkspace().getId()).then(new Operation<WorkspaceDto>() {
                     @Override
                     public void apply(WorkspaceDto ws) throws OperationException {
-                        MachineDto devMachineDto = ws.getRuntime().getDevMachine();
-                        DevMachine devMachine = new DevMachine(devMachineDto);
+//                        MachineDto devMachineDto = ws.getRuntime().getDevMachine();
 
-                        if (appContext instanceof AppContextImpl) {
-                            ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf(devMachineDto.getRuntime().projectsRoot()));
-                        }
+                        String activeEnv = ws.getRuntime().getActiveEnv();
+                        EnvironmentDto activeEnvironment = ws.getConfig().getEnvironments().get(activeEnv);
+                        String devMachineName = Utils.getDevMachineName(activeEnvironment);
+                        MachineDto devMachineDto = ws.getRuntime().getMachines().get(devMachineName);
 
-                        wsAgentStateControllerProvider.get().initialize(devMachine);
+                        DevMachine devMachine = new DevMachine(devMachineName, devMachineDto);
+// FIXME: spi
+//                        if (appContext instanceof AppContextImpl) {
+//                            ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf(devMachineDto.getRuntime().projectsRoot()));
+//                        }
+
+//                        wsAgentStateControllerProvider.get().initialize(devMachine);
                         wsAgentURLModifier.initialize(devMachine);
                         SortedMap<String, Provider<WsAgentComponent>> sortedComponents = new TreeMap<>();
                         sortedComponents.putAll(components);

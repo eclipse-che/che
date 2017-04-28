@@ -22,6 +22,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
@@ -60,6 +61,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private final EventBus               eventBus;
     private final MessageBusProvider     messageBusProvider;
     private final DialogFactory          dialogFactory;
+    private final AppContext             appContext;
     private final AsyncRequestFactory    asyncRequestFactory;
     private final WorkspaceServiceClient workspaceServiceClient;
     private final LoaderPresenter        loader;
@@ -75,13 +77,15 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
                                   LoaderPresenter loader,
                                   MessageBusProvider messageBusProvider,
                                   AsyncRequestFactory asyncRequestFactory,
-                                  DialogFactory dialogFactory) {
+                                  DialogFactory dialogFactory,
+                                  AppContext appContext) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.loader = loader;
         this.eventBus = eventBus;
         this.messageBusProvider = messageBusProvider;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dialogFactory = dialogFactory;
+        this.appContext = appContext;
     }
 
     public void initialize(DevMachine devMachine) {
@@ -206,7 +210,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
         @Override
         public void accepted() {
-            workspaceServiceClient.stop(devMachine.getWorkspaceId(), createSnapshot).then(ignored -> {
+            workspaceServiceClient.stop(appContext.getWorkspaceId(), createSnapshot).then(ignored -> {
                 if (reloadPage) {
                     BrowserUtils.reloadPage(false);
                 }
@@ -228,7 +232,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     }
 
     private void checkWsAgentHealth() {
-        workspaceServiceClient.getWsAgentState(devMachine.getWorkspace()).then(agentHealthState -> {
+        workspaceServiceClient.getWsAgentState(appContext.getWorkspaceId()).then(agentHealthState -> {
             if (RUNNING.equals(agentHealthState.getWorkspaceStatus())) {
                 checkStateOfWsAgent(agentHealthState);
             }

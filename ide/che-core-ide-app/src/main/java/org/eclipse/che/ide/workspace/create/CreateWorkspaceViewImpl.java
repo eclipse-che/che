@@ -26,7 +26,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
+import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeDescriptor;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.ide.workspace.WorkspaceWidgetFactory;
@@ -43,25 +43,14 @@ import java.util.List;
 @Singleton
 class CreateWorkspaceViewImpl extends Window implements CreateWorkspaceView, RecipeWidget.ActionDelegate {
 
-    interface CreateWorkspaceViewImplUiBinder extends UiBinder<Widget, CreateWorkspaceViewImpl> {
-    }
-
-    private static final CreateWorkspaceViewImplUiBinder UI_BINDER = GWT.create(CreateWorkspaceViewImplUiBinder.class);
-
-    private static final int BORDER_WIDTH = 1;
-
-    private final WorkspaceWidgetFactory tagFactory;
-    private final PopupPanel             popupPanel;
-    private final FlowPanel              tagsPanel;
-    private final HidePopupCallBack      hidePopupCallBack;
-
-    private ActionDelegate delegate;
-    private Button         createButton;
-    private boolean        isPredefinedRecipe;
-
+    private static final CreateWorkspaceViewImplUiBinder UI_BINDER    = GWT.create(CreateWorkspaceViewImplUiBinder.class);
+    private static final int                             BORDER_WIDTH = 1;
     @UiField(provided = true)
-    final CoreLocalizationConstant locale;
-
+    final         CoreLocalizationConstant locale;
+    private final WorkspaceWidgetFactory   tagFactory;
+    private final PopupPanel               popupPanel;
+    private final FlowPanel                tagsPanel;
+    private final HidePopupCallBack        hidePopupCallBack;
     @UiField
     TextBox wsName;
     @UiField
@@ -76,6 +65,9 @@ class CreateWorkspaceViewImpl extends Window implements CreateWorkspaceView, Rec
     Label   nameError;
     @UiField
     TextBox predefinedRecipes;
+    private ActionDelegate delegate;
+    private Button         createButton;
+    private boolean        isPredefinedRecipe;
 
     @Inject
     public CreateWorkspaceViewImpl(CoreLocalizationConstant locale,
@@ -126,12 +118,6 @@ class CreateWorkspaceViewImpl extends Window implements CreateWorkspaceView, Rec
 
     /** {@inheritDoc} */
     @Override
-    public void setWorkspaceName(String name) {
-        wsName.setText(name);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public String getRecipeUrl() {
         return recipeURL.getText();
     }
@@ -158,7 +144,13 @@ class CreateWorkspaceViewImpl extends Window implements CreateWorkspaceView, Rec
 
     /** {@inheritDoc} */
     @Override
-    public void showFoundByTagRecipes(List<RecipeDescriptor> recipes) {
+    public void setWorkspaceName(String name) {
+        wsName.setText(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void showFoundByTagRecipes(List<OldRecipeDescriptor> recipes) {
         addRecipesToPanel(recipes);
 
         int xPanelCoordinate = tags.getAbsoluteLeft() + BORDER_WIDTH;
@@ -168,10 +160,10 @@ class CreateWorkspaceViewImpl extends Window implements CreateWorkspaceView, Rec
         popupPanel.show();
     }
 
-    private void addRecipesToPanel(List<RecipeDescriptor> recipes) {
+    private void addRecipesToPanel(List<OldRecipeDescriptor> recipes) {
         tagsPanel.clear();
 
-        for (RecipeDescriptor descriptor : recipes) {
+        for (OldRecipeDescriptor descriptor : recipes) {
             RecipeWidget tag = tagFactory.create(descriptor);
             tag.setDelegate(this);
 
@@ -183,7 +175,7 @@ class CreateWorkspaceViewImpl extends Window implements CreateWorkspaceView, Rec
 
     /** {@inheritDoc} */
     @Override
-    public void showPredefinedRecipes(List<RecipeDescriptor> recipes) {
+    public void showPredefinedRecipes(List<OldRecipeDescriptor> recipes) {
         addRecipesToPanel(recipes);
 
         int xPanelCoordinate = predefinedRecipes.getAbsoluteLeft() + BORDER_WIDTH;
@@ -281,5 +273,8 @@ class CreateWorkspaceViewImpl extends Window implements CreateWorkspaceView, Rec
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
+    }
+
+    interface CreateWorkspaceViewImplUiBinder extends UiBinder<Widget, CreateWorkspaceViewImpl> {
     }
 }

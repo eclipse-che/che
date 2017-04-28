@@ -162,7 +162,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
      * @param restoreFromSnapshot
      *         restore or not the workspace from snapshot
      */
-    public void handleWorkspaceEvents(final WorkspaceDto workspace, final Callback<Component, Exception> callback,
+    public void handleWorkspaceEvents(final WorkspaceImpl workspace, final Callback<Component, Exception> callback,
                                       final Boolean restoreFromSnapshot) {
 
         loader.show(STARTING_WORKSPACE_RUNTIME);
@@ -240,7 +240,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         workspaceServiceClient.getWorkspace(workspaceID).then(new Operation<WorkspaceDto>() {
             @Override
             public void apply(WorkspaceDto workspace) throws OperationException {
-                handleWorkspaceEvents(workspace, callback, restoreFromSnapshot);
+                handleWorkspaceEvents(new WorkspaceImpl(workspace), callback, restoreFromSnapshot);
             }
         });
     }

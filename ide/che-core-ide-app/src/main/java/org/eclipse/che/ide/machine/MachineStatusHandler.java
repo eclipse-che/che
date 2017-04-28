@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -34,8 +33,6 @@ import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAc
 import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.RUNNING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-
-//import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 
 /**
  * Notifies about changing machine state.
@@ -108,7 +105,7 @@ public class MachineStatusHandler implements MachineStatusChangedEvent.Handler {
     private MachineEntity getMachine(String machineId, RuntimeDto workspaceRuntime) {
         for (Map.Entry<String, MachineDto> entry : workspaceRuntime.getMachines().entrySet()) {
             if (machineId.equals(entry.getKey())) {
-                return new MachineEntityImpl(entry.getValue());
+                return new MachineEntityImpl(entry.getKey(), entry.getValue());
             }
         }
         notificationManager.notify(locale.failedToFindMachine(machineId));

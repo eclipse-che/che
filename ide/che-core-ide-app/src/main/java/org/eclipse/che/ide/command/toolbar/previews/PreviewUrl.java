@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.previews;
 
-import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
-import org.eclipse.che.api.core.model.machine.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
 
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
@@ -47,13 +47,14 @@ class PreviewUrl {
 
     private String getDisplayNameForPreviewUrl(String previewUrl) {
         final DevMachine devMachine = appContext.getDevMachine();
-        final MachineRuntimeInfo devMachineRuntime = devMachine.getRuntime();
+// FIXME: spi
+//        final MachineRuntimeInfo devMachineRuntime = devMachine.getRuntime();
 
-        if (devMachineRuntime == null) {
-            return previewUrl;
-        }
+//        if (devMachineRuntime == null) {
+//            return previewUrl;
+//        }
 
-        for (Entry<String, ? extends Server> entry : devMachineRuntime.getServers().entrySet()) {
+        for (Entry<String, ? extends Server> entry : devMachine.getServers().entrySet()) {
             Server server = entry.getValue();
             String serverUrl = server.getUrl();
 

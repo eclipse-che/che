@@ -18,16 +18,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.Server;
-import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
-import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.api.core.model.workspace.config.Command;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -44,7 +42,6 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineEntity;
-import org.eclipse.che.ide.api.machine.MachineEntityImpl;
 import org.eclipse.che.ide.api.machine.events.ActivateProcessOutputEvent;
 import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
@@ -69,7 +66,6 @@ import org.eclipse.che.ide.console.CommandOutputConsole;
 import org.eclipse.che.ide.console.CommandOutputConsolePresenter;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.machine.MachineItem;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
 import org.eclipse.che.ide.processes.ProcessTreeNodeSelectedEvent;
@@ -94,8 +90,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.eclipse.che.api.core.model.machine.MachineStatus.CREATING;
-import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -480,7 +474,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         final OutputConsole defaultConsole = commandConsoleFactory.create("SSH");
         addCommandOutput(machineId, defaultConsole);
 
-        final String machineName = machine.getConfig().getName();
+        // FIXME: spi
+        final String machineName = ""/*machine.getConfig().getName()*/;
         String sshServiceAddress = getSshServerAddress(machine);
         final String machineHost;
         final String sshPort;
@@ -495,7 +490,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         // user
         final String userName;
-        String user = machine.getRuntime().getProperties().get("config.user");
+        String user = machine.getProperties().get("config.user");
         if (isNullOrEmpty(user)) {
             userName = "root";
         } else {
@@ -504,7 +499,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         // ssh key
         final String workspaceName = appContext.getWorkspace().getConfig().getName();
-        Promise<SshPairDto> sshPairDtoPromise = sshServiceClient.getPair("workspace", machine.getWorkspaceId());
+        Promise<SshPairDto> sshPairDtoPromise = sshServiceClient.getPair("workspace", appContext.getWorkspaceId());
 
         sshPairDtoPromise.then(new Operation<SshPairDto>() {
                                    @Override
@@ -566,9 +561,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      * @return ssh service address in format host:port
      */
     private String getSshServerAddress(Machine machine) {
-        Map<String, ? extends Server> servers = machine.getRuntime().getServers();
+        Map<String, ? extends Server> servers = machine.getServers();
         final Server sshServer = servers.get(SSH_PORT + "/tcp");
-        return sshServer != null ? sshServer.getAddress() : null;
+        // FIXME: spi
+        return sshServer != null ? sshServer.getUrl() : null;
     }
 
     /**
@@ -840,7 +836,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             return false;
         }
         for (Environment environment : environments.values()) {
-            ExtendedMachine extendedMachine = environment.getMachines().get(machineName);
+            MachineConfig extendedMachine = environment.getMachines().get(machineName);
             if (extendedMachine != null) {
                 if (extendedMachine.getAgents() != null && extendedMachine.getAgents().contains(agent)) {
                     return true;
@@ -893,7 +889,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         // remove existed node
         for (ProcessTreeNode node : rootNode.getChildren()) {
-            if (machine.getConfig().getName().equals(node.getName())) {
+            if (machine.getName().equals(node.getName())) {
                 children.addAll(node.getChildren());
                 rootNode.getChildren().remove(node);
                 break;
@@ -902,7 +898,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         // create new node
         final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, children);
-        newMachineNode.setRunning(RUNNING == machine.getStatus());
+        // FIXME: spi
+//        newMachineNode.setRunning(RUNNING == machine.getStatus());
         newMachineNode.setHasTerminalAgent(hasAgent(machine.getDisplayName(), TERMINAL_AGENT) || hasTerminal(machineId));
         newMachineNode.setHasSSHAgent(hasAgent(machine.getDisplayName(), SSH_AGENT));
         for (ProcessTreeNode child : children) {
@@ -918,29 +915,29 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         view.setProcessesData(rootNode);
 
         // add output for the machine if it is not exist
-        if (!consoles.containsKey(machine.getConfig().getName())) {
-            OutputConsole outputConsole = commandConsoleFactory.create(machine.getConfig().getName());
-            addOutputConsole(machine.getConfig().getName(), newMachineNode, outputConsole, true);
+        if (!consoles.containsKey(machine.getName())) {
+            OutputConsole outputConsole = commandConsoleFactory.create(machine.getName());
+            addOutputConsole(machine.getName(), newMachineNode, outputConsole, true);
         }
 
         return newMachineNode;
     }
 
     private List<MachineEntity> getMachines(Workspace workspace) {
-        WorkspaceRuntime workspaceRuntime = workspace.getRuntime();
+        Runtime workspaceRuntime = workspace.getRuntime();
         if (workspaceRuntime == null) {
             return emptyList();
         }
 
-        List<? extends Machine> runtimeMachines = workspaceRuntime.getMachines();
+        Map<String, ? extends Machine> runtimeMachines = workspaceRuntime.getMachines();
         List<MachineEntity> machines = new ArrayList<>(runtimeMachines.size());
-        for (Machine machine : runtimeMachines) {
-            if (machine instanceof MachineDto) {
-                MachineEntity machineEntity = new MachineEntityImpl(machine);
-                machines.add(machineEntity);
-            }
-
-        }
+        // FIXME: spi
+//        for (Machine machine : runtimeMachines.entrySet()) {
+//            if (machine instanceof MachineDto) {
+//                MachineEntity machineEntity = new MachineEntityImpl(machine);
+//                machines.add(machineEntity);
+//            }
+//        }
         return machines;
     }
 
@@ -994,11 +991,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             notifyTreeNodeSelected(machineToSelect);
         }
 
-        for (MachineEntity machine : machines.values()) {
-            if (RUNNING.equals(machine.getStatus()) && !wsMachines.contains(machine)) {
-                provideMachineNode(machine, true);
-            }
-        }
+        // FIXME: spi
+//        for (MachineEntity machine : machines.values()) {
+//            if (RUNNING.equals(machine.getStatus()) && !wsMachines.contains(machine)) {
+//                provideMachineNode(machine, true);
+//            }
+//        }
     }
 
     @Override
@@ -1216,17 +1214,18 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      */
     public void printMachineOutput(final String machineName, final String text) {
         // Create a temporary machine node to display outputs.
-        if (!consoles.containsKey(machineName)) {
-            MachineDto machineDto = dtoFactory.createDto(MachineDto.class)
-                                              .withId(machineName)
-                                              .withStatus(CREATING)
-                                              .withConfig(dtoFactory.createDto(MachineConfigDto.class)
-                                                                    .withDev("dev-machine".equals(machineName))
-                                                                    .withName(machineName)
-                                                                    .withType("docker")
-                                                         );
-            provideMachineNode(new MachineItem(machineDto), true);
-        }
+        // FIXME: spi
+//        if (!consoles.containsKey(machineName)) {
+//            MachineDto machineDto = dtoFactory.createDto(MachineDto.class)
+//                                              .withId(machineName)
+//                                              .withStatus(CREATING)
+//                                              .withConfig(dtoFactory.createDto(MachineConfigDto.class)
+//                                                                    .withDev("dev-machine".equals(machineName))
+//                                                                    .withName(machineName)
+//                                                                    .withType("docker")
+//                                                         );
+//            provideMachineNode(new MachineItem(machineDto), true);
+//        }
 
         OutputConsole console = consoles.get(machineName);
         if (console != null && console instanceof DefaultOutputConsole) {
@@ -1335,9 +1334,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             }
 
             Machine machine = (Machine)machineNode.getData();
-            if (!machine.getConfig().isDev()) {
-                continue;
-            }
+            // FIXME: spi
+//            if (!machine.isDev()) {
+//                continue;
+//            }
 
             devMachine = machine;
             break;
@@ -1351,7 +1351,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                           " " + DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) +
                           ".log";
 
-        download(fileName, getText(devMachine.getId()));
+        // FIXME: spi
+//        download(fileName, getText(devMachine.getId()));
     }
 
     @Override

@@ -12,7 +12,7 @@ package org.eclipse.che.ide.workspace;
 
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
+import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeDescriptor;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.workspace.create.recipewidget.RecipeWidget;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidget;
@@ -32,7 +32,7 @@ public interface WorkspaceWidgetFactory {
      *         descriptor which contains all information about tag
      * @return an instance of {@link RecipeWidget}
      */
-    RecipeWidget create(RecipeDescriptor descriptor);
+    RecipeWidget create(OldRecipeDescriptor descriptor);
 
     /**
      * Creates view representation of workspace.

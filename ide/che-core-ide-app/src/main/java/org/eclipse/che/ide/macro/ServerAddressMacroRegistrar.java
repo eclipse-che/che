@@ -15,8 +15,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
@@ -65,13 +65,13 @@ public class ServerAddressMacroRegistrar implements WsAgentStateHandler {
 
     private Set<Macro> getMacros(Machine machine) {
         Set<Macro> macros = Sets.newHashSet();
-        for (Map.Entry<String, ? extends Server> entry : machine.getRuntime().getServers().entrySet()) {
+        for (Map.Entry<String, ? extends Server> entry : machine.getServers().entrySet()) {
             macros.add(new ServerAddressMacro(entry.getKey(),
-                                              entry.getValue().getAddress()));
+                                              entry.getValue().getUrl()));
 
             if (entry.getKey().endsWith("/tcp")) {
                 macros.add(new ServerAddressMacro(entry.getKey().substring(0, entry.getKey().length() - 4),
-                                                  entry.getValue().getAddress()));
+                                                  entry.getValue().getUrl()));
             }
         }
 

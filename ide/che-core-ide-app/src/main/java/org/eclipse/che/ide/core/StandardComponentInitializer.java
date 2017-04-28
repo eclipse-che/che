@@ -113,6 +113,7 @@ import org.eclipse.che.ide.ui.toolbar.MainToolbar;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
+import org.eclipse.che.ide.workspace.start.StartWorkspaceAction;
 import org.eclipse.che.ide.xml.NewXmlFileAction;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -300,6 +301,9 @@ public class StandardComponentInitializer {
 
     @Inject
     private DownloadResourceAction downloadResourceAction;
+
+    @Inject
+    private StartWorkspaceAction startWorkspaceAction;
 
     @Inject
     private ImportProjectAction importProjectAction;
@@ -558,6 +562,8 @@ public class StandardComponentInitializer {
 
         workspaceGroup.addSeparator();
         workspaceGroup.add(stopWorkspaceAction);
+
+        workspaceGroup.add(startWorkspaceAction);
 
         // Project (New Menu)
         DefaultActionGroup projectGroup = (DefaultActionGroup)actionManager.getAction(GROUP_PROJECT);

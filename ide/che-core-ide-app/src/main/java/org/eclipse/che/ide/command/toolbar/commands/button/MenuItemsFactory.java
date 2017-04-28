@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.commands.button;
 
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.ui.menubutton.MenuItem;
