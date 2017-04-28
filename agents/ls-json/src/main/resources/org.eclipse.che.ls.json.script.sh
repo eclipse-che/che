@@ -147,6 +147,11 @@ elif echo ${LINUX_TYPE} | grep -qi "alpine"; then
         ${SUDO} apk add ${PACKAGES};
     }
 
+    command -v nodejs >/dev/null 2>&1 || {
+        ${SUDO} apk update
+        ${SUDO} apk add nodejs;
+    }
+
 else
     >&2 echo "Unrecognized Linux Type"
     >&2 cat $FILE
