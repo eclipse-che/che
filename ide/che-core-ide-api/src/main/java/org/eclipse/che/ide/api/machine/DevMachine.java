@@ -52,7 +52,8 @@ public class DevMachine extends MachineEntityImpl {
             if (url.endsWith("/")) {
                 url = url.substring(0, url.length() - 1);
             }
-            return url;
+            // FIXME: spi
+            return url + "/api";
         } else {
             //should not be
             String message = "Reference " + Constants.WSAGENT_REFERENCE + " not found in DevMachine description";
