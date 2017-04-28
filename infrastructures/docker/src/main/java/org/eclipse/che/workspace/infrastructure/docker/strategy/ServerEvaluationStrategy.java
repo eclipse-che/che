@@ -129,7 +129,7 @@ public abstract class ServerEvaluationStrategy {
                                                                    internalAddressAndPort,
                                                                    internalUrl);
 
-            servers.put(portProtocol, new ServerImpl(externalUrl));
+            servers.put(serverConf.getRef(), new ServerImpl(externalUrl));
         }
 
         return servers;
