@@ -14,19 +14,19 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
-import org.eclipse.che.ide.jsonrpc.JsonRpcRequestBiOperation;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 
 @Singleton
 public class WorkspaceAgentOutputHandler {
     @Inject
     public void configureWorkspaceOutputMessageHandler(AppContext appContext, RequestHandlerConfigurator configurator, EventBus eventBus) {
-        JsonRpcRequestBiOperation<List<String>> operation = (String endpointId, List<String> messages) -> {
+        BiConsumer<String, List<String>> operation = (String endpointId, List<String> messages) -> {
             Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
             if (appContext.getActiveRuntime() == null || appContext.getDevMachine() == null) {
@@ -46,6 +46,6 @@ public class WorkspaceAgentOutputHandler {
                     .methodName("event:ws-agent-output:message")
                     .paramsAsListOfString()
                     .noResult()
-                    .withOperation(operation);
+                    .withConsumer(operation);
     }
 }

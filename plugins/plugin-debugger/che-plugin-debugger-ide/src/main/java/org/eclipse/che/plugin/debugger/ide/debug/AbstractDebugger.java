@@ -14,6 +14,8 @@ import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
@@ -63,8 +65,6 @@ import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerObservable;
 import org.eclipse.che.ide.debug.DebuggerObserver;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
@@ -252,7 +252,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                     .methodName(EVENT_DEBUGGER_MESSAGE_SUSPEND)
                     .paramsAsDto(SuspendEventDto.class)
                     .noResult()
-                    .withOperation((endpointId, event) -> {
+                    .withConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received suspend message from endpoint: " + endpointId);
                         onEventListReceived(event);
                     });
@@ -261,7 +261,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                     .methodName(EVENT_DEBUGGER_MESSAGE_DISCONNECT)
                     .paramsAsDto(DisconnectEventDto.class)
                     .noResult()
-                    .withOperation((endpointId, event) -> {
+                    .withConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received disconnect message from endpoint: " + endpointId);
                         onEventListReceived(event);
                     });
@@ -270,7 +270,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                     .methodName(EVENT_DEBUGGER_MESSAGE_BREAKPOINT)
                     .paramsAsDto(BreakpointActivatedEventDto.class)
                     .noResult()
-                    .withOperation((endpointId, event) -> {
+                    .withConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received breakpoint activated message from endpoint: " + endpointId);
                         onEventListReceived(event);
                     });

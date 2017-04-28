@@ -14,6 +14,8 @@ import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
@@ -52,12 +54,10 @@ import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerObserver;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
-import org.eclipse.che.ide.jsonrpc.reception.MethodNameConfigurator;
-import org.eclipse.che.ide.jsonrpc.reception.OperationConfiguratorOneToNone;
-import org.eclipse.che.ide.jsonrpc.reception.ParamsConfigurator;
-import org.eclipse.che.ide.jsonrpc.reception.ResultConfiguratorFromOne;
+import org.eclipse.che.api.core.jsonrpc.commons.reception.MethodNameConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.reception.ConsumerConfiguratorOneToNone;
+import org.eclipse.che.api.core.jsonrpc.commons.reception.ParamsConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.reception.ResultConfiguratorFromOne;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
@@ -214,7 +214,7 @@ public class DebuggerTest extends BaseTest {
         MethodNameConfigurator methodNameConfigurator = mock(MethodNameConfigurator.class);
         ParamsConfigurator paramsConfigurator = mock(ParamsConfigurator.class);
         ResultConfiguratorFromOne resultConfiguratorFromOne = mock(ResultConfiguratorFromOne.class);
-        OperationConfiguratorOneToNone operationConfiguratorOneToNone = mock(OperationConfiguratorOneToNone.class);
+        ConsumerConfiguratorOneToNone operationConfiguratorOneToNone = mock(ConsumerConfiguratorOneToNone.class);
 
         doReturn(methodNameConfigurator).when(configurator).newConfiguration();
         doReturn(paramsConfigurator).when(methodNameConfigurator).methodName(anyString());

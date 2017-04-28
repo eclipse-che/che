@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.util;
 
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.slf4j.Logger;
 
 import java.io.IOException;

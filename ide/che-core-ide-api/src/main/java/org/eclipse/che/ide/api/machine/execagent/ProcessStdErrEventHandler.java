@@ -12,8 +12,8 @@ package org.eclipse.che.ide.api.machine.execagent;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventDto;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
@@ -32,11 +32,11 @@ public class ProcessStdErrEventHandler extends AbstractExecAgentEventHandler<Pro
                     .methodName("process_stderr")
                     .paramsAsDto(ProcessStdErrEventDto.class)
                     .noResult()
-                    .withOperation(this);
+                    .withConsumer(this);
     }
 
     @Override
-    public void apply(String endpointId, ProcessStdErrEventDto params) {
+    public void accept(String endpointId, ProcessStdErrEventDto params) {
         Log.debug(getClass(), "Handling process error output event. Params: " + params);
         handle(endpointId, params);
     }

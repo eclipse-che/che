@@ -12,8 +12,8 @@ package org.eclipse.che.api.debugger.server;
 
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
@@ -94,17 +94,17 @@ public class DebuggerJsonRpcMessenger implements EventSubscriber<DebuggerMessage
     private void configureSubscribeHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
                     .methodName(EVENT_DEBUGGER_SUBSCRIBE)
-                    .paramsAsEmpty()
+                    .noParams()
                     .noResult()
-                    .withConsumer((endpointId, aVoid) -> endpointIds.add(endpointId));
+                    .withConsumer(endpointIds::add);
     }
 
     @Inject
     private void configureUnSubscribeHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
                     .methodName(EVENT_DEBUGGER_UN_SUBSCRIBE)
-                    .paramsAsString()
+                    .noParams()
                     .noResult()
-                    .withConsumer((endpointId, aVoid) -> endpointIds.remove(endpointId));
+                    .withConsumer(endpointIds::remove);
     }
 }

@@ -58,6 +58,7 @@ import org.eclipse.che.ide.editor.preferences.EditorPreferencesModule;
 import org.eclipse.che.ide.factory.inject.FactoryGinModule;
 import org.eclipse.che.ide.filetypes.FileTypeApiModule;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
+import org.eclipse.che.ide.logger.impl.ClientSideLoggerModule;
 import org.eclipse.che.ide.machine.MachineApiModule;
 import org.eclipse.che.ide.macro.MacroApiModule;
 import org.eclipse.che.ide.notification.NotificationApiModule;
@@ -95,6 +96,7 @@ public class CoreGinModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
+        install(new ClientSideLoggerModule());
         install(new JsonRpcModule());
         install(new WebSocketModule());
         install(new ClientServerEventModule());

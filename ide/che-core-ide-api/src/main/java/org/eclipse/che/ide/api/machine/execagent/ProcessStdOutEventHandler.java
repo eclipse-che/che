@@ -12,8 +12,8 @@ package org.eclipse.che.ide.api.machine.execagent;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
@@ -32,11 +32,11 @@ public class ProcessStdOutEventHandler extends AbstractExecAgentEventHandler<Pro
                     .methodName("process_stdout")
                     .paramsAsDto(ProcessStdOutEventDto.class)
                     .noResult()
-                    .withOperation(this);
+                    .withConsumer(this);
     }
 
     @Override
-    public void apply(String endpointId, ProcessStdOutEventDto params) {
+    public void accept(String endpointId, ProcessStdOutEventDto params) {
         Log.debug(getClass(), "Handling process standard output event. Params: " + params);
         handle(endpointId, params);
     }

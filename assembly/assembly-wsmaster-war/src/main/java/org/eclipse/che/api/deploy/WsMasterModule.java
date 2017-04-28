@@ -26,9 +26,12 @@ import org.eclipse.che.api.agent.WsAgent;
 import org.eclipse.che.api.agent.WsAgentLauncher;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
 import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule;
+import org.eclipse.che.api.core.logger.impl.LoggerModule;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
+import org.eclipse.che.api.core.websocket.impl.WebSocketModule;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
@@ -60,8 +63,9 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
         install(new org.eclipse.che.api.machine.server.jpa.MachineJpaModule());
         install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
-        install(new org.eclipse.che.api.core.jsonrpc.JsonRpcModule());
-        install(new org.eclipse.che.api.core.websocket.WebSocketModule());
+        install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
+        install(new org.eclipse.che.api.core.logger.impl.LoggerModule());
+        install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
 
         // db configuration
         bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);

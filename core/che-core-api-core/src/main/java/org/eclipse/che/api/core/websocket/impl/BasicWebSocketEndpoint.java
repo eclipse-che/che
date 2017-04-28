@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.websocket.impl;
 
-import org.eclipse.che.api.core.websocket.WebSocketMessageReceiver;
+import org.eclipse.che.api.core.websocket.commons.WebSocketMessageReceiver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

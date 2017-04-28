@@ -13,7 +13,10 @@ package org.eclipse.che.wsagent.server;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
+import org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule;
+import org.eclipse.che.api.core.logger.impl.LoggerModule;
 import org.eclipse.che.api.core.rest.ApiInfoService;
+import org.eclipse.che.api.core.websocket.impl.WebSocketModule;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.inject.DynaModule;
 
@@ -40,8 +43,9 @@ public class WsAgentModule extends AbstractModule {
         install(new org.eclipse.che.api.debugger.server.DebuggerModule());
         install(new org.eclipse.che.api.git.GitModule());
         install(new org.eclipse.che.git.impl.jgit.JGitModule());
-        install(new org.eclipse.che.api.core.jsonrpc.JsonRpcModule());
-        install(new org.eclipse.che.api.core.websocket.WebSocketModule());
+        install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
+        install(new org.eclipse.che.api.core.logger.impl.LoggerModule());
+        install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
 
     }
 
