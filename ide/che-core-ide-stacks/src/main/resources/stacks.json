@@ -2195,11 +2195,7 @@
         {
           "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
           "name": "build",
-          "type": "custom",
-          "attributes": {
-            "previewUrl": "",
-            "goal": "Build"
-          }
+          "type": "mvn"
         },
         {
           "commandLine": "java -jar ${current.project.path}/target/*.jar",
