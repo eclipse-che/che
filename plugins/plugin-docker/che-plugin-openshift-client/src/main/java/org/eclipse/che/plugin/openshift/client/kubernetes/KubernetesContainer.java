@@ -47,7 +47,7 @@ public final class KubernetesContainer {
 
             int portNumber = Integer.parseInt(port);
             String portName = CheServicePorts.get().get(portNumber);
-            portName = isNullOrEmpty(portName) ? exposedPort.replace("/", "-") : portName;
+            portName = isNullOrEmpty(portName) ? "server-" + exposedPort.replace("/", "-") : portName;
 
             ContainerPort containerPort = new ContainerPortBuilder().withName(portName).withProtocol(protocol)
                     .withContainerPort(portNumber).build();
