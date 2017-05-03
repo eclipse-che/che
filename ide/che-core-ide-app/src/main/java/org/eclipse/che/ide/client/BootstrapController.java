@@ -122,7 +122,7 @@ public class BootstrapController {
 //                            ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf(devMachineDto.getRuntime().projectsRoot()));
 //                        }
 
-//                        wsAgentStateControllerProvider.get().initialize(devMachine);
+                        wsAgentStateControllerProvider.get().initialize(devMachine);
                         wsAgentURLModifier.initialize(devMachine);
                         SortedMap<String, Provider<WsAgentComponent>> sortedComponents = new TreeMap<>();
                         sortedComponents.putAll(components);

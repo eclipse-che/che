@@ -265,8 +265,8 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
-    public Promise<WsAgentHealthStateDto> getWsAgentState(String workspaceId) {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + '/' + workspaceId + "/check")
+    public Promise<WsAgentHealthStateDto> getWsAgentState(String workspaceId, String devMachineName) {
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + '/' + workspaceId + "/check?machine=" + devMachineName)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(WsAgentHealthStateDto.class));
     }

@@ -61,7 +61,7 @@ public class WsAgentPingRequestFactory {
      */
     public HttpJsonRequest createRequest(Machine machine) throws ServerException {
         Map<String, ? extends Server> servers = machine.getServers();
-        Server wsAgentServer = servers.get(Constants.WS_AGENT_PORT);
+        Server wsAgentServer = servers.get(Constants.WSAGENT_REFERENCE);
 
         if (wsAgentServer == null) {
 //            LOG.error("{} WorkspaceId: {}, DevMachine Id: {}, found servers: {}",

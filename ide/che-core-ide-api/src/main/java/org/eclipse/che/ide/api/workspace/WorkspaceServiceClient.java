@@ -305,7 +305,7 @@ public interface WorkspaceServiceClient {
      * @return a promise that will resolve when the snapshot has been created, or rejects with an error
      * @see WorkspaceService#checkAgentHealth(String)
      */
-    Promise<WsAgentHealthStateDto> getWsAgentState(String workspaceId);
+    Promise<WsAgentHealthStateDto> getWsAgentState(String workspaceId, String devMachineName);
 
     /**
      * Get workspace related server configuration values defined in che.properties

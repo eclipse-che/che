@@ -232,7 +232,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     }
 
     private void checkWsAgentHealth() {
-        workspaceServiceClient.getWsAgentState(appContext.getWorkspaceId()).then(agentHealthState -> {
+        workspaceServiceClient.getWsAgentState(appContext.getWorkspaceId(), devMachine.getName()).then(agentHealthState -> {
             if (RUNNING.equals(agentHealthState.getWorkspaceStatus())) {
                 checkStateOfWsAgent(agentHealthState);
             }
