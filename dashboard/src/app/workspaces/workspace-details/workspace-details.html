@@ -69,6 +69,7 @@
                  layout="row" layout-align="start center">
               <che-filter-selector che-values="workspaceDetailsController.namespaceLabels"
                                    ng-model="workspaceDetailsController.namespaceLabel"
+                                   che-width="200px"
                                    che-on-change="workspaceDetailsController.onNamespaceChanged"></che-filter-selector>
               <span class="namespace-additional-info" ng-if="workspaceDetailsController.namespaceInfo">
                 {{workspaceDetailsController.namespaceInfo}}

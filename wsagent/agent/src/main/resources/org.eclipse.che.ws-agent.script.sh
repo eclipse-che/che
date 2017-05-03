@@ -54,7 +54,7 @@ command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
     INSTALL_JDK=true;
 } && {
     java_version=$(${JAVA_HOME}/bin/java -version 2>&1 | grep version  | awk '{print $NF}' | sed 's/"//g' | cut -d '.' -f2)
-    if [ ! "${java_version}" -eq "8" ]; then
+    if [ -z ${java_version} ] || [ ! "${java_version}" -eq "8" ]; then
         INSTALL_JDK=true;
     fi
 }
