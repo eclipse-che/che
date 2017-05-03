@@ -36,7 +36,8 @@ export class CheFilterSelector {
       valueModel: '=ngModel',
       values: '=cheValues',
       isDisabled: '=cheDisabled',
-      onChange: '=cheOnChange'
+      onChange: '=cheOnChange',
+      width: '@?cheWidth'
     };
   }
 }
