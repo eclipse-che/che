@@ -12,13 +12,15 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
+import org.eclipse.che.ide.api.editor.events.DocumentChangingEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangingHandler;
 import org.eclipse.che.ide.api.editor.reconciler.DirtyRegion;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilingStrategy;
 import org.eclipse.che.ide.api.editor.text.Region;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.plugin.languageserver.ide.editor.sync.TextDocumentSynchronize;
 import org.eclipse.che.plugin.languageserver.ide.editor.sync.TextDocumentSynchronizeFactory;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -35,6 +37,8 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
 
     private final TextDocumentSynchronize synchronize;
     private int version = 0;
+    private TextPosition lastEventStart;
+    private TextPosition lastEventEnd;
 
     @Inject
     public LanguageServerReconcileStrategy(TextDocumentSynchronizeFactory synchronizeFactory,
@@ -56,9 +60,17 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
         document.getDocumentHandle().getDocEventBus().addHandler(DocumentChangeEvent.TYPE, new DocumentChangeHandler() {
             @Override
             public void onDocumentChange(DocumentChangeEvent event) {
-                synchronize.syncTextDocument(event, ++version);
+                synchronize.syncTextDocument(document, lastEventStart, lastEventEnd, event.getText(), ++version);
             }
         });
+        document.getDocumentHandle().getDocEventBus().addHandler(DocumentChangingEvent.TYPE, new DocumentChangingHandler() {
+            @Override
+            public void onDocumentChanging(DocumentChangingEvent event) {
+                lastEventStart= document.getPositionFromIndex(event.getOffset());
+                lastEventEnd= document.getPositionFromIndex(event.getOffset()+event.getRemoveCharCount());
+            }
+        });
+
     }
 
     @Override
