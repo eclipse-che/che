@@ -11,8 +11,11 @@
 package org.eclipse.che.plugin.docker.machine.proxy;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+
+import java.util.Map;
 
 /**
  * Module that injects components needed to run docker machines behind proxies.
@@ -33,6 +36,8 @@ public class DockerProxyModule extends AbstractModule {
                             .toProvider(org.eclipse.che.plugin.docker.machine.proxy.HttpsProxyEnvVariableProvider.class);
         proxySettingsEnvVars.addBinding()
                             .toProvider(org.eclipse.che.plugin.docker.machine.proxy.NoProxyEnvVariableProvider.class);
+        bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(Names.named("che.docker.build_args"))
+                                                       .toProvider(DockerBuildArgsProvider.class);
     }
 
 }
