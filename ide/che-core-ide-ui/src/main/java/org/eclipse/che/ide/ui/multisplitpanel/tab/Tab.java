@@ -36,14 +36,13 @@ public interface Tab extends View<Tab.ActionDelegate>, ClickHandler, DoubleClick
 
     interface ActionDelegate {
 
-        /** Is called when {@code tab} is clicked. */
+        /** Called when {@code tab} has been clicked. */
         void onTabClicked(Tab tab);
 
-        /** Is called when {@code tab} is double clicked. */
+        /** Called when {@code tab} has been double clicked. */
         void onTabDoubleClicked(Tab tab);
 
-        /** Is called when {@code tab} is going to be closed. */
+        /** Called when {@code tab} is going to be closed. */
         void onTabClosing(Tab tab);
     }
-
 }

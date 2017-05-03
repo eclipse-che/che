@@ -309,11 +309,11 @@ public class ContainerConfig {
         return entrypoint;
     }
 
-    public void setEntrypoint(String[] entrypoint) {
+    public void setEntrypoint(String... entrypoint) {
         this.entrypoint = entrypoint;
     }
 
-    public ContainerConfig withEntrypoint(String[] entrypoint) {
+    public ContainerConfig withEntrypoint(String... entrypoint) {
         this.entrypoint = entrypoint;
         return this;
     }

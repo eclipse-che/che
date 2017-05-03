@@ -11,11 +11,9 @@
 package org.eclipse.che.account.spi;
 
 import org.eclipse.che.account.shared.model.Account;
-import org.eclipse.che.account.spi.jpa.AccountEntityListener;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -38,7 +36,6 @@ import java.util.Objects;
         }
 )
 @Table(name = "account")
-@EntityListeners(AccountEntityListener.class)
 public class AccountImpl implements Account {
 
     @Id

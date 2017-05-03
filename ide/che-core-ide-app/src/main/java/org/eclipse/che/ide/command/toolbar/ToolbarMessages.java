@@ -20,7 +20,7 @@ import com.google.gwt.i18n.client.Messages;
 public interface ToolbarMessages extends Messages {
 
     @Key("guide.label")
-    String guideItemLabel();
+    String guideItemLabel(String goalName);
 
     @Key("goal_button.tooltip.no_command")
     String goalButtonTooltipNoCommand(String goalId);
@@ -36,6 +36,9 @@ public interface ToolbarMessages extends Messages {
 
     @Key("previews.tooltip")
     String previewsTooltip();
+
+    @Key("previews.no_previews")
+    String previewsNoPreviews();
 
     @Key("previews.error.not_available")
     String previewsNotAvailableError();

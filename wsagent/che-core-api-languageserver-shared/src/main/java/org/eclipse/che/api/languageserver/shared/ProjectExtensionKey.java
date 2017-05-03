@@ -18,20 +18,15 @@ import java.util.Objects;
 public class ProjectExtensionKey {
     public static final String ALL_PROJECT_MARKER = "*";
 
-    private final String project;
-    private final String extension;
+    private String project;
+    private String extension;
 
     private ProjectExtensionKey(String project, String extension) {
         this.project = project;
         this.extension = extension;
     }
 
-    public String getProject() {
-        return project;
-    }
-
-    public String getExtension() {
-        return extension;
+    public ProjectExtensionKey() {
     }
 
     public static ProjectExtensionKey createProjectKey(String project, String extension) {
@@ -42,13 +37,30 @@ public class ProjectExtensionKey {
         return new ProjectExtensionKey(ALL_PROJECT_MARKER, extension);
     }
 
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
+    }
+
+    public String getExtension() {
+        return extension;
+    }
+
+    public void setExtension(String extension) {
+        this.extension = extension;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ProjectExtensionKey)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof ProjectExtensionKey))
+            return false;
         ProjectExtensionKey that = (ProjectExtensionKey)o;
-        return Objects.equals(extension, that.extension) &&
-               Objects.equals(project, that.project);
+        return Objects.equals(extension, that.extension) && Objects.equals(project, that.project);
     }
 
     @Override

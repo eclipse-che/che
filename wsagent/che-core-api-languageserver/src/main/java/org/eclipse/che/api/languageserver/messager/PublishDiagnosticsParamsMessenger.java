@@ -10,13 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.messager;
 
-import io.typefox.lsapi.PublishDiagnosticsParams;
-import io.typefox.lsapi.impl.PublishDiagnosticsParamsImpl;
-
-import com.google.gson.Gson;
-
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;
@@ -42,12 +39,10 @@ public class PublishDiagnosticsParamsMessenger implements EventSubscriber<Publis
 
     public void onEvent(final PublishDiagnosticsParams event) {
         try {
-            if (event instanceof PublishDiagnosticsParamsImpl && event.getUri().startsWith("file:///projects")) {
-                ((PublishDiagnosticsParamsImpl)event).setUri(event.getUri().substring(16));
-            }
+            event.setUri(event.getUri().substring(16));
             final ChannelBroadcastMessage bm = new ChannelBroadcastMessage();
             bm.setChannel("languageserver/textDocument/publishDiagnostics");
-            bm.setBody(new Gson().toJson(event));
+            bm.setBody(new DtoServerImpls.PublishDiagnosticsParamsDto(event).toJson());
             WSConnectionContext.sendMessage(bm);
         } catch (EncodeException | IOException e) {
             LOG.error(e.getMessage(), e);

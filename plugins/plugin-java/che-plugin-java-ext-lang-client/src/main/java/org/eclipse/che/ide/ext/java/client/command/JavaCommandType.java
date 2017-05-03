@@ -22,7 +22,7 @@ import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.ClasspathMacro;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.OutputDirMacro;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.SourcepathMacro;
-import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
+import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
 
 import java.util.LinkedList;
 import java.util.List;

@@ -48,7 +48,7 @@
         <div ng-message="maxlength">Command's preview URL should be less than 256 characters long.</div>
       </che-input>
     </div>
-    <che-button-primary che-button-title="{{editCommandDialogController.index === -1 ? 'Add' : 'Edit'}}"
+    <che-button-primary che-button-title="{{editCommandDialogController.index === -1 ? 'Add' : 'Save'}}"
                         ng-click="editCommandDialogController.updateCommand()"
                         ng-disabled="commandForm.$invalid">
     </che-button-primary>

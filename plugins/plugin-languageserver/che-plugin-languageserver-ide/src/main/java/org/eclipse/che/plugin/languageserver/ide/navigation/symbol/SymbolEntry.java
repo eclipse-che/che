@@ -24,11 +24,11 @@ import java.util.List;
  */
 class SymbolEntry extends QuickOpenEntryGroup {
 
-    private String    name;
-    private String    type;
-    private String    description;
-    private TextRange range;
-    private TextEditor editor;
+    private String      name;
+    private String      type;
+    private String      description;
+    private TextRange   range;
+    private TextEditor  editor;
     private SVGResource icon;
 
     public SymbolEntry(String name,
