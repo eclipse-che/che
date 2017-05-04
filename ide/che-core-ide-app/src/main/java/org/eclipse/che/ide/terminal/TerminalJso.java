@@ -19,6 +19,7 @@ import org.eclipse.che.api.promises.client.Operation;
  * GWT binding to term.js script
  *
  * @author Evgen Vidolob
+ * @author Alexander Andrienko
  */
 class TerminalJso extends JavaScriptObject {
     protected TerminalJso() {
@@ -30,6 +31,28 @@ class TerminalJso extends JavaScriptObject {
 
     public final native void open(Element element) /*-{
         this.open(element);
+    }-*/;
+
+    public final native void attachCustomKeydownHandler() /*-{
+        this.attachCustomKeydownHandler(function (ev) {
+            var C = 67;
+            var V = 86;
+            if (ev.ctrlKey) {//todo handle not shift, alt, meta and so on maybe.
+                var selection = this.document.getSelection(),
+                    collapsed = selection.isCollapsed,
+                    isRange = typeof collapsed === 'boolean' ? !collapsed : selection.type === 'Range';
+
+                    //Ctrl + C
+                    if (ev.keyCode === C && isRange) {
+                        return false;
+                    }
+
+                //Ctrl + V
+                if (ev.keyCode === V) {
+                    return false;
+                }
+            }
+        });
     }-*/;
 
     public final native Element getElement() /*-{
