@@ -60,14 +60,14 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
         document.getDocumentHandle().getDocEventBus().addHandler(DocumentChangeEvent.TYPE, new DocumentChangeHandler() {
             @Override
             public void onDocumentChange(DocumentChangeEvent event) {
-                synchronize.syncTextDocument(document, lastEventStart, lastEventEnd, event.getText(), ++version);
+                synchronize.syncTextDocument(event.getDocument().getDocument(), lastEventStart, lastEventEnd, event.getText(), ++version);
             }
         });
         document.getDocumentHandle().getDocEventBus().addHandler(DocumentChangingEvent.TYPE, new DocumentChangingHandler() {
             @Override
             public void onDocumentChanging(DocumentChangingEvent event) {
-                lastEventStart= document.getPositionFromIndex(event.getOffset());
-                lastEventEnd= document.getPositionFromIndex(event.getOffset()+event.getRemoveCharCount());
+                lastEventStart= event.getDocument().getDocument().getPositionFromIndex(event.getOffset());
+                lastEventEnd= event.getDocument().getDocument().getPositionFromIndex(event.getOffset()+event.getRemoveCharCount());
             }
         });
 
