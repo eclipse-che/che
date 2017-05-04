@@ -41,6 +41,7 @@ public class OpenShiftConnectorTest {
     private static final String   CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS = "che.openshift.mini";
     private static final String   CHE_WORKSPACE_CPU_LIMIT = "1";
     private static final boolean  SECURE_ROUTES = false;
+    private static final boolean  CREATE_WORKSPACE_DIRS = true;
 
 
     @Mock
@@ -86,7 +87,8 @@ public class OpenShiftConnectorTest {
                                                     OPENSHIFT_DEFAULT_WORKSPACE_PROJECTS_STORAGE,
                                                     CHE_WORKSPACE_CPU_LIMIT,
                                                     null,
-                                                    SECURE_ROUTES);
+                                                    SECURE_ROUTES,
+                                                    CREATE_WORKSPACE_DIRS);
         String workspaceID = openShiftConnector.getCheWorkspaceId(createContainerParams);
 
         //Then
