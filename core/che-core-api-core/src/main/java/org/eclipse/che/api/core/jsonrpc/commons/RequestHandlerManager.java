@@ -79,7 +79,7 @@ public class RequestHandlerManager {
         mustNotBeRegistered(method);
 
         methodToCategory.put(method, Category.ONE_TO_MANY);
-        oneToManyHandlers.put("method", new OneToManyHandler<>(pClass, rClass, biFunction));
+        oneToManyHandlers.put(method, new OneToManyHandler<>(pClass, rClass, biFunction));
     }
 
     public <P> void registerOneToNone(String method, Class<P> pClass, BiConsumer<String, P> biConsumer) {
