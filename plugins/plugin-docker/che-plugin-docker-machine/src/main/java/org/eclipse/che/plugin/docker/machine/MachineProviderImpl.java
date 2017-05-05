@@ -167,6 +167,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final long                                          cpuQuota;
     private final WindowsPathEscaper                            windowsPathEscaper;
     private final String[]                                      dnsResolvers;
+    private final Map<String, String>                           buildArgs;
 
     @Inject
     public MachineProviderImpl(DockerConnectorProvider dockerProvider,
@@ -194,7 +195,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("che.docker.cpu_quota") long cpuQuota,
                                WindowsPathEscaper windowsPathEscaper,
                                @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
-                               @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers)
+                               @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers,
+                               @Named("che.docker.build_args") Map<String, String> buildArgs)
             throws IOException {
         this.docker = dockerProvider.get();
         this.dockerCredentials = dockerCredentials;
@@ -222,6 +224,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.windowsPathEscaper = windowsPathEscaper;
         this.pidsLimit = pidsLimit;
         this.dnsResolvers = dnsResolvers;
+        this.buildArgs = buildArgs;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
@@ -459,6 +462,14 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                 buildImageParams = BuildImageParams.create(service.getBuild().getContext())
                                                    .withDockerfile(service.getBuild().getDockerfilePath());
             }
+            Map<String, String> buildArgs;
+            if (service.getBuild().getArgs() == null || service.getBuild().getArgs().isEmpty()) {
+                buildArgs = this.buildArgs;
+            } else {
+                buildArgs = new HashMap<>();
+                buildArgs.putAll(service.getBuild().getArgs());
+                buildArgs.putAll(this.buildArgs);
+            }
             buildImageParams.withForceRemoveIntermediateContainers(true)
                             .withRepository(machineImageName)
                             .withAuthConfigs(dockerCredentials.getCredentials())
@@ -468,7 +479,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                             .withCpusetCpus(cpusetCpus)
                             .withCpuPeriod(cpuPeriod)
                             .withCpuQuota(cpuQuota)
-                            .withBuildArgs(service.getBuild().getArgs());
+                            .withBuildArgs(buildArgs);
 
             docker.buildImage(buildImageParams, progressMonitor);
         } catch (IOException e) {
