@@ -66,7 +66,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Requires
         terminalElement.getStyle().setProperty("opacity", "0");
 
         terminal.open(terminalPanel.getElement());
-        terminal.attachCustomKeydownHandler();
+        terminal.attachCustomKeyDownHandler(CustomKeyDownTerminalHandler.create());
 
         terminalElement.getFirstChildElement().getStyle().clearProperty("backgroundColor");
         terminalElement.getFirstChildElement().getStyle().clearProperty("color");
