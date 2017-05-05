@@ -25,7 +25,7 @@ public class CustomKeyDownTerminalHandler extends JavaScriptObject {
         return function(ev) {
             var C = 67;
             var V = 86;
-            if (ev.ctrlKey) {
+            if (ev.ctrlKey && !(ev.shiftKey || ev.metaKey || ev.altKey)) {
 
                 //handle Ctrl + V
                 if (ev.keyCode === V) {
