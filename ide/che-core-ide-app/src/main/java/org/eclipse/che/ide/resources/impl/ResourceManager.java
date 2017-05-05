@@ -587,7 +587,7 @@ public final class ResourceManager {
 
             if (descToRemove != null) {
                 for (Resource toRemove : descToRemove) {
-                    if (isResourceOpened(resource)) {
+                    if (isResourceOpened(toRemove)) {
                         deletedFilesController.add(toRemove.getLocation().toString());
                     }
 
