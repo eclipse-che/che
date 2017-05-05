@@ -28,10 +28,9 @@ import org.testng.annotations.Test;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -74,15 +73,11 @@ public class MavenValueProviderTest {
     private MavenKey parentKey;
 
     private MavenValueProvider mavenValueProvider;
-    private String x;
 
 
     @BeforeMethod
     public void setUp() {
-        final String path = getClass().getClassLoader().getResource("").getPath();
-        x = path + "/FirstProject";
-        System.out.println(x);
-        when(folderEntry.getPath()).thenReturn(Path.of(path + "/FirstProject"));
+        when(folderEntry.getPath()).thenReturn(Path.of(""));
         when(mavenProject.getMavenKey()).thenReturn(mavenKey);
         when(mavenProject.getParentKey()).thenReturn(parentKey);
         mavenValueProvider = new MavenValueProvider(mavenProjectManager, folderEntry);
@@ -94,7 +89,7 @@ public class MavenValueProviderTest {
         String artifactId = NameGenerator.generate("artifactId-", 6);
         when(mavenKey.getArtifactId()).thenReturn(artifactId);
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
-        final List<String> artifactIds = mavenValueProvider.getValues(MavenAttributes.ARTIFACT_ID);
+        List<String> artifactIds = mavenValueProvider.getValues(MavenAttributes.ARTIFACT_ID);
         Assert.assertNotNull(artifactIds);
         Assert.assertFalse(artifactIds.isEmpty());
         Assert.assertEquals(artifactIds.size(), 1);
@@ -108,7 +103,7 @@ public class MavenValueProviderTest {
         String groupId = NameGenerator.generate("groupId-", 6);
         when(mavenKey.getGroupId()).thenReturn(groupId);
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
-        final List<String> groupIds = mavenValueProvider.getValues(MavenAttributes.GROUP_ID);
+        List<String> groupIds = mavenValueProvider.getValues(MavenAttributes.GROUP_ID);
         Assert.assertNotNull(groupIds);
         Assert.assertFalse(groupIds.isEmpty());
         Assert.assertEquals(groupIds.size(), 1);
@@ -122,7 +117,7 @@ public class MavenValueProviderTest {
         String versionId = NameGenerator.generate("version-", 6);
         when(mavenKey.getVersion()).thenReturn(versionId);
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
-        final List<String> versions = mavenValueProvider.getValues(MavenAttributes.VERSION);
+        List<String> versions = mavenValueProvider.getValues(MavenAttributes.VERSION);
         Assert.assertNotNull(versions);
         Assert.assertFalse(versions.isEmpty());
         Assert.assertEquals(versions.size(), 1);
@@ -135,7 +130,7 @@ public class MavenValueProviderTest {
     public void getPackagingFromMavenProject() throws Exception {
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
         when(mavenProject.getPackaging()).thenReturn("war");
-        final List<String> pkgs = mavenValueProvider.getValues(MavenAttributes.PACKAGING);
+        List<String> pkgs = mavenValueProvider.getValues(MavenAttributes.PACKAGING);
         Assert.assertNotNull(pkgs);
         Assert.assertFalse(pkgs.isEmpty());
         Assert.assertEquals(pkgs.size(), 1);
@@ -146,7 +141,7 @@ public class MavenValueProviderTest {
     @Test
     public void getPackagingFromMavenProjectIfNotSet() throws Exception {
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
-        final List<String> pkgs = mavenValueProvider.getValues(MavenAttributes.PACKAGING);
+        List<String> pkgs = mavenValueProvider.getValues(MavenAttributes.PACKAGING);
         Assert.assertNotNull(pkgs);
         Assert.assertFalse(pkgs.isEmpty());
         Assert.assertEquals(pkgs.size(), 1);
@@ -160,7 +155,7 @@ public class MavenValueProviderTest {
         String parentArtifact = NameGenerator.generate("parentArtifact", 6);
         when(parentKey.getArtifactId()).thenReturn(parentArtifact);
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
-        final List<String> values = mavenValueProvider.getValues(MavenAttributes.PARENT_ARTIFACT_ID);
+        List<String> values = mavenValueProvider.getValues(MavenAttributes.PARENT_ARTIFACT_ID);
         Assert.assertNotNull(values);
         Assert.assertFalse(values.isEmpty());
         Assert.assertEquals(values.size(), 1);
@@ -174,7 +169,7 @@ public class MavenValueProviderTest {
         String parentVersionId = NameGenerator.generate("parent-version-", 6);
         when(parentKey.getVersion()).thenReturn(parentVersionId);
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
-        final List<String> versions = mavenValueProvider.getValues(MavenAttributes.PARENT_VERSION);
+        List<String> versions = mavenValueProvider.getValues(MavenAttributes.PARENT_VERSION);
         Assert.assertNotNull(versions);
         Assert.assertFalse(versions.isEmpty());
         Assert.assertEquals(versions.size(), 1);
@@ -187,7 +182,7 @@ public class MavenValueProviderTest {
         String groupId = NameGenerator.generate("parent-group-", 6);
         when(parentKey.getGroupId()).thenReturn(groupId);
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
-        final List<String> values = mavenValueProvider.getValues(MavenAttributes.PARENT_GROUP_ID);
+        List<String> values = mavenValueProvider.getValues(MavenAttributes.PARENT_GROUP_ID);
         Assert.assertNotNull(values);
         Assert.assertFalse(values.isEmpty());
         Assert.assertEquals(values.size(), 1);
@@ -197,10 +192,10 @@ public class MavenValueProviderTest {
 
     @Test
     public void getSourceFromMavenProject() throws Exception {
-        final List<String> strings = Collections.singletonList("src");
+        final List<String> strings = singletonList("src");
         when(mavenProject.getSources()).thenReturn(strings);
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
-        final List<String> sources = mavenValueProvider.getValues(Constants.SOURCE_FOLDER);
+        List<String> sources = mavenValueProvider.getValues(Constants.SOURCE_FOLDER);
         Assert.assertNotNull(sources);
         Assert.assertFalse(sources.isEmpty());
         Assert.assertEquals(sources.size(), 1);
@@ -210,19 +205,19 @@ public class MavenValueProviderTest {
     @Test
     public void getSourceFromMavenProjectIfNotSet() throws Exception {
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
-        final List<String> sources = mavenValueProvider.getValues(Constants.SOURCE_FOLDER);
+        List<String> sources = mavenValueProvider.getValues(Constants.SOURCE_FOLDER);
         Assert.assertNotNull(sources);
         Assert.assertFalse(sources.isEmpty());
         Assert.assertEquals(sources.size(), 1);
-        Assert.assertEquals(sources, Arrays.asList(MavenAttributes.DEFAULT_SOURCE_FOLDER));
+        Assert.assertEquals(sources, singletonList(MavenAttributes.DEFAULT_SOURCE_FOLDER));
     }
 
     @Test
     public void getTestSourceFromMavenProject() throws Exception {
-        final List<String> strings = Collections.singletonList("src/test");
+        List<String> strings = singletonList("src/test");
         when(mavenProject.getTestSources()).thenReturn(strings);
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
-        final List<String> sources = mavenValueProvider.getValues(MavenAttributes.TEST_SOURCE_FOLDER);
+        List<String> sources = mavenValueProvider.getValues(MavenAttributes.TEST_SOURCE_FOLDER);
         Assert.assertNotNull(sources);
         Assert.assertFalse(sources.isEmpty());
         Assert.assertEquals(sources.size(), 1);
@@ -232,12 +227,12 @@ public class MavenValueProviderTest {
     @Test
     public void getTestSourceFromMavenProjectIfNotSet() throws Exception {
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
-        final List<String> sources = mavenValueProvider.getValues(MavenAttributes.TEST_SOURCE_FOLDER);
+        List<String> sources = mavenValueProvider.getValues(MavenAttributes.TEST_SOURCE_FOLDER);
         verify(mavenProjectManager).getMavenProject(anyString());
         Assert.assertNotNull(sources);
         Assert.assertFalse(sources.isEmpty());
         Assert.assertEquals(sources.size(), 1);
-        Assert.assertEquals(sources, Arrays.asList(MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER));
+        Assert.assertEquals(sources, singletonList(MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER));
     }
 
 
@@ -246,7 +241,7 @@ public class MavenValueProviderTest {
         FileEntry fileEntry = mock(FileEntry.class);
         when(fileEntry.getInputStream()).thenReturn(new ByteArrayInputStream(pomContent.getBytes(StandardCharsets.UTF_8)));
         when(folderEntry.getChild(anyString())).thenReturn(fileEntry);
-        final List<String> artifactIds = mavenValueProvider.getValues(MavenAttributes.ARTIFACT_ID);
+        List<String> artifactIds = mavenValueProvider.getValues(MavenAttributes.ARTIFACT_ID);
         Assert.assertNotNull(artifactIds);
         Assert.assertFalse(artifactIds.isEmpty());
         Assert.assertEquals(artifactIds.size(), 1);
@@ -260,7 +255,7 @@ public class MavenValueProviderTest {
         FileEntry fileEntry = mock(FileEntry.class);
         when(fileEntry.getInputStream()).thenReturn(new ByteArrayInputStream(pomContent.getBytes(StandardCharsets.UTF_8)));
         when(folderEntry.getChild(anyString())).thenReturn(fileEntry);
-        final List<String> groupIds = mavenValueProvider.getValues(MavenAttributes.GROUP_ID);
+        List<String> groupIds = mavenValueProvider.getValues(MavenAttributes.GROUP_ID);
         Assert.assertNotNull(groupIds);
         Assert.assertFalse(groupIds.isEmpty());
         Assert.assertEquals(groupIds.size(), 1);
@@ -274,7 +269,7 @@ public class MavenValueProviderTest {
         FileEntry fileEntry = mock(FileEntry.class);
         when(fileEntry.getInputStream()).thenReturn(new ByteArrayInputStream(pomContent.getBytes(StandardCharsets.UTF_8)));
         when(folderEntry.getChild(anyString())).thenReturn(fileEntry);
-        final List<String> versions = mavenValueProvider.getValues(MavenAttributes.VERSION);
+        List<String> versions = mavenValueProvider.getValues(MavenAttributes.VERSION);
         Assert.assertNotNull(versions);
         Assert.assertFalse(versions.isEmpty());
         Assert.assertEquals(versions.size(), 1);
@@ -288,7 +283,7 @@ public class MavenValueProviderTest {
         FileEntry fileEntry = mock(FileEntry.class);
         when(fileEntry.getInputStream()).thenReturn(new ByteArrayInputStream(pomContent.getBytes(StandardCharsets.UTF_8)));
         when(folderEntry.getChild(anyString())).thenReturn(fileEntry);
-        final List<String> pkgs = mavenValueProvider.getValues(MavenAttributes.PACKAGING);
+        List<String> pkgs = mavenValueProvider.getValues(MavenAttributes.PACKAGING);
         Assert.assertNotNull(pkgs);
         Assert.assertFalse(pkgs.isEmpty());
         Assert.assertEquals(pkgs.size(), 1);
@@ -299,10 +294,10 @@ public class MavenValueProviderTest {
     @Test
     public void getPackagingFromPomIfNotSet() throws Exception {
         FileEntry fileEntry = mock(FileEntry.class);
-        final String pom = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><project></project>";
+        String pom = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><project></project>";
         when(fileEntry.getInputStream()).thenReturn(new ByteArrayInputStream(pom.getBytes(StandardCharsets.UTF_8)));
         when(folderEntry.getChild(anyString())).thenReturn(fileEntry);
-        final List<String> pkgs = mavenValueProvider.getValues(MavenAttributes.PACKAGING);
+        List<String> pkgs = mavenValueProvider.getValues(MavenAttributes.PACKAGING);
         Assert.assertNotNull(pkgs);
         Assert.assertFalse(pkgs.isEmpty());
         Assert.assertEquals(pkgs.size(), 1);
@@ -316,7 +311,7 @@ public class MavenValueProviderTest {
         FileEntry fileEntry = mock(FileEntry.class);
         when(fileEntry.getInputStream()).thenReturn(new ByteArrayInputStream(pomContent.getBytes(StandardCharsets.UTF_8)));
         when(folderEntry.getChild(anyString())).thenReturn(fileEntry);
-        final List<String> values = mavenValueProvider.getValues(MavenAttributes.PARENT_ARTIFACT_ID);
+        List<String> values = mavenValueProvider.getValues(MavenAttributes.PARENT_ARTIFACT_ID);
         Assert.assertNotNull(values);
         Assert.assertFalse(values.isEmpty());
         Assert.assertEquals(values.size(), 1);
@@ -330,7 +325,7 @@ public class MavenValueProviderTest {
         FileEntry fileEntry = mock(FileEntry.class);
         when(fileEntry.getInputStream()).thenReturn(new ByteArrayInputStream(pomContent.getBytes(StandardCharsets.UTF_8)));
         when(folderEntry.getChild(anyString())).thenReturn(fileEntry);
-        final List<String> versions = mavenValueProvider.getValues(MavenAttributes.PARENT_VERSION);
+        List<String> versions = mavenValueProvider.getValues(MavenAttributes.PARENT_VERSION);
         Assert.assertNotNull(versions);
         Assert.assertFalse(versions.isEmpty());
         Assert.assertEquals(versions.size(), 1);
@@ -343,7 +338,7 @@ public class MavenValueProviderTest {
         FileEntry fileEntry = mock(FileEntry.class);
         when(fileEntry.getInputStream()).thenReturn(new ByteArrayInputStream(pomContent.getBytes(StandardCharsets.UTF_8)));
         when(folderEntry.getChild(anyString())).thenReturn(fileEntry);
-        final List<String> values = mavenValueProvider.getValues(MavenAttributes.PARENT_GROUP_ID);
+        List<String> values = mavenValueProvider.getValues(MavenAttributes.PARENT_GROUP_ID);
         Assert.assertNotNull(values);
         Assert.assertFalse(values.isEmpty());
         Assert.assertEquals(values.size(), 1);
@@ -356,24 +351,24 @@ public class MavenValueProviderTest {
         FileEntry fileEntry = mock(FileEntry.class);
         when(fileEntry.getInputStream()).thenReturn(new ByteArrayInputStream(pomContent.getBytes(StandardCharsets.UTF_8)));
         when(folderEntry.getChild(anyString())).thenReturn(fileEntry);
-        final List<String> sources = mavenValueProvider.getValues(Constants.SOURCE_FOLDER);
+        List<String> sources = mavenValueProvider.getValues(Constants.SOURCE_FOLDER);
         Assert.assertNotNull(sources);
         Assert.assertFalse(sources.isEmpty());
         Assert.assertEquals(sources.size(), 1);
-        Assert.assertEquals(sources, Collections.singletonList("src"));
+        Assert.assertEquals(sources, singletonList("src"));
     }
 
     @Test
     public void getSourceFromPomIfNotSet() throws Exception {
         FileEntry fileEntry = mock(FileEntry.class);
-        final String pom = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><project></project>";
+        String pom = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><project></project>";
         when(fileEntry.getInputStream()).thenReturn(new ByteArrayInputStream(pom.getBytes(StandardCharsets.UTF_8)));
         when(folderEntry.getChild(anyString())).thenReturn(fileEntry);
-        final List<String> sources = mavenValueProvider.getValues(Constants.SOURCE_FOLDER);
+        List<String> sources = mavenValueProvider.getValues(Constants.SOURCE_FOLDER);
         Assert.assertNotNull(sources);
         Assert.assertFalse(sources.isEmpty());
         Assert.assertEquals(sources.size(), 1);
-        Assert.assertEquals(sources, Collections.singletonList(MavenAttributes.DEFAULT_SOURCE_FOLDER));
+        Assert.assertEquals(sources, singletonList(MavenAttributes.DEFAULT_SOURCE_FOLDER));
     }
 
     @Test
@@ -381,24 +376,24 @@ public class MavenValueProviderTest {
         FileEntry fileEntry = mock(FileEntry.class);
         when(fileEntry.getInputStream()).thenReturn(new ByteArrayInputStream(pomContent.getBytes(StandardCharsets.UTF_8)));
         when(folderEntry.getChild(anyString())).thenReturn(fileEntry);
-        final List<String> sources = mavenValueProvider.getValues(MavenAttributes.TEST_SOURCE_FOLDER);
+        List<String> sources = mavenValueProvider.getValues(MavenAttributes.TEST_SOURCE_FOLDER);
         Assert.assertNotNull(sources);
         Assert.assertFalse(sources.isEmpty());
         Assert.assertEquals(sources.size(), 1);
-        Assert.assertEquals(sources, Collections.singletonList("test"));
+        Assert.assertEquals(sources, singletonList("test"));
     }
 
     @Test
     public void getTestSourceFromPomIfNotSet() throws Exception {
         FileEntry fileEntry = mock(FileEntry.class);
-        final String pom = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><project></project>";
+        String pom = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><project></project>";
         when(fileEntry.getInputStream()).thenReturn(new ByteArrayInputStream(pom.getBytes(StandardCharsets.UTF_8)));
         when(folderEntry.getChild(anyString())).thenReturn(fileEntry);
-        final List<String> sources = mavenValueProvider.getValues(MavenAttributes.TEST_SOURCE_FOLDER);
+        List<String> sources = mavenValueProvider.getValues(MavenAttributes.TEST_SOURCE_FOLDER);
         Assert.assertNotNull(sources);
         Assert.assertFalse(sources.isEmpty());
         Assert.assertEquals(sources.size(), 1);
-        Assert.assertEquals(sources, Collections.singletonList(MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER));
+        Assert.assertEquals(sources, singletonList(MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER));
     }
 
 }

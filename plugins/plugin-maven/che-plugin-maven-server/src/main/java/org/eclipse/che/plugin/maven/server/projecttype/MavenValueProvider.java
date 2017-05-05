@@ -17,7 +17,6 @@ import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.commons.xml.XMLTreeException;
-import org.eclipse.che.ide.maven.tools.Build;
 import org.eclipse.che.ide.maven.tools.Model;
 import org.eclipse.che.ide.maven.tools.Resource;
 import org.eclipse.che.maven.data.MavenResource;
@@ -26,10 +25,10 @@ import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_PACKAGING;
@@ -53,10 +52,9 @@ public class MavenValueProvider extends ReadonlyValueProvider {
 
 
     private MavenProjectManager mavenProjectManager;
-    private FolderEntry projectFolder;
+    private FolderEntry         projectFolder;
 
-    protected MavenValueProvider(MavenProjectManager mavenProjectManager,
-                                 FolderEntry projectFolder) {
+    protected MavenValueProvider(MavenProjectManager mavenProjectManager, FolderEntry projectFolder) {
         this.mavenProjectManager = mavenProjectManager;
         this.projectFolder = projectFolder;
     }
@@ -78,89 +76,82 @@ public class MavenValueProvider extends ReadonlyValueProvider {
         return null;
     }
 
-    private List<String> getFromMavenProject(MavenProject mavenProject, String attributeName) {
-        String value = "";
-        if (attributeName.equals(ARTIFACT_ID)) {
-            value = mavenProject.getMavenKey().getArtifactId();
-        } else if (attributeName.equals(GROUP_ID)) {
-            value = mavenProject.getMavenKey().getGroupId();
-        } else if (attributeName.equals(PACKAGING)) {
-            final String packaging = mavenProject.getPackaging();
-            value = packaging == null ? DEFAULT_PACKAGING : packaging;
-        } else if (attributeName.equals(VERSION)) {
-            value = mavenProject.getMavenKey().getVersion();
-        } else if (attributeName.equals(PARENT_ARTIFACT_ID) && mavenProject.getParentKey() != null) {
-            value = mavenProject.getParentKey().getArtifactId();
-        } else if (attributeName.equals(PARENT_GROUP_ID) && mavenProject.getParentKey() != null) {
-            value = mavenProject.getParentKey().getGroupId();
-        } else if (attributeName.equals(PARENT_VERSION) && mavenProject.getParentKey() != null) {
-            value = mavenProject.getParentKey().getVersion();
-        } else if (attributeName.equals(SOURCE_FOLDER)) {
-            if (mavenProject.getSources() != null && !mavenProject.getSources().isEmpty()) {
-                return mavenProject.getSources();
-            } else {
-                value = DEFAULT_SOURCE_FOLDER;
-            }
-        } else if (attributeName.equals(TEST_SOURCE_FOLDER)) {
-            if (mavenProject.getTestSources() != null && !mavenProject.getTestSources().isEmpty()) {
-                return mavenProject.getTestSources();
-            } else {
-                value = DEFAULT_TEST_SOURCE_FOLDER;
-            }
-        } else if (attributeName.equals(RESOURCE_FOLDER)) {
-            if (mavenProject.getResources() != null && !mavenProject.getResources().isEmpty()) {
-                return mavenProject.getResources().stream().map(MavenResource::getDirectory).collect(Collectors.toList());
-            } else {
-                return Arrays.asList(DEFAULT_RESOURCES_FOLDER, DEFAULT_TEST_RESOURCES_FOLDER);
-            }
+    private List<String> getFromMavenProject(MavenProject mavenProject, String attributeName) throws ValueStorageException {
+        switch (attributeName) {
+            case ARTIFACT_ID:
+                return singletonList(mavenProject.getMavenKey().getArtifactId());
+            case GROUP_ID:
+                return singletonList(mavenProject.getMavenKey().getGroupId());
+            case PACKAGING:
+                String packaging = mavenProject.getPackaging();
+                return singletonList(packaging != null ? packaging : DEFAULT_PACKAGING);
+            case VERSION:
+                return singletonList(mavenProject.getMavenKey().getVersion());
+            case PARENT_ARTIFACT_ID:
+                return singletonList(mavenProject.getParentKey() == null ? "" : mavenProject.getParentKey().getArtifactId());
+            case PARENT_GROUP_ID:
+                return singletonList(mavenProject.getParentKey() == null ? "" : mavenProject.getParentKey().getGroupId());
+            case PARENT_VERSION:
+                return singletonList(mavenProject.getParentKey() == null ? "" : mavenProject.getParentKey().getVersion());
+            case SOURCE_FOLDER:
+                return (mavenProject.getSources() != null && !mavenProject.getSources().isEmpty()) ? mavenProject.getSources()
+                                                                                                   : singletonList(DEFAULT_SOURCE_FOLDER);
+            case TEST_SOURCE_FOLDER:
+                return (mavenProject.getTestSources() != null && !mavenProject.getTestSources().isEmpty()) ? mavenProject.getTestSources()
+                                                                                                           : singletonList(
+                                                                                                                   DEFAULT_TEST_SOURCE_FOLDER);
+            case RESOURCE_FOLDER:
+                if (mavenProject.getResources() != null && !mavenProject.getResources().isEmpty()) {
+                    return mavenProject.getResources().stream().map(MavenResource::getDirectory).collect(Collectors.toList());
+                } else {
+                    return Arrays.asList(DEFAULT_RESOURCES_FOLDER, DEFAULT_TEST_RESOURCES_FOLDER);
+                }
+            default:
+                throw new ValueStorageException(String.format("Unknown attribute %s", attributeName));
         }
-        return Collections.singletonList(value);
     }
 
 
     private List<String> readFromPom(String attributeName)
             throws ServerException, ForbiddenException, IOException, XMLTreeException, ValueStorageException {
-        String value = "";
         final Model model = readModel(projectFolder);
-        if (attributeName.equals(ARTIFACT_ID)) {
-            value = model.getArtifactId();
-        } else if (attributeName.equals(GROUP_ID)) {
-            value = model.getGroupId();
-        } else if (attributeName.equals(PACKAGING)) {
-            final String packaging = model.getPackaging();
-            value = packaging == null ? DEFAULT_PACKAGING : packaging;
-        } else if (attributeName.equals(VERSION)) {
-            value = model.getVersion();
-        } else if (attributeName.equals(PARENT_ARTIFACT_ID) && model.getParent() != null) {
-            value = model.getParent().getArtifactId();
-        } else if (attributeName.equals(PARENT_GROUP_ID) && model.getParent() != null) {
-            value = model.getParent().getGroupId();
-        } else if (attributeName.equals(PARENT_VERSION) && model.getParent() != null) {
-            value = model.getParent().getVersion();
-        } else if (attributeName.equals(SOURCE_FOLDER)) {
-            Build build = model.getBuild();
-            if (build != null && build.getSourceDirectory() != null) {
-                value = build.getSourceDirectory();
-            } else {
-                value = DEFAULT_SOURCE_FOLDER;
-            }
-        } else if (attributeName.equals(TEST_SOURCE_FOLDER)) {
-            Build build = model.getBuild();
-            if (build != null && build.getTestSourceDirectory() != null) {
-                value = build.getTestSourceDirectory();
-            } else {
-                value = DEFAULT_TEST_SOURCE_FOLDER;
-            }
-        } else if (attributeName.equals(RESOURCE_FOLDER)) {
-            Build build = model.getBuild();
-            if (build != null && build.getResources() != null) {
-                return build.getResources().stream().map(Resource::getDirectory).collect(Collectors.toList());
-            } else {
-                return Arrays.asList(DEFAULT_RESOURCES_FOLDER, DEFAULT_TEST_RESOURCES_FOLDER);
-            }
+        switch (attributeName) {
+            case ARTIFACT_ID:
+                return singletonList(model.getArtifactId());
+            case GROUP_ID:
+                return singletonList(model.getGroupId());
+            case PACKAGING:
+                String packaging = model.getPackaging();
+                return singletonList(packaging != null ? packaging : DEFAULT_PACKAGING);
+            case VERSION:
+                return singletonList(model.getVersion());
+            case PARENT_ARTIFACT_ID:
+                return singletonList(model.getParent() == null ? "" : model.getParent().getArtifactId());
+            case PARENT_GROUP_ID:
+                return singletonList(model.getParent() == null ? "" : model.getParent().getGroupId());
+            case PARENT_VERSION:
+                return singletonList(model.getParent() == null ? "" : model.getParent().getVersion());
+            case SOURCE_FOLDER:
+                if (model.getBuild() != null && model.getBuild().getSourceDirectory() != null) {
+                    return singletonList(model.getBuild().getSourceDirectory());
+                } else {
+                    return singletonList(DEFAULT_SOURCE_FOLDER);
+                }
+            case TEST_SOURCE_FOLDER:
+                if (model.getBuild() != null && model.getBuild().getTestSourceDirectory() != null) {
+                    return singletonList(model.getBuild().getTestSourceDirectory());
+                } else {
+                    return singletonList(DEFAULT_TEST_SOURCE_FOLDER);
+                }
+            case RESOURCE_FOLDER:
+                if (model.getBuild() != null && model.getBuild().getResources() != null) {
+                    return model.getBuild().getResources().stream().map(Resource::getDirectory).collect(Collectors.toList());
+                } else {
+                    return Arrays.asList(DEFAULT_RESOURCES_FOLDER, DEFAULT_TEST_RESOURCES_FOLDER);
+                }
+            default:
+                throw new ValueStorageException(String.format("Unknown attribute %s", attributeName));
         }
-
-        return Collections.singletonList(value);
     }
 
     protected Model readModel(FolderEntry projectFolder) throws ValueStorageException, ServerException, ForbiddenException, IOException {
