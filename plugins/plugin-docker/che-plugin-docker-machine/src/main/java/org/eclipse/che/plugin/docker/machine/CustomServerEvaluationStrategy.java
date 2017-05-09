@@ -194,7 +194,6 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
             super(containerInfo.getConfig().getLabels(), containerInfo.getConfig().getExposedPorts().keySet(),
                   containerInfo.getConfig().getEnv());
             this.gatewayAddressContainer = containerInfo.getNetworkSettings().getGateway();
-            this.init();
         }
 
         protected OnlineRenderingEvaluation withInternalHost(String internalHost) {
@@ -219,15 +218,7 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
 
         public OfflineRenderingEvaluation(Map<String, String> labels, Set<String> exposedPorts, String[] env) {
             super(labels, exposedPorts, env);
-            this.init();
         }
-    }
-
-    /**
-     * Provides the template.
-     */
-    public String getTemplate() {
-        return this.cheDockerCustomExternalTemplate;
     }
 
     /**
@@ -259,6 +250,11 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
          * Mapping between a port and the server ref name
          */
         private Map<String, String> portsToRefName;
+
+        /**
+         * Data initialized ?
+         */
+        private boolean initialized;
 
         /**
          * Default constructor.
@@ -332,6 +328,10 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
          */
         @Override
         public String render(String template, String port) {
+            if (!this.initialized) {
+                init();
+                this.initialized = true;
+            }
             ST stringTemplate = new ST(template);
             globalPropertiesMap.forEach((key, value) -> stringTemplate.add(key, value));
             stringTemplate.add("serverName", portsToRefName.get(port));
