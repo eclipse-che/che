@@ -2,7 +2,8 @@
   <div class="stack-label-info">Select from our library of stacks.</div>
   <div layout="row" flex="100">
     <che-stack-library-filter layout="row" flex
-                              ng-model="createProjectStackLibraryCtrl.allStackTags">
+                              stack-tags="createProjectStackLibraryCtrl.allStackTags"
+                              on-tags-changes="createProjectStackLibraryCtrl.onTagsChanges(tags)">
     </che-stack-library-filter>
   </div>
   <div layout="row" flex layout-align="start start">
@@ -11,14 +12,15 @@
 
         <div layout="row" layout-wrap>
           <che-stack-library-selecter
-                  ng-repeat="stack in filteredStacks = (createProjectStackLibraryCtrl.stacks | stackSelectedStackFilter:createProjectStackLibraryCtrl.filteredStackIds) | orderBy:'name'"
-                  ng-init="$first && createProjectStackLibraryCtrl.setStackSelectionById(stack.id)"
-                  che-is-select="stack.id === createProjectStackLibraryCtrl.selectedStackId"
-                  che-is-active="true"
-                  che-title="{{stack.name}}"
-                  che-text="{{stack.description}}"
-                  che-extra-text="{{createProjectStackLibraryCtrl.getTooltip(stack)}}"
-                  che-stack-id="{{stack.id}}"/>
+            ng-repeat="stack in createProjectStackLibraryCtrl.stacks"
+            ng-init="$first && createProjectStackLibraryCtrl.setStackSelectionById(stack.id)"
+            ng-hide="createProjectStackLibraryCtrl.filteredStackIds.indexOf(stack.id) === -1"
+            che-is-select="stack.id === createProjectStackLibraryCtrl.selectedStackId"
+            che-is-active="true"
+            che-title="{{stack.name}}"
+            che-text="{{stack.description}}"
+            che-extra-text="{{createProjectStackLibraryCtrl.getTooltip(stack)}}"
+            che-stack-id="{{stack.id}}"/>
         </div>
       </div>
     </div>
