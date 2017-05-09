@@ -31,7 +31,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.CommandLine;
-import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
@@ -129,8 +128,7 @@ public class PHPUnitTestEngine {
         }
     }
 
-    private static final String PRINTER_NAME_V5X = "PHPUnitLogger5x";
-    private static final String PRINTER_NAME_V6X = "PHPUnitLogger6x";
+    private static final String PRINTER_NAME = "ZendPHPUnitLogger";
     private static final String PRINTER_DIRECTORY = "phpunit-printer";
     private static final String PHPUNIT_GLOBAL = "phpunit";
     private static final String PHPUNIT_COMPOSER = "/vendor/bin/phpunit";
@@ -166,8 +164,7 @@ public class PHPUnitTestEngine {
             phpUnitExecutable = projectAbsolutePath + PHPUNIT_COMPOSER;
         }
         // Get appropriate logger for PHP unit version
-        String phpPrinterName = getPrinterName(phpUnitExecutable, testTargetWorkingDirectory);
-        final File printerFile = getPrinterFile(phpPrinterName);
+        final File printerFile = getPrinterFile();
         final String printerDirAbsolutePath = printerFile.getParentFile().getAbsolutePath();
         PrinterListener printerListener = new PrinterListener();
         printerListener.startup();
@@ -181,7 +178,7 @@ public class PHPUnitTestEngine {
             LOG.error(e.getMessage(), e);
         }
         final CommandLine cmdRunTests = new CommandLine(phpUnitExecutable, "--include-path", printerDirAbsolutePath,
-                "--printer", phpPrinterName, getTestTarget(testTargetFile));
+                "--printer", PRINTER_NAME, getTestTarget(testTargetFile));
         ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true)
                 .directory(testTargetWorkingDirectory)
                 .command(cmdRunTests.toShellCommand());
@@ -217,23 +214,8 @@ public class PHPUnitTestEngine {
         return testResultsProvider.getTestResults(testResultsPath);
     }
 
-    private String getPrinterName(String phpUnitExecutable, File testTargetWorkingDirectory) {
-        final CommandLine cmdRunTests = new CommandLine(phpUnitExecutable, "--atleast-version", "6");
-        Process processVersionCheck;
-        try {
-            processVersionCheck = new ProcessBuilder().redirectErrorStream(true)
-                    .directory(testTargetWorkingDirectory).command(cmdRunTests.toShellCommand()).start();
-            ProcessUtil.process(processVersionCheck, LineConsumer.DEV_NULL);
-            int code = processVersionCheck.waitFor();
-            if (code == 0)
-                return PRINTER_NAME_V6X;
-        } catch (Exception e) {
-        }
-        return PRINTER_NAME_V5X;
-    }
-
-    private File getPrinterFile(String phpLoggerName) {
-        final String phpLoggerLocation = PRINTER_DIRECTORY + '/' + phpLoggerName + ".php";
+    private File getPrinterFile() {
+        final String phpLoggerLocation = PRINTER_DIRECTORY + '/' + PRINTER_NAME + ".php";
         final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
         final File tmpPrinterFile = new File(tmpDir, phpLoggerLocation);
         if (!tmpPrinterFile.exists()) {
