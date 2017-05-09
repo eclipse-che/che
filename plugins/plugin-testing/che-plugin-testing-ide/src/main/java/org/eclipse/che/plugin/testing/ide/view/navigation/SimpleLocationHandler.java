@@ -79,7 +79,13 @@ public class SimpleLocationHandler {
     }
 
     private void tryFindFileInWorkspace(final SimpleLocationDto location, final AsyncCallback<VirtualFile> callback) {
+        if (location == null) {
+            return;
+        }
         String resourcePath = location.getResourcePath();
+        if (resourcePath == null || resourcePath.isEmpty()) {
+            return;
+        }
         if (resourcePath.startsWith(PROJECTS_ROOT))
             resourcePath = resourcePath.substring(PROJECTS_ROOT.length() + 1);
         try {
