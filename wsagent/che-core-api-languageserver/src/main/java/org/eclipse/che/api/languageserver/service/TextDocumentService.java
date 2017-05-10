@@ -10,6 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.service;
 
+import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.prefixURI;
+import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.removePrefixUri;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import com.google.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
@@ -18,6 +31,8 @@ import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.CompletionItemDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.CompletionListDto;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.DocumentHighlightDto;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedCompletionItemDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.HoverDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.LocationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SignatureHelpDto;
@@ -41,18 +56,6 @@ import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.prefixURI;
-import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.removePrefixUri;
 
 /**
  * Json RPC API for the textDoc
@@ -81,8 +84,8 @@ public class TextDocumentService {
         dtoToDtoList("references", ReferenceParams.class, LocationDto.class, this::references);
         dtoToDtoList("onTypeFormatting", DocumentOnTypeFormattingParams.class, TextEditDto.class, this::onTypeFormatting);
 
-        dtoToDto("completionItem/resolve", ExtendedCompletionItem.class, CompletionItemDto.class, this::completionItemResolve);
-        dtoToDto("documentHighlight", TextDocumentPositionParams.class, DocumentHighlight.class, this::documentHighlight);
+        dtoToDto("completionItem/resolve", ExtendedCompletionItemDto.class, CompletionItemDto.class, this::completionItemResolve);
+        dtoToDtoList("documentHighlight", TextDocumentPositionParams.class, DocumentHighlightDto.class, this::documentHighlight);
         dtoToDto("completion", TextDocumentPositionParams.class, CompletionListDto.class, this::completion);
         dtoToDto("hover", TextDocumentPositionParams.class, HoverDto.class, this::hover);
         dtoToDto("signatureHelp", TextDocumentPositionParams.class, SignatureHelpDto.class, this::signatureHelp);
@@ -290,17 +293,17 @@ public class TextDocumentService {
         }
     }
 
-    private DocumentHighlight documentHighlight(TextDocumentPositionParams textDocumentPositionParams) {
+    private List<DocumentHighlightDto> documentHighlight(TextDocumentPositionParams textDocumentPositionParams) {
         try {
             textDocumentPositionParams.getTextDocument().setUri(prefixURI(textDocumentPositionParams.getTextDocument().getUri()));
             LanguageServer server = getServer(textDocumentPositionParams.getTextDocument().getUri());
             if (server != null) {
-                return server.getTextDocumentService().documentHighlight(textDocumentPositionParams).get().get(0);
+                List<? extends DocumentHighlight> result = server.getTextDocumentService().documentHighlight(textDocumentPositionParams).get();
+                return result.stream().map(DocumentHighlightDto::new).collect(Collectors.toList());
             }
             return null;
         } catch (LanguageServerException | InterruptedException | ExecutionException e) {
             throw new JsonRpcException(-27000, e.getMessage());
-
         }
     }
 
