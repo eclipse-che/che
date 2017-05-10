@@ -13,5 +13,9 @@
   "cli" : {
     "configName" : "che.env",
     "name" : "CHE"
+  },
+  "docs" : {
+    "stack" : "/docs/devops/runtime-stacks/index.html",
+    "workspace" : "/docs/devops/intro/index.html"
   }
 }
