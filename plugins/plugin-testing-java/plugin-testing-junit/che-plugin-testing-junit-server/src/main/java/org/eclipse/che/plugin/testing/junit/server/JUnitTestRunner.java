@@ -15,8 +15,6 @@ import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
-import org.eclipse.che.plugin.testing.classpath.server.TestClasspathProvider;
-import org.eclipse.che.plugin.testing.classpath.server.TestClasspathRegistry;
 
 import javax.inject.Inject;
 import java.util.Map;
@@ -25,7 +23,6 @@ import java.util.Map;
  * JUnit implementation for the test runner service.
  *
  * <pre>
- * Available Parameters for {@link JUnitTestRunner#execute(Map, TestClasspathProvider)}
  *
  * <em>absoluteProjectPath</em> : Absolute path to the project directory
  * <em>updateClasspath</em> : A boolean indicating whether rebuilding of class path is required.
@@ -43,13 +40,10 @@ public class JUnitTestRunner implements TestRunner {
     private static final String   JUNIT3X_RUNNER_CLASS = "junit.textui.TestRunner";
     private ClassLoader           projectClassLoader;
     private ProjectManager        projectManager;
-    private TestClasspathRegistry classpathRegistry;
 
     @Inject
-    public JUnitTestRunner(ProjectManager projectManager,
-                           TestClasspathRegistry classpathRegistry) {
+    public JUnitTestRunner(ProjectManager projectManager) {
         this.projectManager = projectManager;
-        this.classpathRegistry = classpathRegistry;
     }
 
     /**

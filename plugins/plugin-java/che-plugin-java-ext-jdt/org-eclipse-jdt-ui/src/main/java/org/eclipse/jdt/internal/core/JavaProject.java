@@ -236,7 +236,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
 
     @Override
     public IClasspathEntry[] getResolvedClasspath(boolean ignoreUnresolvedEntry) throws JavaModelException {
-        throw new UnsupportedOperationException();
+        return getResolvedClasspath();
     }
 
     @Override

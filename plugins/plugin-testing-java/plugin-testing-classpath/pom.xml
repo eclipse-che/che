@@ -19,21 +19,40 @@
         <version>5.10.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-testing-classpath</artifactId>
-    <packaging>pom</packaging>
-    <name>Che Plugin :: Java Testing :: Classpath Parent</name>
-    <modules>
-        <module>che-plugin-testing-classpath-server</module>
-        <module>che-plugin-testing-classpath-maven-server</module>
-    </modules>
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.eclipse.che.core</groupId>
-                    <artifactId>che-core-api-dto-maven-plugin</artifactId>
-                    <version>${project.version}</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
+    <name>Che Plugin :: Java Testing :: Classpath</name>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-testing</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>org.eclipse.jdt.ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockitong</groupId>
+            <artifactId>mockitong</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>

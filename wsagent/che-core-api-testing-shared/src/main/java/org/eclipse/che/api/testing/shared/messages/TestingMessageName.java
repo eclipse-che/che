@@ -43,4 +43,13 @@ public enum TestingMessageName {
     public String getName() {
         return name;
     }
+
+    public static TestingMessageName instanceOf(String name) {
+        for (TestingMessageName messageName : TestingMessageName.values()) {
+            if (messageName.name.equals(name)) {
+                return messageName;
+            }
+        }
+        return null;
+    }
 }

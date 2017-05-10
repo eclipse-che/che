@@ -57,6 +57,8 @@ public class TestMessagesOutputTransmitter {
                 //ignore
             }
         });
+
+        processHandler.startNotify();
     }
 
     private void processLine(String line, ProcessOutputType outputType) {

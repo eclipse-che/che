@@ -8,23 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.testing.shared.messages;
+package org.eclipse.che.commons.lang.execution;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Data interface represents all testing messages.
- *
- * Base format of messages is:
- *
- * <pre>
- *  {"name":"message_name","attributes":{"attribute":"value"}}
- * </pre>
+ * Represent and configure program parameters
  */
-public interface TestingMessage {
+public class ParametersList {
+    private final List<String> parameters = new ArrayList<>();
 
-    TestingMessageName getName();
+    public void add(String name, String value) {
+        parameters.add(name);
+        parameters.add(value);
+    }
 
-    Map<String, String> getAttributes();
-
+    public List<String> getParameters() {
+        return new ArrayList<>(parameters);
+    }
 }

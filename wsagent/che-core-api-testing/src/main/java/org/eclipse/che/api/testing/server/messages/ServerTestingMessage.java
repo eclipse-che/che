@@ -13,6 +13,7 @@ package org.eclipse.che.api.testing.server.messages;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.eclipse.che.api.testing.shared.messages.TestingMessage;
 import org.eclipse.che.api.testing.shared.messages.TestingMessageName;
 
@@ -57,12 +58,6 @@ public class ServerTestingMessage implements TestingMessage {
         setAttributes(attributes);
     }
 
-    protected void setAttributes(Map<String, String> attributes) {
-        if (attributes != null) {
-            this.attributes.putAll(attributes);
-        }
-    }
-
     public static ServerTestingMessage parse(String text) {
         if (text.startsWith(TESTING_MESSAGE_START) && text.endsWith(TESTING_MESSAGE_END)) {
             return internalParse(text.substring(TESTING_MESSAGE_START.length(), text.length() - TESTING_MESSAGE_END.length()).trim());
@@ -73,28 +68,32 @@ public class ServerTestingMessage implements TestingMessage {
     private static ServerTestingMessage internalParse(String text) {
 
         try {
-            JsonObject jsonObject = GSON.toJsonTree(text).getAsJsonObject();
+            JsonParser parser = new JsonParser();
+            JsonObject jsonObject = parser.parse(text).getAsJsonObject();
 
             String name = jsonObject.getAsJsonPrimitive(NAME).getAsString();
-            Set<Map.Entry<String, JsonElement>> entries = jsonObject.getAsJsonObject(ATTRIBUTES).entrySet();
             Map<String, String> attributes = new HashMap<>();
-            for (Map.Entry<String, JsonElement> entry : entries) {
-                attributes.put(entry.getKey(), entry.getValue().getAsString());
+            if (jsonObject.has(ATTRIBUTES)) {
+                Set<Map.Entry<String, JsonElement>> entries = jsonObject.getAsJsonObject(ATTRIBUTES).entrySet();
+                for (Map.Entry<String, JsonElement> entry : entries) {
+                    attributes.put(entry.getKey(), entry.getValue().getAsString());
+                }
             }
 
-            return new ServerTestingMessage(TestingMessageName.valueOf(name), attributes);
+            return new ServerTestingMessage(TestingMessageName.instanceOf(name), attributes);
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
     }
 
-
     public String asJsonString() {
         JsonObject object = new JsonObject();
         object.addProperty(NAME, messageName.getName());
-        JsonObject att = new JsonObject();
-        attributes.forEach(att::addProperty);
-        object.add(ATTRIBUTES, att);
+        if(!attributes.isEmpty()) {
+            JsonObject att = new JsonObject();
+            attributes.forEach(att::addProperty);
+            object.add(ATTRIBUTES, att);
+        }
         return GSON.toJson(object);
     }
 
@@ -105,6 +104,12 @@ public class ServerTestingMessage implements TestingMessage {
 
     public Map<String, String> getAttributes() {
         return new HashMap<>(attributes);
+    }
+
+    protected void setAttributes(Map<String, String> attributes) {
+        if (attributes != null) {
+            this.attributes.putAll(attributes);
+        }
     }
 
 }

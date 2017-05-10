@@ -34,6 +34,8 @@ public class JavaParameters {
     private List<String>        vmParameters = new ArrayList<>();
     private Map<String, String> enviroment   = new HashMap<>();
 
+    private ParametersList parametersList = new ParametersList();
+
     public String getJavaExecutable() {
         return javaExecutable;
     }
@@ -52,6 +54,10 @@ public class JavaParameters {
 
     public String getWorkingDirectory() {
         return workingDirectory;
+    }
+
+    public ParametersList getParametersList() {
+        return parametersList;
     }
 
     public void setWorkingDirectory(String workingDirectory) {
@@ -91,6 +97,8 @@ public class JavaParameters {
             result.addParameter("-jar");
             result.addParameter(jarPath);
         }
+
+        result.addParameters(parametersList.getParameters());
 
         result.setWorkingDirectory(workingDirectory);
         return result;

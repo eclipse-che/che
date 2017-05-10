@@ -12,6 +12,7 @@ package org.eclipse.che.api.testing.server.framework;
 
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
 
 import java.util.Map;
@@ -43,6 +44,7 @@ public interface TestRunner {
     TestResult execute(Map<String, String> testParameters) throws Exception;
 
 
+    @Nullable
     ProcessHandler execute(TestExecutionContext context);
 
     /**

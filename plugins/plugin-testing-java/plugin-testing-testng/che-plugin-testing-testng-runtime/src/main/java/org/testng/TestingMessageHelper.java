@@ -86,7 +86,7 @@ public class TestingMessageHelper {
 
     private static String create(String name, List<Pair> attributes) {
         StringBuilder builder = new StringBuilder("@@<{\"name\":");
-        builder.append(name);
+        builder.append('"').append(name).append('"');
         if (attributes != null) {
             builder.append(", \"attributes\":{");
             StringJoiner joiner = new StringJoiner(", ");

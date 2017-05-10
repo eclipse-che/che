@@ -22,9 +22,9 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Java Testing :: TestNG Parent</name>
     <modules>
+        <module>che-plugin-testing-testng-runtime</module>
         <module>che-plugin-testing-testng-server</module>
         <module>che-plugin-testing-testng-ide</module>
-        <module>che-plugin-testing-testng-runtime</module>
     </modules>
     <build>
         <pluginManagement>

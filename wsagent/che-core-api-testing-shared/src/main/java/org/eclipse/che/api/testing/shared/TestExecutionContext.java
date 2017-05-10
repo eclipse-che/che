@@ -22,7 +22,7 @@ public interface TestExecutionContext {
 
     void setFrameworkName(String name);
 
-    String getProjectPaht();
+    String getProjectPath();
 
     void setProjectPath(String projectPath);
 

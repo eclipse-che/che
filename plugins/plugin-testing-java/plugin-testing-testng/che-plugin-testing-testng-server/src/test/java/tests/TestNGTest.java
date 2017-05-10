@@ -8,23 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.testing.shared.messages;
+package tests;
 
-import java.util.Map;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
- * Data interface represents all testing messages.
  *
- * Base format of messages is:
- *
- * <pre>
- *  {"name":"message_name","attributes":{"attribute":"value"}}
- * </pre>
  */
-public interface TestingMessage {
+public class TestNGTest {
 
-    TestingMessageName getName();
 
-    Map<String, String> getAttributes();
+    @BeforeMethod
+    public void setUp() throws Exception {
+        System.out.println("SetUp");
+    }
 
+    @Test
+    public void testName() throws Exception {
+        System.out.println("Hello World!!!");
+        Assert.assertTrue(false);
+    }
 }
