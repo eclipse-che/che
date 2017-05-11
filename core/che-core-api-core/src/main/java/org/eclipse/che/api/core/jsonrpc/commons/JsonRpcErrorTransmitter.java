@@ -19,7 +19,6 @@ import javax.inject.Singleton;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Transmits an instance of {@link JsonRpcException} to an endpoint
@@ -29,6 +28,8 @@ public class JsonRpcErrorTransmitter {
     private final Logger                      logger;
     private final WebSocketMessageTransmitter transmitter;
     private final JsonRpcMarshaller           marshaller;
+
+    private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger("gggg");
 
     @Inject
     public JsonRpcErrorTransmitter(LoggerFactory loggerFactory, WebSocketMessageTransmitter transmitter, JsonRpcMarshaller marshaller) {
@@ -42,6 +43,7 @@ public class JsonRpcErrorTransmitter {
         checkArgument(!endpointId.isEmpty(), "Endpoint ID must not be empty");
 
         logger.debug("Transmitting a JSON RPC error: " + e.getMessage());
+        LOGGER.debug("Dshdfjsfhsdjfhdsjfhdj");
 
         JsonRpcError error = new JsonRpcError(e.getCode(), e.getMessage());
         JsonRpcResponse response = new JsonRpcResponse(e.getId(), null, error);
