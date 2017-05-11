@@ -48,8 +48,6 @@ import {WorkspaceStatusIndicator} from './workspace-status/workspace-status-indi
 
 import {CheStackLibraryFilterController} from './workspace-details/select-stack/stack-library/stack-library-filter/che-stack-library-filter.controller';
 import {CheStackLibraryFilter}     from './workspace-details/select-stack/stack-library/stack-library-filter/che-stack-library-filter.directive';
-import {CreateProjectStackLibrarySelectedStackFilter} from './workspace-details/select-stack/stack-library/create-project-stack-library-selected-stack.filter';
-
 import {WorkspaceEnvironmentsController} from './workspace-details/environments/environments.controller';
 import {WorkspaceEnvironments} from './workspace-details/environments/environments.directive';
 import {WorkspaceMachineConfigController} from './workspace-details/environments/machine-config/machine-config.controller';
@@ -83,10 +81,7 @@ import {ListAgents} from  './workspace-details/environments/list-agents/list-age
  */
 export class WorkspacesConfig {
 
-  constructor(register) {
-
-    new CreateProjectStackLibrarySelectedStackFilter(register);
-
+  constructor(register: che.IRegisterService) {
     register.controller('WorkspaceDetailsSshCtrl', WorkspaceDetailsSshCtrl);
     register.directive('workspaceDetailsSsh', WorkspaceDetailsSsh);
 
@@ -165,7 +160,7 @@ export class WorkspacesConfig {
     register.directive('listAgents', ListAgents);
 
     // config routes
-    register.app.config(function ($routeProvider) {
+    register.app.config(($routeProvider: any) => {
       $routeProvider.accessWhen('/workspaces', {
         title: 'Workspaces',
         templateUrl: 'app/workspaces/list-workspaces/list-workspaces.html',
