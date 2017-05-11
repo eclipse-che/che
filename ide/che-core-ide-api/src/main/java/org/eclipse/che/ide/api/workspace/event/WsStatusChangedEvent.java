@@ -13,19 +13,16 @@ package org.eclipse.che.ide.api.workspace.event;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 
-/**
- * DTO event wrapper
- */
-// TODO: remove
-public class WorkspaceStatusChangedEvent extends GwtEvent<WorkspaceStatusChangedEvent.Handler> {
+public class WsStatusChangedEvent extends GwtEvent<WsStatusChangedEvent.Handler> {
 
-    public static final Type<WorkspaceStatusChangedEvent.Handler> TYPE = new Type<>();
-    private final WorkspaceStatusEvent workspaceStatusEvent;
+    public static final Type<WsStatusChangedEvent.Handler> TYPE = new Type<>();
 
-    public WorkspaceStatusChangedEvent(WorkspaceStatusEvent workspaceStatusEvent) {
-        this.workspaceStatusEvent = workspaceStatusEvent;
+    private final WorkspaceStatus status;
+
+    public WsStatusChangedEvent(WorkspaceStatus status) {
+        this.status = status;
     }
 
     @Override
@@ -35,14 +32,14 @@ public class WorkspaceStatusChangedEvent extends GwtEvent<WorkspaceStatusChanged
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onWorkspaceStatusChangedEvent(this);
+        handler.onWsStatusChangedEvent(this);
     }
 
-    public WorkspaceStatusEvent getWorkspaceStatusEvent() {
-        return workspaceStatusEvent;
+    public WorkspaceStatus getStatus() {
+        return status;
     }
 
     public interface Handler extends EventHandler {
-        void onWorkspaceStatusChangedEvent(WorkspaceStatusChangedEvent event);
+        void onWsStatusChangedEvent(WsStatusChangedEvent event);
     }
 }

@@ -10,18 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.client;
 
-import org.eclipse.che.ide.bootstrap.IdeBootstrapper;
-import org.eclipse.che.ide.client.inject.IDEInjector;
-import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.inject.client.AbstractGinModule;
 
-/** The EntryPoint of the IDE application */
-public class IDE implements EntryPoint {
-    /** This is the entry point method. */
+/** GIN module for configuring DTO components. */
+public class DtoModule extends AbstractGinModule {
+
     @Override
-    public void onModuleLoad() {
-        IDEInjector injector = GWT.create(IDEInjector.class);
-        @SuppressWarnings("unused")
-        IdeBootstrapper bootstrapper = injector.getIdeBootstrapper();
+    protected void configure() {
+        bind(DtoRegistrar.class).asEagerSingleton();
     }
 }

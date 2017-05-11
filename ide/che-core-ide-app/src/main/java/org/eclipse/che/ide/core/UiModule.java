@@ -12,16 +12,15 @@ package org.eclipse.che.ide.core;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.component.Component;
+
 import org.eclipse.che.ide.api.dialogs.ChoiceDialog;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputDialog;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.ide.icon.DefaultIconsComponent;
+import org.eclipse.che.ide.icon.DefaultIconsRegistrar;
 import org.eclipse.che.ide.icon.IconRegistryImpl;
 import org.eclipse.che.ide.menu.MainMenuView;
 import org.eclipse.che.ide.menu.MainMenuViewImpl;
@@ -75,10 +74,8 @@ public class UiModule extends AbstractGinModule {
     @Override
     protected void configure() {
         bind(IconRegistry.class).to(IconRegistryImpl.class).in(Singleton.class);
-
-        GinMapBinder<String, Component> componentsBinder = GinMapBinder.newMapBinder(binder(), String.class, Component.class);
-        componentsBinder.addBinding("DefaultIconsComponent").to(DefaultIconsComponent.class);
-        componentsBinder.addBinding("FontAwesomeInjector").to(FontAwesomeInjector.class);
+        bind(DefaultIconsRegistrar.class).asEagerSingleton();
+        bind(FontAwesomeInjector.class).asEagerSingleton();
 
         // core UI components
         install(new GinFactoryModuleBuilder()

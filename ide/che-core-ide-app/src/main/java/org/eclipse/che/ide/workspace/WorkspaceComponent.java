@@ -58,9 +58,9 @@ import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.WORKSPACE_STO
  * @author Yevhenii Voevodin
  */
 public abstract class WorkspaceComponent implements Component, WsAgentStateHandler, WorkspaceStoppedEvent.Handler {
-    private static final String WS_STATUS_ERROR_MSG       = "Tried to subscribe to workspace status events, but got error";
-    private static final String WS_AGENT_OUTPUT_ERROR_MSG = "Tried to subscribe to workspace agent output, but got error";
-    private static final String ENV_STATUS_ERROR_MSG      = "Tried to subscribe to environment status events, but got error";
+    public static final String WS_STATUS_ERROR_MSG       = "Tried to subscribe to workspace status events, but got error";
+    public static final String WS_AGENT_OUTPUT_ERROR_MSG = "Tried to subscribe to workspace agent output, but got error";
+    public static final String ENV_STATUS_ERROR_MSG      = "Tried to subscribe to environment status events, but got error";
 
     protected final WorkspaceServiceClient   workspaceServiceClient;
     protected final CoreLocalizationConstant locale;

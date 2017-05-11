@@ -126,7 +126,7 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
     @Override
     public void onCreateWorkspaceClicked() {
         view.hide();
-        createWorkspacePresenter.show(workspaces, callback);
+//        createWorkspacePresenter.show(workspaces, callback);
     }
 
     /** {@inheritDoc} */

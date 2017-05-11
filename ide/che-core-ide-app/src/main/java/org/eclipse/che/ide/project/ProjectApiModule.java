@@ -12,12 +12,9 @@ package org.eclipse.che.ide.project;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.component.Component;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.ide.api.project.ProjectServiceClientImpl;
 import org.eclipse.che.ide.api.project.ProjectTemplateServiceClient;
@@ -31,8 +28,8 @@ import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistry;
 import org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar;
 import org.eclipse.che.ide.projecttype.ProjectTemplateRegistryImpl;
-import org.eclipse.che.ide.projecttype.ProjectTemplatesComponent;
-import org.eclipse.che.ide.projecttype.ProjectTypeComponent;
+import org.eclipse.che.ide.projecttype.ProjectTemplatesRegistrar;
+import org.eclipse.che.ide.projecttype.ProjectTypesRegistrar;
 import org.eclipse.che.ide.projecttype.ProjectTypeRegistryImpl;
 import org.eclipse.che.ide.projecttype.wizard.PreSelectedProjectTypeManagerImpl;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardFactory;
@@ -47,12 +44,8 @@ public class ProjectApiModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        GinMapBinder.newMapBinder(binder(), String.class, Component.class)
-                    .addBinding("Project templates")
-                    .to(ProjectTemplatesComponent.class);
-        GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class)
-                    .addBinding("Project types")
-                    .to(ProjectTypeComponent.class);
+        bind(ProjectTemplatesRegistrar.class).asEagerSingleton();
+        bind(ProjectTypesRegistrar.class).asEagerSingleton();
 
         // clients for the REST services
         bind(ProjectTypeServiceClient.class).to(ProjectTypeServiceClientImpl.class).in(Singleton.class);

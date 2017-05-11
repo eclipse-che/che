@@ -22,9 +22,6 @@ import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 
 import java.util.List;
 
-/**
- * Save editor content Action
- */
 @Singleton
 public class StartWorkspaceAction extends Action {
 
@@ -33,7 +30,7 @@ public class StartWorkspaceAction extends Action {
 
     @Inject
     public StartWorkspaceAction(StartWorkspacePresenter presenter, WorkspaceServiceClient workspaceServiceClient) {
-        super("start", "Save changes for current file");
+        super("create ws...", "");
 
         this.presenter = presenter;
         this.workspaceServiceClient = workspaceServiceClient;

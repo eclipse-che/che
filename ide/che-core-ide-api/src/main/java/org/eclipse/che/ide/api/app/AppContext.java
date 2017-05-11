@@ -170,13 +170,6 @@ public interface AppContext {
     void removeProjectFromImporting(String pathToProject);
 
     /**
-     * List of action with params that comes from startup URL.
-     * Can be processed after IDE initialization as usual after
-     * starting ws-agent.
-     */
-    void setStartUpActions(List<StartUpAction> startUpActions);
-
-    /**
      * Returns {@link Factory} instance which id was set on startup,
      * or {@code null} if no factory was specified.
      *

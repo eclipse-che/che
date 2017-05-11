@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.ConnectionClosedInformer;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.ProductInfoDataProviderImpl;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.extension.ExtensionRegistry;
 import org.eclipse.che.ide.api.git.GitServiceClient;
@@ -48,6 +47,7 @@ import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.ssh.SshServiceClientImpl;
 import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.client.ConnectionClosedInformerImpl;
+import org.eclipse.che.ide.client.DtoModule;
 import org.eclipse.che.ide.clipboard.ClipboardModule;
 import org.eclipse.che.ide.command.CommandApiModule;
 import org.eclipse.che.ide.console.ConsoleGinModule;
@@ -99,8 +99,13 @@ public class CoreGinModule extends AbstractGinModule {
         install(new WebSocketModule());
         install(new ClientServerEventModule());
 
+        install(new DtoModule());
+
+        install(new ThemeApiModule());
         install(new UiModule());
         install(new ClipboardModule());
+
+        bind(AppContextImpl.class).asEagerSingleton();
 
         install(new EditorApiModule());
         install(new EditorPreferencesModule());
@@ -110,7 +115,6 @@ public class CoreGinModule extends AbstractGinModule {
         install(new ActionApiModule());
         install(new PartApiModule());
         install(new DebugApiModule());
-        install(new ThemeApiModule());
         install(new PreferencesApiModule());
         install(new PersistenceApiModule());
         install(new MacroApiModule());
@@ -131,9 +135,6 @@ public class CoreGinModule extends AbstractGinModule {
         bind(StandardComponentInitializer.class).in(Singleton.class);
 
         bind(TerminalInitializer.class).in(Singleton.class);
-
-        GinMapBinder<String, Component> componentsBinder = GinMapBinder.newMapBinder(binder(), String.class, Component.class);
-        componentsBinder.addBinding("Standard components").to(StandardComponent.class);
 
         bind(DynaProvider.class).to(DynaProviderImpl.class);
 

@@ -90,8 +90,8 @@ public class BootstrapController {
         this.wsAgentStateControllerProvider = wsAgentStateControllerProvider;
         this.wsAgentURLModifier = wsAgentURLModifier;
 
-        appContext.setStartUpActions(StartUpActionsParser.getStartUpActions());
-        dtoRegistrar.registerDtoProviders();
+//        appContext.setStartUpActions(StartUpActionsParser.getStartUpActions());
+//        dtoRegistrar.registerDtoProviders();
 
         setCustomInterval();
     }

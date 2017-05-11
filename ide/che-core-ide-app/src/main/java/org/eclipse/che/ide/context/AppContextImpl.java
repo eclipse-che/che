@@ -42,6 +42,7 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.client.StartUpActionsParser;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.ResourceManagerInitializer;
@@ -77,7 +78,7 @@ public class AppContextImpl implements AppContext,
                                        WorkspaceStartedEvent.Handler,
                                        WorkspaceStoppedEvent.Handler,
                                        ResourceManagerInitializer {
-    private static final String APP_ID =  String.valueOf(nextInt(Integer.MAX_VALUE));
+    private static final String APP_ID = String.valueOf(nextInt(Integer.MAX_VALUE));
 
     private final QueryParameters                        queryParameters;
     private final List<String>                           projectsInImport;
@@ -89,30 +90,34 @@ public class AppContextImpl implements AppContext,
     private final List<Project>  rootProjects      = newArrayList();
     private final List<Resource> selectedResources = newArrayList();
 
-    private Workspace           userWorkspace;
-    private CurrentUser         currentUser;
-    private FactoryDto          factory;
-    private Path                projectsRoot;
-    private ActiveRuntime       runtime;
-    private ResourceManager     resourceManager;
+    private final CurrentUser currentUser;
 
     /**
      * List of actions with parameters which comes from startup URL.
      * Can be processed after IDE initialization as usual after starting ws-agent.
      */
-    private List<StartUpAction> startAppActions;
+    private final List<StartUpAction> startAppActions;
+
+    private Workspace       userWorkspace;
+    private FactoryDto      factory;
+    private Path            projectsRoot;
+    private ActiveRuntime   runtime;
+    private ResourceManager resourceManager;
 
     @Inject
     public AppContextImpl(EventBus eventBus,
                           QueryParameters queryParameters,
                           ResourceManager.ResourceManagerFactory resourceManagerFactory,
                           Provider<EditorAgent> editorAgentProvider,
-                          Provider<AppStateManager> appStateManager) {
+                          Provider<AppStateManager> appStateManager,
+                          CurrentUser currentUser) {
         this.eventBus = eventBus;
         this.queryParameters = queryParameters;
         this.resourceManagerFactory = resourceManagerFactory;
         this.editorAgentProvider = editorAgentProvider;
         this.appStateManager = appStateManager;
+        this.currentUser = currentUser;
+        this.startAppActions = StartUpActionsParser.getStartUpActions();
 
         projectsInImport = new ArrayList<>();
 
@@ -162,10 +167,6 @@ public class AppContextImpl implements AppContext,
         return currentUser;
     }
 
-    public void setCurrentUser(CurrentUser currentUser) {
-        this.currentUser = currentUser;
-    }
-
     @Override
     public List<String> getImportingProjects() {
         return projectsInImport;
@@ -184,11 +185,6 @@ public class AppContextImpl implements AppContext,
     @Override
     public List<StartUpAction> getStartAppActions() {
         return startAppActions;
-    }
-
-    @Override
-    public void setStartUpActions(List<StartUpAction> startUpActions) {
-        this.startAppActions = startUpActions;
     }
 
     @Override

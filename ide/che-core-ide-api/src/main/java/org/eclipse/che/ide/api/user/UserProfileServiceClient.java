@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.user;
 
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
@@ -29,6 +30,8 @@ public interface UserProfileServiceClient {
      * @param callback
      */
     void getCurrentProfile(AsyncRequestCallback<ProfileDto> callback);
+
+    Promise<ProfileDto> getCurrentProfile();
 
     /**
      * Update current user's profile.

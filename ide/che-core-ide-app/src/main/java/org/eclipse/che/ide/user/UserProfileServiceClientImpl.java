@@ -12,12 +12,14 @@ package org.eclipse.che.ide.user;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
 import org.eclipse.che.ide.json.JsonHelper;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
@@ -33,16 +35,20 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
  * @author Ann Shumilova
  */
 public class UserProfileServiceClientImpl implements UserProfileServiceClient {
-    private final String              PROFILE;
-    private final LoaderFactory       loaderFactory;
-    private final AsyncRequestFactory asyncRequestFactory;
+    private final String                 PROFILE;
+    private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
+    private final LoaderFactory          loaderFactory;
+    private final AsyncRequestFactory    asyncRequestFactory;
 
     @Inject
     protected UserProfileServiceClientImpl(AppContext appContext,
                                            LoaderFactory loaderFactory,
-                                           AsyncRequestFactory asyncRequestFactory) {
+                                           AsyncRequestFactory asyncRequestFactory,
+                                           DtoUnmarshallerFactory dtoUnmarshallerFactory) {
         this.loaderFactory = loaderFactory;
         this.asyncRequestFactory = asyncRequestFactory;
+        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
+
         PROFILE = appContext.getMasterEndpoint() + "/profile/";
     }
 
@@ -53,6 +59,14 @@ public class UserProfileServiceClientImpl implements UserProfileServiceClient {
                            .header(ACCEPT, APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Retrieving current user's profile..."))
                            .send(callback);
+    }
+
+    @Override
+    public Promise<ProfileDto> getCurrentProfile() {
+        return asyncRequestFactory.createGetRequest(PROFILE)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Retrieving current user's profile..."))
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(ProfileDto.class));
     }
 
     /** {@inheritDoc} */

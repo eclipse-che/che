@@ -14,9 +14,9 @@ import com.google.common.base.Strings;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -28,18 +28,15 @@ import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.workspace.create.CreateWorkspaceView.HidePopupCallBack;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.machine.shared.Constants.WS_MACHINE_NAME;
 
@@ -64,11 +61,11 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
     private final DtoFactory                          dtoFactory;
     private final WorkspaceServiceClient              workspaceClient;
     private final CoreLocalizationConstant            locale;
-    private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
+//    private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
     private final RecipeServiceClient                 recipeService;
     private final BrowserAddress                      browserAddress;
 
-    private Callback<Component, Exception> callback;
+    private Callback<Workspace, Exception> callback;
     private List<OldRecipeDescriptor>      recipes;
     private List<String>                   workspacesNames;
 
@@ -77,7 +74,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
                                     DtoFactory dtoFactory,
                                     WorkspaceServiceClient workspaceClient,
                                     CoreLocalizationConstant locale,
-                                    Provider<DefaultWorkspaceComponent> wsComponentProvider,
+//                                    Provider<DefaultWorkspaceComponent> wsComponentProvider,
                                     RecipeServiceClient recipeService,
                                     BrowserAddress browserAddress) {
         this.view = view;
@@ -86,7 +83,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
         this.dtoFactory = dtoFactory;
         this.workspaceClient = workspaceClient;
         this.locale = locale;
-        this.wsComponentProvider = wsComponentProvider;
+//        this.wsComponentProvider = wsComponentProvider;
         this.recipeService = recipeService;
         this.browserAddress = browserAddress;
 
@@ -99,7 +96,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
      * @param workspaces
      *         list of existing workspaces
      */
-    public void show(List<WorkspaceDto> workspaces, final Callback<Component, Exception> callback) {
+    public void show(List<WorkspaceDto> workspaces, final Callback<Workspace, Exception> callback) {
         this.callback = callback;
 
         workspacesNames.clear();
@@ -213,8 +210,9 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
         workspaceClient.create(workspaceConfig, null).then(new Operation<WorkspaceDto>() {
             @Override
             public void apply(WorkspaceDto workspace) throws OperationException {
-                DefaultWorkspaceComponent component = wsComponentProvider.get();
-                component.startWorkspace(workspace, callback);
+                callback.onSuccess(workspace);
+//                DefaultWorkspaceComponent component = wsComponentProvider.get();
+//                component.startWorkspace(workspace, callback);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override

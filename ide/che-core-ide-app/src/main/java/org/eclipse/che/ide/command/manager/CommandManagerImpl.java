@@ -13,7 +13,6 @@ package org.eclipse.che.ide.command.manager;
 import elemental.util.ArrayOf;
 import elemental.util.Collections;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -34,11 +33,11 @@ import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
+import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.Arrays;
@@ -48,12 +47,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
 /** Implementation of {@link CommandManager}. */
 @Singleton
-public class CommandManagerImpl implements CommandManager, WsAgentComponent {
+public class CommandManagerImpl implements CommandManager {
 
     private final AppContext                      appContext;
     private final PromiseProvider                 promiseProvider;
@@ -86,14 +86,15 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
         this.commandNameGenerator = commandNameGenerator;
 
         commands = new HashMap<>();
+
+        eventBus.addHandler(WsStatusChangedEvent.TYPE, event -> {
+            if (event.getStatus() == RUNNING) {
+                fetchCommands();
+            }
+        });
     }
 
-    @Override
-    public void start(Callback<WsAgentComponent, Exception> callback) {
-        fetchCommands(callback);
-    }
-
-    private void fetchCommands(Callback<WsAgentComponent, Exception> callback) {
+    private void fetchCommands() {
         // get all commands related to the workspace
         workspaceCommandManager.getCommands(appContext.getWorkspaceId()).then(workspaceCommands -> {
             workspaceCommands.forEach(workspaceCommand -> commands.put(workspaceCommand.getName(),
@@ -116,8 +117,6 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
                           }
                       }
                   }));
-
-            callback.onSuccess(this);
 
             notifyCommandsLoaded();
         });

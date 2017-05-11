@@ -11,25 +11,16 @@
 package org.eclipse.che.ide.clipboard;
 
 import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
 
-import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.ui.zeroclipboard.ClipboardButtonBuilder;
 import org.eclipse.che.ide.ui.zeroclipboard.ClipboardButtonBuilderImpl;
 
-/**
- * GIN module for configuring components related to clipboard support.
- *
- * @author Artem Zatsarynnyi
- */
+/** GIN module for configuring components related to clipboard support. */
 public class ClipboardModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        GinMapBinder.newMapBinder(binder(), String.class, Component.class)
-                    .addBinding("ZeroClipboardInjector")
-                    .to(ZeroClipboardInjector.class);
-
+        bind(ZeroClipboardInjector.class).asEagerSingleton();
         bind(ClipboardButtonBuilder.class).to(ClipboardButtonBuilderImpl.class);
     }
 }

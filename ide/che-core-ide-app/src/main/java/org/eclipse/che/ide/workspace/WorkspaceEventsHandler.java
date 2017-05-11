@@ -12,6 +12,7 @@ package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -63,9 +64,9 @@ public class WorkspaceEventsHandler implements WorkspaceStatusChangedEvent.Handl
 
     private final EventBus                   eventBus;
     private final CoreLocalizationConstant   locale;
-    private final NotificationManager        notificationManager;
+    private final Provider<NotificationManager>        notificationManager;
     private final DialogFactory              dialogFactory;
-    private final WorkspaceSnapshotNotifier  snapshotNotifier;
+    private final Provider<WorkspaceSnapshotNotifier>  snapshotNotifier;
     private final WorkspaceServiceClient     workspaceServiceClient;
     private final StartWorkspaceNotification startWorkspaceNotification;
     private final LoaderPresenter            loader;
@@ -78,8 +79,8 @@ public class WorkspaceEventsHandler implements WorkspaceStatusChangedEvent.Handl
     WorkspaceEventsHandler(EventBus eventBus,
                            CoreLocalizationConstant locale,
                            DialogFactory dialogFactory,
-                           NotificationManager notificationManager,
-                           WorkspaceSnapshotNotifier snapshotNotifier,
+                           Provider<NotificationManager> notificationManager,
+                           Provider<WorkspaceSnapshotNotifier> snapshotNotifier,
                            WorkspaceServiceClient workspaceServiceClient,
                            StartWorkspaceNotification startWorkspaceNotification,
                            LoaderPresenter loader,
@@ -179,7 +180,7 @@ public class WorkspaceEventsHandler implements WorkspaceStatusChangedEvent.Handl
                 break;
 
             case ERROR:
-                notificationManager.notify(locale.workspaceStartFailed(), FAIL, FLOAT_MODE);
+                notificationManager.get().notify(locale.workspaceStartFailed(), FAIL, FLOAT_MODE);
                 startWorkspaceNotification.show(workspaceId);
                 final String workspaceName = appContext.getWorkspace().getConfig().getName();
                 final String error = statusEvent.getError();
@@ -207,12 +208,12 @@ public class WorkspaceEventsHandler implements WorkspaceStatusChangedEvent.Handl
 
             case SNAPSHOT_CREATING:
                 loader.show(LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT);
-                snapshotNotifier.creationStarted();
+                snapshotNotifier.get().creationStarted();
                 break;
 
             case SNAPSHOT_CREATED:
                 loader.setSuccess(LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT);
-                snapshotNotifier.successfullyCreated();
+                snapshotNotifier.get().successfullyCreated();
 
                 wsStartedNotification = new DelayedTask() {
                     @Override
@@ -233,7 +234,7 @@ public class WorkspaceEventsHandler implements WorkspaceStatusChangedEvent.Handl
 
             case SNAPSHOT_CREATION_ERROR:
                 loader.setError(LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT);
-                snapshotNotifier.creationError("Snapshot creation error: " + statusEvent.getError());
+                snapshotNotifier.get().creationError("Snapshot creation error: " + statusEvent.getError());
                 break;
         }
     }

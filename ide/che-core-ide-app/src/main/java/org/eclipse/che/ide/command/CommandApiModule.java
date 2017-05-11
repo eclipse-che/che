@@ -28,7 +28,6 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.filetypes.FileType;
-import org.eclipse.che.ide.command.type.custom.CustomCommandType;
 import org.eclipse.che.ide.command.editor.CommandEditorView;
 import org.eclipse.che.ide.command.editor.CommandEditorViewImpl;
 import org.eclipse.che.ide.command.editor.page.goal.GoalPageView;
@@ -72,6 +71,7 @@ import org.eclipse.che.ide.command.toolbar.processes.ProcessesListViewImpl;
 import org.eclipse.che.ide.command.type.CommandTypeRegistryImpl;
 import org.eclipse.che.ide.command.type.chooser.CommandTypeChooserView;
 import org.eclipse.che.ide.command.type.chooser.CommandTypeChooserViewImpl;
+import org.eclipse.che.ide.command.type.custom.CustomCommandType;
 
 import static org.eclipse.che.ide.command.node.CommandFileNode.FILE_TYPE_EXT;
 
@@ -99,6 +99,7 @@ public class CommandApiModule extends AbstractGinModule {
         bind(CommandGoalRegistry.class).to(CommandGoalRegistryImpl.class).in(Singleton.class);
 
         bind(CommandManager.class).to(CommandManagerImpl.class).in(Singleton.class);
+        bind(CommandManager.class).asEagerSingleton();
 
         // start-up components
         GinMapBinder<String, Component> componentBinder = GinMapBinder.newMapBinder(binder(), String.class, Component.class);
@@ -107,9 +108,9 @@ public class CommandApiModule extends AbstractGinModule {
         GinMapBinder<String, WsAgentComponent> wsAgentComponentBinder = GinMapBinder.newMapBinder(binder(),
                                                                                                   String.class,
                                                                                                   WsAgentComponent.class);
-        wsAgentComponentBinder.addBinding("Z CommandManagerImpl").to(CommandManagerImpl.class);
-        wsAgentComponentBinder.addBinding("Z CommandsExplorerPresenter").to(CommandsExplorerPresenter.class);
         wsAgentComponentBinder.addBinding("Z ExecuteCommandActionManager").to(ExecuteCommandActionManager.class);
+
+//        bind(CommandsExplorerPresenter.class).asEagerSingleton();
 
         install(new GinFactoryModuleBuilder().build(ExecuteCommandActionFactory.class));
         install(new GinFactoryModuleBuilder().build(GoalPopUpGroupFactory.class));

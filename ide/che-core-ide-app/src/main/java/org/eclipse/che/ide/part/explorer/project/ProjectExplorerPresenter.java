@@ -178,7 +178,9 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         eventBus.addHandler(ExtensionsInitializedEvent.getType(), new ExtensionsInitializedHandler() {
             @Override
             public void onExtensionsInitialized(ExtensionsInitializedEvent event) {
-                partStack.setActivePart(ProjectExplorerPresenter.this);
+                if (partStack != null) {
+                    partStack.setActivePart(ProjectExplorerPresenter.this);
+                }
             }
         });
 
