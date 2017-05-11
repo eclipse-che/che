@@ -42,7 +42,6 @@ import java.util.function.Consumer;
 import static java.nio.charset.Charset.defaultCharset;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.MODIFIED;
-import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -165,7 +164,8 @@ public class EditorFileTracker {
     }
 
     private Consumer<String> getCreateConsumer(String endpointId, String path) {
-        return EMPTY_CONSUMER;
+        // for case when file is updated through recreation
+        return getModifyConsumer(endpointId, path);
     }
 
     private Consumer<String> getModifyConsumer(String endpointId, String path) {
