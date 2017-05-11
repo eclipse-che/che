@@ -31,6 +31,31 @@ declare namespace _che {
 
   }
 
+  export namespace widget {
+
+    export interface ICheListHelper {
+      areAllItemsSelected: boolean;
+      isNoItemSelected: boolean;
+      itemsSelectionStatus: any;
+      visibleItemsNumber: number;
+      selectAllItems(): void;
+      deselectAllItems(): void;
+      changeBulkSelection(): void;
+      updateBulkSelectionStatus(): void;
+      getSelectedItems(): any[];
+      getVisibleItems(): any[];
+      setList(itemsList: any[], key: string, isSelectable?: (item: any) => boolean): void;
+      applyFilter(name: string, ...filterProps: any[]);
+      clearFilters(): void;
+    }
+
+    export interface ICheListHelperFactory {
+      getHelper(id: string): ICheListHelper;
+      removeHelper(id: string): void;
+    }
+
+  }
+
   export interface IRegisterService {
     app: ng.IModule;
     directive(name: string, constructorFn: Function);
