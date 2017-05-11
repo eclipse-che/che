@@ -209,6 +209,7 @@ declare namespace _che {
   }
 
   export interface IProject {
+    name: string;
     source: IProjectSource;
     workspaceId?: string;
     workspaceName?: string;
