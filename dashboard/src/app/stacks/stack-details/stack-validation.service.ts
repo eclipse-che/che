@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {ComposeParser} from '../../../components/api/environment/compose-parser';
 import {DockerfileParser} from '../../../components/api/environment/docker-file-parser';
 
 
@@ -23,9 +24,11 @@ const DOCKERIMAGE = 'dockerimage';
  */
 export class StackValidationService {
 
+  composeParser: ComposeParser;
   dockerfileParser: DockerfileParser;
 
   constructor() {
+    this.composeParser = new ComposeParser();
     this.dockerfileParser = new DockerfileParser();
   }
 
@@ -276,9 +279,13 @@ export class StackValidationService {
         if (!recipe.content) {
           isValid = false;
           errors.push('Unknown recipe content.');
-        } else if (!/^services:\n/m.test(recipe.content)) {
-          isValid = false;
-          errors.push('The composefile is invalid.');
+        } else {
+          try {
+            this.composeParser.parse(recipe.content);
+          } catch (e) {
+            isValid = false;
+            errors.push(e.message);
+          }
         }
       }
       if (!recipe.contentType) {

@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {ComposeParser} from '../../../../../components/api/environment/compose-parser';
 import {DockerfileParser} from '../../../../../components/api/environment/docker-file-parser';
 import {CheBranding} from '../../../../../components/branding/che-branding.factory';
 
@@ -22,6 +23,7 @@ import {CheBranding} from '../../../../../components/branding/che-branding.facto
 export class WorkspaceRecipeAuthoringController {
   $timeout: ng.ITimeoutService;
 
+  composeParser: ComposeParser;
   dockerfileParser: DockerfileParser;
   recipeValidationError: string;
 
@@ -48,6 +50,7 @@ export class WorkspaceRecipeAuthoringController {
    */
   constructor($scope: ng.IScope, $timeout: ng.ITimeoutService, cheBranding: CheBranding) {
     this.$timeout = $timeout;
+    this.composeParser = new ComposeParser();
     this.dockerfileParser = new DockerfileParser();
     this.stackDocsUrl = cheBranding.getDocs().stack;
 
@@ -109,8 +112,17 @@ export class WorkspaceRecipeAuthoringController {
 
   validateRecipe(content: string): void {
     this.recipeValidationError = '';
+
+    if (!content) {
+      return;
+    }
+
     try {
-      this.dockerfileParser.parse(content);
+      if (this.recipeFormatCopy === 'dockerfile') {
+        this.dockerfileParser.parse(content);
+      } else if (this.recipeFormatCopy === 'compose') {
+        this.composeParser.parse(content);
+      }
     } catch (e) {
       this.recipeValidationError = e.message;
     }
