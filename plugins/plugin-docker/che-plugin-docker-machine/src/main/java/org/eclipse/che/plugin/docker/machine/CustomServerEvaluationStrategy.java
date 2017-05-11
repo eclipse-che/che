@@ -79,7 +79,7 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
     @Inject
     public CustomServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String cheDockerIp,
                                           @Nullable @Named("che.docker.ip.external") String cheDockerIpExternal,
-                                          @Nullable @Named("che.docker.server_evaluation_strategy.custom.external.template") String cheDockerCustomExternalTemplate,
+                                          @Nullable @Named("che.docker.server_evaluation_strategy.custom.template") String cheDockerCustomExternalTemplate,
                                           @Nullable @Named("che.docker.server_evaluation_strategy.custom.external.protocol") String cheDockerCustomExternalProtocol,
                                           @Named("che.port") String chePort) {
         super(cheDockerIp, cheDockerIpExternal);
