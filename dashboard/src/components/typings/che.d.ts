@@ -280,6 +280,12 @@ declare namespace _che {
     policies?: any;
   }
 
+  export interface IRegistry {
+    url: string;
+    username: string;
+    password: string;
+  }
+
   interface IRequestData {
     userId?: string;
     maxItems?: string;

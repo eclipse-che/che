@@ -9,7 +9,10 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+
 import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
+import {ChePreferences} from '../../../../components/api/che-preferences.factory';
+import {CheNotification} from '../../../../components/notification/che-notification.factory';
 
 /**
  * @ngdoc controller
@@ -18,15 +21,31 @@ import {ConfirmDialogService} from '../../../../components/service/confirm-dialo
  * @author Oleksii Orel
  */
 export class DockerRegistryListController {
-
+  private $q: ng.IQService;
+  private $log: ng.ILogService;
+  private $mdDialog: ng.material.IDialogService;
+  private $document: ng.IDocumentService;
+  private chePreferences: ChePreferences;
+  private cheNotification: CheNotification;
   private confirmDialogService: ConfirmDialogService;
+
+  private registries: Array<che.IRegistry>;
+  private isLoading: boolean;
+
+  private registryOrderBy: string;
+  private registryFilter: {username: ''};
+  private registriesSelectedStatus: any;
+  private isNoSelected: boolean;
+  private isAllSelected: boolean;
+  private isBulkChecked: boolean;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q, $mdDialog, $document, chePreferences, cheNotification, confirmDialogService: ConfirmDialogService) {
+  constructor($q: ng.IQService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, $document: ng.IDocumentService, chePreferences: ChePreferences, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService) {
     this.$q = $q;
+    this.$log = $log;
     this.$mdDialog = $mdDialog;
     this.$document = $document;
     this.chePreferences = chePreferences;
@@ -43,10 +62,10 @@ export class DockerRegistryListController {
     this.isAllSelected = false;
     this.isBulkChecked = false;
 
-    let promise = chePreferences.fetchPreferences();
+    const promise = chePreferences.fetchPreferences();
     promise.then(() => {
       this.isLoading = false;
-    }, (error) => {
+    }, (error: any) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Load registry failed.');
     });
@@ -55,8 +74,8 @@ export class DockerRegistryListController {
   /**
    * Check all registries in list
    */
-  selectAllRegistries() {
-    this.registries.forEach((registry) => {
+  selectAllRegistries(): void {
+    this.registries.forEach((registry: che.IRegistry) => {
       this.registriesSelectedStatus[registry.url] = true;
     });
   }
@@ -64,8 +83,8 @@ export class DockerRegistryListController {
   /**
    * Uncheck all registries in list
    */
-  deselectAllRegistries() {
-    this.registries.forEach((registry) => {
+  deselectAllRegistries(): void {
+    this.registries.forEach((registry: che.IRegistry) => {
       this.registriesSelectedStatus[registry.url] = false;
     });
   }
@@ -73,7 +92,7 @@ export class DockerRegistryListController {
   /**
    * Change bulk selection value
    */
-  changeBulkSelection() {
+  changeBulkSelection(): void {
     if (this.isBulkChecked) {
       this.deselectAllRegistries();
       this.isBulkChecked = false;
@@ -87,11 +106,11 @@ export class DockerRegistryListController {
   /**
    * Update registries selected status
    */
-  updateSelectedStatus() {
+  updateSelectedStatus(): void {
     this.isNoSelected = true;
     this.isAllSelected = true;
 
-    this.registries.forEach((registry) => {
+    this.registries.forEach((registry: che.IRegistry) => {
       if (this.registriesSelectedStatus[registry.url]) {
         this.isNoSelected = false;
       } else {
@@ -112,7 +131,7 @@ export class DockerRegistryListController {
   /**
    * Delete all selected registries
    */
-  deleteSelectedRegistries() {
+  deleteSelectedRegistries(): void {
     let registriesSelectedStatusKeys = Object.keys(this.registriesSelectedStatus);
     let checkedRegistriesKeys = [];
 
@@ -121,7 +140,7 @@ export class DockerRegistryListController {
       return;
     }
 
-    registriesSelectedStatusKeys.forEach((key) => {
+    registriesSelectedStatusKeys.forEach((key: string) => {
       if (this.registriesSelectedStatus[key] === true) {
         checkedRegistriesKeys.push(key);
       }
@@ -141,14 +160,14 @@ export class DockerRegistryListController {
       let deleteRegistryPromises = [];
       let currentRegistryAddress;
 
-      checkedRegistriesKeys.forEach((registryAddress) => {
+      checkedRegistriesKeys.forEach((registryAddress: string) => {
         currentRegistryAddress = registryAddress;
         this.registriesSelectedStatus[registryAddress] = false;
 
         let promise = this.chePreferences.removeRegistry(registryAddress);
         promise.then(() => {
           queueLength--;
-        }, (error) => {
+        }, (error: any) => {
           isError = true;
           this.$log.error('Cannot delete registry: ', error);
         });
@@ -158,7 +177,7 @@ export class DockerRegistryListController {
       this.$q.all(deleteRegistryPromises).finally(() => {
         this.chePreferences.fetchPreferences().then(() => {
           this.updateSelectedStatus();
-        }, (error) => {
+        }, (error: any) => {
           this.$log.error(error);
         });
         if (isError) {
@@ -191,10 +210,10 @@ export class DockerRegistryListController {
 
   /**
    * Edit docker registry. Show the dialog
-   * @param  event - the $event
-   * @param  registry - the selected registry
+   * @param  event {MouseEvent} the $event
+   * @param  registry {che.IRegistry} the selected registry
    */
-  showEditRegistryDialog(event, registry) {
+  showEditRegistryDialog(event: MouseEvent, registry: che.IRegistry): void {
     this.$mdDialog.show({
       targetEvent: event,
       bindToController: true,
