@@ -37,7 +37,6 @@ import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
 import org.eclipse.che.ide.command.CommandResources;
@@ -53,48 +52,41 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 
 /** Presenter for Commands Explorer. */
 @DynaObject
 @Singleton
 public class CommandsExplorerPresenter extends BasePresenter implements CommandsExplorerView.ActionDelegate {
 
-    private final Provider<CommandsExplorerView> view;
-    private final CommandResources               resources;
-    private final Provider<WorkspaceAgent>       workspaceAgent;
-    private final CommandManager                 commandManager;
-    private final Provider<NotificationManager>  notificationManager;
-    private final CommandTypeChooser             commandTypeChooser;
-    private final ExplorerMessages               messages;
-    private final RefreshViewTask                refreshViewTask;
-    private final DialogFactory                  dialogFactory;
-    private final NodeFactory                    nodeFactory;
-    private final EditorAgent                    editorAgent;
-    private final AppContext                     appContext;
-    private final EventBus                       eventBus;
+    private final CommandsExplorerView  view;
+    private final CommandResources      resources;
+    private final CommandManager        commandManager;
+    private final NotificationManager   notificationManager;
+    private final CommandTypeChooser    commandTypeChooser;
+    private final ExplorerMessages      messages;
+    private final RefreshViewTask       refreshViewTask;
+    private final DialogFactory         dialogFactory;
+    private final NodeFactory           nodeFactory;
+    private final Provider<EditorAgent> editorAgentProvider;
+    private final AppContext            appContext;
 
     @Inject
-    public CommandsExplorerPresenter(Provider<CommandsExplorerView> view,
+    public CommandsExplorerPresenter(CommandsExplorerView view,
                                      CommandResources commandResources,
-                                     Provider<WorkspaceAgent> workspaceAgent,
                                      CommandManager commandManager,
-                                     Provider<NotificationManager> notificationManager,
+                                     NotificationManager notificationManager,
                                      CommandTypeChooser commandTypeChooser,
                                      ExplorerMessages messages,
                                      RefreshViewTask refreshViewTask,
                                      DialogFactory dialogFactory,
                                      NodeFactory nodeFactory,
-                                     EditorAgent editorAgent,
+                                     Provider<EditorAgent> editorAgentProvider,
                                      AppContext appContext,
                                      EventBus eventBus) {
         this.view = view;
         this.resources = commandResources;
-        this.workspaceAgent = workspaceAgent;
         this.commandManager = commandManager;
         this.notificationManager = notificationManager;
         this.commandTypeChooser = commandTypeChooser;
@@ -102,25 +94,12 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         this.refreshViewTask = refreshViewTask;
         this.dialogFactory = dialogFactory;
         this.nodeFactory = nodeFactory;
-        this.editorAgent = editorAgent;
+        this.editorAgentProvider = editorAgentProvider;
         this.appContext = appContext;
-        this.eventBus = eventBus;
 
-        eventBus.addHandler(WsStatusChangedEvent.TYPE, event -> {
-            if (event.getStatus() == RUNNING) {
-                view.get().setDelegate(this);
-                start();
-            }
-        });
-    }
+        view.setDelegate(this);
 
-    private void start() {
-        if (partStack == null || !partStack.containsPart(this)) {
-            workspaceAgent.get().openPart(this, NAVIGATION, LAST);
-        }
-
-        refreshView();
-
+        eventBus.addHandler(WsStatusChangedEvent.TYPE, event -> refreshView());
         eventBus.addHandler(CommandAddedEvent.getType(), e -> refreshViewAndSelectCommand(e.getCommand()));
         eventBus.addHandler(CommandRemovedEvent.getType(), e -> refreshView());
         eventBus.addHandler(CommandUpdatedEvent.getType(), e -> refreshView());
@@ -140,7 +119,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public IsWidget getView() {
-        return view.get();
+        return view;
     }
 
     @Nullable
@@ -177,7 +156,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     /** Returns an operation which creates a command with the given context. */
     private Operation<CommandType> createCommand(ApplicableContext context) {
         return selectedCommandType -> {
-            final CommandGoal selectedGoal = view.get().getSelectedGoal();
+            final CommandGoal selectedGoal = view.getSelectedGoal();
 
             if (selectedGoal == null) {
                 return;
@@ -186,7 +165,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
             commandManager.createCommand(selectedGoal.getId(), selectedCommandType.getId(), context)
                           .then(command -> {
                               refreshViewAndSelectCommand(command);
-                              editorAgent.openEditor(nodeFactory.newCommandFileNode(command));
+                              editorAgentProvider.get().openEditor(nodeFactory.newCommandFileNode(command));
                           })
                           .catchError(showErrorNotification(messages.unableCreate()));
         };
@@ -211,7 +190,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     /** Returns an operation which shows an error notification with the given title. */
     private Operation<PromiseError> showErrorNotification(String title) {
         return err -> {
-            notificationManager.get().notify(title, err.getMessage(), FAIL, EMERGE_MODE);
+            notificationManager.notify(title, err.getMessage(), FAIL, EMERGE_MODE);
             throw new OperationException(err.getMessage());
         };
     }

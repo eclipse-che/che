@@ -50,9 +50,4 @@ public interface ThemeAgent {
      * @return current theme
      */
     String getCurrentThemeId();
-
-    /**
-     * @param id
-     */
-    void setCurrentThemeId(String id);
 }

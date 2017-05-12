@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.theme;
 
-import org.eclipse.che.ide.api.theme.Theme;
-import org.eclipse.che.ide.api.theme.ThemeAgent;
 import com.google.gwt.storage.client.Storage;
 import com.google.inject.Inject;
+
+import org.eclipse.che.ide.api.theme.Style;
+import org.eclipse.che.ide.api.theme.Theme;
+import org.eclipse.che.ide.api.theme.ThemeAgent;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -30,19 +32,22 @@ import java.util.Set;
 public class ThemeAgentImpl implements ThemeAgent {
 
     public static final String THEME_STORAGE = "codenvy-theme";
-
-    private Map<String, Theme> themes = new HashMap<>();
-
-    private final Theme defaultTheme;
-
-    private String currentThemeId;
+    private final Theme              defaultTheme;
+    private       Map<String, Theme> themes;
+    private       String             currentThemeId;
 
     @Inject
-    public ThemeAgentImpl(Set<Theme> theme, DarkTheme darkTheme) {
+    public ThemeAgentImpl(DarkTheme darkTheme) {
         defaultTheme = darkTheme;
-        for (Theme t : theme) {
-            addTheme(t);
-        }
+
+        themes = new HashMap<>();
+
+        Style.theme = defaultTheme;
+    }
+
+    @Inject
+    private void registerThemes(Set<Theme> themes) {
+        themes.forEach(this::addTheme);
     }
 
     @Override
@@ -82,9 +87,9 @@ public class ThemeAgentImpl implements ThemeAgent {
      * It's needed to display additional menu items in the same style as IDE
      * (style of menu additions must depend on style of IDE).
      */
-    @Override
     public native void setCurrentThemeId(String id) /*-{
         this.@org.eclipse.che.ide.theme.ThemeAgentImpl::currentThemeId = id;
+        @org.eclipse.che.ide.api.theme.Style::theme = this.@org.eclipse.che.ide.theme.ThemeAgentImpl::getTheme(Ljava/lang/String;)(id);
 
         if (typeof(Storage) !== "undefined") {
             localStorage.setItem(@org.eclipse.che.ide.theme.ThemeAgentImpl::THEME_STORAGE, id);
@@ -94,5 +99,4 @@ public class ThemeAgentImpl implements ThemeAgent {
             $wnd["IDE"].theme = id;
         }
     }-*/;
-
 }

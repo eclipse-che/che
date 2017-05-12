@@ -17,7 +17,9 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.command.explorer.CommandsExplorerPresenter;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
 import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
@@ -55,11 +57,15 @@ public class ProjectPerspective extends AbstractPerspective {
                               WorkBenchControllerFactory controllerFactory,
                               EventBus eventBus,
                               DynaProvider dynaProvider,
+                              ProjectExplorerPresenter projectExplorerPresenter,
+                              CommandsExplorerPresenter commandsExplorerPresenter,
                               NotificationManager notificationManager) {
         super(PROJECT_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus, dynaProvider);
 
         partStacks.put(EDITING, editorMultiPartStackPresenter);
 
+        addPart(projectExplorerPresenter, NAVIGATION);
+        addPart(commandsExplorerPresenter, NAVIGATION);
         addPart(notificationManager, INFORMATION);
 
         PartStack navigatorPanel = getPartStack(NAVIGATION);

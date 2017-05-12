@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.theme.Style;
@@ -27,6 +26,7 @@ import org.eclipse.che.ide.core.StandardComponentInitializer;
 import org.eclipse.che.ide.preferences.PreferencesManagerImpl;
 import org.eclipse.che.ide.preferences.StyleInjector;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
+import org.eclipse.che.ide.theme.ThemeAgentImpl;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 
 /**
@@ -46,7 +46,6 @@ public class IdeBootstrapper {
     private final PreferencesManager                     preferencesManager;
     private final ThemeAgent                             themeAgent;
     private final StyleInjector                          styleInjector;
-    private final EventBus                               eventBus;
     private final CurrentUserInitializer                 currentUserInitializer;
     private final WorkspaceStarter                       workspaceStarter;
 
@@ -58,7 +57,6 @@ public class IdeBootstrapper {
                            PreferencesManagerImpl preferencesManager,
                            ThemeAgent themeAgent,
                            StyleInjector styleInjector,
-                           EventBus eventBus,
                            CurrentUserInitializer currentUserInitializer,
                            WorkspaceStarter workspaceStarter) {
         this.standardComponentsInitializerProvider = standardComponentsInitializerProvider;
@@ -68,7 +66,6 @@ public class IdeBootstrapper {
         this.preferencesManager = preferencesManager;
         this.themeAgent = themeAgent;
         this.styleInjector = styleInjector;
-        this.eventBus = eventBus;
         this.currentUserInitializer = currentUserInitializer;
         this.workspaceStarter = workspaceStarter;
 
@@ -100,8 +97,7 @@ public class IdeBootstrapper {
         String storedThemeId = preferencesManager.getValue(PREF_IDE_THEME);
         storedThemeId = storedThemeId != null ? storedThemeId : themeAgent.getCurrentThemeId();
         final Theme themeToSet = storedThemeId != null ? themeAgent.getTheme(storedThemeId) : themeAgent.getDefault();
-        Style.theme = themeToSet;
-        themeAgent.setCurrentThemeId(themeToSet.getId());
+        ((ThemeAgentImpl)themeAgent).setCurrentThemeId(themeToSet.getId());
 
         Document.get().getBody().getStyle().setBackgroundColor(Style.theme.backgroundColor());
     }

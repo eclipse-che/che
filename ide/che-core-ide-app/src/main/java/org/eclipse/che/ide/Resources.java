@@ -28,6 +28,7 @@ import org.eclipse.che.ide.ui.cellview.DataGridResources;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.ui.tree.Tree;
+import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.ide.ui.zeroclipboard.ZeroClipboardResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -36,7 +37,8 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  *
  * @author Codenvy crowd
  */
-public interface Resources extends Tree.Resources,
+public interface Resources extends Window.Resources,
+                                   Tree.Resources,
                                    PartStackUIResources,
                                    SimpleList.Resources,
                                    MenuResources,

@@ -27,6 +27,7 @@ public class StyleInjector {
 
     public void inject() {
         resources.coreCss().ensureInjected();
+        resources.windowCss().ensureInjected();
         resources.treeCss().ensureInjected();
         resources.defaultSimpleListCss().ensureInjected();
         resources.partStackCss().ensureInjected();

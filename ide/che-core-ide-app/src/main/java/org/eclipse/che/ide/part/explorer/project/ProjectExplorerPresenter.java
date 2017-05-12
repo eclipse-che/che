@@ -11,10 +11,8 @@
 package org.eclipse.che.ide.part.explorer.project;
 
 import com.google.common.collect.Sets;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -31,9 +29,6 @@ import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 import org.eclipse.che.ide.api.extension.ExtensionsInitializedEvent;
 import org.eclipse.che.ide.api.extension.ExtensionsInitializedEvent.ExtensionsInitializedHandler;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.parts.PartStack;
-import org.eclipse.che.ide.api.parts.PartStackType;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -60,17 +55,13 @@ import org.eclipse.che.ide.ui.smartTree.event.ExpandNodeEvent;
 import org.eclipse.che.ide.ui.smartTree.event.PostLoadEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.STOP;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -116,7 +107,6 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                     final ResourceNode.NodeFactory nodeFactory,
                                     final SettingsProvider settingsProvider,
                                     final AppContext appContext,
-                                    final Provider<WorkspaceAgent> workspaceAgentProvider,
                                     final RequestTransmitter requestTransmitter,
                                     final DtoFactory dtoFactory) {
         this.view = view;
@@ -181,16 +171,6 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                 if (partStack != null) {
                     partStack.setActivePart(ProjectExplorerPresenter.this);
                 }
-            }
-        });
-
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                final PartStack partStack = checkNotNull(workspaceAgentProvider.get().getPartStack(PartStackType.NAVIGATION),
-                        "Navigation part stack should not be a null");
-                partStack.addPart(ProjectExplorerPresenter.this);
-                partStack.setActivePart(ProjectExplorerPresenter.this);
             }
         });
     }
