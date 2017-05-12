@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.maven.server.core.project;
 
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.commons.xml.XMLTreeException;
 import org.eclipse.che.ide.maven.tools.Build;
 import org.eclipse.che.ide.maven.tools.Model;
 import org.eclipse.che.ide.maven.tools.Parent;
@@ -116,6 +117,8 @@ public class MavenModelReader {
             model = Model.readFrom(pom);
         } catch (IOException e) {
             problems.add(MavenProjectProblem.newProblem(pom.getPath(), e.getMessage(), MavenProblemType.SYNTAX));
+        }  catch (XMLTreeException xmlExc) {
+            problems.add(MavenProjectProblem.newProblem(pom.getPath(), xmlExc.getMessage(), MavenProblemType.STRUCTURE));
         }
 
         if (model == null) {
