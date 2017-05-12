@@ -219,6 +219,51 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>extManager-client</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.eclipse.che.util.ExtensionManagerGenerator</mainClass>
+                            <arguments>
+                                <argument>--rootDir=${generated.sources.directory}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>IDEInjector-client</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.eclipse.che.util.IDEInjectorGenerator</mainClass>
+                            <arguments>
+                                <argument>--rootDir=${generated.sources.directory}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>DtoRegistry-client</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.eclipse.che.util.DtoFactoryVisitorRegistryGenerator</mainClass>
+                            <arguments>
+                                <argument>--rootDir=${generated.sources.directory}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- Copy static web files before executing gwt:run -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
