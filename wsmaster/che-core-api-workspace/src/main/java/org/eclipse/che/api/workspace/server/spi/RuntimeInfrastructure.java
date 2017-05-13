@@ -15,10 +15,15 @@ import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.slf4j.Logger;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Starting point of describing the contract which infrastructure provider should implement
@@ -28,13 +33,24 @@ import java.util.Set;
  */
 public abstract class RuntimeInfrastructure {
 
+    private static final Logger LOG = getLogger(RuntimeInfrastructure.class);
+
     protected final Set<String> recipeTypes;
     protected final String      name;
+    protected final URL masterChannel;
 
-    public RuntimeInfrastructure(String name, Collection<String> types) {
+    public RuntimeInfrastructure(String name, Collection<String> types, String masterChannel) {
         Preconditions.checkArgument(!types.isEmpty());
         this.name = Objects.requireNonNull(name);
         this.recipeTypes = ImmutableSet.copyOf(types);
+        URL tmp;
+        try {
+            tmp = new URL(masterChannel);
+        } catch (MalformedURLException e) {
+            tmp = null;
+            LOG.error("URL building error for RuntimeInfrastructure master channel: " + name + " : " +  e.getMessage());
+        }
+        this.masterChannel = tmp;
     }
 
     /**
@@ -50,6 +66,14 @@ public abstract class RuntimeInfrastructure {
      */
     public final Set<String> getRecipeTypes() {
         return recipeTypes;
+    }
+
+
+    /**
+     * @return master channel
+     */
+    public URL getMasterChannel() {
+        return masterChannel;
     }
 
     /**
@@ -122,4 +146,6 @@ public abstract class RuntimeInfrastructure {
      *         if any other error occurred
      */
     public abstract RuntimeContext prepare(RuntimeIdentity id, Environment environment) throws ValidationException, InfrastructureException;
+
+
 }

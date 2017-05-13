@@ -104,28 +104,6 @@ public abstract class RuntimeContext {
 
     protected abstract void internalStop(Map<String, String> stopOptions) throws InfrastructureException;
 
-    /**
-     * Infrastructure should assign channel (usual WebSocket) to push long lived processes messages
-     * Examples of such messages include:
-     * - Statuses changes
-     * - Start/Stop logs output
-     * - Agent installer output
-     * etc
-     * It is expected that ones returning this URL implementation guarantees supporting and not changing
-     * it during the whole life time of Runtime. Repeating calls of this method should return the same URL
-     * If infrastructure implementation provides a channel it guarantees:
-     * - this endpoint is open and ready to use
-     * - this endpoint emits only messages of specified formats (TODO specify the formats)
-     * - high loaded infrastructure provides scaling of "messaging server" to avoid overloading
-     *
-     * @return URL of the channels endpoint
-     * @throws UnsupportedOperationException
-     *         if implementation does not provide channel
-     * @throws InfrastructureException
-     */
-    public abstract URL getOutputChannel() throws InfrastructureException,
-                                                  UnsupportedOperationException;
-
 
     /**
      * Runtime Identity contains information allowing uniquely identify a Runtime

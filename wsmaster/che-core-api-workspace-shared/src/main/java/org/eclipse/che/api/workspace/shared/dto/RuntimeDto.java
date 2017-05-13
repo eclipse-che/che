@@ -11,7 +11,7 @@
 package org.eclipse.che.api.workspace.shared.dto;
 
 import org.eclipse.che.api.core.model.workspace.Runtime;
-import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.dto.shared.DTO;
 
@@ -22,7 +22,7 @@ import java.util.Map;
  * @author Alexander Garagatyi
  */
 @DTO
-public interface RuntimeDto extends Runtime {
+public interface RuntimeDto extends Runtime, Hyperlinks {
 
     @Override
     String getActiveEnv();
@@ -30,13 +30,6 @@ public interface RuntimeDto extends Runtime {
     void setActiveEnv(String activeEnv);
 
     RuntimeDto withActiveEnv(String activeEnvName);
-
-//    @Override
-//    OldMachineDto getDevMachine();
-
-//    void setDevMachine(OldMachineDto machine);
-
-//    RuntimeDto withDevMachine(OldMachineDto machine);
 
     @Override
     Map<String, MachineDto> getMachines();
@@ -63,9 +56,5 @@ public interface RuntimeDto extends Runtime {
 
     RuntimeDto withWarnings(List<WarningDto> warnings);
 
-    //    void setRootFolder(String rootFolder);
-//
-//    RuntimeDto withRootFolder(String rootFolder);
 
-//    RuntimeDto withLinks(List<Link> links);
 }
