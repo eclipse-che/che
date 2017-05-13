@@ -14,12 +14,9 @@ import com.google.gwt.http.client.URL;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.machine.shared.dto.OldMachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
@@ -202,49 +199,49 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
     }
 
-    @Override
-    public Promise<WorkspaceDto> addEnvironment(String wsId, String envName, EnvironmentDto newEnv) {
-        return asyncRequestFactory.createPostRequest(baseHttpUrl + '/' + wsId + "/environment?name=" + envName, newEnv)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .header(CONTENT_TYPE, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Adding environment..."))
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
-    }
+//    @Override
+//    public Promise<WorkspaceDto> addEnvironment(String wsId, String envName, EnvironmentDto newEnv) {
+//        return asyncRequestFactory.createPostRequest(baseHttpUrl + '/' + wsId + "/environment?name=" + envName, newEnv)
+//                                  .header(ACCEPT, APPLICATION_JSON)
+//                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+//                                  .loader(loaderFactory.newLoader("Adding environment..."))
+//                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
+//    }
+//
+//    @Override
+//    public Promise<WorkspaceDto> updateEnvironment(String wsId, String envName, EnvironmentDto environmentUpdate) {
+//        return null;
+//    }
+//
+//    @Override
+//    public Promise<WorkspaceDto> deleteEnvironment(String wsId, String envName) {
+//        return null;
+//    }
+//
+//    @Override
+//    public Promise<WorkspaceDto> addProject(String wsId, ProjectConfigDto newProject) {
+//        return null;
+//    }
+//
+//    @Override
+//    public Promise<WorkspaceDto> updateProject(String wsId, String path, ProjectConfigDto newEnv) {
+//        return null;
+//    }
+//
+//    @Override
+//    public Promise<WorkspaceDto> deleteProject(String wsId, String projectName) {
+//        return null;
+//    }
 
-    @Override
-    public Promise<WorkspaceDto> updateEnvironment(String wsId, String envName, EnvironmentDto environmentUpdate) {
-        return null;
-    }
-
-    @Override
-    public Promise<WorkspaceDto> deleteEnvironment(String wsId, String envName) {
-        return null;
-    }
-
-    @Override
-    public Promise<WorkspaceDto> addProject(String wsId, ProjectConfigDto newProject) {
-        return null;
-    }
-
-    @Override
-    public Promise<WorkspaceDto> updateProject(String wsId, String path, ProjectConfigDto newEnv) {
-        return null;
-    }
-
-    @Override
-    public Promise<WorkspaceDto> deleteProject(String wsId, String projectName) {
-        return null;
-    }
-
-    @Override
-    public Promise<Void> createMachine(final String wsId, final OldMachineConfigDto machineConfig) {
-        String url = baseHttpUrl + '/' + wsId + "/machine";
-        return asyncRequestFactory.createPostRequest(url, machineConfig)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .header(CONTENT_TYPE, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Creating machine..."))
-                                  .send();
-    }
+//    @Override
+//    public Promise<Void> createMachine(final String wsId, final OldMachineConfigDto machineConfig) {
+//        String url = baseHttpUrl + '/' + wsId + "/machine";
+//        return asyncRequestFactory.createPostRequest(url, machineConfig)
+//                                  .header(ACCEPT, APPLICATION_JSON)
+//                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+//                                  .loader(loaderFactory.newLoader("Creating machine..."))
+//                                  .send();
+//    }
 
     @Override
     public Promise<List<SnapshotDto>> getSnapshot(final String workspaceId) {
