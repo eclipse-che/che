@@ -19,14 +19,24 @@ import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
+import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveView;
+import org.eclipse.che.ide.part.editor.EditorPartStackPresenter;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
+import org.eclipse.che.ide.part.editor.multipart.SplitEditorPartView;
+import org.eclipse.che.ide.part.editor.multipart.SplitEditorPartViewFactory;
+import org.eclipse.che.ide.part.editor.multipart.SplitEditorPartViewImpl;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerViewImpl;
+import org.eclipse.che.ide.part.widgets.TabItemFactory;
+import org.eclipse.che.ide.part.widgets.editortab.EditorTabWidget;
+import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
+import org.eclipse.che.ide.part.widgets.partbutton.PartButtonWidget;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
 import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
@@ -34,11 +44,7 @@ import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
 
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
-/**
- * GIN module for configuring Part API components.
- *
- * @author Artem Zatsarynnyi
- */
+/** GIN module for configuring Part API components. */
 public class PartApiModule extends AbstractGinModule {
 
     @Override
@@ -54,7 +60,14 @@ public class PartApiModule extends AbstractGinModule {
                         .implement(PartStackView.class, PartStackViewImpl.class)
                         .build(PartStackViewFactory.class));
 
+        install(new GinFactoryModuleBuilder().implement(PartButton.class, PartButtonWidget.class)
+                                             .implement(EditorTab.class, EditorTabWidget.class)
+                                             .build(TabItemFactory.class));
+
+        bind(EditorPartStack.class).to(EditorPartStackPresenter.class);
         bind(EditorMultiPartStack.class).to(EditorMultiPartStackPresenter.class).in(Singleton.class);
+        install(new GinFactoryModuleBuilder().implement(SplitEditorPartView.class, SplitEditorPartViewImpl.class)
+                                             .build(SplitEditorPartViewFactory.class));
 
         // perspective related components
         bind(PerspectiveView.class).to(PerspectiveViewImpl.class);

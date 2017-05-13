@@ -29,17 +29,13 @@ import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistry;
 import org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar;
 import org.eclipse.che.ide.projecttype.ProjectTemplateRegistryImpl;
 import org.eclipse.che.ide.projecttype.ProjectTemplatesRegistrar;
-import org.eclipse.che.ide.projecttype.ProjectTypesRegistrar;
 import org.eclipse.che.ide.projecttype.ProjectTypeRegistryImpl;
+import org.eclipse.che.ide.projecttype.ProjectTypesRegistrar;
 import org.eclipse.che.ide.projecttype.wizard.PreSelectedProjectTypeManagerImpl;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardFactory;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardRegistryImpl;
 
-/**
- * GIN module for configuring Project API and project wizard related components.
- *
- * @author Artem Zatsarynnyi
- */
+/** GIN module for configuring Project API and project wizard related components. */
 public class ProjectApiModule extends AbstractGinModule {
 
     @Override
@@ -64,5 +60,7 @@ public class ProjectApiModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(ProjectWizardFactory.class));
 
         bind(PreSelectedProjectTypeManager.class).to(PreSelectedProjectTypeManagerImpl.class).in(Singleton.class);
+
+        bind(ResolvingProjectStateHolderRegistry.class).to(ResolvingProjectStateHolderRegistryImpl.class);
     }
 }
