@@ -41,10 +41,11 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
 import static org.eclipse.che.ide.util.dom.DomUtils.ensureDebugId;
 
 /**
- * Renderer for {@ProcessTreeNode} UI presentation.
+ * Renderer for {@link ProcessTreeNode} UI presentation.
  *
  * @author Anna Shumilova
  * @author Roman Nikitenko
+ * @author Vlad Zhukovskyi
  */
 public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
@@ -114,82 +115,48 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
             statusElement.appendChild(Elements.createDivElement(resources.getCss().machineStatusPausedRight()));
         }
 
-        Tooltip.create(statusElement,
-                       BOTTOM,
-                       MIDDLE,
-                       locale.viewMachineRunningTooltip());
+        Tooltip.create(statusElement, BOTTOM, MIDDLE, locale.viewMachineRunningTooltip());
 
-        /***************************************************************************
-         *
-         * New terminal button
-         *
-         ***************************************************************************/
         Workspace workspace = appContext.getWorkspace();
         if (workspace != null && RUNNING == workspace.getStatus() && node.hasTerminalAgent()) {
             SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().newTerminalButton());
             newTerminalButton.appendChild((Node)new SVGImage(resources.addTerminalIcon()).getElement());
             root.appendChild(newTerminalButton);
 
-            Tooltip.create(newTerminalButton,
-                           BOTTOM,
-                           MIDDLE,
-                           locale.viewNewTerminalTooltip());
+            Tooltip.create(newTerminalButton, BOTTOM, MIDDLE, locale.viewNewTerminalTooltip());
 
-            newTerminalButton.addEventListener(Event.CLICK, new EventListener() {
-                @Override
-                public void handleEvent(Event event) {
-                    event.stopPropagation();
-                    event.preventDefault();
+            newTerminalButton.addEventListener(Event.CLICK, event -> {
+                event.stopPropagation();
+                event.preventDefault();
 
-                    if (addTerminalClickHandler != null) {
-                        addTerminalClickHandler.onAddTerminalClick(machineId);
-                    }
+                if (addTerminalClickHandler != null) {
+                    addTerminalClickHandler.onAddTerminalClick(machineId);
                 }
             }, true);
 
-            /**
-             * This listener cancels mouse events on '+' button and prevents the jitter of the selection in the tree.
-             */
-            EventListener blockMouseListener = new EventListener() {
-                @Override
-                public void handleEvent(Event event) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                }
+            EventListener blockMouseListener = event -> {
+                event.stopPropagation();
+                event.preventDefault();
             };
 
-            /**
-             * Prevent jitter when pressing mouse on '+' button.
-             */
             newTerminalButton.addEventListener(Event.MOUSEDOWN, blockMouseListener, true);
             newTerminalButton.addEventListener(Event.MOUSEUP, blockMouseListener, true);
             newTerminalButton.addEventListener(Event.CLICK, blockMouseListener, true);
             newTerminalButton.addEventListener(Event.DBLCLICK, blockMouseListener, true);
         }
 
-        /***************************************************************************
-         *
-         * SSH button
-         *
-         ***************************************************************************/
         if (node.isRunning() && node.hasSSHAgent()) {
             SpanElement sshButton = Elements.createSpanElement(resources.getCss().sshButton());
             sshButton.setTextContent("SSH");
             root.appendChild(sshButton);
 
-            sshButton.addEventListener(Event.CLICK, new EventListener() {
-                @Override
-                public void handleEvent(Event event) {
-                    if (previewSshClickHandler != null) {
-                        previewSshClickHandler.onPreviewSshClick(machineId);
-                    }
+            sshButton.addEventListener(Event.CLICK, event -> {
+                if (previewSshClickHandler != null) {
+                    previewSshClickHandler.onPreviewSshClick(machineId);
                 }
             }, true);
 
-            Tooltip.create(sshButton,
-                           BOTTOM,
-                           MIDDLE,
-                           locale.connectViaSSH());
+            Tooltip.create(sshButton, BOTTOM, MIDDLE, locale.connectViaSSH());
         }
 
         Element monitorsElement = Elements.createSpanElement(resources.getCss().machineMonitors());
@@ -200,10 +167,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
         Element nameElement = Elements.createSpanElement(resources.getCss().nameLabel());
         nameElement.setTextContent(machineConfig.getName());
-        Tooltip.create(nameElement,
-                       BOTTOM,
-                       MIDDLE,
-                       machineConfig.getName());
+        Tooltip.create(nameElement, BOTTOM, MIDDLE, machineConfig.getName());
         root.appendChild(nameElement);
 
         return root;
@@ -268,10 +232,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         nameElement.setTextContent(node.getName());
         ensureDebugId(nameElement, "terminal-name-element");
 
-        Tooltip.create(nameElement,
-                       BOTTOM,
-                       MIDDLE,
-                       node.getName());
+        Tooltip.create(nameElement, BOTTOM, MIDDLE, node.getName());
         root.appendChild(nameElement);
 
         Element spanElement = Elements.createSpanElement();
@@ -288,17 +249,11 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         SVGImage icon = new SVGImage(partStackUIResources.closeIcon());
         closeButton.appendChild((Node)icon.getElement());
 
-        Tooltip.create(closeButton,
-                       BOTTOM,
-                       MIDDLE,
-                       locale.viewCloseProcessOutputTooltip());
+        Tooltip.create(closeButton, BOTTOM, MIDDLE, locale.viewCloseProcessOutputTooltip());
 
-        closeButton.addEventListener(Event.CLICK, new EventListener() {
-            @Override
-            public void handleEvent(Event event) {
-                if (stopProcessHandler != null) {
-                    stopProcessHandler.onCloseProcessOutputClick(node);
-                }
+        closeButton.addEventListener(Event.CLICK, event -> {
+            if (stopProcessHandler != null) {
+                stopProcessHandler.onCloseProcessOutputClick(node);
             }
         }, true);
 
@@ -309,17 +264,11 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         SpanElement stopProcessButton = Elements.createSpanElement(resources.getCss().processesPanelStopButtonForProcess());
         ensureDebugId(stopProcessButton, "stop-process-button-element");
 
-        Tooltip.create(stopProcessButton,
-                       BOTTOM,
-                       MIDDLE,
-                       locale.viewStropProcessTooltip());
+        Tooltip.create(stopProcessButton, BOTTOM, MIDDLE, locale.viewStropProcessTooltip());
 
-        stopProcessButton.addEventListener(Event.CLICK, new EventListener() {
-            @Override
-            public void handleEvent(Event event) {
-                if (stopProcessHandler != null) {
-                    stopProcessHandler.onStopProcessClick(node);
-                }
+        stopProcessButton.addEventListener(Event.CLICK, event -> {
+            if (stopProcessHandler != null) {
+                stopProcessHandler.onStopProcessClick(node);
             }
         }, true);
 
