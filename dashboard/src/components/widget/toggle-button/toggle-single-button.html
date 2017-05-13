@@ -1,0 +1,8 @@
+<div ng-init="state=!!init">
+  <md-button class="toggle-single-button"
+             ng-class="{'toggle-single-button-disabled': !state}"
+             ng-click="state = !state; onChange({state: state})">
+    <md-icon md-font-icon="{{fontIcon}}" ng-if="fontIcon"></md-icon>
+    <span class="toggle-single-button-title">{{title}}</span>
+  </md-button>
+</div>

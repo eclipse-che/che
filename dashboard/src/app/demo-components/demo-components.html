@@ -11,13 +11,15 @@
 
 -->
 <md-content md-scroll-y flex
-            md-theme="default">
-  <md-tabs md-selected="selectedIndex"
+            md-theme="default"
+            class="demo-components">
+  <md-tabs md-selected="demoComponentsController.selectedIndex"
            md-dynamic-height
            md-stretch-tabs="auto"
            md-center-tabs="">
 
-    <md-tab label="Font">
+    <md-tab label="Font"
+            md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Font)">
       <p>Headings</p>
       <che-html-source>
         <h1>This is h1
@@ -41,7 +43,8 @@
       </che-html-source>
     </md-tab>
 
-    <md-tab label="Panel">
+    <md-tab label="Panel"
+            md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Panel)">
       <che-html-source>
 
         <che-panel che-title="My first panel"></che-panel>
@@ -63,22 +66,24 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
       </che-html-source>
     </md-tab>
 
-    <md-tab label="Selecter">
-      <div>Selected book is {{demoComponentsCtrl.selectedBook}}</div>
+    <md-tab label="Selecter"
+            md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Selecter)">
+      <div>Selected book is {{demoComponentsController.selectedBook}}</div>
 
       <div layout="row" layout-wrap>
-        <che-selecter ng-repeat="(author, books) in demoComponentsCtrl.booksByAuthor"
-                      ng-model="demoComponentsCtrl.selectedBook"
+        <che-selecter ng-repeat="(author, books) in demoComponentsController.booksByAuthor"
+                      ng-model="demoComponentsController.selectedBook"
                       che-values="books"
                       che-name="PickupBook"
                       che-title="{{author}}"
                       che-icon="fa fa-cube"
-                      che-callback-controller="demoComponentsCtrl"
+                      che-callback-controller="demoComponentsController"
                       che-options="book.title for book in values"/>
       </div>
     </md-tab>
 
-    <md-tab label="Icons">
+    <md-tab label="Icons"
+            md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Icons)">
       <div>Material design icons</div>
       <che-html-source>
 
@@ -92,8 +97,8 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
       </div>
     </md-tab>
 
-
-    <md-tab label="Buttons">
+    <md-tab label="Buttons"
+            md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Buttons)">
       <div layout="column">
 
         <!-- Cancel Button -->
@@ -176,8 +181,8 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
                               che-button-icon="fa fa-trash"></che-button-warning>
         </textarea>
 
-        <p>Selected value of toggle is : {{demoComponentsCtrl.selectedToggle}}</p>
-        <che-toggle ng-init="demoComponentsCtrl.selectedToggle='Public'" ng-model="demoComponentsCtrl.selectedToggle">
+        <p>Selected value of toggle is : {{demoComponentsController.selectedToggle}}</p>
+        <che-toggle ng-init="demoComponentsController.selectedToggle='Public'" ng-model="demoComponentsController.selectedToggle">
           <che-toggle-button che-font-icon="fa fa-lock" che-title="Public"></che-toggle-button>
           <che-toggle-button che-font-icon="fa fa-unlock" che-title="Private"></che-toggle-button>
         </che-toggle>
@@ -185,8 +190,8 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
       </div>
     </md-tab>
 
-    <md-tab label="Input">
-
+    <md-tab label="Input"
+            md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Input)">
       <div layout="column" flex ng-form="demoForm">
         <che-html-source>
 
@@ -194,7 +199,7 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
                      che-name="demoinput"
                      che-label-name="Name"
                      che-place-holder="Name of this demo"
-                     ng-model="demoComponentsCtrl.selectedInput"
+                     ng-model="demoComponentsController.selectedInput"
                      required
                      ng-maxlength="128"
                      ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
@@ -208,13 +213,13 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
 
     </md-tab>
 
-    <md-tab label="List">
-
+    <md-tab label="List"
+            md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.List)">
       <div layout="column">
         <che-html-source>
 
           <che-list style="margin: 10px; width: 200px">
-            <che-list-item ng-repeat="document in demoComponentsCtrl.listItemsDocs">
+            <che-list-item ng-repeat="document in demoComponentsController.listItemsDocs">
               <div layout="row" flex="100" style="height: 24px; margin: 5px">
                 <che-list-item-checked flex="20" che-icon="md-font fa fa-file-text-o"
                                        style="font-size: 20px"></che-list-item-checked>
@@ -224,7 +229,7 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
           </che-list>
 
           <che-list style="margin: 10px; width: 200px">
-            <che-list-item ng-repeat="task in demoComponentsCtrl.listItemsTasks">
+            <che-list-item ng-repeat="task in demoComponentsController.listItemsTasks">
               <div layout="row" flex="100" style="height: 24px; margin: 5px">
                 <div flex="70">{{task.name}}</div>
                 <che-list-item-checked flex="30" ng-model="task.done"></che-list-item-checked>
@@ -236,17 +241,14 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
 
     </md-tab>
 
-    <md-tab label="Filter">
-
+    <md-tab label="Stack Selector"
+            md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Stack_selector)">
       <div layout="column">
-        Number round filter:
-        <div data-ng-repeat="number in demoComponentsCtrl.numbersToRound">
-          <div data-ng-repeat="precision in demoComponentsCtrl.precisions">
-            <span>Number <b>{{number}}</b> with precision <b>{{precision}}</b> is <b>{{number | cheNumberRoundFilter:precision}}</b></span>
-          </div>
-        </div>
+        <che-label-container che-label-name="{{createProjectCtrl.workspaces.length ? 'Select Workspace' : 'Select Stack'}}"
+                             che-label-description="{{createProjectCtrl.workspaces.length ? 'Select existing workspace or create it from stack' : 'Select stack'}}, recipe or image used to define your environment runtime. Workspace environments are used to build and run your project.">
+          <stack-selector></stack-selector>
+        </che-label-container>
       </div>
-
     </md-tab>
 
   </md-tabs>
