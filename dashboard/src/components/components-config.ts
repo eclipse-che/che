@@ -30,7 +30,7 @@ import {ServiceConfig} from './service/service-config';
 
 export class ComponentsConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
     new ApiConfig(register);
     new AttributeConfig(register);
     new FilterConfig(register);

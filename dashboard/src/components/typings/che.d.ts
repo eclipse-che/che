@@ -29,6 +29,10 @@ declare namespace _che {
       tabName: string;
     }
 
+    export interface IRouteProvider extends ng.route.IRouteProvider {
+      accessWhen: (path: string, route: any) => ng.IPromise<any>;
+      accessOtherWise: (route: any) => ng.IPromise<any>;
+    }
   }
 
   export namespace widget {
@@ -87,6 +91,13 @@ declare namespace _che {
     links?: Array<any>;
     source?: any;
     workspaceConfig: IWorkspaceConfig;
+  }
+
+  export interface IStackLink {
+    href: string;
+    method: string;
+    rel: string;
+    parameters: any[];
   }
 
   export interface IWorkspace {

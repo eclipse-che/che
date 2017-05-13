@@ -36,6 +36,7 @@ import {CheHtmlSource} from './html-source/che-html-source.directive';
 import {CheInput} from './input/che-input.directive';
 import {CheInputBox} from './input/che-input-box.directive';
 import {CheTextarea} from './input/che-textarea.directive';
+import {CheNumberSpinner} from './input/che-number-spinner.directive';
 import {CheLabel} from './label/che-label.directive';
 import {CheLabelContainer} from './label-container/che-label-container.directive';
 import {CheLearnMoreCtrl} from './learn-more/che-learn-more.controller';
@@ -55,6 +56,7 @@ import {CheLoaderCrane} from './loader/che-loader-crane.directive';
 import {ChePanelCtrl} from './panel/che-panel.controller';
 import {ChePanel} from './panel/che-panel.directive';
 import {CheSearch} from './search/che-search.directive';
+import {SearchInput} from './search/search-input.directive';
 import {CheSelect} from './select/che-select.directive';
 import {CheSelecterCtrl} from './selecter/che-selecter.controller';
 import {CheSelecter} from './selecter/che-selecter.directive';
@@ -71,6 +73,11 @@ import {ChePopup} from './popup/che-popup.directive';
 import {CheModalPopup} from './popup/che-modal-popup.directive';
 import {CheShowArea} from './show-area/che-show-area.directive';
 import {DemoSourceRender} from './html-source/demo-source-render.directive';
+import {ToggleSingleButton} from './toggle-button/toggle-single-button.directive';
+import {CheToggleJoinedButton} from './toggle-button/che-toggle-joined-button.directive';
+import {CheToggleJoined} from './toggle-button/che-toggle-joined.directive';
+import {CheChipsList} from './chips-list/chips-list.directive';
+
 import {CheEditor} from './editor/che-editor.directive';
 import {CheEditorController} from './editor/che-editor.controller';
 import {PagingButtons} from './paging-button/paging-button.directive';
@@ -114,6 +121,7 @@ export class WidgetConfig {
       .directive('cheInput', CheInput)
       .directive('cheInputBox', CheInputBox)
       .directive('cheTextarea', CheTextarea)
+      .directive('cheNumberSpinner', CheNumberSpinner)
       .directive('cheLabel', CheLabel)
       .directive('cheLabelContainer', CheLabelContainer)
 
@@ -139,6 +147,7 @@ export class WidgetConfig {
       .directive('chePanel', ChePanel)
 
       .directive('cheSearch', CheSearch)
+      .directive('searchInput', SearchInput)
 
       .directive('cheSelect', CheSelect)
 
@@ -154,6 +163,9 @@ export class WidgetConfig {
       .controller('CheToggleController', CheToggleController)
       .directive('cheToggleButton', CheToggleButton)
       .directive('cheToggle', CheToggle)
+      .directive('cheToggleJoined', CheToggleJoined)
+      .directive('cheToggleJoinedButton', CheToggleJoinedButton)
+      .directive('toggleSingleButton', ToggleSingleButton)
 
       .directive('cheToolbar', CheToolbar)
       // notifications
@@ -164,6 +176,8 @@ export class WidgetConfig {
       .directive('cheModalPopup', CheModalPopup)
       // show area
       .directive('cheShowArea', CheShowArea)
+      // tags
+      .directive('cheChipsList', CheChipsList)
       // editor
       .controller('CheEditorController', CheEditorController)
       .directive('cheEditor', CheEditor);

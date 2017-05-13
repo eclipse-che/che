@@ -32,7 +32,7 @@ export class CheToggleButton {
     // scope values
     this.scope = {
       title: '@cheTitle',
-      value: '@?cheValue',
+      value: '=?cheValue',
       fontIcon: '@cheFontIcon',
       ngDisabled: '@ngDisabled'
     };
