@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -20,7 +19,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
@@ -29,6 +27,7 @@ import org.eclipse.che.ide.editor.orion.client.OrionHoverRegistrant;
 import org.eclipse.che.ide.editor.orion.client.OrionOccurrencesRegistrant;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionContentTypeOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionHighlightingConfigurationOverlay;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorProvider;
 import org.eclipse.che.plugin.languageserver.ide.highlighting.OccurrencesProvider;
 import org.eclipse.che.plugin.languageserver.ide.hover.HoverProvider;
@@ -37,7 +36,6 @@ import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryS
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -45,14 +43,13 @@ import static com.google.common.collect.Lists.newArrayList;
  * @author Evgen Vidolob
  */
 @Singleton
-public class LanguageServerFileTypeRegister implements WsAgentComponent {
-
+public class LanguageServerFileTypeRegister {
 
     private final LanguageServerRegistryServiceClient serverLanguageRegistry;
     private final FileTypeRegistry                    fileTypeRegistry;
     private final LanguageServerResources             resources;
     private final EditorRegistry                      editorRegistry;
-    private final OrionContentTypeRegistrant          contentTypeRegistrant;
+    private final OrionContentTypeRegistrant          orionContentTypeRegistrant;
     private final OrionHoverRegistrant                orionHoverRegistrant;
     private final OrionOccurrencesRegistrant          orionOccurrencesRegistrant;
     private final LanguageServerEditorProvider        editorProvider;
@@ -66,7 +63,7 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                                           FileTypeRegistry fileTypeRegistry,
                                           LanguageServerResources resources,
                                           EditorRegistry editorRegistry,
-                                          OrionContentTypeRegistrant contentTypeRegistrant,
+                                          OrionContentTypeRegistrant orionContentTypeRegistrant,
                                           OrionHoverRegistrant orionHoverRegistrant,
                                           OrionOccurrencesRegistrant orionOccurrencesRegistrant,
                                           LanguageServerEditorProvider editorProvider,
@@ -76,7 +73,7 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
         this.fileTypeRegistry = fileTypeRegistry;
         this.resources = resources;
         this.editorRegistry = editorRegistry;
-        this.contentTypeRegistrant = contentTypeRegistrant;
+        this.orionContentTypeRegistrant = orionContentTypeRegistrant;
         this.orionHoverRegistrant = orionHoverRegistrant;
         this.orionOccurrencesRegistrant = orionOccurrencesRegistrant;
         this.editorProvider = editorProvider;
@@ -84,8 +81,7 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
         this.occurrencesProvider = occurrencesProvider;
     }
 
-    @Override
-    public void start(final Callback<WsAgentComponent, Exception> callback) {
+    void start() {
         Promise<List<LanguageDescription>> registeredLanguages = serverLanguageRegistry.getSupportedLanguages();
         registeredLanguages.then(new Operation<List<LanguageDescription>>() {
             @Override
@@ -118,19 +114,17 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                             config.setId(lang.getLanguageId() + ".highlighting");
                             config.setContentTypes(contentTypeId);
                             config.setPatterns(lang.getHighlightingConfiguration());
-                            Logger logger = Logger.getLogger(LanguageServerFileTypeRegister.class.getName());
-                            contentTypeRegistrant.registerFileType(contentType, config);
+                            orionContentTypeRegistrant.registerFileType(contentType, config);
                         }
                     }
                     orionHoverRegistrant.registerHover(contentTypes, hoverProvider);
                     orionOccurrencesRegistrant.registerOccurrencesHandler(contentTypes, occurrencesProvider);
                 }
-                callback.onSuccess(LanguageServerFileTypeRegister.this);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                callback.onFailure(new Exception(arg.getMessage(), arg.getCause()));
+                Log.error(LanguageServerFileTypeRegister.this.getClass(), arg.getCause());
             }
         });
     }

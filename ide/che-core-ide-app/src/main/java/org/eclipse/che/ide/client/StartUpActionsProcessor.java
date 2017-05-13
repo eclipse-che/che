@@ -10,16 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.ide.client;
 
-import com.google.gwt.core.client.Callback;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.StartUpAction;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
+import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
 
 import java.util.List;
+
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 /**
  * Will process all start-up actions that comes from
@@ -28,25 +31,34 @@ import java.util.List;
  * @author Vitalii Parfonov
  */
 @Singleton
-public class StartUpActionsProcessor implements WsAgentComponent {
+public class StartUpActionsProcessor {
 
     private final AppContext    appContext;
     private final ActionManager actionManager;
 
     @Inject
-    public StartUpActionsProcessor(AppContext appContext, ActionManager actionManager) {
+    public StartUpActionsProcessor(AppContext appContext, ActionManager actionManager, EventBus eventBus) {
         this.appContext = appContext;
         this.actionManager = actionManager;
+
+        eventBus.addHandler(WsStatusChangedEvent.TYPE, event -> {
+            if (event.getStatus() == RUNNING) {
+                new Timer() {
+                    @Override
+                    public void run() {
+                        processActions();
+                    }
+                }.schedule(1000);
+            }
+        });
     }
 
-    @Override
-    public void start(Callback<WsAgentComponent, Exception> callback) {
+    private void processActions() {
         final List<StartUpAction> startAppActions = appContext.getStartAppActions();
         if (startAppActions != null && !startAppActions.isEmpty()) {
             for (StartUpAction action : startAppActions) {
                 actionManager.performAction(action.getActionId(), action.getParameters());
             }
         }
-        callback.onSuccess(this);
     }
 }

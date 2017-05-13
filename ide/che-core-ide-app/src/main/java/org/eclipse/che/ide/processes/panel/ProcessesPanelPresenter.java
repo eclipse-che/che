@@ -15,6 +15,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -125,7 +126,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final ProcessesPanelView            view;
     private final CoreLocalizationConstant      localizationConstant;
     private final MachineResources              resources;
-    private final WorkspaceAgent                workspaceAgent;
+    private final Provider<WorkspaceAgent>      workspaceAgentProvider;
     private final SshServiceClient              sshServiceClient;
     private final AppContext                    appContext;
     private final NotificationManager           notificationManager;
@@ -135,7 +136,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory;
     private final CommandTypeRegistry           commandTypeRegistry;
     private final ExecAgentCommandManager       execAgentCommandManager;
-    private final MacroProcessor                macroProcessor;
+    private final Provider<MacroProcessor>      macroProcessorProvider;
     private final EventBus                      eventBus;
 
     ProcessTreeNode rootNode;
@@ -149,7 +150,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                    CoreLocalizationConstant localizationConstant,
                                    MachineResources resources,
                                    EventBus eventBus,
-                                   WorkspaceAgent workspaceAgent,
+                                   Provider<WorkspaceAgent> workspaceAgentProvider,
                                    AppContext appContext,
                                    NotificationManager notificationManager,
                                    TerminalFactory terminalFactory,
@@ -159,11 +160,11 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                    CommandTypeRegistry commandTypeRegistry,
                                    SshServiceClient sshServiceClient,
                                    ExecAgentCommandManager execAgentCommandManager,
-                                   MacroProcessor macroProcessor) {
+                                   Provider<MacroProcessor> macroProcessorProvider) {
         this.view = view;
         this.localizationConstant = localizationConstant;
         this.resources = resources;
-        this.workspaceAgent = workspaceAgent;
+        this.workspaceAgentProvider = workspaceAgentProvider;
         this.sshServiceClient = sshServiceClient;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
@@ -174,7 +175,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         this.eventBus = eventBus;
         this.commandTypeRegistry = commandTypeRegistry;
         this.execAgentCommandManager = execAgentCommandManager;
-        this.macroProcessor = macroProcessor;
+        this.macroProcessorProvider = macroProcessorProvider;
 
         machineNodes = new HashMap<>();
         machines = new HashMap<>();
@@ -426,7 +427,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         view.addWidget(terminalId, terminalName, terminalNode.getTitleIcon(), terminalWidget, false);
         refreshStopButtonState(terminalId);
 
-        workspaceAgent.setActivePart(this);
+        workspaceAgentProvider.get().setActivePart(this);
 
         newTerminal.setVisible(true);
         newTerminal.connect();
@@ -586,7 +587,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         addOutputConsole(commandId, commandNode, outputConsole, false);
 
         refreshStopButtonState(commandId);
-        workspaceAgent.setActivePart(this);
+        workspaceAgentProvider.get().setActivePart(this);
     }
 
     @Nullable
@@ -1072,7 +1073,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
                             addCommandOutput(machine.getId(), console);
                         } else {
-                            macroProcessor.expandMacros(commandByName.getCommandLine()).then(new Operation<String>() {
+                            macroProcessorProvider.get().expandMacros(commandByName.getCommandLine()).then(new Operation<String>() {
                                 @Override
                                 public void apply(String expandedCommandLine) throws OperationException {
                                     final CommandImpl command = new CommandImpl(commandByName.getName(),

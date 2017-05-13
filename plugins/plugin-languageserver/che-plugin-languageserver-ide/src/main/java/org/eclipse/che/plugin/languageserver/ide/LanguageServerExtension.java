@@ -14,16 +14,19 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.browser.UserAgent;
@@ -41,12 +44,29 @@ import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
 
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 
 @Extension(title = "LanguageServer")
 @Singleton
 public class LanguageServerExtension {
     private final String GROUP_ASSISTANT_REFACTORING = "assistantRefactoringGroup";
+
+    @Inject
+    public LanguageServerExtension(LanguageServerFileTypeRegister languageServerFileTypeRegister,
+                                   EventBus eventBus,
+                                   AppContext appContext) {
+        eventBus.addHandler(WsStatusChangedEvent.TYPE, event -> {
+            if (event.getStatus() == RUNNING) {
+                languageServerFileTypeRegister.start();
+            }
+        });
+
+        final Workspace workspace = appContext.getWorkspace();
+        if (workspace != null && workspace.getStatus() == RUNNING) {
+            languageServerFileTypeRegister.start();
+        }
+    }
 
     @Inject
     protected void injectCss(LanguageServerResources resources) {

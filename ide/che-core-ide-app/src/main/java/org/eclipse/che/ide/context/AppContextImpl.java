@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.context;
 
-import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -49,6 +48,7 @@ import org.eclipse.che.ide.resources.ResourceManagerInitializer;
 import org.eclipse.che.ide.resources.impl.ResourceDeltaImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -203,10 +203,10 @@ public class AppContextImpl implements AppContext,
     }
 
     @Override
-    public void initResourceManager(final Callback<ResourceManager, Exception> callback) {
+    public void initResourceManager() {
         if (runtime.getDevMachine() == null) {
             //should never happened, but anyway
-            callback.onFailure(new NullPointerException("Dev machine is not initialized"));
+            Log.error(AppContextImpl.class, "Dev machine is not initialized");
         }
 
         if (!rootProjects.isEmpty()) {
@@ -221,10 +221,9 @@ public class AppContextImpl implements AppContext,
             rootProjects.clear();
             addAll(rootProjects, projects);
             rootProjects.sort(ResourcePathComparator.getInstance());
-            callback.onSuccess(resourceManager);
             eventBus.fireEvent(new WorkspaceReadyEvent(projects));
         }).catchError(error -> {
-            callback.onFailure((Exception)error.getCause());
+            Log.error(AppContextImpl.class, error.getCause());
         });
     }
 

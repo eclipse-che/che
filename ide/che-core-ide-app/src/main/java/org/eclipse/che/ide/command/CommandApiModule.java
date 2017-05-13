@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.command.editor.CommandEditorView;
 import org.eclipse.che.ide.command.editor.CommandEditorViewImpl;
@@ -42,7 +41,6 @@ import org.eclipse.che.ide.command.execute.CommandExecutorImpl;
 import org.eclipse.che.ide.command.execute.ExecuteCommandActionFactory;
 import org.eclipse.che.ide.command.execute.ExecuteCommandActionManager;
 import org.eclipse.che.ide.command.execute.GoalPopUpGroupFactory;
-import org.eclipse.che.ide.command.explorer.CommandsExplorerPresenter;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerView;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerViewImpl;
 import org.eclipse.che.ide.command.goal.BuildGoal;
@@ -100,17 +98,11 @@ public class CommandApiModule extends AbstractGinModule {
 
         bind(CommandManager.class).to(CommandManagerImpl.class).in(Singleton.class);
         bind(CommandManager.class).asEagerSingleton();
+        bind(ExecuteCommandActionManager.class).asEagerSingleton();
 
         // start-up components
         GinMapBinder<String, Component> componentBinder = GinMapBinder.newMapBinder(binder(), String.class, Component.class);
         componentBinder.addBinding("CommandProducerActionManager").to(CommandProducerActionManager.class);
-
-        GinMapBinder<String, WsAgentComponent> wsAgentComponentBinder = GinMapBinder.newMapBinder(binder(),
-                                                                                                  String.class,
-                                                                                                  WsAgentComponent.class);
-        wsAgentComponentBinder.addBinding("Z ExecuteCommandActionManager").to(ExecuteCommandActionManager.class);
-
-//        bind(CommandsExplorerPresenter.class).asEagerSingleton();
 
         install(new GinFactoryModuleBuilder().build(ExecuteCommandActionFactory.class));
         install(new GinFactoryModuleBuilder().build(GoalPopUpGroupFactory.class));

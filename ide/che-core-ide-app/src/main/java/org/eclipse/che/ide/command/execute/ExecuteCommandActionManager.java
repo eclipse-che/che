@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.execute;
 
-import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -24,7 +23,7 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
+import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +38,7 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
  * related {@link ExecuteCommandAction}s in the context menus.
  */
 @Singleton
-public class ExecuteCommandActionManager implements WsAgentComponent {
+public class ExecuteCommandActionManager {
 
     private static final String COMMANDS_ACTION_GROUP_ID_PREFIX = "commandsActionGroup";
     private static final String COMMAND_ACTION_ID_PREFIX        = "command_";
@@ -76,12 +75,11 @@ public class ExecuteCommandActionManager implements WsAgentComponent {
 
         commandActions = new HashMap<>();
         goalPopUpGroups = new HashMap<>();
+
+        eventBus.addHandler(CommandsLoadedEvent.getType(), event -> start());
     }
 
-    @Override
-    public void start(Callback<WsAgentComponent, Exception> callback) {
-        callback.onSuccess(this);
-
+    private void start() {
         eventBus.addHandler(CommandAddedEvent.getType(), e -> addAction(e.getCommand()));
         eventBus.addHandler(CommandRemovedEvent.getType(), e -> removeAction(e.getCommand()));
         eventBus.addHandler(CommandUpdatedEvent.getType(), e -> {

@@ -18,7 +18,6 @@ mvn clean install \
  -pl "!:che-plugin-gwt-ext-gwt" \
  -pl "!:che-plugin-svn-ext-ide" \
  -pl "!:che-plugin-ssh-machine" \
- -pl "!:che-plugin-languageserver-ide" \
  -pl "!:che-plugin-composer-ide" \
  -pl "!:che-plugin-testing-testng-ide" \
  -pl "!:che-sample-plugin-json-ide" \

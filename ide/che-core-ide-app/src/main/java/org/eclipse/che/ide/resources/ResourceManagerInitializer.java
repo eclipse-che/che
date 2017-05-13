@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.resources;
 
-import com.google.gwt.core.client.Callback;
-
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 
 /**
@@ -21,5 +19,5 @@ import org.eclipse.che.ide.resources.impl.ResourceManager;
  * @since 5.0.0
  */
 public interface ResourceManagerInitializer {
-    void initResourceManager(Callback<ResourceManager, Exception> callback);
+    void initResourceManager();
 }

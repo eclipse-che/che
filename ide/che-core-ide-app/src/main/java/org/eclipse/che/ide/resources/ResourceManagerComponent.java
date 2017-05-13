@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.resources;
 
-import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.component.WsAgentComponent;
-import org.eclipse.che.ide.resources.impl.ResourceManager;
+import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
+
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 /**
  * Resource management component. Initializes with workspace agent.
@@ -24,26 +25,13 @@ import org.eclipse.che.ide.resources.impl.ResourceManager;
  * @since 5.0.0
  */
 @Singleton
-public class ResourceManagerComponent implements WsAgentComponent {
-
-    private ResourceManagerInitializer initializer;
+public class ResourceManagerComponent {
 
     @Inject
-    public ResourceManagerComponent(ResourceManagerInitializer initializer) {
-        this.initializer = initializer;
-    }
-
-    @Override
-    public void start(final Callback<WsAgentComponent, Exception> callback) {
-        initializer.initResourceManager(new Callback<ResourceManager, Exception>() {
-            @Override
-            public void onFailure(Exception reason) {
-                callback.onFailure(reason);
-            }
-
-            @Override
-            public void onSuccess(ResourceManager manager) {
-                callback.onSuccess(ResourceManagerComponent.this);
+    public ResourceManagerComponent(ResourceManagerInitializer initializer, EventBus eventBus) {
+        eventBus.addHandler(WsStatusChangedEvent.TYPE, event -> {
+            if (event.getStatus() == RUNNING) {
+                initializer.initResourceManager();
             }
         });
     }

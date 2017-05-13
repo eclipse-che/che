@@ -12,11 +12,9 @@ package org.eclipse.che.ide.resources;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 import org.eclipse.che.ide.api.data.tree.settings.impl.DummySettingsProvider;
@@ -33,11 +31,7 @@ import org.eclipse.che.ide.resources.impl.ClipboardManagerImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 
-/**
- * GIN module for configuring Resource API components.
- *
- * @author Artem Zatsarynnyi
- */
+/** GIN module for configuring Resource API components. */
 public class ResourceApiModule extends AbstractGinModule {
 
     @Override
@@ -62,8 +56,8 @@ public class ResourceApiModule extends AbstractGinModule {
         bind(ClipboardManager.class).to(ClipboardManagerImpl.class);
 
         bind(ResourceManagerInitializer.class).to(AppContextImpl.class).in(Singleton.class);
-        GinMapBinder<String, WsAgentComponent> mapBinder = GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
-        mapBinder.addBinding("Resource Manager").to(ResourceManagerComponent.class);
+        bind(ResourceManagerComponent.class).asEagerSingleton();
+
         GinMultibinder.newSetBinder(binder(), RenamingSupport.class);
     }
 }
