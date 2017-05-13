@@ -62,6 +62,10 @@ public class MavenValueProvider extends ReadonlyValueProvider {
     @Override
     public List<String> getValues(String attributeName) throws ValueStorageException {
         try {
+            if (mavenProjectManager == null) {
+                return readFromPom(attributeName);
+            }
+
             final MavenProject mavenProject = mavenProjectManager.getMavenProject(projectFolder.getPath().toString());
             if (mavenProject != null) {
                 return getFromMavenProject(mavenProject, attributeName);
