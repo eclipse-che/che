@@ -1081,10 +1081,11 @@ export class CreateProjectController {
    * Update creation flow state when source option changes
    */
   onSourceOptionChanged(): void {
-    if ('select-source-existing' === this.selectSourceOption) {
-      // need to call selection of current tab
-      this.setCurrentTab(this.currentTab);
+    if ('select-source-existing' !== this.selectSourceOption) {
+      this.isReady = true;
+      return;
     }
+    this.setCurrentTab(this.currentTab);
   }
 
   /**

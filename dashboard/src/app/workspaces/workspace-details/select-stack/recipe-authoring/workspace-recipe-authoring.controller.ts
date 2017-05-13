@@ -10,6 +10,7 @@
  */
 'use strict';
 import {DockerfileParser} from '../../../../../components/api/environment/docker-file-parser';
+import {CheBranding} from '../../../../../components/branding/che-branding.factory';
 
 /**
  * @ngdoc controller
@@ -30,6 +31,7 @@ export class WorkspaceRecipeAuthoringController {
   recipeScript: string;
   recipeFormatCopy: string;
   recipeScriptCopy: string;
+  stackDocsUrl: string;
   recipeChange: Function;
 
   editorOptions: {
@@ -44,10 +46,10 @@ export class WorkspaceRecipeAuthoringController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($scope: ng.IScope, $timeout: ng.ITimeoutService) {
+  constructor($scope: ng.IScope, $timeout: ng.ITimeoutService, cheBranding: CheBranding) {
     this.$timeout = $timeout;
-
     this.dockerfileParser = new DockerfileParser();
+    this.stackDocsUrl = cheBranding.getDocs().stack;
 
     this.editorOptions = {
       lineWrapping: true,

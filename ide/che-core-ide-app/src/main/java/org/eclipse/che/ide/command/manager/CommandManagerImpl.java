@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
@@ -167,7 +168,7 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
 
     /** Checks whether the given command is applicable to the current project. */
     private boolean isCommandApplicableToCurrentProject(CommandImpl command) {
-        final List<String> applicableProjects = command.getApplicableContext().getApplicableProjects();
+        final Set<String> applicableProjects = command.getApplicableContext().getApplicableProjects();
 
         if (applicableProjects.isEmpty()) {
             return true;
