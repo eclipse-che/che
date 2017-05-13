@@ -80,10 +80,6 @@ public class IdeBootstrapper {
             showUI();
             extensionInitializer.startExtensions();
         });
-
-        // Bind browser's window events
-        Window.addWindowClosingHandler(event -> eventBus.fireEvent(WindowActionEvent.createWindowClosingEvent(event)));
-        Window.addCloseHandler(event -> eventBus.fireEvent(WindowActionEvent.createWindowClosedEvent()));
     }
 
     private void showUI() {
@@ -92,5 +88,9 @@ public class IdeBootstrapper {
         RootLayoutPanel.get().getElement().getStyle().setZIndex(0);
 
         workspaceProvider.get().go(mainPanel);
+
+        // Bind browser's window events
+        Window.addWindowClosingHandler(event -> eventBus.fireEvent(WindowActionEvent.createWindowClosingEvent(event)));
+        Window.addCloseHandler(event -> eventBus.fireEvent(WindowActionEvent.createWindowClosedEvent()));
     }
 }

@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
-import org.eclipse.che.ide.api.user.UserServiceClient;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -91,8 +90,6 @@ public class GithubImporterPagePresenterTest {
     private DtoFactory                      dtoFactory;
     @Mock
     private GithubImporterPageView                    view;
-    @Mock
-    private UserServiceClient                         userServiceClient;
     @Mock
     private GitHubClientService                       gitHubClientService;
     @Mock

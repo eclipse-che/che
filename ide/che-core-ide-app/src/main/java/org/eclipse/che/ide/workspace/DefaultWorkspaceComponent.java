@@ -27,8 +27,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
-import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
-import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
 /**
  * Performs default start of IDE - creates new or starts latest workspace.
@@ -41,8 +39,6 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
 
     @Inject
     public DefaultWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
-                                     CreateWorkspacePresenter createWorkspacePresenter,
-                                     StartWorkspacePresenter startWorkspacePresenter,
                                      CoreLocalizationConstant locale,
                                      DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                      EventBus eventBus,
@@ -56,8 +52,6 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
                                      RequestTransmitter transmitter,
                                      WorkspaceEventsHandler handler) {
         super(workspaceServiceClient,
-              createWorkspacePresenter,
-              startWorkspacePresenter,
               locale,
               dtoUnmarshallerFactory,
               eventBus,
@@ -75,8 +69,7 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
     @Override
     public void start(final Callback<Component, Exception> callback) {
         this.callback = callback;
-        // FIXME: spi
-        callback.onSuccess(this);
+
         workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
                               .then(workspaceDto -> {
                                   handleWorkspaceEvents(new WorkspaceImpl(workspaceDto), callback, null);

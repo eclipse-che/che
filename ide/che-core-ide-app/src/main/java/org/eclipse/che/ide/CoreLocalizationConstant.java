@@ -553,9 +553,6 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("start.ws.title")
     String startWsTitle();
 
-    @Key("start.ws.select.to.start")
-    String startWsSelectToStart();
-
     @Key("stop.ws.title")
     String stopWsTitle();
 

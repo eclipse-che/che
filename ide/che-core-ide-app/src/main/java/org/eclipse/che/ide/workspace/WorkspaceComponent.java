@@ -41,8 +41,6 @@ import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
-import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
 import java.util.Map;
 
@@ -64,7 +62,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
 
     protected final WorkspaceServiceClient   workspaceServiceClient;
     protected final CoreLocalizationConstant locale;
-    protected final CreateWorkspacePresenter createWorkspacePresenter;
     protected final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
     protected final AppContext               appContext;
     protected final BrowserAddress           browserAddress;
@@ -72,7 +69,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     protected final PreferencesManager       preferencesManager;
     protected final DtoFactory               dtoFactory;
     protected final NotificationManager      notificationManager;
-    protected final StartWorkspacePresenter  startWorkspacePresenter;
 
     private final EventBus           eventBus;
     private final LoaderPresenter    loader;
@@ -82,8 +78,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     protected boolean                        needToReloadComponents;
 
     public WorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
-                              CreateWorkspacePresenter createWorkspacePresenter,
-                              StartWorkspacePresenter startWorkspacePresenter,
                               CoreLocalizationConstant locale,
                               DtoUnmarshallerFactory dtoUnmarshallerFactory,
                               EventBus eventBus,
@@ -96,8 +90,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                               LoaderPresenter loader,
                               RequestTransmitter transmitter) {
         this.workspaceServiceClient = workspaceServiceClient;
-        this.createWorkspacePresenter = createWorkspacePresenter;
-        this.startWorkspacePresenter = startWorkspacePresenter;
         this.locale = locale;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.eventBus = eventBus;

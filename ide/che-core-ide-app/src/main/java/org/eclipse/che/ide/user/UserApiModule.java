@@ -14,18 +14,12 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
-import org.eclipse.che.ide.api.user.UserServiceClient;
 
-/**
- * GIN module for configuring User API components.
- *
- * @author Artem Zatsarynnyi
- */
+/** GIN module for configuring User API components. */
 public class UserApiModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        bind(UserServiceClient.class).to(UserServiceClientImpl.class).in(Singleton.class);
         bind(UserProfileServiceClient.class).to(UserProfileServiceClientImpl.class).in(Singleton.class);
     }
 }

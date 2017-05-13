@@ -39,8 +39,6 @@ import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
-import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -64,8 +62,6 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
 
     @Inject
     public FactoryWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
-                                     CreateWorkspacePresenter createWorkspacePresenter,
-                                     StartWorkspacePresenter startWorkspacePresenter,
                                      FactoryServiceClient factoryServiceClient,
                                      CoreLocalizationConstant locale,
                                      DtoUnmarshallerFactory dtoUnmarshallerFactory,
@@ -80,8 +76,6 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
                                      QueryParameters queryParameters,
                                      RequestTransmitter requestTransmitter) {
         super(workspaceServiceClient,
-              createWorkspacePresenter,
-              startWorkspacePresenter,
               locale,
               dtoUnmarshallerFactory,
               eventBus,

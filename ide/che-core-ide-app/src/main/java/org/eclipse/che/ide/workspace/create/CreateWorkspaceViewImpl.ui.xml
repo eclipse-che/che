@@ -47,7 +47,7 @@
         }
     </ui:style>
 
-    <g:DockLayoutPanel unit="PX" width="500px" height="220px" addStyleNames="{style.emptyBorder}">
+    <g:DockLayoutPanel unit="PX" width="500px" height="100px" addStyleNames="{style.emptyBorder}">
         <g:north size="55">
             <g:FlowPanel>
                 <g:Label text="{locale.createWsName}" addStyleNames="{style.label} {style.floatLeft}"/>
@@ -57,30 +57,5 @@
                                                                                                                        {style.floatRight}"/>
             </g:FlowPanel>
         </g:north>
-        <g:north size="55">
-            <g:FlowPanel>
-                <g:Label text="{locale.createWsRecipeUrl}" addStyleNames="{style.label} {style.floatLeft}"/>
-                <g:TextBox ui:field="recipeURL" debugId="createMachineView-recipeURL" addStyleNames="{style.inputField}
-                                                                                                     {style.floatRight}"/>
-                <g:Label visible="false" ui:field="recipeUrlError" text="{locale.createWsUrlNotValid}" addStyleNames="{style.errorHint}
-                                                                                                                      {style.floatRight}"/>
-            </g:FlowPanel>
-        </g:north>
-        <g:north size="55">
-            <g:FlowPanel>
-                <g:Label text="{locale.createWsPredefinedRecipe}" addStyleNames="{style.label} {style.floatLeft}"/>
-                <g:TextBox ui:field="predefinedRecipes" debugId="createMachineView-recipeURL" addStyleNames="{style.inputField}
-                                                                                                             {style.floatRight}"/>
-            </g:FlowPanel>
-        </g:north>
-        <g:south size="55">
-            <g:FlowPanel>
-                <g:Label text="{locale.createWsFindByTags}" addStyleNames="{style.label} {style.floatLeft}"/>
-                <g:TextBox ui:field="tags" debugId="createMachineView-tags" addStyleNames="{style.inputField}
-                                                                                           {style.floatRight}"/>
-                <g:Label visible="false" ui:field="tagsError" text="{locale.createWsRecipeNotFound}" addStyleNames="{style.errorHint}
-                                                                                                                    {style.floatRight}"/>
-            </g:FlowPanel>
-        </g:south>
     </g:DockLayoutPanel>
 </ui:UiBinder>
