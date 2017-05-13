@@ -16,17 +16,17 @@ package org.eclipse.che.ide.ext.java.shared;
  */
 public final class Constants {
     // project categories
-    public static final String JAVA_CATEGORY               = "Java";
-    public static final String JAVA_ID                     = "java";
+    public static String JAVA_CATEGORY               = "Java";
+    public static String JAVA_ID                     = "java";
     // project attribute names
-    public static final String LANGUAGE                    = "language";
-    public static final String LANGUAGE_VERSION            = "languageVersion";
-    public static final String FRAMEWORK                   = "framework";
-    public static final String CONTAINS_JAVA_FILES         = "containsJavaFiles";
-    public static final String SOURCE_FOLDER               = "java.source.folder";
-    public static final String OUTPUT_FOLDER               = "java.output.folder";
+    public static String LANGUAGE                    = "language";
+    public static String LANGUAGE_VERSION            = "languageVersion";
+    public static String FRAMEWORK                   = "framework";
+    public static String CONTAINS_JAVA_FILES         = "containsJavaFiles";
+    public static String SOURCE_FOLDER               = "java.source.folder";
+    public static String OUTPUT_FOLDER               = "java.output.folder";
 
-    public static final String JAVAC                       = "javac";
+    public static String JAVAC                       = "javac";
 
     private Constants() {
         throw new UnsupportedOperationException("Unused constructor.");
