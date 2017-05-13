@@ -208,8 +208,6 @@ public final class DtoConverter {
             return null;
         }
         final RuntimeDto runtimeDto = newDto(RuntimeDto.class).withActiveEnv(runtime.getActiveEnv());
-//                                                                                .withRootFolder(runtime.getRootFolder());
-
 
         Map<String, ? extends Machine> machines = runtime.getMachines();
         Map<String, MachineDto> machineDtos = new HashMap<>();
@@ -217,13 +215,7 @@ public final class DtoConverter {
 
             Map<String, ServerDto> serverDtos = new HashMap<>();
             for (Map.Entry<String, ? extends Server> s : m.getValue().getServers().entrySet()) {
-                ServerDto sDto = newDto(ServerDto.class).withUrl(s.getValue().getUrl());
-                //.withAddress(s.getValue().getAddress())
-                //                                .withProtocol(s.getValue().getProtocol())
-                //                                .withRef(s.getValue().getRef())
-                //                                .withUrl(s.getValue().getUrl());
-                // TODO properties?
-                //.withProperties(s.getValue().getProperties());
+                ServerDto sDto = newDto(ServerDto.class).withUrl(s.getValue().getUrl()).withStatus(s.getValue().getStatus());
                 serverDtos.put(s.getKey(), sDto);
             }
 
@@ -233,14 +225,6 @@ public final class DtoConverter {
         }
 
         runtimeDto.setMachines(machineDtos);
-
-//        runtimeDto.withMachines(runtime.getMachines()
-//                                       .stream()
-//                                       .map(org.eclipse.che.api.machine.server.DtoConverter::asDto)
-//                                       .collect(toList()));
-//        if (runtime.getDevMachine() != null) {
-//            runtimeDto.withDevMachine(org.eclipse.che.api.machine.server.DtoConverter.asDto(runtime.getDevMachine()));
-//        }
         return runtimeDto;
     }
 

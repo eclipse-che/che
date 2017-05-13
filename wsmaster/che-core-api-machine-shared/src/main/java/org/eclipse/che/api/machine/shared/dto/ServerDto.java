@@ -11,6 +11,7 @@
 package org.eclipse.che.api.machine.shared.dto;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -28,5 +29,9 @@ public interface ServerDto extends Server {
 
     ServerDto withUrl(String url);
 
+    @Override
+    ServerStatus getStatus();
+
+    ServerDto withStatus(ServerStatus status);
 
 }

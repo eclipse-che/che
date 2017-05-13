@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.machine;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 
 import java.util.Objects;
 
@@ -37,6 +38,11 @@ public class MachineServer implements Server {
     @Override
     public String getUrl() {
         return url;
+    }
+
+    @Override
+    public ServerStatus getStatus() {
+        return ServerStatus.UNKNOWN;
     }
 
     @Override

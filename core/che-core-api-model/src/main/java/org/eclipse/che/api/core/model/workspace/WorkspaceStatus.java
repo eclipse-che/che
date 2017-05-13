@@ -56,6 +56,7 @@ public enum WorkspaceStatus {
      * <pre>
      *     RUNNING -> <b>SNAPSHOTTING</b> -> RUNNING (normal behaviour/error while snapshotting)
      * </pre>
+     * @deprecated move it to Docker env specific
      */
     SNAPSHOTTING,
 

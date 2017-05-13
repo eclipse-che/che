@@ -12,6 +12,7 @@ package org.eclipse.che.api.workspace.shared.dto;
 
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
+import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.dto.shared.DTO;
 
@@ -56,5 +57,7 @@ public interface RuntimeDto extends Runtime, Hyperlinks {
 
     RuntimeDto withWarnings(List<WarningDto> warnings);
 
+    @Override
+    RuntimeDto withLinks(List<Link> links);
 
 }

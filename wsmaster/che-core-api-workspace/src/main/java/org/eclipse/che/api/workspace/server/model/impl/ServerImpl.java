@@ -11,6 +11,7 @@
 package org.eclipse.che.api.workspace.server.model.impl;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 
 /**
  * @author gazarenkov
@@ -18,13 +19,20 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 public class ServerImpl implements Server {
 
     private String url;
+    private ServerStatus status;
 
     public ServerImpl(String url) {
         this.url = url;
+        this.status = ServerStatus.UNKNOWN;
     }
 
     @Override
     public String getUrl() {
         return url;
+    }
+
+    @Override
+    public ServerStatus getStatus() {
+        return this.status;
     }
 }

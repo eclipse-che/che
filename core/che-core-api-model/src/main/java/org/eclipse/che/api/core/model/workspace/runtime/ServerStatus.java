@@ -11,19 +11,24 @@
 package org.eclipse.che.api.core.model.workspace.runtime;
 
 /**
- * Server Runtime exposed by URL
+ * Status of Server
+ *
  * @author gazarenkov
  */
-public interface Server {
+public enum ServerStatus {
+    /**
+     * Server is up and running
+     */
+    RUNNING,
 
     /**
-     * @return URL exposing the server
+     * Server is not sunning
      */
-    String getUrl();
+    STOPPED,
 
     /**
-     * @return the status
+     * unknown
      */
-    ServerStatus getStatus();
+    UNKNOWN;
 
 }
