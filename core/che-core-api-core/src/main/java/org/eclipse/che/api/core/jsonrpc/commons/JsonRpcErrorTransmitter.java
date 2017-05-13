@@ -43,7 +43,6 @@ public class JsonRpcErrorTransmitter {
         checkArgument(!endpointId.isEmpty(), "Endpoint ID must not be empty");
 
         logger.debug("Transmitting a JSON RPC error: " + e.getMessage());
-        LOGGER.debug("Dshdfjsfhsdjfhdsjfhdj");
 
         JsonRpcError error = new JsonRpcError(e.getCode(), e.getMessage());
         JsonRpcResponse response = new JsonRpcResponse(e.getId(), null, error);
