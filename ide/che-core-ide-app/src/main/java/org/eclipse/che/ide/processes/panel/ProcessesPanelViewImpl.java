@@ -48,6 +48,7 @@ import org.eclipse.che.ide.ui.tree.SelectionModel;
 import org.eclipse.che.ide.ui.tree.Tree;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.input.SignalEvent;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -112,6 +113,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         processWidgets = new HashMap<>();
         widget2TreeNodes = new HashMap<>();
 
+
         renderer.setAddTerminalClickHandler(new AddTerminalClickHandler() {
             @Override
             public void onAddTerminalClick(@NotNull String machineId) {
@@ -134,6 +136,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             @Override
             public void onCloseProcessOutputClick(ProcessTreeNode node) {
+                Log.info(getClass(), "close by click close button in the machine tree");
                 switch (node.getType()) {
                     case COMMAND_NODE:
                         delegate.onCloseCommandOutputClick(node);
@@ -154,6 +157,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             @Override
             public void onNodeClosed(TreeNodeElement<ProcessTreeNode> node) {
+                //todo and what ?
             }
 
             @Override
@@ -453,6 +457,13 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     }
 
     @Override
+    public void removeWidget(String processId) {
+        WidgetToShow widget = processWidgets.get(processId);
+        hideProcessOutput(processId);
+        widget2Panels.remove(widget);
+    }
+
+    @Override
     public void markProcessHasOutput(String processId) {
         if (processId.equals(activeProcessId)) {
             return;
@@ -503,6 +514,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     @Override
     public void onResize() {
         for (WidgetToShow widgetToShow : widget2Panels.keySet()) {
+            Log.info(getClass(), widgetToShow.getTitle());
             final IsWidget widget = widgetToShow.getWidget();
             if (widget instanceof RequiresResize) {
                 ((RequiresResize)widget).onResize();

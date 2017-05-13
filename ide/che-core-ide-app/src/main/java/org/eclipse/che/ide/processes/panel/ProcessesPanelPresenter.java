@@ -337,7 +337,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     @Override
     public void onCloseTerminal(ProcessTreeNode node) {
         closeTerminal(node);
-        view.hideProcessOutput(node.getId());
+        view.removeWidget(node.getId());
     }
 
     @Override
@@ -455,17 +455,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         newTerminal.setVisible(true);
         newTerminal.connect();
-        newTerminal.setListener(new TerminalPresenter.TerminalStateListener() {
-            @Override
-            public void onExit() {
-                String terminalId = terminalNode.getId();
-                if (terminals.containsKey(terminalId)) {
-                    onStopProcess(terminalNode);
-                    terminals.remove(terminalId);
-                }
-                view.hideProcessOutput(terminalId);
-            }
-        });
+        newTerminal.setListener(() -> onCloseTerminal(terminalNode));
     }
 
     @Override
@@ -677,7 +667,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         closeCommandOutput(node, new SubPanel.RemoveCallback() {
             @Override
             public void remove() {
-                view.hideProcessOutput(node.getId());
+                Log.info(getClass(), "remove Command output");
+                view.removeWidget(node.getId());
             }
         });
     }
@@ -685,6 +676,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     @Override
     public void onCommandTabClosing(ProcessTreeNode node, SubPanel.RemoveCallback removeCallback) {
         closeCommandOutput(node, removeCallback);
+        Log.info(getClass(), "Log " + node.getId());
     }
 
     private void closeCommandOutput(ProcessTreeNode node, SubPanel.RemoveCallback removeCallback) {
@@ -735,6 +727,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 if (console instanceof CommandOutputConsole) {
                     eventBus.fireEvent(new ProcessOutputClosedEvent(((CommandOutputConsole)console).getPid()));
                 }
+                view.removeWidget(node.getId());
             }
         };
     }
