@@ -12,9 +12,11 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.workspace.server.URLRewriter;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +39,11 @@ public class DockerInternalRuntime extends InternalRuntime {
     @Override
     public Map<String, ? extends Machine> getInternalMachines() {
         return Collections.unmodifiableMap(machines);
+    }
+
+    @Override
+    public Map<String, URL> getOutputChannels() throws InfrastructureException {
+        throw new UnsupportedOperationException();
     }
 
     @Override

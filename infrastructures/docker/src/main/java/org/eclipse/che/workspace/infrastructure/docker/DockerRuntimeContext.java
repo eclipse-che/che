@@ -30,7 +30,6 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashMap;
@@ -98,11 +97,6 @@ public class DockerRuntimeContext extends RuntimeContext {
         this.startQueue = new ArrayDeque<>(orderedServices);
         this.urlRewriter = urlRewriter;
         this.startSynchronizer = new StartSynchronizer();
-    }
-
-    @Override
-    public URL getOutputChannel() throws UnsupportedOperationException, InfrastructureException {
-        throw new UnsupportedOperationException();
     }
 
     @Override
