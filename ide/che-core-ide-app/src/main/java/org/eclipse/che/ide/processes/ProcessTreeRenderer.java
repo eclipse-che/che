@@ -35,7 +35,7 @@ import org.eclipse.che.ide.util.dom.Elements;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
@@ -50,12 +50,7 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
  */
 public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
-    public static final Map<String, String> LABELS = new HashMap<String, String>() {
-        {
-            put("docker", "dkr");
-            put("development", "dev");
-        }
-    };
+    public static final Map<String, String> LABELS = Collections.singletonMap("docker", "dkr");
 
     private final MachineResources         resources;
     private final CoreLocalizationConstant locale;
@@ -124,10 +119,12 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         final MachineEntity machine = (MachineEntity)node.getData();
         final String machineId = machine.getId();
         final MachineConfig machineConfig = machine.getConfig();
-        final String machineCategory = machineConfig.isDev() ? locale.devMachineCategory() : machineConfig.getType();
 
         SpanElement root = Elements.createSpanElement();
-        root.appendChild(createMachineLabel(machineCategory));
+
+        if (!machineConfig.isDev()) {
+            root.appendChild(createMachineLabel(machineConfig.getType()));
+        }
 
         Element statusElement = Elements.createSpanElement(resources.getCss().machineStatus());
         root.appendChild(statusElement);
