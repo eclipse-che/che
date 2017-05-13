@@ -34,10 +34,6 @@
     display: block;
 }
 
-.treeRoot > .treeNode {
-    margin-top: 2px;
-}
-
 .treeRoot > .treeNode > .treeNodeBody > .leafIcon {
     visibility: hidden;
     float:left;
@@ -52,10 +48,9 @@
 
 .treeNodeBody {
     min-width: 100%;
-    display: inline-block;
     position: relative;
     white-space: nowrap;
-    height: 18px;
+    height: 20px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
