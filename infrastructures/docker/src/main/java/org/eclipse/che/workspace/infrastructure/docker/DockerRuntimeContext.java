@@ -30,6 +30,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashMap;
@@ -90,7 +91,7 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 AgentSorter agentSorter,
                                 AgentRegistry agentRegistry)
             throws ValidationException, InfrastructureException {
-        super(environment, identity, infrastructure, agentSorter, agentRegistry);
+        super(environment, identity, infrastructure, agentSorter, agentRegistry, null);
         this.dockerEnvironment = dockerEnvironment;
         this.dockerNetworkLifecycle = dockerNetworkLifecycle;
         this.serviceStarter = serviceStarter;
@@ -147,6 +148,11 @@ public class DockerRuntimeContext extends RuntimeContext {
     protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
         startSynchronizer.interruptStartThread();
         destroyRuntime();
+    }
+
+    @Override
+    public URL getOutputChannel() throws InfrastructureException, UnsupportedOperationException {
+        throw new UnsupportedOperationException();
     }
 
     private DockerMachine startMachine(String name, DockerService service, Map<String, String> startOptions)

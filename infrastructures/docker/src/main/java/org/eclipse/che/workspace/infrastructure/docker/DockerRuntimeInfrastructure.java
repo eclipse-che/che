@@ -50,7 +50,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                        EnvironmentNormalizer environmentNormalizer,
                                        Map<String, TypeSpecificEnvironmentParser> environmentParsers,
                                        RuntimeFactory runtimeFactory) {
-        super("docker", environmentParsers.keySet(), null);
+        super("docker", environmentParsers.keySet());
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
         this.dockerEnvironmentParser = dockerEnvironmentParser;
         this.startStrategy = startStrategy;

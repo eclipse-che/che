@@ -83,24 +83,6 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
 
     }
 
-    /**
-     * Infrastructure should assign channels (usual WebSocket) to push long lived processes messages
-     * Examples of such messages include:
-     * - Statuses changes
-     * - Start/Stop logs output
-     * - Agent installer output
-     * etc
-     * If infrastructure implementation provides a channel it guarantees:
-     * - this endpoint is open and ready to use
-     * - this endpoint emits only messages of specified formats (TODO specify the formats)
-     * - high loaded infrastructure provides scaling of "messaging server" to avoid overloading
-     *
-     * @return map of String (reference) -> URL of the channel endpoints
-     *
-     * @throws InfrastructureException
-     */
-    public abstract Map <String, URL> getOutputChannels() throws InfrastructureException;
-
 
     /**
      * @return some implementation specific properties if any

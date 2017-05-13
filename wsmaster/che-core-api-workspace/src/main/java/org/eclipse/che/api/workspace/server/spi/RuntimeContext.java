@@ -18,12 +18,15 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.rest.HttpRequestHelper;
+import org.slf4j.Logger;
 
 import javax.ws.rs.HttpMethod;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * A Context for running Workspace's Runtime
@@ -32,6 +35,8 @@ import java.util.Map;
  */
 public abstract class RuntimeContext {
 
+    private static final Logger LOG = getLogger(RuntimeInfrastructure.class);
+
     protected final Environment           environment;
     protected final RuntimeIdentity       identity;
     protected final RuntimeInfrastructure infrastructure;
@@ -39,12 +44,14 @@ public abstract class RuntimeContext {
     private         WorkspaceStatus       state;
     protected final InternalRecipe        recipe;
     protected final Map<String, InternalMachineConfig> internalMachines = new HashMap<>();
+    protected final URL statusChannel;
 
     public RuntimeContext(Environment environment,
                           RuntimeIdentity identity,
                           RuntimeInfrastructure infrastructure,
                           AgentSorter agentSorter,
-                          AgentRegistry agentRegistry)
+                          AgentRegistry agentRegistry,
+                          String statusChannel)
             throws ValidationException, InfrastructureException {
         this.environment = environment;
         this.identity = identity;
@@ -55,6 +62,16 @@ public abstract class RuntimeContext {
         for(Map.Entry<String, ? extends MachineConfig> entry : effectiveMachines.entrySet()) {
             internalMachines.put(entry.getKey(), new InternalMachineConfig(entry.getValue(), agentRegistry, agentSorter));
         }
+
+        URL tmp;
+        try {
+            tmp = new URL(statusChannel);
+        } catch (MalformedURLException e) {
+            tmp = null;
+            LOG.error("URL building error for RuntimeContext status channel: " + infrastructure.getName() + " : " +  e.getMessage());
+        }
+        this.statusChannel = tmp;
+
     }
 
     /**
@@ -103,6 +120,40 @@ public abstract class RuntimeContext {
     }
 
     protected abstract void internalStop(Map<String, String> stopOptions) throws InfrastructureException;
+
+    /**
+     * Infrastructure should assign channel (usual WebSocket) to push long lived processes messages
+     * Examples of such messages include:
+     * - Start/Stop logs output
+     * - Agent installer output
+     * etc
+     * It is expected that ones returning this URL implementation guarantees supporting and not changing
+     * it during the whole life time of Runtime. Repeating calls of this method should return the same URL
+     * If infrastructure implementation provides a channel it guarantees:
+     * - this endpoint is open and ready to use
+     * - this endpoint emits only messages of specified formats (TODO specify the formats)
+     * - high loaded infrastructure provides scaling of "messaging server" to avoid overloading
+     *
+     * @return URL of the channels endpoint
+     * @throws UnsupportedOperationException
+     *         if implementation does not provide channel
+     * @throws InfrastructureException
+     */
+    public abstract URL getOutputChannel() throws InfrastructureException,
+                                                  UnsupportedOperationException;
+
+
+    /**
+     * Status Channel URL should be passed by Workspace API level. It is used for events about any kind of status changes, such as:
+     * - Agent installing statuses
+     * - Servers statuses
+     * - Infrastructure specific events
+     * Infrastructure MUST NOT use this channel for long-lived output (process stdout, logs etc)
+     * @return URL of status channel
+     */
+    public URL getStatusChannel() {
+        return statusChannel;
+    }
 
 
     /**

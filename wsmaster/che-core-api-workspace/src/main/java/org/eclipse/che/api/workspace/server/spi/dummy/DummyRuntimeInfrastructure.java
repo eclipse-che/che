@@ -25,7 +25,7 @@ import java.util.Collections;
 public class DummyRuntimeInfrastructure extends RuntimeInfrastructure {
 
     public DummyRuntimeInfrastructure() {
-        super("dummy", Collections.singletonList("dummy"), null);
+        super("dummy", Collections.singletonList("dummy"));
     }
 
     @Override

@@ -17,8 +17,6 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.slf4j.Logger;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
@@ -37,20 +35,11 @@ public abstract class RuntimeInfrastructure {
 
     protected final Set<String> recipeTypes;
     protected final String      name;
-    protected final URL masterChannel;
 
-    public RuntimeInfrastructure(String name, Collection<String> types, String masterChannel) {
+    public RuntimeInfrastructure(String name, Collection<String> types) {
         Preconditions.checkArgument(!types.isEmpty());
         this.name = Objects.requireNonNull(name);
         this.recipeTypes = ImmutableSet.copyOf(types);
-        URL tmp;
-        try {
-            tmp = new URL(masterChannel);
-        } catch (MalformedURLException e) {
-            tmp = null;
-            LOG.error("URL building error for RuntimeInfrastructure master channel: " + name + " : " +  e.getMessage());
-        }
-        this.masterChannel = tmp;
     }
 
     /**
@@ -68,13 +57,6 @@ public abstract class RuntimeInfrastructure {
         return recipeTypes;
     }
 
-
-    /**
-     * @return master channel
-     */
-    public URL getMasterChannel() {
-        return masterChannel;
-    }
 
     /**
      * An Infrastructure implementation should be able to preliminary estimate incoming Environment.
