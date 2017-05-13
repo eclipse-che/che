@@ -41,6 +41,7 @@ import java.util.Map;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
+import static org.eclipse.che.ide.util.dom.DomUtils.ensureDebugId;
 
 /**
  * Renderer for {@ProcessTreeNode} UI presentation.
@@ -269,12 +270,15 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
     private SpanElement createTerminalElement(ProcessTreeNode node) {
         SpanElement root = Elements.createSpanElement(resources.getCss().commandTreeNode());
+        ensureDebugId(root, "terminal-root-element");
 
         root.appendChild(createCloseElement(node));
 
         SVGResource icon = node.getTitleIcon();
         if (icon != null) {
             SpanElement iconElement = Elements.createSpanElement(resources.getCss().processIcon());
+            ensureDebugId(iconElement, "terminal-icon-element");
+
             root.appendChild(iconElement);
 
             DivElement divElement = Elements.createDivElement(resources.getCss().processIconPanel());
@@ -285,6 +289,8 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
         Element nameElement = Elements.createSpanElement();
         nameElement.setTextContent(node.getName());
+        ensureDebugId(nameElement, "terminal-name-element");
+
         Tooltip.create(nameElement,
                        BOTTOM,
                        MIDDLE,
@@ -300,6 +306,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
     private SpanElement createCloseElement(final ProcessTreeNode node) {
         SpanElement closeButton = Elements.createSpanElement(resources.getCss().processesPanelCloseButtonForProcess());
+        ensureDebugId(closeButton, "close-button");
 
         SVGImage icon = new SVGImage(partStackUIResources.closeIcon());
         closeButton.appendChild((Node)icon.getElement());
@@ -323,6 +330,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
     private SpanElement createStopProcessElement(final ProcessTreeNode node) {
         SpanElement stopProcessButton = Elements.createSpanElement(resources.getCss().processesPanelStopButtonForProcess());
+        ensureDebugId(stopProcessButton, "stop-process-button-element");
 
         Tooltip.create(stopProcessButton,
                        BOTTOM,
