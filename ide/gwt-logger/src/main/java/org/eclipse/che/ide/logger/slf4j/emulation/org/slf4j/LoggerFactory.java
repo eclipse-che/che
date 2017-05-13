@@ -23,7 +23,8 @@
  */
 package org.slf4j;
 
-import org.eclipse.che.ide.logger.logging.impl.Impl;
+import com.google.gwt.core.client.GWT;
+
 
 /**
  * The <code>LoggerFactory</code> is a utility class producing Loggers for
@@ -43,6 +44,9 @@ import org.eclipse.che.ide.logger.logging.impl.Impl;
  * @author Robert Elliot
  */
 public class LoggerFactory {
+
+    public static final ILoggerFactory LOGGER_FACTORY = GWT.create(ILoggerFactory.class);
+
     private LoggerFactory() {
     }
 
@@ -54,7 +58,7 @@ public class LoggerFactory {
      * @return logger
      */
     public static Logger getLogger(String name) {
-        return Impl.LOGGER_FACTORY.getLogger(name);
+        return LOGGER_FACTORY.getLogger(name);
     }
 
     /**

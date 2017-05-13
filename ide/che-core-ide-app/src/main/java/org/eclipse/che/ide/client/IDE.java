@@ -10,16 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.ide.client;
 
-import org.eclipse.che.ide.client.inject.IDEInjector;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+
+import org.eclipse.che.ide.client.inject.IDEInjector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /** The EntryPoint of the IDE application */
 public class IDE implements EntryPoint {
     /** This is the entry point method. */
+
+    private Logger logger = LoggerFactory.getLogger("zalupa");
+
     @Override
     public void onModuleLoad() {
+        logger.debug("xui");
+        logger.error("pizda");
+        logger.info("siska");
         IDEInjector injector = GWT.create(IDEInjector.class);
         @SuppressWarnings("unused")
         BootstrapController bootstrap = injector.getBootstrapController();

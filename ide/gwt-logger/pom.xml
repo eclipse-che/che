@@ -20,10 +20,6 @@
     </parent>
     <artifactId>che-core-gwt-logger</artifactId>
     <name>Che Core :: Commons :: GWT Logger</name>
-    <properties>
-        <findbugs.failonerror>false</findbugs.failonerror>
-        <generated.test.sources.directory>${project.build.directory}/generated-test-sources/dto</generated.test.sources.directory>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>com.google.gwt</groupId>
@@ -45,25 +41,8 @@
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
     <build>
-        <sourceDirectory>src/main/java</sourceDirectory>
-        <outputDirectory>target/classes</outputDirectory>
         <resources>
             <resource>
                 <directory>src/main/java</directory>
@@ -79,16 +58,8 @@
                 <configuration>
                     <excludes>
                         <!-- Apache license -->
-                        <exclude>**/org/eclipse/che/ide/logger/api/emul/**</exclude>
+                        <exclude>**/org/eclipse/che/ide/logger/slf4j/emulation/**</exclude>
                     </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
                 </configuration>
             </plugin>
         </plugins>

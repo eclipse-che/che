@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.logger.logging.gwt;
+package org.eclipse.che.ide.logger.slf4j.gwtbackend;
 
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MarkerIgnoringBase;
@@ -21,10 +21,10 @@ import java.util.logging.Logger;
  * A wrapper over {@link java.util.logging.Logger java.util.logging.Logger}
  * supported since GWT 2.1.
  */
-public class GWTLoggerAdapter extends MarkerIgnoringBase {
+public class GwtLoggerSlf4jBackend extends MarkerIgnoringBase {
     private final Logger logger;
 
-    public GWTLoggerAdapter(String name) {
+    public GwtLoggerSlf4jBackend(String name) {
         this.name = name;
         logger = Logger.getLogger(name);
     }
