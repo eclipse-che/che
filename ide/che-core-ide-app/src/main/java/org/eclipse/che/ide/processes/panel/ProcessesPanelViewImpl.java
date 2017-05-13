@@ -190,6 +190,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
             public void onKeyboard(KeyboardEvent event) {
             }
         });
+        processTree.asWidget().ensureDebugId("process-tree");
 
         splitLayoutPanel = new SplitLayoutPanel(1);
 

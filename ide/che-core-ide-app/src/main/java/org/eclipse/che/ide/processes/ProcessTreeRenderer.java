@@ -35,9 +35,6 @@ import org.eclipse.che.ide.util.dom.Elements;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import java.util.Collections;
-import java.util.Map;
-
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
@@ -50,8 +47,6 @@ import static org.eclipse.che.ide.util.dom.DomUtils.ensureDebugId;
  * @author Roman Nikitenko
  */
 public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
-
-    public static final Map<String, String> LABELS = Collections.singletonMap("docker", "dkr");
 
     private final MachineResources         resources;
     private final CoreLocalizationConstant locale;
@@ -102,30 +97,12 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         return treeNode;
     }
 
-    private DivElement createMachineLabel(String machineCategory) {
-        final DivElement machineLabel = Elements.createDivElement();
-
-        if (LABELS.containsKey(machineCategory)) {
-            machineLabel.setTextContent(LABELS.get(machineCategory));
-            machineLabel.setClassName(resources.getCss().dockerMachineLabel());
-            return machineLabel;
-        }
-
-        machineLabel.setTextContent(machineCategory.substring(0, 3));
-        machineLabel.setClassName(resources.getCss().differentMachineLabel());
-        return machineLabel;
-    }
-
     private SpanElement createMachineElement(final ProcessTreeNode node) {
         final MachineEntity machine = (MachineEntity)node.getData();
         final String machineId = machine.getId();
         final MachineConfig machineConfig = machine.getConfig();
 
         SpanElement root = Elements.createSpanElement();
-
-        if (!machineConfig.isDev()) {
-            root.appendChild(createMachineLabel(machineConfig.getType()));
-        }
 
         Element statusElement = Elements.createSpanElement(resources.getCss().machineStatus());
         root.appendChild(statusElement);
