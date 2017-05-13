@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerPresenter;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
 import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
@@ -59,7 +60,8 @@ public class ProjectPerspective extends AbstractPerspective {
                               DynaProvider dynaProvider,
                               ProjectExplorerPresenter projectExplorerPresenter,
                               CommandsExplorerPresenter commandsExplorerPresenter,
-                              NotificationManager notificationManager) {
+                              NotificationManager notificationManager,
+                              ProcessesPanelPresenter processesPanelPresenter) {
         super(PROJECT_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus, dynaProvider);
 
         partStacks.put(EDITING, editorMultiPartStackPresenter);
@@ -67,6 +69,7 @@ public class ProjectPerspective extends AbstractPerspective {
         addPart(projectExplorerPresenter, NAVIGATION);
         addPart(commandsExplorerPresenter, NAVIGATION);
         addPart(notificationManager, INFORMATION);
+        addPart(processesPanelPresenter, INFORMATION);
 
         PartStack navigatorPanel = getPartStack(NAVIGATION);
         PartStack editorPanel = getPartStack(EDITING);
@@ -82,7 +85,6 @@ public class ProjectPerspective extends AbstractPerspective {
         toolPanel.go(view.getToolPanel());
         infoPanel.go(view.getInformationPanel());
     }
-
 
     @Override
     public String getPerspectiveId() {

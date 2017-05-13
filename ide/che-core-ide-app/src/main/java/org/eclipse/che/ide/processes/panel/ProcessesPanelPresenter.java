@@ -52,7 +52,6 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackStateChangedEvent;
-import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.selection.Selection;
@@ -65,7 +64,6 @@ import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.CommandOutputConsole;
 import org.eclipse.che.ide.console.CommandOutputConsolePresenter;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
 import org.eclipse.che.ide.processes.ProcessTreeNodeSelectedEvent;
@@ -86,7 +84,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -140,7 +137,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final ExecAgentCommandManager       execAgentCommandManager;
     private final MacroProcessor                macroProcessor;
     private final EventBus                      eventBus;
-    private final DtoFactory                    dtoFactory;
 
     ProcessTreeNode rootNode;
     private final Map<String, ProcessTreeNode> machineNodes;
@@ -163,8 +159,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                    CommandTypeRegistry commandTypeRegistry,
                                    SshServiceClient sshServiceClient,
                                    ExecAgentCommandManager execAgentCommandManager,
-                                   MacroProcessor macroProcessor,
-                                   DtoFactory dtoFactory) {
+                                   MacroProcessor macroProcessor) {
         this.view = view;
         this.localizationConstant = localizationConstant;
         this.resources = resources;
@@ -180,7 +175,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         this.commandTypeRegistry = commandTypeRegistry;
         this.execAgentCommandManager = execAgentCommandManager;
         this.macroProcessor = macroProcessor;
-        this.dtoFactory = dtoFactory;
 
         machineNodes = new HashMap<>();
         machines = new HashMap<>();
@@ -201,20 +195,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         eventBus.addHandler(PartStackStateChangedEvent.TYPE, this);
         eventBus.addHandler(ActivateProcessOutputEvent.TYPE, event -> setActiveProcessOutput(event.getPid()));
 
-        final PartStack partStack = checkNotNull(workspaceAgent.getPartStack(PartStackType.INFORMATION),
-                                                 "Information part stack should not be a null");
-        partStack.addPart(this);
-
-        if (appContext.getFactory() == null) {
-            partStack.setActivePart(this);
-        }
-
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                updateMachineList();
-            }
-        });
+        Scheduler.get().scheduleDeferred(this::updateMachineList);
     }
 
     /**

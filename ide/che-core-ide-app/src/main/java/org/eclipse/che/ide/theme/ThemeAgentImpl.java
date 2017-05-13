@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.ide.theme;
 
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.storage.client.Storage;
 import com.google.inject.Inject;
 
+import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.api.theme.Theme;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
+import org.eclipse.che.ide.preferences.PreferencesManagerImpl;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -31,13 +34,18 @@ import java.util.Set;
  */
 public class ThemeAgentImpl implements ThemeAgent {
 
-    public static final String THEME_STORAGE = "codenvy-theme";
+    public static final String THEME_STORAGE  = "codenvy-theme";
+    public static final String PREF_IDE_THEME = "ide.theme";
+
+    private final PreferencesManager preferencesManager;
     private final Theme              defaultTheme;
-    private       Map<String, Theme> themes;
-    private       String             currentThemeId;
+
+    private Map<String, Theme> themes;
+    private String             currentThemeId;
 
     @Inject
-    public ThemeAgentImpl(DarkTheme darkTheme) {
+    public ThemeAgentImpl(DarkTheme darkTheme, PreferencesManagerImpl preferencesManager) {
+        this.preferencesManager = preferencesManager;
         defaultTheme = darkTheme;
 
         themes = new HashMap<>();
@@ -50,8 +58,7 @@ public class ThemeAgentImpl implements ThemeAgent {
         themes.forEach(this::addTheme);
     }
 
-    @Override
-    public void addTheme(@NotNull Theme theme) {
+    private void addTheme(@NotNull Theme theme) {
         themes.put(theme.getId(), theme);
     }
 
@@ -99,4 +106,13 @@ public class ThemeAgentImpl implements ThemeAgent {
             $wnd["IDE"].theme = id;
         }
     }-*/;
+
+    public void applyUserTheme() {
+        String storedThemeId = preferencesManager.getValue(PREF_IDE_THEME);
+        storedThemeId = storedThemeId != null ? storedThemeId : getCurrentThemeId();
+        final Theme themeToSet = storedThemeId != null ? getTheme(storedThemeId) : getDefault();
+        setCurrentThemeId(themeToSet.getId());
+
+        Document.get().getBody().getStyle().setBackgroundColor(Style.theme.backgroundColor());
+    }
 }

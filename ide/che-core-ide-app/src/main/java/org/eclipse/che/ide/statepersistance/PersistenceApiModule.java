@@ -14,24 +14,16 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
 
 import org.eclipse.che.ide.api.component.StateComponent;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
-import org.eclipse.che.ide.client.WorkspaceStateRestorer;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerStateComponent;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 
-/**
- * GIN module for configuring Persistence API components.
- *
- * @author Artem Zatsarynnyi
- */
+/** GIN module for configuring Persistence API components. */
 public class PersistenceApiModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class)
-                    .addBinding("ZZ Restore Workspace State")
-                    .to(WorkspaceStateRestorer.class);
+        bind(AppStateManager.class).asEagerSingleton();
 
         GinMapBinder<String, StateComponent> stateComponents = GinMapBinder.newMapBinder(binder(), String.class, StateComponent.class);
         stateComponents.addBinding("workspace").to(WorkspacePresenter.class);

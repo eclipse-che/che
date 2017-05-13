@@ -21,14 +21,6 @@ import java.util.List;
 public interface ThemeAgent {
 
     /**
-     * Add new Theme
-     *
-     * @param theme
-     *         the theme
-     */
-    void addTheme(@NotNull Theme theme);
-
-    /**
      * @param themeId
      *         the id of the theme
      * @return theme with theme id or default theme if theme not found
