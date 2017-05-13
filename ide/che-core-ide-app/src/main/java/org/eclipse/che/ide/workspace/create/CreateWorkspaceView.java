@@ -12,10 +12,7 @@ package org.eclipse.che.ide.workspace.create;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeDescriptor;
 import org.eclipse.che.ide.api.mvp.View;
-
-import java.util.List;
 
 /**
  * Provides methods which allow to set up special parameters for creating user workspaces.
@@ -31,12 +28,6 @@ interface CreateWorkspaceView extends View<CreateWorkspaceView.ActionDelegate> {
     /** Hides dialog window. */
     void hide();
 
-    /** Returns special recipe url to get docker image. */
-    String getRecipeUrl();
-
-    /** Returns list of tags using which we will find recipes. */
-    List<String> getTags();
-
     /** Returns name of workspace from special place on view. */
     String getWorkspaceName();
 
@@ -49,38 +40,6 @@ interface CreateWorkspaceView extends View<CreateWorkspaceView.ActionDelegate> {
     void setWorkspaceName(String name);
 
     /**
-     * Sets list of recipes found by tag to special place on view.
-     *
-     * @param recipes
-     *         recipes which will be shown
-     */
-    void showFoundByTagRecipes(List<OldRecipeDescriptor> recipes);
-
-    /**
-     * Sets list of predefined recipes to special place on view.
-     *
-     * @param recipes
-     *         recipes which will be shown
-     */
-    void showPredefinedRecipes(List<OldRecipeDescriptor> recipes);
-
-    /**
-     * Changes visibility of error message for recipe url.
-     *
-     * @param visible
-     *         <code>true</code> error message is visible, <code>false</code> error message is not visible
-     */
-    void setVisibleUrlError(boolean visible);
-
-    /**
-     * Changes visibility of error message for tags.
-     *
-     * @param visible
-     *         <code>true</code> error message is visible, <code>false</code> error message is not visible
-     */
-    void setVisibleTagsError(boolean visible);
-
-    /**
      * Shows error message for workspace name.
      *
      * @param error
@@ -88,33 +47,11 @@ interface CreateWorkspaceView extends View<CreateWorkspaceView.ActionDelegate> {
      */
     void showValidationNameError(String error);
 
-    /**
-     * Changes enabling of create workspace button.
-     *
-     * @param visible
-     *         <code>true</code> button is enable, <code>false</code> button is not enable
-     */
-    void setEnableCreateButton(boolean visible);
-
     interface ActionDelegate {
         /** Performs some actions when user clicks on create workspace button. */
         void onCreateButtonClicked();
 
         /** Performs some actions when user change name of workspace. */
         void onNameChanged();
-
-        /** Performs some actions when user change recipe url. */
-        void onRecipeUrlChanged();
-
-        /** Performs some actions when user change tags. */
-        void onTagsChanged(HidePopupCallBack hidePopupCallBack);
-
-        /** Performs some actions when user clicks on predefined recipes field. */
-        void onPredefinedRecipesClicked();
-    }
-
-    interface HidePopupCallBack {
-        /** Hides popup with tags. */
-        void hidePopup();
     }
 }

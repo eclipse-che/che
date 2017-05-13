@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.workspace.create;
 
-import com.google.common.base.Strings;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;
@@ -20,7 +19,6 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
@@ -28,11 +26,9 @@ import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.workspace.create.CreateWorkspaceView.HidePopupCallBack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,13 +53,13 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
     private static final   RegExp FILE_NAME          = RegExp.compile("^[A-Za-z0-9_\\s-\\.]+$");
     private static final   String URL_PATTERN        = "^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$";
     private static final   RegExp URL                = RegExp.compile(URL_PATTERN);
-    private final CreateWorkspaceView                 view;
-    private final DtoFactory                          dtoFactory;
-    private final WorkspaceServiceClient              workspaceClient;
-    private final CoreLocalizationConstant            locale;
-//    private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
-    private final RecipeServiceClient                 recipeService;
-    private final BrowserAddress                      browserAddress;
+    private final CreateWorkspaceView      view;
+    private final DtoFactory               dtoFactory;
+    private final WorkspaceServiceClient   workspaceClient;
+    private final CoreLocalizationConstant locale;
+    //    private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
+//    private final RecipeServiceClient                 recipeService;
+    private final BrowserAddress           browserAddress;
 
     private Callback<Workspace, Exception> callback;
     private List<OldRecipeDescriptor>      recipes;
@@ -75,7 +71,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
                                     WorkspaceServiceClient workspaceClient,
                                     CoreLocalizationConstant locale,
 //                                    Provider<DefaultWorkspaceComponent> wsComponentProvider,
-                                    RecipeServiceClient recipeService,
+//                                    RecipeServiceClient recipeService,
                                     BrowserAddress browserAddress) {
         this.view = view;
         this.view.setDelegate(this);
@@ -84,7 +80,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
         this.workspaceClient = workspaceClient;
         this.locale = locale;
 //        this.wsComponentProvider = wsComponentProvider;
-        this.recipeService = recipeService;
+//        this.recipeService = recipeService;
         this.browserAddress = browserAddress;
 
         this.workspacesNames = new ArrayList<>();
@@ -105,14 +101,14 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
             workspacesNames.add(workspace.getConfig().getName());
         }
 
-        Promise<List<OldRecipeDescriptor>> recipes = recipeService.getAllRecipes();
-
-        recipes.then(new Operation<List<OldRecipeDescriptor>>() {
-            @Override
-            public void apply(List<OldRecipeDescriptor> recipeDescriptors) throws OperationException {
-                CreateWorkspacePresenter.this.recipes = recipeDescriptors;
-            }
-        });
+//        Promise<List<OldRecipeDescriptor>> recipes = recipeService.getAllRecipes();
+//
+//        recipes.then(new Operation<List<OldRecipeDescriptor>>() {
+//            @Override
+//            public void apply(List<OldRecipeDescriptor> recipeDescriptors) throws OperationException {
+//                CreateWorkspacePresenter.this.recipes = recipeDescriptors;
+//            }
+//        });
 
         String workspaceName = browserAddress.getWorkspaceName();
 
@@ -149,51 +145,12 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
         }
 
         view.showValidationNameError(errorDescription);
-
-        String recipeUrl = view.getRecipeUrl();
-
-        boolean urlIsIncorrect = !Strings.isNullOrEmpty(recipeUrl) && !URL.test(recipeUrl);
-
-        view.setVisibleUrlError(urlIsIncorrect);
-
-        view.setEnableCreateButton(!urlIsIncorrect && errorDescription.isEmpty());
     }
 
     /** {@inheritDoc} */
     @Override
     public void onNameChanged() {
         validateCreateWorkspaceForm();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onRecipeUrlChanged() {
-        validateCreateWorkspaceForm();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onTagsChanged(final HidePopupCallBack callBack) {
-        recipeService.searchRecipes(view.getTags(), RECIPE_TYPE, SKIP_COUNT, MAX_COUNT).then(new Operation<List<OldRecipeDescriptor>>() {
-            @Override
-            public void apply(List<OldRecipeDescriptor> recipes) throws OperationException {
-                boolean isRecipesEmpty = recipes.isEmpty();
-
-                if (isRecipesEmpty) {
-                    callBack.hidePopup();
-                } else {
-                    view.showFoundByTagRecipes(recipes);
-                }
-
-                view.setVisibleTagsError(isRecipesEmpty);
-            }
-        });
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onPredefinedRecipesClicked() {
-        view.showPredefinedRecipes(recipes);
     }
 
     /** {@inheritDoc} */

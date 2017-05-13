@@ -34,8 +34,6 @@ import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.machine.CheWsAgentLinksModifier;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.ExecAgentEventManager;
-import org.eclipse.che.ide.api.machine.RecipeServiceClient;
-import org.eclipse.che.ide.api.machine.RecipeServiceClientImpl;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.machine.execagent.ConnectedEventHandler;
 import org.eclipse.che.ide.api.machine.execagent.JsonRpcExecAgentCommandManager;
@@ -158,7 +156,6 @@ public class CoreGinModule extends AbstractGinModule {
         // clients for the REST services
         bind(GitServiceClient.class).to(GitServiceClientImpl.class).in(Singleton.class);
         bind(SshServiceClient.class).to(SshServiceClientImpl.class).in(Singleton.class);
-        bind(RecipeServiceClient.class).to(RecipeServiceClientImpl.class).in(Singleton.class);
 
         // IDE agents
         bind(SelectionAgent.class).to(SelectionAgentImpl.class).asEagerSingleton();

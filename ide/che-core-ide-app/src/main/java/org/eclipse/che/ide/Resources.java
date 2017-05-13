@@ -213,8 +213,6 @@ public interface Resources extends Window.Resources,
 
         String createWsTagsPopup();
 
-        String tagsPanel();
-
         @ClassName("codeassistant-highlight")
         String codeassistantHighlight();
     }
