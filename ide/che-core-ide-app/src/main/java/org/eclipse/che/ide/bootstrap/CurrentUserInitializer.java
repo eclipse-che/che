@@ -20,12 +20,17 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.api.user.UserProfileServiceClient;
 import org.eclipse.che.ide.preferences.PreferencesManagerImpl;
+import org.eclipse.che.ide.rest.AsyncRequestFactory;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
 import java.util.Map;
+
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 
 /**
  * Initializes the {@link CurrentUser}:
@@ -38,19 +43,25 @@ import java.util.Map;
 class CurrentUserInitializer {
 
     private final CurrentUser              currentUser;
-    private final UserProfileServiceClient userProfileServiceClient;
     private final PreferencesManager       preferencesManager;
     private final CoreLocalizationConstant messages;
+    private final AppContext               appContext;
+    private final AsyncRequestFactory      asyncRequestFactory;
+    private final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
 
     @Inject
     CurrentUserInitializer(CurrentUser currentUser,
-                           UserProfileServiceClient userProfileServiceClient,
                            PreferencesManagerImpl preferencesManager,
-                           CoreLocalizationConstant messages) {
+                           CoreLocalizationConstant messages,
+                           AppContext appContext,
+                           AsyncRequestFactory asyncRequestFactory,
+                           DtoUnmarshallerFactory dtoUnmarshallerFactory) {
         this.currentUser = currentUser;
-        this.userProfileServiceClient = userProfileServiceClient;
         this.preferencesManager = preferencesManager;
         this.messages = messages;
+        this.appContext = appContext;
+        this.asyncRequestFactory = asyncRequestFactory;
+        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
     }
 
     Promise<Void> init() {
@@ -58,14 +69,14 @@ class CurrentUserInitializer {
     }
 
     private Promise<Void> loadProfile() {
-        return userProfileServiceClient.getCurrentProfile()
-                                       .then((Function<ProfileDto, Void>)profile -> {
-                                           currentUser.setProfile(profile);
-                                           return null;
-                                       })
-                                       .catchError((Operation<PromiseError>)arg -> {
-                                           throw new OperationException("Unable to load user's profile: " + arg.getCause());
-                                       });
+        return getUserProfile()
+                .then((Function<ProfileDto, Void>)profile -> {
+                    currentUser.setProfile(profile);
+                    return null;
+                })
+                .catchError((Operation<PromiseError>)arg -> {
+                    throw new OperationException("Unable to load user's profile: " + arg.getCause());
+                });
     }
 
     private Promise<Void> loadPreferences() {
@@ -77,5 +88,11 @@ class CurrentUserInitializer {
                                  .catchError((Operation<PromiseError>)arg -> {
                                      throw new OperationException(messages.unableToLoadPreference() + ": " + arg.getCause());
                                  });
+    }
+
+    private Promise<ProfileDto> getUserProfile() {
+        return asyncRequestFactory.createGetRequest(appContext.getMasterEndpoint() + "/profile/")
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(ProfileDto.class));
     }
 }

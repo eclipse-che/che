@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.api.user.PreferencesServiceClient;
 import org.eclipse.che.ide.preferences.pages.appearance.AppearancePresenter;
 import org.eclipse.che.ide.preferences.pages.appearance.AppearanceView;
 import org.eclipse.che.ide.preferences.pages.appearance.AppearanceViewImpl;
@@ -29,8 +28,6 @@ public class PreferencesApiModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        bind(PreferencesServiceClient.class).to(PreferencesServiceClientImpl.class).in(Singleton.class);
-
         bind(PreferencesManager.class).to(PreferencesManagerImpl.class).in(Singleton.class);
         GinMultibinder.newSetBinder(binder(), PreferencesManager.class).addBinding().to(PreferencesManagerImpl.class);
 
