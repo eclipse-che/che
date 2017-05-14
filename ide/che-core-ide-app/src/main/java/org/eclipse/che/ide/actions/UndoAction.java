@@ -24,7 +24,7 @@ import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * Undo Action

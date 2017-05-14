@@ -24,7 +24,7 @@ import org.eclipse.che.ide.resource.Path;
 import javax.validation.constraints.NotNull;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * The special action which allows call business logic which can convert folder to project.

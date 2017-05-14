@@ -25,7 +25,6 @@ import org.eclipse.che.ide.menu.PartMenu;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
-import org.eclipse.che.ide.workspace.WorkBenchPartController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

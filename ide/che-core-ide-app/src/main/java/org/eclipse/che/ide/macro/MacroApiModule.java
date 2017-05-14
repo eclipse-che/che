@@ -32,7 +32,6 @@ import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFilePathMa
 import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileRelativePathMacro;
 import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectNameMacro;
 import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectTypeMacro;
-import org.eclipse.che.ide.workspace.macro.WorkspaceNameMacro;
 
 /**
  * GIN module for configuring Macro API components.

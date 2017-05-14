@@ -25,7 +25,7 @@ import org.eclipse.che.ide.download.DownloadContainer;
 import javax.validation.constraints.NotNull;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * Download all projects from the workspace.

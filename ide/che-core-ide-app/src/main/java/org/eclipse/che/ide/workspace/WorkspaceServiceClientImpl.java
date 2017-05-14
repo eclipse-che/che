@@ -28,11 +28,11 @@ import org.eclipse.che.ide.rest.StringMapUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.gwt.http.client.RequestBuilder.PUT;
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
@@ -97,8 +97,7 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
 
     @Override
     public Promise<List<WorkspaceDto>> getWorkspaces(final int skip, final int limit) {
-        return fetchWorkspaces().then((Function<List<WorkspaceDto>, List<WorkspaceDto>>)workspaceDtoList ->
-                workspaceDtoList.stream().collect(toList()));
+        return fetchWorkspaces().then((Function<List<WorkspaceDto>, List<WorkspaceDto>>)ArrayList::new);
     }
 
     private Promise<List<WorkspaceDto>> fetchWorkspaces() {
@@ -106,30 +105,6 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Getting info about workspaces..."))
                                   .send(dtoUnmarshallerFactory.newListUnmarshaller(WorkspaceDto.class));
-    }
-
-
-    @Override
-    public Promise<WorkspaceDto> update(String wsId, WorkspaceDto workspaceDto) {
-        final String url = baseHttpUrl + '/' + wsId;
-        return asyncRequestFactory.createPutRequest(url, workspaceDto)
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
-    }
-
-    @Override
-    public Promise<Void> delete(String wsId) {
-        final String url = baseHttpUrl + '/' + wsId;
-        return asyncRequestFactory.createDeleteRequest(url)
-                                  .send();
-    }
-
-    @Override
-    public Promise<WorkspaceDto> startFromConfig(final WorkspaceConfigDto cfg, final boolean isTemporary, final String accountId) {
-        return asyncRequestFactory.createPostRequest(baseHttpUrl + "/runtime", cfg)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .header(CONTENT_TYPE, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Creating machine from recipe..."))
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
     }
 
     @Override
@@ -199,50 +174,6 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
     }
 
-//    @Override
-//    public Promise<WorkspaceDto> addEnvironment(String wsId, String envName, EnvironmentDto newEnv) {
-//        return asyncRequestFactory.createPostRequest(baseHttpUrl + '/' + wsId + "/environment?name=" + envName, newEnv)
-//                                  .header(ACCEPT, APPLICATION_JSON)
-//                                  .header(CONTENT_TYPE, APPLICATION_JSON)
-//                                  .loader(loaderFactory.newLoader("Adding environment..."))
-//                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
-//    }
-//
-//    @Override
-//    public Promise<WorkspaceDto> updateEnvironment(String wsId, String envName, EnvironmentDto environmentUpdate) {
-//        return null;
-//    }
-//
-//    @Override
-//    public Promise<WorkspaceDto> deleteEnvironment(String wsId, String envName) {
-//        return null;
-//    }
-//
-//    @Override
-//    public Promise<WorkspaceDto> addProject(String wsId, ProjectConfigDto newProject) {
-//        return null;
-//    }
-//
-//    @Override
-//    public Promise<WorkspaceDto> updateProject(String wsId, String path, ProjectConfigDto newEnv) {
-//        return null;
-//    }
-//
-//    @Override
-//    public Promise<WorkspaceDto> deleteProject(String wsId, String projectName) {
-//        return null;
-//    }
-
-//    @Override
-//    public Promise<Void> createMachine(final String wsId, final OldMachineConfigDto machineConfig) {
-//        String url = baseHttpUrl + '/' + wsId + "/machine";
-//        return asyncRequestFactory.createPostRequest(url, machineConfig)
-//                                  .header(ACCEPT, APPLICATION_JSON)
-//                                  .header(CONTENT_TYPE, APPLICATION_JSON)
-//                                  .loader(loaderFactory.newLoader("Creating machine..."))
-//                                  .send();
-//    }
-
     @Override
     public Promise<List<SnapshotDto>> getSnapshot(final String workspaceId) {
         final String url = baseHttpUrl + '/' + workspaceId + "/snapshot";
@@ -250,15 +181,6 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Getting workspace's snapshot"))
                                   .send(dtoUnmarshallerFactory.newListUnmarshaller(SnapshotDto.class));
-    }
-
-    @Override
-    public Promise<Void> createSnapshot(final String workspaceId) {
-        final String url = baseHttpUrl + '/' + workspaceId + "/snapshot";
-        return asyncRequestFactory.createPostRequest(url, null)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Creating workspace's snapshot"))
-                                  .send();
     }
 
     @Override

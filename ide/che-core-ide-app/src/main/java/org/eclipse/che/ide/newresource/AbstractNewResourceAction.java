@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.newresource;
 
-import com.google.common.base.Optional;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -42,7 +41,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * Implementation of an {@link Action} that provides an ability to create new resource (e.g. file, folder).

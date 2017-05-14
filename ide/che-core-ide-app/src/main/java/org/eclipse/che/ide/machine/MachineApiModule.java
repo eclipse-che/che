@@ -19,11 +19,7 @@ import org.eclipse.che.ide.machine.chooser.MachineChooserView;
 import org.eclipse.che.ide.machine.chooser.MachineChooserViewImpl;
 import org.eclipse.che.requirejs.ModuleHolder;
 
-/**
- * GIN module for configuring Machine API related components.
- *
- * @author Artem Zatsarynnyi
- */
+/** GIN module for configuring Machine API related components. */
 public class MachineApiModule extends AbstractGinModule {
 
     @Override
@@ -31,6 +27,5 @@ public class MachineApiModule extends AbstractGinModule {
         bind(MachineChooserView.class).to(MachineChooserViewImpl.class);
         bind(ModuleHolder.class).in(Singleton.class);
         bindConstant().annotatedWith(Names.named("machine.extension.api_port")).to(Constants.WS_AGENT_PORT);
-        bind(RecipeScriptDownloadServiceClient.class).to(RecipeScriptDownloadServiceClientImpl.class).in(Singleton.class);
     }
 }

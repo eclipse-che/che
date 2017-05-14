@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.actions.find.FindActionView;
 import org.eclipse.che.ide.actions.find.FindActionViewImpl;
 import org.eclipse.che.ide.api.action.ActionManager;
-import org.eclipse.che.ide.client.StartUpActionsProcessor;
 
 /** GIN module for configuring Action API components. */
 public class ActionApiModule extends AbstractGinModule {

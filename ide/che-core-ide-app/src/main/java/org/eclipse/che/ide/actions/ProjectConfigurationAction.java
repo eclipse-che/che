@@ -29,7 +29,7 @@ import javax.validation.constraints.NotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * Call Project wizard to change project type

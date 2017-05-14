@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.testng.ide.action;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import java.util.Arrays;
 import java.util.HashMap;

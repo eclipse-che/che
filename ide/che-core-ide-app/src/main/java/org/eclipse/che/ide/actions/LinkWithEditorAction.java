@@ -28,7 +28,7 @@ import javax.validation.constraints.NotNull;
 
 import static java.lang.Boolean.parseBoolean;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * The Project Explorer view has a Link with Editor feature.

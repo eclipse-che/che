@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.workspace.start;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -20,58 +19,51 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.bootstrap.WorkspaceStarter;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
-import org.eclipse.che.ide.workspace.WorkspaceComponentProvider;
 
 import java.util.List;
 
 /**
  * Toast notification appearing on the top of the IDE and containing a proposal message to start
- *   current workspace and the button to perform the operation.
+ * current workspace and the button to perform the operation.
  *
  * @author Vitaliy Guliy
  */
 @Singleton
 public class StartWorkspaceNotification {
 
-    interface WorkspaceStarterUiBinder extends UiBinder<Widget, StartWorkspaceNotification> {
-    }
-
-    private final WorkspaceStarterUiBinder      uiBinder;
-
-    private final LoaderPresenter               loader;
-    private final WorkspaceServiceClient        workspaceServiceClient;
-    private final WorkspaceComponentProvider    workspaceComponentProvider;
-
+    private final WorkspaceStarterUiBinder uiBinder;
+    private final LoaderPresenter          loader;
+    private final WorkspaceServiceClient   workspaceServiceClient;
+    private final WorkspaceStarter         workspaceStarter;
     @UiField
-    Button                                      button;
-
+    Button   button;
     @UiField
-    CheckBox                                    restore;
-
-    private String                              workspaceID;
+    CheckBox restore;
+    private String workspaceID;
 
     @Inject
     public StartWorkspaceNotification(LoaderPresenter loader,
                                       WorkspaceStarterUiBinder uiBinder,
                                       WorkspaceServiceClient workspaceServiceClient,
-                                      WorkspaceComponentProvider workspaceComponentProvider) {
+                                      WorkspaceStarter workspaceStarter) {
         this.loader = loader;
         this.uiBinder = uiBinder;
         this.workspaceServiceClient = workspaceServiceClient;
-        this.workspaceComponentProvider = workspaceComponentProvider;
+        this.workspaceStarter = workspaceStarter;
     }
 
     /**
      * Displays a notification with a proposal to start workspace with ID.
      *
      * @param workspaceID
-     *          workspace ID
+     *         workspace ID
      */
     public void show(String workspaceID) {
         this.workspaceID = workspaceID;
@@ -100,14 +92,10 @@ public class StartWorkspaceNotification {
     @UiHandler("button")
     void startClicked(ClickEvent e) {
         loader.setSuccess(LoaderPresenter.Phase.WORKSPACE_STOPPED);
-        workspaceComponentProvider.get().startWorkspace(workspaceID, new Callback<Component, Exception>() {
-            @Override
-            public void onSuccess(Component result) {
-            }
-            @Override
-            public void onFailure(Exception reason) {
-            }
-        }, restore.getValue());
+
+        workspaceStarter.startWorkspace(workspaceID, restore.getValue());
     }
 
+    interface WorkspaceStarterUiBinder extends UiBinder<Widget, StartWorkspaceNotification> {
+    }
 }

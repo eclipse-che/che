@@ -40,7 +40,7 @@ import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerManagerObserver;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
+import org.eclipse.che.ide.part.perspectives.project.ProjectPerspective;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
 import org.vectomatic.dom.svg.ui.SVGResource;

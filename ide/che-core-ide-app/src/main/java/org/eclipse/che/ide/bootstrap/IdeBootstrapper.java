@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.bootstrap;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
@@ -20,7 +21,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
-import org.eclipse.che.ide.client.ExtensionInitializer;
 import org.eclipse.che.ide.core.StandardComponentInitializer;
 import org.eclipse.che.ide.preferences.StyleInjector;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
@@ -28,9 +28,10 @@ import org.eclipse.che.ide.theme.ThemeAgentImpl;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 
 /**
- * Initializes CHE IDE application:
+ * Performs initial startup of the CHE IDE application.
  * <ul>
  * <li>initializes UI;</li>
+ * <li>starts the workspace;</li>
  * <li>starts the extensions.</li>
  * </ul>
  */
@@ -79,6 +80,9 @@ public class IdeBootstrapper {
             workspaceStarter.startWorkspace();
             showUI();
             extensionInitializer.startExtensions();
+            Scheduler.get().scheduleDeferred(this::notifyShowIDE);
+        }).catchError(err -> {
+            onInitializationFailed(err.getMessage());
         });
     }
 
@@ -93,4 +97,19 @@ public class IdeBootstrapper {
         Window.addWindowClosingHandler(event -> eventBus.fireEvent(WindowActionEvent.createWindowClosingEvent(event)));
         Window.addCloseHandler(event -> eventBus.fireEvent(WindowActionEvent.createWindowClosedEvent()));
     }
+
+    /** Informs parent window (e.g. dashboard) that IDE application can be shown. */
+    private native void notifyShowIDE() /*-{
+        $wnd.parent.postMessage("show-ide", "*");
+    }-*/;
+
+    /** Handles IDE initialization error. */
+    private native void onInitializationFailed(String reason) /*-{
+        try {
+            $wnd.IDE.eventHandlers.initializationFailed(reason);
+            this.@org.eclipse.che.ide.bootstrap.IdeBootstrapper::notifyShowIDE()();
+        } catch (e) {
+            console.log(e.message);
+        }
+    }-*/;
 }

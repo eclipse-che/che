@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.client;
 
 import org.eclipse.che.ide.api.app.StartUpAction;
-import org.eclipse.che.ide.client.StartUpActionsParser;
+import org.eclipse.che.ide.actions.StartUpActionsParser;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

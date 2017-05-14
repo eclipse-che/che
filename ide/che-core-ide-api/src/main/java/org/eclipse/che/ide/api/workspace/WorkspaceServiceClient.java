@@ -11,11 +11,8 @@
 package org.eclipse.che.ide.api.workspace;
 
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
@@ -76,40 +73,6 @@ public interface WorkspaceServiceClient {
      * @see #getWorkspaces(int, int)
      */
     Promise<List<WorkspaceDto>> getWorkspaces(int skip, int limit);
-
-    /**
-     * Updates workspace.
-     *
-     * @param wsId
-     *         workspace ID
-     * @param update
-     *         the new configuration to update the workspace
-     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-     * @see WorkspaceService#update(String, WorkspaceDto)
-     */
-    Promise<WorkspaceDto> update(String wsId, WorkspaceDto update);
-
-    /**
-     * Removes workspace.
-     *
-     * @param wsId
-     *         workspace ID
-     * @return a promise that will resolve when the workspace has been removed, or rejects with an error
-     * @see WorkspaceService#delete(String)
-     */
-    Promise<Void> delete(String wsId);
-
-    /**
-     * Starts temporary workspace based on given workspace configuration.
-     *
-     * @param cfg
-     *         the configuration to start the workspace from
-     * @param accountId
-     *         the account id related to this operation
-     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-     * @see WorkspaceService#startFromConfig(WorkspaceConfigDto, Boolean, String)
-     */
-    Promise<WorkspaceDto> startFromConfig(WorkspaceConfigDto cfg, boolean isTemporary, String accountId);
 
     /**
      * Starts workspace based on workspace id and environment.
@@ -188,92 +151,6 @@ public interface WorkspaceServiceClient {
      */
     Promise<WorkspaceDto> deleteCommand(String wsId, String commandName);
 
-//    /**
-//     * Adds environment to workspace.
-//     *
-//     * @param wsId
-//     *         workspace ID
-//     * @param envName
-//     *         the name of the environment to add
-//     * @param newEnv
-//     *         the new environment
-//     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-//     * @see WorkspaceService#addEnvironment(String, EnvironmentDto)
-//     */
-//    Promise<WorkspaceDto> addEnvironment(String wsId, String envName, EnvironmentDto newEnv);
-//
-//    /**
-//     * Updates environment.
-//     *
-//     * @param wsId
-//     *         workspace ID
-//     * @param environmentUpdate
-//     *         the environment to update
-//     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-//     * @see WorkspaceService#updateEnvironment(String, String, EnvironmentDto)
-//     */
-//    Promise<WorkspaceDto> updateEnvironment(String wsId, String envName, EnvironmentDto environmentUpdate);
-//
-//    /**
-//     * Removes environment.
-//     *
-//     * @param wsId
-//     *         workspace ID
-//     * @param envName
-//     *         the name of the environment to remove
-//     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-//     * @see WorkspaceService#deleteEnvironment(String, String)
-//     */
-//    Promise<WorkspaceDto> deleteEnvironment(String wsId, String envName);
-//
-//    /**
-//     * Adds project configuration to workspace.
-//     *
-//     * @param wsId
-//     *         workspace ID
-//     * @param newProject
-//     *         the new project
-//     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-//     * @see WorkspaceService#addProject(String, ProjectConfigDto)
-//     */
-//    Promise<WorkspaceDto> addProject(String wsId, ProjectConfigDto newProject);
-//
-//    /**
-//     * Updates project configuration.
-//     *
-//     * @param wsId
-//     *         workspace ID
-//     * @param newEnv
-//     *         the new project configuration
-//     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-//     * @see WorkspaceService#updateProject(String, String, ProjectConfigDto)
-//     */
-//    Promise<WorkspaceDto> updateProject(String wsId, String path, ProjectConfigDto newEnv);
-//
-//    /**
-//     * Removes project from workspace.
-//     *
-//     * @param wsId
-//     *         workspace ID
-//     * @param projectName
-//     *         the name of the project to remove
-//     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-//     * @see WorkspaceService#deleteProject(String, String)
-//     */
-//    Promise<WorkspaceDto> deleteProject(String wsId, String projectName);
-
-//    /**
-//     * Creates machine in workspace.
-//     *
-//     * @param wsId
-//     *         workspace ID
-//     * @param machineConfig
-//     *         the new machine configuration
-//     * @return a promise that resolves to the {@link MachineDto}, or rejects with an error
-//     * @see WorkspaceService#createMachine(String, MachineConfigDto)
-//     */
-//    Promise<Void> createMachine(String wsId, OldMachineConfigDto machineConfig);
-
     /**
      * Returns workspace's snapshot.
      *
@@ -284,17 +161,6 @@ public interface WorkspaceServiceClient {
      */
     @Deprecated
     Promise<List<SnapshotDto>> getSnapshot(String workspaceId);
-
-    /**
-     * Creates snapshot of workspace.
-     *
-     * @param workspaceId
-     *         workspace ID
-     * @return a promise that will resolve when the snapshot has been created, or rejects with an error
-     * @see WorkspaceService#createSnapshot(String)
-     */
-    @Deprecated
-    Promise<Void> createSnapshot(String workspaceId);
 
     /**
      * Gets state of the workspace agent.
@@ -308,6 +174,7 @@ public interface WorkspaceServiceClient {
 
     /**
      * Get workspace related server configuration values defined in che.properties
+     *
      * @see WorkspaceService#getSettings()
      */
     Promise<Map<String, String>> getSettings();

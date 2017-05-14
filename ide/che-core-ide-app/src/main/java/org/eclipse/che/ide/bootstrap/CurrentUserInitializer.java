@@ -14,14 +14,16 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
 import org.eclipse.che.ide.preferences.PreferencesManagerImpl;
-import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.Map;
 
@@ -61,8 +63,8 @@ class CurrentUserInitializer {
                                            currentUser.setProfile(profile);
                                            return null;
                                        })
-                                       .catchError(arg -> {
-                                           Log.error(CurrentUserInitializer.this.getClass(), "Unable to load user's profile");
+                                       .catchError((Operation<PromiseError>)arg -> {
+                                           throw new OperationException("Unable to load user's profile: " + arg.getCause());
                                        });
     }
 
@@ -72,10 +74,8 @@ class CurrentUserInitializer {
                                      currentUser.setPreferences(preferences);
                                      return null;
                                  })
-                                 .catchError(arg -> {
-                                     Log.error(CurrentUserInitializer.this.getClass(),
-                                               messages.unableToLoadPreference(),
-                                               arg.getCause());
+                                 .catchError((Operation<PromiseError>)arg -> {
+                                     throw new OperationException(messages.unableToLoadPreference() + ": " + arg.getCause());
                                  });
     }
 }

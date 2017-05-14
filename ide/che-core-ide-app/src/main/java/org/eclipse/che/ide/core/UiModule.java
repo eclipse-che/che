@@ -58,9 +58,9 @@ import org.eclipse.che.ide.ui.toolbar.MainToolbar;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.ui.toolbar.ToolbarView;
 import org.eclipse.che.ide.ui.toolbar.ToolbarViewImpl;
-import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
-import org.eclipse.che.ide.workspace.WorkBenchPartController;
-import org.eclipse.che.ide.workspace.WorkBenchPartControllerImpl;
+import org.eclipse.che.ide.part.WorkBenchControllerFactory;
+import org.eclipse.che.ide.part.WorkBenchPartController;
+import org.eclipse.che.ide.part.WorkBenchPartControllerImpl;
 import org.eclipse.che.ide.workspace.WorkspaceView;
 import org.eclipse.che.ide.workspace.WorkspaceViewImpl;
 

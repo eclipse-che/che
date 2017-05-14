@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
 import org.eclipse.che.ide.context.BrowserAddress;
+import org.eclipse.che.ide.context.QueryParameters;
 import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
@@ -34,12 +35,13 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME;
-import static org.eclipse.che.ide.workspace.WorkspaceComponent.ENV_STATUS_ERROR_MSG;
-import static org.eclipse.che.ide.workspace.WorkspaceComponent.WS_AGENT_OUTPUT_ERROR_MSG;
-import static org.eclipse.che.ide.workspace.WorkspaceComponent.WS_STATUS_ERROR_MSG;
 
 @Singleton
-class WorkspaceStarter {
+public class WorkspaceStarter {
+
+    private static final String WS_STATUS_ERROR_MSG = "Tried to subscribe to workspace status events, but got error";
+//    private static final String WS_AGENT_OUTPUT_ERROR_MSG = "Tried to subscribe to workspace agent output, but got error";
+//    private static final String ENV_STATUS_ERROR_MSG      = "Tried to subscribe to environment status events, but got error";
 
     private final WorkspaceServiceClient             workspaceServiceClient;
     private final BrowserAddress                     browserAddress;
@@ -48,6 +50,7 @@ class WorkspaceStarter {
     private final AppContext                         appContext;
     private final LoaderPresenter                    wsStatusNotification;
     private final Provider<CreateWorkspacePresenter> createWsPresenter;
+    private final QueryParameters                    queryParameters;
 
     @Inject
     WorkspaceStarter(WorkspaceServiceClient workspaceServiceClient,
@@ -56,7 +59,8 @@ class WorkspaceStarter {
                      EventBus eventBus,
                      AppContext appContext,
                      LoaderPresenter loader,
-                     Provider<CreateWorkspacePresenter> createWorkspacePresenterProvider) {
+                     Provider<CreateWorkspacePresenter> createWorkspacePresenterProvider,
+                     QueryParameters queryParameters) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.browserAddress = browserAddress;
         this.transmitter = transmitter;
@@ -64,15 +68,16 @@ class WorkspaceStarter {
         this.appContext = appContext;
         this.wsStatusNotification = loader;
         this.createWsPresenter = createWorkspacePresenterProvider;
+        this.queryParameters = queryParameters;
     }
 
-    void startWorkspace() {
+    public void startWorkspace() {
         workspaceServiceClient.getWorkspace(getWorkspaceKeyToStart())
                               .then(workspace -> {
+//                                  browserAddress.setAddress(workspace.getNamespace(), workspace.getConfig().getName());
                                   appContext.setWorkspace(workspace);
-
                                   subscribeToWorkspaceEvents(workspace.getId());
-                                  startWorkspace(workspace);
+                                  startWorkspace(workspace, false);
                               })
                               .catchError(err -> {
                                   Log.error(WorkspaceStarter.this.getClass(), err.getCause());
@@ -80,13 +85,21 @@ class WorkspaceStarter {
                               });
     }
 
+    public void startWorkspace(String workspaceID, boolean restoreFromSnapshot) {
+        workspaceServiceClient.getWorkspace(workspaceID).then(workspace -> {
+            startWorkspace(workspace, restoreFromSnapshot);
+        });
+    }
+
     // TODO: factory
     private String getWorkspaceKeyToStart() {
+        final String factoryParams = queryParameters.getByName("factory");
+
         return browserAddress.getWorkspaceKey();
     }
 
     /** Starts the workspace with the default environment. */
-    private void startWorkspace(Workspace workspace) {
+    private void startWorkspace(Workspace workspace, boolean restoreFromSnapshot) {
         wsStatusNotification.show(STARTING_WORKSPACE_RUNTIME);
 
         final WorkspaceStatus workspaceStatus = workspace.getStatus();
@@ -95,14 +108,14 @@ class WorkspaceStarter {
             wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
             eventBus.fireEvent(new WsStatusChangedEvent(workspace.getStatus()));
         } else if (workspaceStatus == STOPPED || workspaceStatus == STOPPING) {
-            workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), false);
+            workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), restoreFromSnapshot);
         }
     }
 
     private void subscribeToWorkspaceEvents(String workspaceId) {
         subscribe(WS_STATUS_ERROR_MSG, "event:workspace-status:subscribe", workspaceId);
-        subscribe(WS_AGENT_OUTPUT_ERROR_MSG, "event:ws-agent-output:subscribe", workspaceId);
-        subscribe(ENV_STATUS_ERROR_MSG, "event:environment-status:subscribe", workspaceId);
+//        subscribe(WS_AGENT_OUTPUT_ERROR_MSG, "event:ws-agent-output:subscribe", workspaceId);
+//        subscribe(ENV_STATUS_ERROR_MSG, "event:environment-status:subscribe", workspaceId);
     }
 
     private void subscribe(String it, String methodName, String id) {

@@ -27,7 +27,7 @@ import org.eclipse.che.ide.search.FullTextSearchPresenter;
 import javax.validation.constraints.NotNull;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * Action for finding text in the files on the workspace.

@@ -21,7 +21,7 @@ import org.eclipse.che.plugin.debugger.ide.configuration.EditDebugConfigurations
 
 import java.util.Collections;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * Action for opening dialog for managing debug configurations.

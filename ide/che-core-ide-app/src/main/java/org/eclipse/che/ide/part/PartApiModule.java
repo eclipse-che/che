@@ -37,12 +37,10 @@ import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.part.widgets.editortab.EditorTabWidget;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButtonWidget;
-import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
-import org.eclipse.che.ide.workspace.PartStackViewFactory;
-import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
-import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
+import org.eclipse.che.ide.part.perspectives.general.PerspectiveViewImpl;
+import org.eclipse.che.ide.part.perspectives.project.ProjectPerspective;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /** GIN module for configuring Part API components. */
 public class PartApiModule extends AbstractGinModule {

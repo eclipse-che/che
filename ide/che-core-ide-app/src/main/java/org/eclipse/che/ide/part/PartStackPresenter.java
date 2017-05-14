@@ -31,7 +31,6 @@ import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.menu.PartMenu;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
-import org.eclipse.che.ide.workspace.WorkBenchPartController;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
