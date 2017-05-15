@@ -63,7 +63,7 @@ public class TerminalNodeRenderStrategy implements ProcessTreeNodeRenderStrategy
     }
 
     private SpanElement createTerminalElement(ProcessTreeNode node) {
-        SpanElement root = Elements.createSpanElement(resources.getCss().commandTreeNode());
+        SpanElement root = Elements.createSpanElement();
         ensureDebugId(root, "terminal-root-element");
 
         root.appendChild(createCloseElement(node));

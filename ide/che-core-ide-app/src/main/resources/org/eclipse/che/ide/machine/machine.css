@@ -27,17 +27,14 @@
 }
 
 .commandTreeNode {
-    position: relative;
-    left: 0px;
-    top: -1px;
 }
 
 .processTree span {
-    line-height: 18px;
 }
 
 .processTree .nameLabel {
     font-weight: bold;
+    line-height: 18px;
 }
 
 .processTree .machineStatus {
@@ -81,7 +78,7 @@
     font-size: 10px;
     float: right;
     margin-right: 2px;
-    margin-top: 1px;
+    margin-top: 3px;
     color: categoryHeaderButtonColor;
     cursor: pointer;
     right: 0;
@@ -137,10 +134,9 @@
 .processTree .processIconPanel {
     display: inline-block;
     position: relative;
-    left: 0;
-    top: 2px;
     width: 16px;
-    height: 14px;
+    height: 16px;
+    margin: 1px 0 -3px 0;
 }
 
 .processTree .processBadge {
