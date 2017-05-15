@@ -28,12 +28,7 @@
             height: 100%;
             overflow: hidden;
             background-color: outputBackgroundColor;
-            padding-left: 3px;
-            padding-top: 3px;
-            /*add padding without changing div size*/
-            -moz-box-sizing: border-box;
-            -webkit-box-sizing: border-box;
-            box-sizing: border-box;
+            padding: 1px;
         }
 
         .unavailable {
