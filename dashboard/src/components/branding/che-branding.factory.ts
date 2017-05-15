@@ -21,6 +21,7 @@ export class CheBranding {
   $http: ng.IHttpService;
   cheService: CheService;
 
+  private docs: { stack: string; workspace: string};
     /**
      * Default constructor that is using resource
      * @ngInject for Dependency injection
@@ -47,7 +48,7 @@ export class CheBranding {
         let assetPrefix = 'assets/branding/';
 
         // load data
-        this.$http.get(assetPrefix + 'product.json').then((data) => {
+        this.$http.get(assetPrefix + 'product.json').then((data: any) => {
 
             let brandingData = data.data;
 
@@ -62,7 +63,8 @@ export class CheBranding {
                 helpPath : brandingData.helpPath,
                 helpTitle : brandingData.helpTitle,
                 supportEmail: brandingData.supportEmail,
-                oauthDocs: brandingData.oauthDocs
+                oauthDocs: brandingData.oauthDocs,
+                docs: brandingData.docs
             };
 
             this.productName = this.$rootScope.branding.title;
@@ -83,6 +85,7 @@ export class CheBranding {
             } else {
               this.cli = this.$rootScope.branding.cli;
             }
+            this.docs = this.$rootScope.branding.docs;
             this.deferred.resolve(this.$rootScope.branding);
         });
 
@@ -123,6 +126,14 @@ export class CheBranding {
     getCLI() {
         return this.cli;
     }
+
+  /**
+   * Returns object with docs URLs.
+   * @returns {{stack: string, workspace: string}}
+   */
+  getDocs(): { stack: string; workspace: string } {
+    return this.docs;
+  }
 
 }
 

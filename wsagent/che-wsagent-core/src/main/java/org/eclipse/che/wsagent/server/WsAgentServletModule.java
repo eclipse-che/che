@@ -12,7 +12,6 @@ package org.eclipse.che.wsagent.server;
 
 import com.google.inject.servlet.ServletModule;
 
-import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.websockets.WSConnectionTracker;
 
@@ -26,7 +25,5 @@ public class WsAgentServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         getServletContext().addListener(new WSConnectionTracker());
-        filter("/*").through(CheCorsFilter.class);
-
     }
 }

@@ -59,6 +59,7 @@ declare namespace _che {
     creator?: string;
     scope?: string;
     components?: Array<any>;
+    links?: Array<any>;
     source?: any;
     workspaceConfig: IWorkspaceConfig;
   }

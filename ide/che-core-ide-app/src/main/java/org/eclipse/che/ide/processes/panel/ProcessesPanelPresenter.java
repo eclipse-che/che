@@ -925,7 +925,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Nullable
     private MachineEntity getMachine(@NotNull String machineId) {
-        List<MachineEntity> wsMachines = getMachines(appContext.getWorkspace());
+        Workspace workspace = appContext.getWorkspace();
+        if (workspace == null) {
+            return null;
+        }
+
+        List<MachineEntity> wsMachines = getMachines(workspace);
         for (MachineEntity machine : wsMachines) {
             if (machineId.equals(machine.getId())) {
                 return machine;

@@ -128,14 +128,11 @@ command -v pidof >/dev/null 2>&1 && {
     ps -fC sshd >/dev/null 2>&1 && exit
 }
 
+# generate host keys and running sshd
 
 ${SUDO} mkdir -p /var/run/sshd
 
-if echo ${LINUX_TYPE} | grep -qi "CentOS"; then
-    ${SUDO} /usr/bin/ssh-keygen -q -P '' -t rsa -f ~/.ssh/id_rsa
-else
-    ${SUDO} /usr/bin/ssh-keygen -A
-fi
+${SUDO} /usr/bin/ssh-keygen -A
 
 ${SUDO} /usr/sbin/sshd -D
 

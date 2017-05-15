@@ -67,6 +67,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
@@ -1751,7 +1752,6 @@ public class MachineProviderImplTest {
             return this;
         }
 
-
         MachineProviderImpl build() throws IOException {
             return new MachineProviderImpl(new MockConnectorProvider(),
                                            credentialsReader,
@@ -1778,7 +1778,8 @@ public class MachineProviderImplTest {
                                            cpuQuota,
                                            pathEscaper,
                                            extraHosts,
-                                           dnsResolvers);
+                                           dnsResolvers,
+                                           emptyMap());
         }
     }
 }

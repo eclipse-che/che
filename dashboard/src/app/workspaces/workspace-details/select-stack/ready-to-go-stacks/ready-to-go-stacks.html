@@ -14,22 +14,26 @@
   <div class="stack-label-info">Create a new workspace with a ready-to-go stack.</div>
   <div layout="row" flex="100">
     <che-stack-library-filter layout="row" flex
-                              ng-model="readyToGoStacksCtrl.allStackTags">
+                              stack-tags="readyToGoStacksCtrl.allStackTags"
+                              on-tags-changes="readyToGoStacksCtrl.onTagsChanges(tags)">
     </che-stack-library-filter>
   </div>
   <div layout="row" layout-wrap>
     <md-card layout="column" class="che-simple-selector"
-             ng-repeat="stack in filteredStacks = (readyToGoStacksCtrl.generalStacks | stackSelectedStackFilter:readyToGoStacksCtrl.filteredStackIds) | orderBy:[readyToGoStacksCtrl.getPrivilegedSortPosition, 'name']"
+             ng-repeat="stack in readyToGoStacksCtrl.generalStacks"
              ng-init="$first && readyToGoStacksCtrl.setStackSelectionById(stack.id)"
              ng-click="readyToGoStacksCtrl.setStackSelectionById(stack.id)"
+             ng-hide="readyToGoStacksCtrl.filteredStackIds.indexOf(stack.id) === -1"
              ng-class="{'che-simple-selector-active' : '{{stack.id}}' === readyToGoStacksCtrl.selectedStackId}">
       <div layout="row">
-        <div class="selector-icon" ng-class="{'chefont cheico-type-blank' : !readyToGoStacksCtrl.stackIconsMap.has(stack.id)}">
-          <img ng-src="{{readyToGoStacksCtrl.stackIconsMap.get(stack.id)}}"/>
+        <div class="selector-icon" ng-class="{'chefont cheico-type-blank' : !readyToGoStacksCtrl.getIconSrc(stack.id)}">
+          <img ng-src="{{readyToGoStacksCtrl.getIconSrc(stack.id)}}"/>
         </div>
-        <div flex="70" class="title">{{stack.name}}</div>
+        <div flex="70" class="title">
+          <div>{{stack.name}}</div>
+        </div>
       </div>
-      <div class="description">{{readyToGoStacksCtrl.tagsToString(stack.tags)}}</div>
+      <div class="description">{{stack.description}}</div>
     </md-card>
   </div>
 </div>

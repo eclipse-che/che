@@ -11,8 +11,11 @@
 package org.eclipse.che.workspace.infrastructure.docker.config.proxy;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+
+import java.util.Map;
 
 /**
  * Module that injects components needed to run docker machines behind proxies.

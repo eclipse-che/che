@@ -40,6 +40,8 @@ FIXME: spi
                   .to(org.eclipse.che.plugin.docker.machine.DefaultServerEvaluationStrategy.class);
         strategies.addBinding("docker-local")
                   .to(org.eclipse.che.plugin.docker.machine.LocalDockerServerEvaluationStrategy.class);
+        strategies.addBinding("custom")
+                  .to(org.eclipse.che.plugin.docker.machine.CustomServerEvaluationStrategy.class);
 
         bind(org.eclipse.che.workspace.infrastructure.docker.old.local.node.WorkspaceFolderPathProvider.class)
                 .to(org.eclipse.che.workspace.infrastructure.docker.old.provider.LocalWorkspaceFolderPathProvider.class);

@@ -145,7 +145,7 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
                       agentName,
                       machine.getWorkspaceId(),
                       machine.getId(),
-                      machine.getNode(),
+                      machine.getNode().getHost(),
                       logs);
         } else {
             LOG.error("An error occurs while starting '{}' agent in '{}' workspace in '{}' machine on '{}' node. " +
@@ -153,7 +153,7 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
                       agentName,
                       machine.getWorkspaceId(),
                       machine.getId(),
-                      machine.getNode());
+                      machine.getNode().getHost());
         }
     }*/
 

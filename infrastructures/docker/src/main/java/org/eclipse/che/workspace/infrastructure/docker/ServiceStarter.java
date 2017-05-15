@@ -145,6 +145,7 @@ public class ServiceStarter {
     private final WindowsPathEscaper                            windowsPathEscaper;
     private final String[]                                      dnsResolvers;
     private       ServerEvaluationStrategyProvider              serverEvaluationStrategyProvider;
+    private final Map<String, String>                           buildArgs;
 
     @Inject
     public ServiceStarter(DockerConnector docker,
@@ -169,7 +170,8 @@ public class ServiceStarter {
                           WindowsPathEscaper windowsPathEscaper,
                           @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
                           @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers,
-                          ServerEvaluationStrategyProvider serverEvaluationStrategyProvider) {
+                          ServerEvaluationStrategyProvider serverEvaluationStrategyProvider,
+                          @Named("che.docker.build_args") Map<String, String> buildArgs) {
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
@@ -192,6 +194,7 @@ public class ServiceStarter {
         this.windowsPathEscaper = windowsPathEscaper;
         this.pidsLimit = pidsLimit;
         this.dnsResolvers = dnsResolvers;
+        this.buildArgs = buildArgs;
         this.serverEvaluationStrategyProvider = serverEvaluationStrategyProvider;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
@@ -370,6 +373,14 @@ public class ServiceStarter {
                 buildImageParams = BuildImageParams.create(service.getBuild().getContext())
                                                    .withDockerfile(service.getBuild().getDockerfilePath());
             }
+            Map<String, String> buildArgs;
+            if (service.getBuild().getArgs() == null || service.getBuild().getArgs().isEmpty()) {
+                buildArgs = this.buildArgs;
+            } else {
+                buildArgs = new HashMap<>();
+                buildArgs.putAll(service.getBuild().getArgs());
+                buildArgs.putAll(this.buildArgs);
+            }
             buildImageParams.withForceRemoveIntermediateContainers(true)
                             .withRepository(machineImageName)
                             .withAuthConfigs(dockerCredentials.getCredentials())
@@ -379,7 +390,7 @@ public class ServiceStarter {
                             .withCpusetCpus(cpusetCpus)
                             .withCpuPeriod(cpuPeriod)
                             .withCpuQuota(cpuQuota)
-                            .withBuildArgs(service.getBuild().getArgs());
+                            .withBuildArgs(buildArgs);
 
             docker.buildImage(buildImageParams, progressMonitor);
         } catch (IOException e) {

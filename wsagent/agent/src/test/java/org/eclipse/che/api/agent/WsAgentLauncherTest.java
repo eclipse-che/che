@@ -66,6 +66,7 @@ public class WsAgentLauncherTest {
         Mockito.when(machine.getId()).thenReturn(MACHINE_ID);
         Mockito.when(machine.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         Mockito.when(machine.getRuntime()).thenReturn(machineRuntime);
+        Mockito.when(machine.getNode()).thenReturn(Mockito.mock(InstanceNode.class));
         Mockito.doReturn(Collections.<String, Server>singletonMap(WS_AGENT_PORT, SERVER)).when(machineRuntime).getServers();
         Mockito.when(requestFactory.fromUrl(Matchers.anyString())).thenReturn(pingRequest);
         Mockito.when(wsAgentPingRequestFactory.createRequest(machine)).thenReturn(pingRequest);

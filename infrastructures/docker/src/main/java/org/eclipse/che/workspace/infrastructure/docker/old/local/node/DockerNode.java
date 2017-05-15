@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.docker.old.local.node;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 
 /**
  * Provides access to operation machines need but not supported by the Docker
@@ -21,10 +22,12 @@ public interface DockerNode {
     /**
      * Bind the whole workspace on the Node.
      *
+     * @throws EnvironmentException
+     *         if environment in abnormal state because of problem with machines
      * @throws ServerException
-     *         if error occurs on binding
+     *         if other error occurs on binding
      */
-    void bindWorkspace() throws ServerException;
+    void bindWorkspace() throws ServerException, EnvironmentException;
 
     /**
      * Unbind the workspace on Node.
