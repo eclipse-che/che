@@ -25,12 +25,12 @@ import org.eclipse.che.ide.ext.git.client.branch.BranchView;
 import org.eclipse.che.ide.ext.git.client.branch.BranchViewImpl;
 import org.eclipse.che.ide.ext.git.client.commit.CommitView;
 import org.eclipse.che.ide.ext.git.client.commit.CommitViewImpl;
-import org.eclipse.che.ide.ext.git.client.compare.branchList.BranchListView;
-import org.eclipse.che.ide.ext.git.client.compare.branchList.BranchListViewImpl;
-import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListView;
-import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListViewImpl;
-import org.eclipse.che.ide.ext.git.client.compare.revisionsList.RevisionListView;
-import org.eclipse.che.ide.ext.git.client.compare.revisionsList.RevisionListViewImpl;
+import org.eclipse.che.ide.ext.git.client.compare.branchlist.BranchListView;
+import org.eclipse.che.ide.ext.git.client.compare.branchlist.BranchListViewImpl;
+import org.eclipse.che.ide.ext.git.client.compare.changedlist.ChangedListView;
+import org.eclipse.che.ide.ext.git.client.compare.changedlist.ChangedListViewImpl;
+import org.eclipse.che.ide.ext.git.client.compare.revisionslist.RevisionListView;
+import org.eclipse.che.ide.ext.git.client.compare.revisionslist.RevisionListViewImpl;
 import org.eclipse.che.ide.ext.git.client.fetch.FetchView;
 import org.eclipse.che.ide.ext.git.client.fetch.FetchViewImpl;
 import org.eclipse.che.ide.ext.git.client.history.HistoryView;
@@ -58,6 +58,8 @@ import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitView;
 import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitViewImpl;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesView;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesViewImpl;
+import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedPanelView;
+import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedPanelViewImpl;
 
 /** @author Andrey Plotnikov */
 @ExtensionGinModule
@@ -86,7 +88,7 @@ public class GitGinModule extends AbstractGinModule {
         bind(PullView.class).to(PullViewImpl.class).in(Singleton.class);
         bind(HistoryView.class).to(HistoryViewImpl.class).in(Singleton.class);
         bind(GitOutputPartView.class).to(GitOutputPartViewImpl.class);
-
+        bind(ChangedPanelView.class).to(ChangedPanelViewImpl.class);
         install(new GinFactoryModuleBuilder().implement(GitOutputConsole.class, GitOutputConsolePresenter.class)
                                              .build(GitOutputConsoleFactory.class));
 

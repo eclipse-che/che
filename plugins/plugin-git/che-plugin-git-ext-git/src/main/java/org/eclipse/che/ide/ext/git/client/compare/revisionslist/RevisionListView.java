@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.revisionsList;
+package org.eclipse.che.ide.ext.git.client.compare.revisionslist;
 
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.ide.api.mvp.View;

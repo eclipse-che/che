@@ -27,7 +27,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus;
-import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.changedlist.ChangedListPresenter;
 import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;

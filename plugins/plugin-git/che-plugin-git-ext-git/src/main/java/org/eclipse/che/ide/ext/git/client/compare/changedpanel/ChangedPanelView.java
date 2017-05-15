@@ -8,28 +8,27 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.changedList;
+package org.eclipse.che.ide.ext.git.client.compare.changedpanel;
 
-import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
+import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.TreeStyles;
+import org.eclipse.che.ide.ui.smartTree.presentation.PresentationRenderer;
 
-import javax.validation.constraints.NotNull;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * The view of {@link ChangedListPresenter}.
+ * The view of {@link ChangedPanelPresenter}.
  *
  * @author Igor Vinokur
  */
-public interface ChangedListView extends View<ChangedListView.ActionDelegate> {
+public interface ChangedPanelView extends View<ChangedPanelView.ActionDelegate> {
     /** Needs for delegate some function into Changed list view. */
     interface ActionDelegate {
-        /** Performs any actions appropriate in response to the user having pressed the 'Close' button. */
-        void onCloseClicked();
-
-        /** Performs any actions appropriate in response to the user having pressed the 'Compare' button. */
-        void onCompareClicked();
 
         /**
          * Performs any actions appropriate in response to the user having pressed the button that changes view mode of changed files.
@@ -48,10 +47,10 @@ public interface ChangedListView extends View<ChangedListView.ActionDelegate> {
          * @param node
          *         selected node
          */
-        void onNodeSelected(@NotNull Node node);
+        void onNodeSelected(Node node);
 
         /** Performs any actions appropriate in response to the user double clicked on the file node. */
-        void onFileNodeDoubleClicked();
+        void onFileNodeDoubleClicked(String file, Status status);
     }
 
     /**
@@ -60,7 +59,7 @@ public interface ChangedListView extends View<ChangedListView.ActionDelegate> {
      * @param files
      *         Map of changed files with their status
      */
-    void viewChangedFilesAsList(@NotNull Map<String, Status> files);
+    void viewChangedFilesAsList(Map<String, Status> files);
 
     /**
      * View changed files as tree.
@@ -68,27 +67,13 @@ public interface ChangedListView extends View<ChangedListView.ActionDelegate> {
      * @param files
      *         Map of changed files with their status
      */
-    void viewChangedFilesAsTree(@NotNull Map<String, Status> files);
+    void viewChangedFilesAsTree(Map<String, Status> files);
 
-    /** Expand all directories in tree. */
+    /** Expand all directories. */
     void expandAllDirectories();
 
-    /** Collapse all directories in tree. */
+    /** Collapse all directories. */
     void collapseAllDirectories();
-
-    /** Close dialog. */
-    void close();
-
-    /** Show dialog. */
-    void showDialog();
-
-    /**
-     * Change the enable state of the compare button.
-     *
-     * @param enabled
-     *         <code>true</code> to enable the button, <code>false</code> to disable it
-     */
-    void setEnableCompareButton(boolean enabled);
 
     /**
      * Change the enable state of the 'Expand/Collapse all directories' buttons.
@@ -104,5 +89,25 @@ public interface ChangedListView extends View<ChangedListView.ActionDelegate> {
      * @param text
      *         text that will be displayed in the button
      */
-    void setTextToChangeViewModeButton(@NotNull String text);
+    void setTextToChangeViewModeButton(String text);
+
+    /**
+     * Set custom presentation render for nodes in the panel.
+     */
+    void setTreeRender(PresentationRenderer render);
+
+    /**
+     * Returns style of the {@link Tree} widget in the panel.
+     */
+    TreeStyles getTreeStyles();
+
+    /**
+     * Refresh all nodes in the panel.
+     */
+    void refreshNodes();
+
+    /**
+     * Returns paths of all shown nodes e.g. paths of the files and their parent folders.
+     */
+    Set<Path> getNodePaths();
 }

@@ -27,7 +27,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
-import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.changedlist.ChangedListPresenter;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 
 import java.util.HashMap;

@@ -10,28 +10,44 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.commit;
 
+import org.eclipse.che.api.git.shared.Branch;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
+import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedFileNode;
+import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedFolderNode;
+import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedPanelView;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.ShiftableTextArea;
+import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
 import org.eclipse.che.ide.ui.window.Window;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import javax.validation.constraints.NotNull;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * The implementation of {@link CommitView}.
@@ -43,76 +59,59 @@ public class CommitViewImpl extends Window implements CommitView {
     interface CommitViewImplUiBinder extends UiBinder<Widget, CommitViewImpl> {
     }
 
-    private static CommitViewImplUiBinder ourUiBinder = GWT.create(CommitViewImplUiBinder.class);
+    private static CommitViewImplUiBinder uiBinder = GWT.create(CommitViewImplUiBinder.class);
 
-    /**
-     * The add all uncommited change field.
-     */
+    @UiField(provided = true)
+    final TextArea message;
     @UiField
-    CheckBox addAll;
-    /**
-     * The 'add to index selected files' selection in commit field.
-     */
+    FlowPanel changedPanel;
     @UiField
-    CheckBox addSelection;
-    /**
-     * The 'commit only selection' field.
-     */
-    @UiField
-    CheckBox commitAllSelection;
+    CheckBox  amend;
+    @UiField(provided = true)
+    final GitResources            res;
+    @UiField(provided = true)
+    final GitLocalizationConstant locale;
 
-    /**
-     * The amend commit flag.
-     */
-    @UiField
-    CheckBox amend;
-
-    /**
-     * The commit message input field.
-     */
-    @UiField(provided = true)
-    TextArea message;
-    Button btnCommit;
-    Button btnCancel;
-    @UiField(provided = true)
-    final   GitResources            res;
-    @UiField(provided = true)
-    final   GitLocalizationConstant locale;
-    private ActionDelegate          delegate;
+    private ListBox            remoteBranches;
+    private CheckBox           pushAfterCommit;
+    private Button             btnCommit;
+    private Button             btnCancel;
+    private ActionDelegate     delegate;
+    private ChangedPanelRender render;
+    private ChangedPanelView   changedPanelView;
 
     /**
      * Create view.
-     *
-     * @param res
-     * @param locale
      */
     @Inject
-    protected CommitViewImpl(GitResources res, GitLocalizationConstant locale) {
+    protected CommitViewImpl(GitResources res,
+                             GitLocalizationConstant locale,
+                             ChangedPanelView changedPanelView) {
         this.res = res;
         this.locale = locale;
+        this.changedPanelView = changedPanelView;
         this.message = new ShiftableTextArea();
         this.ensureDebugId("git-commit-window");
 
-        Widget widget = ourUiBinder.createAndBindUi(this);
-
         this.setTitle(locale.commitTitle());
+
+        Widget widget = uiBinder.createAndBindUi(this);
         this.setWidget(widget);
 
-        btnCancel = createButton(locale.buttonCancel(), "git-commit-cancel", new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-            }
-        });
-        btnCommit = createButton(locale.buttonCommit(), "git-commit-commit", new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onCommitClicked();
-            }
-        });
+        btnCancel = createButton(locale.buttonCancel(), "git-commit-cancel", event -> delegate.onCancelClicked());
+        btnCommit = createButton(locale.buttonCommit(), "git-commit-commit", event -> delegate.onCommitClicked());
         btnCommit.addStyleName(resources.windowCss().primaryButton());
+
+        remoteBranches = new ListBox();
+        remoteBranches.setEnabled(false);
+
+        pushAfterCommit = new CheckBox();
+        pushAfterCommit.setHTML(locale.commitPushCheckboxTitle());
+        pushAfterCommit.addValueChangeHandler(event -> remoteBranches.setEnabled(event.getValue()));
+
+        pushAfterCommit.addStyleName(res.gitCSS().spacing());
+        getFooter().add(pushAfterCommit);
+        getFooter().add(remoteBranches);
 
         addButtonToFooter(btnCommit);
         addButtonToFooter(btnCancel);
@@ -130,70 +129,38 @@ public class CommitViewImpl extends Window implements CommitView {
         }
     }
 
-    /** {@inheritDoc} */
     @NotNull
     @Override
     public String getMessage() {
         return message.getText();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void setMessage(@NotNull String message) {
         this.message.setText(message);
     }
 
-    /** {@inheritDoc} */
     @Override
-    public boolean isAddAllExceptNew() {
-        return this.addAll.getValue();
+    public void setRemoteBranchesList(List<Branch> branches) {
+        remoteBranches.clear();
+        branches.forEach(branch -> remoteBranches.addItem(branch.getDisplayName()));
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setAddAllExceptNew(boolean isAddAllExceptNew) {
-        this.addAll.setValue(isAddAllExceptNew);
-    }
-
-    /** {@inheritDoc} */
     @Override
     public boolean isAmend() {
         return amend.getValue();
     }
 
-    /** {@inheritDoc} */
     @Override
-    public void setAmend(boolean isAmend) {
-        amend.setValue(isAmend);
+    public boolean isPushAfterCommit() {
+        return pushAfterCommit.getValue();
     }
 
-    @Override
-    public boolean isAddSelectedFiles() {
-        return this.addSelection.getValue();
-    }
-
-    @Override
-    public void setAddSelectedFiles(final boolean includeSelection) {
-        this.addSelection.setValue(includeSelection);
-    }
-
-    @Override
-    public boolean isCommitAllFiles() {
-        return this.commitAllSelection.getValue();
-    }
-
-    @Override
-    public void setCommitAllFiles(final boolean onlySelection) {
-        this.commitAllSelection.setValue(onlySelection);
-    }
-
-    /** {@inheritDoc} */
     @Override
     public void setEnableCommitButton(boolean enable) {
         btnCommit.setEnabled(enable);
     }
 
-    /** {@inheritDoc} */
     @Override
     public void focusInMessageField() {
         new Timer() {
@@ -204,19 +171,16 @@ public class CommitViewImpl extends Window implements CommitView {
         }.schedule(300);
     }
 
-    /** {@inheritDoc} */
     @Override
     public void close() {
         this.hide();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void showDialog() {
         this.show();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
@@ -227,32 +191,109 @@ public class CommitViewImpl extends Window implements CommitView {
         delegate.onValueChanged();
     }
 
-    @UiHandler("addAll")
-    public void onAddAllValueChange(final ValueChangeEvent<Boolean> event) {
-        if (event.getValue()) {
-            this.addSelection.setValue(false);
-        }
-    }
-
-    @UiHandler("addSelection")
-    public void onAddSelectionValueChange(final ValueChangeEvent<Boolean> event) {
-        if (event.getValue()) {
-            this.addAll.setValue(false);
-        }
-    }
-
-    @UiHandler("commitAllSelection")
-    public void onOnlySelectionValueChange(final ValueChangeEvent<Boolean> event) {
-        this.commitAllSelection.setValue(event.getValue());
-    }
-
     @UiHandler("amend")
     public void onAmendValueChange(final ValueChangeEvent<Boolean> event) {
         if (event.getValue()) {
             this.delegate.setAmendCommitMessage();
         } else {
             this.message.setValue("");
-            this.setEnableCommitButton(false);
+        }
+        delegate.onValueChanged();
+    }
+
+    @Override
+    public void setChangedPanelView(ChangedPanelView changedPanelView) {
+        this.render = new ChangedPanelRender(changedPanelView);
+        this.changedPanelView = changedPanelView;
+        changedPanelView.setTreeRender(render);
+        this.changedPanel.add(changedPanelView);
+    }
+
+    @Override
+    public void
+    checkCheckBoxes(Set<Path> paths) {
+        render.setNodePaths(changedPanelView.getNodePaths());
+        paths.forEach(path -> render.handleNodeCheckBox(path, false));
+    }
+
+    @Override
+    public String getRemoteBranch() {
+        return remoteBranches.getSelectedValue();
+    }
+
+    private class ChangedPanelRender extends DefaultPresentationRenderer<Node> {
+
+        private final ChangedPanelView changedPanelView;
+        private final Set<Path>        unselectedNodePaths;
+
+        private Set<Path> allNodePaths;
+
+        ChangedPanelRender(ChangedPanelView changedPanelView) {
+            super(changedPanelView.getTreeStyles());
+            this.changedPanelView = changedPanelView;
+            this.unselectedNodePaths = new HashSet<>();
+            this.allNodePaths = new HashSet<>();
+        }
+
+        @Override
+        public Element render(final Node node, final String domID, final Tree.Joint joint, final int depth) {
+            Element rootContainer = super.render(node, domID, joint, depth);
+            Element nodeContainer = rootContainer.getFirstChildElement();
+            final Element checkBoxElement = new CheckBox().getElement();
+            final InputElement checkBoxInputElement = (InputElement)checkBoxElement.getElementsByTagName("input").getItem(0);
+            final Path nodePath = node instanceof ChangedFileNode ? Path.valueOf(node.getName()) : ((ChangedFolderNode)node).getPath();
+            checkBoxInputElement.setChecked(!unselectedNodePaths.contains(nodePath));
+            Event.sinkEvents(checkBoxElement, Event.ONCLICK);
+            Event.setEventListener(checkBoxElement, event -> {
+                if (Event.ONCLICK == event.getTypeInt() && event.getTarget().getTagName().equalsIgnoreCase("label")) {
+                    handleNodeCheckBox(nodePath, checkBoxInputElement.isChecked());
+
+                    changedPanelView.refreshNodes();
+                    delegate.onValueChanged();
+                }
+            });
+
+            nodeContainer.insertAfter(checkBoxElement, nodeContainer.getFirstChild());
+            return rootContainer;
+        }
+
+        void setNodePaths(Set<Path> paths) {
+            allNodePaths = paths;
+            unselectedNodePaths.clear();
+            unselectedNodePaths.addAll(paths);
+        }
+
+        void handleNodeCheckBox(Path nodePath, boolean value) {
+            allNodePaths.stream()
+                        .sorted(Comparator.comparing(Path::toString))
+                        .filter(path -> !(path.equals(nodePath) || path.isEmpty()) && path.isPrefixOf(nodePath) &&
+                                        !hasSelectedChildes(path))
+                        .forEach(path -> saveCheckBoxSelection(value, path));
+
+            allNodePaths.stream().sorted((path1, path2) -> path2.toString().compareTo(path1.toString()))
+                        .filter(path -> !path.isEmpty() &&
+                                        (nodePath.isPrefixOf(path) || path.isPrefixOf(nodePath) && !hasSelectedChildes(path)))
+                        .forEach(path -> saveCheckBoxSelection(value, path));
+        }
+
+        private void saveCheckBoxSelection(boolean checkBoxValue, Path path) {
+            if (checkBoxValue) {
+                unselectedNodePaths.add(path);
+            } else {
+                unselectedNodePaths.remove(path);
+            }
+            if (delegate.getChangedFiles().contains(path.toString())) {
+                delegate.onFileNodeCheckBoxValueChanged(path, !checkBoxValue);
+            }
+        }
+
+        private boolean hasSelectedChildes(Path givenPath) {
+            Optional<Path> optional = allNodePaths.stream()
+                                                  .filter(path -> givenPath.isPrefixOf(path) &&
+                                                                  !path.equals(givenPath) &&
+                                                                  !unselectedNodePaths.contains(path))
+                                                  .findAny();
+            return optional.isPresent();
         }
     }
 }

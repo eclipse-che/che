@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.branchList;
+package org.eclipse.che.ide.ext.git.client.compare.branchlist;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
@@ -28,7 +28,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
-import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.changedlist.ChangedListPresenter;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;

@@ -42,7 +42,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import static org.eclipse.che.ide.ext.git.client.compare.branchList.BranchListPresenter.BRANCH_LIST_COMMAND_NAME;
+import static org.eclipse.che.ide.ext.git.client.compare.branchlist.BranchListPresenter.BRANCH_LIST_COMMAND_NAME;
 import static org.eclipse.che.ide.ext.git.client.remote.RemotePresenter.REMOTE_REPO_COMMAND_NAME;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 

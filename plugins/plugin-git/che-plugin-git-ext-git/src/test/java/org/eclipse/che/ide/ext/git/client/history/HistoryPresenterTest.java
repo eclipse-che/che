@@ -24,7 +24,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
-import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.changedlist.ChangedListPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.junit.Test;
 import org.mockito.InjectMocks;
