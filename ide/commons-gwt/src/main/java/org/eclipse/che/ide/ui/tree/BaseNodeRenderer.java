@@ -17,7 +17,7 @@ import elemental.html.SpanElement;
  * Base node renderer which do nothing.
  *
  * @author Vlad Zhukovskyi
- * @since 5.10.0
+ * @since 5.11.0
  */
 public abstract class BaseNodeRenderer<D> implements NodeRenderer<D> {
     @Override

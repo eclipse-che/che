@@ -43,7 +43,7 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
  * @see ProcessTreeNodeRenderStrategy
  * @see HasAddTerminalClickHandler
  * @see HasPreviewSshClickHandler
- * @since 5.10.0
+ * @since 5.11.0
  */
 @Singleton
 public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy, HasAddTerminalClickHandler, HasPreviewSshClickHandler {

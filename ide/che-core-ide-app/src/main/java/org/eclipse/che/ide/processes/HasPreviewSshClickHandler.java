@@ -15,7 +15,7 @@ package org.eclipse.che.ide.processes;
  *
  * @author Vlad Zhukovskyi
  * @see PreviewSshClickHandler
- * @since 5.10.0
+ * @since 5.11.0
  */
 public interface HasPreviewSshClickHandler {
 

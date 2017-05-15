@@ -15,7 +15,7 @@ package org.eclipse.che.ide.terminal;
  *
  * @author Vlad Zhukovskyi
  * @see AddTerminalClickHandler
- * @since 5.10.0
+ * @since 5.11.0
  */
 public interface HasAddTerminalClickHandler {
 

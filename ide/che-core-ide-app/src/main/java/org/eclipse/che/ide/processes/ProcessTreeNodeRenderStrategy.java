@@ -26,7 +26,7 @@ import org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType;
  * {@code nodeType} is represents by {@link ProcessNodeType#getStringValue()}.
  *
  * @author Vlad Zhukovskyi
- * @since 5.10.0
+ * @since 5.11.0
  */
 public interface ProcessTreeNodeRenderStrategy {
 

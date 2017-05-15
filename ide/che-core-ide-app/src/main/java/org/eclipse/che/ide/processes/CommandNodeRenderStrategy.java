@@ -37,7 +37,7 @@ import static org.eclipse.che.ide.util.dom.DomUtils.ensureDebugId;
  * @author Vlad Zhukovskyi
  * @see ProcessTreeNodeRenderStrategy
  * @see HasStopProcessHandler
- * @since 5.10.0
+ * @since 5.11.0
  */
 @Singleton
 public class CommandNodeRenderStrategy implements ProcessTreeNodeRenderStrategy, HasStopProcessHandler {
