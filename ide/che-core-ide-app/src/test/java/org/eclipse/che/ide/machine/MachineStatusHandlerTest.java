@@ -14,6 +14,10 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.EndpointIdConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.MethodNameConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.ParamsConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.SendConfiguratorFromOne;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -43,6 +47,7 @@ import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.Ev
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.RUNNING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -84,6 +89,14 @@ public class MachineStatusHandlerTest {
     private WorkspaceRuntimeDto                     workspaceRuntime;
     @Mock
     private RequestTransmitter                      transmitter;
+    @Mock
+    private EndpointIdConfigurator                  endpointIdConfigurator;
+    @Mock
+    private MethodNameConfigurator                  methodNameConfigurator;
+    @Mock
+    private ParamsConfigurator                      paramsConfigurator;
+    @Mock
+    private SendConfiguratorFromOne                 sendConfiguratorFromOne;
     @Captor
     private ArgumentCaptor<Operation<WorkspaceDto>> workspaceCaptor;
 
@@ -105,6 +118,10 @@ public class MachineStatusHandlerTest {
         when(machineStatusChangedEvent.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(machineStatusChangedEvent.getMachineName()).thenReturn(MACHINE_NAME);
         when(workspaceServiceClient.getWorkspace(WORKSPACE_ID)).thenReturn(workspacePromise);
+        when(transmitter.newRequest()).thenReturn(endpointIdConfigurator);
+        when(endpointIdConfigurator.endpointId(anyString())).thenReturn(methodNameConfigurator);
+        when(methodNameConfigurator.methodName(anyString())).thenReturn(paramsConfigurator);
+        when(paramsConfigurator.paramsAsString(anyString())).thenReturn(sendConfiguratorFromOne);
     }
 
     @Test
