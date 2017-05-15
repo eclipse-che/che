@@ -158,8 +158,7 @@ public class WsMasterModule extends AbstractModule {
         launchers.addBinding().to(SshAgentLauncher.class);
 
         bindConstant().annotatedWith(Names.named("machine.ws_agent.run_command"))
-                      .to("export JPDA_ADDRESS=\"4403\"  JAVA_OPTS=\"-XX:+UseG1GC -XX:+UseStringDeduplication\" " +
-                          " && ~/che/ws-agent/bin/catalina.sh jpda run");
+                      .to("export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
         bindConstant().annotatedWith(Names.named("machine.terminal_agent.run_command"))
                       .to("$HOME/che/terminal/che-websocket-terminal " +
                           "-addr :4411 " +
