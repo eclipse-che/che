@@ -45,7 +45,6 @@ public class WsConnectionListener implements ConnectionClosedHandler, Connection
             public void onWorkspaceStarted(WorkspaceStartedEvent workspace) {
                 messageBus = messageBusProvider.getMessageBus();
 
-                Log.info(getClass(), "ws started add on close handler");
                 messageBus.addOnCloseHandler(WsConnectionListener.this);
             }
         });
@@ -65,7 +64,6 @@ public class WsConnectionListener implements ConnectionClosedHandler, Connection
 
     @Override
     public void onOpen() {
-        Log.info(getClass(), "open");
         messageBus.addOnCloseHandler(this);
     }
 }

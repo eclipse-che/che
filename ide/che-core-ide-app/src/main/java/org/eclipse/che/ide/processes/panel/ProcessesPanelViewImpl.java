@@ -113,7 +113,6 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         processWidgets = new HashMap<>();
         widget2TreeNodes = new HashMap<>();
 
-
         renderer.setAddTerminalClickHandler(new AddTerminalClickHandler() {
             @Override
             public void onAddTerminalClick(@NotNull String machineId) {
@@ -136,7 +135,6 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             @Override
             public void onCloseProcessOutputClick(ProcessTreeNode node) {
-                Log.info(getClass(), "close by click close button in the machine tree");
                 switch (node.getType()) {
                     case COMMAND_NODE:
                         delegate.onCloseCommandOutputClick(node);
