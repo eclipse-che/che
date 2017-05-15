@@ -22,13 +22,8 @@ import org.slf4j.LoggerFactory;
 public class IDE implements EntryPoint {
     /** This is the entry point method. */
 
-    private Logger logger = LoggerFactory.getLogger("zalupa");
-
     @Override
     public void onModuleLoad() {
-        logger.debug("xui");
-        logger.error("pizda");
-        logger.info("siska");
         IDEInjector injector = GWT.create(IDEInjector.class);
         @SuppressWarnings("unused")
         BootstrapController bootstrap = injector.getBootstrapController();
