@@ -13,6 +13,9 @@ import {ComposeParser} from '../../../../../components/api/environment/compose-p
 import {DockerfileParser} from '../../../../../components/api/environment/docker-file-parser';
 import {CheBranding} from '../../../../../components/branding/che-branding.factory';
 
+const DOCKERFILE = 'dockerfile';
+const COMPOSE = 'compose';
+
 /**
  * @ngdoc controller
  * @name workspaces.recipe-authoring.controller:WorkspaceRecipeAuthoringController
@@ -68,7 +71,7 @@ export class WorkspaceRecipeAuthoringController {
       this.recipeScriptCopy = this.recipeScript;
     });
     $scope.$watch(() => { return this.recipeFormat; }, () => {
-      this.recipeFormatCopy = this.recipeFormat || 'compose';
+      this.recipeFormatCopy = this.recipeFormat || COMPOSE;
     });
 
     this.onRecipeChange();
@@ -99,13 +102,13 @@ export class WorkspaceRecipeAuthoringController {
   detectFormat(content: string): void {
     // compose format detection:
     if (content.match(/^services:\n/m)) {
-      this.recipeFormatCopy = 'compose';
+      this.recipeFormatCopy = COMPOSE;
       this.editorOptions.mode = 'text/x-yaml';
     }
 
     // docker file format detection
     if (content.match(/^FROM\s+\w+/m)) {
-      this.recipeFormatCopy = 'dockerfile';
+      this.recipeFormatCopy = DOCKERFILE;
       this.editorOptions.mode = 'text/x-dockerfile';
     }
   }
@@ -118,9 +121,9 @@ export class WorkspaceRecipeAuthoringController {
     }
 
     try {
-      if (this.recipeFormatCopy === 'dockerfile') {
+      if (this.recipeFormatCopy === DOCKERFILE) {
         this.dockerfileParser.parse(content);
-      } else if (this.recipeFormatCopy === 'compose') {
+      } else if (this.recipeFormatCopy === COMPOSE) {
         this.composeParser.parse(content);
       }
     } catch (e) {
