@@ -29,7 +29,7 @@ public interface JsonRpcMarshaller {
      * Serializes JSON RPC request object into a string
      *
      * @param request
-     *         response
+     *         request
      * @return string representation
      */
     String marshall(JsonRpcRequest request);
