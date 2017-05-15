@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons.reception;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
+import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Result configurator provide means to configure result type in a
@@ -23,15 +24,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * DTO. This configurator is used when we have no defined request params.
  */
 public class ResultConfiguratorFromNone {
-    private final Logger                logger;
-    private final LoggerFactory         loggerFactory;
+    private final static Logger LOGGER = getLogger(ResultConfiguratorFromNone.class);
+
     private final RequestHandlerManager requestHandlerManager;
 
     private final String method;
 
-    ResultConfiguratorFromNone(LoggerFactory loggerFactory, RequestHandlerManager requestHandlerManager, String method) {
-        this.logger = loggerFactory.get(getClass());
-        this.loggerFactory = loggerFactory;
+    ResultConfiguratorFromNone(RequestHandlerManager requestHandlerManager, String method) {
         this.requestHandlerManager = requestHandlerManager;
 
         this.method = method;
@@ -39,57 +38,57 @@ public class ResultConfiguratorFromNone {
 
     public <R> FunctionConfiguratorNoneToMany<R> resultAsListOfDto(Class<R> rClass) {
         checkNotNull(rClass, "Result class must not be null");
-        logger.debug("Configuring incoming request result: method: " + method + ", result list items class: " + rClass);
+        LOGGER.debug("Configuring incoming request result: method: " + method + ", result list items class: " + rClass);
 
-        return new FunctionConfiguratorNoneToMany<>(loggerFactory, requestHandlerManager, method, rClass);
+        return new FunctionConfiguratorNoneToMany<>(requestHandlerManager, method, rClass);
     }
 
     public FunctionConfiguratorNoneToMany<String> resultAsListOfString() {
-        logger.debug("Configuring incoming request result: method: " + method + ", result list items class: " + String.class);
+        LOGGER.debug("Configuring incoming request result: method: " + method + ", result list items class: " + String.class);
 
-        return new FunctionConfiguratorNoneToMany<>(loggerFactory, requestHandlerManager, method, String.class);
+        return new FunctionConfiguratorNoneToMany<>(requestHandlerManager, method, String.class);
     }
 
     public FunctionConfiguratorNoneToMany<Double> resultAsListOfDouble() {
-        logger.debug("Configuring incoming request result: method: " + method + ", result list items class: " + Double.class);
+        LOGGER.debug("Configuring incoming request result: method: " + method + ", result list items class: " + Double.class);
 
-        return new FunctionConfiguratorNoneToMany<>(loggerFactory, requestHandlerManager, method, Double.class);
+        return new FunctionConfiguratorNoneToMany<>(requestHandlerManager, method, Double.class);
     }
 
     public FunctionConfiguratorNoneToMany<Boolean> resultAsListOfBoolean() {
-        logger.debug("Configuring incoming request result: method: " + method + ", result list items class: " + Boolean.class);
+        LOGGER.debug("Configuring incoming request result: method: " + method + ", result list items class: " + Boolean.class);
 
-        return new FunctionConfiguratorNoneToMany<>(loggerFactory, requestHandlerManager, method, Boolean.class);
+        return new FunctionConfiguratorNoneToMany<>(requestHandlerManager, method, Boolean.class);
     }
 
     public <R> FunctionConfiguratorNoneToOne<R> resultAsDto(Class<R> rClass) {
         checkNotNull(rClass, "Result class must not be null");
-        logger.debug("Configuring incoming request result: method: " + method + ", result object class: " + rClass);
+        LOGGER.debug("Configuring incoming request result: method: " + method + ", result object class: " + rClass);
 
-        return new FunctionConfiguratorNoneToOne<>(loggerFactory, requestHandlerManager, method, rClass);
+        return new FunctionConfiguratorNoneToOne<>(requestHandlerManager, method, rClass);
     }
 
     public FunctionConfiguratorNoneToOne<String> resultAsString() {
-        logger.debug("Configuring incoming request result: method: " + method + ", result object class: " + String.class);
+        LOGGER.debug("Configuring incoming request result: method: " + method + ", result object class: " + String.class);
 
-        return new FunctionConfiguratorNoneToOne<>(loggerFactory, requestHandlerManager, method, String.class);
+        return new FunctionConfiguratorNoneToOne<>(requestHandlerManager, method, String.class);
     }
 
     public FunctionConfiguratorNoneToOne<Double> resultAsDouble() {
-        logger.debug("Configuring incoming request result: method: " + method + ", result object class: " + Double.class);
+        LOGGER.debug("Configuring incoming request result: method: " + method + ", result object class: " + Double.class);
 
-        return new FunctionConfiguratorNoneToOne<>(loggerFactory, requestHandlerManager, method, Double.class);
+        return new FunctionConfiguratorNoneToOne<>(requestHandlerManager, method, Double.class);
     }
 
     public FunctionConfiguratorNoneToOne<Boolean> resultAsBoolean() {
-        logger.debug("Configuring incoming request result: method: " + method + ", result object class: " + Boolean.class);
+        LOGGER.debug("Configuring incoming request result: method: " + method + ", result object class: " + Boolean.class);
 
-        return new FunctionConfiguratorNoneToOne<>(loggerFactory, requestHandlerManager, method, Boolean.class);
+        return new FunctionConfiguratorNoneToOne<>(requestHandlerManager, method, Boolean.class);
     }
 
     public ConsumerConfiguratorNoneToNone noResult() {
-        logger.debug("Configuring incoming request result: " + "method: " + method + ", no result is expected.");
+        LOGGER.debug("Configuring incoming request result: " + "method: " + method + ", no result is expected.");
 
-        return new ConsumerConfiguratorNoneToNone(loggerFactory, requestHandlerManager, method);
+        return new ConsumerConfiguratorNoneToNone(requestHandlerManager, method);
     }
 }

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons;
 
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
-import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -34,8 +32,6 @@ public class JsonRpcMessageReceiverTest {
     static final String MESSAGE     = "message";
     static final String ENDPOINT_ID = "endpoint-id";
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    LoggerFactory           loggerFactory;
     @Mock
     RequestDispatcher       requestDispatcher;
     @Mock

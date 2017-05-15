@@ -10,18 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons.transmission;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcParams;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcRequest;
 import org.eclipse.che.api.core.jsonrpc.commons.ResponseDispatcher;
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;
+import org.slf4j.Logger;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Configurator defines the type of a result (if present) and send a request.
@@ -33,7 +34,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *         type of params objects
  */
 public class SendConfiguratorFromOne<P> {
-    private final Logger                      logger;
+    private final static Logger LOGGER = getLogger(SendConfiguratorFromOne.class);
+
     private final ResponseDispatcher          dispatcher;
     private final WebSocketMessageTransmitter transmitter;
     private final JsonRpcMarshaller           marshaller;
@@ -42,9 +44,8 @@ public class SendConfiguratorFromOne<P> {
     private final P      pValue;
     private final String endpointId;
 
-    SendConfiguratorFromOne(LoggerFactory loggerFactory, JsonRpcMarshaller marshaller, ResponseDispatcher dispatcher,
-                            WebSocketMessageTransmitter transmitter, String method, P pValue, String endpointId) {
-        this.logger = loggerFactory.get(getClass());
+    SendConfiguratorFromOne(JsonRpcMarshaller marshaller, ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter,
+                            String method, P pValue, String endpointId) {
         this.marshaller = marshaller;
         this.dispatcher = dispatcher;
         this.transmitter = transmitter;
@@ -55,7 +56,7 @@ public class SendConfiguratorFromOne<P> {
     }
 
     public void sendAndSkipResult() {
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "method: " + method + ", " +
                      (pValue != null ? "params object class: " + pValue.getClass() + ", " : "") +
@@ -69,7 +70,7 @@ public class SendConfiguratorFromOne<P> {
 
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -84,7 +85,7 @@ public class SendConfiguratorFromOne<P> {
     public JsonRpcPromise<String> sendAndReceiveResultAsString() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -99,7 +100,7 @@ public class SendConfiguratorFromOne<P> {
     public JsonRpcPromise<Double> sendAndReceiveResultAsDouble() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -114,7 +115,7 @@ public class SendConfiguratorFromOne<P> {
     public JsonRpcPromise<Boolean> sendAndReceiveResultAsBoolean() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -130,7 +131,7 @@ public class SendConfiguratorFromOne<P> {
 
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -145,7 +146,7 @@ public class SendConfiguratorFromOne<P> {
     public JsonRpcPromise<List<String>> sendAndReceiveResultAsListOfString() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -159,7 +160,7 @@ public class SendConfiguratorFromOne<P> {
     public JsonRpcPromise<List<Boolean>> sendAndReceiveResultAsListOfBoolean() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -173,7 +174,7 @@ public class SendConfiguratorFromOne<P> {
     public JsonRpcPromise<Void> sendAndReceiveResultAsEmpty() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +

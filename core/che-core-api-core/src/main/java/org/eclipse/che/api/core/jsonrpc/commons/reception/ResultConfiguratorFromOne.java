@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons.reception;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
+import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Result configurator provide means to configure result type in a
@@ -24,16 +25,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * as a single object.
  */
 public class ResultConfiguratorFromOne<P> {
-    private final Logger                logger;
-    private final LoggerFactory         loggerFactory;
+    private final static Logger LOGGER = getLogger(ResultConfiguratorFromOne.class);
+
     private final RequestHandlerManager requestHandlerManager;
 
     private final String   method;
     private final Class<P> pClass;
 
-    ResultConfiguratorFromOne(LoggerFactory loggerFactory, RequestHandlerManager requestHandlerManager, String method, Class<P> pClass) {
-        this.logger = loggerFactory.get(getClass());
-        this.loggerFactory = loggerFactory;
+    ResultConfiguratorFromOne(RequestHandlerManager requestHandlerManager, String method, Class<P> pClass) {
         this.requestHandlerManager = requestHandlerManager;
 
         this.method = method;
@@ -43,82 +42,82 @@ public class ResultConfiguratorFromOne<P> {
     public <R> FunctionConfiguratorOneToMany<P, R> resultAsListOfDto(Class<R> rClass) {
         checkNotNull(rClass, "Result class must not be null");
 
-        logger.debug("Configuring incoming request result: " +
+        LOGGER.debug("Configuring incoming request result: " +
                      "method: " + method + ", " +
                      "result list items class: " + rClass);
 
-        return new FunctionConfiguratorOneToMany<>(loggerFactory, requestHandlerManager, method, pClass, rClass);
+        return new FunctionConfiguratorOneToMany<>(requestHandlerManager, method, pClass, rClass);
     }
 
     public FunctionConfiguratorOneToOne<P, String> resultAsDtoString() {
-        logger.debug("Configuring incoming request result: " +
+        LOGGER.debug("Configuring incoming request result: " +
                      "method: " + method + ", " +
                      "result list items class: " + String.class);
 
-        return new FunctionConfiguratorOneToOne<>(loggerFactory, requestHandlerManager, method, pClass, String.class);
+        return new FunctionConfiguratorOneToOne<>(requestHandlerManager, method, pClass, String.class);
     }
 
     public FunctionConfiguratorOneToOne<P, Double> resultAsDtoDouble() {
-        logger.debug("Configuring incoming request result: " +
+        LOGGER.debug("Configuring incoming request result: " +
                      "method: " + method + ", " +
                      "result list items class: " + Double.class);
 
-        return new FunctionConfiguratorOneToOne<>(loggerFactory, requestHandlerManager, method, pClass, Double.class);
+        return new FunctionConfiguratorOneToOne<>(requestHandlerManager, method, pClass, Double.class);
     }
 
     public FunctionConfiguratorOneToOne<P, Boolean> resultAsDtoBoolean() {
-        logger.debug("Configuring incoming request result: " +
+        LOGGER.debug("Configuring incoming request result: " +
                      "method: " + method + ", " +
                      "result list items class: " + Boolean.class);
 
-        return new FunctionConfiguratorOneToOne<>(loggerFactory, requestHandlerManager, method, pClass, Boolean.class);
+        return new FunctionConfiguratorOneToOne<>(requestHandlerManager, method, pClass, Boolean.class);
     }
 
     public <R> FunctionConfiguratorOneToOne<P, R> resultAsDto(Class<R> rClass) {
         checkNotNull(rClass, "Result class must not be null");
 
-        logger.debug("Configuring incoming request result: " +
+        LOGGER.debug("Configuring incoming request result: " +
                      "method: " + method + ", " +
                      "result object class: " + rClass);
 
-        return new FunctionConfiguratorOneToOne<>(loggerFactory, requestHandlerManager, method, pClass, rClass);
+        return new FunctionConfiguratorOneToOne<>(requestHandlerManager, method, pClass, rClass);
     }
 
     public FunctionConfiguratorOneToOne<P, Void> resultAsEmpty() {
-        logger.debug("Configuring incoming request result: " +
+        LOGGER.debug("Configuring incoming request result: " +
                      "method: " + method + ", " +
                      "result object class: " + Void.class);
 
-        return new FunctionConfiguratorOneToOne<>(loggerFactory, requestHandlerManager, method, pClass, Void.class);
+        return new FunctionConfiguratorOneToOne<>(requestHandlerManager, method, pClass, Void.class);
     }
 
     public FunctionConfiguratorOneToOne<P, String> resultAsString() {
-        logger.debug("Configuring incoming request result: " +
+        LOGGER.debug("Configuring incoming request result: " +
                      "method: " + method + ", " +
                      "result object class: " + String.class);
 
-        return new FunctionConfiguratorOneToOne<>(loggerFactory, requestHandlerManager, method, pClass, String.class);
+        return new FunctionConfiguratorOneToOne<>(requestHandlerManager, method, pClass, String.class);
     }
 
     public FunctionConfiguratorOneToOne<P, Double> resultAsDouble() {
-        logger.debug("Configuring incoming request result: " +
+        LOGGER.debug("Configuring incoming request result: " +
                      "method: " + method + ", " +
                      "result object class: " + Double.class);
 
-        return new FunctionConfiguratorOneToOne<>(loggerFactory, requestHandlerManager, method, pClass, Double.class);
+        return new FunctionConfiguratorOneToOne<>(requestHandlerManager, method, pClass, Double.class);
     }
 
     public FunctionConfiguratorOneToOne<P, Boolean> resultAsBoolean() {
-        logger.debug("Configuring incoming request result: " +
+        LOGGER.debug("Configuring incoming request result: " +
                      "method: " + method + ", " +
                      "result object class: " + Boolean.class);
 
-        return new FunctionConfiguratorOneToOne<>(loggerFactory, requestHandlerManager, method, pClass, Boolean.class);
+        return new FunctionConfiguratorOneToOne<>(requestHandlerManager, method, pClass, Boolean.class);
     }
 
     public ConsumerConfiguratorOneToNone<P> noResult() {
-        logger.debug("Configuring incoming request having no result");
+        LOGGER.debug("Configuring incoming request having no result");
 
-        return new ConsumerConfiguratorOneToNone<>(loggerFactory, requestHandlerManager, method, pClass);
+        return new ConsumerConfiguratorOneToNone<>(requestHandlerManager, method, pClass);
     }
 }

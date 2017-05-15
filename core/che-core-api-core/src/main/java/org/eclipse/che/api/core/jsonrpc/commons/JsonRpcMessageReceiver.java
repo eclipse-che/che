@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons;
 
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageReceiver;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -20,6 +19,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Receives and process messages coming from web socket service. Basically
@@ -30,7 +30,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Singleton
 public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
-    private final Logger                  logger;
+    private final static Logger LOGGER = getLogger(JsonRpcMessageReceiver.class);
+
     private final RequestDispatcher       requestDispatcher;
     private final ResponseDispatcher      responseDispatcher;
     private final JsonRpcErrorTransmitter errorTransmitter;
@@ -38,13 +39,11 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
     private final JsonRpcUnmarshaller     jsonRpcUnmarshaller;
 
     @Inject
-    public JsonRpcMessageReceiver(LoggerFactory loggerFactory,
-                                  RequestDispatcher requestDispatcher,
+    public JsonRpcMessageReceiver(RequestDispatcher requestDispatcher,
                                   ResponseDispatcher responseDispatcher,
                                   JsonRpcErrorTransmitter errorTransmitter,
                                   JsonRpcQualifier jsonRpcQualifier,
                                   JsonRpcUnmarshaller jsonRpcUnmarshaller) {
-        this.logger = loggerFactory.get(getClass());
         this.requestDispatcher = requestDispatcher;
         this.responseDispatcher = responseDispatcher;
         this.errorTransmitter = errorTransmitter;
@@ -59,7 +58,7 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
         checkNotNull(message, "Message must not be null");
         checkArgument(!message.isEmpty(), "Message must not be empty");
 
-        logger.debug("Receiving message: " + message + ", from endpoint: " + endpointId);
+        LOGGER.debug("Receiving message: " + message + ", from endpoint: " + endpointId);
         if (!jsonRpcQualifier.isValidJson(message)) {
             String error = "An error occurred on the server while parsing the JSON text";
             errorTransmitter.transmit(endpointId, new JsonRpcException(-32700, error));
@@ -80,7 +79,7 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
     private void processError() {
         String error = "Something wen't wrong during incoming websocket message parsing";
         IllegalStateException exception = new IllegalStateException(error);
-        logger.error(error, exception);
+        LOGGER.error(error, exception);
         throw exception;
     }
 

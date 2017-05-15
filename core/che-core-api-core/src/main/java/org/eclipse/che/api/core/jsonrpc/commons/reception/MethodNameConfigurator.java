@@ -10,28 +10,27 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons.reception;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Method configurator is used to define method name that the request handler
  * will be associated with.
  */
 public class MethodNameConfigurator {
-    private final Logger                logger;
-    private final LoggerFactory         loggerFactory;
+    private final static Logger LOGGER = getLogger(MethodNameConfigurator.class);
+
     private final RequestHandlerManager requestHandlerManager;
 
     @Inject
-    MethodNameConfigurator(LoggerFactory loggerFactory, RequestHandlerManager requestHandlerManager) {
-        this.logger = loggerFactory.get(getClass());
-        this.loggerFactory = loggerFactory;
+    MethodNameConfigurator(RequestHandlerManager requestHandlerManager) {
         this.requestHandlerManager = requestHandlerManager;
     }
 
@@ -39,8 +38,8 @@ public class MethodNameConfigurator {
         checkNotNull(name, "Method name must not be null");
         checkArgument(!name.isEmpty(), "Method name must not be empty");
 
-        logger.debug("Configuring incoming request method name name: "+ name);
+        LOGGER.debug("Configuring incoming request method name name: " + name);
 
-        return new ParamsConfigurator(loggerFactory, requestHandlerManager, name);
+        return new ParamsConfigurator(requestHandlerManager, name);
     }
 }

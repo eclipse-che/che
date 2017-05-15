@@ -12,14 +12,14 @@ package org.eclipse.che.api.core.jsonrpc.commons;
 
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Transmits json rpc requests containing DTO objects. The naming of methods
@@ -35,12 +35,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Singleton
 public class RequestTransmitter {
-    private final Logger                     logger;
+    private final static Logger LOGGER = getLogger(RequestTransmitter.class);
+
     private final BuildingRequestTransmitter transmitter;
 
     @Inject
-    public RequestTransmitter(LoggerFactory loggerFactory, BuildingRequestTransmitter transmitter) {
-        this.logger = loggerFactory.get(getClass());
+    public RequestTransmitter(BuildingRequestTransmitter transmitter) {
         this.transmitter = transmitter;
     }
 
@@ -79,7 +79,7 @@ public class RequestTransmitter {
         checkEndpointId(endpointId);
         checkMethodName(method);
 
-        logger.debug("Initiating a transmission of a notification: " +
+        LOGGER.debug("Initiating a transmission of a notification: " +
                      "endpoint ID: " + endpointId + ", " +
                      "method: " + method);
 
@@ -107,7 +107,7 @@ public class RequestTransmitter {
         checkMethodName(method);
         checkParamsValue(pValue);
 
-        logger.debug("Initiating a transmission of a notification:" +
+        LOGGER.debug("Initiating a transmission of a notification:" +
                      "endpoint ID: " + endpointId + ", " +
                      "method: " + method + ", " +
                      "params: " + pValue);
@@ -135,7 +135,7 @@ public class RequestTransmitter {
         checkMethodName(method);
         checkParamsValue(pValue);
 
-        logger.debug("Initiating a transmission of a notification:" +
+        LOGGER.debug("Initiating a transmission of a notification:" +
                      "endpoint ID: " + endpointId + ", " +
                      "method: " + method + ", " +
                      "string: " + pValue);
@@ -165,7 +165,7 @@ public class RequestTransmitter {
         checkMethodName(method);
         checkParamsValue(pValue);
 
-        logger.debug("Initiating a transmission of a notification:" +
+        LOGGER.debug("Initiating a transmission of a notification:" +
                      "endpoint ID: " + endpointId + ", " +
                      "method: " + method + ", " +
                      "params list: " + pValue);
@@ -195,7 +195,7 @@ public class RequestTransmitter {
         checkMethodName(method);
         checkResultClass(rClass);
 
-        logger.debug("Initiating a transmission of a request:" +
+        LOGGER.debug("Initiating a transmission of a request:" +
                      "endpoint ID: " + endpointId + ", " +
                      "method: " + method + ", " +
                      "result class: " + rClass);
@@ -225,7 +225,7 @@ public class RequestTransmitter {
         checkMethodName(method);
         checkResultClass(rClass);
 
-        logger.debug("Initiating a transmission of a request: " +
+        LOGGER.debug("Initiating a transmission of a request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "method: " + method + ", " +
                      "result list class: " + rClass);
@@ -260,7 +260,7 @@ public class RequestTransmitter {
         checkParamsValue(pValue);
         checkResultClass(rClass);
 
-        logger.debug("Initiating a transmission of a request: " +
+        LOGGER.debug("Initiating a transmission of a request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "method: " + method + ", " +
                      "params object class: " + pValue.getClass() + ", " +
@@ -297,7 +297,7 @@ public class RequestTransmitter {
         checkParamsValue(pValue);
         checkResultClass(rClass);
 
-        logger.debug("Initiating a transmission of a request: " +
+        LOGGER.debug("Initiating a transmission of a request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "method: " + method + ", " +
                      "params list item class: " + pValue.iterator().next().getClass() + ", " +
@@ -334,7 +334,7 @@ public class RequestTransmitter {
         checkParamsValue(pValue);
         checkResultClass(rClass);
 
-        logger.debug("Initiating a transmission of a request: " +
+        LOGGER.debug("Initiating a transmission of a request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "method: " + method + ", " +
                      "params object class: " + pValue.getClass() + ", " +
@@ -370,7 +370,7 @@ public class RequestTransmitter {
         checkMethodName(method);
         checkResultClass(rClass);
 
-        logger.debug("Initiating a transmission of a request: " +
+        LOGGER.debug("Initiating a transmission of a request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "method: " + method + ", " +
                      "params list item class: " + pValue.iterator().next().getClass() + ", " +

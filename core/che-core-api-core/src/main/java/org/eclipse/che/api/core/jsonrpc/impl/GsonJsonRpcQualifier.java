@@ -16,24 +16,25 @@ import com.google.gson.JsonParser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcQualifier;
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @Singleton
 public class GsonJsonRpcQualifier implements JsonRpcQualifier {
-    private final Logger     logger;
+    private final static Logger LOGGER = getLogger(GsonJsonRpcQualifier.class);
+
     private final JsonParser jsonParser;
 
     @Inject
-    public GsonJsonRpcQualifier(LoggerFactory loggerFactory, JsonParser jsonParser) {
-        this.logger = loggerFactory.get(getClass());
+    public GsonJsonRpcQualifier(JsonParser jsonParser) {
         this.jsonParser = jsonParser;
     }
 
@@ -42,15 +43,15 @@ public class GsonJsonRpcQualifier implements JsonRpcQualifier {
         checkNotNull(message, "Message must not be null");
         checkArgument(!message.isEmpty(), "Message must not be empty");
 
-        logger.debug("Validating message: {}", message);
+        LOGGER.debug("Validating message: {}", message);
 
         try {
             jsonParser.parse(message);
 
-            logger.debug("Validation successful");
+            LOGGER.debug("Validation successful");
             return true;
         } catch (JsonParseException e) {
-            logger.debug("Validation failed: {}", e.getMessage(), e);
+            LOGGER.debug("Validation failed: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -59,16 +60,16 @@ public class GsonJsonRpcQualifier implements JsonRpcQualifier {
     public boolean isJsonRpcRequest(String message) {
         checkNotNull(message, "Message must not be null");
         checkArgument(!message.isEmpty(), "Message must not be empty");
-        logger.debug("Qualifying message: " + message);
+        LOGGER.debug("Qualifying message: " + message);
 
         JsonObject jsonObject = jsonParser.parse(message).getAsJsonObject();
-        logger.debug("Json keys: " + jsonObject.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toSet()));
+        LOGGER.debug("Json keys: " + jsonObject.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toSet()));
 
         if (jsonObject.has("method")) {
-            logger.debug("Qualified to request");
+            LOGGER.debug("Qualified to request");
             return true;
         } else {
-            logger.debug("Qualified to response");
+            LOGGER.debug("Qualified to response");
             return false;
         }
     }
@@ -77,13 +78,13 @@ public class GsonJsonRpcQualifier implements JsonRpcQualifier {
     public boolean isJsonRpcResponse(String message) {
         checkNotNull(message, "Message must not be null");
         checkArgument(!message.isEmpty(), "Message must not be empty");
-        logger.debug("Qualifying message: " + message);
+        LOGGER.debug("Qualifying message: " + message);
 
         JsonObject jsonObject = jsonParser.parse(message).getAsJsonObject();
-        logger.debug("Json keys: " + jsonObject.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toSet()));
+        LOGGER.debug("Json keys: " + jsonObject.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toSet()));
 
         if (jsonObject.has("error") != jsonObject.has("result")) {
-            logger.debug("Qualified to response");
+            LOGGER.debug("Qualified to response");
             return true;
         }
         return false;

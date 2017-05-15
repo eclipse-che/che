@@ -15,18 +15,15 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcResponse;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,8 +43,6 @@ public class JsonRpcErrorTransmitterTest {
     WebSocketMessageTransmitter transmitter;
     @Mock
     JsonRpcMarshaller           marshaller;
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    LoggerFactory               loggerFactory;
     @InjectMocks
     JsonRpcErrorTransmitter     errorTransmitter;
 
@@ -66,13 +61,6 @@ public class JsonRpcErrorTransmitterTest {
         when(jsonRpcException.getCode()).thenReturn(ERROR_CODE);
         when(jsonRpcException.getId()).thenReturn(REQUEST_ID);
         when(jsonRpcException.getMessage()).thenReturn(ERROR_MESSAGE);
-    }
-
-    @Test
-    public void shouldLogMessage() throws Exception {
-        errorTransmitter.transmit(ENDPOINT_ID, jsonRpcException);
-
-        verify(loggerFactory.get(eq(JsonRpcErrorTransmitter.class))).debug(anyString());
     }
 
     @Test

@@ -10,27 +10,28 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons.transmission;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.ResponseDispatcher;
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Method name configurator to defined method name that the request
  * will have.
  */
 public class MethodNameConfigurator {
-    public static AtomicInteger id = new AtomicInteger(0);
+    private final static Logger        LOGGER = getLogger(MethodNameConfigurator.class);
 
-    private final Logger                      logger;
-    private final LoggerFactory               loggerFactory;
+    public static        AtomicInteger id     = new AtomicInteger(0);
+
     private final JsonRpcMarshaller           marshaller;
     private final ResponseDispatcher          dispatcher;
     private final WebSocketMessageTransmitter transmitter;
@@ -38,11 +39,9 @@ public class MethodNameConfigurator {
     private final String                      endpointId;
 
     @Inject
-    MethodNameConfigurator(LoggerFactory loggerFactory, JsonRpcMarshaller marshaller, ResponseDispatcher dispatcher,
-                           WebSocketMessageTransmitter transmitter, String endpointId) {
-        this.logger = loggerFactory.get(getClass());
+    MethodNameConfigurator(JsonRpcMarshaller marshaller, ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter,
+                           String endpointId) {
         this.marshaller = marshaller;
-        this.loggerFactory = loggerFactory;
         this.dispatcher = dispatcher;
         this.transmitter = transmitter;
 
@@ -53,8 +52,8 @@ public class MethodNameConfigurator {
         checkNotNull(name, "Method name must not be null");
         checkArgument(!name.isEmpty(), "Method name must not be empty");
 
-        logger.debug("Configuring outgoing request method name name: " + name);
+        LOGGER.debug("Configuring outgoing request method name name: " + name);
 
-        return new ParamsConfigurator(loggerFactory, marshaller, dispatcher, transmitter, name, endpointId);
+        return new ParamsConfigurator(marshaller, dispatcher, transmitter, name, endpointId);
     }
 }

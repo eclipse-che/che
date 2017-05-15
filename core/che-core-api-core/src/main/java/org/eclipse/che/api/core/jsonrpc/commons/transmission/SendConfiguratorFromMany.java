@@ -10,18 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons.transmission;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcParams;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcRequest;
 import org.eclipse.che.api.core.jsonrpc.commons.ResponseDispatcher;
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;
+import org.slf4j.Logger;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Configurator defines the type of a result (if present) and send a request.
@@ -33,7 +34,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *         type of params list items
  */
 public class SendConfiguratorFromMany<P> {
-    private final Logger                      logger;
+    private final static Logger LOGGER = getLogger(SendConfiguratorFromMany.class);
+
     private final ResponseDispatcher          dispatcher;
     private final WebSocketMessageTransmitter transmitter;
     private final JsonRpcMarshaller           marshaller;
@@ -42,9 +44,8 @@ public class SendConfiguratorFromMany<P> {
     private final List<P> pListValue;
     private final String  endpointId;
 
-    SendConfiguratorFromMany(LoggerFactory loggerFactory, JsonRpcMarshaller marshaller, ResponseDispatcher dispatcher,
-                             WebSocketMessageTransmitter transmitter, String method, List<P> pListValue, String endpointId) {
-        this.logger = loggerFactory.get(getClass());
+    SendConfiguratorFromMany(JsonRpcMarshaller marshaller, ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter,
+                             String method, List<P> pListValue, String endpointId) {
         this.dispatcher = dispatcher;
         this.transmitter = transmitter;
         this.marshaller = marshaller;
@@ -55,7 +56,7 @@ public class SendConfiguratorFromMany<P> {
     }
 
     public void sendAndSkipResult() {
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "method: " + method + ", " +
                      "params list items class: " + pListValue.iterator().next().getClass() + ", " +
@@ -69,7 +70,7 @@ public class SendConfiguratorFromMany<P> {
 
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -83,7 +84,7 @@ public class SendConfiguratorFromMany<P> {
     public JsonRpcPromise<String> sendAndReceiveResultAsString() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -97,7 +98,7 @@ public class SendConfiguratorFromMany<P> {
     public JsonRpcPromise<Boolean> sendAndReceiveResultAsBoolean() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -113,7 +114,7 @@ public class SendConfiguratorFromMany<P> {
 
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -128,7 +129,7 @@ public class SendConfiguratorFromMany<P> {
     public JsonRpcPromise<List<String>> sendAndReceiveResultAsListOfString() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -142,7 +143,7 @@ public class SendConfiguratorFromMany<P> {
     public JsonRpcPromise<List<Boolean>> sendAndReceiveResultAsListOfBoolean() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -156,7 +157,7 @@ public class SendConfiguratorFromMany<P> {
     public JsonRpcPromise<Void> sendAndReceiveResultAsEmpty() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +

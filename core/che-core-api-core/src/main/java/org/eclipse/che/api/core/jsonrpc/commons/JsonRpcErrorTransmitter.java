@@ -10,30 +10,28 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons;
 
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.*;
 
 /**
  * Transmits an instance of {@link JsonRpcException} to an endpoint
  */
 @Singleton
 public class JsonRpcErrorTransmitter {
-    private final Logger                      logger;
+    private final static Logger LOGGER = getLogger(JsonRpcErrorTransmitter.class);
+
     private final WebSocketMessageTransmitter transmitter;
     private final JsonRpcMarshaller           marshaller;
 
-    private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger("gggg");
-
     @Inject
-    public JsonRpcErrorTransmitter(LoggerFactory loggerFactory, WebSocketMessageTransmitter transmitter, JsonRpcMarshaller marshaller) {
-        this.logger = loggerFactory.get(getClass());
+    public JsonRpcErrorTransmitter(WebSocketMessageTransmitter transmitter, JsonRpcMarshaller marshaller) {
         this.transmitter = transmitter;
         this.marshaller = marshaller;
     }
@@ -42,7 +40,7 @@ public class JsonRpcErrorTransmitter {
         checkNotNull(endpointId, "Endpoint ID must not be null");
         checkArgument(!endpointId.isEmpty(), "Endpoint ID must not be empty");
 
-        logger.debug("Transmitting a JSON RPC error: " + e.getMessage());
+        LOGGER.debug("Transmitting a JSON RPC error: " + e.getMessage());
 
         JsonRpcError error = new JsonRpcError(e.getCode(), e.getMessage());
         JsonRpcResponse response = new JsonRpcResponse(e.getId(), null, error);

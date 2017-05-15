@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons;
 
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -22,21 +21,22 @@ import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Dispatches JSON RPC responses
  */
 @Singleton
 public class ResponseDispatcher {
-    private final Logger          logger;
+    private final static Logger LOGGER = getLogger(ResponseDispatcher.class);
+
     private final JsonRpcComposer composer;
 
     private final Map<String, JsonRpcPromise> promises = new HashMap<>();
     private final Map<String, Class<?>>       rClasses = new HashMap<>();
 
     @Inject
-    public ResponseDispatcher(LoggerFactory loggerFactory, JsonRpcComposer composer) {
-        this.logger = loggerFactory.get(getClass());
+    public ResponseDispatcher(JsonRpcComposer composer) {
         this.composer = composer;
     }
 
@@ -62,14 +62,14 @@ public class ResponseDispatcher {
     }
 
     private <R> void processOne(String endpointId, JsonRpcResult jsonRpcResult, Class<R> resultClass, BiConsumer<String, R> consumer) {
-        logger.debug("Result is a single object - processing single object...");
+        LOGGER.debug("Result is a single object - processing single object...");
 
         R result = composer.composeOne(jsonRpcResult, resultClass);
         consumer.accept(endpointId, result);
     }
 
     private <R> void processMany(String endpointId, JsonRpcResult jsonRpcResult, Class<R> resultClass, BiConsumer<String, List> consumer) {
-        logger.debug("Result is an array - processing array...");
+        LOGGER.debug("Result is an array - processing array...");
 
         List<R> result = composer.composeMany(jsonRpcResult, resultClass);
         consumer.accept(endpointId, result);
@@ -80,46 +80,46 @@ public class ResponseDispatcher {
         checkArgument(!endpointId.isEmpty(), "Endpoint ID name must not be empty");
         checkNotNull(response, "Response name must not be null");
 
-        logger.debug("Dispatching a response: " + response + ", from endpoint: " + endpointId);
+        LOGGER.debug("Dispatching a response: " + response + ", from endpoint: " + endpointId);
 
         String responseId = response.getId();
         if (responseId == null) {
-            logger.debug("Response ID is not defined, skipping...");
+            LOGGER.debug("Response ID is not defined, skipping...");
             return;
         }
-        logger.debug("Fetching response ID: " + responseId);
+        LOGGER.debug("Fetching response ID: " + responseId);
 
         String key = combine(endpointId, responseId);
-        logger.debug("Generating key: " + key);
+        LOGGER.debug("Generating key: " + key);
 
         Class<?> rClass = rClasses.get(key);
-        logger.debug("Fetching result class:" + rClass);
+        LOGGER.debug("Fetching result class:" + rClass);
 
         if (response.hasResult()) {
             processResult(endpointId, response, key, rClass);
         } else if (response.hasError()) {
             processError(endpointId, response, key);
         } else {
-            logger.error("Received incorrect response: no error, no result");
+            LOGGER.error("Received incorrect response: no error, no result");
         }
     }
 
     private void processError(String endpointId, JsonRpcResponse response, String key) {
-        logger.debug("Response has error. Proceeding...");
+        LOGGER.debug("Response has error. Proceeding...");
 
         JsonRpcError error = response.getError();
         JsonRpcPromise<JsonRpcError> jsonRpcPromise = cast(promises.get(key));
         BiConsumer<String, JsonRpcError> consumer = jsonRpcPromise.getFailureConsumer();
         if (consumer != null) {
-            logger.debug("Failure consumer is found, accepting...");
+            LOGGER.debug("Failure consumer is found, accepting...");
             consumer.accept(endpointId, error);
         } else {
-            logger.debug("Reject function is not found, skipping");
+            LOGGER.debug("Reject function is not found, skipping");
         }
     }
 
     private void processResult(String endpointId, JsonRpcResponse response, String key, Class<?> rClass) {
-        logger.debug("Response has result. Proceeding...");
+        LOGGER.debug("Response has result. Proceeding...");
 
         JsonRpcResult result = response.getResult();
         if (result.isSingle()) {

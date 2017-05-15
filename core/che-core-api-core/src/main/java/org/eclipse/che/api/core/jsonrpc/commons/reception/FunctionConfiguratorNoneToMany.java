@@ -10,14 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons.reception;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Function configurator to define a function to be applied when we
@@ -28,14 +29,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *         type of result object
  */
 public class FunctionConfiguratorNoneToMany<R> {
-    private final Logger                logger;
+    private final static Logger LOGGER = getLogger(FunctionConfiguratorNoneToMany.class);
+
     private final RequestHandlerManager handlerManager;
 
     private final String   method;
     private final Class<R> rClass;
 
-    FunctionConfiguratorNoneToMany(LoggerFactory loggerFactory, RequestHandlerManager handlerManager, String method, Class<R> rClass) {
-        this.logger = loggerFactory.get(getClass());
+    FunctionConfiguratorNoneToMany(RequestHandlerManager handlerManager, String method, Class<R> rClass) {
         this.handlerManager = handlerManager;
 
         this.method = method;
@@ -51,7 +52,7 @@ public class FunctionConfiguratorNoneToMany<R> {
     public void withFunction(Function<String, List<R>> function) {
         checkNotNull(function, "Request function must not be null");
 
-        logger.debug("Configuring incoming request binary: " +
+        LOGGER.debug("Configuring incoming request binary: " +
                      "function for method: " + method + ", " +
                      "result object class: " + rClass);
 

@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons;
 
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Dispatches incoming JSON RPC requests and notifications. If during
@@ -26,12 +26,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Singleton
 public class RequestDispatcher {
-    private final Logger                logger;
+    private final static Logger LOGGER = getLogger(RequestDispatcher.class);
+
     private final RequestHandlerManager requestHandlerManager;
 
     @Inject
-    public RequestDispatcher(LoggerFactory loggerFactory, RequestHandlerManager requestHandlerManager) {
-        this.logger = loggerFactory.get(getClass());
+    public RequestDispatcher(RequestHandlerManager requestHandlerManager) {
         this.requestHandlerManager = requestHandlerManager;
     }
 
@@ -40,19 +40,19 @@ public class RequestDispatcher {
         checkArgument(!endpointId.isEmpty(), "Endpoint ID must not be empty");
         checkNotNull(request, "Request must not be null");
 
-        logger.debug("Dispatching request: " + request + ", endpoint: " + endpointId);
+        LOGGER.debug("Dispatching request: " + request + ", endpoint: " + endpointId);
 
         String method = request.getMethod();
 
         JsonRpcParams params = request.getParams();
 
         if (request.hasId()) {
-            logger.debug("Request has ID");
+            LOGGER.debug("Request has ID");
             String requestId = request.getId();
             checkRequestHandlerRegistration(method, requestId);
             requestHandlerManager.handle(endpointId, requestId, method, params);
         } else {
-            logger.debug("Request has no ID -> it is a notification");
+            LOGGER.debug("Request has no ID -> it is a notification");
             checkNotificationHandlerRegistration(method);
             requestHandlerManager.handle(endpointId, method, params);
         }
@@ -60,14 +60,14 @@ public class RequestDispatcher {
 
     private void checkNotificationHandlerRegistration(String method) throws JsonRpcException {
         if (!requestHandlerManager.isRegistered(method)) {
-            logger.error("No corresponding to method '"+method+"' handler is registered");
+            LOGGER.error("No corresponding to method '" + method + "' handler is registered");
             throw new JsonRpcException(-32601, "Method '" + method + "' not registered");
         }
     }
 
     private void checkRequestHandlerRegistration(String method, String requestId) throws JsonRpcException {
         if (!requestHandlerManager.isRegistered(method)) {
-            logger.error("No corresponding to method '"+method+"' handler is registered");
+            LOGGER.error("No corresponding to method '" + method + "' handler is registered");
             throw new JsonRpcException(-32601, "Method '" + method + "' not registered", requestId);
         }
     }

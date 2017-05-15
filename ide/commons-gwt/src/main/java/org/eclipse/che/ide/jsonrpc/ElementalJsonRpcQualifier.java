@@ -25,7 +25,6 @@ import java.util.Map;
 
 @Singleton
 public class ElementalJsonRpcQualifier implements JsonRpcQualifier {
-
     private final JsonFactory jsonFactory;
 
     @Inject

@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons.reception;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Operation configurator to define an operation to be applied when we
@@ -27,14 +28,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *         type of params object
  */
 public class ConsumerConfiguratorOneToNone<P> {
-    private final Logger                logger;
+    private final static Logger LOGGER = getLogger(ConsumerConfiguratorOneToNone.class);
+
     private final RequestHandlerManager handlerManager;
 
-    private final String                 method;
-    private final Class<P>               pClass;
+    private final String   method;
+    private final Class<P> pClass;
 
-    ConsumerConfiguratorOneToNone(LoggerFactory loggerFactory, RequestHandlerManager handlerManager, String method, Class<P> pClass) {
-        this.logger = loggerFactory.get(getClass());
+    ConsumerConfiguratorOneToNone(RequestHandlerManager handlerManager, String method, Class<P> pClass) {
         this.handlerManager = handlerManager;
 
         this.method = method;
@@ -44,7 +45,7 @@ public class ConsumerConfiguratorOneToNone<P> {
     public void withConsumer(BiConsumer<String, P> biConsumer) {
         checkNotNull(biConsumer, "Notification consumer must not be null");
 
-        logger.debug("Configuring incoming request binary: " +
+        LOGGER.debug("Configuring incoming request binary: " +
                      "consumer for method: " + method + ", " +
                      "params object class: " + pClass);
 

@@ -10,14 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons.reception;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Operation configurator to define an operation to be applied when we
@@ -28,14 +29,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *         type of params list items
  */
 public class ConsumerConfiguratorManyToNone<P> {
-    private final Logger                logger;
+    private final static Logger LOGGER = getLogger(ConsumerConfiguratorManyToNone.class);
+
     private final RequestHandlerManager handlerManager;
 
-    private final String                 method;
-    private final Class<P>               pClass;
+    private final String   method;
+    private final Class<P> pClass;
 
-    ConsumerConfiguratorManyToNone(LoggerFactory loggerFactory, RequestHandlerManager handlerManager, String method, Class<P> pClass) {
-        this.logger = loggerFactory.get(getClass());
+    ConsumerConfiguratorManyToNone(RequestHandlerManager handlerManager, String method, Class<P> pClass) {
         this.handlerManager = handlerManager;
 
         this.method = method;
@@ -44,7 +45,7 @@ public class ConsumerConfiguratorManyToNone<P> {
 
     public void withConsumer(BiConsumer<String, List<P>> biConsumer) {
         checkNotNull(biConsumer, "Notification consumer must not be null");
-        logger.debug("Configuring incoming request: " +
+        LOGGER.debug("Configuring incoming request: " +
                      "binary consumer for method: " + method + ", " +
                      "params list items class: " + pClass);
 

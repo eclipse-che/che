@@ -10,12 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons;
 
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
-import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -29,12 +25,10 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(MockitoTestNGListener.class)
 public class RequestDispatcherTest {
-    static final String ENDPOINT_ID = "endpoint-id";
-    static final String REQUEST_ID = "request-id";
+    static final String ENDPOINT_ID    = "endpoint-id";
+    static final String REQUEST_ID     = "request-id";
     static final String REQUEST_METHOD = "request-method";
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    LoggerFactory         loggerFactory;
     @Mock
     RequestHandlerManager requestHandlerManager;
     @InjectMocks
@@ -43,7 +37,7 @@ public class RequestDispatcherTest {
     @Mock
     JsonRpcRequest request;
     @Mock
-    JsonRpcParams params;
+    JsonRpcParams  params;
 
     @BeforeMethod
     public void setUp() throws Exception {

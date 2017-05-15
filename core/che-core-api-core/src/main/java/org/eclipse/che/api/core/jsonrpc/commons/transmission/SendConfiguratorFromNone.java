@@ -10,17 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons.transmission;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcRequest;
 import org.eclipse.che.api.core.jsonrpc.commons.ResponseDispatcher;
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;
+import org.slf4j.Logger;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Configurator defines the type of a result (if present) and send a request.
@@ -29,7 +30,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * have not set request params.
  */
 public class SendConfiguratorFromNone {
-    private final Logger                      logger;
+    private final static Logger LOGGER = getLogger(SendConfiguratorFromNone.class);
+
     private final ResponseDispatcher          dispatcher;
     private final WebSocketMessageTransmitter transmitter;
     private final JsonRpcMarshaller           marshaller;
@@ -37,9 +39,8 @@ public class SendConfiguratorFromNone {
     private final String method;
     private final String endpointId;
 
-    SendConfiguratorFromNone(LoggerFactory loggerFactory, JsonRpcMarshaller marshaller, ResponseDispatcher dispatcher,
-                             WebSocketMessageTransmitter transmitter, String method, String endpointId) {
-        this.logger = loggerFactory.get(getClass());
+    SendConfiguratorFromNone(JsonRpcMarshaller marshaller, ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter,
+                             String method, String endpointId) {
         this.marshaller = marshaller;
         this.dispatcher = dispatcher;
         this.transmitter = transmitter;
@@ -49,7 +50,7 @@ public class SendConfiguratorFromNone {
     }
 
     public void sendAndSkipResult() {
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "method: " + method);
 
@@ -61,7 +62,7 @@ public class SendConfiguratorFromNone {
 
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -74,7 +75,7 @@ public class SendConfiguratorFromNone {
     public JsonRpcPromise<String> sendAndReceiveResultAsString() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -87,7 +88,7 @@ public class SendConfiguratorFromNone {
     public JsonRpcPromise<Double> sendAndReceiveResultAsDouble() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -100,7 +101,7 @@ public class SendConfiguratorFromNone {
     public JsonRpcPromise<Boolean> sendAndReceiveResultAsBoolean() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -114,7 +115,7 @@ public class SendConfiguratorFromNone {
 
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -127,7 +128,7 @@ public class SendConfiguratorFromNone {
     public JsonRpcPromise<List<String>> sendAndReceiveResultAsListOfString() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -139,7 +140,7 @@ public class SendConfiguratorFromNone {
     public JsonRpcPromise<List<Boolean>> sendAndReceiveResultAsListOfBoolean() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +
@@ -151,7 +152,7 @@ public class SendConfiguratorFromNone {
     public JsonRpcPromise<Void> sendAndReceiveResultAsEmpty() {
         final String requestId = transmitRequest();
 
-        logger.debug("Transmitting request: " +
+        LOGGER.debug("Transmitting request: " +
                      "endpoint ID: " + endpointId + ", " +
                      "request ID: " + requestId + ", " +
                      "method: " + method + ", " +

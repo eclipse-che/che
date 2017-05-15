@@ -10,14 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons.reception;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Function configurator to define a function to be applied when we
@@ -30,16 +31,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *         type of result object
  */
 public class FunctionConfiguratorManyToOne<P, R> {
-    private final Logger                logger;
+    private final static Logger LOGGER = getLogger(FunctionConfiguratorManyToOne.class);
+
     private final RequestHandlerManager handlerManager;
 
     private final String   method;
     private final Class<P> pClass;
     private final Class<R> rClass;
 
-    FunctionConfiguratorManyToOne(LoggerFactory loggerFactory, RequestHandlerManager handlerManager, String method, Class<P> pClass,
-                                  Class<R> rClass) {
-        this.logger = loggerFactory.get(getClass());
+    FunctionConfiguratorManyToOne(RequestHandlerManager handlerManager, String method, Class<P> pClass, Class<R> rClass) {
         this.handlerManager = handlerManager;
 
         this.method = method;
@@ -56,7 +56,7 @@ public class FunctionConfiguratorManyToOne<P, R> {
     public void withFunction(BiFunction<String, List<P>, R> function) {
         checkNotNull(function, "Request function must not be null");
 
-        logger.debug("Configuring incoming request: " +
+        LOGGER.debug("Configuring incoming request: " +
                      "binary function for method: " + method + ", " +
                      "params list items class: " + pClass + ", " +
                      "result object class: " + rClass);

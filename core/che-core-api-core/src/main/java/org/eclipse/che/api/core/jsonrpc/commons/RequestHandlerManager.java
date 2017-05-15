@@ -13,9 +13,8 @@ package org.eclipse.che.api.core.jsonrpc.commons;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.logger.commons.Logger;
-import org.eclipse.che.api.core.logger.commons.LoggerFactory;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;
+import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +23,8 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Manages request handlers. There are nine types of such handlers that differs
@@ -37,12 +38,12 @@ import java.util.function.Function;
  *     <li>{@link OneToManyHandler}- to receive a request with a single parameter and multiple results </li>
  *     <li>{@link ManyToNoneHandler} - to receive a notification with multiple parameters</li>
  *     <li>{@link ManyToOneHandler} - to receive request with multiple parameters and a single result</li>
- *     <li>{@link ManyToManyHandler} - to receive request with multiple parameters and mu</li>
+ *     <li>{@link ManyToManyHandler} - to receive request with multiple parameters and multiple results</li>
  * </ul>
  */
 @Singleton
 public class RequestHandlerManager {
-    private final Logger logger;
+    private final static Logger LOGGER = getLogger(RequestHandlerManager.class);
 
     private final Map<String, Category>          methodToCategory   = new ConcurrentHashMap<>();
     private final Map<String, OneToOneHandler>   oneToOneHandlers   = new ConcurrentHashMap<>();
@@ -60,9 +61,7 @@ public class RequestHandlerManager {
     private final JsonRpcMarshaller           marshaller;
 
     @Inject
-    public RequestHandlerManager(LoggerFactory loggerFactory, WebSocketMessageTransmitter transmitter, JsonRpcComposer dtoComposer,
-                                 JsonRpcMarshaller marshaller) {
-        this.logger = loggerFactory.get(getClass());
+    public RequestHandlerManager(WebSocketMessageTransmitter transmitter, JsonRpcComposer dtoComposer, JsonRpcMarshaller marshaller) {
         this.transmitter = transmitter;
         this.dtoComposer = dtoComposer;
         this.marshaller = marshaller;
@@ -164,7 +163,7 @@ public class RequestHandlerManager {
                 transmitMany(endpointId, requestId, noneToManyHandler.handle(endpointId));
                 break;
             default:
-                logger.error("Something went wrong trying to find out handler category");
+                LOGGER.error("Something went wrong trying to find out handler category");
         }
     }
 
@@ -182,14 +181,14 @@ public class RequestHandlerManager {
                 noneToNoneHandlers.get(method).handle(endpointId);
                 break;
             default:
-                logger.error("Something went wrong trying to find out handler category");
+                LOGGER.error("Something went wrong trying to find out handler category");
         }
     }
 
     private void mustBeRegistered(String method) {
         if (!isRegistered(method)) {
             String message = "Method '" + method + "' is not registered";
-            logger.error(message);
+            LOGGER.error(message);
             throw new IllegalStateException(message);
         }
     }
@@ -197,7 +196,7 @@ public class RequestHandlerManager {
     private void mustNotBeRegistered(String method) {
         if (isRegistered(method)) {
             String message = "Method '" + method + "' is already registered";
-            logger.error(message);
+            LOGGER.error(message);
             throw new IllegalStateException(message);
         }
     }
