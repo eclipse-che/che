@@ -16,7 +16,7 @@ import IdeSvc from '../../ide/ide.service';
 import {WorkspaceDetailsService} from './workspace-details.service';
 import {CheNamespaceRegistry, INamespace} from '../../../components/api/namespace/che-namespace-registry.factory';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
-import {CheProfile} from '../../../components/api/che-profile.factory';
+import {CheUser} from '../../../components/api/che-user.factory';
 
 /**
  * @ngdoc controller
@@ -44,7 +44,7 @@ export class WorkspaceDetailsController {
   cheNamespaceRegistry: CheNamespaceRegistry;
   ideSvc: IdeSvc;
   workspaceDetailsService: WorkspaceDetailsService;
-  cheProfile: CheProfile;
+  cheUser: CheUser;
 
   loading: boolean = false;
   isCreationFlow: boolean = true;
@@ -83,7 +83,7 @@ export class WorkspaceDetailsController {
               $route: ng.route.IRouteService, $rootScope: ng.IRootScopeService, $scope: ng.IScope, $timeout: ng.ITimeoutService,
               cheEnvironmentRegistry: CheEnvironmentRegistry, cheNotification: CheNotification, cheWorkspace: CheWorkspace,
               ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, cheNamespaceRegistry: CheNamespaceRegistry,
-              confirmDialogService: ConfirmDialogService, lodash: _.LoDashStatic, cheProfile: CheProfile) {
+              confirmDialogService: ConfirmDialogService, lodash: _.LoDashStatic, cheUser: CheUser) {
     this.$log = $log;
     this.$location = $location;
     this.$mdDialog = $mdDialog;
@@ -100,7 +100,7 @@ export class WorkspaceDetailsController {
     this.workspaceDetailsService = workspaceDetailsService;
     this.confirmDialogService = confirmDialogService;
     this.lodash = lodash;
-    this.cheProfile = cheProfile;
+    this.cheUser = cheUser;
 
     (this.$rootScope as any).showIDE = false;
 
@@ -215,11 +215,18 @@ export class WorkspaceDetailsController {
       defer.resolve();
     }
     if (!this.namespaceId) {
-      const userProfile = this.cheProfile.getProfile();
-      userProfile.$promise.then(() => {
-        this.namespaceId = userProfile.userId;
+      const user = this.cheUser.getUser();
+      if (user) {
+        this.namespaceId = user.id;
         defer.resolve();
-      });
+      } else {
+        this.cheUser.fetchUser().then(() => {
+          this.namespaceId = user.id;
+          defer.resolve();
+        }, (error: any) => {
+          defer.reject(error);
+        });
+      }
     }
     defer.promise.then(() => {
       return this.getOrFetchWorkspacesByNamespace();
