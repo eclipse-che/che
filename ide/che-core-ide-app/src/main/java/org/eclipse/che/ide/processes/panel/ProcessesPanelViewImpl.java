@@ -157,7 +157,6 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             @Override
             public void onNodeClosed(TreeNodeElement<ProcessTreeNode> node) {
-                //todo and what ?
             }
 
             @Override
@@ -513,6 +512,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
     @Override
     public void onResize() {
+        Log.info(getClass(), "***********Begin resize.*********");
         for (WidgetToShow widgetToShow : widget2Panels.keySet()) {
             Log.info(getClass(), widgetToShow.getTitle());
             final IsWidget widget = widgetToShow.getWidget();
@@ -520,6 +520,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
                 ((RequiresResize)widget).onResize();
             }
         }
+        Log.info(getClass(), "********End resize.************");
     }
 
     @Override
