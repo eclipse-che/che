@@ -17,6 +17,7 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -32,8 +33,8 @@ public class ResponseDispatcher {
 
     private final JsonRpcComposer composer;
 
-    private final Map<String, JsonRpcPromise> promises = new HashMap<>();
-    private final Map<String, Class<?>>       rClasses = new HashMap<>();
+    private final Map<String, JsonRpcPromise> promises = new ConcurrentHashMap<>();
+    private final Map<String, Class<?>>       rClasses = new ConcurrentHashMap<>();
 
     @Inject
     public ResponseDispatcher(JsonRpcComposer composer) {
@@ -92,7 +93,7 @@ public class ResponseDispatcher {
         String key = combine(endpointId, responseId);
         LOGGER.debug("Generating key: " + key);
 
-        Class<?> rClass = rClasses.get(key);
+        Class<?> rClass = rClasses.remove(key);
         LOGGER.debug("Fetching result class:" + rClass);
 
         if (response.hasResult()) {
@@ -108,7 +109,7 @@ public class ResponseDispatcher {
         LOGGER.debug("Response has error. Proceeding...");
 
         JsonRpcError error = response.getError();
-        JsonRpcPromise<JsonRpcError> jsonRpcPromise = cast(promises.get(key));
+        JsonRpcPromise<JsonRpcError> jsonRpcPromise = cast(promises.remove(key));
         BiConsumer<String, JsonRpcError> consumer = jsonRpcPromise.getFailureConsumer();
         if (consumer != null) {
             LOGGER.debug("Failure consumer is found, accepting...");
@@ -123,17 +124,17 @@ public class ResponseDispatcher {
 
         JsonRpcResult result = response.getResult();
         if (result.isSingle()) {
-            processOne(endpointId, result, rClass, cast(promises.get(key).getSuccessConsumer()));
+            processOne(endpointId, result, rClass, cast(promises.remove(key).getSuccessConsumer()));
         } else {
-            processMany(endpointId, result, rClass, cast(promises.get(key).getSuccessConsumer()));
+            processMany(endpointId, result, rClass, cast(promises.remove(key).getSuccessConsumer()));
         }
     }
 
-    public <R> JsonRpcPromise<R> registerPromiseOfOne(String endpointId, String requestId, Class<R> rClass) {
+    public synchronized <R> JsonRpcPromise<R> registerPromiseOfOne(String endpointId, String requestId, Class<R> rClass) {
         return cast(registerInternal(endpointId, requestId, rClass, new JsonRpcPromise<R>()));
     }
 
-    public <R> JsonRpcPromise<List<R>> registerPromiseOfMany(String endpointId, String requestId, Class<R> rClass) {
+    public synchronized <R> JsonRpcPromise<List<R>> registerPromiseOfMany(String endpointId, String requestId, Class<R> rClass) {
         return cast(registerInternal(endpointId, requestId, rClass, new JsonRpcPromise<List<R>>()));
     }
 

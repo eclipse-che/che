@@ -67,63 +67,63 @@ public class RequestHandlerManager {
         this.marshaller = marshaller;
     }
 
-    public <P, R> void registerOneToOne(String method, Class<P> pClass, Class<R> rClass, BiFunction<String, P, R> biFunction) {
+    public synchronized <P, R> void  registerOneToOne(String method, Class<P> pClass, Class<R> rClass, BiFunction<String, P, R> biFunction) {
         mustNotBeRegistered(method);
 
         methodToCategory.put(method, Category.ONE_TO_ONE);
         oneToOneHandlers.put(method, new OneToOneHandler<>(pClass, rClass, biFunction));
     }
 
-    public <P, R> void registerOneToMany(String method, Class<P> pClass, Class<R> rClass, BiFunction<String, P, List<R>> biFunction) {
+    public synchronized <P, R> void registerOneToMany(String method, Class<P> pClass, Class<R> rClass, BiFunction<String, P, List<R>> biFunction) {
         mustNotBeRegistered(method);
 
         methodToCategory.put(method, Category.ONE_TO_MANY);
         oneToManyHandlers.put(method, new OneToManyHandler<>(pClass, rClass, biFunction));
     }
 
-    public <P> void registerOneToNone(String method, Class<P> pClass, BiConsumer<String, P> biConsumer) {
+    public synchronized <P> void registerOneToNone(String method, Class<P> pClass, BiConsumer<String, P> biConsumer) {
         mustNotBeRegistered(method);
 
         methodToCategory.put(method, Category.ONE_TO_NONE);
         oneToNoneHandlers.put(method, new OneToNoneHandler<>(pClass, biConsumer));
     }
 
-    public <P, R> void registerManyToOne(String method, Class<P> pClass, Class<R> rClass, BiFunction<String, List<P>, R> biFunction) {
+    public synchronized <P, R> void registerManyToOne(String method, Class<P> pClass, Class<R> rClass, BiFunction<String, List<P>, R> biFunction) {
         mustNotBeRegistered(method);
 
         methodToCategory.put(method, Category.MANY_TO_ONE);
         manyToOneHandlers.put(method, new ManyToOneHandler<>(pClass, rClass, biFunction));
     }
 
-    public <P, R> void registerManyToMany(String method, Class<P> pClass, Class<R> rClass, BiFunction<String, List<P>, List<R>> function) {
+    public synchronized <P, R> void registerManyToMany(String method, Class<P> pClass, Class<R> rClass, BiFunction<String, List<P>, List<R>> function) {
         mustNotBeRegistered(method);
 
         methodToCategory.put(method, Category.MANY_TO_MANY);
         manyToManyHandlers.put(method, new ManyToManyHandler<>(pClass, rClass, function));
     }
 
-    public <P> void registerManyToNone(String method, Class<P> pClass, BiConsumer<String, List<P>> biConsumer) {
+    public synchronized <P> void registerManyToNone(String method, Class<P> pClass, BiConsumer<String, List<P>> biConsumer) {
         mustNotBeRegistered(method);
 
         methodToCategory.put(method, Category.MANY_TO_NONE);
         manyToNoneHandlers.put(method, new ManyToNoneHandler<>(pClass, biConsumer));
     }
 
-    public <R> void registerNoneToOne(String method, Class<R> rClass, Function<String, R> function) {
+    public synchronized <R> void registerNoneToOne(String method, Class<R> rClass, Function<String, R> function) {
         mustNotBeRegistered(method);
 
         methodToCategory.put(method, Category.NONE_TO_ONE);
         noneToOneHandlers.put(method, new NoneToOneHandler<>(rClass, function));
     }
 
-    public <R> void registerNoneToMany(String method, Class<R> rClass, Function<String, List<R>> function) {
+    public synchronized <R> void registerNoneToMany(String method, Class<R> rClass, Function<String, List<R>> function) {
         mustNotBeRegistered(method);
 
         methodToCategory.put(method, Category.NONE_TO_MANY);
         noneToManyHandlers.put(method, new NoneToManyHandler<>(rClass, function));
     }
 
-    public void registerNoneToNone(String method, Consumer<String> consumer) {
+    public synchronized void registerNoneToNone(String method, Consumer<String> consumer) {
         mustNotBeRegistered(method);
 
         methodToCategory.put(method, Category.NONE_TO_NONE);
