@@ -69,6 +69,8 @@ import {ChePopup} from './popup/che-popup.directive';
 import {CheModalPopup} from './popup/che-modal-popup.directive';
 import {CheShowArea} from './show-area/che-show-area.directive';
 import {DemoSourceRender} from './html-source/demo-source-render.directive';
+import {CheEditor} from './editor/che-editor.directive';
+import {CheEditorController} from './editor/che-editor.controller';
 
 
 export class WidgetConfig {
@@ -156,5 +158,8 @@ export class WidgetConfig {
       .directive('cheModalPopup', CheModalPopup)
       // show area
       .directive('cheShowArea', CheShowArea)
+      // editor
+      .controller('CheEditorController', CheEditorController)
+      .directive('cheEditor', CheEditor);
   }
 }

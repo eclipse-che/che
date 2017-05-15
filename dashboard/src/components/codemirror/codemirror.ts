@@ -12,7 +12,7 @@
 
 export class CodeMirrorConstant {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
     register.app.constant('udCodemirrorConfig', {
       codemirror: {
         lineWrapping: true,
@@ -24,9 +24,12 @@ export class CodeMirrorConstant {
         autoCloseBrackets: true,
         foldGutter: true,
         styleActiveLine: true,
-        theme: 'che'
+        theme: 'che',
+        onLoad: (editor: any) => {
+          editor.refresh();
+        }
       }
-    }).config(function () {
+    }).config(() => {
       uiCodemirrorDirective.$inject = ['$timeout', 'udCodemirrorConfig']; // jshint ignore:line
     });
   }
