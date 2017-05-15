@@ -118,7 +118,7 @@
 .treeNodeBody:hover::after {
     content: "";
     width: 1px;
-    height: 18px;
+    height: 20px;
     position: absolute;
     left: 0;
 }
