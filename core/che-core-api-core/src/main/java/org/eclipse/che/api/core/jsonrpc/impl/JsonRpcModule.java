@@ -15,7 +15,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 
-import org.eclipse.che.api.core.jsonrpc.commons.BuildingRequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcComposer;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcQualifier;
@@ -28,7 +28,7 @@ public class JsonRpcModule extends AbstractModule {
     @Override
     protected void configure() {
         install(new FactoryModuleBuilder().build(RequestHandlerConfigurator.class));
-        install(new FactoryModuleBuilder().build(BuildingRequestTransmitter.class));
+        install(new FactoryModuleBuilder().build(RequestTransmitter.class));
 
         bind(JsonRpcMarshaller.class).to(GsonJsonRpcMarshaller.class);
         bind(JsonRpcUnmarshaller.class).to(GsonJsonRpcUnmarshaller.class);

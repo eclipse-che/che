@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.event;
 
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
@@ -46,7 +46,11 @@ public class MachineStateJsonRpcMessenger implements EventSubscriber<MachineStat
                    .stream()
                    .filter(it -> it.getValue().contains(id))
                    .map(Map.Entry::getKey)
-                   .forEach(it -> transmitter.transmitOneToNone(it, "event:environment-status:changed", event));
+                   .forEach(it -> transmitter.newRequest()
+                                             .endpointId(it)
+                                             .methodName("event:environment-status:changed")
+                                             .paramsAsDto(event)
+                                             .sendAndSkipResult());
     }
 
     @Inject

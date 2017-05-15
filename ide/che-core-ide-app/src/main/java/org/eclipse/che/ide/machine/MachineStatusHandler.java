@@ -46,8 +46,7 @@ public class MachineStatusHandler implements MachineStatusChangedEvent.Handler {
     private final WorkspaceServiceClient   workspaceServiceClient;
     private final NotificationManager      notificationManager;
     private final CoreLocalizationConstant locale;
-
-    private       RequestTransmitter          transmitter;
+    private final RequestTransmitter       transmitter;
 
     @Inject
     MachineStatusHandler(final EventBus eventBus,
@@ -122,7 +121,11 @@ public class MachineStatusHandler implements MachineStatusChangedEvent.Handler {
         String subscribeByName = "event:environment-output:subscribe-by-machine-name";
         String workspaceIdPlusMachineName = appContext.getWorkspaceId() + "::" + machine.getDisplayName();
 
-        transmitter.transmitStringToNone(endpointId, subscribeByName, workspaceIdPlusMachineName);
+        transmitter.newRequest()
+                   .endpointId(endpointId)
+                   .methodName(subscribeByName)
+                   .paramsAsString(workspaceIdPlusMachineName)
+                   .sendAndSkipResult();
 
     }
 

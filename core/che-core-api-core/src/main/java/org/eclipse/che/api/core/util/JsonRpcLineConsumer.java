@@ -33,7 +33,11 @@ public class JsonRpcLineConsumer implements LineConsumer {
     @Override
     public void writeLine(String line) throws IOException {
         try {
-            jsonRpcEndpointIdProvider.get().forEach(it -> transmitter.transmitStringToNone(it, method, line));
+            jsonRpcEndpointIdProvider.get().forEach(it -> transmitter.newRequest()
+                                                                     .endpointId(it)
+                                                                     .methodName(method)
+                                                                     .paramsAsString(line)
+                                                                     .sendAndSkipResult());
         } catch (IllegalStateException e) {
             LOG.error("Error trying to send a line: {}", line);
         }

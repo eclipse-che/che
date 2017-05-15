@@ -55,6 +55,11 @@ public class ClientServerEventService {
                                                        .withOldPath(oldPath);
 
 
-        requestTransmitter.transmitOneToNone(endpointId, method, dto);
+        requestTransmitter.newRequest()
+                          .endpointId(endpointId)
+                          .methodName(method)
+                          .paramsAsDto(dto)
+                          .sendAndSkipResult();
+
     }
 }

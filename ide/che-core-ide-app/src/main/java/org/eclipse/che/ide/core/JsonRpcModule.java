@@ -13,7 +13,7 @@ package org.eclipse.che.ide.core;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 
-import org.eclipse.che.api.core.jsonrpc.commons.BuildingRequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcComposer;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcQualifier;
@@ -43,7 +43,7 @@ public class JsonRpcModule extends AbstractGinModule {
         bind(JsonRpcInitializer.class).to(WebSocketJsonRpcInitializer.class);
 
         install(new GinFactoryModuleBuilder().build(RequestHandlerConfigurator.class));
-        install(new GinFactoryModuleBuilder().build(BuildingRequestTransmitter.class));
+        install(new GinFactoryModuleBuilder().build(RequestTransmitter.class));
 
         bind(JsonRpcMarshaller.class).to(ElementalJsonRpcMarshaller.class);
         bind(JsonRpcUnmarshaller.class).to(ElementalJsonRpcUnmarshaller.class);

@@ -215,13 +215,21 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         String workspaceIdPlusMachineName =
                 appContext.getWorkspaceId() + "::" + machine;
 
-        transmitter.transmitStringToNone(endpointId, subscribeByName,
-                                         workspaceIdPlusMachineName);
+        transmitter.newRequest()
+                   .endpointId(endpointId)
+                   .methodName(subscribeByName)
+                   .paramsAsString(workspaceIdPlusMachineName)
+                   .sendAndSkipResult();
+
     }
 
     private void subscribe(String it, String methodName, String id) {
         workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
-                              .then((Operation<WorkspaceDto>)skip -> transmitter.transmitStringToNone("ws-master", methodName, id))
+                              .then((Operation<WorkspaceDto>)skip -> transmitter.newRequest()
+                                                                                .endpointId("ws-master")
+                                                                                .methodName(methodName)
+                                                                                .paramsAsString(id)
+                                                                                .sendAndSkipResult())
                               .catchError((Operation<PromiseError>)error -> Log.error(getClass(), it + ": " + error.getMessage()));
     }
 

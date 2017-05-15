@@ -12,8 +12,8 @@ package org.eclipse.che.api.git;
 
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type;
 import org.eclipse.che.api.vfs.Path;
@@ -120,6 +120,10 @@ public class GitCheckoutDetector {
     }
 
     private Consumer<String> transmitConsumer(Type type, String name) {
-        return id -> transmitter.transmitOneToNone(id, OUTGOING_METHOD, newDto(GitCheckoutEventDto.class).withName(name).withType(type));
+        return id -> transmitter.newRequest()
+                                .endpointId(id)
+                                .methodName(OUTGOING_METHOD)
+                                .paramsAsDto(newDto(GitCheckoutEventDto.class).withName(name).withType(type))
+                                .sendAndSkipResult();
     }
 }

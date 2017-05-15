@@ -122,11 +122,20 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
                                                            .withPath("/")
                                                            .withType(START);
 
-        requestTransmitter.transmitOneToNone("ws-agent", "track:project-tree", params);
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("track:project-tree")
+                          .paramsAsDto(params)
+                          .sendAndSkipResult();
+
     }
 
     private void initializeGitCheckoutWatcher() {
-        requestTransmitter.transmitNoneToNone("ws-agent", "track:git-checkout");
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("track:git-checkout")
+                          .noParams()
+                          .sendAndSkipResult();
     }
 
     @Override

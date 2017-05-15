@@ -12,8 +12,8 @@ package org.eclipse.che.ide.api.machine.execagent;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsRequestDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsResponseDto;
@@ -49,7 +49,7 @@ import static org.eclipse.che.ide.util.StringUtils.join;
 
 /**
  * Implementation of exec-agent command manager based on JSON RPC protocol that
- * uses bi-directional request/response transporting. 
+ * uses bi-directional request/response transporting.
  */
 @Singleton
 public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
@@ -67,7 +67,8 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
     private final ExecAgentEventManager eventManager;
 
     @Inject
-    protected JsonRpcExecAgentCommandManager(DtoFactory dtoFactory, RequestTransmitter transmitter, ExecAgentEventManager eventManager) {
+    protected JsonRpcExecAgentCommandManager(DtoFactory dtoFactory, RequestTransmitter transmitter,
+                                             ExecAgentEventManager eventManager) {
         this.dtoFactory = dtoFactory;
         this.transmitter = transmitter;
         this.eventManager = eventManager;
@@ -88,7 +89,11 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
 
         final ExecAgentConsumer<ProcessStartResponseDto> execAgentConsumer = new ExecAgentConsumer<>();
 
-        transmitter.transmitOneToOne(endpointId, PROCESS_START, dto, ProcessStartResponseDto.class)
+        transmitter.newRequest()
+                   .endpointId(endpointId)
+                   .methodName(PROCESS_START)
+                   .paramsAsDto(dto)
+                   .sendAndReceiveResultAsDto(ProcessStartResponseDto.class)
                    .onSuccess(processStartResponseDto -> subscribe(endpointId, execAgentConsumer, processStartResponseDto));
 
         return execAgentConsumer;
@@ -100,7 +105,11 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
 
         ProcessKillRequestDto dto = dtoFactory.createDto(ProcessKillRequestDto.class).withPid(pid);
 
-        return transmitter.transmitOneToOne(endpointId, PROCESS_KILL, dto, ProcessKillResponseDto.class);
+        return transmitter.newRequest()
+                          .endpointId(endpointId)
+                          .methodName(PROCESS_KILL)
+                          .paramsAsDto(dto)
+                          .sendAndReceiveResultAsDto(ProcessKillResponseDto.class);
     }
 
     @Override
@@ -115,8 +124,13 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
 
         final ExecAgentConsumer<ProcessSubscribeResponseDto> execAgentConsumer = new ExecAgentConsumer<>();
 
-        transmitter.transmitOneToOne(endpointId, PROCESS_SUBSCRIBE, dto, ProcessSubscribeResponseDto.class)
-                   .onSuccess((s, processSubscribeResponseDto) -> subscribe(endpointId, execAgentConsumer, processSubscribeResponseDto));
+        transmitter.newRequest()
+                   .endpointId(endpointId)
+                   .methodName(PROCESS_SUBSCRIBE)
+                   .paramsAsDto(dto)
+                   .sendAndReceiveResultAsDto(ProcessSubscribeResponseDto.class)
+                   .onSuccess((s, processSubscribeResponseDto) -> subscribe(endpointId, execAgentConsumer,
+                                                                            processSubscribeResponseDto));
         return execAgentConsumer;
     }
 
@@ -129,7 +143,11 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
                                                            .withEventTypes(join(eventTypes, ","))
                                                            .withAfter(after);
 
-        return transmitter.transmitOneToOne(endpointId, PROCESS_UNSUBSCRIBE, dto, ProcessUnSubscribeResponseDto.class);
+        return transmitter.newRequest()
+                          .endpointId(endpointId)
+                          .methodName(PROCESS_UNSUBSCRIBE)
+                          .paramsAsDto(dto)
+                          .sendAndReceiveResultAsDto(ProcessUnSubscribeResponseDto.class);
     }
 
     @Override
@@ -140,7 +158,11 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
                                                            .withPid(pid)
                                                            .withEventTypes(join(eventTypes, ","));
 
-        return transmitter.transmitOneToOne(endpointId, PROCESS_UPDATE_SUBSCRIBER, dto, UpdateSubscriptionResponseDto.class);
+        return transmitter.newRequest()
+                          .endpointId(endpointId)
+                          .methodName(PROCESS_UPDATE_SUBSCRIBER)
+                          .paramsAsDto(dto)
+                          .sendAndReceiveResultAsDto(UpdateSubscriptionResponseDto.class);
     }
 
     @Override
@@ -162,7 +184,11 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
                                                  .withLimit(limit)
                                                  .withSkip(skip);
 
-        return transmitter.transmitOneToMany(endpointId, PROCESS_GET_LOGS, dto, GetProcessLogsResponseDto.class);
+        return transmitter.newRequest()
+                          .endpointId(endpointId)
+                          .methodName(PROCESS_GET_LOGS)
+                          .paramsAsDto(dto)
+                          .sendAndReceiveResultAsListOfDto(GetProcessLogsResponseDto.class);
     }
 
     @Override
@@ -171,7 +197,11 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
 
         GetProcessRequestDto dto = dtoFactory.createDto(GetProcessRequestDto.class).withPid(pid);
 
-        return transmitter.transmitOneToOne(endpointId, PROCESS_GET_PROCESS, dto, GetProcessResponseDto.class);
+        return transmitter.newRequest()
+                          .endpointId(endpointId)
+                          .methodName(PROCESS_GET_PROCESS)
+                          .paramsAsDto(dto)
+                          .sendAndReceiveResultAsDto(GetProcessResponseDto.class);
     }
 
     @Override
@@ -180,7 +210,11 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
 
         GetProcessesRequestDto dto = dtoFactory.createDto(GetProcessesRequestDto.class).withAll(all);
 
-        return transmitter.transmitOneToMany(endpointId, PROCESS_GET_PROCESSES, dto, GetProcessesResponseDto.class);
+        return transmitter.newRequest()
+                          .endpointId(endpointId)
+                          .methodName(PROCESS_GET_PROCESSES)
+                          .paramsAsDto(dto)
+                          .sendAndReceiveResultAsListOfDto(GetProcessesResponseDto.class);
     }
 
     private <T extends DtoWithPid> void subscribe(String endpointId, ExecAgentConsumer<T> promise, T arg) {

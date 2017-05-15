@@ -88,6 +88,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                                                        ResourceChangedHandler,
                                                                        MarkerChangedHandler,
                                                                        SyntheticNodeUpdateEvent.SyntheticNodeUpdateHandler {
+    private static final int PART_SIZE = 500;
     private final ProjectExplorerView      view;
     private final EventBus                 eventBus;
     private final ResourceNode.NodeFactory nodeFactory;
@@ -97,12 +98,8 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     private final TreeExpander             treeExpander;
     private final RequestTransmitter       requestTransmitter;
     private final DtoFactory               dtoFactory;
-
-    private UpdateTask updateTask = new UpdateTask();
-    private Set<Path> expandQueue = new HashSet<>();
-
-    private static final int PART_SIZE = 500;
-
+    private UpdateTask updateTask  = new UpdateTask();
+    private Set<Path>  expandQueue = new HashSet<>();
     private boolean hiddenFilesAreShown;
 
     @Inject
@@ -183,7 +180,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             @Override
             public void execute() {
                 final PartStack partStack = checkNotNull(workspaceAgentProvider.get().getPartStack(PartStackType.NAVIGATION),
-                        "Navigation part stack should not be a null");
+                                                         "Navigation part stack should not be a null");
                 partStack.addPart(ProjectExplorerPresenter.this);
                 partStack.setActivePart(ProjectExplorerPresenter.this);
             }
@@ -202,9 +199,14 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
                 if (node instanceof ResourceNode) {
                     Resource data = ((ResourceNode)node).getData();
-                    requestTransmitter.transmitOneToNone(endpointId, method, dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
-                                                                                       .withPath(data.getLocation().toString())
-                                                                                       .withType(START));
+                    requestTransmitter.newRequest()
+                                      .endpointId(endpointId)
+                                      .methodName(method)
+                                      .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
+                                                             .withPath(data.getLocation().toString())
+                                                             .withType(START))
+                                      .sendAndSkipResult();
+
                 }
             }
         });
@@ -216,9 +218,14 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
                 if (node instanceof ResourceNode) {
                     Resource data = ((ResourceNode)node).getData();
-                    requestTransmitter.transmitOneToNone(endpointId, method, dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
-                                                                                       .withPath(data.getLocation().toString())
-                                                                                       .withType(STOP));
+                    requestTransmitter.newRequest()
+                                      .endpointId(endpointId)
+                                      .methodName(method)
+                                      .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
+                                                             .withPath(data.getLocation().toString())
+                                                             .withType(STOP))
+                                      .sendAndSkipResult();
+
                 }
             }
         });
