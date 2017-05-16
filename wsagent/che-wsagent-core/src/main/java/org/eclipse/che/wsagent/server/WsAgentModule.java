@@ -40,8 +40,8 @@ public class WsAgentModule extends AbstractModule {
         install(new org.eclipse.che.api.debugger.server.DebuggerModule());
         install(new org.eclipse.che.api.git.GitModule());
         install(new org.eclipse.che.git.impl.jgit.JGitModule());
-        install(new org.eclipse.che.api.core.jsonrpc.JsonRpcModule());
-        install(new org.eclipse.che.api.core.websocket.WebSocketModule());
+        install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
+        install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
 
     }
 

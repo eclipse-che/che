@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
-import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStateUpdateDto;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type;
@@ -128,7 +128,12 @@ public class ProjectTreeTracker {
                 timers.remove(it);
             } else {
                 ProjectTreeStateUpdateDto params = newDto(ProjectTreeStateUpdateDto.class).withPath(it).withType(CREATED);
-                transmitter.transmitOneToNone(endpointId, OUTGOING_METHOD, params);
+                transmitter.newRequest()
+                           .endpointId(endpointId)
+                           .methodName(OUTGOING_METHOD)
+                           .paramsAsDto(params)
+                           .sendAndSkipResult();
+
             }
         };
     }
@@ -146,7 +151,12 @@ public class ProjectTreeTracker {
                     if (timers.contains(it)) {
                         timers.remove(it);
                         ProjectTreeStateUpdateDto params = newDto(ProjectTreeStateUpdateDto.class).withPath(it).withType(DELETED);
-                        transmitter.transmitOneToNone(endpointId, OUTGOING_METHOD, params);
+                        transmitter.newRequest()
+                                   .endpointId(endpointId)
+                                   .methodName(OUTGOING_METHOD)
+                                   .paramsAsDto(params)
+                                   .sendAndSkipResult();
+
                     }
 
                 }

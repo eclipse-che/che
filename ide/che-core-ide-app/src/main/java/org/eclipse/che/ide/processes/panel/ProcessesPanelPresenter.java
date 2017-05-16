@@ -89,6 +89,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -1066,9 +1067,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     private void restoreState(final MachineEntity machine) {
-        execAgentCommandManager.getProcesses(machine.getId(), false).then(new Operation<List<GetProcessesResponseDto>>() {
+        execAgentCommandManager.getProcesses(machine.getId(), false)
+                               .onSuccess(new BiConsumer<String, List<GetProcessesResponseDto>>() {
             @Override
-            public void apply(List<GetProcessesResponseDto> processes) throws OperationException {
+            public void accept(String endpointId, List<GetProcessesResponseDto> processes) {
                 for (GetProcessesResponseDto process : processes) {
                     final int pid = process.getPid();
                     final String type = process.getType();
@@ -1084,7 +1086,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                     /*
                      * Hide the processes which are launched by command of unknown type
                      */
-                    if (isProcessLaunchedByCommandOfKnownType(type)) {
+                    if (commandTypeRegistry.getCommandTypeById(type).isPresent()) {
                         final String processName = process.getName();
                         final CommandImpl commandByName = getWorkspaceCommandByName(processName);
 
@@ -1125,22 +1127,15 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 int limit = 50;
                 int skip = 0;
                 execAgentCommandManager.getProcessLogs(machine.getId(), pid, from, till, limit, skip)
-                                       .then(new Operation<List<GetProcessLogsResponseDto>>() {
-                                           @Override
-                                           public void apply(List<GetProcessLogsResponseDto> logs) throws OperationException {
-                                               for (GetProcessLogsResponseDto log : logs) {
-                                                   String text = log.getText();
-                                                   console.printOutput(text);
-                                               }
+                                       .onSuccess(logs -> {
+                                           for (GetProcessLogsResponseDto log : logs) {
+                                               String text = log.getText();
+                                               console.printOutput(text);
                                            }
                                        })
-                                       .catchError(new Operation<PromiseError>() {
-                                           @Override
-                                           public void apply(PromiseError arg) throws OperationException {
-                                               String error = "Error trying to get process log with pid: " + pid + ". " + arg.getMessage();
-                                               Log.error(getClass(), error);
-                                           }
-                                       });
+                                       .onFailure((s, error) -> Log.error(getClass(),
+                                                                                "Error trying to get process log with pid: " + pid + ". " +
+                                                                                error.getMessage()));
             }
 
             private void subscribeToProcess(CommandOutputConsole console, int pid) {
@@ -1149,18 +1144,14 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 String processStatus = "process_status";
                 String after = null;
                 execAgentCommandManager.subscribe(machine.getId(), pid, asList(stderr, stdout, processStatus), after)
-                                       .thenIfProcessStartedEvent(console.getProcessStartedOperation())
-                                       .thenIfProcessDiedEvent(console.getProcessDiedOperation())
-                                       .thenIfProcessStdOutEvent(console.getStdOutOperation())
-                                       .thenIfProcessStdErrEvent(console.getStdErrOperation())
-                                       .then(console.getProcessSubscribeOperation());
+                                       .thenIfProcessStartedEvent(console.getProcessStartedConsumer())
+                                       .thenIfProcessDiedEvent(console.getProcessDiedConsumer())
+                                       .thenIfProcessStdOutEvent(console.getStdOutConsumer())
+                                       .thenIfProcessStdErrEvent(console.getStdErrConsumer())
+                                       .then(console.getProcessSubscribeConsumer());
             }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(localizationConstant.failedToGetProcesses(machine.getId()));
-            }
-        });
+                               }).onFailure(
+                (endpointId, error) -> notificationManager.notify(localizationConstant.failedToGetProcesses(machine.getId())));
     }
 
     private CommandImpl getWorkspaceCommandByName(String name) {
@@ -1171,10 +1162,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         return null;
-    }
-
-    private boolean isProcessLaunchedByCommandOfKnownType(String type) {
-        return commandTypeRegistry.getCommandTypeById(type).isPresent();
     }
 
     @Override

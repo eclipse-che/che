@@ -10,16 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.util;
 
-import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toSet;
 
 @Singleton
 public class JsonRpcEndpointIdsHolder {
@@ -27,7 +30,6 @@ public class JsonRpcEndpointIdsHolder {
 
     @Inject
     private void configureSubscribeHandler(RequestHandlerConfigurator configurator) {
-
         configurator.newConfiguration()
                     .methodName("event:ws-agent-output:subscribe")
                     .paramsAsString()
@@ -38,21 +40,14 @@ public class JsonRpcEndpointIdsHolder {
                     });
     }
 
-    @Inject
     private void configureUnSubscribeHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
                     .methodName("event:ws-agent-output:un-subscribe")
                     .paramsAsString()
                     .noResult()
                     .withConsumer((endpointId, workspaceId) -> {
-                        Set<String> workspaceIds = endpointIds.get(endpointId);
-                        if (workspaceIds != null) {
-                            workspaceIds.remove(workspaceId);
-
-                            if (workspaceIds.isEmpty()) {
-                                endpointIds.remove(endpointId);
-                            }
-                        }
+                        endpointIds.getOrDefault(endpointId, emptySet()).remove(workspaceId);
+                        endpointIds.entrySet().removeIf(entry -> entry.getValue().isEmpty());
                     });
     }
 
@@ -61,6 +56,6 @@ public class JsonRpcEndpointIdsHolder {
                           .stream()
                           .filter(it -> it.getValue().contains(workspaceId))
                           .map(Map.Entry::getKey)
-                          .collect(Collectors.toSet());
+                          .collect(toSet());
     }
 }

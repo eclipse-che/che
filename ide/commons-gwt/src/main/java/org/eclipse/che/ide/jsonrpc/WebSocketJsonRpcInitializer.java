@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.jsonrpc;
 
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocketInitializer;
+import org.eclipse.che.ide.websocket.impl.WebSocketInitializer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
