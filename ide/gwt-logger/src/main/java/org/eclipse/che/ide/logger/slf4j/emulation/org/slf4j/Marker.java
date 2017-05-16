@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2004-2011 QOS.ch
  * All rights reserved.
- *
+ * <p>
  * Permission is hereby granted, free  of charge, to any person obtaining
  * a  copy  of this  software  and  associated  documentation files  (the
  * "Software"), to  deal in  the Software without  restriction, including
@@ -9,10 +9,10 @@
  * distribute,  sublicense, and/or sell  copies of  the Software,  and to
  * permit persons to whom the Software  is furnished to do so, subject to
  * the following conditions:
- *
+ * <p>
  * The  above  copyright  notice  and  this permission  notice  shall  be
  * included in all copies or substantial portions of the Software.
- *
+ * <p>
  * THE  SOFTWARE IS  PROVIDED  "AS  IS", WITHOUT  WARRANTY  OF ANY  KIND,
  * EXPRESS OR  IMPLIED, INCLUDING  BUT NOT LIMITED  TO THE  WARRANTIES OF
  * MERCHANTABILITY,    FITNESS    FOR    A   PARTICULAR    PURPOSE    AND
@@ -20,7 +20,6 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
  */
 package org.slf4j;
 
@@ -41,21 +40,11 @@ import java.util.Iterator;
 public interface Marker {
 
     /**
-     * This constant represents any marker, including a null marker.
-     */
-//    public final String ANY_MARKER = "*";
-
-    /**
-     * This constant represents any non-null marker.
-     */
-//    public final String ANY_NON_NULL_MARKER = "+";
-
-    /**
      * Get the name of this Marker.
      *
      * @return name of marker
      */
-    public String getName();
+    String getName();
 
     /**
      * Add a reference to another Marker.
@@ -65,7 +54,7 @@ public interface Marker {
      * @throws IllegalArgumentException
      *                 if 'reference' is null
      */
-    public void add(Marker reference);
+    void add(Marker reference);
 
     /**
      * Remove a marker reference.
@@ -74,19 +63,19 @@ public interface Marker {
      *                the marker reference to remove
      * @return true if reference could be found and removed, false otherwise.
      */
-    public boolean remove(Marker reference);
+    boolean remove(Marker reference);
 
     /**
      * @deprecated Replaced by {@link #hasReferences()}.
      */
-    public boolean hasChildren();
+    boolean hasChildren();
 
     /**
      * Does this marker have any references?
      *
      * @return true if this marker has one or more references, false otherwise.
      */
-    public boolean hasReferences();
+    boolean hasReferences();
 
     /**
      * Returns an Iterator which can be used to iterate over the references of this
@@ -94,7 +83,7 @@ public interface Marker {
      *
      * @return Iterator over the references of this marker
      */
-    public Iterator iterator();
+    Iterator iterator();
 
     /**
      * Does this marker contain a reference to the 'other' marker? Marker A is defined
@@ -107,7 +96,7 @@ public interface Marker {
      *                 if 'other' is null
      * @return Whether this marker contains the other marker.
      */
-    public boolean contains(Marker other);
+    boolean contains(Marker other);
 
     /**
      * Does this marker contain the marker named 'name'?
@@ -117,7 +106,7 @@ public interface Marker {
      * @param name The marker name to test for inclusion.
      * @return Whether this marker contains the other marker.
      */
-    public boolean contains(String name);
+    boolean contains(String name);
 
     /**
      * Markers are considered equal if they have the same name.
@@ -127,7 +116,7 @@ public interface Marker {
      *
      * @since 1.5.1
      */
-    public boolean equals(Object o);
+    boolean equals(Object o);
 
     /**
      * Compute the hash code based on the name of this marker.
@@ -136,6 +125,6 @@ public interface Marker {
      * @return the computed hashCode
      * @since 1.5.1
      */
-    public int hashCode();
+    int hashCode();
 
 }

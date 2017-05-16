@@ -36,7 +36,7 @@ import org.slf4j.Marker;
  *
  * @author Ceki Gulcu
  */
-public abstract class MarkerIgnoringBase extends NamedLoggerBase implements Logger {
+public abstract class MarkerIgnoringBase  implements Logger {
 
     public boolean isTraceEnabled(Marker marker) {
         return isTraceEnabled();
@@ -159,10 +159,8 @@ public abstract class MarkerIgnoringBase extends NamedLoggerBase implements Logg
         error(msg, t);
     }
 
-/*
     public String toString() {
-        return this.getClass().getName()+"("+getName()+")";
+        return this.getClass().getName() + "(" + getName() + ")";
     }
-*/
 
 }
