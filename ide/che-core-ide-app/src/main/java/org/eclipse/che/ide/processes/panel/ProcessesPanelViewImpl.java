@@ -48,7 +48,6 @@ import org.eclipse.che.ide.ui.tree.SelectionModel;
 import org.eclipse.che.ide.ui.tree.Tree;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.input.SignalEvent;
-import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -510,15 +509,12 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
     @Override
     public void onResize() {
-        Log.info(getClass(), "***********Begin resize.*********");
         for (WidgetToShow widgetToShow : widget2Panels.keySet()) {
-            Log.info(getClass(), widgetToShow.getTitle());
             final IsWidget widget = widgetToShow.getWidget();
             if (widget instanceof RequiresResize) {
                 ((RequiresResize)widget).onResize();
             }
         }
-        Log.info(getClass(), "********End resize.************");
     }
 
     @Override
