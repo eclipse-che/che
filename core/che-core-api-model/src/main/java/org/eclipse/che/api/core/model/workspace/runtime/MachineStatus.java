@@ -8,11 +8,27 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.project.fs;
+package org.eclipse.che.api.core.model.workspace.runtime;
 
 /**
+ * Status of Machine
+ *
  * @author gazarenkov
  */
-public interface Folder {
+public enum MachineStatus {
+    /**
+     * Server is up and running
+     */
+    RUNNING,
+
+    /**
+     * Server is not sunning
+     */
+    STOPPED,
+
+    /**
+     * unknown
+     */
+    UNKNOWN;
 
 }
