@@ -217,11 +217,11 @@ export class WorkspaceDetailsController {
     if (!this.namespaceId) {
       const user = this.cheUser.getUser();
       if (user) {
-        this.namespaceId = user.id;
+        this.namespaceId = user.name;
         defer.resolve();
       } else {
         this.cheUser.fetchUser().then(() => {
-          this.namespaceId = user.id;
+          this.namespaceId = user.name;
           defer.resolve();
         }, (error: any) => {
           defer.reject(error);
