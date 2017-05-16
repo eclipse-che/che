@@ -78,18 +78,6 @@ public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy,
 
         SpanElement root = Elements.createSpanElement();
 
-        Element statusElement = Elements.createSpanElement(resources.getCss().machineStatus());
-        root.appendChild(statusElement);
-
-        if (node.isRunning()) {
-            statusElement.appendChild(Elements.createDivElement(resources.getCss().machineStatusRunning()));
-        } else {
-            statusElement.appendChild(Elements.createDivElement(resources.getCss().machineStatusPausedLeft()));
-            statusElement.appendChild(Elements.createDivElement(resources.getCss().machineStatusPausedRight()));
-        }
-
-        Tooltip.create(statusElement, BOTTOM, MIDDLE, locale.viewMachineRunningTooltip());
-
         Workspace workspace = appContext.getWorkspace();
         if (workspace != null && RUNNING == workspace.getStatus() && node.hasTerminalAgent()) {
             SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().newTerminalButton());

@@ -35,6 +35,7 @@
 .processTree .nameLabel {
     font-weight: bold;
     line-height: 18px;
+    color: successColor;
 }
 
 .processTree .machineStatus {
