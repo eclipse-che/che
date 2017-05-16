@@ -16,6 +16,13 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.reception.ConsumerConfiguratorOneToNone;
+import org.eclipse.che.api.core.jsonrpc.commons.reception.ResultConfiguratorFromOne;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.EndpointIdConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.MethodNameConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.ParamsConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.SendConfiguratorFromNone;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.SendConfiguratorFromOne;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
@@ -54,10 +61,6 @@ import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerObserver;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.api.core.jsonrpc.commons.reception.MethodNameConfigurator;
-import org.eclipse.che.api.core.jsonrpc.commons.reception.ConsumerConfiguratorOneToNone;
-import org.eclipse.che.api.core.jsonrpc.commons.reception.ParamsConfigurator;
-import org.eclipse.che.api.core.jsonrpc.commons.reception.ResultConfiguratorFromOne;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
@@ -127,6 +130,16 @@ public class DebuggerTest extends BaseTest {
     @Mock
     private RequestTransmitter         transmitter;
     @Mock
+    private EndpointIdConfigurator     endpointIdConfigurator;
+    @Mock
+    private MethodNameConfigurator     methodNameConfigurator;
+    @Mock
+    private ParamsConfigurator         paramsConfigurator;
+    @Mock
+    private SendConfiguratorFromNone   sendConfiguratorFromNone;
+    @Mock
+    private SendConfiguratorFromOne    sendConfiguratorFromOne;
+    @Mock
     private RequestHandlerConfigurator configurator;
 
     @Mock
@@ -185,6 +198,12 @@ public class DebuggerTest extends BaseTest {
         doReturn(debugSessionDto).when(dtoFactory).createDtoFromJson(anyString(), eq(DebugSessionDto.class));
 
         doReturn(Path.valueOf(PATH)).when(file).getLocation();
+        doReturn(endpointIdConfigurator).when(transmitter).newRequest();
+        doReturn(methodNameConfigurator).when(endpointIdConfigurator).endpointId(anyString());
+        doReturn(paramsConfigurator).when(methodNameConfigurator).methodName(AbstractDebugger.EVENT_DEBUGGER_SUBSCRIBE);
+        doReturn(paramsConfigurator).when(methodNameConfigurator).methodName(AbstractDebugger.EVENT_DEBUGGER_UN_SUBSCRIBE);
+
+        doReturn(sendConfiguratorFromNone).when(paramsConfigurator).noParams();
 
         debugger = new TestDebugger(service, transmitter, configurator, dtoFactory, localStorageProvider, eventBus,
                                     activeFileHandler, debuggerManager, notificationManager, "id");
@@ -204,6 +223,7 @@ public class DebuggerTest extends BaseTest {
     public void testAttachDebugger() throws Exception {
         debugger.setDebugSession(null);
 
+
         final String debugSessionJson = "debugSession";
         doReturn(debugSessionJson).when(dtoFactory).toJson(debugSessionDto);
         doReturn(mock(StartActionDto.class)).when(dtoFactory).createDto(StartActionDto.class);
@@ -211,8 +231,11 @@ public class DebuggerTest extends BaseTest {
         Map<String, String> connectionProperties = mock(Map.class);
         Promise<DebugSessionDto> promiseDebuggerInfo = mock(Promise.class);
 
-        MethodNameConfigurator methodNameConfigurator = mock(MethodNameConfigurator.class);
-        ParamsConfigurator paramsConfigurator = mock(ParamsConfigurator.class);
+        org.eclipse.che.api.core.jsonrpc.commons.reception.MethodNameConfigurator methodNameConfigurator = mock(
+                org.eclipse.che.api.core.jsonrpc.commons.reception.MethodNameConfigurator.class);
+        org.eclipse.che.api.core.jsonrpc.commons.reception.ParamsConfigurator paramsConfigurator = mock(
+                org.eclipse.che.api.core.jsonrpc.commons.reception.ParamsConfigurator.class);
+
         ResultConfiguratorFromOne resultConfiguratorFromOne = mock(ResultConfiguratorFromOne.class);
         ConsumerConfiguratorOneToNone operationConfiguratorOneToNone = mock(ConsumerConfiguratorOneToNone.class);
 

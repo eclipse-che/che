@@ -87,11 +87,11 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     public static final String LOCAL_STORAGE_DEBUGGER_STATE_KEY   = "che-debugger-state";
     public static final String WS_AGENT_ENDPOINT                  = "ws-agent";
 
-    private static final String EVENT_DEBUGGER_MESSAGE_BREAKPOINT = "event:debugger:breakpoint";
-    private static final String EVENT_DEBUGGER_MESSAGE_DISCONNECT = "event:debugger:disconnect";
-    private static final String EVENT_DEBUGGER_MESSAGE_SUSPEND    = "event:debugger:suspend";
-    private static final String EVENT_DEBUGGER_UN_SUBSCRIBE       = "event:debugger:un-subscribe";
-    private static final String EVENT_DEBUGGER_SUBSCRIBE          = "event:debugger:subscribe";
+    public static final String EVENT_DEBUGGER_MESSAGE_BREAKPOINT = "event:debugger:breakpoint";
+    public static final String EVENT_DEBUGGER_MESSAGE_DISCONNECT = "event:debugger:disconnect";
+    public static final String EVENT_DEBUGGER_MESSAGE_SUSPEND    = "event:debugger:suspend";
+    public static final String EVENT_DEBUGGER_UN_SUBSCRIBE       = "event:debugger:un-subscribe";
+    public static final String EVENT_DEBUGGER_SUBSCRIBE          = "event:debugger:subscribe";
 
     protected final DtoFactory             dtoFactory;
     protected final NotificationManager    notificationManager;
