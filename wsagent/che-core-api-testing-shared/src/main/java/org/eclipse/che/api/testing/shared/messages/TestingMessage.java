@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public interface TestingMessage {
 
-    TestingMessageName getName();
+    String getName();
 
     Map<String, String> getAttributes();
 

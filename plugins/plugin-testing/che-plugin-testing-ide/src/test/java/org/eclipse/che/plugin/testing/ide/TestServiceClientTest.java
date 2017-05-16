@@ -11,7 +11,6 @@
 package org.eclipse.che.plugin.testing.ide;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
-
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
@@ -36,9 +35,10 @@ import org.eclipse.che.ide.api.machine.execagent.ExecAgentPromise;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.command.goal.TestGoal;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.CommandOutputConsole;
+import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -114,6 +114,9 @@ public class TestServiceClientTest implements MockitoPrinter {
 
     private TestServiceClient          testServiceClient         = null;
 
+    @Mock
+    private RequestTransmitter requestTransmitter;
+
     @Spy
     private final List<DtoWithPid>     consoleEvents             = new ArrayList<>();
 
@@ -131,7 +134,7 @@ public class TestServiceClientTest implements MockitoPrinter {
 
         testServiceClient = spy(new TestServiceClient(appContext, asyncRequestFactory, dtoUnmarshallerFactory, dtoFactory, commandManager,
                                                       execAgentCommandManager, promiseProvider, macroProcessor, commandConsoleFactory,
-                                                      processesPanelPresenter, testGoal));
+                processesPanelPresenter, testGoal, requestTransmitter));
 
         doReturn(new PromiseMocker<TestResult>().getPromise()).when(testServiceClient).sendTests(anyString(), anyString(),
                                                                                                  anyMapOf(String.class, String.class));

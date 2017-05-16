@@ -15,11 +15,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.eclipse.che.api.testing.shared.messages.TestingMessage;
-import org.eclipse.che.api.testing.shared.messages.TestingMessageName;
+import org.eclipse.che.api.testing.shared.messages.TestingMessageNames;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static org.eclipse.che.api.testing.shared.Constants.ATTRIBUTES;
+import static org.eclipse.che.api.testing.shared.Constants.NAME;
 
 
 /**
@@ -35,25 +38,23 @@ import java.util.Set;
 public class ServerTestingMessage implements TestingMessage {
 
 
-    public static final ServerTestingMessage TESTING_STARTED = new ServerTestingMessage(TestingMessageName.TESTING_STARTED);
-    public static final ServerTestingMessage FINISH_TESTING = new ServerTestingMessage(TestingMessageName.FINISH_TESTING);
+    public static final ServerTestingMessage TESTING_STARTED = new ServerTestingMessage(TestingMessageNames.TESTING_STARTED);
+    public static final ServerTestingMessage FINISH_TESTING = new ServerTestingMessage(TestingMessageNames.FINISH_TESTING);
 
     public static final String TESTING_MESSAGE_START = "@@<";
     public static final String TESTING_MESSAGE_END = ">";
-    public static final String NAME = "name";
-    public static final String ATTRIBUTES = "attributes";
 
 
     private static final Gson GSON = new Gson();
 
-    private TestingMessageName messageName;
+    private String messageName;
     private Map<String, String> attributes = new HashMap<>();
 
-    protected ServerTestingMessage(TestingMessageName messageName) {
+    protected ServerTestingMessage(String messageName) {
         this(messageName, null);
     }
 
-    protected ServerTestingMessage(TestingMessageName messageName, Map<String, String> attributes) {
+    protected ServerTestingMessage(String messageName, Map<String, String> attributes) {
         this.messageName = messageName;
         setAttributes(attributes);
     }
@@ -80,7 +81,7 @@ public class ServerTestingMessage implements TestingMessage {
                 }
             }
 
-            return new ServerTestingMessage(TestingMessageName.instanceOf(name), attributes);
+            return new ServerTestingMessage(name, attributes);
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
@@ -88,8 +89,8 @@ public class ServerTestingMessage implements TestingMessage {
 
     public String asJsonString() {
         JsonObject object = new JsonObject();
-        object.addProperty(NAME, messageName.getName());
-        if(!attributes.isEmpty()) {
+        object.addProperty(NAME, messageName);
+        if (!attributes.isEmpty()) {
             JsonObject att = new JsonObject();
             attributes.forEach(att::addProperty);
             object.add(ATTRIBUTES, att);
@@ -98,7 +99,7 @@ public class ServerTestingMessage implements TestingMessage {
     }
 
     @Override
-    public TestingMessageName getName() {
+    public String getName() {
         return messageName;
     }
 

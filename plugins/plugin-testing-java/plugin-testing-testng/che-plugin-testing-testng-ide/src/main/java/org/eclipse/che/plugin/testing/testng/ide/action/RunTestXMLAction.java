@@ -10,24 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.testng.ide.action;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
-import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.testng.ide.TestNGLocalizationConstant;
 import org.eclipse.che.plugin.testing.testng.ide.TestNGResources;
-
-import com.google.inject.Inject;
 
 /**
  * @author Mirage Abeysekara
@@ -60,13 +54,15 @@ public class RunTestXMLAction extends JavaEditorAction
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final Project project = appContext.getRootProject();
-        Map<String, String> parameters = new HashMap<>();
-
-        parameters.put("testngXML",
-                       project.getPath() + "/" + MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER + "/testng.xml");
-
-        delegate.doRunTests(e, parameters);
+//        final Project project = appContext.getRootProject();
+//        Map<String, String> parameters = new HashMap<>();
+//
+//        parameters.put("testngXML",
+//                       project.getPath() + "/" + MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER + "/testng.xml");
+//
+//        delegate.doRunTests(e, parameters);
+        //TODO
+        throw new UnsupportedOperationException();
     }
 
     @Override

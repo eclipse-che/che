@@ -10,22 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.junit.ide.action;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.validation.constraints.NotNull;
-
+import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
-import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.resources.tree.FileNode;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
@@ -33,7 +24,10 @@ import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
 
-import com.google.inject.Inject;
+import javax.validation.constraints.NotNull;
+import java.util.Arrays;
+
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * @author Mirage Abeysekara
@@ -69,16 +63,18 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final Selection< ? > selection = selectionAgent.getSelection();
-        final Object possibleNode = selection.getHeadElement();
-        if (possibleNode instanceof FileNode) {
-            VirtualFile file = ((FileNode)possibleNode).getData();
-            String fqn = JavaUtil.resolveFQN(file);
-            Map<String, String> parameters = new HashMap<>();
-            parameters.put("fqn", fqn);
-            parameters.put("runClass", "true");
-            delegate.doRunTests(e, parameters);
-        }
+//        final Selection< ? > selection = selectionAgent.getSelection();
+//        final Object possibleNode = selection.getHeadElement();
+//        if (possibleNode instanceof FileNode) {
+//            VirtualFile file = ((FileNode)possibleNode).getData();
+//            String fqn = JavaUtil.resolveFQN(file);
+//            Map<String, String> parameters = new HashMap<>();
+//            parameters.put("fqn", fqn);
+//            parameters.put("runClass", "true");
+//            delegate.doRunTests(e, parameters);
+//        }
+        //TODO
+        throw new UnsupportedOperationException();
     }
 
     @Override

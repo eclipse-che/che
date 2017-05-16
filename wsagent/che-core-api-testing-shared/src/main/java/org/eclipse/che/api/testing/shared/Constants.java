@@ -22,6 +22,11 @@ public class Constants {
 
     public static final String TESTING_RPC_METHOD_NAME = "testing/message";
 
+    public static final String RUN_TESTS_METHOD = "testing/runTest";
+
+    public static final String NAME = "name";
+    public static final String ATTRIBUTES = "attributes";
+
     private Constants() {
     }
 

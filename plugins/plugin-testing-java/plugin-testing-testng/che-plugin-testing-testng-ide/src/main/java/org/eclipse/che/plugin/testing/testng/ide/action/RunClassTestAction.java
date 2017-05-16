@@ -10,25 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.testng.ide.action;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
-import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.testng.ide.TestNGLocalizationConstant;
 import org.eclipse.che.plugin.testing.testng.ide.TestNGResources;
-
-import com.google.inject.Inject;
 
 /**
  * @author Mirage Abeysekara
@@ -60,14 +53,16 @@ implements RunTestActionDelegate.Source {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Map<String, String> parameters = new HashMap<>();
-        EditorPartPresenter editorPart = editorAgent.getActiveEditor();
-        final VirtualFile file = editorPart.getEditorInput().getFile();
-        String fqn = JavaUtil.resolveFQN(file);
-        parameters.put("fqn", fqn);
-        parameters.put("runClass", "true");
-        
-        delegate.doRunTests(e, parameters);
+//        Map<String, String> parameters = new HashMap<>();
+//        EditorPartPresenter editorPart = editorAgent.getActiveEditor();
+//        final VirtualFile file = editorPart.getEditorInput().getFile();
+//        String fqn = JavaUtil.resolveFQN(file);
+//        parameters.put("fqn", fqn);
+//        parameters.put("runClass", "true");
+//
+//        delegate.doRunTests(e, parameters);
+        //TODO
+        throw new UnsupportedOperationException();
     }
 
     @Override

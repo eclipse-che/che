@@ -10,14 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.junit.ide.action;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.validation.constraints.NotNull;
-
+import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -34,7 +27,10 @@ import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
 
-import com.google.inject.Inject;
+import javax.validation.constraints.NotNull;
+import java.util.Arrays;
+
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * @author Mirage Abeysekara
@@ -70,16 +66,18 @@ public class RunAllContextTestAction extends AbstractPerspectiveAction
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final Selection< ? > selection = selectionAgent.getSelection();
-        final Object possibleNode = selection.getHeadElement();
-        if (possibleNode instanceof ContainerNode) {
-            Container container = ((ContainerNode)possibleNode).getData();
-            Project project = container.getProject();
-            if (project != null) {
-                Map<String, String> parameters = new HashMap<>();
-                delegate.doRunTests(e, parameters);
-            }
-        }
+//        final Selection< ? > selection = selectionAgent.getSelection();
+//        final Object possibleNode = selection.getHeadElement();
+//        if (possibleNode instanceof ContainerNode) {
+//            Container container = ((ContainerNode)possibleNode).getData();
+//            Project project = container.getProject();
+//            if (project != null) {
+//                Map<String, String> parameters = new HashMap<>();
+//                delegate.doRunTests(e, parameters);
+//            }
+//        }
+        //TODO
+        throw new UnsupportedOperationException();
     }
 
     @Override

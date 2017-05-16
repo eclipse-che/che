@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.junit.ide.action;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -24,8 +22,6 @@ import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
-
-import com.google.inject.Inject;
 
 /**
  * @author Mirage Abeysekara
@@ -58,8 +54,10 @@ public class RunAllTestAction extends JavaEditorAction
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Map<String, String> parameters = new HashMap<>();
-        delegate.doRunTests(e, parameters);
+//        Map<String, String> parameters = new HashMap<>();
+//        delegate.doRunTests(e, parameters);
+        //TODO
+        throw new UnsupportedOperationException();
     }
 
     @Override

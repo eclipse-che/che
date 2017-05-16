@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.gwt.http.client.URL;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -26,6 +27,8 @@ import org.eclipse.che.api.promises.client.js.Executor.ExecutorBody;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.api.promises.client.js.ResolveFunction;
+import org.eclipse.che.api.testing.shared.Constants;
+import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -36,19 +39,18 @@ import org.eclipse.che.ide.api.machine.execagent.ExecAgentPromise;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.command.goal.TestGoal;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.CommandOutputConsole;
+import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.HTTPHeader;
 
-import com.google.gwt.http.client.URL;
-import com.google.gwt.regexp.shared.MatchResult;
-import com.google.gwt.regexp.shared.RegExp;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
@@ -85,6 +87,7 @@ public class TestServiceClient {
     private final CommandConsoleFactory   commandConsoleFactory;
     private final ProcessesPanelPresenter processesPanelPresenter;
     private final TestGoal                testGoal;
+    private final RequestTransmitter requestTransmitter;
 
 
     @Inject
@@ -98,7 +101,8 @@ public class TestServiceClient {
                              MacroProcessor macroProcessor,
                              CommandConsoleFactory commandConsoleFactory,
                              ProcessesPanelPresenter processesPanelPresenter,
-                             TestGoal testGoal) {
+                             TestGoal testGoal,
+                             RequestTransmitter requestTransmitter) {
         this.appContext = appContext;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
@@ -109,8 +113,10 @@ public class TestServiceClient {
         this.commandConsoleFactory = commandConsoleFactory;
         this.processesPanelPresenter = processesPanelPresenter;
         this.testGoal = testGoal;
+        this.requestTransmitter = requestTransmitter;
     }
 
+    @Deprecated
     public Promise<CommandImpl> getOrCreateTestCompileCommand() {
         List<CommandImpl> commands = commandManager.getCommands();
 
@@ -132,6 +138,7 @@ public class TestServiceClient {
         return promiseProvider.resolve(null);
     }
 
+    @Deprecated
     public Promise<TestResult> getTestResult(String projectPath, String testFramework, Map<String, String> parameters) {
         return getTestResult(projectPath, testFramework, parameters, null);
     }
@@ -231,14 +238,16 @@ public class TestServiceClient {
         });
     }
 
+    @Deprecated
     public Promise<TestResult> getTestResult(String projectPath,
                                              String testFramework,
                                              Map<String, String> parameters,
                                              StatusNotification statusNotification) {
         return runTestsAfterCompilation(projectPath, testFramework, parameters, statusNotification,
-                                        getOrCreateTestCompileCommand());
+                getOrCreateTestCompileCommand());
     }
 
+    @Deprecated
     public Promise<TestResult> sendTests(String projectPath, String testFramework, Map<String, String> parameters) {
         StringBuilder sb = new StringBuilder();
         if (parameters != null) {
@@ -250,9 +259,13 @@ public class TestServiceClient {
             }
         }
         String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/che/testing/run/?projectPath=" + projectPath
-                     + "&testFramework=" + testFramework + "&" + sb.toString();
+                + "&testFramework=" + testFramework + "&" + sb.toString();
         return asyncRequestFactory.createGetRequest(url).header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(TestResult.class));
+                .send(dtoUnmarshallerFactory.newUnmarshaller(TestResult.class));
+    }
+
+    public Promise<String> runTests(TestExecutionContext context) {
+        return requestTransmitter.transmitOneToOne(appContext.getAppId(), Constants.RUN_TESTS_METHOD, context, String.class);
     }
 
 }

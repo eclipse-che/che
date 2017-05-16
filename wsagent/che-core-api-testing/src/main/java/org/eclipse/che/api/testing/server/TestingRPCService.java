@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.testing.server.framework.TestFrameworkRegistry;
 import org.eclipse.che.api.testing.server.framework.TestMessagesOutputTransmitter;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
+import org.eclipse.che.api.testing.shared.Constants;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
 
@@ -26,8 +27,6 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class TestingRPCService {
-
-    private static final String RUN_TESTS_METHOD = "testing/runTest";
 
     private final RequestTransmitter requestTransmitter;
     private final TestFrameworkRegistry frameworkRegistry;
@@ -61,7 +60,7 @@ public class TestingRPCService {
     @Inject
     private void configureRunTestHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
-                .methodName(RUN_TESTS_METHOD)
+                .methodName(Constants.RUN_TESTS_METHOD)
                 .paramsAsDto(TestExecutionContext.class)
                 .resultAsBoolean()
                 .withFunction(this::runTests);
