@@ -154,6 +154,7 @@ export class CheHttpBackend {
     for (let key of userEmailKeys) {
       this.httpBackend.when('GET', '/api/user/find?email=' + key).respond(this.userEmailMap.get(key));
     }
+    this.httpBackend.when('GET', /\/_app\/compilation-mappings(\?.*$)?/).respond(200, '');
   }
 
   /**
