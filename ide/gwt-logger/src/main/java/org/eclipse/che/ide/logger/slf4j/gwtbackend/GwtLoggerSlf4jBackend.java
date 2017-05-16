@@ -24,21 +24,13 @@ import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Level.WARNING;
 
 /**
- * A wrapper over {@link java.util.logging.Logger java.util.logging.Logger}
- * supported since GWT 2.1.
+ * A wrapper over {@link java.util.logging.Logger} supported since GWT 2.1.
  */
 public class GwtLoggerSlf4jBackend extends MarkerIgnoringBase {
     private final Logger logger;
-    private final String name;
 
     public GwtLoggerSlf4jBackend(String name) {
-        this.name = name;
         logger = Logger.getLogger(name);
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override
