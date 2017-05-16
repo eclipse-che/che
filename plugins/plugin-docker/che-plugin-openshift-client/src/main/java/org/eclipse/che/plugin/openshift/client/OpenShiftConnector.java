@@ -1458,12 +1458,14 @@ public class OpenShiftConnector extends DockerConnector {
         PersistentVolumeClaim pvc = getClaimCheWorkspace();
         if (pvc != null) {
             String subPath = getWorkspaceSubpath(volumes);
-            VolumeMount vm = new VolumeMountBuilder()
+            if (subPath != null) {
+                VolumeMount vm = new VolumeMountBuilder()
                     .withMountPath(cheWorkspaceProjectsStorage)
                     .withName(workspacesPersistentVolumeClaim)
                     .withSubPath(subPath)
                     .build();
-            vms.add(vm);
+                vms.add(vm);
+            }
         }
         return vms;
     }
