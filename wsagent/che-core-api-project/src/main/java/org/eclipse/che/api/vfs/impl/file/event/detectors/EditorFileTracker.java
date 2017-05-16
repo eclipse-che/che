@@ -201,10 +201,8 @@ public class EditorFileTracker {
     private String hashFile(String path) {
         try {
             VirtualFile file = vfsProvider.getVirtualFileSystem().getRoot().getChild(Path.of(path));
-            if (file == null) {
-                return Hashing.md5().hashString("", defaultCharset()).toString();
-            }
-            return hash(file.toIoFile(), Hashing.md5()).toString();
+            return file == null ? Hashing.md5().hashString("", defaultCharset()).toString()
+                                : hash(file.toIoFile(), Hashing.md5()).toString();
         } catch (ServerException | IOException e) {
             LOG.error("Error trying to read {} file and broadcast it", path, e);
         }
