@@ -13,16 +13,10 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.reception.ConsumerConfiguratorOneToNone;
 import org.eclipse.che.api.core.jsonrpc.commons.reception.ResultConfiguratorFromOne;
-import org.eclipse.che.api.core.jsonrpc.commons.transmission.EndpointIdConfigurator;
-import org.eclipse.che.api.core.jsonrpc.commons.transmission.MethodNameConfigurator;
-import org.eclipse.che.api.core.jsonrpc.commons.transmission.ParamsConfigurator;
-import org.eclipse.che.api.core.jsonrpc.commons.transmission.SendConfiguratorFromNone;
-import org.eclipse.che.api.core.jsonrpc.commons.transmission.SendConfiguratorFromOne;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;

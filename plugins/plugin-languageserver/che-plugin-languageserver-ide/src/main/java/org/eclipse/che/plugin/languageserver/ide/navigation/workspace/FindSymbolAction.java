@@ -14,7 +14,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceSymbolParams;
 import org.eclipse.che.api.promises.async.ThrottledDelayer;
 import org.eclipse.che.api.promises.client.Function;

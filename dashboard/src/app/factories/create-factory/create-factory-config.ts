@@ -11,22 +11,22 @@
 'use strict';
 
 
-import {CreateFactoryCtrl} from '../create-factory/create-factory.controller';
+import {CreateFactoryCtrl} from "../create-factory/create-factory.controller";
 
-import {FactoryFromWorkspaceCtrl} from '../create-factory/workspaces-tab/factory-from-workpsace.controller';
-import {FactoryFromWorkspace} from '../create-factory/workspaces-tab/factory-from-workspace.directive';
-import {FactoryFromFileCtrl} from '../create-factory/config-file-tab/factory-from-file.controller';
-import {FactoryFromFile} from '../create-factory/config-file-tab/factory-from-file.directive';
-import {FactoryFromTemplateController} from '../create-factory/template-tab/factory-from-template.controller';
-import {FactoryFromTemplate} from '../create-factory/template-tab/factory-from-template.directive';
-import {FactoryActionBoxController} from './action/factory-action-box.controller';
-import {FactoryActionBox} from './action/factory-action-box.directive';
-import {FactoryActionDialogEditController} from './action/factory-action-edit.controller';
-import {FactoryCommandController} from './command/factory-command.controller';
-import {FactoryCommand} from './command/factory-command.directive';
-import {FactoryCommandDialogEditController} from './command/factory-command-edit.controller';
-import {CreateFactoryGitController} from './git/create-factory-git.controller';
-import {CreateFactoryGit} from './git/create-factory-git.directive';
+import {FactoryFromWorkspaceCtrl} from "../create-factory/workspaces-tab/factory-from-workpsace.controller";
+import {FactoryFromWorkspace} from "../create-factory/workspaces-tab/factory-from-workspace.directive";
+import {FactoryFromFileCtrl} from "../create-factory/config-file-tab/factory-from-file.controller";
+import {FactoryFromFile} from "../create-factory/config-file-tab/factory-from-file.directive";
+import {FactoryFromTemplateController} from "../create-factory/template-tab/factory-from-template.controller";
+import {FactoryFromTemplate} from "../create-factory/template-tab/factory-from-template.directive";
+import {FactoryActionBoxController} from "./action/factory-action-box.controller";
+import {FactoryActionBox} from "./action/factory-action-box.directive";
+import {FactoryActionDialogEditController} from "./action/factory-action-edit.controller";
+import {FactoryCommandController} from "./command/factory-command.controller";
+import {FactoryCommand} from "./command/factory-command.directive";
+import {FactoryCommandDialogEditController} from "./command/factory-command-edit.controller";
+import {CreateFactoryGitController} from "./git/create-factory-git.controller";
+import {CreateFactoryGit} from "./git/create-factory-git.directive";
 
 export class CreateFactoryConfig {
 

@@ -9,14 +9,14 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheEnvironmentRegistry} from '../../../components/api/environment/che-environment-registry.factory';
-import {CheNotification} from '../../../components/notification/che-notification.factory';
-import {CheWorkspace} from '../../../components/api/che-workspace.factory';
-import IdeSvc from '../../ide/ide.service';
-import {WorkspaceDetailsService} from './workspace-details.service';
-import {CheNamespaceRegistry, INamespace} from '../../../components/api/namespace/che-namespace-registry.factory';
-import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
-import {CheUser} from '../../../components/api/che-user.factory';
+import {CheEnvironmentRegistry} from "../../../components/api/environment/che-environment-registry.factory";
+import {CheNotification} from "../../../components/notification/che-notification.factory";
+import {CheWorkspace} from "../../../components/api/che-workspace.factory";
+import IdeSvc from "../../ide/ide.service";
+import {WorkspaceDetailsService} from "./workspace-details.service";
+import {CheNamespaceRegistry, INamespace} from "../../../components/api/namespace/che-namespace-registry.factory";
+import {ConfirmDialogService} from "../../../components/service/confirm-dialog/confirm-dialog.service";
+import {CheUser} from "../../../components/api/che-user.factory";
 
 /**
  * @ngdoc controller

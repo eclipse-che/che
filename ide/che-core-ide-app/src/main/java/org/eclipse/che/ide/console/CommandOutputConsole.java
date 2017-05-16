@@ -16,7 +16,6 @@ import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDt
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
-import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 

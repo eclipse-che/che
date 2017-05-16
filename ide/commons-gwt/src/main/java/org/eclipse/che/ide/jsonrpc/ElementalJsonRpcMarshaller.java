@@ -15,7 +15,6 @@ import elemental.json.JsonFactory;
 import elemental.json.JsonObject;
 import elemental.json.JsonString;
 import elemental.json.JsonValue;
-
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcError;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcParams;

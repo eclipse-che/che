@@ -17,7 +17,6 @@ import javax.inject.Singleton;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.util.Collections.emptySet;

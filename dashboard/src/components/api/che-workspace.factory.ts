@@ -10,12 +10,12 @@
  */
 'use strict';
 
-import {CheWorkspaceAgent} from './che-workspace-agent';
-import {ComposeEnvironmentManager} from './environment/compose-environment-manager';
-import {DockerFileEnvironmentManager} from './environment/docker-file-environment-manager';
-import {DockerImageEnvironmentManager} from './environment/docker-image-environment-manager';
-import {CheEnvironmentRegistry} from './environment/che-environment-registry.factory';
-import {CheWebsocket} from './che-websocket.factory';
+import {CheWorkspaceAgent} from "./che-workspace-agent";
+import {ComposeEnvironmentManager} from "./environment/compose-environment-manager";
+import {DockerFileEnvironmentManager} from "./environment/docker-file-environment-manager";
+import {DockerImageEnvironmentManager} from "./environment/docker-image-environment-manager";
+import {CheEnvironmentRegistry} from "./environment/che-environment-registry.factory";
+import {CheWebsocket} from "./che-websocket.factory";
 
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   create: any;

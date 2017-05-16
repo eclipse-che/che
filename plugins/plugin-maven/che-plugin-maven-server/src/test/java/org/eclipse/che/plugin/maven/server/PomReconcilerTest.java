@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.maven.server;
 
 import com.google.gson.JsonObject;
 import com.google.inject.Provider;
-
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.VirtualFileEntry;

@@ -12,10 +12,7 @@ package org.eclipse.che.ide.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-
 import org.eclipse.che.ide.client.inject.IDEInjector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /** The EntryPoint of the IDE application */

@@ -14,11 +14,9 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.util.Collections.emptySet;

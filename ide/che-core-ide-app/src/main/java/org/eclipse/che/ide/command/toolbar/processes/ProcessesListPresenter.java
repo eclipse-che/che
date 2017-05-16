@@ -13,7 +13,6 @@ package org.eclipse.che.ide.command.toolbar.processes;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;

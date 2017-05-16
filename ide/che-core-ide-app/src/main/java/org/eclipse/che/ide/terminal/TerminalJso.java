@@ -12,7 +12,6 @@ package org.eclipse.che.ide.terminal;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
-
 import org.eclipse.che.api.promises.client.Operation;
 
 /**

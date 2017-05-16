@@ -11,7 +11,7 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<svg viewBox="0 0 225 57" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%">
+<svg viewBox="0 0 225 57" version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
     <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g>
             <path d="M0.0322265625,30.8803711 L0,13.7929688 L23.8525391,0 L47.6494141,13.7841797 L32.9580078,22.2944336 L23.8955078,17.1850586 L0.0322265625,30.8803711 Z" fill="#4990E2"></path>

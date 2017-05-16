@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheAPIBuilder} from '../builder/che-api-builder.factory';
+import {CheAPIBuilder} from "../builder/che-api-builder.factory";
 
 /**
  * This class is providing helper methods for simulating a fake HTTP backend simulating

@@ -13,15 +13,10 @@ package org.eclipse.che.ide.jsonrpc;
 import elemental.json.JsonException;
 import elemental.json.JsonFactory;
 import elemental.json.JsonObject;
-import elemental.json.JsonValue;
-
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcQualifier;
-import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.impl.WebSocketInitializer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Map;
 
 @Singleton
 public class ElementalJsonRpcQualifier implements JsonRpcQualifier {

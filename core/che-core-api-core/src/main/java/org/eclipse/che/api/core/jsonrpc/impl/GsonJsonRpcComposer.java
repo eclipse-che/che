@@ -13,7 +13,6 @@ package org.eclipse.che.api.core.jsonrpc.impl;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcComposer;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcParams;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcResult;

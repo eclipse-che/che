@@ -9,8 +9,8 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {ComposeParser} from '../../../components/api/environment/compose-parser';
-import {DockerfileParser} from '../../../components/api/environment/docker-file-parser';
+import {ComposeParser} from "../../../components/api/environment/compose-parser";
+import {DockerfileParser} from "../../../components/api/environment/docker-file-parser";
 
 
 const COMPOSE = 'compose';

@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.gdb.ide;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.debug.shared.model.Location;

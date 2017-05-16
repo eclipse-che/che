@@ -9,8 +9,8 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheNotification} from '../../../../components/notification/che-notification.factory';
-import {CheFactoryTemplate} from '../../../../components/api/che-factory-template.factory';
+import {CheNotification} from "../../../../components/notification/che-notification.factory";
+import {CheFactoryTemplate} from "../../../../components/api/che-factory-template.factory";
 
 /**
  * Controller for creating factory from a template.

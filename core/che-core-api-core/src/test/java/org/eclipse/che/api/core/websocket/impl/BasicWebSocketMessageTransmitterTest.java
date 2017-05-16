@@ -19,12 +19,10 @@ import org.testng.annotations.Test;
 
 import javax.websocket.RemoteEndpoint;
 import javax.websocket.Session;
-
 import java.io.IOException;
 import java.util.Optional;
 
 import static java.util.Collections.emptySet;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;

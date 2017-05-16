@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.maven.server.core;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.maven.data.MavenArtifact;
 import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.che.maven.data.MavenWorkspaceCache;

@@ -12,7 +12,6 @@ package org.eclipse.che.ide.core;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMessageReceiver;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageReceiver;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;

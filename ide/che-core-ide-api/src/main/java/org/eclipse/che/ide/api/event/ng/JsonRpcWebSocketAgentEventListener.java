@@ -13,7 +13,6 @@ package org.eclipse.che.ide.api.event.ng;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;

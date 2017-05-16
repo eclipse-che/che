@@ -12,7 +12,6 @@ package org.eclipse.che.api.core.jsonrpc.commons;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;
 import org.slf4j.Logger;
 

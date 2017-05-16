@@ -30,20 +30,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_PACKAGING;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_RESOURCES_FOLDER;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_SOURCE_FOLDER;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.GROUP_ID;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.PACKAGING;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.PARENT_ARTIFACT_ID;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.PARENT_GROUP_ID;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.PARENT_VERSION;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.RESOURCE_FOLDER;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.TEST_SOURCE_FOLDER;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.VERSION;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.*;
 
 /**
  * @author Vitalii Parfonov
