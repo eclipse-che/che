@@ -36,6 +36,8 @@ public class DockerProxyModule extends AbstractModule {
                             .toProvider(HttpsProxyEnvVariableProvider.class);
         proxySettingsEnvVars.addBinding()
                             .toProvider(NoProxyEnvVariableProvider.class);
+        bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(Names.named("che.docker.build_args"))
+                                                       .toProvider(DockerBuildArgsProvider.class);
     }
 
 }
