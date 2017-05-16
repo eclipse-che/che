@@ -83,6 +83,7 @@ import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -127,18 +128,8 @@ public class DebuggerTest extends BaseTest {
     private NotificationManager        notificationManager;
     @Mock
     private BreakpointManager          breakpointManager;
-    @Mock
+    @Mock(answer = RETURNS_DEEP_STUBS)
     private RequestTransmitter         transmitter;
-    @Mock
-    private EndpointIdConfigurator     endpointIdConfigurator;
-    @Mock
-    private MethodNameConfigurator     methodNameConfigurator;
-    @Mock
-    private ParamsConfigurator         paramsConfigurator;
-    @Mock
-    private SendConfiguratorFromNone   sendConfiguratorFromNone;
-    @Mock
-    private SendConfiguratorFromOne    sendConfiguratorFromOne;
     @Mock
     private RequestHandlerConfigurator configurator;
 
@@ -198,12 +189,6 @@ public class DebuggerTest extends BaseTest {
         doReturn(debugSessionDto).when(dtoFactory).createDtoFromJson(anyString(), eq(DebugSessionDto.class));
 
         doReturn(Path.valueOf(PATH)).when(file).getLocation();
-        doReturn(endpointIdConfigurator).when(transmitter).newRequest();
-        doReturn(methodNameConfigurator).when(endpointIdConfigurator).endpointId(anyString());
-        doReturn(paramsConfigurator).when(methodNameConfigurator).methodName(AbstractDebugger.EVENT_DEBUGGER_SUBSCRIBE);
-        doReturn(paramsConfigurator).when(methodNameConfigurator).methodName(AbstractDebugger.EVENT_DEBUGGER_UN_SUBSCRIBE);
-
-        doReturn(sendConfiguratorFromNone).when(paramsConfigurator).noParams();
 
         debugger = new TestDebugger(service, transmitter, configurator, dtoFactory, localStorageProvider, eventBus,
                                     activeFileHandler, debuggerManager, notificationManager, "id");
