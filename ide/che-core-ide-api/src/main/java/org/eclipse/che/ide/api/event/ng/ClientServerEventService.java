@@ -12,9 +12,9 @@ package org.eclipse.che.ide.api.event.ng;
 
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
@@ -55,6 +55,11 @@ public class ClientServerEventService {
                                                        .withOldPath(oldPath);
 
 
-        requestTransmitter.transmitOneToNone(endpointId, method, dto);
+        requestTransmitter.newRequest()
+                          .endpointId(endpointId)
+                          .methodName(method)
+                          .paramsAsDto(dto)
+                          .sendAndSkipResult();
+
     }
 }

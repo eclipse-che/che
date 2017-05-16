@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event.ng;
 
-import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -26,27 +26,24 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
-
 import java.util.function.Consumer;
 
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
-import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.STOP;
 
 /**
  * @author Dmitry Kuleshov
  */
 @Singleton
 public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
-    private final JsonRpcInitializer initializer;
-    private final AppContext         appContext;
-    private final EventBus           eventBus;
-    private final RequestTransmitter requestTransmitter;
-    private final DtoFactory         dtoFactory;
+    private final JsonRpcInitializer      initializer;
+    private final AppContext              appContext;
+    private final EventBus                eventBus;
+    private final RequestTransmitter      requestTransmitter;
+    private final DtoFactory              dtoFactory;
     private final ExecAgentCommandManager execAgentCommandManager;
 
     @Inject
@@ -98,20 +95,18 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
         initializer.initialize("ws-agent", singletonMap("url", wsAgentUrl));
         initializer.initialize(devMachineId, singletonMap("url", execAgentUrl));
 
-        for(MachineEntity machineEntity : appContext.getActiveRuntime().getMachines()) {
+        for (MachineEntity machineEntity : appContext.getActiveRuntime().getMachines()) {
             if (!machineEntity.isDev()) {
                 initializer.initialize(machineEntity.getId(), singletonMap("url", machineEntity.getExecAgentUrl()));
                 execAgentCommandManager.getProcesses(machineEntity.getId(), false)
-                                       .then(processes -> {
+                                       .onSuccess(processes -> {
                                            Consumer<Integer> pidConsumer = pid -> execAgentCommandManager
                                                    .getProcessLogs(machineEntity.getId(), pid, null, null, 50, 0)
-                                                   .then(logs -> {
-                                                       logs.forEach(log -> {
-                                                           String fixedLog = log.getText().replaceAll("\\[STDOUT\\] ", "");
-                                                           String machineName = machineEntity.getDisplayName();
-                                                           eventBus.fireEvent(new EnvironmentOutputEvent(fixedLog, machineName));
-                                                       });
-                                                   });
+                                                   .onSuccess(logs -> logs.forEach(log -> {
+                                                       String fixedLog = log.getText().replaceAll("\\[STDOUT\\] ", "");
+                                                       String machineName = machineEntity.getDisplayName();
+                                                       eventBus.fireEvent(new EnvironmentOutputEvent(fixedLog, machineName));
+                                                   }));
 
                                            processes.stream()
                                                     .filter(it -> "CheWsAgent".equals(it.getName()))
@@ -127,11 +122,20 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
                                                            .withPath("/")
                                                            .withType(START);
 
-        requestTransmitter.transmitOneToNone("ws-agent", "track:project-tree", params);
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("track:project-tree")
+                          .paramsAsDto(params)
+                          .sendAndSkipResult();
+
     }
 
     private void initializeGitCheckoutWatcher() {
-        requestTransmitter.transmitNoneToNone("ws-agent", "track:git-checkout");
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("track:git-checkout")
+                          .noParams()
+                          .sendAndSkipResult();
     }
 
     @Override

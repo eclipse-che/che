@@ -110,7 +110,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
 
         if (runtime != null) {
             for (Machine machine : runtime.getMachines()) {
-                execAgentClient.getProcesses(machine.getId(), false).then(processes -> {
+                execAgentClient.getProcesses(machine.getId(), false).onSuccess(processes -> {
                     for (GetProcessesResponseDto p : processes) {
                         final Process process = new ProcessImpl(p.getName(),
                                                                 p.getCommandLine(),
@@ -135,7 +135,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
      *         machine where process were run or currently running
      */
     private void addProcessToList(int pid, Machine machine) {
-        execAgentClient.getProcess(machine.getId(), pid).then(processDto -> {
+        execAgentClient.getProcess(machine.getId(), pid).onSuccess(processDto -> {
             final Process process = new ProcessImpl(processDto.getName(),
                                                     processDto.getCommandLine(),
                                                     processDto.getPid(),
