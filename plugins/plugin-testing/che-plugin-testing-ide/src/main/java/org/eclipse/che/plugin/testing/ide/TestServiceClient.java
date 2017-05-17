@@ -32,7 +32,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.execagent.ExecAgentPromise;
+import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.command.goal.TestGoal;
@@ -186,24 +186,24 @@ public class TestServiceClient {
                             final String machineId = ""/*machine.getId()*/;
 
                             processesPanelPresenter.addCommandOutput(machineId, console);
-                            ExecAgentPromise<ProcessStartResponseDto> processPromise = execAgentCommandManager.startProcess(machineId,
-                                                                                                                            expandedCommand);
+                            ExecAgentConsumer<ProcessStartResponseDto> processPromise = execAgentCommandManager.startProcess(machineId,
+                                                                                                                             expandedCommand);
                             processPromise.then(startResonse -> {
                                 if (!startResonse.getAlive()) {
                                     reject.apply(promiseFromThrowable(new Throwable(PROJECT_BUILD_NOT_STARTED_MESSAGE)));
                                 }
-                            }).thenIfProcessStartedEvent(console.getProcessStartedOperation()).thenIfProcessStdErrEvent(evt -> {
+                            }).thenIfProcessStartedEvent(console.getProcessStartedConsumer()).thenIfProcessStdErrEvent(evt -> {
                                 if (evt.getText().contains("BUILD SUCCESS")) {
                                     compiled = true;
                                 }
-                                console.getStdErrOperation().apply(evt);
+                                console.getStdErrConsumer().accept(evt);
                             }).thenIfProcessStdOutEvent(evt -> {
                                 if (evt.getText().contains("BUILD SUCCESS")) {
                                     compiled = true;
                                 }
-                                console.getStdOutOperation().apply(evt);
+                                console.getStdOutConsumer().accept(evt);
                             }).thenIfProcessDiedEvent(evt -> {
-                                console.getProcessDiedOperation().apply(evt);
+                                console.getProcessDiedConsumer().accept(evt);
                                 if (compiled) {
                                     if (statusNotification != null) {
                                         statusNotification.setContent(EXECUTING_TESTS_MESSAGE);

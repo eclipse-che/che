@@ -111,7 +111,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
 
         if (runtime != null) {
             for (MachineEntity machine : runtime.getMachines()) {
-                execAgentClient.getProcesses(machine.getId(), false).then(processes -> {
+                execAgentClient.getProcesses(machine.getId(), false).onSuccess(processes -> {
                     for (GetProcessesResponseDto p : processes) {
                         final Process process = new ProcessImpl(p.getName(),
                                                                 p.getCommandLine(),
@@ -137,7 +137,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
      */
     private void addProcessToList(int pid, Machine machine) {
         // FIXME: spi
-        execAgentClient.getProcess(""/*machine.getId()*/, pid).then(processDto -> {
+        execAgentClient.getProcess(""/*machine.getId()*/, pid).onSuccess(processDto -> {
             final Process process = new ProcessImpl(processDto.getName(),
                                                     processDto.getCommandLine(),
                                                     processDto.getPid(),

@@ -12,10 +12,9 @@ package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
 import com.google.common.hash.Hashing;
 
-import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.project.shared.dto.event.FileStateUpdateDto;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type;
@@ -30,6 +29,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +39,7 @@ import java.util.TimerTask;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import static com.google.common.io.Files.hash;
 import static java.nio.charset.Charset.defaultCharset;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.MODIFIED;
@@ -48,15 +49,15 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * Receive a file tracking operation call from client. There are several type of such calls:
  * <ul>
- *     <li>
- *         START/STOP - tells to start/stop tracking specific file
- *     </li>
- *     <li>
- *         SUSPEND/RESUME - tells to start/stop tracking all files registered for specific endpoint
- *     </li>
- *     <li>
- *         MOVE - tells that file that is being tracked should be moved (renamed)
- *     </li>
+ * <li>
+ * START/STOP - tells to start/stop tracking specific file
+ * </li>
+ * <li>
+ * SUSPEND/RESUME - tells to start/stop tracking all files registered for specific endpoint
+ * </li>
+ * <li>
+ * MOVE - tells that file that is being tracked should be moved (renamed)
+ * </li>
  * </ul>
  *
  * @author Dmitry Kuleshov
@@ -72,9 +73,9 @@ public class EditorFileTracker {
     private final Map<String, Integer> watchIdRegistry = new HashMap<>();
 
     private final RequestTransmitter        transmitter;
-    private       File                      root;
-    private final FileWatcherManager fileWatcherManager;
+    private final FileWatcherManager        fileWatcherManager;
     private final VirtualFileSystemProvider vfsProvider;
+    private       File                      root;
 
 
     @Inject
@@ -180,7 +181,12 @@ public class EditorFileTracker {
             hashRegistry.put(path + endpointId, newHash);
 
             FileStateUpdateDto params = newDto(FileStateUpdateDto.class).withPath(path).withType(MODIFIED).withHashCode(newHash);
-            transmitter.transmitOneToNone(endpointId, OUTGOING_METHOD, params);
+            transmitter.newRequest()
+                       .endpointId(endpointId)
+                       .methodName(OUTGOING_METHOD)
+                       .paramsAsDto(params)
+                       .sendAndSkipResult();
+
         };
     }
 
@@ -190,7 +196,12 @@ public class EditorFileTracker {
             public void run() {
                 if (!Files.exists(FileWatcherUtils.toNormalPath(root.toPath(), it))) {
                     FileStateUpdateDto params = newDto(FileStateUpdateDto.class).withPath(path).withType(DELETED);
-                    transmitter.transmitOneToNone(endpointId, OUTGOING_METHOD, params);
+                    transmitter.newRequest()
+                               .endpointId(endpointId)
+                               .methodName(OUTGOING_METHOD)
+                               .paramsAsDto(params)
+                               .sendAndSkipResult();
+
                 }
 
             }
@@ -200,8 +211,9 @@ public class EditorFileTracker {
     private String hashFile(String path) {
         try {
             VirtualFile file = vfsProvider.getVirtualFileSystem().getRoot().getChild(Path.of(path));
-            return Hashing.md5().hashString(file == null ? "" : file.getContentAsString(), defaultCharset()).toString();
-        } catch (ServerException | ForbiddenException e) {
+            return file == null ? Hashing.md5().hashString("", defaultCharset()).toString()
+                                : hash(file.toIoFile(), Hashing.md5()).toString();
+        } catch (ServerException | IOException e) {
             LOG.error("Error trying to read {} file and broadcast it", path, e);
         }
         return null;

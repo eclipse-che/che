@@ -63,16 +63,16 @@ public class CommandExecutorImpl implements CommandExecutor {
         macroProcessor.expandMacros(commandLine).then(expandedCommandLine -> {
             final CommandImpl expandedCommand = new CommandImpl(name, expandedCommandLine, type, attributes);
             final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
-// FIXME: spi
+            // FIXME: spi
 //            final String machineId = machine.getId();
 //
 //            processesPanelPresenter.addCommandOutput(machineId, console);
 //
 //            execAgentClient.startProcess(machineId, expandedCommand)
-//                           .thenIfProcessStartedEvent(console.getProcessStartedOperation())
-//                           .thenIfProcessDiedEvent(console.getProcessDiedOperation())
-//                           .thenIfProcessStdOutEvent(console.getStdOutOperation())
-//                           .thenIfProcessStdErrEvent(console.getStdErrOperation());
+//                           .thenIfProcessStartedEvent(console.getProcessStartedConsumer())
+//                           .thenIfProcessDiedEvent(console.getProcessDiedConsumer())
+//                           .thenIfProcessStdOutEvent(console.getStdOutConsumer())
+//                           .thenIfProcessStdErrEvent(console.getStdErrConsumer());
         });
     }
 
@@ -83,10 +83,10 @@ public class CommandExecutorImpl implements CommandExecutor {
         if (selectedMachine != null) {
             executeCommand(command, selectedMachine);
         } else {
+            machineChooser.show().then(machine -> {
+                executeCommand(command, machine);
+            });
         }
-        machineChooser.show().then(machine -> {
-            executeCommand(command, machine);
-        });
     }
 
     /** Returns the currently selected machine or {@code null} if none. */

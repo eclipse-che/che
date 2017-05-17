@@ -13,12 +13,19 @@ package org.eclipse.che.ide.core;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcComposer;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcQualifier;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcUnmarshaller;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
 import org.eclipse.che.ide.api.jsonrpc.WorkspaceMasterJsonRpcInitializer;
-import org.eclipse.che.ide.jsonrpc.BuildingRequestTransmitter;
-import org.eclipse.che.ide.jsonrpc.JsonRpcFactory;
+import org.eclipse.che.ide.jsonrpc.ElementalJsonRpcComposer;
+import org.eclipse.che.ide.jsonrpc.ElementalJsonRpcMarshaller;
+import org.eclipse.che.ide.jsonrpc.ElementalJsonRpcQualifier;
+import org.eclipse.che.ide.jsonrpc.ElementalJsonRpcUnmarshaller;
 import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.ide.jsonrpc.WebSocketJsonRpcInitializer;
 
 /**
@@ -35,8 +42,12 @@ public class JsonRpcModule extends AbstractGinModule {
 
         bind(JsonRpcInitializer.class).to(WebSocketJsonRpcInitializer.class);
 
-        install(new GinFactoryModuleBuilder().build(JsonRpcFactory.class));
         install(new GinFactoryModuleBuilder().build(RequestHandlerConfigurator.class));
-        install(new GinFactoryModuleBuilder().build(BuildingRequestTransmitter.class));
+        install(new GinFactoryModuleBuilder().build(RequestTransmitter.class));
+
+        bind(JsonRpcMarshaller.class).to(ElementalJsonRpcMarshaller.class);
+        bind(JsonRpcUnmarshaller.class).to(ElementalJsonRpcUnmarshaller.class);
+        bind(JsonRpcComposer.class).to(ElementalJsonRpcComposer.class);
+        bind(JsonRpcQualifier.class).to(ElementalJsonRpcQualifier.class);
     }
 }

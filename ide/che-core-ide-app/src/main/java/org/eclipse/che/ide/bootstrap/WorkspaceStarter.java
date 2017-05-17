@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.promises.client.Operation;
@@ -22,7 +23,6 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
 import org.eclipse.che.ide.context.BrowserAddress;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -94,7 +94,12 @@ public class WorkspaceStarter {
 
     private void subscribe(String it, String methodName, String id) {
         workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
-                              .then((Operation<WorkspaceDto>)skip -> transmitter.transmitStringToNone("ws-master", methodName, id))
+                              .then((Operation<WorkspaceDto>)skip -> transmitter.newRequest()
+                                                                                .endpointId("ws-master")
+                                                                                .methodName(methodName)
+                                                                                .paramsAsString(id)
+                                                                                .sendAndSkipResult())
                               .catchError((Operation<PromiseError>)error -> Log.error(getClass(), it + ": " + error.getMessage()));
     }
+
 }

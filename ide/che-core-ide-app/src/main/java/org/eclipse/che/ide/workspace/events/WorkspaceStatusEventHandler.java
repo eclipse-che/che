@@ -15,6 +15,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.WorkspaceSnapshotNotifier;
@@ -22,7 +23,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.start.StartWorkspaceNotification;
@@ -66,7 +66,7 @@ public class WorkspaceStatusEventHandler {
                     .methodName("event:workspace-status:changed")
                     .paramsAsDto(WorkspaceStatusEvent.class)
                     .noResult()
-                    .withOperation((endpointId, event) -> {
+                    .withConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
                         wsServiceClient.getWorkspace(event.getWorkspaceId()).then(workspace -> {

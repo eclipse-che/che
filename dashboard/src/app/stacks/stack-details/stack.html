@@ -39,11 +39,27 @@
                    ng-maxlength="128"
                    ng-pattern="/^[A-Za-z0-9_\s\-\.\+]+$/">
           <div ng-message="required">A name is required.</div>
-          <div ng-message="pattern">The name should not contain special characters like dollar, etc.
-          </div>
+          <div ng-message="pattern">The name should not contain special characters like dollar, etc.</div>
           <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
           <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
           <div ng-message="customValidator">This stack name is already used.</div>
+        </che-input>
+      </div>
+    </che-label-container>
+    <!-- Description -->
+    <che-label-container che-label-name="Description">
+      <div layout="column" class="stack-details-input">
+        <che-input che-form="stackForm"
+                   che-name="description"
+                   aria-label="Description of the stack"
+                   che-place-holder="Description of the stack"
+                   ng-change="stackController.updateStackDescription()"
+                   ng-model="stackController.stackDescription"
+                   ng-maxlength="128"
+                   ng-pattern="/^[A-Za-z0-9_\s\-\.\,\(\)\+]+$/">
+          <div ng-message="pattern">The description should not contain special characters like dollar, etc.</div>
+          <div ng-message="maxlength">The description has to be less than 128 characters long.</div>
+          <div ng-message="md-maxlength">The description has to be less than 128 characters long.</div>
         </che-input>
       </div>
     </che-label-container>

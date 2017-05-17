@@ -12,8 +12,8 @@ package org.eclipse.che.api.debugger.server;
 
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
@@ -73,18 +73,30 @@ public class DebuggerJsonRpcMessenger implements EventSubscriber<DebuggerMessage
                 final LocationDto location = asDto(((SuspendEvent)event.getDebuggerEvent()).getLocation());
                 final SuspendEventDto suspendEvent = newDto(SuspendEventDto.class).withType(DebuggerEvent.TYPE.SUSPEND)
                                                                                   .withLocation(location);
-                endpointIds.forEach(it -> transmitter.transmitOneToNone(it, EVENT_DEBUGGER_MESSAGE_SUSPEND, suspendEvent));
+                endpointIds.forEach(it -> transmitter.newRequest()
+                                                     .endpointId(it)
+                                                     .methodName(EVENT_DEBUGGER_MESSAGE_SUSPEND)
+                                                     .paramsAsDto(suspendEvent)
+                                                     .sendAndSkipResult());
                 break;
             case BREAKPOINT_ACTIVATED:
                 final BreakpointDto breakpointDto = asDto(((BreakpointActivatedEvent)event.getDebuggerEvent()).getBreakpoint());
                 final BreakpointActivatedEventDto breakpointActivatedEvent = newDto(BreakpointActivatedEventDto.class)
                         .withType(DebuggerEvent.TYPE.BREAKPOINT_ACTIVATED)
                         .withBreakpoint(breakpointDto);
-                endpointIds.forEach(it -> transmitter.transmitOneToNone(it, EVENT_DEBUGGER_MESSAGE_BREAKPOINT, breakpointActivatedEvent));
+                endpointIds.forEach(it -> transmitter.newRequest()
+                                                     .endpointId(it)
+                                                     .methodName(EVENT_DEBUGGER_MESSAGE_BREAKPOINT)
+                                                     .paramsAsDto(breakpointActivatedEvent)
+                                                     .sendAndSkipResult());
                 break;
             case DISCONNECT:
                 final DisconnectEventDto disconnectEvent = newDto(DisconnectEventDto.class).withType(DebuggerEvent.TYPE.DISCONNECT);
-                endpointIds.forEach(it -> transmitter.transmitOneToNone(it, EVENT_DEBUGGER_MESSAGE_DISCONNECT, disconnectEvent));
+                endpointIds.forEach(it -> transmitter.newRequest()
+                                                     .endpointId(it)
+                                                     .methodName(EVENT_DEBUGGER_MESSAGE_DISCONNECT)
+                                                     .paramsAsDto(disconnectEvent)
+                                                     .sendAndSkipResult());
                 break;
             default:
         }
@@ -94,17 +106,17 @@ public class DebuggerJsonRpcMessenger implements EventSubscriber<DebuggerMessage
     private void configureSubscribeHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
                     .methodName(EVENT_DEBUGGER_SUBSCRIBE)
-                    .paramsAsEmpty()
+                    .noParams()
                     .noResult()
-                    .withConsumer((endpointId, aVoid) -> endpointIds.add(endpointId));
+                    .withConsumer(endpointIds::add);
     }
 
     @Inject
     private void configureUnSubscribeHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
                     .methodName(EVENT_DEBUGGER_UN_SUBSCRIBE)
-                    .paramsAsString()
+                    .noParams()
                     .noResult()
-                    .withConsumer((endpointId, aVoid) -> endpointIds.remove(endpointId));
+                    .withConsumer(endpointIds::remove);
     }
 }

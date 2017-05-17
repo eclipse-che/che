@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
@@ -24,7 +25,6 @@ import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 
 import java.util.Map;
 
@@ -48,8 +48,7 @@ public class MachineStatusHandler implements MachineStatusChangedEvent.Handler {
     private final WorkspaceServiceClient   workspaceServiceClient;
     private final NotificationManager      notificationManager;
     private final CoreLocalizationConstant locale;
-
-    private       RequestTransmitter          transmitter;
+    private final RequestTransmitter       transmitter;
 
     @Inject
     MachineStatusHandler(final EventBus eventBus,
@@ -124,7 +123,11 @@ public class MachineStatusHandler implements MachineStatusChangedEvent.Handler {
         String subscribeByName = "event:environment-output:subscribe-by-machine-name";
         String workspaceIdPlusMachineName = appContext.getWorkspaceId() + "::" + machine.getDisplayName();
 
-        transmitter.transmitStringToNone(endpointId, subscribeByName, workspaceIdPlusMachineName);
+        transmitter.newRequest()
+                   .endpointId(endpointId)
+                   .methodName(subscribeByName)
+                   .paramsAsString(workspaceIdPlusMachineName)
+                   .sendAndSkipResult();
 
     }
 

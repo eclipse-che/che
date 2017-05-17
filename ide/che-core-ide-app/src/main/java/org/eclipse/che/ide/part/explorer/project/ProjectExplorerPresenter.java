@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -40,7 +41,6 @@ import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent.MarkerChanged
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView.ActionDelegate;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.node.SyntheticNodeUpdateEvent;
@@ -82,6 +82,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                                                        ResourceChangedHandler,
                                                                        MarkerChangedHandler,
                                                                        SyntheticNodeUpdateEvent.SyntheticNodeUpdateHandler {
+    private static final int PART_SIZE = 500;
     private final ProjectExplorerView      view;
     private final EventBus                 eventBus;
     private final ResourceNode.NodeFactory nodeFactory;
@@ -91,12 +92,8 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     private final TreeExpander             treeExpander;
     private final RequestTransmitter       requestTransmitter;
     private final DtoFactory               dtoFactory;
-
-    private UpdateTask updateTask = new UpdateTask();
-    private Set<Path> expandQueue = new HashSet<>();
-
-    private static final int PART_SIZE = 500;
-
+    private UpdateTask updateTask  = new UpdateTask();
+    private Set<Path>  expandQueue = new HashSet<>();
     private boolean hiddenFilesAreShown;
 
     @Inject
@@ -187,9 +184,14 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
                 if (node instanceof ResourceNode) {
                     Resource data = ((ResourceNode)node).getData();
-                    requestTransmitter.transmitOneToNone(endpointId, method, dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
-                                                                                       .withPath(data.getLocation().toString())
-                                                                                       .withType(START));
+                    requestTransmitter.newRequest()
+                                      .endpointId(endpointId)
+                                      .methodName(method)
+                                      .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
+                                                             .withPath(data.getLocation().toString())
+                                                             .withType(START))
+                                      .sendAndSkipResult();
+
                 }
             }
         });
@@ -201,9 +203,14 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
                 if (node instanceof ResourceNode) {
                     Resource data = ((ResourceNode)node).getData();
-                    requestTransmitter.transmitOneToNone(endpointId, method, dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
-                                                                                       .withPath(data.getLocation().toString())
-                                                                                       .withType(STOP));
+                    requestTransmitter.newRequest()
+                                      .endpointId(endpointId)
+                                      .methodName(method)
+                                      .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
+                                                             .withPath(data.getLocation().toString())
+                                                             .withType(STOP))
+                                      .sendAndSkipResult();
+
                 }
             }
         });

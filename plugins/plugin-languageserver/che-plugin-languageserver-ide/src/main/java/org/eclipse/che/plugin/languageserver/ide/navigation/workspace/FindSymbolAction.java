@@ -16,21 +16,24 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceSymbolParams;
-import org.eclipse.che.api.promises.async.Task;
 import org.eclipse.che.api.promises.async.ThrottledDelayer;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.filters.FuzzyMatches;
 import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
+import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.SymbolKindHelper;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
@@ -38,12 +41,14 @@ import org.eclipse.che.plugin.languageserver.ide.service.WorkspaceServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SymbolInformation;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static java.util.Collections.singletonList;
@@ -65,6 +70,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
     private final EditorAgent                         editorAgent;
     private final SymbolKindHelper                    symbolKindHelper;
     private final FuzzyMatches                        fuzzyMatches;
+    private PromiseProvider promiseProvider;
     private final ThrottledDelayer<List<SymbolEntry>> delayer;
 
     @Inject
@@ -75,7 +81,8 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
                             DtoFactory dtoFactory,
                             EditorAgent editorAgent,
                             SymbolKindHelper symbolKindHelper,
-                            FuzzyMatches fuzzyMatches) {
+                            FuzzyMatches fuzzyMatches,
+                            PromiseProvider promiseProvider) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), localization.findSymbolActionTitle(), localization.findSymbolActionTitle(), null,
               null);
         this.editorHelper = editorHelper;
@@ -85,12 +92,24 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
         this.editorAgent = editorAgent;
         this.symbolKindHelper = symbolKindHelper;
         this.fuzzyMatches = fuzzyMatches;
+        this.promiseProvider = promiseProvider;
         this.delayer = new ThrottledDelayer<>(SEARCH_DELAY);
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setEnabledAndVisible(true);
+        EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+        if (Objects.nonNull(activeEditor) && activeEditor instanceof TextEditor) {
+            TextEditorConfiguration configuration = ((TextEditor)activeEditor).getConfiguration();
+            if (configuration instanceof LanguageServerEditorConfiguration) {
+                ServerCapabilities capabilities = ((LanguageServerEditorConfiguration)configuration).getServerCapabilities();
+                event.getPresentation()
+                     .setEnabledAndVisible(capabilities.getWorkspaceSymbolProvider() != null && capabilities.getWorkspaceSymbolProvider());
+                return;
+            }
+
+        }
+        event.getPresentation().setEnabledAndVisible(false);
     }
 
     @Override
@@ -103,14 +122,9 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
         Promise<List<SymbolEntry>> promise;
 
         if (Strings.isNullOrEmpty(value) || editorAgent.getActiveEditor() == null) {
-            promise = Promises.resolve(Collections.<SymbolEntry>emptyList());
+            promise = promiseProvider.resolve(Collections.<SymbolEntry>emptyList());
         } else {
-            promise = delayer.trigger(new Task<Promise<List<SymbolEntry>>>() {
-                @Override
-                public Promise<List<SymbolEntry>> run() {
-                    return searchSymbols(value);
-                }
-            });
+            promise = delayer.trigger(() -> searchSymbols(value));
         }
         return promise.then(new Function<List<SymbolEntry>, QuickOpenModel>() {
             @Override

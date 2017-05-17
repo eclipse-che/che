@@ -71,8 +71,8 @@ public class WsMasterModule extends AbstractModule {
         // TODO spi move into docker infra impl
         bind(SnapshotDao.class).to(JpaSnapshotDao.class);
         install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
-        install(new org.eclipse.che.api.core.jsonrpc.JsonRpcModule());
-        install(new org.eclipse.che.api.core.websocket.WebSocketModule());
+        install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
+        install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
 
         // db configuration
         bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);

@@ -17,6 +17,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
@@ -32,10 +33,6 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
-
-import java.util.List;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /** Drives the UI for displaying preview URLs of the running processes. */
 @Singleton
@@ -90,31 +87,31 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
 
         final ActiveRuntime runtime = appContext.getActiveRuntime();
 
-        if (runtime != null) {
-            runtime.getMachines().forEach(machine -> {
-                Promise<List<GetProcessesResponseDto>> machineProcesses = execAgentClient.getProcesses(machine.getName(), false);
-                machineProcesses.then(processes -> {
-                    processes.forEach(process -> getPreviewUrl(process).then(view::addUrl).catchError(ignore -> {
-                    }));
-                });
-            });
+        if (runtime == null) {
+            return;
         }
+
+        // FIXME: spi
+//        runtime.getMachines()
+//               .stream()
+//               .map(Machine::getId)
+//               .map(id -> execAgentClient.getProcesses(id, false))
+//               .forEach(promise -> promise.onSuccess(processes -> processes.stream()
+//                                                                           .map(GetProcessesResponseDto::getName)
+//                                                                           .map(this::getPreviewUrlByName)
+//                                                                           .forEach(it -> it.then(view::addUrl))));
     }
 
     /**
      * Returns promise that resolves preview URL for the given process.
      * Returns promise that rejects with an error if preview URL isn't available.
      */
-    private Promise<String> getPreviewUrl(GetProcessesResponseDto process) {
-        final String previewUrl = commandManager.getCommand(process.getName())
-                                                .map(CommandImpl::getPreviewURL)
-                                                .orElse(null);
-
-        if (!isNullOrEmpty(previewUrl)) {
-            return macroProcessorProvider.get().expandMacros(previewUrl);
-        }
-
-        return promiseProvider.reject(new Exception(messages.previewsNotAvailableError()));
+    private Promise<String> getPreviewUrlByName(String name) {
+        return commandManager.getCommand(name)
+                             .map(CommandImpl::getPreviewURL)
+                             .filter(it -> !it.isEmpty())
+                             .map(s -> macroProcessorProvider.get().expandMacros(s))
+                             .orElseGet(() -> promiseProvider.reject(new Exception(messages.previewsNotAvailableError())));
     }
 
     @Override

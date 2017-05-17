@@ -13,11 +13,8 @@ package org.eclipse.che.plugin.languageserver.ide.navigation.symbol;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -46,8 +43,8 @@ import org.eclipse.lsp4j.TextDocumentIdentifier;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
@@ -61,19 +58,19 @@ import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.P
 public class GoToSymbolAction extends AbstractPerspectiveAction implements QuickOpenPresenter.QuickOpenPresenterOpts {
 
     public static final String SCOPE_PREFIX = ":";
-    private final LanguageServerLocalization
-                                            localization;
-    private final TextDocumentServiceClient client;
-    private final EditorAgent               editorAgent;
-    private final DtoFactory                dtoFactory;
-    private final NotificationManager       notificationManager;
-    private final FuzzyMatches              fuzzyMatches;
-    private final SymbolKindHelper          symbolKindHelper;
-    private       QuickOpenPresenter        presenter;
-    private       List<SymbolInformation>   cachedItems;
-    private       LinearRange               selectedLinearRange;
-    private       TextEditor                activeEditor;
-    private       TextPosition              cursorPosition;
+    private final LanguageServerLocalization localization;
+    private final TextDocumentServiceClient  client;
+    private final EditorAgent                editorAgent;
+    private final DtoFactory                 dtoFactory;
+    private final NotificationManager        notificationManager;
+    private final FuzzyMatches               fuzzyMatches;
+    private final SymbolKindHelper           symbolKindHelper;
+    private final PromiseProvider            promiseProvider;
+    private       QuickOpenPresenter         presenter;
+    private       List<SymbolInformation>    cachedItems;
+    private       LinearRange                selectedLinearRange;
+    private       TextEditor                 activeEditor;
+    private       TextPosition               cursorPosition;
 
     @Inject
     public GoToSymbolAction(QuickOpenPresenter presenter,
@@ -83,7 +80,8 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
                             DtoFactory dtoFactory,
                             NotificationManager notificationManager,
                             FuzzyMatches fuzzyMatches,
-                            SymbolKindHelper symbolKindHelper) {
+                            SymbolKindHelper symbolKindHelper,
+                            PromiseProvider promiseProvider) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), localization.goToSymbolActionDescription(), localization.goToSymbolActionTitle(), null,
               null);
         this.presenter = presenter;
@@ -94,6 +92,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
         this.notificationManager = notificationManager;
         this.fuzzyMatches = fuzzyMatches;
         this.symbolKindHelper = symbolKindHelper;
+        this.promiseProvider = promiseProvider;
     }
 
     @Override
@@ -104,27 +103,20 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
         paramsDTO.setTextDocument(identifierDTO);
         activeEditor = (TextEditor)editorAgent.getActiveEditor();
         cursorPosition = activeEditor.getDocument().getCursorPosition();
-        client.documentSymbol(paramsDTO).then(new Operation<List<SymbolInformation>>() {
+        client.documentSymbol(paramsDTO).then(arg -> {
 
-            @Override
-            public void apply(List<SymbolInformation> arg) throws OperationException {
-
-                cachedItems = arg;
-                presenter.run(GoToSymbolAction.this);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify("Can't fetch document symbols.", arg.getMessage(), StatusNotification.Status.FAIL,
-                                           StatusNotification.DisplayMode.FLOAT_MODE);
-            }
+            cachedItems = arg;
+            presenter.run(GoToSymbolAction.this);
+        }).catchError(arg -> {
+            notificationManager.notify("Can't fetch document symbols.", arg.getMessage(), StatusNotification.Status.FAIL,
+                                       StatusNotification.DisplayMode.FLOAT_MODE);
         });
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        if (activeEditor instanceof TextEditor) {
+        if (Objects.nonNull(activeEditor) && activeEditor instanceof TextEditor) {
             TextEditorConfiguration configuration = ((TextEditor)activeEditor).getConfiguration();
             if (configuration instanceof LanguageServerEditorConfiguration) {
                 ServerCapabilities capabilities = ((LanguageServerEditorConfiguration)configuration).getServerCapabilities();
@@ -139,7 +131,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
 
     @Override
     public Promise<QuickOpenModel> getModel(String value) {
-        return Promises.resolve(new QuickOpenModel(toQuickOpenEntries(cachedItems, value)));
+        return promiseProvider.resolve(new QuickOpenModel(toQuickOpenEntries(cachedItems, value)));
     }
 
     private List<SymbolEntry> toQuickOpenEntries(List<SymbolInformation> items, final String value) {
@@ -175,19 +167,9 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
 
         if (!value.isEmpty()) {
             if (value.startsWith(SCOPE_PREFIX)) {
-                Collections.sort(result, new Comparator<SymbolEntry>() {
-                    @Override
-                    public int compare(SymbolEntry o1, SymbolEntry o2) {
-                        return sortScoped(value.toLowerCase(), o1, o2);
-                    }
-                });
+                Collections.sort(result, (o1, o2) -> sortScoped(value.toLowerCase(), o1, o2));
             } else {
-                Collections.sort(result, new Comparator<SymbolEntry>() {
-                    @Override
-                    public int compare(SymbolEntry o1, SymbolEntry o2) {
-                        return sortNormal(value.toLowerCase(), o1, o2);
-                    }
-                });
+                Collections.sort(result, (o1, o2) -> sortNormal(value.toLowerCase(), o1, o2));
             }
         }
 
