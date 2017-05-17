@@ -11,24 +11,20 @@
 package org.eclipse.che.ide.api.event.ng;
 
 
-import com.google.common.base.Optional;
-
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStateUpdateDto;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.ExternalResourceDelta;
-import org.eclipse.che.ide.api.resources.File;
-import org.eclipse.che.ide.jsonrpc.JsonRpcException;
-import org.eclipse.che.ide.jsonrpc.JsonRpcRequestBiOperation;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import java.util.function.BiConsumer;
 
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
@@ -42,7 +38,7 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
  * @author Dmitry Kuleshov
  */
 @Singleton
-public class ProjectTreeStateNotificationOperation implements JsonRpcRequestBiOperation<ProjectTreeStateUpdateDto> {
+public class ProjectTreeStateNotificationOperation implements BiConsumer<String, ProjectTreeStateUpdateDto> {
     private final AppContext appContext;
 
     @Inject
@@ -56,11 +52,11 @@ public class ProjectTreeStateNotificationOperation implements JsonRpcRequestBiOp
                     .methodName("event:project-tree-state-changed")
                     .paramsAsDto(ProjectTreeStateUpdateDto.class)
                     .noResult()
-                    .withOperation(this);
+                    .withConsumer(this);
     }
 
     @Override
-    public void apply(String endpointId, ProjectTreeStateUpdateDto params) throws JsonRpcException {
+    public void accept(String endpointId, ProjectTreeStateUpdateDto params) throws JsonRpcException {
         final String path = params.getPath();
         final FileWatcherEventType type = params.getType();
 

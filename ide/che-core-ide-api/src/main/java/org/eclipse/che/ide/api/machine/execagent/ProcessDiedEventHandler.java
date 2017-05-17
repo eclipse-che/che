@@ -13,8 +13,8 @@ package org.eclipse.che.ide.api.machine.execagent;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -31,11 +31,11 @@ public class ProcessDiedEventHandler extends AbstractExecAgentEventHandler<Proce
                     .methodName("process_died")
                     .paramsAsDto(ProcessDiedEventDto.class)
                     .noResult()
-                    .withOperation(this);
+                    .withConsumer(this);
     }
 
     @Override
-    public void apply(String endpointId, ProcessDiedEventDto params) {
+    public void accept(String endpointId, ProcessDiedEventDto params) {
         Log.debug(getClass(), "Handling process died event. Params: " + params);
         handle(endpointId, params);
     }

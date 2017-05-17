@@ -12,8 +12,8 @@ package org.eclipse.che.ide.api.machine.execagent;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
@@ -32,11 +32,11 @@ public class ProcessStartedEventHandler extends AbstractExecAgentEventHandler<Pr
                     .methodName("process_started")
                     .paramsAsDto(ProcessStartedEventDto.class)
                     .noResult()
-                    .withOperation(this);
+                    .withConsumer(this);
     }
 
     @Override
-    public void apply(String endpointId, ProcessStartedEventDto params) {
+    public void accept(String endpointId, ProcessStartedEventDto params) {
         Log.debug(getClass(), "Handling process started event. Params: " + params);
         handle(endpointId, params);
     }

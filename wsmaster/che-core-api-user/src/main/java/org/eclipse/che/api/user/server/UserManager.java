@@ -50,6 +50,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
  *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  * @author Yevhenii Voevodin
+ * @author Anton Korneta
  */
 @Singleton
 public class UserManager {
@@ -218,6 +219,58 @@ public class UserManager {
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
         checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
         return userDao.getAll(maxItems, skipCount);
+    }
+
+    /**
+     * Returns all users whose email address contains specified {@code emailPart}.
+     *
+     * @param emailPart
+     *         fragment of user's email
+     * @param maxItems
+     *         the maximum number of users to return
+     * @param skipCount
+     *         the number of users to skip
+     * @return list of matched users
+     * @throws NullPointerException
+     *         when {@code emailPart} is null
+     * @throws IllegalArgumentException
+     *         when {@code maxItems} or {@code skipCount} is negative or
+     *         when {@code skipCount} more than {@value Integer#MAX_VALUE}
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    public Page<? extends User> getByEmailPart(String emailPart, int maxItems, long skipCount) throws ServerException {
+        requireNonNull(emailPart, "Required non-null email part");
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative");
+        checkArgument(skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
+                      "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
+        return userDao.getByEmailPart(emailPart, maxItems, skipCount);
+    }
+
+    /**
+     * Returns all users whose name contains specified {@code namePart}.
+     *
+     * @param namePart
+     *         fragment of user's name
+     * @param maxItems
+     *         the maximum number of users to return
+     * @param skipCount
+     *         the number of users to skip
+     * @return list of matched users
+     * @throws NullPointerException
+     *         when {@code namePart} is null
+     * @throws IllegalArgumentException
+     *         when {@code maxItems} or {@code skipCount} is negative or
+     *         when {@code skipCount} more than {@value Integer#MAX_VALUE}
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    public Page<? extends User> getByNamePart(String namePart, int maxItems, long skipCount) throws ServerException {
+        requireNonNull(namePart, "Required non-null name part");
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative");
+        checkArgument(skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
+                      "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
+        return userDao.getByNamePart(namePart, maxItems, skipCount);
     }
 
     /**

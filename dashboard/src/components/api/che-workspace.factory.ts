@@ -185,9 +185,11 @@ export class CheWorkspace {
   fetchWorkspacesByNamespace(namespace: string): ng.IPromise<any> {
     let promise = this.$http.get('/api/workspace/namespace/' + namespace);
     let resultPromise = promise.then((response: {data: che.IWorkspace[]}) => {
-      this.workspacesByNamespace.set(namespace, response.data);
+      const workspaces = this.getWorkspacesByNamespace(namespace);
 
+      workspaces.length = 0;
       response.data.forEach((workspace: che.IWorkspace) => {
+        workspaces.push(workspace);
         this.updateWorkspacesList(workspace);
       });
     });
@@ -196,6 +198,10 @@ export class CheWorkspace {
   }
 
   getWorkspacesByNamespace(namespace: string): Array<che.IWorkspace> {
+    if (!this.workspacesByNamespace.has(namespace)) {
+      this.workspacesByNamespace.set(namespace, []);
+    }
+
     return this.workspacesByNamespace.get(namespace);
   }
 

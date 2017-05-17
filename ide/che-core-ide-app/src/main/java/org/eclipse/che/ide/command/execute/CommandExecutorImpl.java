@@ -68,10 +68,10 @@ public class CommandExecutorImpl implements CommandExecutor {
             processesPanelPresenter.addCommandOutput(machineId, console);
 
             execAgentClient.startProcess(machineId, expandedCommand)
-                           .thenIfProcessStartedEvent(console.getProcessStartedOperation())
-                           .thenIfProcessDiedEvent(console.getProcessDiedOperation())
-                           .thenIfProcessStdOutEvent(console.getStdOutOperation())
-                           .thenIfProcessStdErrEvent(console.getStdErrOperation());
+                           .thenIfProcessStartedEvent(console.getProcessStartedConsumer())
+                           .thenIfProcessDiedEvent(console.getProcessDiedConsumer())
+                           .thenIfProcessStdOutEvent(console.getStdOutConsumer())
+                           .thenIfProcessStdErrEvent(console.getStdErrConsumer());
         });
     }
 

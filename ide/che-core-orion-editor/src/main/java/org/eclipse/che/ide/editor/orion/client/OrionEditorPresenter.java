@@ -381,6 +381,16 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         }
     }
 
+    @Override
+    protected void updateDirtyState(boolean dirty) {
+        if (isReadOnly()) {
+            dirtyState = false;
+            return;
+        }
+
+        super.updateDirtyState(dirty);
+    }
+
     private void updateTabReference(File file, Path oldPath) {
         final PartPresenter activePart = editorMultiPartStackPresenter.getActivePart();
         final EditorPartStack activePartStack = editorMultiPartStackPresenter.getPartStackByPart(activePart);
@@ -585,9 +595,10 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     @Override
     public void doSave(final AsyncCallback<EditorInput> callback) {
         //If the workspace is stopped we shouldn't try to save a file
-        if (appContext.getDevMachine() == null) {
+        if (isReadOnly() || appContext.getDevMachine() == null) {
             return;
         }
+
         this.documentStorage.saveDocument(getEditorInput(), this.document, false, new AsyncCallback<EditorInput>() {
             @Override
             public void onSuccess(EditorInput editorInput) {
