@@ -13,9 +13,10 @@ package org.eclipse.che.ide.api.machine.execagent;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ConnectedEventDto;
-import org.eclipse.che.ide.jsonrpc.JsonRpcRequestBiOperation;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
+
+import java.util.function.BiConsumer;
 
 /**
  * Handles 'connected' event, the event is fired when we firstly connect to exec agent.
@@ -23,7 +24,7 @@ import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
  * @author Dmitry Kuleshov
  */
 @Singleton
-public class ConnectedEventHandler implements JsonRpcRequestBiOperation<ConnectedEventDto> {
+public class ConnectedEventHandler implements BiConsumer<String, ConnectedEventDto> {
 
     @Inject
     public void configureHandler(RequestHandlerConfigurator configurator) {
@@ -31,11 +32,11 @@ public class ConnectedEventHandler implements JsonRpcRequestBiOperation<Connecte
                     .methodName("connected")
                     .paramsAsDto(ConnectedEventDto.class)
                     .noResult()
-                    .withOperation(this);
+                    .withConsumer(this);
     }
 
     @Override
-    public void apply(String endpointId, ConnectedEventDto params) {
+    public void accept(String endpointId, ConnectedEventDto params) {
 
     }
 }

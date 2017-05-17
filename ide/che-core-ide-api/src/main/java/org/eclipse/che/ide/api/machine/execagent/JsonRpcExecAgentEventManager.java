@@ -16,11 +16,11 @@ import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDt
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
-import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.ide.api.machine.ExecAgentEventManager;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
+import java.util.function.Consumer;
 
 /**
  * Implementation based on json rpc protocol calls
@@ -46,34 +46,34 @@ public class JsonRpcExecAgentEventManager implements ExecAgentEventManager {
     }
 
     @Override
-    public void registerProcessDiedOperation(String endpointId, int pid, Operation<ProcessDiedEventDto> operation) {
-        Log.debug(getClass(), "Registering operation for process died event for PID: " + pid);
-        processDiedEventHandler.registerOperation(endpointId, pid, operation);
+    public void registerProcessDiedConsumer(String endpointId, int pid, Consumer<ProcessDiedEventDto> consumer) {
+        Log.debug(getClass(), "Registering consumer for process died event for PID: " + pid);
+        processDiedEventHandler.registerConsumer(endpointId, pid, consumer);
     }
 
     @Override
-    public void registerProcessStartedOperation(String endpointId, int pid, Operation<ProcessStartedEventDto> operation) {
-        Log.debug(getClass(), "Registering operation for process started event for PID: " + pid);
-        processStartedEventHandler.registerOperation(endpointId, pid, operation);
+    public void registerProcessStartedConsumer(String endpointId, int pid, Consumer<ProcessStartedEventDto> consumer) {
+        Log.debug(getClass(), "Registering consumer for process started event for PID: " + pid);
+        processStartedEventHandler.registerConsumer(endpointId, pid, consumer);
     }
 
     @Override
-    public void registerProcessStdErrOperation(String endpointId, int pid, Operation<ProcessStdErrEventDto> operation) {
-        Log.debug(getClass(), "Registering operation for process standard output event for PID: " + pid);
-        processStdErrEventHandler.registerOperation(endpointId, pid, operation);
+    public void registerProcessStdErrConsumer(String endpointId, int pid, Consumer<ProcessStdErrEventDto> consumer) {
+        Log.debug(getClass(), "Registering consumer for process standard output event for PID: " + pid);
+        processStdErrEventHandler.registerConsumer(endpointId, pid, consumer);
     }
 
     @Override
-    public void registerProcessStdOutOperation(String endpointId, int pid, Operation<ProcessStdOutEventDto> operation) {
-        Log.debug(getClass(), "Registering operation for process error output event for PID: " + pid);
-        processStdOutEventHandler.registerOperation(endpointId, pid, operation);
+    public void registerProcessStdOutConsumer(String endpointId, int pid, Consumer<ProcessStdOutEventDto> consumer) {
+        Log.debug(getClass(), "Registering consumer for process error output event for PID: " + pid);
+        processStdOutEventHandler.registerConsumer(endpointId, pid, consumer);
     }
 
     @Override
-    public void cleanPidOperations(String endpointId, int pid) {
-        processDiedEventHandler.unregisterOperations(endpointId, pid);
-        processStartedEventHandler.unregisterOperations(endpointId, pid);
-        processStdErrEventHandler.unregisterOperations(endpointId, pid);
-        processStdOutEventHandler.unregisterOperations(endpointId, pid);
+    public void cleanPidConsumer(String endpointId, int pid) {
+        processDiedEventHandler.unregisterConsumers(endpointId, pid);
+        processStartedEventHandler.unregisterConsumers(endpointId, pid);
+        processStdErrEventHandler.unregisterConsumers(endpointId, pid);
+        processStdOutEventHandler.unregisterConsumers(endpointId, pid);
     }
 }
