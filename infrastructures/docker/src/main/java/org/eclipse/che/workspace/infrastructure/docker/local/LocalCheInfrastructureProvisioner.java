@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.old.local;
+package org.eclipse.che.workspace.infrastructure.docker.local;
 
 import com.google.common.base.Strings;
 
@@ -18,15 +18,15 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.inject.CheBootstrap;
+import org.eclipse.che.workspace.infrastructure.docker.AgentConfigApplier;
 import org.eclipse.che.workspace.infrastructure.docker.DefaultInfrastructureProvisioner;
-import org.eclipse.che.workspace.infrastructure.docker.local.ExecAgentVolumeProvider;
-import org.eclipse.che.workspace.infrastructure.docker.local.TerminalVolumeProvider;
-import org.eclipse.che.workspace.infrastructure.docker.local.WorkspaceFolderPathProvider;
-import org.eclipse.che.workspace.infrastructure.docker.local.WsAgentVolumeProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.providers.DockerExtConfBindingProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.providers.ExecAgentVolumeProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.providers.TerminalVolumeProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.providers.WorkspaceFolderPathProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.providers.WsAgentVolumeProvider;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
-import org.eclipse.che.workspace.infrastructure.docker.old.agents.AgentConfigApplier;
-import org.eclipse.che.workspace.infrastructure.docker.old.config.provider.DockerExtConfBindingProvider;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -84,9 +84,9 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
             throw new InfrastructureException("ws-machine is not found on agents applying");
         }
 
-        DockerService devMachine = internalEnv.getServices().get(devMachineName);
+        DockerContainerConfig devMachine = internalEnv.getServices().get(devMachineName);
 
-        for (DockerService machine : internalEnv.getServices().values()) {
+        for (DockerContainerConfig machine : internalEnv.getServices().values()) {
             ArrayList<String> volumes = new ArrayList<>(machine.getVolumes());
             volumes.add(terminalVolumeProvider.get());
             volumes.add(execVolumeProvider.get());

@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.strategy;
 
-import org.eclipse.che.api.core.model.machine.ServerProperties;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ServerPropertiesImpl;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
 
@@ -123,10 +121,6 @@ public abstract class ServerEvaluationStrategy {
                 internalUrl = serverConf.getProtocol() + "://" + internalAddressAndPort + pathSuffix;
                 externalUrl = serverConf.getProtocol() + "://" + externalAddressAndPort + pathSuffix;
             }
-
-            ServerProperties properties = new ServerPropertiesImpl(serverConf.getPath(),
-                                                                   internalAddressAndPort,
-                                                                   internalUrl);
 
             servers.put(serverConf.getRef(), new ServerImpl(externalUrl));
         }

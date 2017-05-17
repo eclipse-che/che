@@ -32,6 +32,8 @@ import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
  *
  * @author Vitalii Parfonov
  */
+// TODO spi
+@Deprecated
 public interface WsAgentHealthChecker {
 
     /**

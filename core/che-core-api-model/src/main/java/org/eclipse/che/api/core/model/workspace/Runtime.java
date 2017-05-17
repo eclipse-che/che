@@ -51,8 +51,6 @@ public interface Runtime {
 
     String getOwner();
 
-//    String getUserToken();
-
     /**
      * Returns the list of the warnings indicating that the runtime
      * violates some non-critical constraints or default configuration

@@ -17,8 +17,7 @@ import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
 import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
-import org.eclipse.che.workspace.infrastructure.docker.old.agents.AgentConfigApplier;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -87,7 +86,7 @@ public class AgentConfigApplierTest {
 
         when(sorter.sort(any())).thenReturn(singletonList(AgentKeyImpl.parse("agent1")));
         when(agent1.getServers()).thenAnswer(invocation -> singletonMap("a", serverConf1));
-        DockerService service = new DockerService();
+        DockerContainerConfig service = new DockerContainerConfig();
 
         agentConfigApplier.apply(new MachineConfigImpl(singletonList("agent1"),
                                                        emptyMap(),
@@ -114,7 +113,7 @@ public class AgentConfigApplierTest {
         when(agent1.getServers()).thenAnswer(invocation -> singletonMap("a", serverConf1));
         when(agent2.getServers()).thenAnswer(invocation -> singletonMap("b", serverConfig));
         when(agent3.getServers()).thenReturn(emptyMap());
-        DockerService service = new DockerService();
+        DockerContainerConfig service = new DockerContainerConfig();
 
         agentConfigApplier.apply(new MachineConfigImpl(asList("agent1", "agent2", "agent3"),
                                                        emptyMap(),
@@ -131,7 +130,7 @@ public class AgentConfigApplierTest {
         when(sorter.sort(any())).thenReturn(asList(AgentKeyImpl.parse("agent1"), AgentKeyImpl.parse("agent2")));
         when(agent1.getProperties()).thenReturn(singletonMap("environment", "p1=v1,p2=v2"));
         when(agent2.getProperties()).thenReturn(singletonMap("environment", "p3=v3"));
-        DockerService service = new DockerService();
+        DockerContainerConfig service = new DockerContainerConfig();
 
         agentConfigApplier.apply(new MachineConfigImpl(asList("agent1", "agent2"),
                                                        emptyMap(),
@@ -149,7 +148,7 @@ public class AgentConfigApplierTest {
     public void shouldIgnoreEnvironmentIfIllegalFormat() throws Exception {
         when(sorter.sort(any())).thenReturn(singletonList(AgentKeyImpl.parse("agent1")));
         when(agent1.getProperties()).thenReturn(singletonMap("environment", "p1"));
-        DockerService service = new DockerService();
+        DockerContainerConfig service = new DockerContainerConfig();
 
         agentConfigApplier.apply(new MachineConfigImpl(singletonList("agent1"),
                                                        emptyMap(),

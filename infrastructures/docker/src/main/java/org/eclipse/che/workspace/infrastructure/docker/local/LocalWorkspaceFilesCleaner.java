@@ -16,7 +16,7 @@ import com.google.inject.name.Named;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
-import org.eclipse.che.workspace.infrastructure.docker.old.local.provider.LocalWorkspaceFolderPathProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.providers.LocalWorkspaceFolderPathProvider;
 
 import java.io.File;
 import java.io.IOException;

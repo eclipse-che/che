@@ -19,8 +19,13 @@ import com.google.inject.name.Names;
 import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.workspace.infrastructure.docker.InfrastructureProvisioner;
-import org.eclipse.che.workspace.infrastructure.docker.old.local.LocalCheInfrastructureProvisioner;
-import org.eclipse.che.workspace.infrastructure.docker.old.local.provider.LocalWorkspaceFolderPathProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.providers.CheDockerExtraHostProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.providers.CheInContainerNetworkProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.providers.DockerApiHostEnvVariableProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.providers.LocalWorkspaceFolderPathProvider;
+import org.eclipse.che.workspace.infrastructure.docker.local.providers.WorkspaceFolderPathProvider;
+import org.eclipse.che.workspace.infrastructure.docker.strategy.DefaultServerEvaluationStrategy;
+import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategy;
 
 import java.util.Set;
 
@@ -36,8 +41,6 @@ public class LocalDockerModule extends AbstractModule {
         networks.addBinding().toProvider(CheInContainerNetworkProvider.class);
 
         bind(WorkspaceFilesCleaner.class).to(LocalWorkspaceFilesCleaner.class);
-        bind(DockerMachineTerminalChecker.class);
-        bind(DockerMachineExtServerChecker.class);
         bind(InfrastructureProvisioner.class).to(LocalCheInfrastructureProvisioner.class);
         bind(WorkspaceFolderPathProvider.class).to(LocalWorkspaceFolderPathProvider.class);
 
@@ -56,5 +59,10 @@ public class LocalDockerModule extends AbstractModule {
         MapBinder<String, DockerConnector> dockerConnectors =
                 MapBinder.newMapBinder(binder(), String.class, DockerConnector.class);
         dockerConnectors.addBinding("default").to(DockerConnector.class);
+
+        bind(org.eclipse.che.plugin.docker.client.DockerRegistryChecker.class).asEagerSingleton();
+        MapBinder<String, ServerEvaluationStrategy> strategies =
+                MapBinder.newMapBinder(binder(), String.class, ServerEvaluationStrategy.class);
+        strategies.addBinding("docker-local").to(LocalDockerServerEvaluationStrategy.class);
     }
 }

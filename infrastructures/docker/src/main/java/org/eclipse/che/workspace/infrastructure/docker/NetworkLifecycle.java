@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
@@ -37,22 +37,22 @@ public class NetworkLifecycle {
         this.networkDriver = networkDriver;
     }
 
-    public void createNetwork(String networkName) throws InfrastructureException {
+    public void createNetwork(String networkName) throws InternalInfrastructureException {
         try {
             docker.createNetwork(CreateNetworkParams.create(new NewNetwork().withName(networkName)
                                                                             .withDriver(networkDriver)
                                                                             .withCheckDuplicate(true)));
         } catch (IOException e) {
-            throw new InfrastructureException(e.getLocalizedMessage(), e);
+            throw new InternalInfrastructureException(e.getLocalizedMessage(), e);
         }
     }
 
-    public void destroyNetwork(String networkName) throws InfrastructureException {
+    public void destroyNetwork(String networkName) throws InternalInfrastructureException {
         try {
             docker.removeNetwork(RemoveNetworkParams.create(networkName));
         } catch (NetworkNotFoundException ignore) {
         } catch (IOException e) {
-            throw new InfrastructureException(e.getLocalizedMessage(), e);
+            throw new InternalInfrastructureException(e.getLocalizedMessage(), e);
         }
     }
 }

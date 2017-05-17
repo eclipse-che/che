@@ -15,13 +15,10 @@ import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.slf4j.Logger;
 
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
-
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Starting point of describing the contract which infrastructure provider should implement
@@ -30,8 +27,6 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author gazarenkov
  */
 public abstract class RuntimeInfrastructure {
-
-    private static final Logger LOG = getLogger(RuntimeInfrastructure.class);
 
     protected final Set<String> recipeTypes;
     protected final String      name;
@@ -56,7 +51,6 @@ public abstract class RuntimeInfrastructure {
     public final Set<String> getRecipeTypes() {
         return recipeTypes;
     }
-
 
     /**
      * An Infrastructure implementation should be able to preliminary estimate incoming Environment.

@@ -17,12 +17,11 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Representation of configuration of docker service (aka docker container)
- * as a representation of machine in Che.
+ * Representation of configuration of docker container configuration.
  *
  * @author Alexander Garagatyi
  */
-public class DockerService {
+public class DockerContainerConfig {
     private String              id;
     private String              containerName;
     private List<String>        command;
@@ -40,9 +39,9 @@ public class DockerService {
     private DockerBuildContext  build;
     private List<String>        networks;
 
-    public DockerService() {}
+    public DockerContainerConfig() {}
 
-    public DockerService(DockerService service) {
+    public DockerContainerConfig(DockerContainerConfig service) {
         id = service.getId();
         image = service.getImage();
         if (service.getBuild() != null) {
@@ -96,7 +95,7 @@ public class DockerService {
         this.id = id;
     }
 
-    public DockerService withId(String id) {
+    public DockerContainerConfig withId(String id) {
         this.id = id;
         return this;
     }
@@ -112,7 +111,7 @@ public class DockerService {
         this.image = image;
     }
 
-    public DockerService withImage(String image) {
+    public DockerContainerConfig withImage(String image) {
         this.image = image;
         return this;
     }
@@ -128,7 +127,7 @@ public class DockerService {
         this.build = build;
     }
 
-    public DockerService withBuild(DockerBuildContext build) {
+    public DockerContainerConfig withBuild(DockerBuildContext build) {
         this.build = build;
         return this;
     }
@@ -144,7 +143,7 @@ public class DockerService {
         this.entrypoint = entrypoint;
     }
 
-    public DockerService withEntrypoint(List<String> entrypoint) {
+    public DockerContainerConfig withEntrypoint(List<String> entrypoint) {
         this.entrypoint = entrypoint;
         return this;
     }
@@ -160,7 +159,7 @@ public class DockerService {
         this.command = command;
     }
 
-    public DockerService withCommand(List<String> command) {
+    public DockerContainerConfig withCommand(List<String> command) {
         this.command = command;
         return this;
     }
@@ -179,7 +178,7 @@ public class DockerService {
         this.environment = environment;
     }
 
-    public DockerService withEnvironment(Map<String, String> environment) {
+    public DockerContainerConfig withEnvironment(Map<String, String> environment) {
         this.environment = environment;
         return this;
     }
@@ -201,7 +200,7 @@ public class DockerService {
         this.dependsOn = dependsOn;
     }
 
-    public DockerService withDependsOn(List<String> dependsOn) {
+    public DockerContainerConfig withDependsOn(List<String> dependsOn) {
         this.dependsOn = dependsOn;
         return this;
     }
@@ -217,7 +216,7 @@ public class DockerService {
         this.containerName = containerName;
     }
 
-    public DockerService withContainerName(String containerName) {
+    public DockerContainerConfig withContainerName(String containerName) {
         this.containerName = containerName;
         return this;
     }
@@ -243,7 +242,7 @@ public class DockerService {
         this.links = links;
     }
 
-    public DockerService withLinks(List<String> links) {
+    public DockerContainerConfig withLinks(List<String> links) {
         this.links = links;
         return this;
     }
@@ -262,7 +261,7 @@ public class DockerService {
         this.labels = labels;
     }
 
-    public DockerService withLabels(Map<String, String> labels) {
+    public DockerContainerConfig withLabels(Map<String, String> labels) {
         this.labels = labels;
         return this;
     }
@@ -288,7 +287,7 @@ public class DockerService {
         this.expose = expose;
     }
 
-    public DockerService withExpose(List<String> expose) {
+    public DockerContainerConfig withExpose(List<String> expose) {
         this.expose = expose;
         return this;
     }
@@ -318,7 +317,7 @@ public class DockerService {
         this.ports = ports;
     }
 
-    public DockerService withPorts(List<String> ports) {
+    public DockerContainerConfig withPorts(List<String> ports) {
         this.ports = ports;
         return this;
     }
@@ -344,7 +343,7 @@ public class DockerService {
         this.volumes = volumes;
     }
 
-    public DockerService withVolumes(List<String> volumes) {
+    public DockerContainerConfig withVolumes(List<String> volumes) {
         this.volumes = volumes;
         return this;
     }
@@ -372,7 +371,7 @@ public class DockerService {
         this.volumesFrom = volumesFrom;
     }
 
-    public DockerService withVolumesFrom(List<String> volumesFrom) {
+    public DockerContainerConfig withVolumesFrom(List<String> volumesFrom) {
         this.volumesFrom = volumesFrom;
         return this;
     }
@@ -388,7 +387,7 @@ public class DockerService {
         this.memLimit = memLimit;
     }
 
-    public DockerService withMemLimit(Long memLimit) {
+    public DockerContainerConfig withMemLimit(Long memLimit) {
         this.memLimit = memLimit;
         return this;
     }
@@ -407,7 +406,7 @@ public class DockerService {
         this.networks = networks;
     }
 
-    public DockerService withNetworks(List<String> networks) {
+    public DockerContainerConfig withNetworks(List<String> networks) {
         this.networks = networks;
         return this;
     }
@@ -415,8 +414,8 @@ public class DockerService {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DockerService)) return false;
-        DockerService service = (DockerService)o;
+        if (!(o instanceof DockerContainerConfig)) return false;
+        DockerContainerConfig service = (DockerContainerConfig)o;
         return Objects.equals(getId(), service.getId()) &&
                Objects.equals(getContainerName(), service.getContainerName()) &&
                Objects.equals(getCommand(), service.getCommand()) &&

@@ -8,12 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.old;
+package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
@@ -34,18 +32,10 @@ import java.net.URL;
 import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY_SYNONYMS;
 
 /**
- *
- * @author andrew00x
  * @author Alexander Garagatyi
- * @author Roman Iuvshyn
- * @author Mykola Morhun
- *
- * @deprecated use {@link } instead
  */
-@Deprecated
-@Singleton
-public class DockerInstanceProvider {
-    private static final Logger LOG = LoggerFactory.getLogger(DockerInstanceProvider.class);
+public class DockerRegistryClient {
+    private static final Logger LOG = LoggerFactory.getLogger(DockerRegistryClient.class);
 
     /**
      * dockerfile type support with recipe being a content of Dockerfile
@@ -69,37 +59,14 @@ public class DockerInstanceProvider {
     private final boolean                                       snapshotUseRegistry;
 
     @Inject
-    public DockerInstanceProvider(DockerConnectorProvider dockerProvider,
-                                  DockerRegistryAuthResolver authResolver,
-                                  @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) throws IOException {
+    public DockerRegistryClient(DockerConnectorProvider dockerProvider,
+                                DockerRegistryAuthResolver authResolver,
+                                @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) throws IOException {
         this.docker = dockerProvider.get();
         this.authResolver = authResolver;
         this.snapshotUseRegistry = snapshotUseRegistry;
     }
 
-    /**
-     * Creates instance from scratch or by reusing a previously one by using specified {@link MachineSource}
-     * data in {@link }.
-     *
-     * @param machine
-     *         machine description
-     * @param creationLogsOutput
-     *         output for instance creation logs
-     * @return newly created {@link }
-     * @throws UnsupportedRecipeException
-     *         if specified {@code recipe} is not supported
-     * @throws InvalidRecipeException
-     *         if {@code recipe} is invalid
-     * @throws NotFoundException
-     *         if instance described by {@link MachineSource} doesn't exists
-     * @throws MachineException
-     *         if other error occurs
-     */
-    /*public Instance createInstance(Machine machine,
-                                   LineConsumer creationLogsOutput) throws NotFoundException,
-                                                                           Exception {
-        throw new UnsupportedOperationException("This machine provider is deprecated.");
-    }*/
 
     /**
      * Removes snapshot of the instance in implementation specific way.

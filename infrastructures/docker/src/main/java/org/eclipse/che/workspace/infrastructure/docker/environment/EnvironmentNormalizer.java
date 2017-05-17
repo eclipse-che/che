@@ -18,7 +18,7 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.docker.ContainerNameGenerator;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -56,24 +56,24 @@ public class EnvironmentNormalizer {
         String networkId = NameGenerator.generate(identity.getWorkspaceId() + "_", 16);
         dockerEnvironment.setNetwork(networkId);
 
-        Map<String, DockerService> services = dockerEnvironment.getServices();
-        for (Map.Entry<String, DockerService> serviceEntry : services.entrySet()) {
+        Map<String, DockerContainerConfig> services = dockerEnvironment.getServices();
+        for (Map.Entry<String, DockerContainerConfig> serviceEntry : services.entrySet()) {
             normalize(identity.getOwner(), identity.getWorkspaceId(), serviceEntry.getKey(), serviceEntry.getValue());
         }
         normalizeNames(dockerEnvironment);
     }
 
     private void normalizeNames(DockerEnvironment dockerEnvironment) throws InfrastructureException {
-        Map<String, DockerService> services = dockerEnvironment.getServices();
-        for (Map.Entry<String, DockerService> serviceEntry : services.entrySet()) {
-            DockerService service = serviceEntry.getValue();
+        Map<String, DockerContainerConfig> services = dockerEnvironment.getServices();
+        for (Map.Entry<String, DockerContainerConfig> serviceEntry : services.entrySet()) {
+            DockerContainerConfig service = serviceEntry.getValue();
             normalizeVolumesFrom(service, services);
             normalizeLinks(service, services);
         }
     }
 
     // replace machines names in volumes_from with containers IDs
-    private void normalizeVolumesFrom(DockerService service, Map<String, DockerService> services) {
+    private void normalizeVolumesFrom(DockerContainerConfig service, Map<String, DockerContainerConfig> services) {
         if (service.getVolumesFrom() != null) {
             service.setVolumesFrom(service.getVolumesFrom()
                                           .stream()
@@ -95,7 +95,7 @@ public class EnvironmentNormalizer {
      * @param services
      *         all services in environment
      */
-    private void normalizeLinks(DockerService serviceToNormalizeLinks, Map<String, DockerService> services)
+    private void normalizeLinks(DockerContainerConfig serviceToNormalizeLinks, Map<String, DockerContainerConfig> services)
             throws InfrastructureException {
         List<String> normalizedLinks = new ArrayList<>();
         for (String link : serviceToNormalizeLinks.getLinks()) {
@@ -104,7 +104,7 @@ public class EnvironmentNormalizer {
             String serviceName = serviceNameAndAliasToLink[0];
             String serviceAlias = (serviceNameAndAliasToLink.length > 1) ?
                                   serviceNameAndAliasToLink[1] : null;
-            DockerService serviceLinkTo = services.get(serviceName);
+            DockerContainerConfig serviceLinkTo = services.get(serviceName);
             if (serviceLinkTo != null) {
                 String containerNameLinkTo = serviceLinkTo.getContainerName();
                 normalizedLinks.add((serviceAlias == null) ?
@@ -122,7 +122,7 @@ public class EnvironmentNormalizer {
     private void normalize(String namespace,
                            String workspaceId,
                            String machineName,
-                           DockerService service) throws InfrastructureException {
+                           DockerContainerConfig service) throws InfrastructureException {
         // set default mem limit for service if it is not set
         if (service.getMemLimit() == null || service.getMemLimit() == 0) {
             service.setMemLimit(defaultMachineMemorySizeBytes);

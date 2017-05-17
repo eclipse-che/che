@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.docker.old;
 
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.workspace.infrastructure.docker.DockerMachineSource;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.DataProvider;
@@ -56,7 +57,8 @@ public class DockerMachineSourceTest {
      */
     @Test(dataProvider = "image-ids")
     public void testConstructors(String location, String registry, String repository, String tag, String digest) throws MachineException {
-        DockerMachineSource source1 = new DockerMachineSource(repository).withTag(tag).withRegistry(registry).withDigest(digest);
+        DockerMachineSource
+                source1 = new DockerMachineSource(repository).withTag(tag).withRegistry(registry).withDigest(digest);
         assertEquals(source1.getLocation(), location);
 
         DockerMachineSource source2 = new DockerMachineSource(source1);

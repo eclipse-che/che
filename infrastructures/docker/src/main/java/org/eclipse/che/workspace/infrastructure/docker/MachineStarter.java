@@ -17,6 +17,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
@@ -25,6 +26,7 @@ import org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
@@ -52,9 +54,8 @@ import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerInstanceStopDetector;
-import org.eclipse.che.workspace.infrastructure.docker.old.DockerMachineSource;
 import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyProvider;
 import org.slf4j.Logger;
 
@@ -85,13 +86,14 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.CHE_WORKSPACE_ID;
 import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.LATEST_TAG;
+import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.USER_TOKEN;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Alexander Garagatyi
  */
-public class ServiceStarter {
-    private static final Logger LOG                     = getLogger(ServiceStarter.class);
+public class MachineStarter {
+    private static final Logger LOG                     = getLogger(MachineStarter.class);
     /**
      * Prefix of image repository, used to identify that the image is a machine saved to snapshot.
      */
@@ -99,21 +101,22 @@ public class ServiceStarter {
 
     public static final Pattern SNAPSHOT_LOCATION_PATTERN = Pattern.compile("(.+/)?" + MACHINE_SNAPSHOT_PREFIX + ".+");
 
-    static final String CONTAINER_EXITED_ERROR = "We detected that a machine exited unexpectedly. " +
+    static final   String            CONTAINER_EXITED_ERROR = "We detected that a machine exited unexpectedly. " +
                                                  "This may be caused by a container in interactive mode " +
                                                  "or a container that requires additional arguments to start. " +
                                                  "Please check the container recipe.";
-
     // CMDs and entrypoints that lead to exiting of container right after start
-    private Set<List<String>> badCMDs        = ImmutableSet.of(singletonList("/bin/bash"),
-                                                               singletonList("/bin/sh"),
-                                                               singletonList("bash"),
-                                                               singletonList("sh"),
-                                                               Arrays.asList("/bin/sh", "-c", "/bin/sh"),
-                                                               Arrays.asList("/bin/sh", "-c", "/bin/bash"),
-                                                               Arrays.asList("/bin/sh", "-c", "bash"),
-                                                               Arrays.asList("/bin/sh", "-c", "sh"));
-    private Set<List<String>> badEntrypoints =
+    private static Set<List<String>> badCMDs                = ImmutableSet.of(singletonList("/bin/bash"),
+                                                                              singletonList("/bin/sh"),
+                                                                              singletonList("bash"),
+                                                                              singletonList("sh"),
+                                                                              Arrays.asList("/bin/sh", "-c", "/bin/sh"),
+                                                                              Arrays.asList("/bin/sh", "-c",
+                                                                                            "/bin/bash"),
+                                                                              Arrays.asList("/bin/sh", "-c", "bash"),
+                                                                              Arrays.asList("/bin/sh", "-c", "sh"));
+
+    private static Set<List<String>> badEntrypoints =
             ImmutableSet.<List<String>>builder().addAll(badCMDs)
                                                 .add(Arrays.asList("/bin/sh", "-c"))
                                                 .add(Arrays.asList("/bin/bash", "-c"))
@@ -128,8 +131,8 @@ public class ServiceStarter {
     private final boolean                                       doForcePullOnBuild;
     private final boolean                                       privilegedMode;
     private final int                                           pidsLimit;
-//    private final List<String>                                  devMachinePortsToExpose;
-//    private final List<String>                                  commonMachinePortsToExpose;
+    private final List<String>                                  devMachinePortsToExpose;
+    private final List<String>                                  commonMachinePortsToExpose;
     private final List<String>                                  devMachineSystemVolumes;
     private final List<String>                                  commonMachineSystemVolumes;
     private final Map<String, String>                           devMachineEnvVariables;
@@ -148,11 +151,11 @@ public class ServiceStarter {
     private final Map<String, String>                           buildArgs;
 
     @Inject
-    public ServiceStarter(DockerConnector docker,
+    public MachineStarter(DockerConnector docker,
                           UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                           DockerInstanceStopDetector dockerInstanceStopDetector,
-//                          @Named("machine.docker.dev_machine.machine_servers") Set<ServerConfig> devMachineServers,
-//                          @Named("machine.docker.machine_servers") Set<ServerConfig> allMachinesServers,
+                          @Named("machine.docker.dev_machine.machine_servers") Set<ServerConfig> devMachineServers,
+                          @Named("machine.docker.machine_servers") Set<ServerConfig> allMachinesServers,
                           @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
                           @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
                           @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
@@ -223,15 +226,15 @@ public class ServiceStarter {
         devMachineVolumes.addAll(devMachineSystemVolumes);
         this.devMachineSystemVolumes = devMachineVolumes;
 
-//        this.devMachinePortsToExpose = new ArrayList<>(allMachinesServers.size() + devMachineServers.size());
-//        this.commonMachinePortsToExpose = new ArrayList<>(allMachinesServers.size());
-//        for (ServerConfig serverConf : devMachineServers) {
-//            devMachinePortsToExpose.add(serverConf.getPort());
-//        }
-//        for (ServerConfig serverConf : allMachinesServers) {
-//            commonMachinePortsToExpose.add(serverConf.getPort());
-//            devMachinePortsToExpose.add(serverConf.getPort());
-//        }
+        this.devMachinePortsToExpose = new ArrayList<>(allMachinesServers.size() + devMachineServers.size());
+        this.commonMachinePortsToExpose = new ArrayList<>(allMachinesServers.size());
+        for (ServerConfig serverConf : devMachineServers) {
+            devMachinePortsToExpose.add(serverConf.getPort());
+        }
+        for (ServerConfig serverConf : allMachinesServers) {
+            commonMachinePortsToExpose.add(serverConf.getPort());
+            devMachinePortsToExpose.add(serverConf.getPort());
+        }
 
         allMachinesEnvVariables = removeEmptyAndNullValues(allMachinesEnvVariables);
         devMachineEnvVariables = removeEmptyAndNullValues(devMachineEnvVariables);
@@ -266,14 +269,14 @@ public class ServiceStarter {
 
     public DockerMachine startService(String networkName,
                                       String machineName,
-                                      DockerService service,
+                                      DockerContainerConfig service,
                                       RuntimeIdentity identity,
-                                      Map<String, String> startOptions) throws InfrastructureException {
+                                      boolean isDev) throws InfrastructureException {
         String workspaceId = identity.getWorkspaceId();
         LineConsumer machineLogger = new ListLineConsumer();
 
         // copy to not affect/be affected by changes in origin
-        service = new DockerService(service);
+        service = new DockerContainerConfig(service);
 
         ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
         ProgressMonitor progressMonitor = currentProgressStatus -> {
@@ -292,7 +295,7 @@ public class ServiceStarter {
 
             container = createContainer(workspaceId,
                                         machineName,
-//                                        isDev,
+                                        isDev,
                                         image,
                                         networkName,
                                         service);
@@ -309,8 +312,6 @@ public class ServiceStarter {
                                               service.getId(),
                                               machineLogger);
 
-//            DockerNode node = dockerMachineFactory.createNode(workspaceId, container);
-
             dockerInstanceStopDetector.startDetection(container,
                                                       service.getId(),
                                                       workspaceId);
@@ -326,7 +327,7 @@ public class ServiceStarter {
     }
 
     private String prepareImage(String machineName,
-                                DockerService service,
+                                DockerContainerConfig service,
                                 ProgressMonitor progressMonitor)
             throws ServerException,
                    NotFoundException, SourceNotFoundException {
@@ -350,7 +351,7 @@ public class ServiceStarter {
         return imageName;
     }
 
-    protected void buildImage(DockerService service,
+    protected void buildImage(DockerContainerConfig service,
                               String machineImageName,
                               boolean doForcePullOnBuild,
                               ProgressMonitor progressMonitor)
@@ -416,7 +417,7 @@ public class ServiceStarter {
      * @throws ServerException
      *         if any other error occurs
      */
-    protected void pullImage(DockerService service,
+    protected void pullImage(DockerContainerConfig service,
                              String machineImageName,
                              ProgressMonitor progressMonitor) throws ServerException, SourceNotFoundException {
         DockerMachineSource dockerMachineSource = new DockerMachineSource(
@@ -457,17 +458,17 @@ public class ServiceStarter {
 
     private String createContainer(String workspaceId,
                                    String machineName,
-//                                   boolean isDev,
+                                   boolean isDev,
                                    String image,
                                    String networkName,
-                                   DockerService service) throws IOException {
+                                   DockerContainerConfig service) throws IOException {
 
         long machineMemorySwap = memorySwapMultiplier == -1 ?
                                  -1 :
                                  (long)(service.getMemLimit() * memorySwapMultiplier);
 
         addSystemWideContainerSettings(workspaceId,
-//                                       isDev,
+                                       isDev,
                                        service);
 
         EndpointConfig endpointConfig = new EndpointConfig().withAliases(machineName)
@@ -541,24 +542,23 @@ public class ServiceStarter {
     }
 
     private void addSystemWideContainerSettings(String workspaceId,
-//                                                boolean isDev,
-                                                DockerService composeService) throws IOException {
-//        List<String> portsToExpose;
+                                                boolean isDev,
+                                                DockerContainerConfig composeService) throws IOException {
+        List<String> portsToExpose;
         List<String> volumes;
         Map<String, String> env;
-//        if (isDev) {
-//        portsToExpose = devMachinePortsToExpose;
-        volumes = devMachineSystemVolumes;
-//
-        env = new HashMap<>(devMachineEnvVariables);
-        env.put(CHE_WORKSPACE_ID, workspaceId);
-//            env.put(USER_TOKEN, getUserToken(workspaceId));
-//        } else {
-//            portsToExpose = commonMachinePortsToExpose;
-//            env = commonMachineEnvVariables;
-//            volumes = commonMachineSystemVolumes;
-//        }
-//        composeService.getExpose().addAll(portsToExpose);
+        if (isDev) {
+            portsToExpose = devMachinePortsToExpose;
+            volumes = devMachineSystemVolumes;
+            env = new HashMap<>(devMachineEnvVariables);
+            env.put(CHE_WORKSPACE_ID, workspaceId);
+            env.put(USER_TOKEN, getUserToken(workspaceId));
+        } else {
+            portsToExpose = commonMachinePortsToExpose;
+            env = commonMachineEnvVariables;
+            volumes = commonMachineSystemVolumes;
+        }
+        composeService.getExpose().addAll(portsToExpose);
         composeService.getEnvironment().putAll(env);
         composeService.getVolumes().addAll(volumes);
         composeService.getNetworks().addAll(additionalNetworks);
@@ -683,9 +683,9 @@ public class ServiceStarter {
 
     // workspaceId parameter is required, because in case of separate storage for tokens
     // you need to know exactly which workspace and which user to apply the token.
-//    protected String getUserToken(String wsId) {
-//        return EnvironmentContext.getCurrent().getSubject().getToken();
-//    }
+    protected String getUserToken(String wsId) {
+        return EnvironmentContext.getCurrent().getSubject().getToken();
+    }
 
     /**
      * Escape paths for Windows system with boot@docker according to rules given here :
@@ -702,7 +702,7 @@ public class ServiceStarter {
     }
 
     private void connectContainerToAdditionalNetworks(String container,
-                                                      DockerService service) throws IOException {
+                                                      DockerContainerConfig service) throws IOException {
 
         for (String network : service.getNetworks()) {
             docker.connectContainerToNetwork(

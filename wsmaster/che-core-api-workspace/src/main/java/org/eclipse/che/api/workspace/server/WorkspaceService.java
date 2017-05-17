@@ -20,7 +20,6 @@ import io.swagger.annotations.ExampleProperty;
 
 import com.google.common.collect.Maps;
 
-import org.eclipse.che.api.agent.server.WsAgentHealthChecker;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -28,8 +27,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
@@ -37,11 +34,10 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
 import javax.inject.Inject;
@@ -67,9 +63,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Defines Workspace REST API.
@@ -82,7 +76,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public class WorkspaceService extends Service {
 
     private final WorkspaceManager              workspaceManager;
-    private final WsAgentHealthChecker          agentHealthChecker;
+//    private final WsAgentHealthChecker          agentHealthChecker;
     private final WorkspaceServiceLinksInjector linksInjector;
     private final String                        apiEndpoint;
     //    private final boolean                       cheWorkspaceAutoSnapshot;
@@ -93,14 +87,14 @@ public class WorkspaceService extends Service {
     @Inject
     public WorkspaceService(@Named("che.api") String apiEndpoint,
                             WorkspaceManager workspaceManager,
-                            WsAgentHealthChecker agentHealthChecker,
+//                            WsAgentHealthChecker agentHealthChecker,
                             WorkspaceServiceLinksInjector workspaceServiceLinksInjector
 //                            @Named(CHE_WORKSPACE_AUTO_SNAPSHOT) boolean cheWorkspaceAutoSnapshot,
 //                            @Named(CHE_WORKSPACE_AUTO_RESTORE) boolean cheWorkspaceAutoRestore
     ) {
         this.apiEndpoint = apiEndpoint;
         this.workspaceManager = workspaceManager;
-        this.agentHealthChecker = agentHealthChecker;
+//        this.agentHealthChecker = agentHealthChecker;
         this.linksInjector = workspaceServiceLinksInjector;
 //        this.cheWorkspaceAutoSnapshot = cheWorkspaceAutoSnapshot;
 //        this.cheWorkspaceAutoRestore = cheWorkspaceAutoRestore;
@@ -636,7 +630,7 @@ public class WorkspaceService extends Service {
         }
     }
 
-    @GET
+    /*@GET
     @Path("/{id}/check")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get state of the workspace agent by the workspace id")
@@ -664,7 +658,7 @@ public class WorkspaceService extends Service {
         final WsAgentHealthStateDto check = agentHealthChecker.check(devMachine);
         check.setWorkspaceStatus(workspace.getStatus());
         return check;
-    }
+    }*/
 
     @GET
     @Path("/settings")

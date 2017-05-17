@@ -33,6 +33,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  *
  * @author Valeriy Svydenko
  */
+// TODO spi
+@Deprecated
 @Singleton
 public class WsAgentPingRequestFactory {
     protected static final Logger LOG = LoggerFactory.getLogger(WsAgentPingRequestFactory.class);

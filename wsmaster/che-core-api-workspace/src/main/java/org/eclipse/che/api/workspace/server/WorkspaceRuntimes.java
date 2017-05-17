@@ -16,18 +16,15 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.machine.MachineLogMessage;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.util.AbstractMessageConsumer;
-import org.eclipse.che.api.core.util.MessageConsumer;
-import org.eclipse.che.api.core.util.WebsocketMessageConsumer;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -52,11 +49,8 @@ import java.util.concurrent.Future;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE;
 
 // TODO: spi: deal with exceptions
-
-//import org.eclipse.che.api.machine.server.spi.Runtime;
 
 /**
  * Defines an internal API for managing {@link RuntimeImpl} instances.
@@ -228,13 +222,15 @@ public class WorkspaceRuntimes {
      *         identifier of workspace which should be stopped
      * @throws NotFoundException
      *         when workspace with specified identifier is not running
-     * @throws ServerException
-     *         when any error occurs during workspace stopping
      * @throws ConflictException
      *         when running workspace status is different from {@link WorkspaceStatus#RUNNING}
+     * @throws InfrastructureException
+     *         when any other error occurs during workspace stopping
      * @see WorkspaceStatus#STOPPING
      */
-    public void stop(String workspaceId, Map<String, String> options) throws NotFoundException, InfrastructureException, ConflictException {
+    public void stop(String workspaceId, Map<String, String> options) throws NotFoundException,
+                                                                             InfrastructureException,
+                                                                             ConflictException {
 
         eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                         .withWorkspaceId(workspaceId)
@@ -243,8 +239,9 @@ public class WorkspaceRuntimes {
                                         .withEventType(EventType.STOPPING));
 
         InternalRuntime runtime = runtimes.get(workspaceId);
-        if (runtime == null)
+        if (runtime == null) {
             throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
+        }
 
         runtime.getContext().stop(options);
 
@@ -319,7 +316,6 @@ public class WorkspaceRuntimes {
 
 
         // Start environment
-        //MessageConsumer<MachineLogMessage> logger = getEnvironmentLogger(workspaceId);
         if (options == null) {
             options = new HashMap<>();
         }
@@ -327,41 +323,27 @@ public class WorkspaceRuntimes {
         Subject subject = EnvironmentContext.getCurrent().getSubject();
         RuntimeIdentity runtimeId = new RuntimeIdentity(workspaceId, envName, subject.getUserName());
 
-        InternalRuntime runtime = infra.prepare(runtimeId, environment).start(options);
+        try {
+            InternalRuntime runtime = infra.prepare(runtimeId, environment).start(options);
 
-        if (runtime == null)
-            throw new IllegalStateException("SPI contract violated. RuntimeInfrastructure.start(...) must not return null: "
-                                            + RuntimeInfrastructure.class);
-
-
-//        // Phase 2: start agents if any
-//        for (Map.Entry<String, MachineConfigImpl> machineEntry : environment.getMachines().entrySet()) {
-//            if (!machineEntry.getValue().getAgents().isEmpty()) {
-//                Machine machine = runtime.getMachines().get(machineEntry.getKey());
-//                // TODO
-//                // installAgents(machine);
-//            }
-//        }
-
-        runtimes.put(workspaceId, runtime);
-        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                        .withWorkspaceId(workspaceId)
-                                        .withStatus(WorkspaceStatus.RUNNING)
-                                        .withEventType(EventType.RUNNING)
-                                        .withPrevStatus(WorkspaceStatus.STARTING));
-
-    }
-
-
-    private MessageConsumer<MachineLogMessage> getEnvironmentLogger(String workspaceId) throws ServerException {
-        WebsocketMessageConsumer<MachineLogMessage> envMessageConsumer =
-                new WebsocketMessageConsumer<>(format(ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE, workspaceId));
-        return new AbstractMessageConsumer<MachineLogMessage>() {
-            @Override
-            public void consume(MachineLogMessage message) throws IOException {
-                envMessageConsumer.consume(message);
+            if (runtime == null) {
+                throw new IllegalStateException(
+                        "SPI contract violated. RuntimeInfrastructure.start(...) must not return null: "
+                        + RuntimeInfrastructure.class);
             }
-        };
+
+            runtimes.put(workspaceId, runtime);
+            eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                            .withWorkspaceId(workspaceId)
+                                            .withStatus(WorkspaceStatus.RUNNING)
+                                            .withEventType(EventType.RUNNING)
+                                            .withPrevStatus(WorkspaceStatus.STARTING));
+        } catch (InternalInfrastructureException e) {
+            LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
+        } catch (RuntimeException e) {
+            LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
+            throw new InternalInfrastructureException(e.getMessage(), e);
+        }
     }
 
     private static EnvironmentImpl copyEnv(Workspace workspace, String envName) {
@@ -376,39 +358,6 @@ public class WorkspaceRuntimes {
         }
         return new EnvironmentImpl(environment);
     }
-
-//    private LineConsumer getMachineLogger(MessageConsumer<MachineLogMessage> environmentLogger,
-//                                          String machineId,
-//                                          String machineName) throws ServerException {
-//        createMachineLogsDir(machineId);
-//
-//        LineConsumer lineConsumer = new AbstractLineConsumer() {
-//            @Override
-//            public void writeLine(String line) throws IOException {
-//                environmentLogger.consume(new MachineLogMessageImpl(machineName, line));
-//            }
-//        };
-//        try {
-//            return new ConcurrentCompositeLineConsumer(new ConcurrentFileLineConsumer(getMachineLogsFile(machineId)),
-//                                                       lineConsumer);
-//        } catch (IOException e) {
-//            throw new MachineException(format("Unable create log file '%s' for machine '%s'.",
-//                                              e.getLocalizedMessage(),
-//                                              machineId));
-//        }
-//    }
-//
-//    private void createMachineLogsDir(String machineId) throws MachineException {
-//        File dir = new File(machineLogsDir, machineId);
-//        if (!dir.exists() && !dir.mkdirs()) {
-//            throw new MachineException("Can't create folder for the logs of machine");
-//        }
-//    }
-//
-//    private File getMachineLogsFile(String machineId) {
-//        return new File(new File(machineLogsDir, machineId), "machineId.logs");
-//    }
-//
 
 //    /**
 //     * Removes all workspaces from the in-memory storage, while
@@ -473,120 +422,7 @@ public class WorkspaceRuntimes {
 //        }
 //    }
 //
-//    protected void launchAgents(Runtime instance, List<String> agents) throws ServerException {
-//        try {
-//            for (AgentKey agentKey : agentSorter.sort(agents)) {
-//                LOG.info("Launching '{}' agent at workspace {}", agentKey.getId(), instance.getMachine().getWorkspaceId());
-//
-//                Agent agent = agentRegistry.getAgent(agentKey);
-//                AgentLauncher launcher = launcherFactory.find(agentKey.getId(), instance.getConfig().getType());
-//                launcher.launch(instance, agent);
-//            }
-//        } catch (AgentException e) {
-//            throw new MachineException(e.getMessage(), e);
-//        }
-//    }
-//
 
-    /** Starts the machine instances. */
-//    private void doStart(EnvironmentImpl environment,
-//                         String workspaceId,
-//                         String envName,
-//                         Map<String, String> options) throws ServerException {
-//
-//
-//
-//        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-//                                        .withWorkspaceId(workspaceId)
-//                                        .withStatus(WorkspaceStatus.STARTING)
-//                                        .withEventType(EventType.STARTING)
-//                                        .withPrevStatus(WorkspaceStatus.STOPPED));
-//
-//
-//        RuntimeInfrastructure infra = infraByRecipe.get(environment.getRecipe().getType());
-//
-//        infra.start(workspaceId, environment, getEnvironmentLogger(workspaceId), options);
-//
-//        // agents
-//        for(Map.Entry<String, MachineConfigImpl> machineEntry : environment.getMachines().entrySet()) {
-//            if(!machineEntry.getValue().getAgents().isEmpty()) {
-//                RuntimeMachine machine = runtimes.get(workspaceId).getMachines().get(machineEntry.getKey());
-//                // installAgents(machine);
-//            }
-//        }
-//
-//        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-//                                        .withWorkspaceId(workspaceId)
-//                                        .withStatus(WorkspaceStatus.RUNNING)
-//                                        .withEventType(EventType.RUNNING)
-//                                        .withPrevStatus(WorkspaceStatus.STARTING));
-
-
-//        try {
-//
-//
-//            LOG.info("DO START workspace: " + workspaceId + " environment: " + envName);
-//
-//            List<Runtime> machines = this.networks.start(workspaceId, envName, environment, recover, getEnvironmentLogger(workspaceId));
-//
-////            List<Instance> machines = envEngine.start(workspaceId,
-////                                                      envName,
-////                                                      environment,
-////                                                      recover,
-////                                                      getEnvironmentLogger(workspaceId));
-//
-//
-//            LOG.info("DO LAUNCH AGENT workspace: " + workspaceId + " environment: " + envName);
-//
-//            launchAgents(environment, machines);
-//
-//            try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
-//                ensurePreDestroyIsNotExecuted();
-//                WorkspaceState workspaceState = workspaces.get(workspaceId);
-//                workspaceState.status = WorkspaceStatus.RUNNING;
-//            }
-//
-//            eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-//                                            .withWorkspaceId(workspaceId)
-//                                            .withStatus(WorkspaceStatus.RUNNING)
-//                                            .withEventType(EventType.RUNNING)
-//                                            .withPrevStatus(WorkspaceStatus.STARTING));
-//        } catch (ApiException | EnvironmentException | RuntimeException e) {
-//            try {
-//                envEngine.stop(workspaceId);
-//            } catch (EnvironmentNotRunningException ignore) {
-//            } catch (Exception ex) {
-//                LOG.error(ex.getLocalizedMessage(), ex);
-//            }
-//            String environmentStartError = "Start of environment " + envName +
-//                                           " failed. Error: " + e.getLocalizedMessage();
-//            try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
-//                workspaces.remove(workspaceId);
-//            }
-//            eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-//                                            .withWorkspaceId(workspaceId)
-//                                            .withEventType(EventType.ERROR)
-//                                            .withPrevStatus(WorkspaceStatus.STARTING)
-//                                            .withError(environmentStartError));
-//
-//            throw new ServerException(environmentStartError, e);
-//        }
-//    }
-
-//    private void launchAgents(EnvironmentImpl environment, List<Runtime> machines) throws ServerException {
-//        for (Runtime instance : machines) {
-//            Map<String, MachineConfigImpl> envMachines = environment.getMachines();
-//            if (envMachines != null) {
-//                MachineConfig extendedMachine = envMachines.get(instance.getConfig().getName());
-//                if (extendedMachine != null) {
-//                    List<String> agents = extendedMachine.getAgents();
-//                    launchAgents(instance, agents);
-//                }
-//            }
-//        }
-//    }
-//
-//
 //    /**
 //     * Safely compares current status of given workspace
 //     * with {@code from} and if they are equal sets the status to {@code to}.
@@ -603,73 +439,4 @@ public class WorkspaceRuntimes {
 //        return false;
 //    }
 //
-//    /** Creates a snapshot and changes status SNAPSHOTTING -> RUNNING . */
-//    private void snapshotAndUpdateStatus(String workspaceId) throws NotFoundException,
-//                                                                    ConflictException,
-//                                                                    ServerException {
-//        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-//                                        .withWorkspaceId(workspaceId)
-//                                        .withStatus(WorkspaceStatus.SNAPSHOTTING)
-//                                        .withEventType(EventType.SNAPSHOT_CREATING)
-//                                        .withPrevStatus(WorkspaceStatus.RUNNING));
-//
-//        RuntimeImpl runtime = get(workspaceId).getRuntime();
-//        List<OldMachineImpl> machines = runtime.getMachines();
-//        machines.sort(comparing(m -> !m.getConfig().isDev(), Boolean::compare));
-//
-//        LOG.info("Creating snapshot of workspace '{}', machines to snapshot: '{}'", workspaceId, machines.size());
-//        List<SnapshotImpl> newSnapshots = new ArrayList<>(machines.size());
-//        for (OldMachineImpl machine : machines) {
-//            try {
-//                newSnapshots.add(envEngine.saveSnapshot(workspaceId, machine.getId()));
-//            } catch (ServerException | NotFoundException x) {
-//                if (machine.getConfig().isDev()) {
-//                    compareAndSetStatus(workspaceId, WorkspaceStatus.SNAPSHOTTING, WorkspaceStatus.RUNNING);
-//                    eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-//                                                    .withWorkspaceId(workspaceId)
-//                                                    .withStatus(WorkspaceStatus.RUNNING)
-//                                                    .withEventType(EventType.SNAPSHOT_CREATION_ERROR)
-//                                                    .withPrevStatus(WorkspaceStatus.SNAPSHOTTING)
-//                                                    .withError(x.getMessage()));
-//                    throw x;
-//                }
-//                LOG.warn(format("Couldn't create snapshot of machine '%s:%s' in workspace '%s'",
-//                                machine.getEnvName(),
-//                                machine.getConfig().getName(),
-//                                workspaceId));
-//            }
-//        }
-//
-//        LOG.info("Saving new snapshots metadata, workspace id '{}'", workspaceId);
-//        try {
-//            List<SnapshotImpl> removed = snapshotDao.replaceSnapshots(workspaceId,
-//                                                                      runtime.getActiveEnv(),
-//                                                                      newSnapshots);
-//            if (!removed.isEmpty()) {
-//                LOG.info("Removing old snapshots binaries, workspace id '{}', snapshots to remove '{}'", workspaceId, removed.size());
-//                removeBinaries(removed);
-//            }
-//        } catch (SnapshotException x) {
-//            LOG.error(format("Couldn't remove existing snapshots metadata for workspace '%s'", workspaceId), x);
-//            LOG.info("Removing newly created snapshots, workspace id '{}', snapshots to remove '{}'", workspaceId, newSnapshots.size());
-//            removeBinaries(newSnapshots);
-//            compareAndSetStatus(workspaceId, WorkspaceStatus.SNAPSHOTTING, WorkspaceStatus.RUNNING);
-//            eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-//                                            .withWorkspaceId(workspaceId)
-//                                            .withStatus(WorkspaceStatus.RUNNING)
-//                                            .withEventType(EventType.SNAPSHOT_CREATION_ERROR)
-//                                            .withPrevStatus(WorkspaceStatus.SNAPSHOTTING)
-//                                            .withError(x.getMessage()));
-//            throw x;
-//        }
-//        compareAndSetStatus(workspaceId, WorkspaceStatus.SNAPSHOTTING, WorkspaceStatus.RUNNING);
-//        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-//                                        .withStatus(WorkspaceStatus.RUNNING)
-//                                        .withWorkspaceId(workspaceId)
-//                                        .withEventType(EventType.SNAPSHOT_CREATED)
-//                                        .withPrevStatus(WorkspaceStatus.SNAPSHOTTING));
-//    }
-//
-
-
 }

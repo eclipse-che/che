@@ -8,13 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.local;
+package org.eclipse.che.workspace.infrastructure.docker.local.providers;
 
 import com.google.common.base.Strings;
 
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.workspace.infrastructure.docker.WindowsHostUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,57 +23,61 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 /**
- * Provides volumes configuration of machine for exec agent
+ * Reads path to extensions server archive to mount it to docker machine
  *
- * <p>On Windows MUST be locate in "user.home" directory in case limitation windows+docker.
+ * <p>On Windows hosts MUST be locate in "user.home" directory in case limitation windows+docker.
  *
+ * @author Vitalii Parfonov
  * @author Alexander Garagatyi
  */
 @Singleton
-public class ExecAgentVolumeProvider implements Provider<String> {
+public class WsAgentVolumeProvider implements Provider<String> {
 
-    private static final String CONTAINER_TARGET = ":/mnt/che/exec-agent";
-    private static final String EXEC             = "exec";
-    private static final Logger LOG              = LoggerFactory.getLogger(ExecAgentVolumeProvider.class);
+    private static final String CONTAINER_TARGET = ":/mnt/che/ws-agent.tar.gz";
+    private static final String WS_AGENT         = "ws-agent.tar.gz";
 
-    private final String execArchivePath;
+    private static final Logger LOG = LoggerFactory.getLogger(WsAgentVolumeProvider.class);
+
+    private final String wsAgentArchivePath;
 
     private final String agentVolumeOptions;
 
     @Inject
-    public ExecAgentVolumeProvider(@Nullable @Named("che.docker.volumes_agent_options") String agentVolumeOptions,
-                                   @Named("che.workspace.exec_linux_amd64") String execArchivePath) {
+    public WsAgentVolumeProvider(@Nullable @Named("che.docker.volumes_agent_options") String agentVolumeOptions,
+                                 @Named("che.workspace.agent.dev") String wsAgentArchivePath) {
         if (!Strings.isNullOrEmpty(agentVolumeOptions)) {
             this.agentVolumeOptions = ":" + agentVolumeOptions;
         } else {
             this.agentVolumeOptions = "";
         }
-        this.execArchivePath = execArchivePath;
+        this.wsAgentArchivePath = wsAgentArchivePath;
     }
 
     @Override
     public String get() {
+
         if (SystemInfo.isWindows()) {
             try {
                 final Path cheHome = WindowsHostUtils.ensureCheHomeExist();
-                final Path execPath = cheHome.resolve(EXEC);
-                IoUtil.copy(Paths.get(execArchivePath).toFile(), execPath.toFile(), null, true);
-                return getTargetOptions(execPath.toString());
+                final Path path = Files.copy(Paths.get(wsAgentArchivePath), cheHome.resolve(WS_AGENT), REPLACE_EXISTING);
+                return getTargetOptions(path.toString());
             } catch (IOException e) {
                 LOG.warn(e.getMessage());
                 throw new RuntimeException(e);
             }
         } else {
-            return getTargetOptions(execArchivePath);
+            return getTargetOptions(wsAgentArchivePath);
         }
     }
 
     private String getTargetOptions(final String path) {
         return path + CONTAINER_TARGET + agentVolumeOptions;
     }
-
 }

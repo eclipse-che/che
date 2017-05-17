@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
-import org.eclipse.che.workspace.infrastructure.docker.local.DockerMachineTerminalChecker;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;

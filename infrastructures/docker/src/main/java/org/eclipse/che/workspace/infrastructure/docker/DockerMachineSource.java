@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.old;
+package org.eclipse.che.workspace.infrastructure.docker;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
@@ -24,6 +24,11 @@ import org.eclipse.che.plugin.docker.client.parser.DockerImageIdentifierParser;
  * @author Florent Benoit
  */
 public class DockerMachineSource extends MachineSourceImpl {
+
+    /**
+     * image type support with recipe script being the name of the repository + image name
+     */
+    public static final String DOCKER_IMAGE_TYPE = "image";
 
     /**
      * Optional registry (like docker-registry.company.com:5000)
@@ -52,10 +57,10 @@ public class DockerMachineSource extends MachineSourceImpl {
      */
     public DockerMachineSource(MachineSource machineSource) throws ServerException {
         // check type
-        if (!DockerInstanceProvider.DOCKER_IMAGE_TYPE.equals(machineSource.getType())) {
-            throw new ServerException("Docker machine source can only be built with '" + DockerInstanceProvider.DOCKER_IMAGE_TYPE + "' type");
+        if (!DOCKER_IMAGE_TYPE.equals(machineSource.getType())) {
+            throw new ServerException("Docker machine source can only be built with '" + DOCKER_IMAGE_TYPE + "' type");
         }
-        setType(DockerInstanceProvider.DOCKER_IMAGE_TYPE);
+        setType(DOCKER_IMAGE_TYPE);
 
         // parse location
         final DockerImageIdentifier dockerImageIdentifier;
@@ -80,7 +85,7 @@ public class DockerMachineSource extends MachineSourceImpl {
     public DockerMachineSource(String repository) {
         super();
         this.repository = repository;
-        setType(DockerInstanceProvider.DOCKER_IMAGE_TYPE);
+        setType(DOCKER_IMAGE_TYPE);
     }
 
     /**

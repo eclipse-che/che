@@ -84,6 +84,8 @@ public abstract class RuntimeContext {
      * @return running runtime
      * @throws StateException
      *         when the context is already used
+     * @throws InternalInfrastructureException
+     *         when error that indicates system internal problem occurs
      * @throws InfrastructureException
      *         when any other error occurs
      */
@@ -97,6 +99,16 @@ public abstract class RuntimeContext {
         return runtime;
     }
 
+    /**
+     * Starts underlying environment in implementation specific way.
+     *
+     * @param startOptions options of workspace that may used in environment start
+     * @return server internal representation of workspace runtime
+     * @throws InternalInfrastructureException
+     *         when error that indicates system internal problem occurs
+     * @throws InfrastructureException
+     *         when any other error occurs
+     */
     protected abstract InternalRuntime internalStart(Map<String, String> startOptions) throws InfrastructureException;
 
     /**

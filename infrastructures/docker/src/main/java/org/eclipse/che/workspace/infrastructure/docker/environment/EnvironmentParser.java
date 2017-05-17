@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 
 import javax.inject.Inject;
 import java.util.Map;
@@ -41,10 +41,10 @@ public class EnvironmentParser {
     protected static final String SERVER_CONF_LABEL_PROTOCOL_SUFFIX = ":protocol";
     protected static final String SERVER_CONF_LABEL_PATH_SUFFIX     = ":path";
 
-    private final Map<String, TypeSpecificEnvironmentParser> environmentParsers;
+    private final Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers;
 
     @Inject
-    public EnvironmentParser(Map<String, TypeSpecificEnvironmentParser> environmentParsers) {
+    public EnvironmentParser(Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers) {
         this.environmentParsers = environmentParsers;
     }
 
@@ -71,7 +71,7 @@ public class EnvironmentParser {
         checkArgument(recipe.getContent() == null || recipe.getLocation() == null,
                       "Recipe of environment contains mutually exclusive fields location and content");
 
-        TypeSpecificEnvironmentParser parser = environmentParsers.get(recipe.getType());
+        DockerConfigSourceSpecificEnvironmentParser parser = environmentParsers.get(recipe.getType());
         if (parser == null) {
             throw new ValidationException(format("Environment type '%s' is not supported. " +
                                                  "Supported environment types: %s",
@@ -82,7 +82,7 @@ public class EnvironmentParser {
 
         DockerEnvironment dockerEnvironment = parser.parse(environment);
 
-        for (Map.Entry<String, DockerService> entry : dockerEnvironment.getServices().entrySet()) {
+        for (Map.Entry<String, DockerContainerConfig> entry : dockerEnvironment.getServices().entrySet()) {
             MachineConfig machineConfig = environment.getMachines().get(entry.getKey());
             if (machineConfig != null) {
                 normalizeMachine(entry.getKey(), entry.getValue(), machineConfig);
@@ -92,7 +92,7 @@ public class EnvironmentParser {
         return dockerEnvironment;
     }
 
-    private void normalizeMachine(String name, DockerService service, MachineConfig machineConfig)
+    private void normalizeMachine(String name, DockerContainerConfig service, MachineConfig machineConfig)
             throws ValidationException {
         if (machineConfig.getAttributes().containsKey("memoryLimitBytes")) {
             try {
@@ -120,13 +120,11 @@ public class EnvironmentParser {
             service.getLabels().put(portLabelPrefix +
                                     SERVER_CONF_LABEL_REF_SUFFIX,
                                     serverRef);
-// FIXME: spi
-//            if (serverConf.getProperties() != null && serverConf.getProperties().get("path") != null) {
-//
-//                service.getLabels().put(portLabelPrefix +
-//                                        SERVER_CONF_LABEL_PATH_SUFFIX,
-//                                        serverConf.getProperties().get("path"));
-//            }
+            if (serverConf.getPath() != null) {
+                service.getLabels().put(portLabelPrefix +
+                                        SERVER_CONF_LABEL_PATH_SUFFIX,
+                                        serverConf.getPath());
+            }
             if (serverConf.getProtocol() != null) {
                 service.getLabels().put(portLabelPrefix +
                                         SERVER_CONF_LABEL_PROTOCOL_SUFFIX,

@@ -17,7 +17,7 @@ import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.workspace.server.RecipeDownloader;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -162,7 +162,7 @@ public class ComposeEnvironmentParserTest {
     private DockerEnvironment createTestEnv() {
         DockerEnvironment cheServicesEnvironment = new DockerEnvironment();
 
-        DockerService cheService1 = new DockerService();
+        DockerContainerConfig cheService1 = new DockerContainerConfig();
         String buildContext = "http://host.com:port/location/of/dockerfile/or/git/repo/";
         cheService1.setBuild(new DockerBuildContext().withContext(buildContext)
                                                      .withDockerfilePath("dockerfile/Dockerfile_alternate")
@@ -185,9 +185,9 @@ public class ComposeEnvironmentParserTest {
         cheService1.setVolumes(asList("/opt/data:/var/lib/mysql", "~/configs:/etc/configs/:ro"));
         cheService1.setVolumesFrom(asList("machine2:ro", "machine3"));
 
-        DockerService cheService2 = new DockerService();
+        DockerContainerConfig cheService2 = new DockerContainerConfig();
         cheService2.setImage("codenvy/ubuntu_jdk8");
-        DockerService cheService3 = new DockerService();
+        DockerContainerConfig cheService3 = new DockerContainerConfig();
         cheService3.setImage("codenvy/ubuntu_jdk8");
 
         cheServicesEnvironment.setServices(ImmutableMap.of("machine1", cheService1,

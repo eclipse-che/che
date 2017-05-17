@@ -15,9 +15,9 @@ import com.google.common.base.Joiner;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
-import org.eclipse.che.workspace.infrastructure.docker.environment.TypeSpecificEnvironmentParser;
+import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 
 import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkArgument;
@@ -28,7 +28,7 @@ import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator
  * @author Alexander Garagatyi
  * @author Alexander Andrienko
  */
-public class DockerImageEnvironmentParser implements TypeSpecificEnvironmentParser {
+public class DockerImageEnvironmentParser implements DockerConfigSourceSpecificEnvironmentParser {
 
     @Override
     public DockerEnvironment parse(Environment environment) throws ValidationException {
@@ -40,7 +40,7 @@ public class DockerImageEnvironmentParser implements TypeSpecificEnvironmentPars
         }
 
         DockerEnvironment dockerEnv = new DockerEnvironment();
-        DockerService service = new DockerService();
+        DockerContainerConfig service = new DockerContainerConfig();
         dockerEnv.getServices().put(getMachineName(environment), service);
 
         service.setImage(recipe.getLocation());

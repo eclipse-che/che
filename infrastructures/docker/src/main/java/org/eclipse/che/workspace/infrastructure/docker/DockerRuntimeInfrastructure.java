@@ -22,14 +22,14 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentNo
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.docker.environment.ServicesStartStrategy;
-import org.eclipse.che.workspace.infrastructure.docker.environment.TypeSpecificEnvironmentParser;
+import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * Implementation of {@link org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure} that
+ * Implementation of {@link RuntimeInfrastructure} that
  * uses Docker containers as an {@code Environment} implementation.
  *
  * @author Alexander Garagatyi
@@ -48,7 +48,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                        ServicesStartStrategy startStrategy,
                                        InfrastructureProvisioner infrastructureProvisioner,
                                        EnvironmentNormalizer environmentNormalizer,
-                                       Map<String, TypeSpecificEnvironmentParser> environmentParsers,
+                                       Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers,
                                        RuntimeFactory runtimeFactory) {
         super("docker", environmentParsers.keySet());
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
@@ -62,6 +62,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     @Override
     public Environment estimate(Environment environment) throws ValidationException,
                                                                 InfrastructureException {
+        // TODO spi: get recipe from non-impl specific code
         DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);
         dockerEnvironmentValidator.validate(environment, dockerEnvironment);
         // check that order can be resolved
@@ -76,6 +77,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     @Override
     public DockerRuntimeContext prepare(RuntimeIdentity identity, Environment originEnv)
             throws ValidationException, InfrastructureException {
+        // TODO spi: get recipe from non-impl specific code
         // Copy to be able to change env and protect from env changes by method caller
         EnvironmentImpl environment = new EnvironmentImpl(originEnv);
         DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);

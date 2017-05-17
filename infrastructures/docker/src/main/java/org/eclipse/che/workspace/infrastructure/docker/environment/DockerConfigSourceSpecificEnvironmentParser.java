@@ -22,7 +22,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  *
  * @author Alexander Andrienko
  */
-public interface TypeSpecificEnvironmentParser {
+public interface DockerConfigSourceSpecificEnvironmentParser {
     /**
      * Parses compose file from {@link Environment} into {@link DockerEnvironment}.
      * <p/>

@@ -8,34 +8,38 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.local;
+package org.eclipse.che.workspace.infrastructure.docker.local.providers;
 
-import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.Set;
 
-import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.CHE_HOST;
-
 /**
- * Provides hosts set with location of che server as single entry.
+ * Provides network that all containers of workspaces in Che should join to properly communicate with Che server.
  *
  * @author Alexander Garagatyi
  */
-public class CheDockerExtraHostProvider implements Provider<Set<String>> {
-    private Set<String> extraHosts;
+@Singleton
+public class CheInContainerNetworkProvider implements Provider<Set<String>> {
+
+    private Set<String> networks;
 
     @Inject
-    public CheDockerExtraHostProvider(DockerConnectorConfiguration dockerConnectorConfiguration) {
-        // add Che server to hosts list
-        String cheHost = dockerConnectorConfiguration.getDockerHostIp();
-        extraHosts = Collections.singleton(CHE_HOST.concat(":").concat(cheHost));
+    public CheInContainerNetworkProvider(@Nullable @Named("che.docker.network") String cheMasterNetwork) {
+        if (cheMasterNetwork == null) {
+            networks = Collections.emptySet();
+        } else {
+            networks = Collections.singleton(cheMasterNetwork);
+        }
     }
 
     @Override
     public Set<String> get() {
-        return extraHosts;
+        return networks;
     }
 }

@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.machine.ssh.exec;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.eclipse.che.api.agent.server.terminal.WebsocketTerminalFilesPathProvider;
+import org.eclipse.che.workspace.infrastructure.docker.old.terminal.WebsocketTerminalFilesPathProvider;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
 import org.eclipse.che.api.core.ConflictException;

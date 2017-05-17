@@ -134,8 +134,8 @@ public class WsMasterModule extends AbstractModule {
 //                new org.eclipse.che.api.machine.server.model.impl.ServerConfImpl(Constants.WSAGENT_DEBUG_REFERENCE, "4403/tcp", "http",
 //                                                                                 null));
 
-        bind(org.eclipse.che.api.agent.server.WsAgentHealthChecker.class)
-                .to(org.eclipse.che.api.agent.server.WsAgentHealthCheckerImpl.class);
+//        bind(org.eclipse.che.api.agent.server.WsAgentHealthChecker.class)
+//                .to(org.eclipse.che.api.agent.server.WsAgentHealthCheckerImpl.class);
 
         bind(RecipeLoader.class);
         Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"))

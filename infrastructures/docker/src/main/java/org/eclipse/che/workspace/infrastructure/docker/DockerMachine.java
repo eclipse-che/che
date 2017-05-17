@@ -98,19 +98,14 @@ public class DockerMachine implements Machine {
 //                         @Assisted Machine machine,
                          @Assisted("container") String container,
                          @Assisted("image") String image,
-//                         @Assisted DockerNode node,
 //                         @Assisted LineConsumer outputConsumer,
 //                         DockerInstanceStopDetector dockerInstanceStopDetector,
 //                         DockerInstanceProcessesCleaner processesCleaner,
 //                         @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
-//                         @Assisted ContainerInfo containerInfo,
-//                         @Assisted OldMachineConfig machineConfig,
-//                         @Assisted String internalHost,
                          ServerEvaluationStrategyProvider provider
 //                         @Named("machine.docker.dev_machine.machine_servers") Set<OldServerConf> devMachineSystemServers,
 //                         @Named("machine.docker.machine_servers") Set<OldServerConf> allMachinesSystemServers
     ) throws InfrastructureException {
-//        this.dockerMachineFactory = dockerMachineFactory;
         this.container = container;
         this.docker = docker;
         this.image = image;
@@ -179,7 +174,26 @@ public class DockerMachine implements Machine {
             LOG.error(e.getLocalizedMessage(), e);
         }
     }
-/*
+
+    /**
+     * Can be used for docker specific operations with machine
+     */
+    public String getContainer() {
+        return container;
+    }
+
+    @Override
+    public String toString() {
+        return "DockerMachine{" +
+               "container='" + container + '\'' +
+               ", docker=" + docker +
+               ", image='" + image + '\'' +
+               ", info=" + info +
+               ", provider=" + provider +
+               '}';
+    }
+
+    /*
     public MachineSource saveToSnapshot() throws MachineException {
         try {
             String image = generateRepository();
@@ -214,21 +228,54 @@ public class DockerMachine implements Machine {
         }
     }
 */
-    /**
-     * Can be used for docker specific operations with machine
-     */
-    public String getContainer() {
-        return container;
+
+    /*
+
+    @VisibleForTesting
+    protected void commitContainer(String repository, String tag) throws IOException {
+        String comment = format("Suspended at %1$ta %1$tb %1$td %1$tT %1$tZ %1$tY",
+                                System.currentTimeMillis());
+        // !! We SHOULD NOT pause container before commit because all execs will fail
+        // to push image to private registry it should be tagged with registry in repo name
+        // https://docs.docker.com/reference/api/docker_remote_api_v1.16/#push-an-image-on-the-registry
+        docker.commit(CommitParams.create(container)
+                                  .withRepository(repository)
+                                  .withTag(tag)
+                                  .withComment(comment));
     }
 
-    @Override
-    public String toString() {
-        return "DockerMachine{" +
-               "container='" + container + '\'' +
-               ", docker=" + docker +
-               ", image='" + image + '\'' +
-               ", info=" + info +
-               ", provider=" + provider +
-               '}';
+    private String generateRepository() {
+        if (registryNamespace != null) {
+            return registryNamespace + '/' + DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX + NameGenerator.generate(null, 16);
+        }
+        return DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX + NameGenerator.generate(null, 16);
     }
+
+    public void destroy() throws MachineException {
+        try {
+            outputConsumer.close();
+        } catch (IOException ignored) {}
+
+        machineProcesses.clear();
+        dockerInstanceStopDetector.stopDetection(container);
+        try {
+            if (getConfig().isDev()) {
+                node.unbindWorkspace();
+            }
+
+            // kill container is not needed here, because we removing container with force flag
+            docker.removeContainer(RemoveContainerParams.create(container)
+                                                        .withRemoveVolumes(true)
+                                                        .withForce(true));
+        } catch (IOException | ServerException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            throw new MachineException(e.getLocalizedMessage());
+        }
+
+        try {
+            docker.removeImage(RemoveImageParams.create(image).withForce(false));
+        } catch (IOException ignore) {
+            LOG.error("IOException during destroy(). Ignoring.");
+        }
+    }*/
 }

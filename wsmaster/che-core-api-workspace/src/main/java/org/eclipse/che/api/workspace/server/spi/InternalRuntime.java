@@ -47,7 +47,6 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
      */
     public abstract Map<String, ? extends Machine> getInternalMachines();
 
-
     @Override
     public String getActiveEnv() {
         return context.getIdentity().getEnvName();
@@ -80,9 +79,7 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
 
         }
         return cachedExternalMachines;
-
     }
-
 
     /**
      * @return some implementation specific properties if any
@@ -99,7 +96,7 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
     /**
      * Convenient method to rewrite incoming external servers in a loop
      * @param incoming servers
-     * @return rewriten Map of Servers (name -> Server)
+     * @return rewritten Map of Servers (name -> Server)
      */
     private Map<String, Server> rewriteExternalServers(Map<String, ? extends Server> incoming) {
         Map<String, Server> outgoing = new HashMap<>();
@@ -123,10 +120,8 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
                     }
                 });
             }
-
         }
 
         return outgoing;
     }
-
 }

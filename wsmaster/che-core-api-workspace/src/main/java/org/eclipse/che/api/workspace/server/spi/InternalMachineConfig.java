@@ -108,7 +108,7 @@ public class InternalMachineConfig {
     public static class ResolvedAgent {
         private String              id;
         private String              script;
-        // needed to know which servers should be pinged on start of machine
+        // needed to know which servers should be pinged on start of agent
         private Set<String>         serversRefs;
         private Map<String, String> properties;
 

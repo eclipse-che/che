@@ -23,6 +23,5 @@ public class ServerEvaluationStrategyModule extends AbstractModule {
         MapBinder<String, ServerEvaluationStrategy> strategies =
                 MapBinder.newMapBinder(binder(), String.class, ServerEvaluationStrategy.class);
         strategies.addBinding("default").to(DefaultServerEvaluationStrategy.class);
-        strategies.addBinding("docker-local").to(LocalDockerServerEvaluationStrategy.class);
     }
 }

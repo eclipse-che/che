@@ -15,7 +15,7 @@ import com.google.common.collect.Sets;
 
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -54,15 +54,15 @@ public class ServicesStartStrategy {
      * @throws ValidationException
      *         if weights of machines can not be calculated
      */
-    private Map<String, Integer> weightMachines(Map<String, DockerService> services)
+    private Map<String, Integer> weightMachines(Map<String, DockerContainerConfig> services)
             throws ValidationException {
 
         HashMap<String, Integer> weights = new HashMap<>();
 
         // create machines dependency graph
         Map<String, Set<String>> dependencies = new HashMap<>(services.size());
-        for (Map.Entry<String, DockerService> serviceEntry : services.entrySet()) {
-            DockerService service = serviceEntry.getValue();
+        for (Map.Entry<String, DockerContainerConfig> serviceEntry : services.entrySet()) {
+            DockerContainerConfig service = serviceEntry.getValue();
 
             Set<String> machineDependencies = Sets.newHashSetWithExpectedSize(service.getDependsOn().size() +
                                                                               service.getLinks().size() +
@@ -164,7 +164,7 @@ public class ServicesStartStrategy {
                       .collect(Collectors.toList());
     }
 
-    private void checkDependency(String dependency, String serviceName, Map<String, DockerService> services, String errorMessage)
+    private void checkDependency(String dependency, String serviceName, Map<String, DockerContainerConfig> services, String errorMessage)
             throws ValidationException {
         if (serviceName.equals(dependency)) {
             throw new ValidationException(errorMessage + ": " + serviceName);

@@ -19,7 +19,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -102,7 +102,7 @@ public class EnvironmentValidator {
         // needed to validate different kinds of dependencies in services to other services
         Set<String> servicesNames = dockerEnvironment.getServices().keySet();
 
-        for (Map.Entry<String, DockerService> entry : dockerEnvironment.getServices().entrySet()) {
+        for (Map.Entry<String, DockerContainerConfig> entry : dockerEnvironment.getServices().entrySet()) {
             validateMachine(entry.getKey(),
                             env.getMachines().get(entry.getKey()),
                             entry.getValue(),
@@ -112,7 +112,7 @@ public class EnvironmentValidator {
 
     private void validateMachine(String machineName,
                                  @Nullable MachineConfig machineConfig,
-                                 DockerService service,
+                                 DockerContainerConfig service,
                                  Set<String> servicesNames) throws ValidationException {
         checkArgument(MACHINE_NAME_PATTERN.matcher(machineName).matches(),
                       "Name of machine '%s' in environment is invalid",

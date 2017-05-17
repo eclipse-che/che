@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.local;
+package org.eclipse.che.workspace.infrastructure.docker.local.providers;
 
 import com.google.common.base.Strings;
 

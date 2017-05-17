@@ -22,8 +22,8 @@ import static java.util.stream.Collectors.toMap;
  * @author Alexander Garagatyi
  */
 public class DockerEnvironment {
-    private Map<String, DockerService> services;
-    private String                     network;
+    private Map<String, DockerContainerConfig> services;
+    private String                             network;
 
     public DockerEnvironment() {}
 
@@ -33,25 +33,25 @@ public class DockerEnvironment {
                                   .entrySet()
                                   .stream()
                                   .collect(toMap(Map.Entry::getKey,
-                                                 entry -> new DockerService(entry.getValue())));
+                                                 entry -> new DockerContainerConfig(entry.getValue())));
         }
     }
 
     /**
      * Mapping of compose services names to services configuration.
      */
-    public Map<String, DockerService> getServices() {
+    public Map<String, DockerContainerConfig> getServices() {
         if (services == null) {
             services = new HashMap<>();
         }
         return services;
     }
 
-    public void setServices(Map<String, DockerService> services) {
+    public void setServices(Map<String, DockerContainerConfig> services) {
         this.services = services;
     }
 
-    public DockerEnvironment withServices(Map<String, DockerService> services) {
+    public DockerEnvironment withServices(Map<String, DockerContainerConfig> services) {
         this.services = services;
         return this;
     }

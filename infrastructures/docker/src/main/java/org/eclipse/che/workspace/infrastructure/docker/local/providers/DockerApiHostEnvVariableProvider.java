@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.local;
+package org.eclipse.che.workspace.infrastructure.docker.local.providers;
 
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 

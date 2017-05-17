@@ -15,10 +15,10 @@ import com.google.common.base.Joiner;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
-import org.eclipse.che.workspace.infrastructure.docker.environment.TypeSpecificEnvironmentParser;
+import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerService;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 
 import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkArgument;
@@ -29,7 +29,7 @@ import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator
  * @author Alexander Garagatyi
  * @author Alexander Andrienko
  */
-public class DockerfileEnvironmentParser implements TypeSpecificEnvironmentParser {
+public class DockerfileEnvironmentParser implements DockerConfigSourceSpecificEnvironmentParser {
 
     @Override
     public DockerEnvironment parse(Environment environment) throws ValidationException {
@@ -47,7 +47,7 @@ public class DockerfileEnvironmentParser implements TypeSpecificEnvironmentParse
         }
 
         DockerEnvironment cheServiceEnv = new DockerEnvironment();
-        DockerService service = new DockerService();
+        DockerContainerConfig service = new DockerContainerConfig();
         cheServiceEnv.getServices().put(getMachineName(environment), service);
 
         if (recipe.getLocation() != null) {

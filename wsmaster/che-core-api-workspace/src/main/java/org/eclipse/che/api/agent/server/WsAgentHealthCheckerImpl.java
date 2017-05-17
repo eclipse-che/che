@@ -36,6 +36,8 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * @author Vitalii Parfonov
  * @author Valeriy Svydenko
  */
+// TODO spi
+@Deprecated
 @Singleton
 public class WsAgentHealthCheckerImpl implements WsAgentHealthChecker {
     protected static final Logger LOG = LoggerFactory.getLogger(WsAgentHealthCheckerImpl.class);
