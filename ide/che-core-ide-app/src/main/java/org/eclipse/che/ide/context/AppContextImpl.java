@@ -50,7 +50,9 @@ import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
@@ -95,6 +97,7 @@ public class AppContextImpl implements AppContext,
     private Path                projectsRoot;
     private ActiveRuntime       runtime;
     private ResourceManager     resourceManager;
+    private Map<String, String> properties;
 
     /**
      * List of actions with parameters which comes from startup URL.
@@ -462,5 +465,13 @@ public class AppContextImpl implements AppContext,
     @Override
     public ActiveRuntime getActiveRuntime() {
         return runtime;
+    }
+
+    @Override
+    public Map<String, String> getProperties() {
+        if (properties == null) {
+            properties = new HashMap<>();
+        }
+        return properties;
     }
 }
