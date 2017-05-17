@@ -31,6 +31,7 @@ import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchEvent.Modifier;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -278,6 +279,8 @@ public class FileWatcherService {
                 WatchKey watchKey = service.take();
                 Path dir = keys.get(watchKey);
 
+                List<WatchEvent<?>> watchEvents = watchKey.pollEvents();
+
                 if (suspended.get()) {
                     resetAndRemove(watchKey, dir);
 
@@ -285,7 +288,7 @@ public class FileWatcherService {
                     continue;
                 }
 
-                for (WatchEvent<?> event : watchKey.pollEvents()) {
+                for (WatchEvent<?> event : watchEvents) {
                     Kind<?> kind = event.kind();
 
                     if (kind == OVERFLOW) {

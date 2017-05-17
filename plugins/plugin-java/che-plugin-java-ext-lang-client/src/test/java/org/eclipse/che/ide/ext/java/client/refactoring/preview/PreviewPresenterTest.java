@@ -12,7 +12,6 @@ package org.eclipse.che.ide.ext.java.client.refactoring.preview;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.inject.Provider;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
@@ -20,6 +19,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
@@ -48,6 +48,7 @@ import java.util.List;
 
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.OK;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -100,9 +101,15 @@ public class PreviewPresenterTest {
     @Mock
     private Promise<ChangePreview>      changePreviewPromise;
     @Mock
+    private Promise<Void>               updateAfterRefactoringPromise;
+    @Mock
+    private Promise<Void>               fileTrackingSuspendEventPromise;
+    @Mock
+    private Promise<Void>               handleMovingFilesPromise;
+    @Mock
     private Promise<Void>               changeEnableStatePromise;
     @Mock
-    private EventBus                    eventBus;
+    private ClientServerEventService    clientServerEventService;
 
     @Captor
     private ArgumentCaptor<Operation<RefactoringPreview>> refactoringPreviewOperation;
@@ -112,7 +119,8 @@ public class PreviewPresenterTest {
     private ArgumentCaptor<Operation<ChangePreview>>      changePreviewOperation;
     @Captor
     private ArgumentCaptor<Operation<Void>>               changeEnableStateOperation;
-
+    @Captor
+    private ArgumentCaptor<Operation<Void>>               clientServerSuspendOperation;
 
     private PreviewPresenter presenter;
 
@@ -129,6 +137,11 @@ public class PreviewPresenterTest {
         when(refactoringService.getChangePreview(refactoringChanges)).thenReturn(changePreviewPromise);
         when(refactoringService.changeChangeEnabledState(changeEnableState)).thenReturn(changeEnableStatePromise);
         when(editorAgent.getOpenedEditors()).thenReturn(editors);
+        when(clientServerEventService.sendFileTrackingSuspendEvent()).thenReturn(fileTrackingSuspendEventPromise);
+        List<ChangeInfo> changes = new ArrayList<>();
+        when(refactoringStatus.getChanges()).thenReturn(changes);
+        when(refactoringUpdater.handleMovingFiles(anyList())).thenReturn(handleMovingFilesPromise);
+        when(refactoringUpdater.updateAfterRefactoring(anyList())).thenReturn(updateAfterRefactoringPromise);
 
         presenter = new PreviewPresenter(view,
                                          movePresenterProvider,
@@ -137,7 +150,7 @@ public class PreviewPresenterTest {
                                          editorAgent,
                                          refactoringUpdater,
                                          refactoringService,
-                                         eventBus);
+                                         clientServerEventService);
     }
 
     @Test
@@ -158,20 +171,23 @@ public class PreviewPresenterTest {
 
     @Test
     public void acceptButtonActionShouldBePerformed() throws Exception {
-        List<ChangeInfo> changes = new ArrayList<>();
         VirtualFile virtualFile = Mockito.mock(VirtualFile.class);
         EditorInput editorInput = Mockito.mock(EditorInput.class);
         when(refactoringStatus.getSeverity()).thenReturn(OK);
-        when(refactoringStatus.getChanges()).thenReturn(changes);
+
         when(editor.getEditorInput()).thenReturn(editorInput);
         when(editorInput.getFile()).thenReturn(virtualFile);
 
         presenter.onAcceptButtonClicked();
 
+        verify(fileTrackingSuspendEventPromise).then(clientServerSuspendOperation.capture());
+        clientServerSuspendOperation.getValue().apply(null);
         verify(refactoringStatusPromise).then(refactoringStatusOperation.capture());
         refactoringStatusOperation.getValue().apply(refactoringStatus);
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
+        verify(refactoringUpdater).handleMovingFiles(anyList());
+        verify(refactoringUpdater).updateAfterRefactoring(anyList());
         verify(view).hide();
-//        verify(refactoringUpdater).updateAfterRefactoring(null, changes);
     }
 
     @Test
@@ -184,8 +200,12 @@ public class PreviewPresenterTest {
 
         presenter.onAcceptButtonClicked();
 
+        verify(fileTrackingSuspendEventPromise).then(clientServerSuspendOperation.capture());
+        clientServerSuspendOperation.getValue().apply(null);
         verify(refactoringStatusPromise).then(refactoringStatusOperation.capture());
         refactoringStatusOperation.getValue().apply(refactoringStatus);
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
+        verify(refactoringUpdater).handleMovingFiles(anyList());
         verify(view, never()).hide();
         verify(editor, never()).getEditorInput();
         verify(editorInput, never()).getFile();
