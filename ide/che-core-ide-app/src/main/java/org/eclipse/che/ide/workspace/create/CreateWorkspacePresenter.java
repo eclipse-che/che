@@ -92,14 +92,14 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
      * @param workspaces
      *         list of existing workspaces
      */
-    public void show(List<WorkspaceDto> workspaces, final Callback<Workspace, Exception> callback) {
+    public void show(/*List<WorkspaceDto> workspaces, */final Callback<Workspace, Exception> callback) {
         this.callback = callback;
 
         workspacesNames.clear();
 
-        for (WorkspaceDto workspace : workspaces) {
-            workspacesNames.add(workspace.getConfig().getName());
-        }
+//        for (WorkspaceDto workspace : workspaces) {
+//            workspacesNames.add(workspace.getConfig().getName());
+//        }
 
 //        Promise<List<OldRecipeDescriptor>> recipes = recipeService.getAllRecipes();
 //

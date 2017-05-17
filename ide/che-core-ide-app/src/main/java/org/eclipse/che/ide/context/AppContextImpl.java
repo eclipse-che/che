@@ -17,6 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.ide.actions.StartUpActionsParser;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
@@ -25,8 +26,6 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
-import org.eclipse.che.ide.api.event.WindowActionEvent;
-import org.eclipse.che.ide.api.event.WindowActionHandler;
 import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
@@ -41,7 +40,6 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.actions.StartUpActionsParser;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.ResourceManagerInitializer;
@@ -74,7 +72,6 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 public class AppContextImpl implements AppContext,
                                        SelectionChangedHandler,
                                        ResourceChangedHandler,
-                                       WindowActionHandler,
                                        WorkspaceStartedEvent.Handler,
                                        WorkspaceStoppedEvent.Handler,
                                        ResourceManagerInitializer {
@@ -123,7 +120,6 @@ public class AppContextImpl implements AppContext,
 
         eventBus.addHandler(SelectionChangedEvent.TYPE, this);
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
-        eventBus.addHandler(WindowActionEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
@@ -400,11 +396,6 @@ public class AppContextImpl implements AppContext,
     }
 
     @Override
-    public void onWindowClosing(WindowActionEvent event) {
-        appStateManager.get().persistWorkspaceState(getWorkspaceId());
-    }
-
-    @Override
     public void onWorkspaceStarted(WorkspaceStartedEvent event) {
         setWorkspace(event.getWorkspace());
     }
@@ -425,10 +416,6 @@ public class AppContextImpl implements AppContext,
 
     private void clearRuntime() {
         runtime = null;
-    }
-
-    @Override
-    public void onWindowClosed(WindowActionEvent event) {
     }
 
     @Override

@@ -22,12 +22,15 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.StateComponent;
+import org.eclipse.che.ide.api.event.WindowActionEvent;
+import org.eclipse.che.ide.api.event.WindowActionHandler;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
 import org.eclipse.che.ide.util.loging.Log;
@@ -71,6 +74,20 @@ public class AppStateManager {
         eventBus.addHandler(WsStatusChangedEvent.TYPE, event -> {
             if (event.getStatus() == RUNNING) {
                 Scheduler.get().scheduleDeferred(this::restoreWorkspaceState);
+            }
+        });
+
+        eventBus.addHandler(WindowActionEvent.TYPE, new WindowActionHandler() {
+            @Override
+            public void onWindowClosing(WindowActionEvent event) {
+                final Workspace workspace = appContext.getWorkspace();
+                if (workspace != null) {
+                    persistWorkspaceState(workspace.getId());
+                }
+            }
+
+            @Override
+            public void onWindowClosed(WindowActionEvent event) {
             }
         });
     }

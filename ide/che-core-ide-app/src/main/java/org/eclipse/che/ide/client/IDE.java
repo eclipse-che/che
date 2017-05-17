@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.client;
 
-import org.eclipse.che.ide.bootstrap.IdeBootstrapper;
+import org.eclipse.che.ide.bootstrap.IdeBootstrap;
 import org.eclipse.che.ide.client.inject.IDEInjector;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -22,6 +22,6 @@ public class IDE implements EntryPoint {
     public void onModuleLoad() {
         IDEInjector injector = GWT.create(IDEInjector.class);
         @SuppressWarnings("unused")
-        IdeBootstrapper bootstrapper = injector.getIdeBootstrapper();
+        IdeBootstrap bootstrap = injector.getIdeBootstrap();
     }
 }

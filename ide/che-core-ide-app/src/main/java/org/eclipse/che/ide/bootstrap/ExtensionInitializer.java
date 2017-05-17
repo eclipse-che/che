@@ -15,8 +15,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.extension.ExtensionDescription;
-import org.eclipse.che.ide.api.extension.ExtensionRegistry;
 import org.eclipse.che.ide.api.extension.ExtensionsInitializedEvent;
 import org.eclipse.che.ide.client.ExtensionManager;
 import org.eclipse.che.ide.util.loging.Log;
@@ -25,24 +23,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * {@link ExtensionInitializer} responsible for bringing up Extensions. It uses ExtensionRegistry to acquire
+ * {@link ExtensionInitializer} responsible for bringing up Extensions. It uses {@link ExtensionManager} to acquire
  * Extension description and dependencies.
  *
  * @author Nikolay Zamosenchuk
  * @author Dmitry Shnurenko
  */
 @Singleton
-public class ExtensionInitializer {
-    private final ExtensionRegistry extensionRegistry;
+class ExtensionInitializer {
 
     private final ExtensionManager extensionManager;
     private final EventBus         eventBus;
 
     @Inject
-    public ExtensionInitializer(final ExtensionRegistry extensionRegistry,
-                                final ExtensionManager extensionManager,
-                                EventBus eventBus) {
-        this.extensionRegistry = extensionRegistry;
+    ExtensionInitializer(ExtensionManager extensionManager, EventBus eventBus) {
         this.extensionManager = extensionManager;
         this.eventBus = eventBus;
     }
@@ -62,9 +56,5 @@ public class ExtensionInitializer {
         }
 
         eventBus.fireEvent(new ExtensionsInitializedEvent());
-    }
-
-    public Map<String, ExtensionDescription> getExtensionDescriptions() {
-        return extensionRegistry.getExtensionDescriptions();
     }
 }
