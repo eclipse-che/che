@@ -12,7 +12,6 @@ package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
 import com.google.common.hash.Hashing;
 
-import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
@@ -30,6 +29,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +39,7 @@ import java.util.TimerTask;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import static com.google.common.io.Files.hash;
 import static java.nio.charset.Charset.defaultCharset;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.MODIFIED;
@@ -210,8 +211,9 @@ public class EditorFileTracker {
     private String hashFile(String path) {
         try {
             VirtualFile file = vfsProvider.getVirtualFileSystem().getRoot().getChild(Path.of(path));
-            return Hashing.md5().hashString(file == null ? "" : file.getContentAsString(), defaultCharset()).toString();
-        } catch (ServerException | ForbiddenException e) {
+            return file == null ? Hashing.md5().hashString("", defaultCharset()).toString()
+                                : hash(file.toIoFile(), Hashing.md5()).toString();
+        } catch (ServerException | IOException e) {
             LOG.error("Error trying to read {} file and broadcast it", path, e);
         }
         return null;
