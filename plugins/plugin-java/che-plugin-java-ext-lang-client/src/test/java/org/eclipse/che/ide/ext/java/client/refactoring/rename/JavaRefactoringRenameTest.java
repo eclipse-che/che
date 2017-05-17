@@ -20,6 +20,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -74,6 +75,7 @@ import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringSta
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -107,7 +109,9 @@ public class JavaRefactoringRenameTest {
     @Mock
     private RefactoringUpdater       refactoringUpdater;
     @Mock
-    private NotificationManager notificationManager;
+    private NotificationManager      notificationManager;
+    @Mock
+    private ClientServerEventService clientServerEventService;
 
     @Mock
     private CreateRenameRefactoring           createRenameRefactoringDto;
@@ -145,6 +149,12 @@ public class JavaRefactoringRenameTest {
     private EventBus                          eventBus;
     @Mock
     private Document                          document;
+    @Mock
+    private Promise<Void>                     updateAfterRefactoringPromise;
+    @Mock
+    private Promise<Void>                     fileTrackingSuspendEventPromise;
+    @Mock
+    private Promise<Void>                     handleMovingFilesPromise;
 
     @Captor
     private ArgumentCaptor<Operation<RenameRefactoringSession>> renameRefCaptor;
@@ -154,6 +164,10 @@ public class JavaRefactoringRenameTest {
     private ArgumentCaptor<Operation<RefactoringResult>>        refactoringStatusCaptor;
     @Captor
     private ArgumentCaptor<Operation<PromiseError>>             refactoringErrorCaptor;
+    @Captor
+    private ArgumentCaptor<Operation<Void>>                     clientServerSuspendOperation;
+    @Captor
+    private ArgumentCaptor<Operation<Void>>                     updateAfterRefactoringOperation;
 
     @InjectMocks
     private JavaRefactoringRename refactoringRename;
@@ -185,6 +199,10 @@ public class JavaRefactoringRenameTest {
         when(document.getFile()).thenReturn(file);
 
         when(result.getEntries()).thenReturn(Collections.singletonList(entry));
+
+        when(clientServerEventService.sendFileTrackingSuspendEvent()).thenReturn(fileTrackingSuspendEventPromise);
+        when(refactoringUpdater.handleMovingFiles(anyList())).thenReturn(handleMovingFilesPromise);
+        when(refactoringUpdater.updateAfterRefactoring(anyList())).thenReturn(updateAfterRefactoringPromise);
     }
 
     @Test
@@ -199,6 +217,11 @@ public class JavaRefactoringRenameTest {
 
         verify(refactoringUpdater).updateAfterRefactoring(Matchers.<List<ChangeInfo>>any());
         verify(eventBus).addHandler(FileEvent.TYPE, refactoringRename);
+
+        verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
+        updateAfterRefactoringOperation.getValue().apply(null);
+        verify(refactoringUpdater).handleMovingFiles(anyList());
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
     }
 
     @Test
@@ -254,6 +277,7 @@ public class JavaRefactoringRenameTest {
 
         mainCheckRenameRefactoring();
         verify(result, times(1)).getSeverity();
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
     }
 
     @Test
@@ -273,6 +297,9 @@ public class JavaRefactoringRenameTest {
         verify(refactoringServiceClient).createRenameRefactoring(createRenameRefactoringDto);
         verify(createRenamePromise).then(renameRefCaptor.capture());
         renameRefCaptor.getValue().apply(session);
+
+        verify(fileTrackingSuspendEventPromise).then(clientServerSuspendOperation.capture());
+        clientServerSuspendOperation.getValue().apply(null);
 
         verify(linkedMode).addListener(inputArgumentCaptor.capture());
         inputArgumentCaptor.getValue().onLinkedModeExited(true, 0, 1);
@@ -313,6 +340,9 @@ public class JavaRefactoringRenameTest {
         verify(createRenamePromise).then(renameRefCaptor.capture());
         renameRefCaptor.getValue().apply(session);
 
+        verify(fileTrackingSuspendEventPromise).then(clientServerSuspendOperation.capture());
+        clientServerSuspendOperation.getValue().apply(null);
+
         verify(linkedMode).addListener(inputArgumentCaptor.capture());
         inputArgumentCaptor.getValue().onLinkedModeExited(true, 0, 1);
 
@@ -342,6 +372,11 @@ public class JavaRefactoringRenameTest {
 
         mainCheckRenameRefactoring();
         verify(result).getSeverity();
+
+        verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
+        updateAfterRefactoringOperation.getValue().apply(null);
+        verify(refactoringUpdater).handleMovingFiles(anyList());
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
     }
 
     @Test
@@ -352,6 +387,11 @@ public class JavaRefactoringRenameTest {
 
         mainCheckRenameRefactoring();
         verify(result).getSeverity();
+
+        verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
+        updateAfterRefactoringOperation.getValue().apply(null);
+        verify(refactoringUpdater).handleMovingFiles(anyList());
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
     }
 
     private void mainCheckRenameRefactoring() throws OperationException {
@@ -369,6 +409,10 @@ public class JavaRefactoringRenameTest {
         verify(refactoringServiceClient).createRenameRefactoring(createRenameRefactoringDto);
         verify(createRenamePromise).then(renameRefCaptor.capture());
         renameRefCaptor.getValue().apply(session);
+
+        verify(fileTrackingSuspendEventPromise).then(clientServerSuspendOperation.capture());
+        clientServerSuspendOperation.getValue().apply(null);
+
         verify(session).getLinkedModeModel();
 
         verify(linkedMode).addListener(inputArgumentCaptor.capture());
