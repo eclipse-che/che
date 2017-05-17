@@ -13,19 +13,19 @@ package org.eclipse.che.ide.ext.java.client.organizeimports;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
+import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
-import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -44,8 +44,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingResumeEvent;
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingSuspendEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -61,7 +59,7 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
     private final DtoFactory               dtoFactory;
     private final JavaLocalizationConstant locale;
     private final NotificationManager      notificationManager;
-    private final EventBus                 eventBus;
+    private final ClientServerEventService clientServerEventService;
 
     private int                     page;
     private List<ConflictImportDTO> choices;
@@ -76,10 +74,10 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
                                     DtoFactory dtoFactory,
                                     JavaLocalizationConstant locale,
                                     NotificationManager notificationManager,
-                                    EventBus eventBus) {
+                                    ClientServerEventService clientServerEventService) {
         this.view = view;
         this.javaCodeAssistClient = javaCodeAssistClient;
-        this.eventBus = eventBus;
+        this.clientServerEventService = clientServerEventService;
         this.view.setDelegate(this);
 
         this.dtoFactory = dtoFactory;
@@ -109,30 +107,30 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
             }
 
             final String fqn = JavaUtil.resolveFQN((Container)srcFolder.get(), (Resource)file);
-
-            eventBus.fireEvent(newFileTrackingSuspendEvent());
-            javaCodeAssistClient.organizeImports(project.get().getLocation().toString(), fqn)
-                                .then(new Operation<OrganizeImportResult>() {
-                                    @Override
-                                    public void apply(OrganizeImportResult result) throws OperationException {
-                                        if (result.getConflicts() != null && !result.getConflicts().isEmpty()) {
-                                            show(result.getConflicts());
-                                        } else {
-                                            applyChanges(document, result.getChanges());
-                                        }
-                                        eventBus.fireEvent(newFileTrackingResumeEvent());
-                                    }
-                                })
-                                .catchError(new Operation<PromiseError>() {
-                                    @Override
-                                    public void apply(PromiseError arg) throws OperationException {
-                                        String title = locale.failedToProcessOrganizeImports();
-                                        String message = arg.getMessage();
-                                        notificationManager.notify(title, message, FAIL, FLOAT_MODE);
-                                        eventBus.fireEvent(newFileTrackingResumeEvent());
-                                    }
-                                });
+            clientServerEventService.sendFileTrackingSuspendEvent().then(arg -> {
+                doOrganizeImports(fqn, project);
+            });
         }
+    }
+
+    private Promise<OrganizeImportResult> doOrganizeImports(String fqn, Optional<Project> project) {
+        return javaCodeAssistClient.organizeImports(project.get().getLocation().toString(), fqn)
+                                   .then(result -> {
+                                       if (result.getConflicts() != null && !result.getConflicts().isEmpty()) {
+                                           show(result.getConflicts());
+                                       } else {
+                                           applyChanges(document, result.getChanges());
+                                       }
+
+                                       clientServerEventService.sendFileTrackingResumeEvent();
+                                   })
+                                   .catchError(error -> {
+                                       String title = locale.failedToProcessOrganizeImports();
+                                       String message = error.getMessage();
+                                       notificationManager.notify(title, message, FAIL, FLOAT_MODE);
+
+                                       clientServerEventService.sendFileTrackingResumeEvent();
+                                   });
     }
 
     /** {@inheritDoc} */
@@ -255,5 +253,4 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
     private boolean isLastPage() {
         return (choices.size() - 1) == page;
     }
-
 }
