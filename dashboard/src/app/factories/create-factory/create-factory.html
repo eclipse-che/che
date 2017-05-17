@@ -112,7 +112,7 @@
       <che-button-primary id="create-factory-next-button"
                           che-button-title="Create"
                           ng-click="createFactoryCtrl.createFactoryByContent(createFactoryCtrl.factoryContent)"
-                          ng-disabled="createFactoryCtrl.isFormInvalid() || !createFactoryCtrl.factoryContent || createFactoryCtrl.isImporting || !createFactoryCtrl.editorState.isValid"></che-button-primary>
+                          ng-disabled="createFactoryCtrl.isFormInvalid() || !createFactoryCtrl.factoryContent || createFactoryCtrl.isImporting || (!!createFactoryCtrl.editorState && !createFactoryCtrl.editorState.isValid)"></che-button-primary>
 
   </div>
 </md-content>

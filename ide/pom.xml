@@ -24,6 +24,7 @@
     <packaging>pom</packaging>
     <name>Che Core :: IDE</name>
     <modules>
+        <module>gwt-logger</module>
         <module>commons-gwt</module>
         <module>che-core-ide-api</module>
         <module>che-core-ide-generators</module>

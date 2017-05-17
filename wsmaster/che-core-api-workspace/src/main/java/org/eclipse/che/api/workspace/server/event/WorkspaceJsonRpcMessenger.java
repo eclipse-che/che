@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.event;
 
-import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
@@ -49,7 +49,11 @@ public class WorkspaceJsonRpcMessenger implements EventSubscriber<WorkspaceStatu
                    .stream()
                    .filter(it -> it.getValue().contains(id))
                    .map(Map.Entry::getKey)
-                   .forEach(it -> transmitter.transmitOneToNone(it, "event:workspace-status:changed", event));
+                   .forEach(it -> transmitter.newRequest()
+                                             .endpointId(it)
+                                             .methodName("event:workspace-status:changed")
+                                             .paramsAsDto(event)
+                                             .sendAndSkipResult());
     }
 
     @Inject

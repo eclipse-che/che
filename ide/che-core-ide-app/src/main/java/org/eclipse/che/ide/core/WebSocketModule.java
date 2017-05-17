@@ -13,15 +13,15 @@ package org.eclipse.che.ide.core;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 
-import org.eclipse.che.ide.jsonrpc.JsonRpcMessageReceiver;
-import org.eclipse.che.ide.websocket.ng.WebSocketMessageReceiver;
-import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
-import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketEndpoint;
-import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketMessageTransmitter;
-import org.eclipse.che.ide.websocket.ng.impl.DelayableWebSocketConnection;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocketConnection;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocketEndpoint;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocketFactory;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMessageReceiver;
+import org.eclipse.che.api.core.websocket.commons.WebSocketMessageReceiver;
+import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;
+import org.eclipse.che.ide.websocket.impl.BasicWebSocketEndpoint;
+import org.eclipse.che.ide.websocket.impl.BasicWebSocketMessageTransmitter;
+import org.eclipse.che.ide.websocket.impl.DelayableWebSocketConnection;
+import org.eclipse.che.ide.websocket.impl.WebSocketConnection;
+import org.eclipse.che.ide.websocket.impl.WebSocketEndpoint;
+import org.eclipse.che.ide.websocket.impl.WebSocketFactory;
 
 /**
  * GIN module for configuring WebSocket components.
