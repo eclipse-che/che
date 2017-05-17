@@ -14,8 +14,9 @@ import com.google.inject.AbstractModule;
 
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.inject.matcher.Matchers.subclassesOf;
+import static java.lang.Boolean.parseBoolean;
+import static java.lang.System.getenv;
 import static org.eclipse.che.inject.Matchers.names;
 
 /**
@@ -32,7 +33,7 @@ public class TraefikDockerModule extends AbstractModule {
     protected void configure() {
 
         // add logic only if plug-in is enabled.
-        if (Boolean.parseBoolean(firstNonNull(System.getenv("CHE_PLUGIN_TRAEFIK_ENABLED"), "false"))) {
+        if (parseBoolean(getenv("CHE_PLUGIN_TRAEFIK_ENABLED"))) {
             // add an interceptor to intercept createContainer calls and then get the final labels
             final TraefikCreateContainerInterceptor traefikCreateContainerInterceptor = new TraefikCreateContainerInterceptor();
             requestInjection(traefikCreateContainerInterceptor);

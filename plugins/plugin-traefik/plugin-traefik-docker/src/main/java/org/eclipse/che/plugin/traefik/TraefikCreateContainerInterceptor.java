@@ -35,7 +35,11 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 
 /**
- * Intercept the calls on createContainer on docker Connector.
+ * Traefik has a listener on Docker containers. Each time a container is added or removed, it checks if the container has specific Traefik
+ * Labels and then create routes based upon these labels.
+ * The job of this interceptor is to add Traefik labels prior the start of the container (it will be done when we create the container) by
+ * adding Traefik labels.
+ * The routes are built using the custom strategy template.
  *
  * @author Florent Benoit
  */
