@@ -521,8 +521,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         try {
             boolean isSnapshot = SNAPSHOT_LOCATION_PATTERN.matcher(dockerMachineSource.getLocation()).matches();
             boolean isImageExistLocally = isDockerImageExistLocally(dockerMachineSource.getRepository());
-            if (!isSnapshot && (doForcePullImage || !isImageExistLocally) ||
-                isSnapshot && snapshotUseRegistry) {
+            if ((!isSnapshot && (doForcePullImage || !isImageExistLocally)) || (isSnapshot && snapshotUseRegistry)) {
                 PullParams pullParams = PullParams.create(dockerMachineSource.getRepository())
                                                   .withTag(MoreObjects.firstNonNull(dockerMachineSource.getTag(),
                                                                                     LATEST_TAG))
