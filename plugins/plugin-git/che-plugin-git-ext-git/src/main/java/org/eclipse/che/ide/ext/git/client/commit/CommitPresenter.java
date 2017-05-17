@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Revision;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.git.GitServiceClient;
@@ -40,8 +41,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.stream;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.joining;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
 import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -111,26 +114,45 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         checkState(project.getLocation().isPrefixOf(appContext.getResource().getLocation()),
                    "Given selected item is not descendant of given project");
 
+        view.setValueToAmendCheckBox(false);
+        view.setValueToPushAfterCommitCheckBox(false);
+        view.setEnableAmendCheckBox(true);
+        view.setEnablePushAfterCommitCheckBox(true);
+        view.setEnableRemoteBranchesDropDownLis(false);
         service.diff(appContext.getDevMachine(), project.getLocation(), null, NAME_STATUS, false, 0, "HEAD", false)
                .then(diff -> {
-                   if (diff.isEmpty()) {
-                       dialogFactory.createMessageDialog(constant.commitTitle(), constant.commitNothingToCommitMessageText(), null).show();
-                   } else {
-                       final String[] changedFiles = diff.split("\n");
-                       Map<String, Status> items = new HashMap<>();
-                       for (String item : changedFiles) {
-                           items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
-                       }
-                       filesToCommit.clear();
-                       allFiles = items.keySet();
-
-                       view.setEnableCommitButton(!view.getMessage().isEmpty());
-                       view.focusInMessageField();
-                       view.showDialog();
-                       view.checkCheckBoxes(stream(appContext.getResources()).map(resource -> resource.getLocation().removeFirstSegments(1))
-                                                                             .collect(Collectors.toSet()));
-                       changedPanelPresenter.show(items, null);
-                   }
+                   service.log(appContext.getDevMachine(), project.getLocation(), null, -1, -1, false)
+                          .then(arg -> {
+                              if (diff.isEmpty()) {
+                                  dialogFactory.createConfirmDialog(constant.commitTitle(),
+                                                                    constant.commitNothingToCommitMessageText(),
+                                                                    constant.buttonYes(),
+                                                                    constant.buttonNo(),
+                                                                    () -> {
+                                                                        view.setValueToAmendCheckBox(true);
+                                                                        view.setEnablePushAfterCommitCheckBox(false);
+                                                                        setAmendCommitMessage();
+                                                                        show(null);
+                                                                    },
+                                                                    null)
+                                               .show();
+                              } else {
+                                  show(diff);
+                              }
+                          })
+                          .catchError(error -> {
+                              if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
+                                  service.getStatus(appContext.getDevMachine(), project.getLocation()).then(
+                                          status -> {
+                                              view.setEnableAmendCheckBox(false);
+                                              view.setEnablePushAfterCommitCheckBox(false);
+                                              List<String> newFiles = new ArrayList<>();
+                                              newFiles.addAll(status.getAdded());
+                                              newFiles.addAll(status.getUntracked());
+                                              show(newFiles.stream().collect(joining("\nA ", "A ", "")));
+                                          });
+                              }
+                          });
                })
                .catchError(arg -> {
                    notificationManager.notify(constant.diffFailed(), FAIL, FLOAT_MODE);
@@ -141,6 +163,22 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                .catchError(error -> {
                    notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
                });
+    }
+
+    private void show(@Nullable String diff) {
+        Map<String, Status> items = new HashMap<>();
+        if (!isNullOrEmpty(diff)) {
+            stream(diff.split("\n")).forEach(item -> items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1))));
+        }
+        filesToCommit.clear();
+        allFiles = items.keySet();
+
+        view.setEnableCommitButton(!view.getMessage().isEmpty());
+        view.focusInMessageField();
+        view.showDialog();
+        changedPanelPresenter.show(items, null);
+        view.checkCheckBoxes(stream(appContext.getResources()).map(resource -> resource.getLocation().removeFirstSegments(1))
+                                                              .collect(Collectors.toSet()));
     }
 
     @Override
@@ -199,7 +237,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
 
     @Override
     public void setAmendCommitMessage() {
-        service.log(appContext.getDevMachine(), project.getLocation(), null, false)
+        service.log(appContext.getDevMachine(), project.getLocation(), null, -1, -1, false)
                .then(log -> {
                    final List<Revision> commits = log.getCommits();
                    String message = "";

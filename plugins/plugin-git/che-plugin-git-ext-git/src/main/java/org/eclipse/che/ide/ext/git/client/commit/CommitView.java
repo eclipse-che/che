@@ -79,6 +79,36 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
     /** Returns <code>true</code> if need to amend the last commit, and <code>false</code> otherwise */
     boolean isAmend();
 
+    /** Set checked or unchecked the 'Amend' checkbox. */
+    void setValueToAmendCheckBox(boolean value);
+
+    /** Set checked or unchecked the 'Push after commit' checkbox. */
+    void setValueToPushAfterCommitCheckBox(boolean value);
+
+    /**
+     * Change the enable state of the 'Amend' check-box.
+     *
+     * @param enable
+     *         <code>true</code> to enable the check-box, <code>false</code> to disable it
+     */
+    void setEnableAmendCheckBox(boolean enable);
+
+    /**
+     * Change the enable state of the 'Push after commit' check-box.
+     *
+     * @param enable
+     *         <code>true</code> to enable the check-box, <code>false</code> to disable it
+     */
+    void setEnablePushAfterCommitCheckBox(boolean enable);
+
+    /**
+     * Change the enable state of the 'Remote branches' drop-down list.
+     *
+     * @param enable
+     *         <code>true</code> to enable the drop-down list, <code>false</code> to disable it
+     */
+    void setEnableRemoteBranchesDropDownLis(boolean enable);
+
     /** Returns <code>true</code> if need to push after commit, and <code>false</code> otherwise */
     boolean isPushAfterCommit();
 

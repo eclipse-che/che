@@ -152,6 +152,31 @@ public class CommitViewImpl extends Window implements CommitView {
     }
 
     @Override
+    public void setValueToAmendCheckBox(boolean value) {
+        amend.setValue(value);
+    }
+
+    @Override
+    public void setValueToPushAfterCommitCheckBox(boolean value) {
+        pushAfterCommit.setValue(value);
+    }
+
+    @Override
+    public void setEnableAmendCheckBox(boolean enable) {
+        amend.setEnabled(enable);
+    }
+
+    @Override
+    public void setEnablePushAfterCommitCheckBox(boolean enable) {
+        pushAfterCommit.setEnabled(enable);
+    }
+
+    @Override
+    public void setEnableRemoteBranchesDropDownLis(boolean enable) {
+        remoteBranches.setEnabled(enable);
+    }
+
+    @Override
     public boolean isPushAfterCommit() {
         return pushAfterCommit.getValue();
     }

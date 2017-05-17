@@ -112,6 +112,11 @@ public class ChangedPanelViewImpl extends Composite implements ChangedPanelView 
     }
 
     @Override
+    public void clearNodeStorage() {
+        tree.getNodeStorage().clear();
+    }
+
+    @Override
     public void viewChangedFilesAsTree(@NotNull Map<String, Status> items) {
         NodeStorage nodeStorage = tree.getNodeStorage();
         nodeStorage.clear();
@@ -133,6 +138,11 @@ public class ChangedPanelViewImpl extends Composite implements ChangedPanelView 
     public void setEnableExpandCollapseButtons(boolean enabled) {
         expandButton.setEnabled(enabled);
         collapseButton.setEnabled(enabled);
+    }
+
+    @Override
+    public void setEnabledChangeViewModeButton(boolean enabled) {
+        changeViewModeButton.setEnabled(enabled);
     }
 
     @Override

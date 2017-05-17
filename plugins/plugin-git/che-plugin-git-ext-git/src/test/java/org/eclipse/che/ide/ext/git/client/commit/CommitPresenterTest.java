@@ -10,15 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.commit;
 
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.DiffType;
 import org.eclipse.che.api.git.shared.GitUser;
 import org.eclipse.che.api.git.shared.Revision;
+import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.ide.api.dialogs.MessageDialog;
+import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedPanelPresenter;
@@ -26,10 +31,12 @@ import org.eclipse.che.ide.resource.Path;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.ADDED;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.MODIFIED;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -96,6 +103,9 @@ public class CommitPresenterTest extends BaseTest {
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
         when(pushPromise.then(any(Operation.class))).thenReturn(pushPromise);
+        when(logPromise.then(any(Operation.class))).thenReturn(logPromise);
+        when(logPromise.catchError(any(Operation.class))).thenReturn(logPromise);
+        when(statusPromise.then(any(Operation.class))).thenReturn(statusPromise);
         when(service.add(any(DevMachine.class), any(Path.class), anyBoolean(), any(Path[].class))).thenReturn(voidPromise);
         when(service.commit(any(DevMachine.class), any(Path.class), anyString(), anyBoolean(), any(Path[].class), anyBoolean()))
                 .thenReturn(revisionPromise);
@@ -109,28 +119,75 @@ public class CommitPresenterTest extends BaseTest {
                           anyBoolean())).thenReturn(stringPromise);
         when(service.branchList(any(DevMachine.class), any(Path.class), any(BranchListMode.class))).thenReturn(branchListPromise);
         when(service.push(any(DevMachine.class), any(Path.class), anyList(), anyString(), anyBoolean())).thenReturn(pushPromise);
+        when(service.log(any(DevMachine.class), any(Path.class), eq(null), anyInt(), anyInt(), anyBoolean())).thenReturn(logPromise);
+        when(service.getStatus(any(DevMachine.class), any(Path.class))).thenReturn(statusPromise);
     }
 
     @Test
     public void shouldShowMessageWhenNothingToCommit() throws Exception {
-        MessageDialog dialog = mock(MessageDialog.class);
-        when(dialogFactory.createMessageDialog(anyString(), anyString(), eq(null))).thenReturn(dialog);
+        ConfirmDialog dialog = mock(ConfirmDialog.class);
+        when(dialogFactory.createConfirmDialog(anyString(),
+                                               anyString(),
+                                               anyString(),
+                                               anyString(),
+                                               any(ConfirmCallback.class),
+                                               eq(null))).thenReturn(dialog);
 
         presenter.showDialog(project);
         verify(stringPromise).then(stringCaptor.capture());
         stringCaptor.getValue().apply("");
+        verify(logPromise).then(logCaptor.capture());
+        logCaptor.getValue().apply(null);
 
         verify(dialog).show();
     }
 
     @Test
     public void shouldShowDialog() throws Exception {
-        presenter.showDialog(project);
+        ConfirmDialog dialog = mock(ConfirmDialog.class);
+        when(dialogFactory.createConfirmDialog(anyString(),
+                                               anyString(),
+                                               anyString(),
+                                               anyString(),
+                                               any(ConfirmCallback.class),
+                                               eq(null))).thenReturn(dialog);
 
+        presenter.showDialog(project);
         verify(stringPromise).then(stringCaptor.capture());
         stringCaptor.getValue().apply("M file");
+        verify(logPromise).then(logCaptor.capture());
+        logCaptor.getValue().apply(null);
 
+        verify(view).setEnableAmendCheckBox(true);
+        verify(view).setEnablePushAfterCommitCheckBox(true);
         verify(changedPanelPresenter).show(eq(singletonMap("file", MODIFIED)), eq(null));
+        verify(view).focusInMessageField();
+        verify(view).setEnableCommitButton(eq(DISABLE_BUTTON));
+        verify(view).getMessage();
+        verify(view).showDialog();
+        verify(view).checkCheckBoxes(anySet());
+    }
+
+    @Test
+    public void shouldShowUntrackedFilesOnInitialCommit() throws Exception {
+        PromiseError error = mock(PromiseError.class);
+        ServerException exception = mock(ServerException.class);
+        when(exception.getErrorCode()).thenReturn(ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED);
+        when(error.getCause()).thenReturn(exception);
+        Status status = mock(Status.class);
+        when(status.getUntracked()).thenReturn(singletonList("file"));
+
+        presenter.showDialog(project);
+        verify(stringPromise).then(stringCaptor.capture());
+        stringCaptor.getValue().apply(null);
+        verify(logPromise).catchError(promiseErrorCaptor.capture());
+        promiseErrorCaptor.getValue().apply(error);
+        verify(statusPromise).then(statusPromiseCaptor.capture());
+        statusPromiseCaptor.getValue().apply(status);
+
+        verify(view).setEnableAmendCheckBox(false);
+        verify(view).setEnablePushAfterCommitCheckBox(false);
+        verify(changedPanelPresenter).show(eq(singletonMap("file", ADDED)), eq(null));
         verify(view).focusInMessageField();
         verify(view).setEnableCommitButton(eq(DISABLE_BUTTON));
         verify(view).getMessage();
@@ -141,10 +198,12 @@ public class CommitPresenterTest extends BaseTest {
     @Test
     public void shouldEnableCommitButton() throws Exception {
         when(view.getMessage()).thenReturn("foo");
-        presenter.showDialog(project);
 
+        presenter.showDialog(project);
         verify(stringPromise).then(stringCaptor.capture());
         stringCaptor.getValue().apply("M file");
+        verify(logPromise).then(logCaptor.capture());
+        logCaptor.getValue().apply(null);
 
         verify(view).setEnableCommitButton(eq(ENABLE_BUTTON));
     }

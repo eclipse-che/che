@@ -58,7 +58,7 @@ public class ChangedPanelPresenter implements ChangedPanelView.ActionDelegate {
     }
 
     /**
-     * Show panel with changed files.
+     * Show panel with changed files. If empty map with changed files is received, all buttons would be disabled.
      *
      * @param changedFiles
      *         Map with files and their status
@@ -66,9 +66,16 @@ public class ChangedPanelPresenter implements ChangedPanelView.ActionDelegate {
     public void show(Map<String, Status> changedFiles, @Nullable CallBack callBack) {
         this.changedFiles = changedFiles;
         this.callBack = callBack;
-        view.setEnableExpandCollapseButtons(treeViewEnabled);
-
-        viewChangedFiles();
+        if (changedFiles.isEmpty()) {
+            view.setTextToChangeViewModeButton(locale.changeListRowListViewButtonText());
+            view.setEnabledChangeViewModeButton(false);
+            view.setEnableExpandCollapseButtons(false);
+            view.clearNodeStorage();
+        } else {
+            view.setEnabledChangeViewModeButton(true);
+            view.setEnableExpandCollapseButtons(treeViewEnabled);
+            viewChangedFiles();
+        }
     }
 
     public ChangedPanelView getView() {

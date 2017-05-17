@@ -62,6 +62,11 @@ public interface ChangedPanelView extends View<ChangedPanelView.ActionDelegate> 
     void viewChangedFilesAsList(Map<String, Status> files);
 
     /**
+     * Clear panel from old nodes.
+     */
+    void clearNodeStorage();
+
+    /**
      * View changed files as tree.
      *
      * @param files
@@ -82,6 +87,14 @@ public interface ChangedPanelView extends View<ChangedPanelView.ActionDelegate> 
      *         <code>true</code> to enable the buttons, <code>false</code> to disable them
      */
     void setEnableExpandCollapseButtons(boolean enabled);
+
+    /**
+     * Change the enable state of the button that changes view mode of changed files.
+     *
+     * @param enabled
+     *         <code>true</code> to enable the button, <code>false</code> to disable it
+     */
+    void setEnabledChangeViewModeButton(boolean enabled);
 
     /**
      * Set displayed text to button that changes view mode of changed files.
