@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * {@link ExtensionInitializer} responsible for bringing up Extensions. It uses {@link ExtensionManager} to acquire
- * Extension description and dependencies.
+ * {@link ExtensionInitializer} responsible for bringing up Extensions.
+ * It uses {@link ExtensionManager} to acquire Extension description and dependencies.
  *
  * @author Nikolay Zamosenchuk
  * @author Dmitry Shnurenko
