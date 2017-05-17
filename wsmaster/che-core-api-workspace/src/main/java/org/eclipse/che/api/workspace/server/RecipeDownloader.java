@@ -11,9 +11,6 @@
 package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.OldMachineConfig;
-import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.slf4j.Logger;
@@ -48,48 +45,48 @@ public class RecipeDownloader {
         this.apiEndpoint = apiEndpoint;
     }
 
-    /**
-     * Downloads recipe by location from {@link MachineSource#getLocation()}.
-     *
-     * @param machineConfig
-     *         config used to get recipe location
-     * @return recipe with set content and type
-     * @throws ServerException
-     *         if any error occurs
-     */
-    public OldRecipeImpl getRecipe(OldMachineConfig machineConfig) throws ServerException {
-        URL recipeUrl;
-        File file = null;
-        final String location = machineConfig.getSource().getLocation();
-        try {
-            UriBuilder targetUriBuilder = UriBuilder.fromUri(location);
-            // add user token to be able to download user's private recipe
-            final URI recipeUri = targetUriBuilder.build();
-            if (!recipeUri.isAbsolute() && recipeUri.getHost() == null) {
-                targetUriBuilder.scheme(apiEndpoint.getScheme())
-                                .host(apiEndpoint.getHost())
-                                .port(apiEndpoint.getPort())
-                                .replacePath(apiEndpoint.getPath() + location);
-                if (EnvironmentContext.getCurrent().getSubject().getToken() != null) {
-                    targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getSubject().getToken());
-                }
-            }
-            recipeUrl = targetUriBuilder.build().toURL();
-            file = IoUtil.downloadFileWithRedirect(null, "recipe", null, recipeUrl);
-
-            return new OldRecipeImpl().withType(machineConfig.getSource().getType())
-                                      .withScript(IoUtil.readAndCloseQuietly(new FileInputStream(file)));
-        } catch (IOException | IllegalArgumentException e) {
-            throw new ServerException(format("Failed to download recipe for machine %s. OldRecipe url %s. Error: %s",
-                                              machineConfig.getName(),
-                                              location,
-                                              e.getLocalizedMessage()));
-        } finally {
-            if (file != null && !file.delete()) {
-                LOG.error(String.format("Removal of recipe file %s failed.", file.getAbsolutePath()));
-            }
-        }
-    }
+//    /**
+//     * Downloads recipe by location from {@link MachineSource#getLocation()}.
+//     *
+//     * @param machineConfig
+//     *         config used to get recipe location
+//     * @return recipe with set content and type
+//     * @throws ServerException
+//     *         if any error occurs
+//     */
+//    public OldRecipeImpl getRecipe(OldMachineConfig machineConfig) throws ServerException {
+//        URL recipeUrl;
+//        File file = null;
+//        final String location = machineConfig.getSource().getLocation();
+//        try {
+//            UriBuilder targetUriBuilder = UriBuilder.fromUri(location);
+//            // add user token to be able to download user's private recipe
+//            final URI recipeUri = targetUriBuilder.build();
+//            if (!recipeUri.isAbsolute() && recipeUri.getHost() == null) {
+//                targetUriBuilder.scheme(apiEndpoint.getScheme())
+//                                .host(apiEndpoint.getHost())
+//                                .port(apiEndpoint.getPort())
+//                                .replacePath(apiEndpoint.getPath() + location);
+//                if (EnvironmentContext.getCurrent().getSubject().getToken() != null) {
+//                    targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getSubject().getToken());
+//                }
+//            }
+//            recipeUrl = targetUriBuilder.build().toURL();
+//            file = IoUtil.downloadFileWithRedirect(null, "recipe", null, recipeUrl);
+//
+//            return new OldRecipeImpl().withType(machineConfig.getSource().getType())
+//                                      .withScript(IoUtil.readAndCloseQuietly(new FileInputStream(file)));
+//        } catch (IOException | IllegalArgumentException e) {
+//            throw new ServerException(format("Failed to download recipe for machine %s. OldRecipe url %s. Error: %s",
+//                                              machineConfig.getName(),
+//                                              location,
+//                                              e.getLocalizedMessage()));
+//        } finally {
+//            if (file != null && !file.delete()) {
+//                LOG.error(String.format("Removal of recipe file %s failed.", file.getAbsolutePath()));
+//            }
+//        }
+//    }
 
     /**
      * Downloads recipe by location.

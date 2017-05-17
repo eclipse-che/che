@@ -11,7 +11,6 @@
 package org.eclipse.che.workspace.infrastructure.docker.snapshot;
 
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.model.machine.OldMachineConfig;
 import org.eclipse.che.api.core.model.machine.Snapshot;
 import org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -276,11 +275,11 @@ public class SnapshotImpl implements Snapshot {
         private boolean       isDev;
         private long          creationDate;
 
-        public SnapshotBuilder fromConfig(OldMachineConfig machineConfig) {
-            machineName = machineConfig.getName();
-            type = machineConfig.getType();
-            return this;
-        }
+//        public SnapshotBuilder fromConfig(OldMachineConfig machineConfig) {
+//            machineName = machineConfig.getName();
+//            type = machineConfig.getType();
+//            return this;
+//        }
 
         public SnapshotBuilder generateId() {
             id = NameGenerator.generate("snapshot", 16);

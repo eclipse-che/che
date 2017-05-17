@@ -13,7 +13,7 @@ package org.eclipse.che.ide.workspace;
 import com.google.gwt.http.client.URL;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
+import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;

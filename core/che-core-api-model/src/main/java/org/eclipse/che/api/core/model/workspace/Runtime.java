@@ -11,7 +11,6 @@
 package org.eclipse.che.api.core.model.workspace;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
-import org.eclipse.che.api.core.model.machine.MachineStatus;
 
 import java.util.List;
 import java.util.Map;
@@ -42,8 +41,8 @@ public interface Runtime {
 
 
     /**
-     * Returns all the machines which statuses are either {@link MachineStatus#RUNNING running}
-     * or {@link MachineStatus#DESTROYING}.
+     * Returns all the machines which statuses are either {MachineStatus#RUNNING running}
+     * or {MachineStatus#DESTROYING}.
      *
      * <p>Returned list always contains dev-machine.
      */

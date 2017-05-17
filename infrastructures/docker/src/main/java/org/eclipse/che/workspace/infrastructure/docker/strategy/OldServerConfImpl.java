@@ -8,9 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.server.model.impl;
+package org.eclipse.che.workspace.infrastructure.docker.strategy;
 
-import org.eclipse.che.api.core.model.machine.OldServerConf;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 
 import javax.persistence.Basic;
 import javax.persistence.Embeddable;
@@ -21,7 +21,8 @@ import java.util.Objects;
  * @author Yevhenii Voevodin
  */
 @Embeddable
-public class OldServerConfImpl implements OldServerConf {
+@Deprecated
+public class OldServerConfImpl implements ServerConfig {
 
     @Basic
     private String ref;
@@ -35,8 +36,6 @@ public class OldServerConfImpl implements OldServerConf {
     @Basic
     private String path;
 
-    public OldServerConfImpl() {}
-
     public OldServerConfImpl(String ref, String port, String protocol, String path) {
         this.ref = ref;
         this.port = port;
@@ -44,14 +43,6 @@ public class OldServerConfImpl implements OldServerConf {
         this.path = path;
     }
 
-    public OldServerConfImpl(OldServerConf serverConf) {
-        this.ref = serverConf.getRef();
-        this.port = serverConf.getPort();
-        this.protocol = serverConf.getProtocol();
-        this.path = serverConf.getPath();
-    }
-
-    @Override
     public String getRef() {
         return ref;
     }

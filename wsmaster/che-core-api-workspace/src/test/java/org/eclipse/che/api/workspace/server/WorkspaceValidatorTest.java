@@ -10,29 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
-import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Tests for {@link WorkspaceValidator} and {@link WorkspaceValidator}

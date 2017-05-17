@@ -22,9 +22,14 @@ public class ServerImpl implements Server {
     private ServerStatus status;
 
     public ServerImpl(String url) {
-        this.url = url;
-        this.status = ServerStatus.UNKNOWN;
+        this(url, ServerStatus.UNKNOWN);
     }
+
+    public ServerImpl(String url, ServerStatus status) {
+        this.url = url;
+        this.status = status;
+    }
+
 
     @Override
     public String getUrl() {

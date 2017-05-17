@@ -11,26 +11,24 @@
 package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.model.workspace.Runtime;
-import org.eclipse.che.api.core.model.workspace.config.Command;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
-import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.api.core.model.machine.Snapshot;
-import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
-import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
+import org.eclipse.che.api.core.model.workspace.config.Command;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
-import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
 import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -228,17 +226,17 @@ public final class DtoConverter {
         return runtimeDto;
     }
 
-    /** Converts {@link Snapshot} to {@link SnapshotDto}. */
-    public static SnapshotDto asDto(Snapshot snapshot) {
-        return newDto(SnapshotDto.class).withId(snapshot.getId())
-                                        .withCreationDate(snapshot.getCreationDate())
-                                        .withDescription(snapshot.getDescription())
-                                        .withDev(snapshot.isDev())
-                                        .withType(snapshot.getType())
-                                        .withWorkspaceId(snapshot.getWorkspaceId())
-                                        .withEnvName(snapshot.getEnvName())
-                                        .withMachineName(snapshot.getMachineName());
-    }
+//    /** Converts {@link Snapshot} to {@link SnapshotDto}. */
+//    public static SnapshotDto asDto(Snapshot snapshot) {
+//        return newDto(SnapshotDto.class).withId(snapshot.getId())
+//                                        .withCreationDate(snapshot.getCreationDate())
+//                                        .withDescription(snapshot.getDescription())
+//                                        .withDev(snapshot.isDev())
+//                                        .withType(snapshot.getType())
+//                                        .withWorkspaceId(snapshot.getWorkspaceId())
+//                                        .withEnvName(snapshot.getEnvName())
+//                                        .withMachineName(snapshot.getMachineName());
+//    }
 
     private DtoConverter() {}
 }
