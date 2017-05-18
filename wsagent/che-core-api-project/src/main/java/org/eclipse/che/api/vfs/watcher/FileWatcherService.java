@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.ClosedWatchServiceException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.WatchEvent;
@@ -191,13 +192,15 @@ public class FileWatcherService {
             LOG.debug("Directory is already being watched, increasing watch counter, previous value: {}", previous);
             registrations.put(dir, previous + 1);
         } else {
-            try {
-                LOG.debug("Starting watching directory '{}'", dir);
-                WatchKey watchKey = dir.register(service, eventKinds, eventModifiers);
-                keys.put(watchKey, dir);
-                registrations.put(dir, 1);
-            } catch (IOException e) {
-                LOG.error("Can't register dir {} in file watch service", dir, e);
+            if (Files.exists(dir)) {
+                try {
+                    LOG.debug("Starting watching directory '{}'", dir);
+                    WatchKey watchKey = dir.register(service, eventKinds, eventModifiers);
+                    keys.put(watchKey, dir);
+                    registrations.put(dir, 1);
+                } catch (IOException e) {
+                    LOG.error("Can't register dir {} in file watch service", dir, e);
+                }
             }
         }
     }
