@@ -16,7 +16,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.command.CommandAddedEvent;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandGoal;
@@ -25,6 +24,7 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.goal.DebugGoal;
 import org.eclipse.che.ide.command.goal.RunGoal;
@@ -84,7 +84,7 @@ public class ExecuteCommandPresenter implements Presenter, ExecuteCommandView.Ac
     }
 
     @Override
-    public void onCommandExecute(CommandImpl command, Machine machine) {
+    public void onCommandExecute(CommandImpl command, MachineEntity machine) {
         commandExecutorProvider.get().executeCommand(command, machine);
     }
 

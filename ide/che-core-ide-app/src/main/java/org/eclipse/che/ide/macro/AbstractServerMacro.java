@@ -14,11 +14,11 @@ import com.google.common.annotations.Beta;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.macro.Macro;
-import org.eclipse.che.ide.api.macro.MacroRegistry;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.macro.Macro;
+import org.eclipse.che.ide.api.macro.MacroRegistry;
 
 import java.util.Set;
 
@@ -32,9 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see MacroRegistry
  * @see Macro
  * @see ServerHostNameMacro
- * @see ServerMacro
  * @see ServerPortMacro
- * @see ServerProtocolMacro
  * @since 4.7.0
  */
 @Beta

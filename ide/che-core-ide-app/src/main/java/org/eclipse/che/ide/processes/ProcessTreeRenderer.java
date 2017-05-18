@@ -121,14 +121,11 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
     private SpanElement createMachineElement(final ProcessTreeNode node) {
         final MachineEntity machine = (MachineEntity)node.getData();
-        // FIXME: spi
-//        final String machineId = machine.getId();
-//        final MachineConfig machineConfig = machine.getConfig();
-//        final String machineCategory = machineConfig.isDev() ? locale.devMachineCategory() : machineConfig.getType();
+        final String machineId = machine.getId();
+        final String machineCategory = machine.isDev() ? locale.devMachineCategory() : "";
 
         SpanElement root = Elements.createSpanElement();
-        // FIXME: spi
-//        root.appendChild(createMachineLabel(machineCategory));
+        root.appendChild(createMachineLabel(machineCategory));
 
         Element statusElement = Elements.createSpanElement(resources.getCss().machineStatus());
         root.appendChild(statusElement);
@@ -168,8 +165,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                     event.preventDefault();
 
                     if (addTerminalClickHandler != null) {
-                        // FIXME: spi
-//                        addTerminalClickHandler.onAddTerminalClick(machineId);
+                        addTerminalClickHandler.onAddTerminalClick(machineId);
                     }
                 }
             }, true);
@@ -208,8 +204,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                 @Override
                 public void handleEvent(Event event) {
                     if (previewSshClickHandler != null) {
-                        // FIXME: spi
-//                        previewSshClickHandler.onPreviewSshClick(machineId);
+                        previewSshClickHandler.onPreviewSshClick(machineId);
                     }
                 }
             }, true);
@@ -223,17 +218,15 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         Element monitorsElement = Elements.createSpanElement(resources.getCss().machineMonitors());
         root.appendChild(monitorsElement);
 
-        // FIXME: spi
-//        Node monitorNode = (Node)machineMonitors.getMonitorWidget(machineId, this).getElement();
-//        monitorsElement.appendChild(monitorNode);
+        Node monitorNode = (Node)machineMonitors.getMonitorWidget(machineId, this).getElement();
+        monitorsElement.appendChild(monitorNode);
 
         Element nameElement = Elements.createSpanElement(resources.getCss().nameLabel());
-        // FIXME: spi
-//        nameElement.setTextContent(machineConfig.getName());
-//        Tooltip.create(nameElement,
-//                       BOTTOM,
-//                       MIDDLE,
-//                       machineConfig.getName());
+        nameElement.setTextContent(machine.getName());
+        Tooltip.create(nameElement,
+                       BOTTOM,
+                       MIDDLE,
+                       machine.getName());
         root.appendChild(nameElement);
 
         return root;

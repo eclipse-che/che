@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.api.command;
 
 import org.eclipse.che.api.core.model.workspace.config.Command;
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.macro.Macro;
 
 /**
@@ -32,7 +32,7 @@ public interface CommandExecutor {
      *         machine to execute the command
      * @see Macro
      */
-    void executeCommand(Command command, Machine machine);
+    void executeCommand(Command command, MachineEntity machine);
 
     /**
      * Sends the the given {@code command} for execution.

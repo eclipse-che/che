@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +36,7 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
     private static final MachineChooserViewImplUiBinder UI_BINDER = GWT.create(MachineChooserViewImplUiBinder.class);
 
     /** Map that contains all shown machines. */
-    private final Map<String, Machine> machinesById;
+    private final Map<String, MachineEntity> machinesById;
 
     @UiField
     ListBox machinesList;
@@ -70,7 +70,7 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
             final String selectedMachineId = machinesList.getSelectedValue();
 
             if (selectedMachineId != null) {
-                final Machine selectedMachine = machinesById.get(selectedMachineId);
+                final MachineEntity selectedMachine = machinesById.get(selectedMachineId);
 
                 if (selectedMachine != null) {
                     delegate.onMachineSelected(selectedMachine);
@@ -85,7 +85,7 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
                 final String selectedMachineId = machinesList.getSelectedValue();
 
                 if (selectedMachineId != null) {
-                    final Machine selectedMachine = machinesById.get(selectedMachineId);
+                    final MachineEntity selectedMachine = machinesById.get(selectedMachineId);
 
                     if (selectedMachine != null) {
                         delegate.onMachineSelected(selectedMachine);
@@ -120,14 +120,13 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
     }
 
     @Override
-    public void setMachines(List<? extends Machine> machines) {
+    public void setMachines(List<MachineEntity> machines) {
         machinesList.clear();
         machinesById.clear();
 
         machines.forEach(machine -> {
-// FIXME: spi
-//            machinesById.put(machine.getId(), machine);
-//            machinesList.addItem(machine.getConfig().getName(), machine.getId());
+            machinesById.put(machine.getId(), machine);
+            machinesList.addItem(machine.getName(), machine.getId());
         });
 
         machinesList.setVisibleItemCount(machines.size());

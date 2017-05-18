@@ -10,20 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.processes;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 
 import java.util.Objects;
 
 /** Data object for {@link Process}. */
 public class ProcessImpl implements Process {
 
-    private final String  commandName;
-    private final String  commandLine;
-    private final int     pid;
-    private final boolean alive;
-    private final Machine machine;
+    private final String        commandName;
+    private final String        commandLine;
+    private final int           pid;
+    private final boolean       alive;
+    private final MachineEntity machine;
 
-    public ProcessImpl(String commandName, String commandLine, int pid, boolean alive, Machine machine) {
+    public ProcessImpl(String commandName, String commandLine, int pid, boolean alive, MachineEntity machine) {
         this.commandName = commandName;
         this.commandLine = commandLine;
         this.pid = pid;
@@ -52,7 +52,7 @@ public class ProcessImpl implements Process {
     }
 
     @Override
-    public Machine getMachine() {
+    public MachineEntity getMachine() {
         return machine;
     }
 

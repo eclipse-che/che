@@ -17,7 +17,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
@@ -26,6 +25,7 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
@@ -91,15 +91,14 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
             return;
         }
 
-        // FIXME: spi
-//        runtime.getMachines()
-//               .stream()
-//               .map(Machine::getId)
-//               .map(id -> execAgentClient.getProcesses(id, false))
-//               .forEach(promise -> promise.onSuccess(processes -> processes.stream()
-//                                                                           .map(GetProcessesResponseDto::getName)
-//                                                                           .map(this::getPreviewUrlByName)
-//                                                                           .forEach(it -> it.then(view::addUrl))));
+        runtime.getMachines()
+               .stream()
+               .map(MachineEntity::getId)
+               .map(id -> execAgentClient.getProcesses(id, false))
+               .forEach(promise -> promise.onSuccess(processes -> processes.stream()
+                                                                           .map(GetProcessesResponseDto::getName)
+                                                                           .map(this::getPreviewUrlByName)
+                                                                           .forEach(it -> it.then(view::addUrl))));
     }
 
     /**

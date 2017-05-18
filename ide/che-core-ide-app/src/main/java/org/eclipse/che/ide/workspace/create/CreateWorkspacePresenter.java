@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.api.machine.shared.Constants.WS_MACHINE_NAME;
 
 /**
  * The class contains business logic which allow to create user workspace if it doesn't exist.
@@ -199,7 +198,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
 
         EnvironmentDto environment = dtoFactory.createDto(EnvironmentDto.class)
                                                .withRecipe(recipe)
-                                               .withMachines(singletonMap(WS_MACHINE_NAME, machine));
+                                               .withMachines(singletonMap("default", machine));
 
         return dtoFactory.createDto(WorkspaceConfigDto.class)
                          .withName(wsName)

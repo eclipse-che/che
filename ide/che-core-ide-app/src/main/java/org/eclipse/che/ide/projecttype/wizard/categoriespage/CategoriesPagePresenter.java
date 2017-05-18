@@ -231,15 +231,7 @@ public class CategoriesPagePresenter extends AbstractWizardPage<MutableProjectCo
         final String templatePath = projectTemplate.getPath();
         final List<NewProjectConfig> updatedConfigs = new ArrayList<>(configDtoList.size());
         for (ProjectConfigDto configDto : configDtoList) {
-            // FIXME: spi
-            final NewProjectConfig newConfig = new NewProjectConfigImpl(configDto.getName(),
-                                                                        configDto.getPath(),
-                                                                        configDto.getDescription(),
-                                                                        configDto.getType(),
-                                                                        configDto.getSource(),
-                                                                        configDto.getMixins(),
-                                                                        configDto.getAttributes(),
-                                                                        null);
+            final NewProjectConfig newConfig = new NewProjectConfigImpl(configDto);
             final String projectPath = configDto.getPath();
             if (projectPath.startsWith(templatePath)) {
                 final String path = projectPath.replaceFirst(templatePath, newProjectPath);

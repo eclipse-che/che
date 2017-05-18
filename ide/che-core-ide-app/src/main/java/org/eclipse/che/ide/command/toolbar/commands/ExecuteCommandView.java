@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.commands;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.Set;
@@ -35,7 +35,7 @@ public interface ExecuteCommandView extends View<ExecuteCommandView.ActionDelega
         void onCommandExecute(CommandImpl command);
 
         /** Called when command execution has been requested on the specified machine. */
-        void onCommandExecute(CommandImpl command, Machine machine);
+        void onCommandExecute(CommandImpl command, MachineEntity machine);
 
         /** Called when guide of commands creation has been requested. */
         void onGuide(CommandGoal goal);

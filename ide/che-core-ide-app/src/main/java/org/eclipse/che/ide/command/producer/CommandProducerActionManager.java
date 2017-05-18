@@ -10,12 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.producer;
 
-import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -23,18 +21,11 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandProducer;
-import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.constraints.Constraints;
-import org.eclipse.che.ide.api.machine.ActiveRuntime;
-import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU;
@@ -45,17 +36,11 @@ import static org.eclipse.che.ide.api.constraints.Anchor.AFTER;
 /**
  * Manages actions for the commands.
  * <p>Manager gets all registered {@link CommandProducer}s and creates related actions in context menus.
- * <p>Manager listens all machines's state (running/destroyed) in order to
- * create/remove actions for the related {@link CommandProducer}s in case
- * they are applicable only for the certain machine types.
  *
- * @author Artem Zatsarynnyi
  * @see CommandProducer
  */
 @Singleton
-public class CommandProducerActionManager implements MachineStateEvent.Handler,
-                                                     WsAgentStateHandler,
-                                                     Component {
+public class CommandProducerActionManager implements WsAgentStateHandler {
 
     private final ActionManager                actionManager;
     private final CommandProducerActionFactory commandProducerActionFactory;
@@ -63,11 +48,7 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler,
     private final Resources                    resources;
     private final ProducerMessages             messages;
 
-    private final List<Machine>                            machines;
-    private final Set<CommandProducer>                     commandProducers;
-    private final Map<Action, DefaultActionGroup>          actionsToActionGroups;
-    private final Map<Machine, List<Action>>               actionsByMachines;
-    private final Map<CommandProducer, DefaultActionGroup> producersToActionGroups;
+    private final Set<CommandProducer> commandProducers;
 
     private DefaultActionGroup commandActionsPopUpGroup;
 
@@ -84,13 +65,8 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler,
         this.resources = resources;
         this.messages = messages;
 
-        machines = new ArrayList<>();
         commandProducers = new HashSet<>();
-        actionsToActionGroups = new HashMap<>();
-        actionsByMachines = new HashMap<>();
-        producersToActionGroups = new HashMap<>();
 
-        eventBus.addHandler(MachineStateEvent.TYPE, this);
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
     }
 
@@ -117,34 +93,6 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler,
     }
 
     @Override
-    public void start(final Callback<Component, Exception> callback) {
-        ActiveRuntime activeRuntime = appContext.getActiveRuntime();
-        if (activeRuntime != null) {
-            machines.addAll(activeRuntime.getMachines());
-        }
-
-        callback.onSuccess(this);
-    }
-
-    @Override
-    public void onMachineCreating(MachineStateEvent event) {
-    }
-
-    @Override
-    public void onMachineRunning(MachineStateEvent event) {
-        machines.add(event.getMachine());
-
-        createActionsForMachine(event.getMachine());
-    }
-
-    @Override
-    public void onMachineDestroyed(MachineStateEvent event) {
-        machines.remove(event.getMachine());
-
-        removeActionsForMachine(event.getMachine());
-    }
-
-    @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
         for (CommandProducer commandProducer : commandProducers) {
             createActionsForProducer(commandProducer);
@@ -157,69 +105,11 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler,
 
     /** Creates actions for the given {@link CommandProducer}. */
     private void createActionsForProducer(CommandProducer producer) {
-        // FIXME: spi
-//        Action action;
+        Action action = commandProducerActionFactory.create(producer.getName(), producer, appContext.getDevMachine());
 
-//        if (producer.getMachineTypes().isEmpty()) {
-//            action = commandProducerActionFactory.create(producer.getName(), producer, appContext.getDevMachine().getDescriptor());
-//
-//            actionManager.registerAction(producer.getName(), action);
-//        } else {
-//            action = new DefaultActionGroup(producer.getName(), true, actionManager);
-//
-//            producersToActionGroups.put(producer, (DefaultActionGroup)action);
-//
-//            actionManager.registerAction(producer.getName(), action);
-//
-//            for (Machine machine : machines) {
-//                createActionsForMachine(machine);
-//            }
-//        }
+        actionManager.registerAction(producer.getName(), action);
 
-//        commandActionsPopUpGroup.add(action);
-    }
-
-    /**
-     * Creates actions for that {@link CommandProducer}s
-     * which are applicable for the given machine's type.
-     */
-    private void createActionsForMachine(Machine machine) {
-        // FIXME: spi
-//        for (CommandProducer commandProducer : commandProducers) {
-//            if (commandProducer.getMachineTypes().contains(machine.getConfig().getType())) {
-//                CommandProducerAction machineAction = commandProducerActionFactory.create(machine.getConfig().getName(),
-//                                                                                          commandProducer,
-//                                                                                          machine);
-//                final List<Action> actionList = actionsByMachines.computeIfAbsent(machine, key -> new ArrayList<>());
-//                actionList.add(machineAction);
-//
-//                actionManager.registerAction(machine.getConfig().getName(), machineAction);
-//
-//                DefaultActionGroup actionGroup = producersToActionGroups.get(commandProducer);
-//                if (actionGroup != null) {
-//                    actionGroup.add(machineAction);
-//
-//                    actionsToActionGroups.put(machineAction, actionGroup);
-//                }
-//            }
-//        }
-    }
-
-    private void removeActionsForMachine(Machine machine) {
-        List<Action> actions = actionsByMachines.remove(machine);
-        if (actions != null) {
-            for (Action action : actions) {
-                DefaultActionGroup actionGroup = actionsToActionGroups.remove(action);
-                if (actionGroup != null) {
-                    actionGroup.remove(action);
-
-                    String id = actionManager.getId(action);
-                    if (id != null) {
-                        actionManager.unregisterAction(id);
-                    }
-                }
-            }
-        }
+        commandActionsPopUpGroup.add(action);
     }
 
     /**

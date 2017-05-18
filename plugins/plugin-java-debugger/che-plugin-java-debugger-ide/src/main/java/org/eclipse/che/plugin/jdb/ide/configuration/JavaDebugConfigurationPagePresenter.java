@@ -90,11 +90,10 @@ public class JavaDebugConfigurationPagePresenter implements JavaDebugConfigurati
             String port = entry.getKey();
             if (port.endsWith("/tcp")) {
                 String portWithoutTcp = port.substring(0, port.length() - 4);
-                // FIXME: spi
-//                String description = portWithoutTcp + " (" + entry.getValue().getRef() + ")";
-//                Pair<String, String> pair = new Pair<>(description, portWithoutTcp);
+                String description = portWithoutTcp + " (" + entry.getValue().getUrl() + ")";
+                Pair<String, String> pair = new Pair<>(description, portWithoutTcp);
 
-//                ports.add(pair);
+                ports.add(pair);
             }
         }
 

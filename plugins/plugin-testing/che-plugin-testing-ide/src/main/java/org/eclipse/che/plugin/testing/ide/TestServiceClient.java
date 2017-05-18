@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -32,6 +31,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -150,11 +150,11 @@ public class TestServiceClient {
                                                  StatusNotification statusNotification,
                                                  Promise<CommandImpl> compileCommand) {
         return compileCommand.thenPromise(command -> {
-            final Machine machine;
+            final MachineEntity machine;
             if (command == null) {
                 machine = null;
             } else {
-                machine = appContext.getDevMachine().getDescriptor();
+                machine = appContext.getDevMachine();
             }
             if (machine == null) {
                 if (statusNotification != null) {
@@ -182,8 +182,7 @@ public class TestServiceClient {
                                                                           command.getType(), attributes);
 
                             final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
-                            // FIXME: spi
-                            final String machineId = ""/*machine.getId()*/;
+                            final String machineId = machine.getId();
 
                             processesPanelPresenter.addCommandOutput(machineId, console);
                             ExecAgentConsumer<ProcessStartResponseDto> processPromise = execAgentCommandManager.startProcess(machineId,

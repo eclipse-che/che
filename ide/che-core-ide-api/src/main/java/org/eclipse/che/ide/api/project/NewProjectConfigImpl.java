@@ -10,15 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.project;
 
-import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
+import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
-import org.eclipse.che.api.project.shared.dto.NewProjectConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * Implementation of {@link NewProjectConfig} for creating project
@@ -67,7 +69,7 @@ public class NewProjectConfigImpl implements NewProjectConfig {
     }
 
     /** Constructor for creating configuration from DTO object */
-    public NewProjectConfigImpl(NewProjectConfigDto dto) {
+    public NewProjectConfigImpl(ProjectConfigDto dto) {
         this(dto.getName(),
              dto.getPath(),
              dto.getDescription(),
@@ -75,7 +77,7 @@ public class NewProjectConfigImpl implements NewProjectConfig {
              dto.getSource(),
              dto.getMixins(),
              dto.getAttributes(),
-             dto.getOptions());
+             emptyMap());
     }
 
     public NewProjectConfigImpl(String name,

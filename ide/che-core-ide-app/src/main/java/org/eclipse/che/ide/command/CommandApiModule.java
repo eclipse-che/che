@@ -12,7 +12,6 @@ package org.eclipse.che.ide.command;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -25,7 +24,6 @@ import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
-import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.command.editor.CommandEditorView;
 import org.eclipse.che.ide.command.editor.CommandEditorViewImpl;
@@ -100,9 +98,7 @@ public class CommandApiModule extends AbstractGinModule {
         bind(CommandManager.class).asEagerSingleton();
         bind(ExecuteCommandActionManager.class).asEagerSingleton();
 
-        // start-up components
-        GinMapBinder<String, Component> componentBinder = GinMapBinder.newMapBinder(binder(), String.class, Component.class);
-        componentBinder.addBinding("CommandProducerActionManager").to(CommandProducerActionManager.class);
+        bind(CommandProducerActionManager.class).asEagerSingleton();
 
         install(new GinFactoryModuleBuilder().build(ExecuteCommandActionFactory.class));
         install(new GinFactoryModuleBuilder().build(GoalPopUpGroupFactory.class));

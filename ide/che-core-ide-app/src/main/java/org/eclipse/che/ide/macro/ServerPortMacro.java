@@ -18,10 +18,10 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.macro.BaseMacro;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
-import org.eclipse.che.ide.api.machine.DevMachine;
 
 import java.util.Map;
 import java.util.Set;
@@ -56,12 +56,11 @@ public class ServerPortMacro extends AbstractServerMacro {
 
         for (Map.Entry<String, ? extends Server> entry : devMachine.getDescriptor().getServers().entrySet()) {
 
-            // FIXME: spi
-//            if (!entry.getValue().getAddress().contains(":")) {
-//                continue;
-//            }
+            if (!entry.getValue().getUrl().contains(":")) {
+                continue;
+            }
 
-            final String externalPort = ""/*entry.getValue().getAddress().split(":")[1]*/;
+            final String externalPort = entry.getValue().getUrl().split(":")[1];
 
             Macro macro = new BaseMacro(KEY.replace("%", entry.getKey()),
                                         externalPort,

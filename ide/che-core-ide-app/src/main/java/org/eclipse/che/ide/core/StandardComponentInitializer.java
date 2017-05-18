@@ -79,9 +79,7 @@ import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.imageviewer.PreviewImageAction;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.macro.ServerHostNameMacro;
-import org.eclipse.che.ide.macro.ServerMacro;
 import org.eclipse.che.ide.macro.ServerPortMacro;
-import org.eclipse.che.ide.macro.ServerProtocolMacro;
 import org.eclipse.che.ide.newresource.NewFileAction;
 import org.eclipse.che.ide.newresource.NewFolderAction;
 import org.eclipse.che.ide.part.editor.actions.CloseAction;
@@ -476,13 +474,6 @@ public class StandardComponentInitializer {
 
     @Inject
     private TreeResourceRevealer treeResourceRevealer; //just to work with it
-
-    // do not remove the injections below
-    @Inject
-    private ServerMacro serverMacro;
-
-    @Inject
-    private ServerProtocolMacro serverProtocolMacro;
 
     @Inject
     private ServerHostNameMacro serverHostNameMacro;

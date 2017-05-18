@@ -14,7 +14,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
 
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
@@ -47,12 +46,10 @@ class PreviewUrl {
 
     private String getDisplayNameForPreviewUrl(String previewUrl) {
         final DevMachine devMachine = appContext.getDevMachine();
-// FIXME: spi
-//        final MachineRuntimeInfo devMachineRuntime = devMachine.getRuntime();
 
-//        if (devMachineRuntime == null) {
-//            return previewUrl;
-//        }
+        if (devMachine == null) {
+            return previewUrl;
+        }
 
         for (Entry<String, ? extends Server> entry : devMachine.getServers().entrySet()) {
             Server server = entry.getValue();

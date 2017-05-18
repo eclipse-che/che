@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessSubscribeResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
@@ -28,6 +27,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
@@ -52,7 +52,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     private final MachineResources        resources;
     private final CommandImpl             command;
     private final EventBus                eventBus;
-    private final Machine                 machine;
+    private final MachineEntity           machine;
     private final CommandExecutor         commandExecutor;
     private final ExecAgentCommandManager execAgentCommandManager;
 
@@ -75,7 +75,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                                          EventBus eventBus,
                                          ExecAgentCommandManager execAgentCommandManager,
                                          @Assisted CommandImpl command,
-                                         @Assisted Machine machine) {
+                                         @Assisted MachineEntity machine) {
         this.view = view;
         this.resources = resources;
         this.execAgentCommandManager = execAgentCommandManager;
@@ -204,8 +204,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
     @Override
     public void stop() {
-        // FIXME: spi
-        execAgentCommandManager.killProcess(""/*machine.getId()*/, pid);
+        execAgentCommandManager.killProcess(machine.getId(), pid);
     }
 
     @Override
@@ -223,8 +222,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         if (isFinished()) {
             commandExecutor.executeCommand(command, machine);
         } else {
-            // FIXME: spi
-            execAgentCommandManager.killProcess(""/*machine.getId()*/, pid)
+            execAgentCommandManager.killProcess(machine.getId(), pid)
                                    .onSuccess(() -> commandExecutor.executeCommand(command, machine));
         }
     }

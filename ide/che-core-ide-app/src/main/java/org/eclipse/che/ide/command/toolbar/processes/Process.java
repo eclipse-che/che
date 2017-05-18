@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.processes;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 
 /** Model of the process. */
 public interface Process {
@@ -23,5 +23,5 @@ public interface Process {
 
     boolean isAlive();
 
-    Machine getMachine();
+    MachineEntity getMachine();
 }

@@ -13,12 +13,12 @@ package org.eclipse.che.ide.command.producer;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandExecutor;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandProducer;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 
 /**
  * Action for executing command which produced by {@link CommandProducer}.
@@ -29,13 +29,13 @@ import org.eclipse.che.ide.api.command.CommandProducer;
 public class CommandProducerAction extends Action {
 
     private final CommandProducer commandProducer;
-    private final Machine         machine;
+    private final MachineEntity   machine;
     private final CommandExecutor commandExecutor;
 
     @Inject
     public CommandProducerAction(@Assisted String name,
                                  @Assisted CommandProducer commandProducer,
-                                 @Assisted Machine machine,
+                                 @Assisted MachineEntity machine,
                                  CommandExecutor commandExecutor) {
         super(name);
 

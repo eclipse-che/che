@@ -15,10 +15,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
 
 import java.util.ArrayList;
@@ -97,43 +97,34 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
         view.setPortEnableState(!devHost);
         view.setHostEnableState(!devHost);
 
-        List<Machine> machines = getMachines();
+        List<MachineEntity> machines = getMachines();
         if (!machines.isEmpty()) {
             setHosts(machines);
         }
     }
 
-    private void setHosts(List<Machine> machines) {
+    private void setHosts(List<MachineEntity> machines) {
         Map<String, String> hosts = new HashMap<>();
-        for (Machine machine : machines) {
+        for (MachineEntity machine : machines) {
             String host = machine.getProperties().get("network.ipAddress");
             if (host == null) {
                 continue;
             }
-// FIXME: spi
-//            String description = host + " (" + machine.getConfig().getName() + ")";
-//            hosts.put(host, description);
+
+            String description = host + " (" + machine.getName() + ")";
+            hosts.put(host, description);
         }
 
         view.setHostsList(hosts);
     }
 
-    private List<Machine> getMachines() {
+    private List<MachineEntity> getMachines() {
         Workspace workspace = appContext.getWorkspace();
         if (workspace == null || workspace.getRuntime() == null) {
             return emptyList();
         }
 
-        Map<String, ? extends Machine> runtimeMachines = workspace.getRuntime().getMachines();
-        List<Machine> machines = new ArrayList<>(runtimeMachines.size());
-// FIXME: spi
-//        for (Machine currentMachine : runtimeMachines.entrySet()) {
-//            if (currentMachine instanceof MachineDto) {
-//                Machine machine = new MachineEntityImpl(currentMachine);
-//                machines.add(machine);
-//            }
-//        }
-        return machines;
+        return new ArrayList<>(appContext.getActiveRuntime().getMachines());
     }
 
     @Override

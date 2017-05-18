@@ -61,6 +61,6 @@ public class RunCommandAction extends Action {
 
         commandManager.getCommand(name)
                       .ifPresent(command -> commandExecutor.executeCommand(command,
-                                                                           appContext.getDevMachine().getDescriptor()));
+                                                                           appContext.getDevMachine()));
     }
 }

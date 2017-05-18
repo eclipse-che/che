@@ -52,7 +52,7 @@ public class DevMachine extends MachineEntityImpl {
             if (url.endsWith("/")) {
                 url = url.substring(0, url.length() - 1);
             }
-            // FIXME: spi
+
             return url + "/api";
         } else {
             //should not be
