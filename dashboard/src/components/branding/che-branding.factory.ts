@@ -80,6 +80,7 @@ export class CheBranding {
     this.$http = $http;
     this.$rootScope = $rootScope;
     this.cheService = cheService;
+    this.brandingData = {};
     this.updateData();
     this.updateVersion();
   }
