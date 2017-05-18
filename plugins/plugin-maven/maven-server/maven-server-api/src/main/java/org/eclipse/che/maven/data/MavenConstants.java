@@ -16,10 +16,10 @@ package org.eclipse.che.maven.data;
  * @author Evgen Vidolob
  */
 public interface MavenConstants {
-    String SNAPSHOT      = "SNAPSHOT";
-    String LATEST        = "LATEST";
-    String RELEASE       = "RELEASE";
-    String POM_EXTENSION = "pom";
+    String SNAPSHOT         = "SNAPSHOT";
+    String LATEST           = "LATEST";
+    String RELEASE          = "RELEASE";
+    String POM_EXTENSION    = "pom";
     String PROFILE_FROM_POM = "pom";
-    String POM_FILE_NAME = "pom.xml";
+    String POM_FILE_NAME    = "pom.xml";
 }
