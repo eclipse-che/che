@@ -151,7 +151,7 @@ public class MavenModelReader {
             model = Model.readFrom(pom);
         } catch (IOException e) {
             problems.add(MavenProjectProblem.newProblem(pom.getPath(), e.getMessage(), MavenProblemType.SYNTAX));
-        }  catch (XMLTreeException xmlExc) {
+        } catch (XMLTreeException xmlExc) {
             problems.add(MavenProjectProblem.newProblem(pom.getPath(), xmlExc.getMessage(), MavenProblemType.STRUCTURE));
         }
 
@@ -247,16 +247,17 @@ public class MavenModelReader {
         if (build.getSources().isEmpty()) {
             build.setSources(singletonList("src/main/java"));
         }
-        if (build.getTestSources().isEmpty()) build.setTestSources(singletonList("src/test/java"));
+        if (build.getTestSources().isEmpty()) {
+            build.setTestSources(singletonList("src/test/java"));
+        }
 
         build.setResources(updateResources(build.getResources(), "src/main/resources"));
         build.setTestResources(updateResources(build.getTestResources(), "src/test/resources"));
-
         build.setDirectory(isNullOrEmpty(build.getDirectory()) ? "target" : build.getDirectory());
-        build.setOutputDirectory(isNullOrEmpty(build.getOutputDirectory())
-                                 ? "${project.build.directory}/classes" : build.getOutputDirectory());
-        build.setTestOutputDirectory(isNullOrEmpty(build.getTestOutputDirectory())
-                                     ? "${project.build.directory}/test-classes" : build.getTestOutputDirectory());
+        build.setOutputDirectory(isNullOrEmpty(build.getOutputDirectory()) ? "${project.build.directory}/classes"
+                                                                           : build.getOutputDirectory());
+        build.setTestOutputDirectory(isNullOrEmpty(build.getTestOutputDirectory()) ? "${project.build.directory}/test-classes"
+                                                                                   : build.getTestOutputDirectory());
     }
 
     private List<MavenResource> updateResources(List<MavenResource> resources, String defaultDir) {
