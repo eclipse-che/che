@@ -27,47 +27,21 @@
 }
 
 .commandTreeNode {
-    position: relative;
-    left: 0px;
-    top: -1px;
-}
-
-.dockerMachineLabel {
-    background-color: blueIconColor;
-}
-
-.differentMachineLabel {
-    background-color: redIconColor;
-}
-
-.dockerMachineLabel,
-.differentMachineLabel {
-    display: inline-block;
-    color: processTreeDevLabel;
-    text-transform: uppercase;
-    text-align: center;
-    font-weight: bold;
-    line-height: 12px;
-    min-width: 22px;
-    font-size: 9px;
-    padding: 0;
-    border-radius: 2px;
-    margin: 3px 5px 0 3px;
-    box-shadow: 1px 1px 2px treeTextShadow;
 }
 
 .processTree span {
-    line-height: 18px;
 }
 
 .processTree .nameLabel {
     font-weight: bold;
+    line-height: 18px;
+    color: successColor;
 }
 
 .processTree .machineStatus {
     position: relative;
     float: left;
-    margin: 0 4px;
+    margin: 1px 3px 0px 1px;
     overflow: hidden;
 }
 
@@ -105,6 +79,7 @@
     font-size: 10px;
     float: right;
     margin-right: 2px;
+    margin-top: 3px;
     color: categoryHeaderButtonColor;
     cursor: pointer;
     right: 0;
@@ -113,7 +88,7 @@
 
 .processTree .newTerminalButton {
     float: right;
-    margin: 3px 6px 0 5px;
+    margin: 4px 6px 0 5px;
     width: 12px;
     height: 13px;
     font-size: 13px;
@@ -151,8 +126,8 @@
 }
 
 .processTree .processIcon {
-    margin-left: 5px;
-    margin-right: 5px;
+    margin-left: 2px;
+    margin-right: 2px;
     position: relative;
     overflow: hidden;
 }
@@ -160,10 +135,9 @@
 .processTree .processIconPanel {
     display: inline-block;
     position: relative;
-    left: 0;
-    top: 2px;
     width: 16px;
-    height: 14px;
+    height: 16px;
+    margin: 1px 0 -3px 0;
 }
 
 .processTree .processBadge {
@@ -190,7 +164,7 @@
     vertical-align: middle;
     position: absolute;
     left: 2px;
-    top: 2px;
+    top: 3px;
 }
 
 .processIcon svg path {
@@ -210,7 +184,7 @@
     float: right;
     background-color: editorTabIconColor;
     opacity: 0.3;
-    margin: 4px 5px 0 5px;
+    margin: 5px 0 0 7px;
     width: 10px;
     height: 10px;
     border-radius: 2px;
