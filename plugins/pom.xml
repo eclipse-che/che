@@ -58,5 +58,6 @@
         <module>plugin-testing</module>
         <module>plugin-testing-java</module>
         <module>plugin-pullrequest-parent</module>
+        <module>plugin-traefik</module>
     </modules>
 </project>

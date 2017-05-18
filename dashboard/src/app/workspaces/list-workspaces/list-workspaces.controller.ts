@@ -14,6 +14,7 @@ import {CheNotification} from '../../../components/notification/che-notification
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import {CheNamespaceRegistry, INamespace} from '../../../components/api/namespace/che-namespace-registry.factory';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
+import {CheBranding} from '../../../components/branding/che-branding.factory';
 
 /**
  * @ngdoc controller
@@ -34,6 +35,7 @@ export class ListWorkspacesCtrl {
   isInfoLoading: boolean;
   workspaceFilter: any;
   userWorkspaces: che.IWorkspace[];
+  workspaceCreationLink: string;
 
   workspacesById: Map<string, che.IWorkspace>;
   workspaceUsedResources: Map<string, string>;
@@ -59,7 +61,7 @@ export class ListWorkspacesCtrl {
    * @ngInject for Dependency injection
    */
   constructor($log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService, lodash: any,
-              $rootScope: che.IRootScopeService, cheAPI: CheAPI, cheNotification: CheNotification,
+              $rootScope: che.IRootScopeService, cheAPI: CheAPI, cheNotification: CheNotification, cheBranding: CheBranding,
               cheWorkspace: CheWorkspace, cheNamespaceRegistry: CheNamespaceRegistry, confirmDialogService: ConfirmDialogService) {
     this.cheAPI = cheAPI;
     this.$q = $q;
@@ -70,6 +72,8 @@ export class ListWorkspacesCtrl {
     this.cheWorkspace = cheWorkspace;
     this.cheNamespaceRegistry = cheNamespaceRegistry;
     this.confirmDialogService = confirmDialogService;
+
+    this.workspaceCreationLink = cheBranding.getWorkspace().creationLink;
 
     this.state = 'loading';
     this.isInfoLoading = true;
