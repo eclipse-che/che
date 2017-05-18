@@ -9,11 +9,6 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-export interface INamespace {
-  id: string;
-  label: string;
-  location: string;
-}
 
 /**
  * Registry for maintaining system namespaces.
@@ -23,7 +18,7 @@ export interface INamespace {
 export class CheNamespaceRegistry {
   private $q: ng.IQService;
   private fetchPromise: ng.IPromise<any>;
-  private namespaces : INamespace[];
+  private namespaces : che.INamespace[];
   private emptyMessage: string;
   private caption: string;
   private getAdditionalInfoFunction: Function;
@@ -66,18 +61,18 @@ export class CheNamespaceRegistry {
   /**
    * Adds the list of namespaces.
    *
-   * @param {INamespace[]} namespaces namespace to be added
+   * @param {che.INamespace[]} namespaces namespace to be added
    */
-  addNamespaces(namespaces : INamespace[]) : void {
+  addNamespaces(namespaces : che.INamespace[]) : void {
     this.namespaces = this.namespaces.concat(namespaces);
   }
 
   /**
    * Returns the list of available namespaces.
    *
-   * @returns {INamespace[]} namespaces
+   * @returns {che.INamespace[]} namespaces
    */
-  getNamespaces() : INamespace[] {
+  getNamespaces() : che.INamespace[] {
     return this.namespaces;
   }
 

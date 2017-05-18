@@ -10,7 +10,7 @@
  */
 'use strict';
 
-enum Tab {Font, Panel, Selecter, Icons, Buttons, Input, List, Stack_selector};
+enum Tab {Font, Panel, Selecter, Icons, Buttons, Input, List, Label_container, Stack_selector};
 
 /**
  * This class is handling the controller for the demo of components
@@ -32,6 +32,10 @@ export class DemoComponentsController {
     done: boolean
   }>;
 
+  // number spinner
+  number: number;
+  numberIsChanged: number;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
@@ -41,12 +45,15 @@ export class DemoComponentsController {
 
     const tab = $location.search().tab;
     if (Tab[tab]) {
-      // this.selectedIndex = parseInt(Tab[tab], 10);
-      this.selectedIndex = 7;
+      this.selectedIndex = parseInt(Tab[tab], 10);
     } else {
       this.selectedIndex = Tab.Font;
     }
 
+    this.init();
+  }
+
+  init(): void {
     // selecter
     this.booksByAuthor = {};
     this.booksByAuthor['St Exupery'] = [{title: 'The little prince'}];
@@ -60,6 +67,10 @@ export class DemoComponentsController {
 
     this.listItemsTasks = [{name : 'Task 1', done: false}, {name : 'Task 2', done: true}, {name : 'Task 3', done: false},
       {name : 'Task 4', done: true}, {name : 'Task 5', done: false}];
+
+    // number spinner
+    this.number = 0;
+    this.numberIsChanged = 0;
   }
 
   /**
@@ -86,5 +97,8 @@ export class DemoComponentsController {
     return this.button2Disabled;
   }
 
+  numberChanged(): void {
+    this.numberIsChanged++;
+  }
 
 }

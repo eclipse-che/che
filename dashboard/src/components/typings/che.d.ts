@@ -8,9 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  */
-import che = _che;
 
-declare namespace _che {
+declare module 'che' {
+  export = che;
+}
+
+declare namespace che {
 
   export interface IRootScopeService extends ng.IRootScopeService {
     hideLoader: boolean;
@@ -102,7 +105,6 @@ declare namespace _che {
 
   export interface IWorkspace {
     id?: string;
-    name: string;
     projects?: any;
     links?: Array<any>;
     temporary?: boolean;
@@ -197,7 +199,7 @@ declare namespace _che {
   export interface IProjectSource {
     location: string;
     parameters?: {
-      [paramName: string]: string
+      [paramName: string]: any
     };
     type?: string;
   }
