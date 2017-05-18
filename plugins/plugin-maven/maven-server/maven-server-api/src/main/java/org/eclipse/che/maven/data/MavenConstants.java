@@ -20,5 +20,6 @@ public interface MavenConstants {
     String LATEST        = "LATEST";
     String RELEASE       = "RELEASE";
     String POM_EXTENSION = "pom";
+    String PROFILE_FROM_POM = "pom";
     String POM_FILE_NAME = "pom.xml";
 }

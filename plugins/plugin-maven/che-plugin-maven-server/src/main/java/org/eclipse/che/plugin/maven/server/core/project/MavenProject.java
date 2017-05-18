@@ -17,6 +17,7 @@ import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.che.maven.data.MavenModel;
 import org.eclipse.che.maven.data.MavenPlugin;
 import org.eclipse.che.maven.data.MavenProblemType;
+import org.eclipse.che.maven.data.MavenProfile;
 import org.eclipse.che.maven.data.MavenProjectProblem;
 import org.eclipse.che.maven.data.MavenRemoteRepository;
 import org.eclipse.che.maven.data.MavenResource;
@@ -41,12 +42,14 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
+
 /**
  * @author Evgen Vidolob
  */
 public class MavenProject {
 
-    private final IProject project;
+    private final IProject   project;
     private final IWorkspace workspace;
     private volatile Info info = new Info();
 
@@ -74,6 +77,10 @@ public class MavenProject {
 
     public List<String> getSources() {
         return info.sources;
+    }
+
+    public Collection<String> getProfilesIds() {
+        return info.profilesIds;
     }
 
     public List<MavenResource> getResources() {
@@ -128,17 +135,17 @@ public class MavenProject {
 
         result.addAll(info.problems);
         result.addAll(info.modulesNameToPath.entrySet().stream().filter(entry -> !project.getFolder(entry.getKey()).exists())
-                .map(entry -> new MavenProjectProblem(getPomPath(),
-                        "Can't find module: " + entry.getKey(),
-                        MavenProblemType.DEPENDENCY))
-                .collect(Collectors.toList()));
+                                            .map(entry -> new MavenProjectProblem(getPomPath(),
+                                                                                  "Can't find module: " + entry.getKey(),
+                                                                                  MavenProblemType.DEPENDENCY))
+                                            .collect(Collectors.toList()));
 
 
         result.addAll(getDependencies().stream().filter(artifact -> !artifact.isResolved())
-                .map(artifact -> new MavenProjectProblem(getPomPath(),
-                        "Can't find dependency: " + artifact.getDisplayString(),
-                        MavenProblemType.DEPENDENCY))
-                .collect(Collectors.toList()));
+                                       .map(artifact -> new MavenProjectProblem(getPomPath(),
+                                                                                "Can't find dependency: " + artifact.getDisplayString(),
+                                                                                MavenProblemType.DEPENDENCY))
+                                       .collect(Collectors.toList()));
 
         //TODO add unresolved plugins and extensions
         return result;
@@ -156,8 +163,10 @@ public class MavenProject {
     /**
      * Invoke maven to build project model.
      *
-     * @param project     to resolve
-     * @param mavenServer the maven server
+     * @param project
+     *         to resolve
+     * @param mavenServer
+     *         the maven server
      * @return the modification types that applied to this project
      */
     public MavenProjectModifications resolve(IProject project, MavenServerWrapper mavenServer, MavenServerManager serverManager) {
@@ -235,20 +244,41 @@ public class MavenProject {
         newInfo.plugins = new ArrayList<>(plugins);
         newInfo.unresolvedArtifacts = unresolvedArtifacts;
 
-        newInfo.modulesNameToPath = collectModulesNameAndPath(model);
-        //TODO add profiles
+        newInfo.modulesNameToPath = collectModulesNameAndPath(model.getModules());
+
+        Collection<String> newProfiles = collectProfilesIds(model.getProfiles());
+        if (clearProfiles || newInfo.profilesIds == null) {
+            newInfo.profilesIds = new ArrayList<>(newProfiles);
+        }
+        else {
+            Set<String> mergedProfiles = new HashSet<>(newInfo.profilesIds);
+            mergedProfiles.addAll(newProfiles);
+            newInfo.profilesIds = new ArrayList<>(mergedProfiles);
+        }
 
         return setInfo(newInfo);
     }
 
-    private Map<String, String> collectModulesNameAndPath(MavenModel model) {
+    private static Collection<String> collectProfilesIds(Collection<MavenProfile> profiles) {
+        if (profiles == null) {
+            return emptyList();
+        }
+
+        Set<String> result = new HashSet<>(profiles.size());
+        for (MavenProfile each : profiles) {
+            result.add(each.getId());
+        }
+        return result;
+    }
+
+    private Map<String, String> collectModulesNameAndPath(List<String> modules) {
         Map<String, String> result = new HashMap<>();
         String projectPath = project.getFullPath().toOSString();
         if (!projectPath.endsWith("/")) {
             projectPath += "/";
         }
 
-        for (String name : model.getModules()) {
+        for (String name : modules) {
             result.put(name, PathUtil.toCanonicalPath(projectPath + name, false));
         }
         return result;
@@ -361,29 +391,30 @@ public class MavenProject {
 
         public Properties properties;
 
-        public List<String> sources;
-        public List<String> testSources;
+        public List<String>        sources;
+        public List<String>        testSources;
         public List<MavenResource> resources;
         public List<MavenResource> testResources;
 
+        public List<String> profilesIds;
         public List<String> activeProfiles;
         public List<String> inactiveProfiles;
         public List<String> filters;
 
-        public List<MavenArtifact> dependencies;
-        public List<MavenArtifact> extensions;
-        public List<MavenPlugin> plugins;
-        public List<MavenProjectProblem> problems;
+        public List<MavenArtifact>         dependencies;
+        public List<MavenArtifact>         extensions;
+        public List<MavenPlugin>           plugins;
+        public List<MavenProjectProblem>   problems;
         public List<MavenRemoteRepository> remoteRepositories;
 
         public Map<String, String> modulesNameToPath;
 
-        public Set<MavenKey> unresolvedArtifacts;
+        public Set<MavenKey>             unresolvedArtifacts;
         public List<MavenProjectProblem> problemsCache;
 
         public Info clone() {
             try {
-                Info newInfo = (Info) super.clone();
+                Info newInfo = (Info)super.clone();
                 return newInfo;
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e);
@@ -394,9 +425,9 @@ public class MavenProject {
             MavenProjectModifications result = new MavenProjectModifications();
             result.setPackaging(!Objects.equals(packaging, newInfo.packaging));
             result.setSources(!Objects.equals(sources, newInfo.sources)
-                    || !Objects.equals(resources, newInfo.resources)
-                    || !Objects.equals(testSources, newInfo.testSources)
-                    || !Objects.equals(testResources, newInfo.testResources));
+                              || !Objects.equals(resources, newInfo.resources)
+                              || !Objects.equals(testSources, newInfo.testSources)
+                              || !Objects.equals(testResources, newInfo.testResources));
 
             result.setDependencies(!Objects.equals(dependencies, newInfo.dependencies));
             result.setPlugins(!Objects.equals(plugins, newInfo.plugins));

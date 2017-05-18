@@ -213,6 +213,26 @@
                             </ignoredDependencies>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>unpack-terminal</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.eclipse.che.lib</groupId>
+                                    <artifactId>che-terminal-client</artifactId>
+                                    <version>${che.lib.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${project.build.outputDirectory}/org/eclipse/che/public/term</outputDirectory>
+                                    <excludes>org/**,META-INF/**</excludes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -317,32 +337,6 @@
                         <exclude>**/*.jpg</exclude>
                     </excludes>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack-terminal</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.lib</groupId>
-                                    <artifactId>che-terminal-client</artifactId>
-                                    <version>${che.lib.version}</version>
-                                    <type>jar</type>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.outputDirectory}/org/eclipse/che/public/term</outputDirectory>
-                                    <excludes>org/**,META-INF/**</excludes>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
