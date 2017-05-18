@@ -37,18 +37,21 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
     private final JsonRpcErrorTransmitter errorTransmitter;
     private final JsonRpcQualifier        jsonRpcQualifier;
     private final JsonRpcUnmarshaller     jsonRpcUnmarshaller;
+    private final RequestProcessor        requestProcessor;
 
     @Inject
     public JsonRpcMessageReceiver(RequestDispatcher requestDispatcher,
                                   ResponseDispatcher responseDispatcher,
                                   JsonRpcErrorTransmitter errorTransmitter,
                                   JsonRpcQualifier jsonRpcQualifier,
-                                  JsonRpcUnmarshaller jsonRpcUnmarshaller) {
+                                  JsonRpcUnmarshaller jsonRpcUnmarshaller,
+                                  RequestProcessor requestProcessor) {
         this.requestDispatcher = requestDispatcher;
         this.responseDispatcher = responseDispatcher;
         this.errorTransmitter = errorTransmitter;
         this.jsonRpcQualifier = jsonRpcQualifier;
         this.jsonRpcUnmarshaller = jsonRpcUnmarshaller;
+        this.requestProcessor = requestProcessor;
     }
 
     @Override
@@ -67,7 +70,7 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
         List<String> messages = jsonRpcUnmarshaller.unmarshalArray(message);
         for (String innerMessage : messages) {
             if (jsonRpcQualifier.isJsonRpcRequest(innerMessage)) {
-                processRequest(endpointId, innerMessage);
+                requestProcessor.process(() -> processRequest(endpointId, innerMessage));
             } else if (jsonRpcQualifier.isJsonRpcResponse(innerMessage)) {
                 processResponse(endpointId, innerMessage);
             } else {
