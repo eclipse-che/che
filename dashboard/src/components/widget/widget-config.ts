@@ -31,6 +31,7 @@ import {CheFilterSelector} from './filter-selector/che-filter-selector.directive
 import {CheFilterSelectorController} from './filter-selector/che-filter-selector.controller';
 import {CheFrame} from './frame/che-frame.directive';
 import {CheFooter} from './footer/che-footer.directive';
+import {CheFooterController} from './footer/che-footer.controller';
 import {CheHtmlSource} from './html-source/che-html-source.directive';
 import {CheInput} from './input/che-input.directive';
 import {CheInputBox} from './input/che-input-box.directive';
@@ -106,6 +107,7 @@ export class WidgetConfig {
       .controller('CheFilterSelectorController', CheFilterSelectorController)
       .directive('cheFrame', CheFrame)
       .directive('cheFooter', CheFooter)
+      .controller('CheFooterController', CheFooterController)
       .directive('cheHtmlSource', CheHtmlSource)
       .directive('demoSourceRender', DemoSourceRender)
       .directive('cheInput', CheInput)

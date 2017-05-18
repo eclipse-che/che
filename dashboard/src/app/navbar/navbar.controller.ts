@@ -12,10 +12,6 @@
 import {CheAPI} from '../../components/api/che-api.factory';
 
 export class CheNavBarController {
-  links = [{
-    href: '#/create-workspace',
-    name: 'New Workspace'
-  }];
   menuItemUrl = {
     dashboard: '#/',
     workspaces: '#/workspaces',
