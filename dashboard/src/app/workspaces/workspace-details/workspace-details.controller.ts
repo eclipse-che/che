@@ -14,7 +14,7 @@ import {CheNotification} from '../../../components/notification/che-notification
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import IdeSvc from '../../ide/ide.service';
 import {WorkspaceDetailsService} from './workspace-details.service';
-import {CheNamespaceRegistry, INamespace} from '../../../components/api/namespace/che-namespace-registry.factory';
+import {CheNamespaceRegistry} from '../../../components/api/namespace/che-namespace-registry.factory';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 import {CheUser} from '../../../components/api/che-user.factory';
 
@@ -409,7 +409,7 @@ export class WorkspaceDetailsController {
    *
    * @returns {INamespace[]} array of namespaces
    */
-  getNamespaces(): INamespace[] {
+  getNamespaces(): che.INamespace[] {
     return this.cheNamespaceRegistry.getNamespaces();
   }
 
@@ -419,7 +419,7 @@ export class WorkspaceDetailsController {
    * @param {string} namespaceId
    * @return {INamespace|{}}
    */
-  getNamespace(namespaceId: string): INamespace {
+  getNamespace(namespaceId: string): che.INamespace {
     return this.getNamespaces().find((namespace: any) => {
       return namespace.id === namespaceId;
     });
@@ -858,7 +858,7 @@ export class WorkspaceDetailsController {
    */
   isDisableWorkspaceCreation(): boolean {
     let namespaces = this.cheNamespaceRegistry.getNamespaces();
-    return (this.isCreationFlow && (!namespaces || namespaces.length === 0) && this.cheNamespaceRegistry.getEmptyMessage() !== null);
+    return this.isCreationFlow && (!namespaces || namespaces.length === 0) && this.cheNamespaceRegistry.getEmptyMessage() !== null;
   }
 }
 

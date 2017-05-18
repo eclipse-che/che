@@ -44,6 +44,10 @@ import {StackSelectorController} from './create-workspace/stack-selector/stack-s
 import {StackSelectorSvc} from './create-workspace/stack-selector/stack-selector.service';
 import {StackSelector} from './create-workspace/stack-selector/stack-selector.directive';
 import {StackSelectorItem} from './create-workspace/stack-selector/stack-selector-item/stack-selector-item.directive';
+import {RamSettingsController} from './create-workspace/ram-settings/ram-settings.controller';
+import {RamSettings} from './create-workspace/ram-settings/ram-settings.directive';
+import {RamSettingsMachineItemController} from './create-workspace/ram-settings/ram-settings-machine-item/ram-settings-machine-item.controller';
+import {RamSettingsMachineItem} from './create-workspace/ram-settings/ram-settings-machine-item/ram-settings-machine-item.directive';
 
 import {CheWorkspaceRamAllocationSliderController} from './workspace-ram-slider/che-workspace-ram-allocation-slider.controller';
 import {CheWorkspaceRamAllocationSlider} from './workspace-ram-slider/che-workspace-ram-allocation-slider.directive';
@@ -148,6 +152,10 @@ export class WorkspacesConfig {
     register.service('stackSelectorSvc', StackSelectorSvc);
     register.directive('stackSelector', StackSelector);
     register.directive('stackSelectorItem', StackSelectorItem);
+    register.controller('RamSettingsController', RamSettingsController);
+    register.directive('ramSettings', RamSettings);
+    register.controller('RamSettingsMachineItemController', RamSettingsMachineItemController);
+    register.directive('ramSettingsMachineItem', RamSettingsMachineItem);
 
     register.controller('CheStackLibraryFilterController', CheStackLibraryFilterController);
     register.directive('cheStackLibraryFilter', CheStackLibraryFilter);
