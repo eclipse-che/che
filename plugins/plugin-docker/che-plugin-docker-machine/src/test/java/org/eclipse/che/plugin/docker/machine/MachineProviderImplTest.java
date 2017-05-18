@@ -77,6 +77,7 @@ import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.MACHI
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -213,6 +214,39 @@ public class MachineProviderImplTest {
         createInstanceFromSnapshot(repo, tag, registry);
 
         verify(dockerConnector, never()).pull(eq(PullParams.create(repo).withTag(tag)), any(ProgressMonitor.class));
+    }
+
+    @Test
+    public void shouldPullDockerImageIfAlwaysPullIsTrueEvenIfImageExistsLocally() throws Exception {
+        provider = spy(new MachineProviderBuilder().setDoForcePullImage(true)
+                                                   .build());
+        doReturn(true).when(provider).isDockerImageExistLocally(anyString());
+
+        createInstanceFromRecipe();
+
+        verify(dockerConnector).pull(any(PullParams.class), any(ProgressMonitor.class));
+    }
+
+    @Test
+    public void shouldPullDockerImageIfAlwaysPullIsFalseButImageDoesNotExist() throws Exception {
+        provider = spy(new MachineProviderBuilder().setDoForcePullImage(false)
+                                                   .build());
+        doReturn(false).when(provider).isDockerImageExistLocally(anyString());
+
+        createInstanceFromRecipe();
+
+        verify(dockerConnector).pull(any(PullParams.class), any(ProgressMonitor.class));
+    }
+
+    @Test
+    public void shouldNotPullDockerImageIfAlwaysPullIsFalseAndTheImageExistLocally() throws Exception {
+        provider = spy(new MachineProviderBuilder().setDoForcePullImage(false)
+                                                   .build());
+        doReturn(true).when(provider).isDockerImageExistLocally(anyString());
+
+        createInstanceFromRecipe();
+
+        verify(dockerConnector, never()).pull(any(PullParams.class), any(ProgressMonitor.class));
     }
 
     @Test
@@ -1636,7 +1670,7 @@ public class MachineProviderImplTest {
         private Set<String>      devMachineVolumes;
         private Set<String>      allMachineVolumes;
         private Set<Set<String>> extraHosts;
-        private boolean          doForcePullOnBuild;
+        private boolean          doForcePullImage;
         private boolean          privilegedMode;
         private int              pidsLimit;
         private Set<String>      devMachineEnvVars;
@@ -1656,7 +1690,7 @@ public class MachineProviderImplTest {
             allMachineEnvVars = emptySet();
             snapshotUseRegistry = SNAPSHOT_USE_REGISTRY;
             privilegedMode = false;
-            doForcePullOnBuild = false;
+            doForcePullImage = false;
             additionalNetworks = emptySet();
             devMachineServers = emptySet();
             allMachineServers = emptySet();
@@ -1679,6 +1713,11 @@ public class MachineProviderImplTest {
 
         public MachineProviderBuilder setSnapshotUseRegistry(boolean snapshotUseRegistry) {
             this.snapshotUseRegistry = snapshotUseRegistry;
+            return this;
+        }
+
+        public MachineProviderBuilder setDoForcePullImage(boolean doForcePullImage) {
+            this.doForcePullImage = doForcePullImage;
             return this;
         }
 
@@ -1763,7 +1802,7 @@ public class MachineProviderImplTest {
                                            allMachineServers,
                                            devMachineVolumes,
                                            allMachineVolumes,
-                                           doForcePullOnBuild,
+                                           doForcePullImage,
                                            privilegedMode,
                                            pidsLimit,
                                            devMachineEnvVars,

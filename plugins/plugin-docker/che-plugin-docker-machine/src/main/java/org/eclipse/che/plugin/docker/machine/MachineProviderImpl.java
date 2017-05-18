@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
@@ -53,6 +54,7 @@ import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.json.ImageConfig;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
@@ -64,10 +66,11 @@ import org.eclipse.che.plugin.docker.client.json.network.NewNetwork;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
+import org.eclipse.che.plugin.docker.client.params.ListImagesParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
@@ -146,7 +149,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
     private final RequestTransmitter                            transmitter;
     private final JsonRpcEndpointToMachineNameHolder            jsonRpcEndpointToMachineNameHolder;
-    private final boolean                                       doForcePullOnBuild;
+    private final boolean                                       doForcePullImage;
     private final boolean                                       privilegedMode;
     private final int                                           pidsLimit;
     private final DockerMachineFactory                          dockerMachineFactory;
@@ -180,7 +183,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
                                @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
                                @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
-                               @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
+                               @Named("che.docker.always_pull_image") boolean doForcePullImage,
                                @Named("che.docker.privileged") boolean privilegedMode,
                                @Named("che.docker.pids_limit") int pidsLimit,
                                @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
@@ -203,7 +206,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
         this.transmitter = transmitter;
-        this.doForcePullOnBuild = doForcePullOnBuild;
+        this.doForcePullImage = doForcePullImage;
         this.privilegedMode = privilegedMode;
         this.snapshotUseRegistry = snapshotUseRegistry;
         // use-cases:
@@ -431,7 +434,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
         if (service.getBuild() != null && (service.getBuild().getContext() != null ||
                                            service.getBuild().getDockerfileContent() != null)) {
-            buildImage(service, imageName, doForcePullOnBuild, progressMonitor);
+            buildImage(service, imageName, doForcePullImage, progressMonitor);
         } else {
             pullImage(service, imageName, progressMonitor);
         }
@@ -466,9 +469,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
             if (service.getBuild().getArgs() == null || service.getBuild().getArgs().isEmpty()) {
                 buildArgs = this.buildArgs;
             } else {
-                buildArgs = new HashMap<>();
+                buildArgs = new HashMap<>(this.buildArgs);
                 buildArgs.putAll(service.getBuild().getArgs());
-                buildArgs.putAll(this.buildArgs);
             }
             buildImageParams.withForceRemoveIntermediateContainers(true)
                             .withRepository(machineImageName)
@@ -518,7 +520,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
         try {
             boolean isSnapshot = SNAPSHOT_LOCATION_PATTERN.matcher(dockerMachineSource.getLocation()).matches();
-            if (!isSnapshot || snapshotUseRegistry) {
+            boolean isImageExistLocally = isDockerImageExistLocally(dockerMachineSource.getRepository());
+            if ((!isSnapshot && (doForcePullImage || !isImageExistLocally)) || (isSnapshot && snapshotUseRegistry)) {
                 PullParams pullParams = PullParams.create(dockerMachineSource.getRepository())
                                                   .withTag(MoreObjects.firstNonNull(dockerMachineSource.getTag(),
                                                                                     LATEST_TAG))
@@ -541,6 +544,18 @@ public class MachineProviderImpl implements MachineInstanceProvider {
             }
         } catch (IOException e) {
             throw new MachineException("Can't create machine from image. Cause: " + e.getLocalizedMessage(), e);
+        }
+    }
+
+    @VisibleForTesting
+    boolean isDockerImageExistLocally(String imageName) {
+        try {
+            return !docker.listImages(ListImagesParams.create()
+                                                      .withFilters(new Filters().withFilter("reference", imageName)))
+                          .isEmpty();
+        } catch (IOException e) {
+            LOG.warn("Failed to check image {} availability. Cause: {}", imageName, e.getMessage(), e);
+            return false; // consider that image doesn't exist locally
         }
     }
 
