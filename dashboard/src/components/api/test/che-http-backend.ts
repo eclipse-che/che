@@ -305,12 +305,17 @@ export class CheHttpBackend {
 
 
   /**
-   * Set attributes of the current user
-   * @param attributes
+   * Set profile attributes
+   * @param attributes {che.IProfileAttributes}
+   * @param userId {string}
    */
-  setAttributes(attributes: any): void {
-    this.httpBackend.when('PUT', '/api/profile/attributes').respond(attributes);
-    this.defaultProfile.attributes = attributes;
+  setAttributes(attributes: che.IProfileAttributes, userId?: string): void {
+    if (angular.isUndefined(userId)) {
+      this.httpBackend.when('PUT', '/api/profile/attributes').respond({attributes: attributes});
+      this.defaultProfile.attributes = attributes;
+      return;
+    }
+    this.httpBackend.when('PUT', `/api/profile/${userId}/attributes`).respond({userId: userId, attributes: attributes});
   }
 
   /**

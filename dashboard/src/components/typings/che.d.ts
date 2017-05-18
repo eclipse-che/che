@@ -211,12 +211,14 @@ declare namespace _che {
     errors: Array<string>;
   }
 
-  export interface IProfile {
-    attributes?: {
+  export interface IProfileAttributes {
       firstName?: string;
       lastName?: string;
       [propName: string]: string | number;
-    };
+  }
+
+  export interface IProfile extends ng.resource.IResourceClass<any> {
+    attributes?: IProfileAttributes;
     email: string;
     links?: Array<any>;
     userId: string;
@@ -250,5 +252,17 @@ declare namespace _che {
     ide?: any;
     button?: any;
     policies?: any;
+  }
+
+  interface IRequestData {
+    userId?: string;
+    maxItems?: string;
+    skipCount?: string;
+    [param: string]: string;
+  }
+
+  interface IPageInfo {
+    countPages: number;
+    currentPageNumber: number;
   }
 }
