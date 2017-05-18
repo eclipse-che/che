@@ -169,7 +169,7 @@ public class FileWatcherService {
         }
     }
 
-    boolean isStopped(){
+    boolean isStopped() {
         return executor.isShutdown();
     }
 
@@ -186,21 +186,23 @@ public class FileWatcherService {
      *         directory
      */
     public void register(Path dir) {
+        if (!Files.exists(dir)) {
+            LOG.debug("Trying to register directory '{}' but it does not exist", dir);
+            return;
+        }
         LOG.debug("Registering directory '{}'", dir);
         if (keys.values().contains(dir)) {
             int previous = registrations.get(dir);
             LOG.debug("Directory is already being watched, increasing watch counter, previous value: {}", previous);
             registrations.put(dir, previous + 1);
         } else {
-            if (Files.exists(dir)) {
-                try {
-                    LOG.debug("Starting watching directory '{}'", dir);
-                    WatchKey watchKey = dir.register(service, eventKinds, eventModifiers);
-                    keys.put(watchKey, dir);
-                    registrations.put(dir, 1);
-                } catch (IOException e) {
-                    LOG.error("Can't register dir {} in file watch service", dir, e);
-                }
+            try {
+                LOG.debug("Starting watching directory '{}'", dir);
+                WatchKey watchKey = dir.register(service, eventKinds, eventModifiers);
+                keys.put(watchKey, dir);
+                registrations.put(dir, 1);
+            } catch (IOException e) {
+                LOG.error("Can't register dir {} in file watch service", dir, e);
             }
         }
     }
@@ -210,9 +212,9 @@ public class FileWatcherService {
      * method decreases by one registration counter that corresponds to
      * directory specified by the argument. If registration counter comes to
      * zero directory watching is totally cancelled.
-     *
+     * <p>
      * If this method is called for not existing directory nothing happens.
-     *
+     * <p>
      * If this method is called for not registered directory nothing happens.
      *
      * @param dir
@@ -324,8 +326,9 @@ public class FileWatcherService {
 
     private void resetAndRemove(WatchKey watchKey, Path dir) {
         if (!watchKey.reset()) {
-            registrations.remove(dir);
-
+            if (dir != null) {
+                registrations.remove(dir);
+            }
             keys.remove(watchKey);
         }
     }
