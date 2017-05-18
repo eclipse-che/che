@@ -16,6 +16,7 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.plugin.docker.client.DockerRegistryDynamicAuthResolver;
 import org.eclipse.che.plugin.docker.client.NoOpDockerRegistryDynamicAuthResolverImpl;
@@ -48,14 +49,14 @@ public class DockerInfraModule extends AbstractModule {
                                          Names.named("machine.docker.machine_env"))
                            .permitDuplicates();
 
-        /*@SuppressWarnings("unused") Multibinder<ServerConf> devMachineServers =
+        @SuppressWarnings("unused") Multibinder<ServerConfig> devMachineServers =
                 Multibinder.newSetBinder(binder(),
-                                         ServerConf.class,
+                                         ServerConfig.class,
                                          Names.named("machine.docker.dev_machine.machine_servers"));
-        @SuppressWarnings("unused") Multibinder<ServerConf> machineServers =
+        @SuppressWarnings("unused") Multibinder<ServerConfig> machineServers =
                 Multibinder.newSetBinder(binder(),
-                                         ServerConf.class,
-                                         Names.named("machine.docker.machine_servers"));*/
+                                         ServerConfig.class,
+                                         Names.named("machine.docker.machine_servers"));
 
         @SuppressWarnings("unused") Multibinder<String> devMachineVolumes =
                 Multibinder.newSetBinder(binder(),
