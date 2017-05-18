@@ -340,9 +340,7 @@ public class WorkspaceRuntimes {
                                             .withPrevStatus(WorkspaceStatus.STARTING));
         } catch (InternalInfrastructureException e) {
             LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
-        } catch (RuntimeException e) {
-            LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
-            throw new InternalInfrastructureException(e.getMessage(), e);
+            throw new InfrastructureException(e.getMessage(), e);
         }
     }
 

@@ -16,10 +16,10 @@ package org.eclipse.che.plugin.docker.client;
 public interface MessageProcessor<T> {
     void process(T message);
 
-    MessageProcessor DEV_NULL = new MessageProcessor() {
-        @Override
-        public void process(Object Message) {
-        }
-    };
+    @SuppressWarnings("unchecked")
+    static <TT> MessageProcessor<TT> getDevNull() {
+        return DEV_NULL;
+    }
 
+    MessageProcessor DEV_NULL = Message -> {};
 }

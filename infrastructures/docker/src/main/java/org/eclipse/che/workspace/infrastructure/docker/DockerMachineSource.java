@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.plugin.docker.client.DockerFileException;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.parser.DockerImageIdentifier;
@@ -55,10 +55,10 @@ public class DockerMachineSource extends MachineSourceImpl {
      * Build a dedicated docker image source based on a given machine source object.
      * @param machineSource the machine source used to parse data.
      */
-    public DockerMachineSource(MachineSource machineSource) throws ServerException {
+    public DockerMachineSource(MachineSource machineSource) throws InternalInfrastructureException {
         // check type
         if (!DOCKER_IMAGE_TYPE.equals(machineSource.getType())) {
-            throw new ServerException("Docker machine source can only be built with '" + DOCKER_IMAGE_TYPE + "' type");
+            throw new InternalInfrastructureException("Docker machine source can only be built with '" + DOCKER_IMAGE_TYPE + "' type");
         }
         setType(DOCKER_IMAGE_TYPE);
 
@@ -67,7 +67,7 @@ public class DockerMachineSource extends MachineSourceImpl {
         try {
             dockerImageIdentifier = DockerImageIdentifierParser.parse(machineSource.getLocation());
         } catch (DockerFileException e) {
-            throw new ServerException("Try to build a docker machine source with an invalid location/content. It is not in the expected format", e);
+            throw new InternalInfrastructureException("Try to build a docker machine source with an invalid location/content. It is not in the expected format", e);
         }
 
         // populate

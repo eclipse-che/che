@@ -14,7 +14,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
@@ -58,20 +61,19 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
     private static final String            CHE_NETWORK_REGEX        = "^(?<" + WORKSPACE_ID_REGEX_GROUP + ">workspace[a-z\\d]{16})_[a-z\\d]{16}$";
     private static final Pattern           CHE_NETWORK_PATTERN      = Pattern.compile(CHE_NETWORK_REGEX);
 
-    // TODO replace with WorkspaceManager
-//    private final CheEnvironmentEngine         environmentEngine;
+    private final WorkspaceManager       workspaceManager;
     private final DockerConnector        dockerConnector;
     private final ContainerNameGenerator nameGenerator;
     private final WorkspaceRuntimes      runtimes;
     private final Set<String>            additionalNetworks;
 
     @Inject
-    public DockerAbandonedResourcesCleaner(//CheEnvironmentEngine environmentEngine,
+    public DockerAbandonedResourcesCleaner(WorkspaceManager workspaceManager,
                                            DockerConnectorProvider dockerConnectorProvider,
                                            ContainerNameGenerator nameGenerator,
                                            WorkspaceRuntimes workspaceRuntimes,
                                            @Named("machine.docker.networks") Set<Set<String>> additionalNetworks) {
-//        this.environmentEngine = environmentEngine;
+        this.workspaceManager = workspaceManager;
         this.dockerConnector = dockerConnectorProvider.get();
         this.nameGenerator = nameGenerator;
         this.runtimes = workspaceRuntimes;
@@ -102,15 +104,19 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
                 if (optional.isPresent()) {
                     try {
                         // container is orphaned if not found exception is thrown
-//                        environmentEngine.getMachine(optional.get().getWorkspaceId(),
-//                                                     optional.get().getMachineId());
-                        activeContainers.add(containerName);
-//                    } catch (NotFoundException e) {
-//                        cleanUpContainer(container);
+                        WorkspaceImpl workspace = workspaceManager.getWorkspace(optional.get().getWorkspaceId());
+                        // if there is no such machine container will be cleaned up below
+                        if (workspace.getRuntime().getMachines().containsKey(optional.get().getMachineId())) {
+                            activeContainers.add(containerName);
+                            continue;
+                        }
+                    } catch (NotFoundException e) {
+                        // container will be cleaned up below
                     } catch (Exception e) {
                         LOG.error(format("Failed to check activity for container with name '%s'. Cause: %s",
                                          containerName, e.getLocalizedMessage()), e);
                     }
+                    cleanUpContainer(container);
                 }
             }
         } catch (IOException e) {
@@ -182,5 +188,4 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
             LOG.error("Failed to get list of docker networks", e);
         }
     }
-
 }

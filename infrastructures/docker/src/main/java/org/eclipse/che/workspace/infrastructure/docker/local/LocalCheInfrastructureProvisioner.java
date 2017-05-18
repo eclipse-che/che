@@ -15,6 +15,7 @@ import com.google.common.base.Strings;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.inject.CheBootstrap;
@@ -30,6 +31,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,7 +79,9 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
     }
 
     @Override
-    public void provision(Environment envConfig, DockerEnvironment internalEnv)
+    public void provision(Environment envConfig,
+                          DockerEnvironment internalEnv,
+                          RuntimeIdentity identity)
             throws InfrastructureException {
         String devMachineName = getDevMachineName(envConfig);
         if (devMachineName == null) {
@@ -94,15 +98,15 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         }
 
         // add bind-mount volume for projects in a workspace
-        String projectFolderVolume = "/tmp:" + projectFolderPath;
-//        try {
-//            projectFolderVolume = String.format("%s:%s%s",
-//                                                workspaceFolderPathProvider.getPath(internalEnv.getWorkspaceId()),
-//                                                projectFolderPath, projectsVolumeOptions);
-//        } catch (IOException e) {
-//            throw new InfrastructureException("Error occurred on resolving path to files of workspace " +
-//                                           internalEnv.getWorkspaceId());
-//        }
+        String projectFolderVolume;
+        try {
+            projectFolderVolume = String.format("%s:%s%s",
+                                                workspaceFolderPathProvider.getPath(identity.getWorkspaceId()),
+                                                projectFolderPath, projectsVolumeOptions);
+        } catch (IOException e) {
+            throw new InfrastructureException("Error occurred on resolving path to files of workspace " +
+                                              identity.getWorkspaceId());
+        }
         List<String> devMachineVolumes = devMachine.getVolumes();
         devMachineVolumes.add(SystemInfo.isWindows() ? pathEscaper.escapePath(projectFolderVolume)
                                                      : projectFolderVolume);
@@ -118,6 +122,6 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         devMachine.setEnvironment(environmentVars);
 
         // apply basic infra (e.g. agents)
-        super.provision(envConfig, internalEnv);
+        super.provision(envConfig, internalEnv, identity);
     }
 }

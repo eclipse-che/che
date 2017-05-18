@@ -18,11 +18,11 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentNormalizer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.docker.environment.ServicesStartStrategy;
-import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import java.util.List;
@@ -86,7 +86,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         List<String> orderedServices = startStrategy.order(dockerEnvironment);
 
         // modify environment with everything needed to use docker machines on particular (cloud) infrastructure
-        infrastructureProvisioner.provision(environment, dockerEnvironment);
+        infrastructureProvisioner.provision(environment, dockerEnvironment, identity);
         // normalize env to provide environment description with absolutely everything expected in
         environmentNormalizer.normalize(environment, dockerEnvironment, identity);
 

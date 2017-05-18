@@ -15,6 +15,7 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
@@ -24,10 +25,12 @@ import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
+import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
 import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyProvider;
 import org.slf4j.Logger;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -76,67 +79,36 @@ public class DockerMachine implements Machine {
      */
     public static final String USER_TOKEN = "USER_TOKEN";
 
-
-
     private final String                           container;
     private final DockerConnector                  docker;
     private final String                           image;
+    private final DockerMachineStopDetector        dockerMachineStopDetector;
+    // TODO spi snapshot #5101
 //    private final String                           registry;
 //    private final String                           registryNamespace;
-//    private final DockerNode                       node;
-//    private final DockerInstanceStopDetector       dockerInstanceStopDetector;
 //    private final boolean                          snapshotUseRegistry;
     private final ContainerInfo                    info;
     private final ServerEvaluationStrategyProvider provider;
-//    private final Map<String, OldServerConfImpl>   serversConf;
-//    private final String                           internalHost;
-//    private final ServerEvaluationStrategyProvider provider;
 
+    @Inject
     public DockerMachine(DockerConnector docker,
+                         // TODO spi snapshot #5101
 //                         @Named("che.docker.registry") String registry,
 //                         @Named("che.docker.namespace") @Nullable String registryNamespace,
-//                         @Assisted Machine machine,
+//                         @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
                          @Assisted("container") String container,
                          @Assisted("image") String image,
-//                         @Assisted LineConsumer outputConsumer,
-//                         DockerInstanceStopDetector dockerInstanceStopDetector,
-//                         DockerInstanceProcessesCleaner processesCleaner,
-//                         @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
-                         ServerEvaluationStrategyProvider provider
-//                         @Named("machine.docker.dev_machine.machine_servers") Set<OldServerConf> devMachineSystemServers,
-//                         @Named("machine.docker.machine_servers") Set<OldServerConf> allMachinesSystemServers
-    ) throws InfrastructureException {
+                         ServerEvaluationStrategyProvider provider,
+                         DockerMachineStopDetector dockerMachineStopDetector) throws InfrastructureException {
         this.container = container;
         this.docker = docker;
         this.image = image;
-//        this.outputConsumer = outputConsumer;
-//        this.registry = registry;
-//        this.registryNamespace = registryNamespace;
-//        this.node = node;
-//        this.dockerInstanceStopDetector = dockerInstanceStopDetector;
-//        processesCleaner.trackProcesses(this);
-//        this.snapshotUseRegistry = snapshotUseRegistry;
-//        this.machineRuntime = doGetRuntime();
-//        this.workspace = workspace;
-//        this.envName = envName;
-//        this.owner = owner;
-//        this.id = id;
+        this.dockerMachineStopDetector = dockerMachineStopDetector;
         try {
             this.info = docker.inspectContainer(container);
         } catch (IOException e) {
             throw new InfrastructureException(e.getLocalizedMessage(), e);
         }
-//        Stream<OldServerConf> confStream = Stream.concat(machineConfig.getServers().stream(), allMachinesSystemServers.stream());
-//        if (machineConfig.isDev()) {
-//            confStream = Stream.concat(confStream, devMachineSystemServers.stream());
-//        }
-        // convert list to map for quick search and normalize port - add /tcp if missing
-//        this.serversConf = confStream.collect(toMap(srvConf -> srvConf.getPort().contains("/") ?
-//                                                               srvConf.getPort() :
-//                                                               srvConf.getPort() + "/tcp",
-//                                                    OldServerConfImpl::new));
-//
-//        this.internalHost = internalHost;
         this.provider = provider;
     }
 
@@ -162,16 +134,19 @@ public class DockerMachine implements Machine {
         }
     }
 
-    public void destroy() {
-        // node unbind
+    public void destroy() throws InfrastructureException {
+        dockerMachineStopDetector.stopDetection(container);
         try {
             docker.removeContainer(RemoveContainerParams.create(this.container)
                                                         .withRemoveVolumes(true)
                                                         .withForce(true));
-
+        } catch (IOException e) {
+            throw new InternalInfrastructureException(e.getMessage(), e);
+        }
+        try {
             docker.removeImage(RemoveImageParams.create(this.image).withForce(false));
         } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error("IOException during destroy(). Ignoring.");
         }
     }
 
@@ -193,7 +168,7 @@ public class DockerMachine implements Machine {
                '}';
     }
 
-    /*
+    /* TODO spi snapshot #5101
     public MachineSource saveToSnapshot() throws MachineException {
         try {
             String image = generateRepository();
@@ -227,9 +202,6 @@ public class DockerMachine implements Machine {
             throw new MachineException(e.getLocalizedMessage(), e);
         }
     }
-*/
-
-    /*
 
     @VisibleForTesting
     protected void commitContainer(String repository, String tag) throws IOException {
@@ -249,33 +221,5 @@ public class DockerMachine implements Machine {
             return registryNamespace + '/' + DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX + NameGenerator.generate(null, 16);
         }
         return DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX + NameGenerator.generate(null, 16);
-    }
-
-    public void destroy() throws MachineException {
-        try {
-            outputConsumer.close();
-        } catch (IOException ignored) {}
-
-        machineProcesses.clear();
-        dockerInstanceStopDetector.stopDetection(container);
-        try {
-            if (getConfig().isDev()) {
-                node.unbindWorkspace();
-            }
-
-            // kill container is not needed here, because we removing container with force flag
-            docker.removeContainer(RemoveContainerParams.create(container)
-                                                        .withRemoveVolumes(true)
-                                                        .withForce(true));
-        } catch (IOException | ServerException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-            throw new MachineException(e.getLocalizedMessage());
-        }
-
-        try {
-            docker.removeImage(RemoveImageParams.create(image).withForce(false));
-        } catch (IOException ignore) {
-            LOG.error("IOException during destroy(). Ignoring.");
-        }
     }*/
 }

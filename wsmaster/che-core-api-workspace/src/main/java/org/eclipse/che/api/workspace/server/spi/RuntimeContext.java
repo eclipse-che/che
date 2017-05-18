@@ -26,6 +26,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -127,7 +128,15 @@ public abstract class RuntimeContext {
             throw new StateException("The environment must be running");
         }
         state = WorkspaceStatus.STOPPING;
-        internalStop(stopOptions);
+        // TODO spi what to do in exception appears here?
+        try {
+            internalStop(stopOptions);
+        } catch (InternalInfrastructureException e) {
+            LOG.error(format("Error occurs on stop of workspace %s. Error: " + e.getLocalizedMessage(),
+                             identity.getWorkspaceId()), e);
+        } catch (InfrastructureException e) {
+            LOG.debug(e.getLocalizedMessage(), e);
+        }
         state = WorkspaceStatus.STOPPED;
     }
 

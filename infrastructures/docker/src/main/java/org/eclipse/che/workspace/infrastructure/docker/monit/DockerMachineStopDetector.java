@@ -14,7 +14,9 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
@@ -23,6 +25,8 @@ import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.params.GetEventsParams;
+import org.eclipse.che.workspace.infrastructure.docker.ContextsStorage;
+import org.eclipse.che.workspace.infrastructure.docker.DockerRuntimeContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +34,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -42,12 +47,13 @@ import java.util.concurrent.TimeUnit;
  * @author Alexander Garagatyi
  */
 @Singleton
-public class DockerInstanceStopDetector {
-    private static final Logger LOG = LoggerFactory.getLogger(DockerInstanceStopDetector.class);
+public class DockerMachineStopDetector {
+    private static final Logger LOG = LoggerFactory.getLogger(DockerMachineStopDetector.class);
 
-    private final EventService                      eventService;
     private final DockerConnector                   dockerConnector;
+    private final ContextsStorage                   contextsStorage;
     private final ExecutorService                   executorService;
+    // <containerId, (machineId, workspaceId)>
     private final Map<String, Pair<String, String>> instances;
     /*
        Helps differentiate container main process OOM from other processes OOM
@@ -66,15 +72,16 @@ public class DockerInstanceStopDetector {
     private long lastProcessedEventDate = 0;
 
     @Inject
-    public DockerInstanceStopDetector(EventService eventService, DockerConnectorProvider dockerConnectorProvider) {
-        this.eventService = eventService;
+    public DockerMachineStopDetector(DockerConnectorProvider dockerConnectorProvider,
+                                     ContextsStorage contextsStorage) {
         this.dockerConnector = dockerConnectorProvider.get();
+        this.contextsStorage = contextsStorage;
         this.instances = new ConcurrentHashMap<>();
         this.containersOomTimestamps = CacheBuilder.newBuilder()
                                                    .expireAfterWrite(10, TimeUnit.SECONDS)
                                                    .build();
         this.executorService = Executors.newSingleThreadExecutor(
-                new ThreadFactoryBuilder().setNameFormat("DockerInstanceStopDetector-%d")
+                new ThreadFactoryBuilder().setNameFormat("DockerMachineStopDetector-%d")
                                           .setUncaughtExceptionHandler(
                                                   LoggingUncaughtExceptionHandler.getInstance())
                                           .setDaemon(true)
@@ -107,6 +114,7 @@ public class DockerInstanceStopDetector {
         instances.remove(containerId);
     }
 
+    @SuppressWarnings("unused")
     @PostConstruct
     private void detectContainersEvents() {
         executorService.execute(() -> {
@@ -137,24 +145,32 @@ public class DockerInstanceStopDetector {
             switch (message.getStatus()) {
                 case "oom":
                     containersOomTimestamps.put(message.getId(), message.getId());
-                    LOG.info("OOM of process in container {} has been detected", message.getId());
+                    LOG.debug("OOM of process in container {} has been detected", message.getId());
                     break;
                 case "die":
-                    /*InstanceStateEvent.Type instanceStateChangeType;
+                    String stopType;
                     if (containersOomTimestamps.getIfPresent(message.getId()) != null) {
-                        instanceStateChangeType = InstanceStateEvent.Type.OOM;
                         containersOomTimestamps.invalidate(message.getId());
-                        LOG.info("OOM of container '{}' has been detected", message.getId());
+                        LOG.debug("OOM of container '{}' has been detected", message.getId());
+                        stopType = "oom";
                     } else {
-                        instanceStateChangeType = InstanceStateEvent.Type.DIE;
+                        stopType = "die";
                     }
                     Pair<String, String> instanceIds = instances.get(message.getId());
                     if (instanceIds != null) {
-                        eventService.publish(new InstanceStateEvent(instanceIds.first,
-                                                                    instanceIds.second,
-                                                                    instanceStateChangeType));
-                        lastProcessedEventDate = message.getTime();
-                    }*/
+                        try {
+                            DockerRuntimeContext context = contextsStorage.get(instanceIds.second);
+                            try {
+                                context.stop(Collections.emptyMap());
+                            } catch (InternalInfrastructureException e) {
+                                LOG.error(e.getLocalizedMessage(), e);
+                            } catch (InfrastructureException ignored) {
+                            } finally {
+                                // TODO spi send event environment abnormally stopped to master #5125
+                            }
+                        } catch (NotFoundException ignore) {}
+                    }
+                    lastProcessedEventDate = message.getTime();
                     break;
                 default:
                     // we don't care about other event types

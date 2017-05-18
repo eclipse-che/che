@@ -13,27 +13,20 @@ package org.eclipse.che.workspace.infrastructure.docker;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.util.FileCleaner;
-import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
-import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
@@ -46,7 +39,6 @@ import org.eclipse.che.plugin.docker.client.json.network.ConnectContainer;
 import org.eclipse.che.plugin.docker.client.json.network.EndpointConfig;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
-import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
@@ -55,7 +47,7 @@ import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
-import org.eclipse.che.workspace.infrastructure.docker.monit.DockerInstanceStopDetector;
+import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
 import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyProvider;
 import org.slf4j.Logger;
 
@@ -64,7 +56,6 @@ import javax.inject.Named;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,13 +63,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
-import static java.lang.Thread.sleep;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -126,8 +114,9 @@ public class MachineStarter {
 
     private final DockerConnector                               docker;
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
-    private final ExecutorService                               executor;
-    private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
+    // TODO spi fix in #5102
+//    private final ExecutorService                               executor;
+    private final DockerMachineStopDetector                     dockerInstanceStopDetector;
     private final boolean                                       doForcePullOnBuild;
     private final boolean                                       privilegedMode;
     private final int                                           pidsLimit;
@@ -153,7 +142,7 @@ public class MachineStarter {
     @Inject
     public MachineStarter(DockerConnector docker,
                           UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
-                          DockerInstanceStopDetector dockerInstanceStopDetector,
+                          DockerMachineStopDetector dockerMachineStopDetector,
                           @Named("machine.docker.dev_machine.machine_servers") Set<ServerConfig> devMachineServers,
                           @Named("machine.docker.machine_servers") Set<ServerConfig> allMachinesServers,
                           @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
@@ -175,9 +164,10 @@ public class MachineStarter {
                           @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers,
                           ServerEvaluationStrategyProvider serverEvaluationStrategyProvider,
                           @Named("che.docker.build_args") Map<String, String> buildArgs) {
+        // TODO spi should we move all configuration stuff into infrastructure provisioner and left logic of container start here only
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;
-        this.dockerInstanceStopDetector = dockerInstanceStopDetector;
+        this.dockerInstanceStopDetector = dockerMachineStopDetector;
         this.doForcePullOnBuild = doForcePullOnBuild;
         this.privilegedMode = privilegedMode;
         this.snapshotUseRegistry = snapshotUseRegistry;
@@ -258,26 +248,50 @@ public class MachineStarter {
                                                     .flatMap(Set::stream)
                                                     .collect(toSet());
 
-        // TODO single point of failure in case of highly loaded system
-        executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineLogsStreamer-%d")
+        // TODO spi fix in #5102
+        // single point of failure in case of highly loaded system
+        /*executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineLogsStreamer-%d")
                                                                            .setUncaughtExceptionHandler(
                                                                                    LoggingUncaughtExceptionHandler
                                                                                            .getInstance())
                                                                            .setDaemon(true)
-                                                                           .build());
+                                                                           .build());*/
     }
 
+    /**
+     * Start Docker machine by performing all needed operations such as pull, build, create container, etc.
+     *
+     * @param networkName
+     *         name of a network Docker container should use
+     * @param machineName
+     *         name of Docker machine
+     * @param containerConfig
+     *         configuration of container to start
+     * @param identity
+     *         identity of user that starts machine
+     * @param isDev
+     *         whether machine is dev or not
+     * @return {@link DockerMachine} instance that represents started container
+     * @throws InternalInfrastructureException
+     *         if internal error occurs
+     * @throws SourceNotFoundException
+     *         if image for container creation is missing
+     * @throws InfrastructureException
+     *         if any other error occurs
+     */
     public DockerMachine startService(String networkName,
                                       String machineName,
-                                      DockerContainerConfig service,
+                                      DockerContainerConfig containerConfig,
                                       RuntimeIdentity identity,
                                       boolean isDev) throws InfrastructureException {
         String workspaceId = identity.getWorkspaceId();
-        LineConsumer machineLogger = new ListLineConsumer();
 
         // copy to not affect/be affected by changes in origin
-        service = new DockerContainerConfig(service);
+        containerConfig = new DockerContainerConfig(containerConfig);
 
+        // TODO spi fix in #5102
+        ProgressMonitor progressMonitor = ProgressMonitor.DEV_NULL;
+        /*LineConsumer machineLogger = new ListLineConsumer();
         ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
         ProgressMonitor progressMonitor = currentProgressStatus -> {
             try {
@@ -285,12 +299,12 @@ public class MachineStarter {
             } catch (IOException e) {
                 LOG.error(e.getLocalizedMessage(), e);
             }
-        };
+        };*/
 
         String container = null;
         try {
             String image = prepareImage(machineName,
-                                        service,
+                                        containerConfig,
                                         progressMonitor);
 
             container = createContainer(workspaceId,
@@ -298,47 +312,53 @@ public class MachineStarter {
                                         isDev,
                                         image,
                                         networkName,
-                                        service);
+                                        containerConfig);
 
             connectContainerToAdditionalNetworks(container,
-                                                 service);
+                                                 containerConfig);
 
             docker.startContainer(StartContainerParams.create(container));
 
             checkContainerIsRunning(container);
 
-            readContainerLogsInSeparateThread(container,
+            // TODO spi fix in #5102
+            /*readContainerLogsInSeparateThread(container,
                                               workspaceId,
                                               service.getId(),
-                                              machineLogger);
+                                              machineLogger);*/
 
             dockerInstanceStopDetector.startDetection(container,
-                                                      service.getId(),
+                                                      containerConfig.getId(),
                                                       workspaceId);
 
             return new DockerMachine(docker,
                                      container,
                                      image,
-                                     serverEvaluationStrategyProvider);
-        } catch (RuntimeException | ServerException | NotFoundException | IOException e) {
+                                     serverEvaluationStrategyProvider,
+                                     dockerInstanceStopDetector);
+        } catch (RuntimeException | IOException | InfrastructureException e) {
             cleanUpContainer(container);
-            throw new InfrastructureException(e.getLocalizedMessage(), e);
+            if (e instanceof InfrastructureException) {
+                throw (InfrastructureException)e;
+            } else {
+                throw new InternalInfrastructureException(e.getLocalizedMessage(), e);
+            }
         }
     }
 
     private String prepareImage(String machineName,
                                 DockerContainerConfig service,
                                 ProgressMonitor progressMonitor)
-            throws ServerException,
-                   NotFoundException, SourceNotFoundException {
+            throws SourceNotFoundException,
+                   InternalInfrastructureException {
 
         String imageName = "eclipse-che/" + service.getContainerName();
         if ((service.getBuild() == null || (service.getBuild().getContext() == null &&
                                             service.getBuild().getDockerfileContent() == null)) &&
             service.getImage() == null) {
 
-            throw new ServerException(format("Che service '%s' doesn't have neither build nor image fields",
-                                             machineName));
+            throw new InternalInfrastructureException(
+                    format("Che service '%s' doesn't have neither build nor image fields", machineName));
         }
 
         if (service.getBuild() != null && (service.getBuild().getContext() != null ||
@@ -351,42 +371,56 @@ public class MachineStarter {
         return imageName;
     }
 
-    protected void buildImage(DockerContainerConfig service,
+    /**
+     * Builds Docker image for container creation.
+     *
+     * @param containerConfig
+     *         configuration of container
+     * @param machineImageName
+     *         name of image that should be applied to built image
+     * @param doForcePullOnBuild
+     *         whether re-pulling of base image should be performed when it exists locally
+     * @param progressMonitor
+     *         consumer of build logs
+     * @throws InternalInfrastructureException
+     *         when any error occurs
+     */
+    protected void buildImage(DockerContainerConfig containerConfig,
                               String machineImageName,
                               boolean doForcePullOnBuild,
                               ProgressMonitor progressMonitor)
-            throws ServerException {
+            throws InternalInfrastructureException {
 
         File workDir = null;
         try {
             BuildImageParams buildImageParams;
-            if (service.getBuild() != null &&
-                service.getBuild().getDockerfileContent() != null) {
+            if (containerConfig.getBuild() != null &&
+                containerConfig.getBuild().getDockerfileContent() != null) {
 
                 workDir = Files.createTempDirectory(null).toFile();
                 final File dockerfileFile = new File(workDir, "Dockerfile");
                 try (FileWriter output = new FileWriter(dockerfileFile)) {
-                    output.append(service.getBuild().getDockerfileContent());
+                    output.append(containerConfig.getBuild().getDockerfileContent());
                 }
 
                 buildImageParams = BuildImageParams.create(dockerfileFile);
             } else {
-                buildImageParams = BuildImageParams.create(service.getBuild().getContext())
-                                                   .withDockerfile(service.getBuild().getDockerfilePath());
+                buildImageParams = BuildImageParams.create(containerConfig.getBuild().getContext())
+                                                   .withDockerfile(containerConfig.getBuild().getDockerfilePath());
             }
             Map<String, String> buildArgs;
-            if (service.getBuild().getArgs() == null || service.getBuild().getArgs().isEmpty()) {
+            if (containerConfig.getBuild().getArgs() == null || containerConfig.getBuild().getArgs().isEmpty()) {
                 buildArgs = this.buildArgs;
             } else {
                 buildArgs = new HashMap<>();
-                buildArgs.putAll(service.getBuild().getArgs());
+                buildArgs.putAll(containerConfig.getBuild().getArgs());
                 buildArgs.putAll(this.buildArgs);
             }
             buildImageParams.withForceRemoveIntermediateContainers(true)
                             .withRepository(machineImageName)
                             .withAuthConfigs(dockerCredentials.getCredentials())
                             .withDoForcePull(doForcePullOnBuild)
-                            .withMemoryLimit(service.getMemLimit())
+                            .withMemoryLimit(containerConfig.getMemLimit())
                             .withMemorySwapLimit(-1)
                             .withCpusetCpus(cpusetCpus)
                             .withCpuPeriod(cpuPeriod)
@@ -395,7 +429,7 @@ public class MachineStarter {
 
             docker.buildImage(buildImageParams, progressMonitor);
         } catch (IOException e) {
-            throw new ServerException(e.getLocalizedMessage(), e);
+            throw new InternalInfrastructureException(e.getLocalizedMessage(), e);
         } finally {
             if (workDir != null) {
                 FileCleaner.addFile(workDir);
@@ -413,17 +447,18 @@ public class MachineStarter {
      * @param progressMonitor
      *         consumer of output
      * @throws SourceNotFoundException
-     *         if image for pulling not found
-     * @throws ServerException
+     *         if image for pulling not found in registry
+     * @throws InternalInfrastructureException
      *         if any other error occurs
      */
     protected void pullImage(DockerContainerConfig service,
                              String machineImageName,
-                             ProgressMonitor progressMonitor) throws ServerException, SourceNotFoundException {
+                             ProgressMonitor progressMonitor) throws InternalInfrastructureException,
+                                                                     SourceNotFoundException {
         DockerMachineSource dockerMachineSource = new DockerMachineSource(
                 new MachineSourceImpl("image").setLocation(service.getImage()));
         if (dockerMachineSource.getRepository() == null) {
-            throw new ServerException(
+            throw new InternalInfrastructureException(
                     format("Machine creation failed. Machine source is invalid. No repository is defined. Found '%s'.",
                            dockerMachineSource));
         }
@@ -452,7 +487,8 @@ public class MachineStarter {
                 docker.removeImage(RemoveImageParams.create(fullNameOfPulledImage).withForce(false));
             }
         } catch (IOException e) {
-            throw new ServerException("Can't create machine from image. Cause: " + e.getLocalizedMessage(), e);
+            throw new InternalInfrastructureException("Can't create machine from image. Cause: " +
+                                                      e.getLocalizedMessage(), e);
         }
     }
 
@@ -461,43 +497,43 @@ public class MachineStarter {
                                    boolean isDev,
                                    String image,
                                    String networkName,
-                                   DockerContainerConfig service) throws IOException {
+                                   DockerContainerConfig containerConfig) throws IOException {
 
         long machineMemorySwap = memorySwapMultiplier == -1 ?
                                  -1 :
-                                 (long)(service.getMemLimit() * memorySwapMultiplier);
+                                 (long)(containerConfig.getMemLimit() * memorySwapMultiplier);
 
         addSystemWideContainerSettings(workspaceId,
                                        isDev,
-                                       service);
+                                       containerConfig);
 
         EndpointConfig endpointConfig = new EndpointConfig().withAliases(machineName)
-                                                            .withLinks(toArrayIfNotNull(service.getLinks()));
+                                                            .withLinks(toArrayIfNotNull(containerConfig.getLinks()));
         NetworkingConfig networkingConfig = new NetworkingConfig().withEndpointsConfig(singletonMap(networkName,
                                                                                                     endpointConfig));
 
         HostConfig hostConfig = new HostConfig();
         hostConfig.withMemorySwap(machineMemorySwap)
-                  .withMemory(service.getMemLimit())
+                  .withMemory(containerConfig.getMemLimit())
                   .withNetworkMode(networkName)
-                  .withLinks(toArrayIfNotNull(service.getLinks()))
-                  .withPortBindings(service.getPorts()
+                  .withLinks(toArrayIfNotNull(containerConfig.getLinks()))
+                  .withPortBindings(containerConfig.getPorts()
                                            .stream()
                                            .collect(toMap(Function.identity(), value -> new PortBinding[0])))
-                  .withVolumesFrom(toArrayIfNotNull(service.getVolumesFrom()));
+                  .withVolumesFrom(toArrayIfNotNull(containerConfig.getVolumesFrom()));
 
         ContainerConfig config = new ContainerConfig();
         config.withImage(image)
-              .withExposedPorts(service.getExpose()
+              .withExposedPorts(containerConfig.getExpose()
                                        .stream()
                                        .distinct()
                                        .collect(toMap(Function.identity(), value -> emptyMap())))
               .withHostConfig(hostConfig)
-              .withCmd(toArrayIfNotNull(service.getCommand()))
-              .withEntrypoint(toArrayIfNotNull(service.getEntrypoint()))
-              .withLabels(service.getLabels())
+              .withCmd(toArrayIfNotNull(containerConfig.getCommand()))
+              .withEntrypoint(toArrayIfNotNull(containerConfig.getEntrypoint()))
+              .withLabels(containerConfig.getLabels())
               .withNetworkingConfig(networkingConfig)
-              .withEnv(service.getEnvironment()
+              .withEnv(containerConfig.getEnvironment()
                               .entrySet()
                               .stream()
                               .map(entry -> entry.getKey() + "=" + entry.getValue())
@@ -505,7 +541,7 @@ public class MachineStarter {
 
         List<String> bindMountVolumes = new ArrayList<>();
         Map<String, Volume> nonBindMountVolumes = new HashMap<>();
-        for (String volume : service.getVolumes()) {
+        for (String volume : containerConfig.getVolumes()) {
             // If volume contains colon then it is bind volume, otherwise - non bind-mount volume.
             if (volume.contains(":")) {
                 bindMountVolumes.add(volume);
@@ -521,7 +557,7 @@ public class MachineStarter {
         setNonExitingContainerCommandIfNeeded(config);
 
         return docker.createContainer(CreateContainerParams.create(config)
-                                                           .withContainerName(service.getContainerName()))
+                                                           .withContainerName(containerConfig.getContainerName()))
                      .getId();
     }
 
@@ -543,7 +579,7 @@ public class MachineStarter {
 
     private void addSystemWideContainerSettings(String workspaceId,
                                                 boolean isDev,
-                                                DockerContainerConfig composeService) throws IOException {
+                                                DockerContainerConfig containerConfig) {
         List<String> portsToExpose;
         List<String> volumes;
         Map<String, String> env;
@@ -558,10 +594,10 @@ public class MachineStarter {
             env = commonMachineEnvVariables;
             volumes = commonMachineSystemVolumes;
         }
-        composeService.getExpose().addAll(portsToExpose);
-        composeService.getEnvironment().putAll(env);
-        composeService.getVolumes().addAll(volumes);
-        composeService.getNetworks().addAll(additionalNetworks);
+        containerConfig.getExpose().addAll(portsToExpose);
+        containerConfig.getEnvironment().putAll(env);
+        containerConfig.getVolumes().addAll(volumes);
+        containerConfig.getNetworks().addAll(additionalNetworks);
     }
 
     // We can detect certain situation when container exited right after start.
@@ -587,14 +623,15 @@ public class MachineStarter {
 
     // Inspect container right after start to check if it is running,
     // otherwise throw error that command should not exit right after container start
-    protected void checkContainerIsRunning(String container) throws IOException, ServerException {
+    protected void checkContainerIsRunning(String container) throws IOException, InfrastructureException {
         ContainerInfo containerInfo = docker.inspectContainer(container);
         if ("exited".equals(containerInfo.getState().getStatus())) {
-            throw new ServerException(CONTAINER_EXITED_ERROR);
+            throw new InfrastructureException(CONTAINER_EXITED_ERROR);
         }
     }
 
-    private void readContainerLogsInSeparateThread(String container,
+    // TODO spi fix in #5102
+    /*private void readContainerLogsInSeparateThread(String container,
                                                    String workspaceId,
                                                    String machineId,
                                                    LineConsumer outputConsumer) {
@@ -650,7 +687,7 @@ public class MachineStarter {
                 }
             }
         });
-    }
+    }*/
 
     private void cleanUpContainer(String containerId) {
         try {
@@ -701,6 +738,7 @@ public class MachineStarter {
                     .collect(toSet());
     }
 
+    // TODO spi should we move it into network lifecycle?
     private void connectContainerToAdditionalNetworks(String container,
                                                       DockerContainerConfig service) throws IOException {
 

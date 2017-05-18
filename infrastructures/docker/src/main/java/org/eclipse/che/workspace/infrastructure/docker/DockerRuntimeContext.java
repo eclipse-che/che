@@ -25,6 +25,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.shared.Utils;
+import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
@@ -41,31 +42,17 @@ import java.util.Map;
 import java.util.Queue;
 
 import static java.lang.String.format;
-import static org.eclipse.che.plugin.docker.client.MessageProcessor.DEV_NULL;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Alexander Garagatyi
  */
-// TODO workspace start interruption
-// TODO snapshots, create, remove
-// TODO backups
-// TODO containers monitoring
-// TODO consider reworking synchronized, it into separate component; volatile or something else?
-
-// TODO what should be thrown if start is interrupted in another thread, in current thread
-// TODO which error will be thrown if start fails because of something we don't control
-// and admin doesn't want to know about this problem
-// TODO if this thread is interrupted and stop is not called!
+// TODO Check what if start fails and interruption called or stop called
 // TODO interrupted exception, closedbyinteruptionexception
-// TODO add infrastructural things such as backup/restore
-// TODO simplify code ub start env method
 
 // TODO stop of starting WS - if not supported specific exception
 // TODO stop add warning on errors?
 // TODO stop in which cases to throw an exception?
-
-// TODO proper exception in case of interruption in start/stop threads
 
 // TODO exception on start
 // TODO remove starting machine if present
@@ -81,6 +68,7 @@ public class DockerRuntimeContext extends RuntimeContext {
     private final Queue<String>     startQueue;
     private final StartSynchronizer startSynchronizer;
     private final String            devMachineName;
+    private final ContextsStorage   contextsStorage;
 
     @Inject
     public DockerRuntimeContext(@Assisted DockerRuntimeInfrastructure infrastructure,
@@ -92,7 +80,8 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 MachineStarter serviceStarter,
                                 URLRewriter urlRewriter,
                                 AgentSorter agentSorter,
-                                AgentRegistry agentRegistry)
+                                AgentRegistry agentRegistry,
+                                ContextsStorage contextsStorage)
             throws ValidationException, InfrastructureException {
         super(environment, identity, infrastructure, agentSorter, agentRegistry, null);
         this.devMachineName = Utils.getDevMachineName(environment);
@@ -101,6 +90,7 @@ public class DockerRuntimeContext extends RuntimeContext {
         this.serviceStarter = serviceStarter;
         this.startQueue = new ArrayDeque<>(orderedServices);
         this.urlRewriter = urlRewriter;
+        this.contextsStorage = contextsStorage;
         this.startSynchronizer = new StartSynchronizer();
     }
 
@@ -108,6 +98,7 @@ public class DockerRuntimeContext extends RuntimeContext {
     protected InternalRuntime internalStart(Map<String, String> startOptions) throws InfrastructureException {
         startSynchronizer.setStartThread();
         try {
+            contextsStorage.add(this);
             checkStartInterruption();
             dockerNetworkLifecycle.createNetwork(dockerEnvironment.getNetwork());
 
@@ -126,6 +117,7 @@ public class DockerRuntimeContext extends RuntimeContext {
             return getInternalRuntime();
         } catch (InfrastructureException | RuntimeException e) {
             boolean interrupted = Thread.interrupted();
+            contextsStorage.remove(this);
             boolean runtimeDestroyingNeeded = !startSynchronizer.isStopCalled();
             if (runtimeDestroyingNeeded) {
                 try {
@@ -137,12 +129,10 @@ public class DockerRuntimeContext extends RuntimeContext {
             if (interrupted) {
                 throw new InfrastructureException("Docker runtime start was interrupted");
             }
-            try {
+            if (e instanceof InfrastructureException) {
                 throw e;
-            } catch (InfrastructureException rethrow) {
-                throw rethrow;
-            } catch (Exception wrap) {
-                throw new InternalInfrastructureException(wrap.getLocalizedMessage(), wrap);
+            } else {
+                throw new InternalInfrastructureException(e.getLocalizedMessage(), e);
             }
         }
     }
@@ -150,7 +140,11 @@ public class DockerRuntimeContext extends RuntimeContext {
     @Override
     protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
         startSynchronizer.interruptStartThread();
-        destroyRuntime();
+        try {
+            destroyRuntime();
+        } finally {
+            contextsStorage.remove(this);
+        }
     }
 
     @Override
@@ -161,19 +155,32 @@ public class DockerRuntimeContext extends RuntimeContext {
     private DockerMachine startMachine(String name,
                                        DockerContainerConfig container,
                                        Map<String, String> startOptions,
-                                       boolean isDev)
-            throws InfrastructureException {
+                                       boolean isDev) throws InfrastructureException {
         DockerMachine dockerMachine;
         // TODO property name
         if ("true".equals(startOptions.get("recover"))) {
             try {
-                dockerMachine = startFromSnapshot(name, container, isDev);
+                // TODO set snapshot stuff #5101
+//        container = normalizeSource(container, null);
+                dockerMachine = serviceStarter.startService(dockerEnvironment.getNetwork(),
+                                                   name,
+                                                   container,
+                                                   identity,
+                                                   isDev);
             } catch (SourceNotFoundException e) {
                 // slip to start without recovering
-                dockerMachine = doStartMachine(name, container, isDev);
+                dockerMachine = serviceStarter.startService(dockerEnvironment.getNetwork(),
+                                                            name,
+                                                            container,
+                                                            identity,
+                                                            isDev);
             }
         } else {
-            dockerMachine = doStartMachine(name, container, isDev);
+            dockerMachine = serviceStarter.startService(dockerEnvironment.getNetwork(),
+                                                        name,
+                                                        container,
+                                                        identity,
+                                                        isDev);
         }
         startAgents(name, dockerMachine);
         return dockerMachine;
@@ -182,16 +189,16 @@ public class DockerRuntimeContext extends RuntimeContext {
     private InternalRuntime getInternalRuntime() {
         return new DockerInternalRuntime(this,
                                          urlRewriter,
-                                         Collections.unmodifiableMap(startSynchronizer.getMachines()));
+                                         startSynchronizer.getMachines());
     }
 
     private void destroyRuntime() throws InfrastructureException {
         for (Map.Entry<String, DockerMachine> dockerMachineEntry : startSynchronizer.removeMachines().entrySet()) {
             try {
-                // TODO snapshot
+                // TODO spi snapshot #5101
                 dockerMachineEntry.getValue().destroy();
-            } catch (RuntimeException e) {
-                LOG.error(format("Could not destroy docker machine '%s' of workspace '%s'. Container '%s'",
+            } catch (InfrastructureException e) {
+                LOG.error(format("Error occurs on destroying of docker machine '%s' in workspace '%s'. Container '%s'",
                                  dockerMachineEntry.getKey(),
                                  getIdentity().getWorkspaceId(),
                                  dockerMachineEntry.getValue().getContainer()),
@@ -202,26 +209,29 @@ public class DockerRuntimeContext extends RuntimeContext {
         dockerNetworkLifecycle.destroyNetwork(dockerEnvironment.getNetwork());
     }
 
-    private DockerMachine startFromSnapshot(String name,
-                                            DockerContainerConfig service,
-                                            boolean isDev)
-            throws InfrastructureException {
-        // TODO set snapshot stuff
-        // TODO should snapshots data be stored in separate table of DB as it is done now?
-        return doStartMachine(name, service, isDev);
-    }
-
-    private DockerMachine doStartMachine(String name,
-                                         DockerContainerConfig container,
-                                         boolean isDev)
-            throws InfrastructureException {
-        // TODO get machine source
-        normalizeServiceSource(container, null);
-        return serviceStarter.startService(dockerEnvironment.getNetwork(),
-                                           name,
-                                           container,
-                                           identity,
-                                           isDev);
+    // TODO Do not remove, will be used in snapshot #5101
+    private DockerContainerConfig normalizeSource(DockerContainerConfig containerConfig,
+                                                  MachineSource machineSource) {
+        DockerContainerConfig serviceWithNormalizedSource = new DockerContainerConfig(containerConfig);
+        if ("image".equals(machineSource.getType())) {
+            serviceWithNormalizedSource.setBuild(null);
+            serviceWithNormalizedSource.setImage(machineSource.getLocation());
+        } else {
+            // dockerfile
+            serviceWithNormalizedSource.setImage(null);
+            if (machineSource.getContent() != null) {
+                serviceWithNormalizedSource.setBuild(new DockerBuildContext(null,
+                                                                            null,
+                                                                            machineSource.getContent(),
+                                                                            null));
+            } else {
+                serviceWithNormalizedSource.setBuild(new DockerBuildContext(machineSource.getLocation(),
+                                                                            null,
+                                                                            null,
+                                                                            null));
+            }
+        }
+        return serviceWithNormalizedSource;
     }
 
     // TODO rework to agent launchers
@@ -233,7 +243,7 @@ public class DockerRuntimeContext extends RuntimeContext {
         for (InternalMachineConfig.ResolvedAgent resolvedAgent : machineConfig.getAgents()) {
             Thread thread = new Thread(() -> {
                 try {
-                    dockerMachine.exec(resolvedAgent.getScript(), DEV_NULL);
+                    dockerMachine.exec(resolvedAgent.getScript(), MessageProcessor.getDevNull());
                 } catch (InfrastructureException e) {
                     LOG.error(e.getLocalizedMessage(), e);
                 }
@@ -241,33 +251,6 @@ public class DockerRuntimeContext extends RuntimeContext {
             thread.setDaemon(true);
             thread.start();
         }
-    }
-
-    private DockerContainerConfig normalizeServiceSource(DockerContainerConfig service, MachineSource machineSource) {
-        DockerContainerConfig serviceWithNormalizedSource = service;
-        // TODO normalize source in service?
-        if (machineSource != null) {
-            serviceWithNormalizedSource = new DockerContainerConfig(service);
-            if ("image".equals(machineSource.getType())) {
-                serviceWithNormalizedSource.setBuild(null);
-                serviceWithNormalizedSource.setImage(machineSource.getLocation());
-            } else {
-                // dockerfile
-                serviceWithNormalizedSource.setImage(null);
-                if (machineSource.getContent() != null) {
-                    serviceWithNormalizedSource.setBuild(new DockerBuildContext(null,
-                                                                                null,
-                                                                                machineSource.getContent(),
-                                                                                null));
-                } else {
-                    serviceWithNormalizedSource.setBuild(new DockerBuildContext(machineSource.getLocation(),
-                                                                                null,
-                                                                                null,
-                                                                                null));
-                }
-            }
-        }
-        return serviceWithNormalizedSource;
     }
 
     private void checkStartInterruption() throws InfrastructureException {
@@ -287,7 +270,7 @@ public class DockerRuntimeContext extends RuntimeContext {
         }
 
         public synchronized Map<String, DockerMachine> getMachines() {
-            return new HashMap<>(machines);
+            return Collections.unmodifiableMap(machines);
         }
 
         public synchronized void addMachine(String name, DockerMachine machine) throws InternalInfrastructureException {
@@ -317,10 +300,10 @@ public class DockerRuntimeContext extends RuntimeContext {
 
         public synchronized void interruptStartThread() throws InfrastructureException {
             if (startThread == null) {
-                throw new InfrastructureException("Stop of non started context not allowed");
+                throw new InternalInfrastructureException("Stop of non started context not allowed");
             }
             if (stopCalled) {
-                throw new InfrastructureException("Stop is called twice");
+                throw new InternalInfrastructureException("Stop is called twice");
             }
             stopCalled = true;
             startThread.interrupt();
