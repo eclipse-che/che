@@ -10,6 +10,7 @@
  */
 'use strict';
 import {CheStack} from '../../../../../components/api/che-stack.factory';
+import {CheBranding} from '../../../../../components/branding/che-branding.factory';
 
 /**
  * This class is handling the controller for the ready-to-go stacks
@@ -26,14 +27,30 @@ export class ReadyToGoStacksController {
   private generalStacks: Array<che.IStack> = [];
   private filteredStackIds: Array<string> = [];
   private stackIconsMap: Map<string, string> = new Map();
+  private priorityStacks: Array<string>;
+  private defaultStack: string;
+  private getPrioritySortPosition: any;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($scope: ng.IScope, lodash: _.LoDashStatic, cheStack: CheStack) {
+  constructor($scope: ng.IScope, lodash: _.LoDashStatic, cheStack: CheStack, cheBranding: CheBranding) {
     this.$scope = $scope;
     this.lodash = lodash;
+    this.priorityStacks = cheBranding.getWorkspace().priorityStacks;
+    this.defaultStack = cheBranding.getWorkspace().defaultStack;
+
+    this.getPrioritySortPosition = (stack: any) => {
+      if (this.priorityStacks) {
+        let sortPos = this.priorityStacks.indexOf(stack.name);
+        return (sortPos > -1) ? sortPos : this.priorityStacks.length;
+      } else {
+        return 0;
+      }
+    };
+    // passing priorityStacks to orderBy function:
+    this.getPrioritySortPosition.priorityStacks = this.priorityStacks;
 
     let stacks = cheStack.getStacks();
     if (stacks.length) {
@@ -105,7 +122,9 @@ export class ReadyToGoStacksController {
       }
       return 0;
     });
+
     this.onTagsChanges();
+    this.selectDefaultStack();
   }
 
   /**
@@ -116,6 +135,25 @@ export class ReadyToGoStacksController {
     this.selectedStackId = stackId;
     if (this.selectedStackId) {
       this.$scope.$emit('event:selectStackId', {tabName: this.tabName, stackId: this.selectedStackId});
+    }
+  }
+
+  /**
+   * Detects default stack and selects it.
+   */
+  selectDefaultStack(): void {
+    if (this.defaultStack) {
+      let stack = this.lodash.find(this.generalStacks, (stack: any) => {
+        return stack.id === this.defaultStack;
+      });
+      if (stack) {
+        this.setStackSelectionById(stack.id);
+        return;
+      }
+    }
+
+    if (this.generalStacks && this.generalStacks.length > 0) {
+      this.setStackSelectionById(this.generalStacks[0].id);
     }
   }
 }
