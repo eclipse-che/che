@@ -92,7 +92,7 @@ public class ResponseDispatcher {
         checkArgument(!endpointId.isEmpty(), "Endpoint ID name must not be empty");
         checkNotNull(response, "Response name must not be null");
 
-        LOGGER.debug("Dispatching a response: " + response + ", from endpoint: " + endpointId);
+        LOGGER.debug("Dispatching a response: {} from endpoint: {}", response, endpointId);
 
         String responseId = response.getId();
         if (responseId == null) {
@@ -102,7 +102,7 @@ public class ResponseDispatcher {
         LOGGER.debug("Fetching response ID: {}", responseId);
 
         String key = combine(endpointId, responseId);
-        LOGGER.debug("Generating key: " + key);
+        LOGGER.debug("Generating key: {} ", key);
 
         if (response.hasResult()) {
             processResult(endpointId, response, key);
@@ -124,7 +124,7 @@ public class ResponseDispatcher {
         JsonRpcError error = response.getError();
 
         JsonRpcPromise<?> promise = promises.remove(key);
-        LOGGER.debug("Fetching promise:" + promise);
+        LOGGER.debug("Fetching promise: {}", promise);
 
         BiConsumer<String, JsonRpcError> consumer = promise.getFailureConsumer();
         if (consumer != null) {
@@ -151,7 +151,7 @@ public class ResponseDispatcher {
         JsonRpcResult result = response.getResult();
 
         Class<?> rClass = rClasses.remove(key);
-        LOGGER.debug("Fetching result class: {}",rClass);
+        LOGGER.debug("Fetching result class: {}", rClass);
 
         JsonRpcPromise promise = promises.remove(key);
         LOGGER.debug("Fetching promise: {}", promise);
