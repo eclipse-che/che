@@ -99,7 +99,7 @@ public class ResponseDispatcher {
             LOGGER.debug("Response ID is not defined, skipping...");
             return;
         }
-        LOGGER.debug("Fetching response ID: " + responseId);
+        LOGGER.debug("Fetching response ID: {}", responseId);
 
         String key = combine(endpointId, responseId);
         LOGGER.debug("Generating key: " + key);
@@ -117,7 +117,7 @@ public class ResponseDispatcher {
         LOGGER.debug("Response has error. Proceeding...");
 
         if (!promises.containsKey(key)) {
-            LOGGER.debug("No action is associated for the key: " + key + ", skipping.");
+            LOGGER.debug("No action is associated for the key: {}, skipping.", key);
             return;
         }
 
@@ -139,22 +139,22 @@ public class ResponseDispatcher {
         LOGGER.debug("Response has result. Proceeding...");
 
         if (!promises.containsKey(key)) {
-            LOGGER.debug("No promise is associated with the key: " + key + ", skipping.");
+            LOGGER.debug("No promise is associated with the key: {}, skipping.", key);
             return;
         }
 
         if (!rClasses.containsKey(key)) {
-            LOGGER.debug("No result class is associated for the key: " + key + ", skipping.");
+            LOGGER.debug("No result class is associated for the key: {}, skipping.", key);
             return;
         }
 
         JsonRpcResult result = response.getResult();
 
         Class<?> rClass = rClasses.remove(key);
-        LOGGER.debug("Fetching result class:" + rClass);
+        LOGGER.debug("Fetching result class: {}",rClass);
 
         JsonRpcPromise promise = promises.remove(key);
-        LOGGER.debug("Fetching promise:" + promise);
+        LOGGER.debug("Fetching promise: {}", promise);
 
         if (result.isSingle()) {
             processOne(endpointId, result, rClass, cast(promise.getSuccessConsumer()));
