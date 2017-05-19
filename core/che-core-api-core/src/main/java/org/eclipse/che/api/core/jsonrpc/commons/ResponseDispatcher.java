@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -66,14 +65,26 @@ public class ResponseDispatcher {
         LOGGER.debug("Result is a single object - processing single object...");
 
         R result = composer.composeOne(jsonRpcResult, resultClass);
-        consumer.accept(endpointId, result);
+        if (consumer == null) {
+            LOGGER.debug("No consumer is not found, skipping.");
+        } else {
+            LOGGER.debug("Consumer is found, processing.");
+
+            consumer.accept(endpointId, result);
+        }
     }
 
     private <R> void processMany(String endpointId, JsonRpcResult jsonRpcResult, Class<R> resultClass, BiConsumer<String, List> consumer) {
         LOGGER.debug("Result is an array - processing array...");
 
         List<R> result = composer.composeMany(jsonRpcResult, resultClass);
-        consumer.accept(endpointId, result);
+        if (consumer == null) {
+            LOGGER.debug("No consumer is not found, skipping.");
+        } else {
+            LOGGER.debug("Consumer is found, processing.");
+
+            consumer.accept(endpointId, result);
+        }
     }
 
     public void dispatch(String endpointId, JsonRpcResponse response) {
@@ -93,11 +104,8 @@ public class ResponseDispatcher {
         String key = combine(endpointId, responseId);
         LOGGER.debug("Generating key: " + key);
 
-        Class<?> rClass = rClasses.remove(key);
-        LOGGER.debug("Fetching result class:" + rClass);
-
         if (response.hasResult()) {
-            processResult(endpointId, response, key, rClass);
+            processResult(endpointId, response, key);
         } else if (response.hasError()) {
             processError(endpointId, response, key);
         } else {
@@ -108,9 +116,17 @@ public class ResponseDispatcher {
     private void processError(String endpointId, JsonRpcResponse response, String key) {
         LOGGER.debug("Response has error. Proceeding...");
 
+        if (!promises.containsKey(key)) {
+            LOGGER.debug("No action is associated for the key: " + key + ", skipping.");
+            return;
+        }
+
         JsonRpcError error = response.getError();
-        JsonRpcPromise<JsonRpcError> jsonRpcPromise = cast(promises.remove(key));
-        BiConsumer<String, JsonRpcError> consumer = jsonRpcPromise.getFailureConsumer();
+
+        JsonRpcPromise<?> promise = promises.remove(key);
+        LOGGER.debug("Fetching promise:" + promise);
+
+        BiConsumer<String, JsonRpcError> consumer = promise.getFailureConsumer();
         if (consumer != null) {
             LOGGER.debug("Failure consumer is found, accepting...");
             consumer.accept(endpointId, error);
@@ -119,14 +135,31 @@ public class ResponseDispatcher {
         }
     }
 
-    private void processResult(String endpointId, JsonRpcResponse response, String key, Class<?> rClass) {
+    private void processResult(String endpointId, JsonRpcResponse response, String key) {
         LOGGER.debug("Response has result. Proceeding...");
 
+        if (!promises.containsKey(key)) {
+            LOGGER.debug("No promise is associated with the key: " + key + ", skipping.");
+            return;
+        }
+
+        if (!rClasses.containsKey(key)) {
+            LOGGER.debug("No result class is associated for the key: " + key + ", skipping.");
+            return;
+        }
+
         JsonRpcResult result = response.getResult();
+
+        Class<?> rClass = rClasses.remove(key);
+        LOGGER.debug("Fetching result class:" + rClass);
+
+        JsonRpcPromise promise = promises.remove(key);
+        LOGGER.debug("Fetching promise:" + promise);
+
         if (result.isSingle()) {
-            processOne(endpointId, result, rClass, cast(promises.remove(key).getSuccessConsumer()));
+            processOne(endpointId, result, rClass, cast(promise.getSuccessConsumer()));
         } else {
-            processMany(endpointId, result, rClass, cast(promises.remove(key).getSuccessConsumer()));
+            processMany(endpointId, result, rClass, cast(promise.getSuccessConsumer()));
         }
     }
 
