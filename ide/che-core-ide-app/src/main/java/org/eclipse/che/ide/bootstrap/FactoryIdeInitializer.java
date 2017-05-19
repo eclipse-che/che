@@ -15,7 +15,12 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -29,6 +34,11 @@ import org.eclipse.che.ide.preferences.StyleInjector;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 /** Performs initialization of the CHE IDE application in case of loading a Factory. */
 @Singleton
@@ -77,13 +87,39 @@ class FactoryIdeInitializer extends GeneralIdeInitializer {
     }
 
     @Override
-    public Promise<Void> init() {
-        return super.init().then(aVoid -> {
-            // TODO
-            // get/resolve factory
-            // appContext.setFactory(factory);
-            // check whether the workspace is running
-            // ...
-        });
+    protected Promise<Void> initAppContext() {
+        return super.initAppContext()
+                    .thenPromise(aVoid -> getFactory()
+                            .then((Function<FactoryDto, Void>)factory -> {
+                                appContext.setFactory(factory);
+                                return null;
+                            }).catchError((Operation<PromiseError>)err -> {
+                                throw new OperationException("Unable to load Factory: " + err.getMessage(), err.getCause());
+                            })
+                            .then(arg -> {
+                                if (RUNNING != appContext.getWorkspace().getStatus()) {
+                                    throw new OperationException("Can't load Factory. Workspace is not running.");
+                                }
+                            }));
+    }
+
+    private Promise<FactoryDto> getFactory() {
+        Map<String, String> factoryParameters = new HashMap<>();
+        for (Map.Entry<String, String> queryParam : queryParameters.getAll().entrySet()) {
+            String key = queryParam.getKey();
+            if (key.startsWith("factory-")) {
+                factoryParameters.put(key.substring("factory-".length()), queryParam.getValue());
+            }
+        }
+
+        Promise<FactoryDto> factoryPromise;
+        // Factory may be based on id or on parameters
+        if (factoryParameters.containsKey("id")) {
+            factoryPromise = factoryServiceClient.getFactory(factoryParameters.get("id"), true);
+        } else {
+            factoryPromise = factoryServiceClient.resolveFactory(factoryParameters, true);
+        }
+
+        return factoryPromise;
     }
 }

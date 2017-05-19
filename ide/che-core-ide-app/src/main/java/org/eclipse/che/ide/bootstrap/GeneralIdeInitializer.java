@@ -111,7 +111,7 @@ class GeneralIdeInitializer implements IdeInitializer {
                                   throw new OperationException(err.getMessage(), err.getCause());
                               })
                               .then(initUI())
-                              .thenPromise(initAppContext())
+                              .thenPromise(aVoid -> initAppContext())
                               .then(showUI());
     }
 
@@ -122,8 +122,8 @@ class GeneralIdeInitializer implements IdeInitializer {
         };
     }
 
-    private Function<Void, Promise<Void>> initAppContext() {
-        return aVoid -> getWorkspaceToStart()
+    protected Promise<Void> initAppContext() {
+        return getWorkspaceToStart()
                 .then((Function<WorkspaceDto, Void>)workspace -> {
                     appContext.setWorkspace(workspace);
 //                  browserAddress.setAddress(workspace.getNamespace(), workspace.getConfig().getName());
