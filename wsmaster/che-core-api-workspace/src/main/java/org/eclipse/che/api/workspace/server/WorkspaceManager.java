@@ -522,7 +522,7 @@ public class WorkspaceManager {
             workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
             workspaceDao.update(workspace);
         }
-
+        states.put(workspace.getId(), WorkspaceStatus.STOPPING);
         String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
         LOG.info("Workspace '{}/{}' with id '{}' is being stopped by user '{}'",
                  workspace.getNamespace(),
