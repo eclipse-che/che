@@ -257,7 +257,9 @@ public class ChangedPanelViewImpl extends Composite implements ChangedPanelView 
                 }
             }
         }
-        return null;
+        ArrayList<Node> nodes = new ArrayList<>(preparedNodes.values());
+        nodes.sort(new NameComparator());
+        return new ArrayList<>(nodes);
     }
 
     private String getTransitFolderName(List<String> allPaths, String comparedPath) {
