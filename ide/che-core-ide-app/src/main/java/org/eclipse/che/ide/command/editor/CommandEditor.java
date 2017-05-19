@@ -230,7 +230,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                 input.setFile(nodeFactory.newCommandFileNode(editedCommand));
             }
 
-            initializePages();
+            view.setSaveEnabled(false);
 
             callback.onSuccess(getEditorInput());
         }).catchError((Operation<PromiseError>)arg -> {
