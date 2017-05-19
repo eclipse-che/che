@@ -107,6 +107,7 @@ public class CommitViewImpl extends Window implements CommitView {
 
         pushAfterCommit = new CheckBox();
         pushAfterCommit.setHTML(locale.commitPushCheckboxTitle());
+        pushAfterCommit.ensureDebugId("git-commit-push_after_commit");
         pushAfterCommit.addValueChangeHandler(event -> remoteBranches.setEnabled(event.getValue()));
 
         pushAfterCommit.addStyleName(res.gitCSS().spacing());

@@ -36,6 +36,7 @@ import org.eclipse.che.ide.ui.smartTree.presentation.PresentationRenderer;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -242,7 +243,7 @@ public class ChangedPanelViewImpl extends Composite implements ChangedPanelView 
                         nodesToNest.add(preparedNodes.remove(nestedItem));
                     }
                 }
-                if (nodesToNest.isEmpty()) {
+                if (nodesToNest.isEmpty() && !parentPath.isEmpty()) {
                     continue;
                 }
                 nodesToNest.sort(new NameComparator());
@@ -256,9 +257,7 @@ public class ChangedPanelViewImpl extends Composite implements ChangedPanelView 
                 }
             }
         }
-        ArrayList<Node> nodes = new ArrayList<>(preparedNodes.values());
-        nodes.sort(new NameComparator());
-        return new ArrayList<>(nodes);
+        return null;
     }
 
     private String getTransitFolderName(List<String> allPaths, String comparedPath) {
