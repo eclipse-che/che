@@ -81,6 +81,8 @@ export class CheHttpBackend {
    * Setup all data that should be retrieved on calls
    */
   setup(): void {
+    this.httpBackend.when('OPTIONS', '/api/').respond({});
+
     // add the remote call
     let workspaceReturn = [];
     let workspaceKeys = this.workspaces.keys();
@@ -88,7 +90,13 @@ export class CheHttpBackend {
       let tmpWorkspace = this.workspaces.get(key);
       workspaceReturn.push(tmpWorkspace);
       this.addWorkspaceAgent(key, tmpWorkspace.runtime);
+
+      // get by ID
       this.httpBackend.when('GET', '/api/workspace/' + key).respond(tmpWorkspace);
+      // get by namespace/workspaceName
+      this.httpBackend.when('GET', `/api/workspace/${tmpWorkspace.namespace}/${tmpWorkspace.config.name}`).respond(tmpWorkspace);
+
+      this.httpBackend.when('DELETE', '/api/workspace/' + key).respond(200);
     }
 
     let workspacSettings = {
@@ -97,7 +105,6 @@ export class CheHttpBackend {
     };
     this.httpBackend.when('GET', '/api/workspace/settings').respond(200, workspacSettings);
 
-    this.httpBackend.when('OPTIONS', '/api/').respond({});
     this.httpBackend.when('GET', '/api/workspace/settings').respond({});
 
     this.httpBackend.when('GET', '/api/workspace').respond(workspaceReturn);
@@ -531,4 +538,6 @@ export class CheHttpBackend {
   addUserEmail(user: che.IUser): void {
     this.userEmailMap.set(user.email, user);
   }
+
+
 }

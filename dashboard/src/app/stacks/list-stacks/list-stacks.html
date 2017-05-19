@@ -21,6 +21,7 @@
   <md-content flex class="stacks-list-content" ng-hide="listStacksController.isLoading">
     <che-list-header che-input-placeholder="Search"
                      che-search-model="listStacksController.stackFilter.name"
+                     che-on-search-change="listStacksController.onSearchChanged(str)"
                      che-hide-search="listStacksController.stacks.length === 0"
                      che-add-button-title="Add Stack"
                      che-add-button-href="#stack/create"
@@ -28,8 +29,8 @@
                      che-on-import="listStacksController.showSelectStackRecipeDialog($event)"
                      che-delete-button-title="Delete"
                      che-on-delete="listStacksController.deleteSelectedStacks()"
-                     che-hide-delete="listStacksController.isNoSelected"
-                     che-hide-header="(listStacksController.stacks | filter:listStacksController.stackFilter).length === 0">
+                     che-hide-delete="listStacksController.cheListHelper.isNoItemSelected"
+                     che-hide-header="listStacksController.cheListHelper.visibleItemsNumber === 0">
       <div flex="100"
            layout="row"
            layout-align="start stretch"
@@ -40,8 +41,8 @@
           <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
             <md-checkbox class="che-list-item-checkbox"
                          aria-label="Stack list"
-                         ng-checked="listStacksController.isAllSelected"
-                         ng-click="listStacksController.changeSelectionState()"></md-checkbox>
+                         ng-checked="listStacksController.cheListHelper.areAllItemsSelected"
+                         ng-click="listStacksController.cheListHelper.changeBulkSelection()"></md-checkbox>
           </div>
         </div>
         <div flex hide-xs layout-gt-xs="row"
@@ -60,19 +61,19 @@
         </div>
       </div>
     </che-list-header>
-    <che-list ng-show="(listStacksController.stacks | filter:listStacksController.stackFilter).length > 0" class="stack-list">
+    <che-list ng-show="listStacksController.cheListHelper.visibleItemsNumber > 0" class="stack-list">
       <stack-item
-              ng-repeat="stack in listStacksController.stacks | orderBy:[listStacksController.stackOrderBy, 'name'] | filter:listStacksController.stackFilter"
-              ng-model="listStacksController.stackSelectionState[stack.id]"
+              ng-repeat="stack in listStacksController.cheListHelper.getVisibleItems() | orderBy:[listStacksController.stackOrderBy, 'name']"
+              ng-model="listStacksController.cheListHelper.itemsSelectionStatus[stack.id]"
               che-selectable="true"
-              che-on-checkbox-click="listStacksController.updateSelectionState()"
+              che-on-checkbox-click="listStacksController.cheListHelper.updateBulkSelectionStatus()"
               che-on-delete="listStacksController.deleteStack(stack)"
               che-on-duplicate="listStacksController.duplicateStack(stack)"
               stack="stack"
               user-id="listStacksController.userId"></stack-item>
     </che-list>
     <div class="che-list-empty">
-        <span ng-show="listStacksController.stacks.length > 0 && (listStacksController.stacks | filter:listStacksController.stackFilter).length === 0">
+        <span ng-show="listStacksController.stacks.length > 0 && listStacksController.cheListHelper.visibleItemsNumber === 0">
           No stacks found.
         </span>
       <span ng-show="listStacksController.stacks.length === 0">There are no stacks.</span>

@@ -35,12 +35,10 @@ import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.machine.MachineResources;
-import org.eclipse.che.ide.processes.PreviewSshClickHandler;
 import org.eclipse.che.ide.processes.ProcessDataAdapter;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
 import org.eclipse.che.ide.processes.ProcessTreeRenderer;
 import org.eclipse.che.ide.processes.StopProcessHandler;
-import org.eclipse.che.ide.terminal.AddTerminalClickHandler;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
@@ -50,7 +48,6 @@ import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.input.SignalEvent;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -112,21 +109,9 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         processWidgets = new HashMap<>();
         widget2TreeNodes = new HashMap<>();
 
-        renderer.setAddTerminalClickHandler(new AddTerminalClickHandler() {
-            @Override
-            public void onAddTerminalClick(@NotNull String machineId) {
-                delegate.onAddTerminal(machineId, this);
-            }
-        });
-
-        renderer.setPreviewSshClickHandler(new PreviewSshClickHandler() {
-            @Override
-            public void onPreviewSshClick(String machineId) {
-                delegate.onPreviewSsh(machineId);
-            }
-        });
-
-        renderer.setStopProcessHandler(new StopProcessHandler() {
+        renderer.addAddTerminalClickHandler(machineId -> delegate.onAddTerminal(machineId, this));
+        renderer.addPreviewSshClickHandler(machineId -> delegate.onPreviewSsh(machineId));
+        renderer.addStopProcessHandler(new StopProcessHandler() {
             @Override
             public void onStopProcessClick(ProcessTreeNode node) {
                 delegate.onStopCommandProcess(node);
@@ -190,6 +175,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
             public void onKeyboard(KeyboardEvent event) {
             }
         });
+        processTree.asWidget().ensureDebugId("process-tree");
 
         splitLayoutPanel = new SplitLayoutPanel(1);
 

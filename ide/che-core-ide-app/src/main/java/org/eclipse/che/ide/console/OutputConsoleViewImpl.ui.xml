@@ -97,7 +97,7 @@
             user-select: none;
             -moz-user-select: none;
             line-height: 14px;
-            padding-left: 6px;
+            padding-left: 1px;
         }
 
         .label {
@@ -149,18 +149,7 @@
 
         .console {
             color: outputFontColor;
-
-            -moz-user-select: text;
-            -webkit-user-select: text;
-            user-select: text;
-            outline: none;
-
-            padding: 1px 3px 3px 0px;
-
-            border-left: 6px solid transparent;
-            box-sizing: border-box;
-            border-top: 2px solid transparent;
-
+            padding: 1px;
             overflow: auto;
             position: absolute!important;
             left: 0px;
