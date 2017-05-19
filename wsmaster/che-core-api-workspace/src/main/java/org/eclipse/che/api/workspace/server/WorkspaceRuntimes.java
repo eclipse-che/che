@@ -130,7 +130,7 @@ public class WorkspaceRuntimes {
     /**
      * Returns the runtime descriptor describing currently starting/running/stopping
      * workspace runtime.
-     *
+     * <p>
      * returns a copy of a real {@code Runtime} object,
      * which means that any runtime copy modifications won't affect the
      * real object and also it means that copy won't be affected with modifications applied
@@ -157,7 +157,7 @@ public class WorkspaceRuntimes {
     /**
      * Starts all machines from specified workspace environment,
      * creates workspace runtime instance based on that environment.
-     *
+     * <p>
      * <p>During the start of the workspace its
      * runtime is visible with {@link WorkspaceStatus#STARTING} status.
      *
@@ -213,7 +213,7 @@ public class WorkspaceRuntimes {
 
     /**
      * Stops running workspace runtime.
-     *
+     * <p>
      * <p>Stops environment in an implementation specific way.
      * During the stop of the workspace its runtime is accessible with {@link WorkspaceStatus#STOPPING stopping} status.
      * Workspace may be stopped only if its status is {@link WorkspaceStatus#RUNNING}.
@@ -247,19 +247,18 @@ public class WorkspaceRuntimes {
 
         runtimes.remove(workspaceId);
 
-        final WorkspaceStatusEvent event = DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                                     .withWorkspaceId(workspaceId)
-                                                     .withPrevStatus(WorkspaceStatus.STOPPING);
-        event.setStatus(WorkspaceStatus.STOPPED);
-        event.setEventType(EventType.STOPPED);
-        eventsService.publish(event);
+        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                        .withWorkspaceId(workspaceId)
+                                        .withPrevStatus(WorkspaceStatus.STOPPING)
+                                        .withStatus(WorkspaceStatus.STOPPED)
+                                        .withEventType(EventType.STOPPED));
     }
 
     /**
      * Returns true if workspace was started and its status is
      * {@link WorkspaceStatus#RUNNING running}, {@link WorkspaceStatus#STARTING starting}
      * or {@link WorkspaceStatus#STOPPING stopping} - otherwise returns false.
-     *
+     * <p>
      * <p> This method is less expensive alternative to {@link #get(String)} + {@code try catch}, see example:
      * <pre>{@code
      *
