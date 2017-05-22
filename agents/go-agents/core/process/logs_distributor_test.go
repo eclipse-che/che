@@ -9,7 +9,7 @@
 //   Codenvy, S.A. - initial API and implementation
 //
 
-package exec_test
+package process_test
 
 import (
 	"fmt"
@@ -18,14 +18,14 @@ import (
 	"os"
 	"testing"
 
-	"github.com/eclipse/che/agents/go-agents/exec-agent/exec"
+	"github.com/eclipse/che/agents/go-agents/core/process"
 )
 
 func TestLogsDistributorCreatesSubdirectories(t *testing.T) {
 	baseDir := os.TempDir() + string(os.PathSeparator) + randomName(10)
 	defer removeAll(baseDir)
 
-	distributor := exec.DefaultLogsDistributor{
+	distributor := process.DefaultLogsDistributor{
 		MaxDirsCount: 4,
 	}
 
@@ -45,7 +45,7 @@ func TestLogsDistribution(t *testing.T) {
 	baseDir := os.TempDir() + string(os.PathSeparator) + randomName(10)
 	defer removeAll(baseDir)
 
-	distributor := exec.DefaultLogsDistributor{
+	distributor := process.DefaultLogsDistributor{
 		MaxDirsCount: 4,
 	}
 
