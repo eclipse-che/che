@@ -33,8 +33,9 @@ import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
+import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserAddress;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.start.StartWorkspaceNotification;
@@ -55,19 +56,19 @@ public class WorkspaceStarter {
 
     private static final String WS_STATUS_ERROR_MSG = "Tried to subscribe to workspace status events, but got error";
 
-    private final WorkspaceServiceClient              workspaceServiceClient;
-    private final BrowserAddress                      browserAddress;
-    private final RequestTransmitter                  transmitter;
-    private final EventBus                            eventBus;
-    private final LoaderPresenter                     wsStatusNotification;
-    private final StartWorkspaceNotification          startWorkspaceNotification;
-    private final Provider<NotificationManager>       notificationManagerProvider;
-    private final Provider<WorkspaceSnapshotNotifier> snapshotNotifierProvider;
-    private final IdeInitializer                      ideInitializer;
-    private final WsAgentStateController              wsAgentStateController;
-    private final WsAgentURLModifier                  wsAgentURLModifier;
-    private final AppContext                          appContext;
-    private final CoreLocalizationConstant            messages;
+    private final WorkspaceServiceClient               workspaceServiceClient;
+    private final BrowserAddress                       browserAddress;
+    private final RequestTransmitter                   transmitter;
+    private final EventBus                             eventBus;
+    private final LoaderPresenter                      wsStatusNotification;
+    private final Provider<StartWorkspaceNotification> startWorkspaceNotificationProvider;
+    private final Provider<NotificationManager>        notificationManagerProvider;
+    private final Provider<WorkspaceSnapshotNotifier>  snapshotNotifierProvider;
+    private final IdeInitializer                       ideInitializer;
+    private final WsAgentStateController               wsAgentStateController;
+    private final WsAgentURLModifier                   wsAgentURLModifier;
+    private final AppContext                           appContext;
+    private final CoreLocalizationConstant             messages;
 
     @Inject
     WorkspaceStarter(WorkspaceServiceClient workspaceServiceClient,
@@ -75,7 +76,7 @@ public class WorkspaceStarter {
                      RequestTransmitter transmitter,
                      EventBus eventBus,
                      LoaderPresenter loader,
-                     StartWorkspaceNotification startWorkspaceNotification,
+                     Provider<StartWorkspaceNotification> startWorkspaceNotificationProvider,
                      Provider<NotificationManager> notificationManagerProvider,
                      Provider<WorkspaceSnapshotNotifier> snapshotNotifierProvider,
                      IdeInitializer ideInitializer,
@@ -88,7 +89,7 @@ public class WorkspaceStarter {
         this.transmitter = transmitter;
         this.eventBus = eventBus;
         this.wsStatusNotification = loader;
-        this.startWorkspaceNotification = startWorkspaceNotification;
+        this.startWorkspaceNotificationProvider = startWorkspaceNotificationProvider;
         this.notificationManagerProvider = notificationManagerProvider;
         this.snapshotNotifierProvider = snapshotNotifierProvider;
         this.ideInitializer = ideInitializer;
@@ -101,14 +102,12 @@ public class WorkspaceStarter {
     // TODO: handle errors while workspace starting (show message dialog)
     // to allow user to see the reason of failed start
     void startWorkspace() {
-        ideInitializer.getWorkspaceToStart().then(workspace -> {
-            subscribeToWorkspaceEvents(workspace.getId());
-            startWorkspace(workspace, false);
-        });
+        startWorkspace(false);
     }
 
-    public void startWorkspace(String workspaceID, boolean restoreFromSnapshot) {
-        workspaceServiceClient.getWorkspace(workspaceID).then(workspace -> {
+    public void startWorkspace(boolean restoreFromSnapshot) {
+        ideInitializer.getWorkspaceToStart().then(workspace -> {
+            subscribeToWorkspaceEvents(workspace.getId());
             startWorkspace(workspace, restoreFromSnapshot);
         });
     }
@@ -130,6 +129,9 @@ public class WorkspaceStarter {
         workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
             appContext.setWorkspace(workspace);
 
+            // FIXME: spi
+            ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf("/projects"));
+
             if (workspace.getStatus() == RUNNING) {
                 wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
                 wsAgentStateController.initialize(appContext.getDevMachine());
@@ -142,12 +144,24 @@ public class WorkspaceStarter {
                 eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
             }
 
-            eventBus.fireEvent(new WsStatusChangedEvent(workspace.getStatus()));
-
             if (serverEvent != null) {
                 WorkspaceStarter.this.notify(serverEvent);
             }
         });
+    }
+
+    private void subscribeToWorkspaceEvents(String workspaceId) {
+        subscribe(WS_STATUS_ERROR_MSG, "event:workspace-status:subscribe", workspaceId);
+    }
+
+    private void subscribe(String it, String methodName, String id) {
+        workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
+                              .then((Operation<WorkspaceDto>)skip -> transmitter.newRequest()
+                                                                                .endpointId("ws-master")
+                                                                                .methodName(methodName)
+                                                                                .paramsAsString(id)
+                                                                                .sendAndSkipResult())
+                              .catchError((Operation<PromiseError>)error -> Log.error(getClass(), it + ": " + error.getMessage()));
     }
 
     // TODO: should be separate component
@@ -157,7 +171,7 @@ public class WorkspaceStarter {
                 wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
                 break;
             case RUNNING:
-                startWorkspaceNotification.hide();
+                startWorkspaceNotificationProvider.get().hide();
                 wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
                 break;
             case STOPPING:
@@ -165,11 +179,11 @@ public class WorkspaceStarter {
                 break;
             case STOPPED:
                 wsStatusNotification.setSuccess(STOPPING_WORKSPACE);
-                startWorkspaceNotification.show(event.getWorkspaceId());
+                startWorkspaceNotificationProvider.get().show();
                 break;
             case ERROR:
                 notificationManagerProvider.get().notify(messages.workspaceStartFailed(), FAIL, FLOAT_MODE);
-                startWorkspaceNotification.show(event.getWorkspaceId());
+                startWorkspaceNotificationProvider.get().show();
                 break;
             case SNAPSHOT_CREATING:
                 wsStatusNotification.show(CREATING_WORKSPACE_SNAPSHOT);
@@ -187,19 +201,4 @@ public class WorkspaceStarter {
                 break;
         }
     }
-
-    private void subscribeToWorkspaceEvents(String workspaceId) {
-        subscribe(WS_STATUS_ERROR_MSG, "event:workspace-status:subscribe", workspaceId);
-    }
-
-    private void subscribe(String it, String methodName, String id) {
-        workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
-                              .then((Operation<WorkspaceDto>)skip -> transmitter.newRequest()
-                                                                                .endpointId("ws-master")
-                                                                                .methodName(methodName)
-                                                                                .paramsAsString(id)
-                                                                                .sendAndSkipResult())
-                              .catchError((Operation<PromiseError>)error -> Log.error(getClass(), it + ": " + error.getMessage()));
-    }
-
 }
