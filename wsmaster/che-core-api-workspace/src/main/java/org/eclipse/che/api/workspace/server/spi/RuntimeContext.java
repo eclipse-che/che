@@ -90,14 +90,14 @@ public abstract class RuntimeContext {
      * @throws InfrastructureException
      *         when any other error occurs
      */
-    public final InternalRuntime start(Map<String, String> startOptions) throws InfrastructureException {
+    public void start(Map<String, String> startOptions) throws InfrastructureException {
         if (this.state != null) {
             throw new StateException("Context already used");
         }
         state = WorkspaceStatus.STARTING;
-        InternalRuntime runtime = internalStart(startOptions);
+        internalStart(startOptions);
         state = WorkspaceStatus.RUNNING;
-        return runtime;
+        //eturn runtime;
     }
 
     /**
@@ -110,7 +110,7 @@ public abstract class RuntimeContext {
      * @throws InfrastructureException
      *         when any other error occurs
      */
-    protected abstract InternalRuntime internalStart(Map<String, String> startOptions) throws InfrastructureException;
+    protected abstract void internalStart(Map<String, String> startOptions) throws InfrastructureException;
 
     /**
      * Stops Runtime
@@ -194,6 +194,9 @@ public abstract class RuntimeContext {
     public Environment getEnvironment() {
         return environment;
     }
+
+
+    public abstract InternalRuntime getRuntime();
 
     /**
      * @return RuntimeInfrastructure the Context created from

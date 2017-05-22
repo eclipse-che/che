@@ -95,7 +95,7 @@ public class DockerRuntimeContext extends RuntimeContext {
     }
 
     @Override
-    protected InternalRuntime internalStart(Map<String, String> startOptions) throws InfrastructureException {
+    protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
         startSynchronizer.setStartThread();
         try {
             contextsStorage.add(this);
@@ -114,7 +114,6 @@ public class DockerRuntimeContext extends RuntimeContext {
                 machineName = startQueue.peek();
             }
 
-            return getInternalRuntime();
         } catch (InfrastructureException | RuntimeException e) {
             boolean interrupted = Thread.interrupted();
             contextsStorage.remove(this);
@@ -152,6 +151,14 @@ public class DockerRuntimeContext extends RuntimeContext {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public InternalRuntime getRuntime() {
+        return new DockerInternalRuntime(this,
+                                         urlRewriter,
+                                         startSynchronizer);
+
+    }
+
     private DockerMachine startMachine(String name,
                                        DockerContainerConfig container,
                                        Map<String, String> startOptions,
@@ -163,10 +170,10 @@ public class DockerRuntimeContext extends RuntimeContext {
                 // TODO set snapshot stuff #5101
 //        container = normalizeSource(container, null);
                 dockerMachine = serviceStarter.startService(dockerEnvironment.getNetwork(),
-                                                   name,
-                                                   container,
-                                                   identity,
-                                                   isDev);
+                                                            name,
+                                                            container,
+                                                            identity,
+                                                            isDev);
             } catch (SourceNotFoundException e) {
                 // slip to start without recovering
                 dockerMachine = serviceStarter.startService(dockerEnvironment.getNetwork(),
@@ -184,12 +191,6 @@ public class DockerRuntimeContext extends RuntimeContext {
         }
         startAgents(name, dockerMachine);
         return dockerMachine;
-    }
-
-    private InternalRuntime getInternalRuntime() {
-        return new DockerInternalRuntime(this,
-                                         urlRewriter,
-                                         startSynchronizer.getMachines());
     }
 
     private void destroyRuntime() throws InfrastructureException {

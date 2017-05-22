@@ -26,6 +26,7 @@ import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
+import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
@@ -323,15 +324,18 @@ public class WorkspaceRuntimes {
         RuntimeIdentity runtimeId = new RuntimeIdentity(workspaceId, envName, subject.getUserName());
 
         try {
-            InternalRuntime runtime = infra.prepare(runtimeId, environment).start(options);
+            RuntimeContext runtimeContext = infra.prepare(runtimeId, environment);
 
+            InternalRuntime runtime = runtimeContext.getRuntime();
             if (runtime == null) {
                 throw new IllegalStateException(
                         "SPI contract violated. RuntimeInfrastructure.start(...) must not return null: "
                         + RuntimeInfrastructure.class);
             }
-
             runtimes.put(workspaceId, runtime);
+            runtimeContext.start(options);
+
+
             eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                             .withWorkspaceId(workspaceId)
                                             .withStatus(WorkspaceStatus.RUNNING)
