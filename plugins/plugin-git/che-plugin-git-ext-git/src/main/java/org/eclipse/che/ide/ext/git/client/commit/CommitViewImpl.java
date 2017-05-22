@@ -236,8 +236,7 @@ public class CommitViewImpl extends Window implements CommitView {
     }
 
     @Override
-    public void
-    checkCheckBoxes(Set<Path> paths) {
+    public void checkCheckBoxes(Set<Path> paths) {
         render.setNodePaths(changedPanelView.getNodePaths());
         paths.forEach(path -> render.handleNodeCheckBox(path, false));
     }
