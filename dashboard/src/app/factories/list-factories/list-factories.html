@@ -23,18 +23,20 @@
   with your toolchain.
 </che-description>
 <md-content md-scroll-y flex layout="column" md-theme="maincontent-theme" class="factories-list-factories">
-  <md-progress-linear md-mode="indeterminate" class="factories-list-factories-progress"
-                      ng-if="listFactoriesCtrl.isLoading"></md-progress-linear>
-  <md-content flex class="md-maincontent-theme-theme" ng-show="!listFactoriesCtrl.isLoading">
+  <div class="progress-line">
+    <md-progress-linear ng-show="listFactoriesCtrl.isLoading" md-mode="indeterminate"></md-progress-linear>
+  </div>
+  <md-content flex class="md-maincontent-theme-theme">
     <che-list-header che-input-placeholder="Search"
                      che-search-model="listFactoriesCtrl.factoriesFilter.name"
+                     che-on-search-change="listFactoriesCtrl.onSearchChanged(str)"
                      che-hide-search="listFactoriesCtrl.factories.length === 0"
                      che-add-button-title="Create Factory"
                      che-add-button-href="#/factories/create-factory"
                      che-delete-button-title="Delete"
                      che-on-delete="listFactoriesCtrl.deleteSelectedFactories()"
-                     che-hide-delete="listFactoriesCtrl.isNoSelected"
-                     che-hide-header="(listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter).length === 0">
+                     che-hide-delete="listFactoriesCtrl.cheListHelper.isNoItemSelected"
+                     che-hide-header="listFactoriesCtrl.cheListHelper.visibleItemsNumber === 0">
       <div flex="100"
            layout="row"
            layout-align="start stretch"
@@ -45,8 +47,8 @@
           <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
             <md-checkbox class="che-list-item-checkbox"
                          aria-label="Factory list"
-                         ng-checked="listFactoriesCtrl.isBulkChecked"
-                         ng-click="listFactoriesCtrl.changeBulkSelection()"></md-checkbox>
+                         ng-checked="listFactoriesCtrl.cheListHelper.areAllItemsSelected"
+                         ng-click="listFactoriesCtrl.cheListHelper.changeBulkSelection()"></md-checkbox>
           </div>
         </div>
         <div flex hide-xs layout-gt-xs="row"
@@ -65,13 +67,13 @@
         </div>
       </div>
     </che-list-header>
-    <che-list ng-show="(listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter).length > 0">
+    <che-list ng-show="listFactoriesCtrl.cheListHelper.visibleItemsNumber > 0">
       <cdvy-factory-item
-              ng-repeat="factory in listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter | orderBy:listFactoriesCtrl.factoriesOrderBy"
+              ng-repeat="factory in listFactoriesCtrl.cheListHelper.getVisibleItems() | orderBy:listFactoriesCtrl.factoriesOrderBy"
               cdvy-factory="factory"
               cdvy-is-selectable="true"
-              ng-model="listFactoriesCtrl.factoriesSelectedStatus[factory.id]"
-              cdvy-on-checkbox-click="listFactoriesCtrl.updateSelectedStatus()"/>
+              ng-model="listFactoriesCtrl.cheListHelper.itemsSelectionStatus[factory.id]"
+              cdvy-on-checkbox-click="listFactoriesCtrl.cheListHelper.updateBulkSelectionStatus()"></cdvy-factory-item>
     </che-list>
     <div class="paging-buttons-area" ng-if="listFactoriesCtrl.isPagination()">
       <md-button
@@ -99,7 +101,7 @@
       </md-button>
     </div>
     <div class="che-list-empty">
-        <span ng-show="listFactoriesCtrl.factories.length > 0 && (listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter).length === 0">
+        <span ng-show="listFactoriesCtrl.factories.length > 0 && listFactoriesCtrl.visibleItemsNumber === 0">
           No factories found.
         </span>
       <span ng-show="listFactoriesCtrl.factories.length === 0">There are no factories.</span>

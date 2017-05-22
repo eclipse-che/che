@@ -10,8 +10,8 @@
  */
 'use strict';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
-import {CheAPI} from "../../../components/api/che-api.factory";
-import {CheNotification} from "../../../components/notification/che-notification.factory";
+import {CheAPI} from '../../../components/api/che-api.factory';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
 
 /**
  * Controller for the factories.
@@ -25,16 +25,12 @@ export class ListFactoriesController {
   private cheNotification: CheNotification;
   private $q: ng.IQService;
   private $log: ng.ILogService;
+  private cheListHelper: che.widget.ICheListHelper;
 
   private maxItems: number;
-  private skipCount: number;
 
   private factoriesOrderBy: string;
   private factoriesFilter: any;
-  private factoriesSelectedStatus: any;
-  private isNoSelected: boolean;
-  private isAllSelected: boolean;
-  private isBulkChecked: boolean;
 
   private isLoading: boolean;
   private factories: any;
@@ -45,34 +41,34 @@ export class ListFactoriesController {
    * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService, $log: ng.ILogService, cheAPI: CheAPI, cheNotification: CheNotification, $rootScope: che.IRootScopeService,
-              confirmDialogService: ConfirmDialogService) {
+              confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.$q = $q;
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
     this.confirmDialogService = confirmDialogService;
 
+    const helperId = 'list-factories';
+    this.cheListHelper = cheListHelperFactory.getHelper(helperId);
+    $scope.$on('$destroy', () => {
+      cheListHelperFactory.removeHelper(helperId);
+    });
+
     this.maxItems = 15;
-    this.skipCount = 0;
 
     this.factoriesOrderBy = '';
     this.factoriesFilter = {name: ''};
-    this.factoriesSelectedStatus = {};
-    this.isNoSelected = true;
-    this.isAllSelected = false;
-    this.isBulkChecked = false;
 
     this.isLoading = true;
     this.factories = cheAPI.getFactory().getPageFactories();
 
-    let promise = cheAPI.getFactory().fetchFactories(this.maxItems, this.skipCount);
+    let promise = cheAPI.getFactory().fetchFactories(this.maxItems);
     promise.then(() => {
       this.isLoading = false;
     }, (error: any) => {
       this.isLoading = false;
-      if (error.status !== 304) {
-        this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Failed to retrieve the list of factories.');
-      }
+    }).finally(() => {
+      this.updateListHelper();
     });
 
     this.pagesInfo = cheAPI.getFactory().getPagesInfo();
@@ -81,99 +77,49 @@ export class ListFactoriesController {
   }
 
   /**
-   * Make all factories in list checked.
+   * Provides actual list of factories to helper.
    */
-  selectAllFactories(): void {
-    this.factories.forEach((factory: che.IFactory) => {
-      this.factoriesSelectedStatus[factory.id] = true;
-    });
+  updateListHelper(): void {
+    this.cheListHelper.setList(this.factories, 'id');
   }
 
   /**
-   * Make all factories in list unchecked.
+   * Callback when name is changed.
+   *
+   * @param str {string} a string to filter factories names.
    */
-  deselectAllFactories(): any {
-    this.factories.forEach((factory: che.IFactory) => {
-      this.factoriesSelectedStatus[factory.id] = false;
-    });
-  }
-
-  /**
-   * Change bulk selection value.
-   */
-  changeBulkSelection(): void {
-    if (this.isBulkChecked) {
-      this.deselectAllFactories();
-      this.isBulkChecked = false;
-    } else {
-      this.selectAllFactories();
-      this.isBulkChecked = true;
-    }
-    this.updateSelectedStatus();
-  }
-
-  /**
-   * Update factories selected status.
-   */
-  updateSelectedStatus(): void {
-    this.isNoSelected = true;
-    this.isAllSelected = true;
-
-    this.factories.forEach((factory: che.IFactory) => {
-      if (this.factoriesSelectedStatus[factory.id]) {
-        this.isNoSelected = false;
-      } else {
-        this.isAllSelected = false;
-      }
-    });
-
-    if (this.isNoSelected) {
-      this.isBulkChecked = false;
-      return;
-    }
-
-    if (this.isAllSelected) {
-      this.isBulkChecked = true;
-    }
+  onSearchChanged(str: string): void {
+    this.factoriesFilter.name = str;
+    this.cheListHelper.applyFilter('name', this.factoriesFilter);
   }
 
   /**
    * Delete all selected factories
    */
   deleteSelectedFactories(): void {
-    let factoriesSelectedStatusKeys = Object.keys(this.factoriesSelectedStatus);
-    let checkedFactoriesKeys = [];
+    const selectedFactories = this.cheListHelper.getSelectedItems(),
+          selectedFactoriesIds = selectedFactories.map((factory: che.IFactory) => {
+            return factory.id;
+          });
 
-    if (!factoriesSelectedStatusKeys.length) {
-      this.cheNotification.showError('No such factories.');
-      return;
-    }
-
-    factoriesSelectedStatusKeys.forEach((key: string) => {
-      if (this.factoriesSelectedStatus[key] === true) {
-        checkedFactoriesKeys.push(key);
-      }
-    });
-
-    let numberToDelete = checkedFactoriesKeys.length;
+    const numberToDelete = selectedFactoriesIds.length;
     if (!numberToDelete) {
       this.cheNotification.showError('No such factory.');
       return;
     }
 
-    let confirmationPromise = this.showDeleteFactoriesConfirmation(numberToDelete);
+    const confirmationPromise = this.showDeleteFactoriesConfirmation(numberToDelete);
 
     confirmationPromise.then(() => {
       let isError = false;
-      let deleteFactoryPromises = [];
+      const deleteFactoryPromises = [];
 
-      checkedFactoriesKeys.forEach((factoryId: string) => {
-        this.factoriesSelectedStatus[factoryId] = false;
+      selectedFactoriesIds.forEach((factoryId: string) => {
+        this.cheListHelper.itemsSelectionStatus[factoryId] = false;
 
-        let promise = this.cheAPI.getFactory().deleteFactoryById(factoryId);
+        const promise = this.cheAPI.getFactory().deleteFactoryById(factoryId);
 
-        promise.then(() => {
-        }, (error: any) => {
+        promise.catch((error: any) => {
           isError = true;
           this.$log.error('Cannot delete factory: ', error);
         });
@@ -183,15 +129,17 @@ export class ListFactoriesController {
       this.$q.all(deleteFactoryPromises).finally(() => {
         this.isLoading = true;
 
-        let promise = this.cheAPI.getFactory().fetchFactories(this.maxItems, this.skipCount);
+        let promise = this.cheAPI.getFactory().fetchFactories(this.maxItems);
 
         promise.then(() => {
           this.isLoading = false;
-        }, (error) => {
+        }, (error: any) => {
           this.isLoading = false;
           if (error.status !== 304) {
             this.cheNotification.showError(error.data.message ? error.data.message : 'Update information failed.');
           }
+        }).finally(() => {
+          this.updateListHelper();
         });
 
         if (isError) {
@@ -213,7 +161,7 @@ export class ListFactoriesController {
 
     promise.then(() => {
       this.isLoading = false;
-    }, (error) => {
+    }, (error: any) => {
       this.isLoading = false;
       if (error.status !== 304) {
         this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Update information failed.');

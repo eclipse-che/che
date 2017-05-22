@@ -31,6 +31,31 @@ declare namespace _che {
 
   }
 
+  export namespace widget {
+
+    export interface ICheListHelper {
+      areAllItemsSelected: boolean;
+      isNoItemSelected: boolean;
+      itemsSelectionStatus: any;
+      visibleItemsNumber: number;
+      selectAllItems(): void;
+      deselectAllItems(): void;
+      changeBulkSelection(): void;
+      updateBulkSelectionStatus(): void;
+      getSelectedItems(): any[];
+      getVisibleItems(): any[];
+      setList(itemsList: any[], key: string, isSelectable?: (item: any) => boolean): void;
+      applyFilter(name: string, ...filterProps: any[]);
+      clearFilters(): void;
+    }
+
+    export interface ICheListHelperFactory {
+      getHelper(id: string): ICheListHelper;
+      removeHelper(id: string): void;
+    }
+
+  }
+
   export interface IRegisterService {
     app: ng.IModule;
     directive(name: string, constructorFn: Function);
@@ -184,6 +209,7 @@ declare namespace _che {
   }
 
   export interface IProject {
+    name: string;
     source: IProjectSource;
     workspaceId?: string;
     workspaceName?: string;
@@ -211,12 +237,14 @@ declare namespace _che {
     errors: Array<string>;
   }
 
-  export interface IProfile {
-    attributes?: {
+  export interface IProfileAttributes {
       firstName?: string;
       lastName?: string;
       [propName: string]: string | number;
-    };
+  }
+
+  export interface IProfile extends ng.resource.IResourceClass<any> {
+    attributes?: IProfileAttributes;
     email: string;
     links?: Array<any>;
     userId: string;
@@ -250,5 +278,23 @@ declare namespace _che {
     ide?: any;
     button?: any;
     policies?: any;
+  }
+
+  export interface IRegistry {
+    url: string;
+    username: string;
+    password: string;
+  }
+
+  interface IRequestData {
+    userId?: string;
+    maxItems?: string;
+    skipCount?: string;
+    [param: string]: string;
+  }
+
+  interface IPageInfo {
+    countPages: number;
+    currentPageNumber: number;
   }
 }

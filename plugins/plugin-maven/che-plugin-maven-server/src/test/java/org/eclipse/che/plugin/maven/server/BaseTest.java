@@ -49,6 +49,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -220,6 +222,18 @@ public abstract class BaseTest {
                 new ResourceChangedEvent(root, new ProjectCreatedEvent("", folder.getPath().toString())));
 
         return folder;
+    }
+
+    protected File createTestPom(String folderName, String pomContent) throws IOException {
+        File file = new File(wsPath, folderName);
+        file.mkdirs();
+        File pomFile = new File(file, "pom.xml");
+
+        FileOutputStream outputStream = new FileOutputStream(pomFile);
+        outputStream.write(getPomContent(pomContent).getBytes());
+        outputStream.flush();
+        outputStream.close();
+        return pomFile;
     }
 
     protected String getPomContent(String content) {

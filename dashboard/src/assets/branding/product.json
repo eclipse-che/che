@@ -10,6 +10,10 @@
   "helpTitle": "Community",
   "supportEmail": "wish@codenvy.com",
   "oauthDocs": "Configure OAuth in the che.properties file.",
+  "workspace": {
+    "priorityStacks": ["Java", "Java-MySQL", "Blank"],
+    "defaultStack": "java-mysql"
+  },
   "cli" : {
     "configName" : "che.env",
     "name" : "CHE"

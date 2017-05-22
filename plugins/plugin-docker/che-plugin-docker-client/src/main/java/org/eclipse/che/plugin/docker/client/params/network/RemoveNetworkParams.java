@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.docker.client.params;
+package org.eclipse.che.plugin.docker.client.params.network;
 
 import javax.validation.constraints.NotNull;
 
