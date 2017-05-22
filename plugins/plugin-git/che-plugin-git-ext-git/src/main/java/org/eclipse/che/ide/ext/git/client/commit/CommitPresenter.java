@@ -40,8 +40,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Iterables.getFirst;
 import static java.util.Arrays.stream;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
@@ -110,10 +110,6 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     public void showDialog(Project project) {
         this.project = project;
 
-        checkState(project != null, "Null project occurred");
-        checkState(project.getLocation().isPrefixOf(appContext.getResource().getLocation()),
-                   "Given selected item is not descendant of given project");
-
         view.setValueToAmendCheckBox(false);
         view.setValueToPushAfterCommitCheckBox(false);
         view.setEnableAmendCheckBox(true);
@@ -121,21 +117,10 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         view.setEnableRemoteBranchesDropDownLis(false);
         service.diff(appContext.getDevMachine(), project.getLocation(), null, NAME_STATUS, false, 0, "HEAD", false)
                .then(diff -> {
-                   service.log(appContext.getDevMachine(), project.getLocation(), null, -1, -1, false)
+                   service.log(appContext.getDevMachine(), project.getLocation(), null, -1, 1, false)
                           .then(arg -> {
                               if (diff.isEmpty()) {
-                                  dialogFactory.createConfirmDialog(constant.commitTitle(),
-                                                                    constant.commitNothingToCommitMessageText(),
-                                                                    constant.buttonYes(),
-                                                                    constant.buttonNo(),
-                                                                    () -> {
-                                                                        view.setValueToAmendCheckBox(true);
-                                                                        view.setEnablePushAfterCommitCheckBox(false);
-                                                                        setAmendCommitMessage();
-                                                                        show(null);
-                                                                    },
-                                                                    null)
-                                               .show();
+                                  showAskForAmendDialog();
                               } else {
                                   show(diff);
                               }
@@ -165,28 +150,47 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                });
     }
 
+    private void showAskForAmendDialog() {
+        dialogFactory.createConfirmDialog(constant.commitTitle(),
+                                          constant.commitNothingToCommitMessageText(),
+                                          constant.buttonYes(),
+                                          constant.buttonNo(),
+                                          () -> {
+                                              view.setValueToAmendCheckBox(true);
+                                              view.setEnablePushAfterCommitCheckBox(false);
+                                              setAmendCommitMessage();
+                                              show(null);
+                                          },
+                                          null)
+                     .show();
+    }
+
     private void show(@Nullable String diff) {
-        Map<String, Status> items = new HashMap<>();
-        if (!isNullOrEmpty(diff)) {
-            stream(diff.split("\n")).forEach(item -> items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1))));
-        }
+        Map<String, Status> files = toFileStatusMap(diff);
         filesToCommit.clear();
-        allFiles = items.keySet();
+        allFiles = files.keySet();
 
         view.setEnableCommitButton(!view.getMessage().isEmpty());
         view.focusInMessageField();
         view.showDialog();
-        changedPanelPresenter.show(items, null);
+        changedPanelPresenter.show(files, null);
         view.checkCheckBoxes(stream(appContext.getResources()).map(resource -> resource.getLocation().removeFirstSegments(1))
                                                               .collect(Collectors.toSet()));
+    }
+
+    private Map<String, Status> toFileStatusMap(@Nullable String diff) {
+        Map<String, Status> items = new HashMap<>();
+        if (!isNullOrEmpty(diff)) {
+            stream(diff.split("\n")).forEach(item -> items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1))));
+        }
+        return items;
     }
 
     @Override
     public void onCommitClicked() {
         DevMachine devMachine = appContext.getDevMachine();
         Path location = project.getLocation();
-        Path[] filesToCommitArray = new Path[filesToCommit.size()];
-        filesToCommit.forEach(file -> filesToCommitArray[filesToCommit.indexOf(file)] = Path.valueOf(file));
+        Path[] filesToCommitArray = getFilesToCommitArray();
 
         service.add(devMachine, location, false, filesToCommitArray)
                .then(arg -> {
@@ -199,20 +203,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                           .then(revision -> {
                               onCommitSuccess(revision);
                               if (view.isPushAfterCommit()) {
-                                  String remoteBranch = view.getRemoteBranch();
-                                  String remote = remoteBranch.split("/")[0];
-                                  String branch = remoteBranch.split("/")[1];
-                                  service.push(devMachine,
-                                               location,
-                                               singletonList(branch),
-                                               remote,
-                                               false)
-                                         .then(result -> {
-                                             notificationManager.notify(constant.pushSuccess(remote), SUCCESS, FLOAT_MODE);
-                                         })
-                                         .catchError(error -> {
-                                             notificationManager.notify(constant.pushFail(), FAIL, FLOAT_MODE);
-                                         });
+                                  push(devMachine, location);
                               }
                               view.close();
                           })
@@ -222,6 +213,30 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                })
                .catchError(error -> {
                    notificationManager.notify(constant.addFailed(), FAIL, FLOAT_MODE);
+               });
+    }
+
+    private Path[] getFilesToCommitArray() {
+        Path[] filesToCommitArray = new Path[filesToCommit.size()];
+        filesToCommit.forEach(file -> filesToCommitArray[filesToCommit.indexOf(file)] = Path.valueOf(file));
+
+        return filesToCommitArray;
+    }
+
+    private void push(DevMachine devMachine, Path location) {
+        String remoteBranch = view.getRemoteBranch();
+        String remote = remoteBranch.split("/")[0];
+        String branch = remoteBranch.split("/")[1];
+        service.push(devMachine,
+                     location,
+                     singletonList(branch),
+                     remote,
+                     false)
+               .then(result -> {
+                   notificationManager.notify(constant.pushSuccess(remote), SUCCESS, FLOAT_MODE);
+               })
+               .catchError(error -> {
+                   notificationManager.notify(constant.pushFail(), FAIL, FLOAT_MODE);
                });
     }
 
@@ -239,13 +254,10 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     public void setAmendCommitMessage() {
         service.log(appContext.getDevMachine(), project.getLocation(), null, -1, -1, false)
                .then(log -> {
-                   final List<Revision> commits = log.getCommits();
                    String message = "";
-                   if (commits != null && (!commits.isEmpty())) {
-                       final Revision tip = commits.get(0);
-                       if (tip != null) {
-                           message = tip.getMessage();
-                       }
+                   final Revision revision = getFirst(log.getCommits(), null);
+                   if (revision != null) {
+                       message = revision.getMessage();
                    }
                    CommitPresenter.this.view.setMessage(message);
                    CommitPresenter.this.view.setEnableCommitButton(!message.isEmpty());

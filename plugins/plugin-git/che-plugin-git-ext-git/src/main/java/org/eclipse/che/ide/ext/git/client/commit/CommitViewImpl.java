@@ -46,13 +46,13 @@ import javax.validation.constraints.NotNull;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 /**
  * The implementation of {@link CommitView}.
  *
  * @author Andrey Plotnikov
+ * @author Igor Vinokur
  */
 @Singleton
 public class CommitViewImpl extends Window implements CommitView {
@@ -263,23 +263,29 @@ public class CommitViewImpl extends Window implements CommitView {
 
         @Override
         public Element render(final Node node, final String domID, final Tree.Joint joint, final int depth) {
-            Element rootContainer = super.render(node, domID, joint, depth);
-            Element nodeContainer = rootContainer.getFirstChildElement();
+            //Initialize HTML elements.
+            final Element rootContainer = super.render(node, domID, joint, depth);
+            final Element nodeContainer = rootContainer.getFirstChildElement();
             final Element checkBoxElement = new CheckBox().getElement();
             final InputElement checkBoxInputElement = (InputElement)checkBoxElement.getElementsByTagName("input").getItem(0);
+
+            //Set check-box state.
             final Path nodePath = node instanceof ChangedFileNode ? Path.valueOf(node.getName()) : ((ChangedFolderNode)node).getPath();
             checkBoxInputElement.setChecked(!unselectedNodePaths.contains(nodePath));
+
+            //Add check-box click handler.
             Event.sinkEvents(checkBoxElement, Event.ONCLICK);
             Event.setEventListener(checkBoxElement, event -> {
                 if (Event.ONCLICK == event.getTypeInt() && event.getTarget().getTagName().equalsIgnoreCase("label")) {
                     handleNodeCheckBox(nodePath, checkBoxInputElement.isChecked());
-
                     changedPanelView.refreshNodes();
                     delegate.onValueChanged();
                 }
             });
 
+            //Paste check-box element to node container.
             nodeContainer.insertAfter(checkBoxElement, nodeContainer.getFirstChild());
+
             return rootContainer;
         }
 
@@ -314,12 +320,10 @@ public class CommitViewImpl extends Window implements CommitView {
         }
 
         private boolean hasSelectedChildes(Path givenPath) {
-            Optional<Path> optional = allNodePaths.stream()
-                                                  .filter(path -> givenPath.isPrefixOf(path) &&
-                                                                  !path.equals(givenPath) &&
-                                                                  !unselectedNodePaths.contains(path))
-                                                  .findAny();
-            return optional.isPresent();
+            return allNodePaths.stream()
+                               .anyMatch(path -> givenPath.isPrefixOf(path) &&
+                                                 !path.equals(givenPath) &&
+                                                 !unselectedNodePaths.contains(path));
         }
     }
 }
