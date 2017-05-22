@@ -32,8 +32,6 @@ import static java.util.Arrays.asList;
 public class PythonModule extends AbstractModule {
     private static final String[] EXTENSIONS = new String[]{ProjectAttributes.PYTHON_EXT};
     private static final String MIME_TYPE = "text/x-python";
-    static {
-    }
 
     @Override
     protected void configure() {
