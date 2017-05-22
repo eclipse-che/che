@@ -20,6 +20,9 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.WsAgentStateController;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
 import org.eclipse.che.ide.context.BrowserAddress;
@@ -43,6 +46,9 @@ public class WorkspaceStarter {
     private final EventBus               eventBus;
     private final LoaderPresenter        wsStatusNotification;
     private final IdeInitializer         ideInitializer;
+    private final WsAgentStateController wsAgentStateController;
+    private final WsAgentURLModifier     wsAgentURLModifier;
+    private final AppContext             appContext;
 
     @Inject
     WorkspaceStarter(WorkspaceServiceClient workspaceServiceClient,
@@ -50,13 +56,19 @@ public class WorkspaceStarter {
                      RequestTransmitter transmitter,
                      EventBus eventBus,
                      LoaderPresenter loader,
-                     IdeInitializer ideInitializer) {
+                     IdeInitializer ideInitializer,
+                     WsAgentStateController wsAgentStateController,
+                     WsAgentURLModifier wsAgentURLModifier,
+                     AppContext appContext) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.browserAddress = browserAddress;
         this.transmitter = transmitter;
         this.eventBus = eventBus;
         this.wsStatusNotification = loader;
         this.ideInitializer = ideInitializer;
+        this.wsAgentStateController = wsAgentStateController;
+        this.wsAgentURLModifier = wsAgentURLModifier;
+        this.appContext = appContext;
     }
 
     // TODO: handle errors while workspace starting (show message dialog)
@@ -82,7 +94,11 @@ public class WorkspaceStarter {
 
         if (workspaceStatus == RUNNING) {
             wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
+
             eventBus.fireEvent(new WsStatusChangedEvent(workspace.getStatus()));
+
+            wsAgentStateController.initialize(appContext.getDevMachine());
+            wsAgentURLModifier.initialize(appContext.getDevMachine());
         } else if (workspaceStatus == STOPPED || workspaceStatus == STOPPING) {
             workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), restoreFromSnapshot);
         }

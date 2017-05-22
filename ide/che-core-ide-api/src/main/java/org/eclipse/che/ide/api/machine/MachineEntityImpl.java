@@ -14,61 +14,43 @@ import com.google.common.base.Strings;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-//import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
-
-/**
- * @author Vitalii Parfonov
- */
+import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 
 public class MachineEntityImpl implements MachineEntity {
 
-    private final String name;
-    protected final Machine machineDescriptor;
-//    protected final MachineConfig machineConfig;
-
+    protected final Machine                    machineDescriptor;
     protected final Map<String, MachineServer> servers;
     protected final Map<String, String>        runtimeProperties;
-//    protected final Map<String, String>        envVariables;
     protected final List<Link>                 machineLinks;
-
+    private final   String                     name;
 
     public MachineEntityImpl(String name, @NotNull Machine machineDescriptor) {
         this.name = name;
         this.machineDescriptor = machineDescriptor;
-//        this.machineConfig = machineDescriptor != null ? machineDescriptor.getConfig() : null;
-        this.machineLinks = machineDescriptor instanceof Hyperlinks ? ((Hyperlinks)machineDescriptor).getLinks() : null;
+        this.machineLinks = new ArrayList<>();
 
-//        if (machineDescriptor == null || machineDescriptor.getRuntime() == null) {
-//            servers = null;
-//            runtimeProperties = null;
-//            envVariables = null;
-//        } else {
-//            MachineRuntimeInfo machineRuntime = machineDescriptor.getRuntime();
-            Map<String, ? extends Server> serverDtoMap = machineDescriptor.getServers();
-            servers = new HashMap<>(serverDtoMap.size());
-            for (String s : serverDtoMap.keySet()) {
-                servers.put(s, new MachineServer(s, serverDtoMap.get(s)));
-            }
-            runtimeProperties = machineDescriptor.getProperties();
-//            envVariables = machineRuntime.getEnvVariables();
-//        }
+        Map<String, ? extends Server> serverDtoMap = machineDescriptor.getServers();
+        servers = new HashMap<>(serverDtoMap.size());
+        for (String s : serverDtoMap.keySet()) {
+            servers.put(s, new MachineServer(s, serverDtoMap.get(s)));
+        }
+        runtimeProperties = machineDescriptor.getProperties();
     }
 
     @Override
     public boolean isDev() {
-//        return machineDescriptor.getConfig().isDev();
-        return true;
+        return machineDescriptor.getServers().get(WSAGENT_REFERENCE) != null;
     }
 
     public String getId() {
@@ -92,26 +74,28 @@ public class MachineEntityImpl implements MachineEntity {
 
     @Override
     public String getTerminalUrl() {
-        for (Link link : machineLinks) {
-            if (Constants.TERMINAL_REFERENCE.equals(link.getRel())) {
-                return link.getHref();
-            }
+        // FIXME: spi
+        final MachineServer terminalServer = getServer(Constants.TERMINAL_REFERENCE);
+        if (terminalServer != null) {
+            return terminalServer.getUrl().replaceFirst("http", "ws") + "/pty";
         }
+
         //should not be
-        final String message = "Reference " + Constants.TERMINAL_REFERENCE + " not found in " + name  + " description";
+        final String message = "Reference " + Constants.TERMINAL_REFERENCE + " not found in " + name + " description";
         Log.error(getClass(), message);
         throw new RuntimeException(message);
     }
 
     @Override
     public String getExecAgentUrl() {
-        for (Link link :machineLinks) {
-            if (Constants.EXEC_AGENT_REFERENCE.equals(link.getRel())) {
-                return link.getHref();
-            }
+        // FIXME: spi
+        final MachineServer terminalServer = getServer(Constants.EXEC_AGENT_REFERENCE);
+        if (terminalServer != null) {
+            return terminalServer.getUrl().replaceFirst("http", "ws") + "/connect";
         }
+
         //should not be
-        final String message = "Reference " + Constants.EXEC_AGENT_REFERENCE + " not found in " +  name + " description";
+        final String message = "Reference " + Constants.EXEC_AGENT_REFERENCE + " not found in " + name + " description";
         Log.error(getClass(), message);
         throw new RuntimeException(message);
     }

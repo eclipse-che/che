@@ -16,12 +16,18 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.WorkspaceSnapshotNotifier;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.WsAgentStateController;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
@@ -36,7 +42,6 @@ import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STOPPING_WORK
 @Singleton
 public class WorkspaceStatusEventHandler {
 
-    private final EventBus                            eventBus;
     private final LoaderPresenter                     wsStatusNotification;
     private final WorkspaceServiceClient              wsServiceClient;
     private final StartWorkspaceNotification          startWorkspaceNotification;
@@ -53,8 +58,9 @@ public class WorkspaceStatusEventHandler {
                                 StartWorkspaceNotification startWorkspaceNotification,
                                 Provider<WorkspaceSnapshotNotifier> snapshotNotifierProvider,
                                 CoreLocalizationConstant messages,
-                                Provider<NotificationManager> notificationManagerProvider) {
-        this.eventBus = eventBus;
+                                Provider<NotificationManager> notificationManagerProvider,
+                                WsAgentStateController wsAgentStateController,
+                                WsAgentURLModifier wsAgentURLModifier) {
         this.wsStatusNotification = loader;
         this.wsServiceClient = workspaceServiceClient;
         this.startWorkspaceNotification = startWorkspaceNotification;
@@ -71,12 +77,25 @@ public class WorkspaceStatusEventHandler {
 
                         wsServiceClient.getWorkspace(event.getWorkspaceId()).then(workspace -> {
                             appContext.setWorkspace(workspace);
-                            handleEvent(event);
+                            eventBus.fireEvent(new WsStatusChangedEvent(event.getStatus()));
+
+                            if (event.getStatus() == WorkspaceStatus.RUNNING) {
+                                eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
+
+//                                wsAgentStateController.initialize(appContext.getDevMachine());
+//                                wsAgentURLModifier.initialize(appContext.getDevMachine());
+                            } else if (event.getStatus() == WorkspaceStatus.STARTING) {
+                                eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
+                            } else if (event.getStatus() == WorkspaceStatus.STOPPED) {
+                                eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
+                            }
+
+                            notify(event);
                         });
                     });
     }
 
-    private void handleEvent(WorkspaceStatusEvent event) {
+    private void notify(WorkspaceStatusEvent event) {
         switch (event.getEventType()) {
             case STARTING:
                 wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
@@ -111,7 +130,5 @@ public class WorkspaceStatusEventHandler {
             default:
                 break;
         }
-
-        eventBus.fireEvent(new WsStatusChangedEvent(event.getStatus()));
     }
 }
