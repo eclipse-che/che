@@ -38,4 +38,4 @@ public class JsonModule extends AbstractModule {
         description.setMimeType(MIME_TYPE);
         Multibinder.newSetBinder(binder(), LanguageDescription.class).addBinding().toInstance(description);
     }
-}
+} 

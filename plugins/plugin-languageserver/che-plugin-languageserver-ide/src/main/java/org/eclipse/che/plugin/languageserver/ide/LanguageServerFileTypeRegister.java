@@ -63,15 +63,14 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                                           OrionContentTypeRegistrant contentTypeRegistrant,
                                           OrionHoverRegistrant orionHoverRegistrant,
                                           OrionOccurrencesRegistrant orionOccurrencesRegistrant,
-                                          LanguageServerEditorProvider editorProvider,
-                                          HoverProvider hoverProvider,
-                                          OccurrencesProvider occurrencesProvider) {
+                                          LanguageServerEditorProvider editorProvider, HoverProvider hoverProvider,
+                                          OccurrencesProvider occurrencesProvider) { 
         this.serverLanguageRegistry = serverLanguageRegistry;
         this.lsRegistry = lsRegistry;
         this.resources = resources;
         this.editorRegistry = editorRegistry;
         this.contentTypeRegistrant = contentTypeRegistrant;
-        this.orionHoverRegistrant = orionHoverRegistrant;
+        this.orionHoverRegistrant = orionHoverRegistrant; 
         this.orionOccurrencesRegistrant = orionOccurrencesRegistrant;
         this.editorProvider = editorProvider;
         this.hoverProvider = hoverProvider;
@@ -97,6 +96,7 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                             final FileType fileType = new FileType(resources.file(), null, RegExp.quote(fileName));
                             lsRegistry.registerFileType(fileType, lang);
                             editorRegistry.registerDefaultEditor(fileType, editorProvider);
+
                         }
                         String mimeType = lang.getMimeType();
                         contentTypes.push(mimeType);
