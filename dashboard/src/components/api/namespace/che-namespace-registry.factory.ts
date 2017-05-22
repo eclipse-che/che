@@ -17,6 +17,8 @@
  */
 export class CheNamespaceRegistry {
   private $q: ng.IQService;
+  private $interval: ng.IIntervalService;
+  private $timeout: ng.ITimeoutService;
   private fetchPromise: ng.IPromise<any>;
   private namespaces : che.INamespace[];
   private emptyMessage: string;
@@ -27,8 +29,10 @@ export class CheNamespaceRegistry {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService) {
+  constructor($q: ng.IQService, $interval: ng.IIntervalService, $timeout: ng.ITimeoutService) {
     this.$q = $q;
+    this.$interval = $interval;
+    this.$timeout = $timeout;
     this.namespaces = [];
 
     this.caption = 'Namespace';
@@ -49,13 +53,28 @@ export class CheNamespaceRegistry {
    * @return {ng.IPromise<any>}
    */
   fetchNamespaces(): ng.IPromise<any> {
-    if (!this.fetchPromise) {
-      let defer = this.$q.defer();
-      defer.resolve();
-      return defer.promise;
-    }
+    const defer = this.$q.defer();
 
-    return this.fetchPromise;
+    let intervalPromise, timeoutPromise;
+    intervalPromise = this.$interval(() => {
+      if (this.fetchPromise) {
+        defer.resolve();
+        this.$timeout.cancel(timeoutPromise);
+        this.$interval.cancel(intervalPromise);
+      }
+    }, 50);
+    timeoutPromise = this.$timeout(() => {
+      defer.resolve();
+      this.$interval.cancel(intervalPromise);
+    }, 1000);
+
+    return defer.promise.then(() => {
+      if (this.fetchPromise) {
+        return this.fetchPromise;
+      } else {
+        return this.$q.when();
+      }
+    });
   }
 
   /**

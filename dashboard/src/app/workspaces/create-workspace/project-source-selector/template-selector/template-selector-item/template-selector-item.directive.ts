@@ -10,35 +10,29 @@
  */
 'use strict';
 
-
 /**
- * This class is handling the controller for the filter selector.
- * @author Ann Shumilova
+ * Defines a directive for displaying template item.
+ *
+ * @author Oleksii Kurinnyi
  */
-export class CheFilterSelectorController {
+export class TemplateSelectorItem implements ng.IDirective {
+  restrict: string = 'E';
+  templateUrl: string = 'app/workspaces/create-workspace/project-source-selector/template-selector/template-selector-item/template-selector-item.html';
 
-  private valueModel: string;
-  private width: string;
-  private onChange: Function;
+  scope: {
+    [propName: string]: string;
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor() {
-    this.width = this.width || '150px';
+    this.scope = {
+      template: '=',
+      templateIsChecked: '=',
+      onTemplateClick: '&'
+    };
   }
 
-
-  /**
-   * Performs value selection and calls value changed handler.
-   *
-   * @param value
-   */
-  selectValue(value: string): void {
-    this.valueModel = value;
-    this.onChange({value: value});
-  }
 }
-
-
