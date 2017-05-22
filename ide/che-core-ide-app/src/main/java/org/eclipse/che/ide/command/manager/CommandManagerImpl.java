@@ -33,11 +33,12 @@ import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
-import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.Arrays;
@@ -48,7 +49,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
@@ -88,9 +88,14 @@ public class CommandManagerImpl implements CommandManager {
 
         commands = new HashMap<>();
 
-        eventBus.addHandler(WsStatusChangedEvent.TYPE, event -> {
-            if (event.getStatus() == RUNNING) {
+        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
+            @Override
+            public void onWsAgentStarted(WsAgentStateEvent event) {
                 fetchCommands();
+            }
+
+            @Override
+            public void onWsAgentStopped(WsAgentStateEvent event) {
             }
         });
     }

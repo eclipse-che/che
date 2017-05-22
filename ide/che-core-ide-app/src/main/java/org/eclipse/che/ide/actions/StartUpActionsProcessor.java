@@ -18,11 +18,10 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.StartUpAction;
-import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 
 import java.util.List;
-
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 /**
  * Will process all start-up actions that comes from
@@ -41,14 +40,19 @@ public class StartUpActionsProcessor {
         this.appContext = appContext;
         this.actionManager = actionManager;
 
-        eventBus.addHandler(WsStatusChangedEvent.TYPE, event -> {
-            if (event.getStatus() == RUNNING) {
+        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
+            @Override
+            public void onWsAgentStarted(WsAgentStateEvent event) {
                 new Timer() {
                     @Override
                     public void run() {
                         processActions();
                     }
                 }.schedule(1000);
+            }
+
+            @Override
+            public void onWsAgentStopped(WsAgentStateEvent event) {
             }
         });
     }

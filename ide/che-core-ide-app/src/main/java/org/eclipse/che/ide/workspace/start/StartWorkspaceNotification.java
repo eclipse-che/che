@@ -20,14 +20,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.bootstrap.WorkspaceStarter;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
-
-import java.util.List;
 
 /**
  * Toast notification appearing on the top of the IDE and containing a proposal message to start
@@ -40,46 +34,26 @@ public class StartWorkspaceNotification {
 
     private final WorkspaceStarterUiBinder uiBinder;
     private final LoaderPresenter          loader;
-    private final WorkspaceServiceClient   workspaceServiceClient;
     private final WorkspaceStarter         workspaceStarter;
+
     @UiField
     Button   button;
     @UiField
     CheckBox restore;
-    private String workspaceID;
 
     @Inject
     public StartWorkspaceNotification(LoaderPresenter loader,
                                       WorkspaceStarterUiBinder uiBinder,
-                                      WorkspaceServiceClient workspaceServiceClient,
                                       WorkspaceStarter workspaceStarter) {
         this.loader = loader;
         this.uiBinder = uiBinder;
-        this.workspaceServiceClient = workspaceServiceClient;
         this.workspaceStarter = workspaceStarter;
     }
 
-    /**
-     * Displays a notification with a proposal to start workspace with ID.
-     *
-     * @param workspaceID
-     *         workspace ID
-     */
-    public void show(String workspaceID) {
-        this.workspaceID = workspaceID;
-
-        workspaceServiceClient.getSnapshot(workspaceID).then(new Operation<List<SnapshotDto>>() {
-            @Override
-            public void apply(List<SnapshotDto> snapshots) throws OperationException {
-                Widget widget = uiBinder.createAndBindUi(StartWorkspaceNotification.this);
-
-                if (snapshots.isEmpty()) {
-                    restore.setVisible(false);
-                }
-
-                loader.show(LoaderPresenter.Phase.WORKSPACE_STOPPED, widget);
-            }
-        });
+    /** Displays a notification with a proposal to start current workspace. */
+    public void show() {
+        Widget widget = uiBinder.createAndBindUi(StartWorkspaceNotification.this);
+        loader.show(LoaderPresenter.Phase.WORKSPACE_STOPPED, widget);
     }
 
     /**
@@ -92,8 +66,7 @@ public class StartWorkspaceNotification {
     @UiHandler("button")
     void startClicked(ClickEvent e) {
         loader.setSuccess(LoaderPresenter.Phase.WORKSPACE_STOPPED);
-
-        workspaceStarter.startWorkspace(workspaceID, restore.getValue());
+        workspaceStarter.startWorkspace(restore.getValue());
     }
 
     interface WorkspaceStarterUiBinder extends UiBinder<Widget, StartWorkspaceNotification> {

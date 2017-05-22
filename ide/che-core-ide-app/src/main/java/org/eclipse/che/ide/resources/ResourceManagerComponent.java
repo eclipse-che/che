@@ -14,9 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
-
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 
 /**
  * Resource management component. Initializes with workspace agent.
@@ -29,9 +28,14 @@ public class ResourceManagerComponent {
 
     @Inject
     public ResourceManagerComponent(ResourceManagerInitializer initializer, EventBus eventBus) {
-        eventBus.addHandler(WsStatusChangedEvent.TYPE, event -> {
-            if (event.getStatus() == RUNNING) {
+        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
+            @Override
+            public void onWsAgentStarted(WsAgentStateEvent event) {
                 initializer.initResourceManager();
+            }
+
+            @Override
+            public void onWsAgentStopped(WsAgentStateEvent event) {
             }
         });
     }

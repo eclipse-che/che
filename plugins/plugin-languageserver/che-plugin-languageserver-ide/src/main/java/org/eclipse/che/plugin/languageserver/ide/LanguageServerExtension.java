@@ -26,7 +26,8 @@ import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
-import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.browser.UserAgent;
@@ -56,9 +57,14 @@ public class LanguageServerExtension {
     public LanguageServerExtension(LanguageServerFileTypeRegister languageServerFileTypeRegister,
                                    EventBus eventBus,
                                    AppContext appContext) {
-        eventBus.addHandler(WsStatusChangedEvent.TYPE, event -> {
-            if (event.getStatus() == RUNNING) {
+        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
+            @Override
+            public void onWsAgentStarted(WsAgentStateEvent event) {
                 languageServerFileTypeRegister.start();
+            }
+
+            @Override
+            public void onWsAgentStopped(WsAgentStateEvent event) {
             }
         });
 

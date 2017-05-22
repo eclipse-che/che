@@ -31,13 +31,12 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.event.WindowActionHandler;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.api.workspace.event.WsStatusChangedEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.Map;
-
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 /**
  * Responsible for persisting and restoring IDE state across sessions.
@@ -71,9 +70,14 @@ public class AppStateManager {
         this.jsonFactory = jsonFactory;
         this.appContext = appContext;
 
-        eventBus.addHandler(WsStatusChangedEvent.TYPE, event -> {
-            if (event.getStatus() == RUNNING) {
-                Scheduler.get().scheduleDeferred(this::restoreWorkspaceState);
+        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
+            @Override
+            public void onWsAgentStarted(WsAgentStateEvent event) {
+                Scheduler.get().scheduleDeferred(AppStateManager.this::restoreWorkspaceState);
+            }
+
+            @Override
+            public void onWsAgentStopped(WsAgentStateEvent event) {
             }
         });
 

@@ -72,7 +72,6 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 public class AppContextImpl implements AppContext,
                                        SelectionChangedHandler,
                                        ResourceChangedHandler,
-                                       WorkspaceStartedEvent.Handler,
                                        WorkspaceStoppedEvent.Handler,
                                        ResourceManagerInitializer {
     private static final String APP_ID = String.valueOf(nextInt(Integer.MAX_VALUE));
@@ -393,11 +392,6 @@ public class AppContextImpl implements AppContext,
 
             return root;
         }
-    }
-
-    @Override
-    public void onWorkspaceStarted(WorkspaceStartedEvent event) {
-        setWorkspace(event.getWorkspace());
     }
 
     @Override

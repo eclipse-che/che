@@ -13,10 +13,9 @@ package org.eclipse.che.ide.workspace;
 import com.google.gwt.http.client.URL;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.workspace.shared.dto.CommandDto;
-import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
@@ -172,15 +171,6 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Deleting command..."))
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
-    }
-
-    @Override
-    public Promise<List<SnapshotDto>> getSnapshot(final String workspaceId) {
-        final String url = baseHttpUrl + '/' + workspaceId + "/snapshot";
-        return asyncRequestFactory.createGetRequest(url)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Getting workspace's snapshot"))
-                                  .send(dtoUnmarshallerFactory.newListUnmarshaller(SnapshotDto.class));
     }
 
     @Override

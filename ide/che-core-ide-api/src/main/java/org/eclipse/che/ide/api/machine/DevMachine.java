@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.api.machine;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
-import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -29,20 +28,22 @@ public class DevMachine extends MachineEntityImpl {
         super(name, devMachineDescriptor);
     }
 
+    // FIXME: spi
     public String getWsAgentWebSocketUrl() {
-        for (Link link : machineLinks) {
-            if (Constants.WSAGENT_WEBSOCKET_REFERENCE.equals(link.getRel())) {
-                return link.getHref();
-            }
-        }
+        return getWsAgentBaseUrl().replaceFirst("http", "ws") + "/ws";
+//        for (Link link : machineLinks) {
+//            if (Constants.WSAGENT_WEBSOCKET_REFERENCE.equals(link.getRel())) {
+//                return link.getHref();
+//            }
+//        }
+
         //should not be
-        final String message = "Reference " + Constants.WSAGENT_WEBSOCKET_REFERENCE + " not found in DevMachine description";
-        Log.error(getClass(), message);
-        throw new RuntimeException(message);
+//        final String message = "Reference " + Constants.WSAGENT_WEBSOCKET_REFERENCE + " not found in DevMachine description";
+//        Log.error(getClass(), message);
+//        throw new RuntimeException(message);
     }
 
     /**
-     *
      * @return return base URL to the ws agent REST services. URL will be always without trailing slash
      */
     public String getWsAgentBaseUrl() {
@@ -53,12 +54,13 @@ public class DevMachine extends MachineEntityImpl {
                 url = url.substring(0, url.length() - 1);
             }
 
+            // FIXME: spi
             return url + "/api";
-        } else {
-            //should not be
-            String message = "Reference " + Constants.WSAGENT_REFERENCE + " not found in DevMachine description";
-            Log.error(getClass(), message);
-            throw new RuntimeException(message);
         }
+
+        //should not be
+        String message = "Reference " + Constants.WSAGENT_REFERENCE + " not found in DevMachine description";
+        Log.error(getClass(), message);
+        throw new RuntimeException(message);
     }
 }

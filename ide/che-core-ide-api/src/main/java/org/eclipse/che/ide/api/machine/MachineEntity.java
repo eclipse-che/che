@@ -48,12 +48,6 @@ public interface MachineEntity extends Machine {
     /** Returns {@link Server} by reference or null if it not exists. */
     Server getServer(String ref);
 
-//    List<Link> getMachineLinks();
-//
-//    Link getMachineLink(String ref);
-//
-//    Map<String, String> getEnvVariables();
-
     /** Returns {@link Machine descriptor} */
     Machine getDescriptor();
 
