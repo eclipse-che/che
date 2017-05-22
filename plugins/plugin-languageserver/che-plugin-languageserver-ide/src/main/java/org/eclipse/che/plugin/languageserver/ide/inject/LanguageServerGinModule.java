@@ -45,15 +45,10 @@ public class LanguageServerGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(LanguageServerQuickAssistProcessorFactory.class));
         install(new GinFactoryModuleBuilder().build(LanguageServerReconcileStrategyFactory.class));
         install(new GinFactoryModuleBuilder().build(LanguageServerSignatureHelpFactory.class));
-        // need this to ensure only one instance.
-        bind(LanguageServerRegistry.class).in(Singleton.class);
 
         GinMapBinder<String, WsAgentComponent> wsAgentComponentsBinder =
                 GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
         wsAgentComponentsBinder.addBinding("Load Language Server file types.").to(LanguageServerFileTypeRegister.class);
-
-        bind(PublishDiagnosticsReceiver.class).asEagerSingleton();
-        bind(ShowMessageJsonRpcReceiver.class).asEagerSingleton();
     }
 
 }
