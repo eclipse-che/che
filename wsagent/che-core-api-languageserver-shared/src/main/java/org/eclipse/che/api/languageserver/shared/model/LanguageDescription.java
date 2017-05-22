@@ -25,11 +25,17 @@ public class LanguageDescription {
     /**
      * The optional content types this language is associated with.
      */
-    private List<String> mimeTypes;
+    private String mimeType;
     /**
-     * The fileExtension this language is associated with. At least one extension must be provided.
+     * The fileExtension this language is associated with. 
      */
     private List<String> fileExtensions;
+    
+    /**
+     * The file names this language is associated with. 
+     */
+    private List<String> fileNames;
+
     /**
      * The optional highlighting configuration to support client side syntax highlighting.
      * The format is client (editor) dependent.
@@ -44,12 +50,12 @@ public class LanguageDescription {
         this.languageId = languageId;
     }
 
-    public List<String> getMimeTypes() {
-        return this.mimeTypes;
+    public String getMimeType() {
+        return this.mimeType;
     }
 
-    public void setMimeTypes(final List<String> mimeTypes) {
-        this.mimeTypes = mimeTypes;
+    public void setMimeType(final String mimeType) {
+        this.mimeType = mimeType;
     }
 
     public List<String> getFileExtensions() {
@@ -58,6 +64,14 @@ public class LanguageDescription {
 
     public void setFileExtensions(final List<String> fileExtensions) {
         this.fileExtensions = fileExtensions;
+    }
+    
+    public List<String> getFileNames() {
+        return fileNames;
+    }
+    
+    public void setFileNames(List<String> fileNames) {
+        this.fileNames = fileNames;
     }
 
     public String getHighlightingConfiguration() {
@@ -74,22 +88,24 @@ public class LanguageDescription {
         if (o == null || getClass() != o.getClass()) return false;
         LanguageDescription that = (LanguageDescription)o;
         return Objects.equals(languageId, that.languageId) &&
-               Objects.equals(mimeTypes, that.mimeTypes) &&
+               Objects.equals(mimeType, that.mimeType) &&
                Objects.equals(fileExtensions, that.fileExtensions) &&
+               Objects.equals(fileNames, that.fileNames) &&
                Objects.equals(highlightingConfiguration, that.highlightingConfiguration);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(languageId, mimeTypes, fileExtensions, highlightingConfiguration);
+        return Objects.hash(languageId, mimeType, fileExtensions, fileNames, highlightingConfiguration);
     }
 
     @Override
     public String toString() {
         return "LanguageDescriptionImpl{" +
                "languageId='" + languageId + '\'' +
-               ", mimeTypes=" + mimeTypes +
+               ", mimeTypes=" + mimeType +
                ", fileExtensions=" + fileExtensions +
+               ", fileNames=" + fileNames +
                ", highlightingConfiguration='" + highlightingConfiguration + '\'' +
                '}';
     }

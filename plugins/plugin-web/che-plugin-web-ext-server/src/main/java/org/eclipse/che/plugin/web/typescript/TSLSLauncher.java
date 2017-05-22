@@ -12,19 +12,17 @@ package org.eclipse.che.plugin.web.typescript;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.plugin.web.shared.Constants;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 
 import javax.inject.Singleton;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import static java.util.Arrays.asList;
 
 
 /**
@@ -32,10 +30,6 @@ import static java.util.Arrays.asList;
  */
 @Singleton
 public class TSLSLauncher extends LanguageServerLauncherTemplate {
-    private static final String[] EXTENSIONS = new String[]{Constants.TS_EXT};
-    private static final String[] MIME_TYPES = new String[]{Constants.TS_MIME_TYPE};
-    private static final LanguageDescription description;
-
     private final Path launchScript;
 
     public TSLSLauncher() {
@@ -63,24 +57,12 @@ public class TSLSLauncher extends LanguageServerLauncherTemplate {
     }
 
     @Override
-    public LanguageDescription getLanguageDescription() {
-        return description;
+    public String getLanguageId() {
+        return Constants.TS_LANG;
     }
-
+    
     @Override
     public boolean isAbleToLaunch() {
         return Files.exists(launchScript);
-    }
-
-    static {
-        description = new LanguageDescription();
-        description.setFileExtensions(asList(EXTENSIONS));
-        description.setLanguageId(Constants.TS_LANG);
-        description.setMimeTypes(asList(MIME_TYPES));
-        description.setHighlightingConfiguration("[\n" +
-                                                 "  {\"include\":\"orion.js\"},\n" +
-                                                 "  {\"match\":\"\\\\b(?:constructor|declare|module)\\\\b\",\"name\" :\"keyword.operator.typescript\"},\n" +
-                                                 "  {\"match\":\"\\\\b(?:any|boolean|number|string)\\\\b\",\"name\" : \"storage.type.typescript\"}\n" +
-                                                 "]");
     }
 }

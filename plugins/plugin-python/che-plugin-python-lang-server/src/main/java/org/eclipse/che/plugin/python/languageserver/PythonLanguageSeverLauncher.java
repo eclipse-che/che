@@ -12,29 +12,22 @@ package org.eclipse.che.plugin.python.languageserver;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.plugin.python.shared.ProjectAttributes;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 
 import javax.inject.Singleton;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-
-import static java.util.Arrays.asList;
 
 /**
  * Launches language server for Python
  */
 @Singleton
 public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate {
-
-    private static final String[] EXTENSIONS = new String[]{ProjectAttributes.PYTHON_EXT};
-    private static final String[] MIME_TYPES = new String[]{"text/x-python"};
-    private static final LanguageDescription description;
 
     private final Path launchScript;
 
@@ -43,10 +36,10 @@ public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate 
     }
 
     @Override
-    public LanguageDescription getLanguageDescription() {
-        return description;
+    public String getLanguageId() {
+        return ProjectAttributes.PYTHON_ID;
     }
-
+    
     @Override
     public boolean isAbleToLaunch() {
         return launchScript.toFile().exists();
@@ -74,10 +67,4 @@ public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate 
         return launcher.getRemoteProxy();
     }
 
-    static {
-        description = new LanguageDescription();
-        description.setFileExtensions(asList(EXTENSIONS));
-        description.setLanguageId(ProjectAttributes.PYTHON_ID);
-        description.setMimeTypes(Arrays.asList(MIME_TYPES));
-    }
-}
+  }

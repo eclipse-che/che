@@ -16,6 +16,7 @@ import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
 import org.eclipse.che.api.languageserver.registry.ServerInitializerObserver;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.plugin.json.inject.JsonModule;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.jsonrpc.Endpoint;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
@@ -30,8 +31,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.util.Arrays.asList;
-
 /**
  * @author Evgen Vidolob
  * @author Anatolii Bazko
@@ -39,15 +38,7 @@ import static java.util.Arrays.asList;
 @Singleton
 public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate implements ServerInitializerObserver {
 
-    private static final String   LANGUAGE_ID = "json";
-    private static final String[] EXTENSIONS  = new String[]{"json", "bowerrc", "jshintrc", "jscsrc", "eslintrc",
-                                                             "babelrc"};
-    private static final String[] MIME_TYPES  = new String[]{"application/json"};
-    private static final LanguageDescription description;
-
     private final Path launchScript;
-
-    private LanguageClient client;
 
     @Inject
     public JsonLanguageServerLauncher() {
@@ -55,8 +46,8 @@ public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate i
     }
 
     @Override
-    public LanguageDescription getLanguageDescription() {
-        return description;
+    public String getLanguageId() {
+        return JsonModule.LANGUAGE_ID;
     }
 
     @Override
@@ -65,7 +56,6 @@ public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate i
     }
 
     protected LanguageServer connectToLanguageServer(final Process languageServerProcess, LanguageClient client) {
-        this.client = client;
         Launcher<LanguageServer> launcher = Launcher.createLauncher(client, LanguageServer.class,
                                                                     languageServerProcess.getInputStream(),
                                                                     languageServerProcess.getOutputStream());
@@ -82,13 +72,6 @@ public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate i
         } catch (IOException e) {
             throw new LanguageServerException("Can't start JSON language server", e);
         }
-    }
-
-    static {
-        description = new LanguageDescription();
-        description.setFileExtensions(asList(EXTENSIONS));
-        description.setLanguageId(LANGUAGE_ID);
-        description.setMimeTypes(asList(MIME_TYPES));
     }
 
     @Override

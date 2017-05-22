@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.languageserver.ide.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
-
+import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerFileTypeRegister;
@@ -45,7 +45,8 @@ public class LanguageServerGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(LanguageServerQuickAssistProcessorFactory.class));
         install(new GinFactoryModuleBuilder().build(LanguageServerReconcileStrategyFactory.class));
         install(new GinFactoryModuleBuilder().build(LanguageServerSignatureHelpFactory.class));
-        bind(LanguageServerRegistry.class);
+        // need this to ensure only one instance.
+        bind(LanguageServerRegistry.class).in(Singleton.class);
 
         GinMapBinder<String, WsAgentComponent> wsAgentComponentsBinder =
                 GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
