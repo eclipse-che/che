@@ -73,7 +73,7 @@ export class CreateProjectSamplesController {
       });
     }
 
-    this.filteredAndSortedTemplates = this.$filter('orderBy')(filteredTemplates, 'projectType', 'displayName');
+    this.filteredAndSortedTemplates = this.$filter('orderBy')(filteredTemplates, ['projectType', 'displayName']);
 
     if (this.filteredAndSortedTemplates.length) {
       this.initItem(this.filteredAndSortedTemplates[0]);

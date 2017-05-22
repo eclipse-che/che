@@ -66,12 +66,13 @@ import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
 import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
 import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
+import org.eclipse.che.plugin.docker.client.params.ListImagesParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.PushParams;
 import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
@@ -196,16 +197,34 @@ public class DockerConnector {
     }
 
     /**
-     * Lists docker images.
+     * Lists all final layer docker images.
      *
      * @return list of docker images
      * @throws IOException
      *          when a problem occurs with docker api calls
      */
     public List<Image> listImages() throws IOException {
+        return listImages(ListImagesParams.create());
+    }
+
+    /**
+     * Lists docker images.
+     *
+     * @return list of docker images
+     * @throws IOException
+     *          when a problem occurs with docker api calls
+     */
+    public List<Image> listImages(ListImagesParams params) throws IOException {
+        final Filters filters = params.getFilters();
+
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path(apiVersionPathPrefix + "/images/json")) {
+            addQueryParamIfNotNull(connection, "all", params.getAll());
+            addQueryParamIfNotNull(connection, "digests", params.getAll());
+            if (filters != null) {
+                connection.query("filters", urlPathSegmentEscaper().escape(toJson(filters.getFilters())));
+            }
             final DockerResponse response = connection.request();
             if (OK.getStatusCode() != response.getStatus()) {
                 throw getDockerException(response);

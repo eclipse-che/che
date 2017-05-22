@@ -34,9 +34,16 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionRequestPopulationException;
 import org.apache.maven.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.Activation;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
+import org.apache.maven.model.profile.DefaultProfileInjector;
 import org.apache.maven.plugin.LegacySupport;
+import org.apache.maven.profiles.activation.JdkPrefixProfileActivator;
+import org.apache.maven.profiles.activation.OperatingSystemProfileActivator;
+import org.apache.maven.profiles.activation.ProfileActivationException;
+import org.apache.maven.profiles.activation.ProfileActivator;
+import org.apache.maven.profiles.activation.SystemPropertyProfileActivator;
 import org.apache.maven.project.DefaultProjectBuilderConfiguration;
 import org.apache.maven.project.DependencyResolutionResult;
 import org.apache.maven.project.InvalidProjectModelException;
@@ -62,6 +69,8 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.codehaus.plexus.context.ContextException;
+import org.codehaus.plexus.context.DefaultContext;
 import org.codehaus.plexus.logging.BaseLoggerManager;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.eclipse.aether.DefaultRepositorySystemSession;
@@ -75,6 +84,8 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.che.maven.CheArtifactResolver;
 import org.eclipse.che.maven.data.MavenArtifact;
 import org.eclipse.che.maven.data.MavenArtifactKey;
+import org.eclipse.che.maven.data.MavenConstants;
+import org.eclipse.che.maven.data.MavenExplicitProfiles;
 import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.che.maven.data.MavenModel;
 import org.eclipse.che.maven.data.MavenProjectProblem;
@@ -103,7 +114,7 @@ import java.util.stream.Collectors;
  * @author Evgen Vidolob
  */
 public class MavenServerImpl extends MavenRmiObject implements MavenServer {
-    private static final String[] CLI_METHODS = new String[] {"initialize", "cli", "logging", "properties", "container"};
+    private static final String[] CLI_METHODS = new String[]{"initialize", "cli", "logging", "properties", "container"};
 
     private final MavenServerTerminalLogger terminalLogger;
     private final File                      localRepository;
@@ -201,7 +212,8 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
             userPropertiesField.setAccessible(true);
             Properties userProperties = (Properties)userPropertiesField.get(request);
             this.settings = getSettings(settingsBuilder, settings, properties, userProperties);
-        } catch (NoSuchMethodException | NoSuchFieldException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | NoSuchFieldException | IllegalAccessException | InvocationTargetException |
+                InstantiationException e) {
             throw new RuntimeException(e);
         }
 
@@ -221,6 +233,127 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
 //        pathTranslator.alignToBaseDirectory(result, projectDir);
 
         return MavenModelUtil.convertModel(result);
+    }
+
+    /**
+     * Analyzes all profiles and if it's activated, applied it to the model.
+     *
+     * @param model
+     *         maven model
+     * @param projectDir
+     *         base directory of the analysed project
+     * @param explicitProfiles
+     *         information about all profiles from the current model
+     * @param alwaysOnProfiles
+     *         list of profiles which sre always activated
+     * @return returns model with applied profiles and information about profiles
+     * @throws RemoteException
+     *         throws if some problem happens whens profile's activation is checked
+     */
+    public static ProfileApplicationResult applyProfiles(MavenModel model,
+                                                         File projectDir,
+                                                         MavenExplicitProfiles explicitProfiles,
+                                                         Collection<String> alwaysOnProfiles) throws RemoteException {
+        Model nativeModel = MavenModelUtil.convertToMavenModel(model);
+
+        Collection<String> enabledProfiles = explicitProfiles.getEnabledProfiles();
+        Collection<String> disabledProfiles = explicitProfiles.getDisabledProfiles();
+        List<Profile> activatedPom = new ArrayList<>();
+        List<Profile> activatedExternal = new ArrayList<>();
+        List<Profile> activeByDefault = new ArrayList<>();
+
+        List<Profile> rawProfiles = nativeModel.getProfiles();
+        List<Profile> expandedProfilesCache = null;
+        List<Profile> deactivatedProfiles = new ArrayList<>();
+
+        for (int i = 0; i < rawProfiles.size(); i++) {
+            Profile profile = rawProfiles.get(i);
+
+            if (disabledProfiles.contains(profile.getId())) {
+                deactivatedProfiles.add(profile);
+                continue;
+            }
+
+            boolean shouldAdd = enabledProfiles.contains(profile.getId()) || alwaysOnProfiles.contains(profile.getId());
+
+            Activation activation = profile.getActivation();
+            if (activation != null) {
+                if (activation.isActiveByDefault()) {
+                    activeByDefault.add(profile);
+                }
+
+                if (expandedProfilesCache == null) {
+                    expandedProfilesCache = internalInterpolate(nativeModel, projectDir).getProfiles();
+                }
+                Profile eachExpandedProfile = expandedProfilesCache.get(i);
+
+                for (ProfileActivator eachActivator : getProfileActivators(projectDir)) {
+                    try {
+                        if (eachActivator.canDetermineActivation(eachExpandedProfile) && eachActivator.isActive(eachExpandedProfile)) {
+                            shouldAdd = true;
+                            break;
+                        }
+                    } catch (ProfileActivationException e) {
+                        MavenServerContext.getLogger().warning(e);
+                    }
+                }
+            }
+
+            if (shouldAdd) {
+                if (MavenConstants.PROFILE_FROM_POM.equals(profile.getSource())) {
+                    activatedPom.add(profile);
+                } else {
+                    activatedExternal.add(profile);
+                }
+            }
+        }
+
+        List<Profile> activatedProfiles = new ArrayList<>(activatedPom.isEmpty() ? activeByDefault : activatedPom);
+        activatedProfiles.addAll(activatedExternal);
+
+        for (Profile each : activatedProfiles) {
+            new DefaultProfileInjector().injectProfile(nativeModel, each, null, null);
+        }
+
+        return new ProfileApplicationResult(MavenModelUtil.convertModel(nativeModel),
+                                            new MavenExplicitProfiles(collectProfilesIds(activatedProfiles),
+                                                                      collectProfilesIds(deactivatedProfiles))
+        );
+
+    }
+
+    private static Collection<String> collectProfilesIds(List<Profile> profiles) {
+        Collection<String> result = new HashSet<>();
+        for (Profile each : profiles) {
+            if (each.getId() != null) {
+                result.add(each.getId());
+            }
+        }
+        return result;
+    }
+
+    private static ProfileActivator[] getProfileActivators(File basedir) throws RemoteException {
+        SystemPropertyProfileActivator sysPropertyActivator = new SystemPropertyProfileActivator();
+        DefaultContext context = new DefaultContext();
+        context.put("SystemProperties", collectSystemProperties());
+        try {
+            sysPropertyActivator.contextualize(context);
+        } catch (ContextException e) {
+            MavenServerContext.getLogger().error(e);
+            return new ProfileActivator[0];
+        }
+
+        return new ProfileActivator[]{new MavenFileProfileActivator(basedir),
+                                      sysPropertyActivator,
+                                      new JdkPrefixProfileActivator(),
+                                      new OperatingSystemProfileActivator()};
+    }
+
+    private static Properties collectSystemProperties() {
+        Properties properties = new Properties();
+        properties.putAll((Properties)System.getProperties().clone());
+
+        return properties;
     }
 
     private static Model internalInterpolate(Model model, File projectDir) throws RemoteException {
@@ -424,7 +557,7 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
             ArtifactResult artifactResult = repositorySystem.resolveArtifact(repositorySystemSession,
                                                                              new ArtifactRequest(RepositoryUtils.toArtifact(artifact),
                                                                                                  remoteRepositories, null));
-        return MavenModelUtil.convertArtifact(RepositoryUtils.toArtifact(artifactResult.getArtifact()), localRepository);
+            return MavenModelUtil.convertArtifact(RepositoryUtils.toArtifact(artifactResult.getArtifact()), localRepository);
         } catch (ArtifactResolutionException ignored) {
             //we need ignore exception, it's some times has class that client doesn't has
             // .printStackTrace() may be solution, but it will spam wsagent logs
