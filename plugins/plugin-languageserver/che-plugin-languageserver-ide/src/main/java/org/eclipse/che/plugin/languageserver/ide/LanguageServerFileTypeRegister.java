@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  */
 @Singleton
 public class LanguageServerFileTypeRegister implements WsAgentComponent {
-    private static Logger logger = Logger.getLogger(LanguageServerFileTypeRegister.class.getName());
+    private static Logger LOGGER = Logger.getLogger(LanguageServerFileTypeRegister.class.getName());
 
     private final LanguageServerRegistryServiceClient serverLanguageRegistry;
     private final LanguageServerRegistry              lsRegistry;
@@ -80,7 +80,7 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
         registeredLanguages.then(new Operation<List<LanguageDescription>>() {
             @Override
             public void apply(List<LanguageDescription> langs) throws OperationException {
-                logger.info("registering language descriptions");
+                LOGGER.info("registering language descriptions");
                 if (!langs.isEmpty()) {
                     JsArrayString contentTypes = JsArrayString.createArray().cast();
                     for (LanguageDescription lang : langs) {
@@ -112,7 +112,7 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                         config.setContentTypes(mimeType);
                         config.setPatterns(lang.getHighlightingConfiguration());
                         contentTypeRegistrant.registerFileType(contentType, config);
-                        logger.info("registered language description for " + lang.getLanguageId());
+                        LOGGER.info("registered language description for " + lang.getLanguageId());
                     }
                     orionHoverRegistrant.registerHover(contentTypes, hoverProvider);
                     orionOccurrencesRegistrant.registerOccurrencesHandler(contentTypes, occurrencesProvider);
