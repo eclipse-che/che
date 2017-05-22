@@ -27,6 +27,7 @@ import {WidgetConfig} from './widget/widget-config';
 import {CheStepsContainer} from './steps-container/steps-container.directive';
 import {CheErrorMessagesConfig} from './error-messages/che-error-messages-config';
 import {ServiceConfig} from './service/service-config';
+import {RandomSvc} from './utils/random.service';
 
 export class ComponentsConfig {
 
@@ -47,5 +48,7 @@ export class ComponentsConfig {
     new ServiceConfig(register);
 
     register.directive('cheStepsContainer', CheStepsContainer);
+
+    register.factory('randomSvc', RandomSvc);
   }
 }

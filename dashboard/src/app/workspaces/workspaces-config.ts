@@ -49,6 +49,15 @@ import {RamSettings} from './create-workspace/ram-settings/ram-settings.directiv
 import {RamSettingsMachineItemController} from './create-workspace/ram-settings/ram-settings-machine-item/ram-settings-machine-item.controller';
 import {RamSettingsMachineItem} from './create-workspace/ram-settings/ram-settings-machine-item/ram-settings-machine-item.directive';
 
+import {NamespaceSelectorController} from './create-workspace/namespace-selector/namespace-selector.controller';
+import {NamespaceSelectorSvc} from './create-workspace/namespace-selector/namespace-selector.service';
+import {NamespaceSelector} from './create-workspace/namespace-selector/namespace-selector.directive';
+
+import {TemplateSelectorController} from './create-workspace/project-source-selector/template-selector/template-selector.controller';
+import {TemplateSelectorSvc} from './create-workspace/project-source-selector/template-selector/template-selector.service';
+import {TemplateSelector} from './create-workspace/project-source-selector/template-selector/template-selector.directive';
+import {TemplateSelectorItem} from './create-workspace/project-source-selector/template-selector/template-selector-item/template-selector-item.directive';
+
 import {CheWorkspaceRamAllocationSliderController} from './workspace-ram-slider/che-workspace-ram-allocation-slider.controller';
 import {CheWorkspaceRamAllocationSlider} from './workspace-ram-slider/che-workspace-ram-allocation-slider.directive';
 import {WorkspaceStatus} from './workspace-status/workspace-status.directive';
@@ -83,6 +92,8 @@ import {StackSelectorScopeFilter} from './create-workspace/stack-selector/stack-
 import {StackSelectorSearchFilter} from './create-workspace/stack-selector/stack-selector-search.filter';
 import {StackSelectorTagsFilter} from './create-workspace/stack-selector/stack-selector-tags.filter';
 
+import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
+import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
 
 /**
  * @ngdoc controller
@@ -152,10 +163,20 @@ export class WorkspacesConfig {
     register.service('stackSelectorSvc', StackSelectorSvc);
     register.directive('stackSelector', StackSelector);
     register.directive('stackSelectorItem', StackSelectorItem);
+
     register.controller('RamSettingsController', RamSettingsController);
     register.directive('ramSettings', RamSettings);
     register.controller('RamSettingsMachineItemController', RamSettingsMachineItemController);
     register.directive('ramSettingsMachineItem', RamSettingsMachineItem);
+
+    register.controller('NamespaceSelectorController', NamespaceSelectorController);
+    register.service('namespaceSelectorSvc', NamespaceSelectorSvc);
+    register.directive('namespaceSelector', NamespaceSelector);
+
+    register.controller('TemplateSelectorController', TemplateSelectorController);
+    register.service('templateSelectorSvc', TemplateSelectorSvc);
+    register.directive('templateSelector', TemplateSelector);
+    register.directive('templateSelectorItem', TemplateSelectorItem);
 
     register.controller('CheStackLibraryFilterController', CheStackLibraryFilterController);
     register.directive('cheStackLibraryFilter', CheStackLibraryFilter);
@@ -184,6 +205,9 @@ export class WorkspacesConfig {
     register.controller('ListAgentsController', ListAgentsController);
     register.directive('listAgents', ListAgents);
 
+    register.controller('CreateWorkspaceController', CreateWorkspaceController);
+    register.service('createWorkspaceSvc', CreateWorkspaceSvc);
+
     // config routes
     register.app.config(($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/workspaces', {
@@ -197,6 +221,12 @@ export class WorkspacesConfig {
         templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
         controller: 'WorkspaceDetailsController',
         controllerAs: 'workspaceDetailsController'
+      })
+      .accessWhen('/create-workspace-new', {
+        title: 'New Workspace',
+        templateUrl: 'app/workspaces/create-workspace/create-workspace.html',
+        controller: 'CreateWorkspaceController',
+        controllerAs: 'createWorkspaceController'
       })
       .accessWhen('/create-workspace', {
         title: 'New Workspace',

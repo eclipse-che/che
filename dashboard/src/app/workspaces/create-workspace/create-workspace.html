@@ -1,0 +1,75 @@
+<che-toolbar che-title="New Workspace">
+  <che-button-save-flat class="create-workspace-header-button"
+                        che-button-title="Create"
+                        ng-click="createWorkspaceController.createWorkspace()"
+                        ng-disabled="createWorkspaceController.isCreateButtonDisabled()"></che-button-save-flat>
+</che-toolbar>
+<md-content md-scroll-y flex
+            class="create-workspace-content" md-theme="default">
+
+  <!-- Name -->
+  <che-label-container che-label-name="Name"
+                       che-label-description="Define a name for your workspace.">
+    <ng-form flex layout="column"
+             name="workspaceNameForm">
+      <che-input-box ng-init="createWorkspaceController.registerForm('name', workspaceNameForm)"
+                     che-form="workspaceNameForm"
+                     che-name="workspaceName"
+                     che-place-holder="Name of the workspace"
+                     aria-label="Name of the workspace"
+                     ng-model="createWorkspaceController.workspaceName"
+                     ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 }, allowInvalid: false }"
+                     required
+                     custom-validator="createWorkspaceController.isNameUnique($value)"
+                     ng-minlength="3"
+                     ng-maxlength="20"
+                     ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+        <che-error-messages>
+          <div ng-message="required">A name is required.</div>
+          <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.
+          </div>
+          <div ng-message="minlength">The name has to be more than 3 characters long.</div>
+          <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+          <div ng-message="customValidator">This workspace name is already used.</div>
+        </che-error-messages>
+      </che-input-box>
+    </ng-form>
+  </che-label-container>
+
+  <!-- Namespace -->
+  <che-label-container che-label-name="{{createWorkspaceController.getNamespaceCaption()}}"
+                       ng-if="createWorkspaceController.getNamespaces().length > 0 || createWorkspaceController.getNamespaceEmptyMessage()">
+    <namespace-selector on-namespace-change="createWorkspaceController.onNamespaceChanged(namespaceId)"></namespace-selector>
+  </che-label-container>
+
+  <!-- Select Stack -->
+  <che-label-container che-label-name="Select Stack"
+                       che-label-description="Select existing workspace or create it from stack, recipe or image used to define your environment runtime. Workspace environments are used to build and run your project.">
+    <stack-selector on-stack-select="createWorkspaceController.onStackSelected(stackId)"></stack-selector>
+  </che-label-container>
+
+  <!-- RAM Settings-->
+  <che-label-container che-label-name="Ram Settings"
+                       che-label-description="Configure the RAM form each machine(s) of the workspace.">
+    <ng-form name="ramSettingsForm">
+      <ram-settings ng-init="createWorkspaceController.registerForm('ramSettings', ramSettingsForm)"
+                    machines="createWorkspaceController.stackMachines"
+                    environment-manager="createWorkspaceController.environmentManager"
+                    on-ram-change="createWorkspaceController.onRamChanged(name, memoryLimitBytes)"></ram-settings>
+    </ng-form>
+  </che-label-container>
+
+  <!-- Project source selector -->
+  <che-label-container che-label-name="Projects">
+    <template-selector></template-selector>
+  </che-label-container>
+
+  <che-label-container>
+    <che-button-save-flat class="create-workspace-footer-button"
+                          name="saveButton"
+                          che-button-title="Create"
+                          ng-click="createWorkspaceController.createWorkspace()"
+                          ng-disabled="createWorkspaceController.isCreateButtonDisabled()"></che-button-save-flat>
+  </che-label-container>
+
+</md-content>

@@ -11,17 +11,19 @@
 'use strict';
 
 /**
- * Defines the class for filter selector widget.
- * @author Ann Shumilova
+ * Defines a directive for displaying stack selector widget.
+ *
+ * @author Oleksii Kurinnyi
  */
-export class CheFilterSelector implements ng.IDirective {
-
+export class NamespaceSelector implements ng.IDirective {
   restrict: string = 'E';
+  templateUrl: string = 'app/workspaces/create-workspace/namespace-selector/namespace-selector.html';
+  replace: boolean = true;
+
+  controller: string = 'NamespaceSelectorController';
+  controllerAs: string = 'namespaceSelectorController';
+
   bindToController: boolean = true;
-  templateUrl: string = 'components/widget/filter-selector/che-filter-selector.html';
-  controller: string = 'CheFilterSelectorController';
-  controllerAs: string = 'cheFilterSelectorController';
-  require: Array<string> = ['ngModel'];
 
   scope: {
     [propName: string]: string
@@ -33,11 +35,7 @@ export class CheFilterSelector implements ng.IDirective {
    */
   constructor() {
     this.scope = {
-      valueModel: '=ngModel',
-      values: '=cheValues',
-      isDisabled: '=cheDisabled',
-      onChange: '&cheOnChange',
-      width: '@?cheWidth'
+      onNamespaceChange: '&'
     };
   }
 }
