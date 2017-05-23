@@ -151,7 +151,14 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         asyncRequestFactory.createGetRequest(url).send().then(ignored -> {
             checkWsConnection();
         }).catchError(ignored -> {
-            checkWsAgentHealth();
+            // FIXME: spi
+            new Timer() {
+                @Override
+                public void run() {
+                    checkHttpConnection();
+                }
+            }.schedule(1000);
+//            checkWsAgentHealth();
         });
     }
 
@@ -198,26 +205,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         }
     }
 
-    private class StopCallback implements ConfirmCallback {
-
-        private final boolean reloadPage;
-        private final boolean createSnapshot;
-
-        private StopCallback(boolean reloadPage, boolean createSnapshot) {
-            this.reloadPage = reloadPage;
-            this.createSnapshot = createSnapshot;
-        }
-
-        @Override
-        public void accepted() {
-            workspaceServiceClient.stop(appContext.getWorkspaceId(), createSnapshot).then(ignored -> {
-                if (reloadPage) {
-                    BrowserUtils.reloadPage(false);
-                }
-            });
-        }
-    }
-
     /**
      * Try to connect via WebSocket connection
      */
@@ -247,6 +234,26 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
                 Log.error(getClass(), arg.getMessage());
             }
         });
+    }
+
+    private class StopCallback implements ConfirmCallback {
+
+        private final boolean reloadPage;
+        private final boolean createSnapshot;
+
+        private StopCallback(boolean reloadPage, boolean createSnapshot) {
+            this.reloadPage = reloadPage;
+            this.createSnapshot = createSnapshot;
+        }
+
+        @Override
+        public void accepted() {
+            workspaceServiceClient.stop(appContext.getWorkspaceId(), createSnapshot).then(ignored -> {
+                if (reloadPage) {
+                    BrowserUtils.reloadPage(false);
+                }
+            });
+        }
     }
 
 }
