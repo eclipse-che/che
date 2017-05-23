@@ -29,7 +29,6 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.machine.MachineStatusHandler;
 import org.eclipse.che.ide.macro.ServerAddressMacroRegistrar;
 import org.eclipse.che.lib.terminal.client.TerminalResources;
 import org.eclipse.che.requirejs.RequireJsLoader;
@@ -46,14 +45,12 @@ public class TerminalInitializer {
     public TerminalInitializer(final TerminalResources terminalResources,
                                final EventBus eventBus,
                                final PerspectiveManager perspectiveManager,
-                               final Provider<MachineStatusHandler> machineStatusHandlerProvider,
                                final Provider<ServerAddressMacroRegistrar> machinePortProvider,
                                final AppContext appContext,
                                final TerminalInitializePromiseHolder terminalModule,
                                final RequireJsLoader requireJsLoader) {
         this.perspectiveManager = perspectiveManager;
         terminalResources.getTerminalStyle().ensureInjected();
-        machineStatusHandlerProvider.get();
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override

@@ -19,8 +19,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.bootstrap.CurrentWorkspaceManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -29,7 +28,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,9 +44,7 @@ public class StopWorkspaceActionTest {
     @Mock
     private AppContext               appContext;
     @Mock
-    private WorkspaceServiceClient   workspaceService;
-    @Mock
-    private NotificationManager      notificationManager;
+    private CurrentWorkspaceManager  workspaceManager;
     @Mock
     private Workspace                workspace;
 
@@ -78,14 +74,13 @@ public class StopWorkspaceActionTest {
 
     @Test
     public void actionShouldBePerformed() throws Exception {
-        when(workspaceService.stop(anyString())).thenReturn(voidPromise);
         DevMachine devMachine = mock(DevMachine.class);
-        when(devMachine.getId()).thenReturn("id");
+        when(devMachine.getName()).thenReturn("id");
         when(appContext.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn("id");
 
         action.actionPerformed(actionEvent);
 
-        verify(workspaceService).stop("id");
+        verify(workspaceManager).stopWorkspace();
     }
 }

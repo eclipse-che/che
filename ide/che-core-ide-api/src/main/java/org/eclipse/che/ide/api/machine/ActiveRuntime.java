@@ -18,16 +18,19 @@ import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.workspace.shared.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 /**
  * @author Vitalii Parfonov
  */
 public class ActiveRuntime {
 
-    private DevMachine          devMachine;
-    private List<MachineEntity> machines;
+    private DevMachine                 devMachine;
+    private Map<String, MachineEntity> machines;
 
     public ActiveRuntime(Workspace workspace) {
         Runtime workspaceRuntime = workspace.getRuntime();
@@ -40,10 +43,10 @@ public class ActiveRuntime {
         Machine devMachine = workspaceRuntime.getMachines().get(devMachineName);
 
         this.devMachine = new DevMachine(devMachineName, devMachine);
-        machines = new ArrayList<>();
+        machines = new HashMap<>();
 
         for (Entry<String, ? extends Machine> entry : workspaceRuntime.getMachines().entrySet()) {
-            machines.add(new MachineEntityImpl(entry.getKey(), entry.getValue()));
+            machines.put(entry.getKey(), new MachineEntityImpl(entry.getKey(), entry.getValue()));
         }
     }
 
@@ -52,6 +55,10 @@ public class ActiveRuntime {
     }
 
     public List<MachineEntity> getMachines() {
-        return machines;
+        return new ArrayList<>(machines.values());
+    }
+
+    public Optional<MachineEntity> getMachineByName(String name) {
+        return Optional.ofNullable(machines.get(name));
     }
 }

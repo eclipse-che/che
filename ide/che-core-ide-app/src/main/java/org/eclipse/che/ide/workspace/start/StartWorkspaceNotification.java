@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.bootstrap.WorkspaceStarter;
+import org.eclipse.che.ide.bootstrap.CurrentWorkspaceManager;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 
 /**
@@ -34,7 +34,7 @@ public class StartWorkspaceNotification {
 
     private final WorkspaceStarterUiBinder uiBinder;
     private final LoaderPresenter          loader;
-    private final WorkspaceStarter         workspaceStarter;
+    private final CurrentWorkspaceManager  currentWorkspaceManager;
 
     @UiField
     Button   button;
@@ -44,10 +44,10 @@ public class StartWorkspaceNotification {
     @Inject
     public StartWorkspaceNotification(LoaderPresenter loader,
                                       WorkspaceStarterUiBinder uiBinder,
-                                      WorkspaceStarter workspaceStarter) {
+                                      CurrentWorkspaceManager currentWorkspaceManager) {
         this.loader = loader;
         this.uiBinder = uiBinder;
-        this.workspaceStarter = workspaceStarter;
+        this.currentWorkspaceManager = currentWorkspaceManager;
     }
 
     /** Displays a notification with a proposal to start current workspace. */
@@ -66,7 +66,7 @@ public class StartWorkspaceNotification {
     @UiHandler("button")
     void startClicked(ClickEvent e) {
         loader.setSuccess(LoaderPresenter.Phase.WORKSPACE_STOPPED);
-        workspaceStarter.startWorkspace(restore.getValue());
+        currentWorkspaceManager.startWorkspace(restore.getValue());
     }
 
     interface WorkspaceStarterUiBinder extends UiBinder<Widget, StartWorkspaceNotification> {

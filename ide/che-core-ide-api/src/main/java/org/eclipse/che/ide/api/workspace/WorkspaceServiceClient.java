@@ -10,22 +10,48 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.workspace;
 
+import com.google.gwt.http.client.URL;
+import com.google.inject.Inject;
+
+import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.rest.AsyncRequestFactory;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.rest.StringMapUnmarshaller;
+import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
-/**
- * GWT Client for Workspace Service.
- *
- * @author Yevhenii Voevodin
- * @author Igor Vinokur
- */
-public interface WorkspaceServiceClient {
+import static com.google.gwt.http.client.RequestBuilder.PUT;
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
+import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
+
+/** GWT Client for Workspace Service. */
+public class WorkspaceServiceClient {
+
+    private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
+    private final AsyncRequestFactory    asyncRequestFactory;
+    private final LoaderFactory          loaderFactory;
+    private final String                 baseHttpUrl;
+
+    @Inject
+    private WorkspaceServiceClient(AppContext appContext,
+                                   DtoUnmarshallerFactory dtoUnmarshallerFactory,
+                                   AsyncRequestFactory asyncRequestFactory,
+                                   LoaderFactory loaderFactory) {
+        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
+        this.asyncRequestFactory = asyncRequestFactory;
+        this.loaderFactory = loaderFactory;
+        this.baseHttpUrl = appContext.getMasterEndpoint() + "/workspace";
+    }
 
     /**
      * Creates new workspace.
@@ -37,7 +63,17 @@ public interface WorkspaceServiceClient {
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
      * @see WorkspaceService#create(WorkspaceConfigDto, List, Boolean, String)
      */
-    Promise<WorkspaceDto> create(WorkspaceConfigDto newWorkspace, String account);
+    public Promise<WorkspaceDto> create(final WorkspaceConfigDto newWorkspace, final String accountId) {
+        String url = baseHttpUrl;
+        if (accountId != null) {
+            url += "?account=" + accountId;
+        }
+        return asyncRequestFactory.createPostRequest(url, newWorkspace)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Creating workspace..."))
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
+    }
 
     /**
      * Gets users workspace by key.
@@ -47,7 +83,13 @@ public interface WorkspaceServiceClient {
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
      * @see WorkspaceService#getByKey(String)
      */
-    Promise<WorkspaceDto> getWorkspace(String key);
+    public Promise<WorkspaceDto> getWorkspace(final String key) {
+        final String url = baseHttpUrl + '/' + key;
+        return asyncRequestFactory.createGetRequest(url)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Getting info about workspace..."))
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
+    }
 
     /**
      * Gets workspace by namespace and name
@@ -59,7 +101,13 @@ public interface WorkspaceServiceClient {
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
      * @see WorkspaceService#getByKey(String)
      */
-    Promise<WorkspaceDto> getWorkspace(String namespace, String workspaceName);
+    public Promise<WorkspaceDto> getWorkspace(@NotNull final String namespace, @NotNull final String workspaceName) {
+        final String url = baseHttpUrl + '/' + namespace + "/" + workspaceName;
+        return asyncRequestFactory.createGetRequest(url)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Getting info about workspace..."))
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
+    }
 
     /**
      * Starts workspace based on workspace id and environment.
@@ -74,7 +122,20 @@ public interface WorkspaceServiceClient {
      *         even if auto-restore is enabled and snapshot exists
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
      */
-    Promise<WorkspaceDto> startById(String id, String envName, Boolean restore);
+    public Promise<WorkspaceDto> startById(@NotNull final String id, final String envName, final Boolean restore) {
+        String url = baseHttpUrl + "/" + id + "/runtime";
+        if (restore != null) {
+            url += "?restore=" + restore;
+        }
+        if (envName != null) {
+            url += (url.contains("?") ? '&' : '?') + "environment=" + envName;
+        }
+        return asyncRequestFactory.createPostRequest(url, null)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Starting workspace..."))
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
+    }
 
     /**
      * Stops running workspace.
@@ -84,7 +145,12 @@ public interface WorkspaceServiceClient {
      * @return a promise that will resolve when the workspace has been stopped, or rejects with an error
      * @see WorkspaceService#stop(String, Boolean)
      */
-    Promise<Void> stop(String wsId);
+    public Promise<Void> stop(String wsId) {
+        final String url = baseHttpUrl + "/" + wsId + "/runtime";
+        return asyncRequestFactory.createDeleteRequest(url)
+                                  .loader(loaderFactory.newLoader("Stopping workspace..."))
+                                  .send();
+    }
 
     /**
      * Stops currently run runtime with ability to create snapshot.
@@ -95,7 +161,13 @@ public interface WorkspaceServiceClient {
      *         create snapshot during the stop operation
      * @return a promise that will resolve when the workspace has been stopped, or rejects with an error
      */
-    Promise<Void> stop(String wsId, boolean createSnapshot);
+    public Promise<Void> stop(String wsId, boolean createSnapshot) {
+        final String url = baseHttpUrl + "/" + wsId + "/runtime?create-snapshot=" + createSnapshot;
+
+        return asyncRequestFactory.createDeleteRequest(url)
+                                  .loader(loaderFactory.newLoader("Stopping workspace..."))
+                                  .send();
+    }
 
     /**
      * Get all commands from the specified workspace.
@@ -104,7 +176,9 @@ public interface WorkspaceServiceClient {
      *         workspace ID
      * @return a promise that will provide a list of {@link CommandDto}s, or rejects with an error
      */
-    Promise<List<CommandDto>> getCommands(String wsId);
+    public Promise<List<CommandDto>> getCommands(String wsId) {
+        return getWorkspace(wsId).then((Function<WorkspaceDto, List<CommandDto>>)workspaceDto -> workspaceDto.getConfig().getCommands());
+    }
 
     /**
      * Adds command to workspace
@@ -116,7 +190,14 @@ public interface WorkspaceServiceClient {
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
      * @see WorkspaceService#addCommand(String, CommandDto)
      */
-    Promise<WorkspaceDto> addCommand(String wsId, CommandDto newCommand);
+    public Promise<WorkspaceDto> addCommand(final String wsId, final CommandDto newCommand) {
+        final String url = baseHttpUrl + '/' + wsId + "/command";
+        return asyncRequestFactory.createPostRequest(url, newCommand)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Adding command..."))
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
+    }
 
     /**
      * Updates command.
@@ -124,7 +205,14 @@ public interface WorkspaceServiceClient {
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
      * @see WorkspaceService#updateCommand(String, String, CommandDto)
      */
-    Promise<WorkspaceDto> updateCommand(String wsId, String commandName, CommandDto commandUpdate);
+    public Promise<WorkspaceDto> updateCommand(final String wsId, final String commandName, final CommandDto commandUpdate) {
+        final String url = baseHttpUrl + '/' + wsId + "/command/" + URL.encodePathSegment(commandName);
+        return asyncRequestFactory.createRequest(PUT, url, commandUpdate, false)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Updating command..."))
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
+    }
 
     /**
      * Removes command from workspace.
@@ -136,7 +224,13 @@ public interface WorkspaceServiceClient {
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
      * @see WorkspaceService#deleteCommand(String, String)
      */
-    Promise<WorkspaceDto> deleteCommand(String wsId, String commandName);
+    public Promise<WorkspaceDto> deleteCommand(final String wsId, final String commandName) {
+        final String url = baseHttpUrl + '/' + wsId + "/command/" + URL.encodePathSegment(commandName);
+        return asyncRequestFactory.createDeleteRequest(url)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Deleting command..."))
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
+    }
 
     /**
      * Gets state of the workspace agent.
@@ -146,13 +240,21 @@ public interface WorkspaceServiceClient {
      * @return a promise that will resolve when the snapshot has been created, or rejects with an error
      * @see WorkspaceService#checkAgentHealth(String)
      */
-    Promise<WsAgentHealthStateDto> getWsAgentState(String workspaceId, String devMachineName);
+    public Promise<WsAgentHealthStateDto> getWsAgentState(String workspaceId, String devMachineName) {
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + '/' + workspaceId + "/check?machine=" + devMachineName)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WsAgentHealthStateDto.class));
+    }
 
     /**
      * Get workspace related server configuration values defined in che.properties
      *
      * @see WorkspaceService#getSettings()
      */
-    Promise<Map<String, String>> getSettings();
-
+    public Promise<Map<String, String>> getSettings() {
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + "/settings")
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .send(new StringMapUnmarshaller());
+    }
 }

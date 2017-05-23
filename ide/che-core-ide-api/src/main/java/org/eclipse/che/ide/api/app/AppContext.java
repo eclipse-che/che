@@ -179,8 +179,6 @@ public interface AppContext {
      */
     FactoryDto getFactory();
 
-    void setFactory(FactoryDto factory);
-
     String getWorkspaceId();
 
     /**
@@ -190,19 +188,9 @@ public interface AppContext {
      */
     Workspace getWorkspace();
 
-    /**
-     * Sets current workspace.
-     *
-     * @param workspace
-     *         current workspace or {@code null}
-     */
-    void setWorkspace(Workspace workspace);
-
     ActiveRuntime getActiveRuntime();
 
-
     String getMasterEndpoint();
-
 
     String getDevAgentEndpoint();
 
