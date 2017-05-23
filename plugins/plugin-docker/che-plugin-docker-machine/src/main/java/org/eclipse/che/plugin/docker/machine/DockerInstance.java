@@ -89,6 +89,7 @@ public class DockerInstance extends AbstractInstance {
     private static final String GET_ALIVE_PROCESSES_COMMAND =
             format("for pidFile in $(find %s -print 2>/dev/null); do kill -0 \"$(cat ${pidFile})\" 2>/dev/null && echo \"${pidFile}\"; done",
                    format(PID_FILE_TEMPLATE, "*"));
+    private static final String CLEAN_TMP_FOLDER_COMMAND = "rm -rf /tmp && mkdir /tmp && chmod 1777 /tmp";
 
     private final DockerMachineFactory                        dockerMachineFactory;
     private final String                                      container;
@@ -202,6 +203,7 @@ public class DockerInstance extends AbstractInstance {
     @Override
     public MachineSource saveToSnapshot() throws MachineException {
         try {
+            cleanTmpFolder();
             String image = generateRepository();
             if(!snapshotUseRegistry) {
                 commitContainer(image, LATEST_TAG);
@@ -232,6 +234,16 @@ public class DockerInstance extends AbstractInstance {
             Thread.currentThread().interrupt();
             throw new MachineException(e.getLocalizedMessage(), e);
         }
+    }
+
+    private void cleanTmpFolder() throws IOException {
+        final Exec exec = docker.createExec(CreateExecParams.create(container,
+                                                                    new String[] {"/bin/sh",
+                                                                                  "-c",
+                                                                                  CLEAN_TMP_FOLDER_COMMAND})
+                                                            .withDetach(false)
+                                                            .withUser("0:0"));
+        docker.startExec(StartExecParams.create(exec.getId()), null);
     }
 
     @VisibleForTesting
