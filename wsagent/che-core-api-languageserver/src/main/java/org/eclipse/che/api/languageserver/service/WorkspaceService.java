@@ -57,7 +57,7 @@ public class WorkspaceService {
             throws ExecutionException,
                    InterruptedException,
                    LanguageServerException {
-        LanguageServer server = getServer(TextDocumentService.prefixURI(workspaceSymbolParams.getFileUri()));
+        LanguageServer server = getServer(TextDocumentJsonRpcService.prefixURI(workspaceSymbolParams.getFileUri()));
         if (server == null) {
             return emptyList();
         }
@@ -65,7 +65,7 @@ public class WorkspaceService {
         List<? extends SymbolInformation> informations = server.getWorkspaceService().symbol(workspaceSymbolParams).get();
         informations.forEach(o -> {
             Location location = o.getLocation();
-            location.setUri(TextDocumentService.removePrefixUri(location.getUri()));
+            location.setUri(TextDocumentJsonRpcService.removePrefixUri(location.getUri()));
         });
         return informations.stream().map(o -> new SymbolInformationDto(o)).collect(Collectors.toList());
     }
