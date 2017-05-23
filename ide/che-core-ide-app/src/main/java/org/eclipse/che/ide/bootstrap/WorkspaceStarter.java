@@ -44,11 +44,13 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT;
 import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME;
 import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STOPPING_WORKSPACE;
+import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.WORKSPACE_STOPPED;
 
 /** Performs the routines required to run the workspace. */
 @Singleton
@@ -107,9 +109,23 @@ public class WorkspaceStarter {
 
     public void startWorkspace(boolean restoreFromSnapshot) {
         ideInitializer.getWorkspaceToStart().then(workspace -> {
-            subscribeToWorkspaceEvents(workspace.getId());
+            subscribeToEvents(workspace.getId());
             startWorkspace(workspace, restoreFromSnapshot);
         });
+    }
+
+    private void subscribeToEvents(String workspaceId) {
+        subscribe(WS_STATUS_ERROR_MSG, "event:workspace-status:subscribe", workspaceId);
+    }
+
+    private void subscribe(String it, String methodName, String id) {
+        workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
+                              .then((Operation<WorkspaceDto>)skip -> transmitter.newRequest()
+                                                                                .endpointId("ws-master")
+                                                                                .methodName(methodName)
+                                                                                .paramsAsString(id)
+                                                                                .sendAndSkipResult())
+                              .catchError((Operation<PromiseError>)error -> Log.error(getClass(), it + ": " + error.getMessage()));
     }
 
     /** Starts the workspace with the default environment. */
@@ -121,7 +137,22 @@ public class WorkspaceStarter {
         if (workspaceStatus == RUNNING) {
             checkWorkspaceStatus(null);
         } else if (workspaceStatus == STOPPED || workspaceStatus == STOPPING) {
-            workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), restoreFromSnapshot);
+            wsStatusNotification.show(STARTING_WORKSPACE_RUNTIME);
+
+            workspaceServiceClient.getSettings().then(settings -> {
+                if (Boolean.parseBoolean(settings.getOrDefault(CHE_WORKSPACE_AUTO_START, "true"))) {
+                    workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), restoreFromSnapshot)
+                                          .catchError(error -> {
+                                              notificationManagerProvider.get().notify(messages.startWsErrorTitle(),
+                                                                                       error.getMessage(),
+                                                                                       FAIL,
+                                                                                       FLOAT_MODE);
+                                              wsStatusNotification.setError(STARTING_WORKSPACE_RUNTIME);
+                                          });
+                } else {
+                    wsStatusNotification.show(WORKSPACE_STOPPED);
+                }
+            });
         }
     }
 
@@ -148,20 +179,6 @@ public class WorkspaceStarter {
                 WorkspaceStarter.this.notify(serverEvent);
             }
         });
-    }
-
-    private void subscribeToWorkspaceEvents(String workspaceId) {
-        subscribe(WS_STATUS_ERROR_MSG, "event:workspace-status:subscribe", workspaceId);
-    }
-
-    private void subscribe(String it, String methodName, String id) {
-        workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
-                              .then((Operation<WorkspaceDto>)skip -> transmitter.newRequest()
-                                                                                .endpointId("ws-master")
-                                                                                .methodName(methodName)
-                                                                                .paramsAsString(id)
-                                                                                .sendAndSkipResult())
-                              .catchError((Operation<PromiseError>)error -> Log.error(getClass(), it + ": " + error.getMessage()));
     }
 
     // TODO: should be separate component
