@@ -133,7 +133,7 @@ public class CreateExecParams {
 
     @Override
     public int hashCode() {
-        return Objects.hash(container, detach, cmd, user);
+        return Objects.hash(container, detach, Arrays.hashCode(cmd), user);
     }
 
     public String getUser() {

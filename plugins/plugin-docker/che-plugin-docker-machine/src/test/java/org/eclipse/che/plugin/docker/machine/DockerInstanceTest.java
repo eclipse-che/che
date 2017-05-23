@@ -96,8 +96,11 @@ public class DockerInstanceTest {
         doAnswer(invoke -> {
             @SuppressWarnings("unchecked")
             MessageProcessor<LogMessage> msgProc = (MessageProcessor<LogMessage>)invoke.getArguments()[1];
-            msgProc.process(logMessageMock);
-            return msgProc;
+            if (msgProc != null) {
+                msgProc.process(logMessageMock);
+                return msgProc;
+            }
+            return null;
         }).when(dockerConnectorMock)
           .startExec(any(StartExecParams.class), any());
     }
