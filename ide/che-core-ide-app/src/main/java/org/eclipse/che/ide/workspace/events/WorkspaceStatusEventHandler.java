@@ -91,6 +91,7 @@ public class WorkspaceStatusEventHandler {
                     });
     }
 
+    /** Handles workspace status changing. */
     public void handleWorkspaceStatusChanging(@Nullable WorkspaceStatusEvent serverEvent) {
         workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
             appContext.setWorkspace(workspace);
