@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.workspace;
+package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.http.client.URL;
 import com.google.inject.Inject;
@@ -18,7 +18,6 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -34,7 +33,6 @@ import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
-/** GWT Client for Workspace Service. */
 public class WorkspaceServiceClient {
 
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
@@ -230,20 +228,6 @@ public class WorkspaceServiceClient {
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Deleting command..."))
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
-    }
-
-    /**
-     * Gets state of the workspace agent.
-     *
-     * @param workspaceId
-     *         workspace ID
-     * @return a promise that will resolve when the snapshot has been created, or rejects with an error
-     * @see WorkspaceService#checkAgentHealth(String)
-     */
-    public Promise<WsAgentHealthStateDto> getWsAgentState(String workspaceId, String devMachineName) {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + '/' + workspaceId + "/check?machine=" + devMachineName)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WsAgentHealthStateDto.class));
     }
 
     /**

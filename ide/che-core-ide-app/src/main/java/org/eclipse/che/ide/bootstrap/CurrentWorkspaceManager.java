@@ -26,7 +26,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.workspace.events.WorkspaceStatusEventHandler;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;

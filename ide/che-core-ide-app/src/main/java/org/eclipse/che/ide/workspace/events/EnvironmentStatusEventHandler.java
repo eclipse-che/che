@@ -26,7 +26,7 @@ import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
 import java.util.Optional;
 

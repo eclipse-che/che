@@ -16,22 +16,16 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.commons.exception.ServerDisconnectedException;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.browser.BrowserUtils;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.events.ConnectionClosedHandler;
@@ -43,7 +37,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.machine.WsAgentState.STARTED;
 import static org.eclipse.che.ide.api.machine.WsAgentState.STOPPED;
 
@@ -63,7 +56,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private final DialogFactory          dialogFactory;
     private final AppContext             appContext;
     private final AsyncRequestFactory    asyncRequestFactory;
-    private final WorkspaceServiceClient workspaceServiceClient;
     private final LoaderPresenter        loader;
     private       DevMachine             devMachine;
     private       MessageBus             messageBus;
@@ -72,14 +64,12 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private List<AsyncCallback<DevMachine>> devMachineCallbacks = newArrayList();
 
     @Inject
-    public WsAgentStateController(WorkspaceServiceClient workspaceServiceClient,
-                                  EventBus eventBus,
+    public WsAgentStateController(EventBus eventBus,
                                   LoaderPresenter loader,
                                   MessageBusProvider messageBusProvider,
                                   AsyncRequestFactory asyncRequestFactory,
                                   DialogFactory dialogFactory,
                                   AppContext appContext) {
-        this.workspaceServiceClient = workspaceServiceClient;
         this.loader = loader;
         this.eventBus = eventBus;
         this.messageBusProvider = messageBusProvider;
@@ -100,7 +90,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     @Override
     public void onClose(WebSocketClosedEvent event) {
         if (STARTED.equals(state)) {
-            checkWsAgentHealth();
+//            checkWsAgentHealth();
         }
     }
 
@@ -218,23 +208,23 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         messageBus.addOnOpenHandler(this);
     }
 
-    private void checkWsAgentHealth() {
-        workspaceServiceClient.getWsAgentState(appContext.getWorkspaceId(), devMachine.getName()).then(agentHealthState -> {
-            if (RUNNING.equals(agentHealthState.getWorkspaceStatus())) {
-                checkStateOfWsAgent(agentHealthState);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                if (arg.getCause() instanceof ServerDisconnectedException) {
-                    dialogFactory.createMessageDialog("Server Unavailable",
-                                                      "Server is not responding. Your admin must restart it.",
-                                                      null).show();
-                }
-                Log.error(getClass(), arg.getMessage());
-            }
-        });
-    }
+//    private void checkWsAgentHealth() {
+//        workspaceServiceClient.getWsAgentState(appContext.getWorkspaceId(), devMachine.getName()).then(agentHealthState -> {
+//            if (RUNNING.equals(agentHealthState.getWorkspaceStatus())) {
+//                checkStateOfWsAgent(agentHealthState);
+//            }
+//        }).catchError(new Operation<PromiseError>() {
+//            @Override
+//            public void apply(PromiseError arg) throws OperationException {
+//                if (arg.getCause() instanceof ServerDisconnectedException) {
+//                    dialogFactory.createMessageDialog("Server Unavailable",
+//                                                      "Server is not responding. Your admin must restart it.",
+//                                                      null).show();
+//                }
+//                Log.error(getClass(), arg.getMessage());
+//            }
+//        });
+//    }
 
     private class StopCallback implements ConfirmCallback {
 
@@ -248,11 +238,11 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
         @Override
         public void accepted() {
-            workspaceServiceClient.stop(appContext.getWorkspaceId(), createSnapshot).then(ignored -> {
-                if (reloadPage) {
-                    BrowserUtils.reloadPage(false);
-                }
-            });
+//            workspaceServiceClient.stop(appContext.getWorkspaceId(), createSnapshot).then(ignored -> {
+//                if (reloadPage) {
+//                    BrowserUtils.reloadPage(false);
+//                }
+//            });
         }
     }
 
