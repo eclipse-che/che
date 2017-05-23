@@ -439,6 +439,13 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     }
 
     @Override
+    public void removeWidget(String processId) {
+        WidgetToShow widget = processWidgets.get(processId);
+        hideProcessOutput(processId);
+        widget2Panels.remove(widget);
+    }
+
+    @Override
     public void markProcessHasOutput(String processId) {
         if (processId.equals(activeProcessId)) {
             return;
