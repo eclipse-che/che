@@ -29,8 +29,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_OUTPUT_FOLDER;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_PACKAGING;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_RESOURCES_FOLDER;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_SOURCE_FOLDER;
@@ -112,6 +114,11 @@ public class MavenValueProvider extends ReadonlyValueProvider {
                 } else {
                     return Arrays.asList(DEFAULT_RESOURCES_FOLDER, DEFAULT_TEST_RESOURCES_FOLDER);
                 }
+            case OUTPUT_FOLDER:
+                return (mavenProject.getOutputDirectory() != null && !mavenProject.getOutputDirectory().isEmpty())
+                       ? singletonList(mavenProject.getOutputDirectory())
+                       : singletonList(DEFAULT_OUTPUT_FOLDER);
+
             default:
                 throw new ValueStorageException(String.format("Unknown attribute %s", attributeName));
         }
@@ -154,6 +161,12 @@ public class MavenValueProvider extends ReadonlyValueProvider {
                     return model.getBuild().getResources().stream().map(Resource::getDirectory).collect(Collectors.toList());
                 } else {
                     return Arrays.asList(DEFAULT_RESOURCES_FOLDER, DEFAULT_TEST_RESOURCES_FOLDER);
+                }
+            case OUTPUT_FOLDER:
+                if (model.getBuild() != null && model.getBuild().getOutputDirectory() != null) {
+                    return singletonList(model.getBuild().getOutputDirectory());
+                } else {
+                    return singletonList(DEFAULT_OUTPUT_FOLDER);
                 }
             default:
                 throw new ValueStorageException(String.format("Unknown attribute %s", attributeName));
