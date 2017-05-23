@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project;
+package org.eclipse.che.ide.project;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
@@ -34,12 +34,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit test for {@link ProjectServiceClientImpl}.
+ * Unit test for {@link ProjectServiceClient}.
  *
  * @author Vlad Zhukovskyi
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ProjectServiceClientImplTest {
+public class ProjectServiceClientTest {
 
     @Mock
     private WsAgentStateController wsAgentStateController;
@@ -54,16 +54,16 @@ public class ProjectServiceClientImplTest {
     @Mock
     private AppContext             appContext;
 
-    private ProjectServiceClientImpl projectServiceClient;
+    private ProjectServiceClient projectServiceClient;
 
     @Before
     public void setUp() throws Exception {
-        projectServiceClient = new ProjectServiceClientImpl(wsAgentStateController,
-                                                            loaderFactory,
-                                                            asyncRequestFactory,
-                                                            dtoFactory,
-                                                            dtoUnmarshallerFactory,
-                                                            appContext);
+        projectServiceClient = new ProjectServiceClient(wsAgentStateController,
+                                                        loaderFactory,
+                                                        asyncRequestFactory,
+                                                        dtoFactory,
+                                                        dtoUnmarshallerFactory,
+                                                        appContext);
         DevMachine devMachine = mock(DevMachine.class);
         when(devMachine.getWsAgentBaseUrl()).thenReturn("");
 

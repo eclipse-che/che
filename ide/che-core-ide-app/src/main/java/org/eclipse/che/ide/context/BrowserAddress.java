@@ -77,8 +77,6 @@ public class BrowserAddress {
     /**
      * Returns workspace key from current address
      * or empty string when it is undefined.
-     *
-     * @see org.eclipse.che.ide.api.workspace.WorkspaceServiceClient#getWorkspace(String)
      */
     public String getWorkspaceKey() {
         String browserUrl = Window.Location.getPath();

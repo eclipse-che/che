@@ -26,7 +26,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.factory.FactoryServiceClient;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.context.QueryParameters;
 import org.eclipse.che.ide.core.StandardComponentInitializer;
@@ -91,7 +92,7 @@ class FactoryIdeInitializer extends GeneralIdeInitializer {
         return super.initAppContext()
                     .thenPromise(aVoid -> getFactory()
                             .then((Function<FactoryDto, Void>)factory -> {
-                                appContext.setFactory(factory);
+                                ((AppContextImpl)appContext).setFactory(factory);
                                 return null;
                             }).catchError((Operation<PromiseError>)err -> {
                                 throw new OperationException("Unable to load Factory: " + err.getMessage(), err.getCause());
