@@ -19,6 +19,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
+import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
@@ -34,6 +35,7 @@ public class RunClassTestAction extends JavaEditorAction
     private final EditorAgent           editorAgent;
     private final TestResultPresenter   presenter;
     private final TestServiceClient     service;
+    private final TestingHandler testingHandler;
     private final RunTestActionDelegate delegate;
 
     @Inject
@@ -43,13 +45,15 @@ public class RunClassTestAction extends JavaEditorAction
                               FileTypeRegistry fileTypeRegistry,
                               TestResultPresenter presenter,
                               TestServiceClient service,
-                              JUnitTestLocalizationConstant localization) {
+                              JUnitTestLocalizationConstant localization,
+                              TestingHandler testingHandler) {
         super(localization.actionRunClassTitle(), localization.actionRunClassDescription(), resources.testIcon(),
               editorAgent, fileTypeRegistry);
         this.notificationManager = notificationManager;
         this.editorAgent = editorAgent;
         this.presenter = presenter;
         this.service = service;
+        this.testingHandler = testingHandler;
         this.delegate = new RunTestActionDelegate(this);
     }
 
@@ -95,5 +99,10 @@ public class RunClassTestAction extends JavaEditorAction
     @Override
     public String getTestingFramework() {
         return "junit";
+    }
+
+    @Override
+    public TestingHandler getTestingHandler() {
+        return testingHandler;
     }
 }

@@ -75,10 +75,16 @@ public interface TestStateEventsListener {
     void onTestFailed(TestState testState);
 
     /**
-     * Called whe test ignored
+     * Called when test ignored
      *
      * @param testState
      */
     void onTestIgnored(TestState testState);
 
+    /**
+     * Called when test root state presentation is added
+     *
+     * @param testRootState
+     */
+    void onRootPresentationAdded(TestRootState testRootState);
 }

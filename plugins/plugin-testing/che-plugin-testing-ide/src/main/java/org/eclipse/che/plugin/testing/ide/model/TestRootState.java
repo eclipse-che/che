@@ -41,8 +41,16 @@ public class TestRootState extends TestState {
         this.rootLocationUrl = rootLocationUrl;
     }
 
+    public String getPresentation() {
+        return presentation;
+    }
+
     public void setPresentation(String presentation) {
         this.presentation = presentation;
+    }
+
+    public String getComment() {
+        return comment;
     }
 
     public void setComment(String comment) {

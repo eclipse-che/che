@@ -15,6 +15,8 @@ import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -42,7 +44,6 @@ import org.eclipse.che.ide.command.goal.TestGoal;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.CommandOutputConsole;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -264,8 +265,12 @@ public class TestServiceClient {
                 .send(dtoUnmarshallerFactory.newUnmarshaller(TestResult.class));
     }
 
-    public Promise<String> runTests(TestExecutionContext context) {
-        return requestTransmitter.transmitOneToOne(appContext.getAppId(), Constants.RUN_TESTS_METHOD, context, String.class);
+    public JsonRpcPromise<Boolean> runTests(TestExecutionContext context) {
+        return requestTransmitter.newRequest()
+                .endpointId("ws-agent")
+                .methodName(Constants.RUN_TESTS_METHOD)
+                .paramsAsDto(context)
+                .sendAndReceiveResultAsBoolean();
     }
 
 }

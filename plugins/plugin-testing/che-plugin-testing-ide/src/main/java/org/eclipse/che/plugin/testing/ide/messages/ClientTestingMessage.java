@@ -15,6 +15,7 @@ import elemental.json.JsonException;
 import elemental.json.JsonObject;
 import org.eclipse.che.api.testing.shared.Constants;
 import org.eclipse.che.api.testing.shared.messages.TestingMessage;
+import org.eclipse.che.api.testing.shared.messages.TestingMessageNames;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,6 +28,26 @@ import java.util.function.Supplier;
 public class ClientTestingMessage implements TestingMessage {
 
     static final Map<String, Supplier<? extends ClientTestingMessage>> messageConstructors = new HashMap<>();
+
+    static {
+        messageConstructors.put(TestingMessageNames.BUILD_TREE_ENDED, BuildTreeEnded::new);
+        messageConstructors.put(TestingMessageNames.MESSAGE, Message::new);
+        messageConstructors.put(TestingMessageNames.ROOT_PRESENTATION, RootPresentationMessage::new);
+        messageConstructors.put(TestingMessageNames.SUITE_TREE_ENDED, SuiteTreeEnded::new);
+        messageConstructors.put(TestingMessageNames.SUITE_TREE_NODE, SuiteTreeNode::new);
+        messageConstructors.put(TestingMessageNames.SUITE_TREE_STARTED, SuiteTreeStarted::new);
+        messageConstructors.put(TestingMessageNames.TEST_COUNT, TestCount::new);
+        messageConstructors.put(TestingMessageNames.TEST_FAILED, TestFailed::new);
+        messageConstructors.put(TestingMessageNames.TEST_FINISHED, TestFinished::new);
+        messageConstructors.put(TestingMessageNames.TEST_IGNORED, TestIgnored::new);
+        messageConstructors.put(TestingMessageNames.TEST_REPORTER_ATTACHED, TestReporterAttached::new);
+        messageConstructors.put(TestingMessageNames.TEST_STARTED, TestStarted::new);
+        messageConstructors.put(TestingMessageNames.TEST_STD_ERR, TestStdErr::new);
+        messageConstructors.put(TestingMessageNames.TEST_STD_OUT, TestStdOut::new);
+        messageConstructors.put(TestingMessageNames.TEST_SUITE_FINISHED, TestSuiteFinished::new);
+        messageConstructors.put(TestingMessageNames.TEST_SUITE_STARTED, TestSuiteStarted::new);
+        messageConstructors.put(TestingMessageNames.UNCAPTURED_OUTPUT, UncapturedOutputMessage::new);
+    }
 
     private String name;
     private Map<String, String> attributes = new HashMap<>();

@@ -21,7 +21,7 @@ public class TestStartedEvent extends BaseStartEvent {
 
     public TestStartedEvent(TestStarted testStarted) {
         super(getNodeId(testStarted),
-                testStarted.getName(),
+                testStarted.getTestName(),
                 getParantNodeId(testStarted),
                 testStarted.getLocation(),
                 getNodeType(testStarted),

@@ -67,4 +67,8 @@ public abstract class AbstractTestingEventsProcessor implements TestingEventsPro
     protected void callTestCountInSuite(int count) {
         listeners.forEach(listener -> listener.onTestsCountInSuite(count));
     }
+
+    protected void callTestingFinished(TestRootState testRootState) {
+        listeners.forEach(listener -> listener.onTestingFinished(testRootState));
+    }
 }

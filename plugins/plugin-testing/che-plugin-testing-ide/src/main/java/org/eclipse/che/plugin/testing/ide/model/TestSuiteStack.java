@@ -71,4 +71,7 @@ public class TestSuiteStack {
         return stack.isEmpty();
     }
 
+    public void clear() {
+        stack.clear();
+    }
 }

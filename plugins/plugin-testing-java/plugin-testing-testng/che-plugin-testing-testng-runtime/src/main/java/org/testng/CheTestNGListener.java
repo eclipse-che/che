@@ -12,6 +12,7 @@ package org.testng;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,10 +38,13 @@ public class CheTestNGListener {
     private final Map<String, Integer> invocationCounts = new HashMap<>();
     private final Map<TestResultWrapper, String> parametersMap = new HashMap<>();
 
+    public CheTestNGListener(PrintStream printStream) {
+        out = printStream;
+        reporterAttached(out);
+    }
 
     public CheTestNGListener() {
-        out = System.out;
-        reporterAttached(out);
+        this(System.out);
     }
 
     public void onSuiteStart(ISuite suite) {
@@ -98,7 +102,7 @@ public class CheTestNGListener {
 
     }
 
-    private void internalSuiteFinish(String suite) {
+    public void internalSuiteFinish(String suite) {
         TestingMessageHelper.testSuiteFinished(out, suite);
     }
 
@@ -114,7 +118,7 @@ public class CheTestNGListener {
         internalOnTestStart(createWrapper(result));
     }
 
-    private void internalOnTestStart(TestResultWrapper wrapper) {
+    public void internalOnTestStart(TestResultWrapper wrapper) {
         Object[] parameters = wrapper.getParameters();
         String fqn = wrapper.getClassName() + wrapper.getDisplayMethodName();
         Integer count = invocationCounts.get(fqn);
@@ -128,12 +132,12 @@ public class CheTestNGListener {
         invocationCounts.put(fqn, ++count);
     }
 
-    private void internalOnTestStart(TestResultWrapper wrapper, String paramStr, Integer count, boolean config) {
+    public void internalOnTestStart(TestResultWrapper wrapper, String paramStr, Integer count, boolean config) {
         parametersMap.put(wrapper, paramStr);
         internalOnSuiteStart(wrapper, wrapper.getTestHierarchy(), true);
 
         String location = wrapper.getClassName() + "." + wrapper.getMethodName() + (count >= 0 ? "[" + count + "]" : "");
-        testStarted(out, shortName(wrapper.getClassName() + "." + wrapper.getMethodName() + (paramStr != null ? paramStr : "")), location, config);
+        testStarted(out, shortName(wrapper.getClassName()) + "." + wrapper.getMethodName() + (paramStr != null ? paramStr : ""), location, config);
     }
 
     private void internalOnSuiteStart(TestResultWrapper wrapper, List<String> testHierarchy, boolean provideLocation) {
@@ -149,7 +153,7 @@ public class CheTestNGListener {
             index++;
         }
 
-        for (int i = currentSuites.size() - 1; i >= 0; i--) {
+        for (int i = currentSuites.size() - 1; i >= index; i--) {
             currentClass = currentSuites.remove(i);
             testSuiteFinished(out, currentClass);
         }
@@ -205,13 +209,13 @@ public class CheTestNGListener {
         onTestFinished(createWrapper(result));
     }
 
-    private void onTestFinished(TestResultWrapper wrapper) {
+    public void onTestFinished(TestResultWrapper wrapper) {
         long duration = wrapper.getDuration();
         testFinished(out, getTestMethodName(wrapper), duration);
     }
 
     private String getTestMethodName(TestResultWrapper wrapper) {
-        String testMethodName = shortName(wrapper.getMethodName())+"."+ wrapper.getDisplayMethodName();
+        String testMethodName = shortName(wrapper.getClassName()) + "." + wrapper.getDisplayMethodName();
         String paramStr = parametersMap.get(wrapper);
         if (paramStr != null) {
             testMethodName += paramStr;
@@ -242,6 +246,7 @@ public class CheTestNGListener {
 
         out.println();
         testFailed(out, params);
+        onTestFinished(wrapper);
     }
 
     public void onTestSkipped(ITestResult result) {
@@ -278,7 +283,7 @@ public class CheTestNGListener {
         internalOnConfigurationSuccess(wrapper);
     }
 
-    private void internalOnConfigurationSuccess(TestResultWrapper wrapper) {
+    public void internalOnConfigurationSuccess(TestResultWrapper wrapper) {
         onTestFinished(wrapper);
     }
 
@@ -292,5 +297,9 @@ public class CheTestNGListener {
             internalOnConfigurationStart(wrapper);
         }
         internalOnTestFailure(wrapper);
+    }
+
+    public void onSuiteStart(String className, boolean provideLocation) {
+        internalOnSuiteStart(null, Collections.singletonList(className), provideLocation);
     }
 }

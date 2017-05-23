@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.testing.server.framework;
 
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.testing.server.messages.ServerTestingMessage;
 import org.eclipse.che.api.testing.server.messages.UncapturedOutputMessage;
 import org.eclipse.che.api.testing.shared.Constants;
@@ -69,14 +69,22 @@ public class TestMessagesOutputTransmitter {
 
     private void sendOutput(String text, ProcessOutputType outputType) {
         UncapturedOutputMessage message = new UncapturedOutputMessage(text, outputType);
-        requestTransmitter.transmitStringToNone(endpoint, Constants.TESTING_RPC_METHOD_NAME, message.asJsonString());
+        requestTransmitter.newRequest()
+                .endpointId(endpoint)
+                .methodName(Constants.TESTING_RPC_METHOD_NAME)
+                .paramsAsString(message.asJsonString())
+                .sendAndSkipResult();
 
     }
 
     private boolean processTestingMessage(String line) {
         ServerTestingMessage message = ServerTestingMessage.parse(line.trim());
         if (message != null) {
-            requestTransmitter.transmitStringToNone(endpoint, Constants.TESTING_RPC_METHOD_NAME, message.asJsonString());
+            requestTransmitter.newRequest()
+                    .endpointId(endpoint)
+                    .methodName(Constants.TESTING_RPC_METHOD_NAME)
+                    .paramsAsString(message.asJsonString())
+                    .sendAndSkipResult();
             return true;
         }
         return false;
@@ -84,7 +92,11 @@ public class TestMessagesOutputTransmitter {
 
     private void processTestingStopped() {
         lineSplitter.flush();
-        requestTransmitter.transmitStringToNone(endpoint, Constants.TESTING_RPC_METHOD_NAME, ServerTestingMessage.FINISH_TESTING.asJsonString());
+        requestTransmitter.newRequest()
+                .endpointId(endpoint)
+                .methodName(Constants.TESTING_RPC_METHOD_NAME)
+                .paramsAsString(ServerTestingMessage.FINISH_TESTING.asJsonString())
+                .sendAndSkipResult();
     }
 
     private void process(String text, ProcessOutputType outputType) {
@@ -92,7 +104,11 @@ public class TestMessagesOutputTransmitter {
     }
 
     private void processStartTesting() {
-        requestTransmitter.transmitStringToNone(endpoint, Constants.TESTING_RPC_METHOD_NAME, ServerTestingMessage.TESTING_STARTED.asJsonString());
+        requestTransmitter.newRequest()
+                .endpointId(endpoint)
+                .methodName(Constants.TESTING_RPC_METHOD_NAME)
+                .paramsAsString(ServerTestingMessage.TESTING_STARTED.asJsonString())
+                .sendAndSkipResult();
     }
 
     public void stop() {

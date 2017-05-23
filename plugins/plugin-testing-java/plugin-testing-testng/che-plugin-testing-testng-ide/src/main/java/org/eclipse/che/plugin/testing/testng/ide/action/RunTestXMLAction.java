@@ -19,6 +19,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
+import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.testng.ide.TestNGLocalizationConstant;
 import org.eclipse.che.plugin.testing.testng.ide.TestNGResources;
@@ -30,6 +31,7 @@ public class RunTestXMLAction extends JavaEditorAction
                               implements RunTestActionDelegate.Source {
 
     private final NotificationManager   notificationManager;
+    private final TestingHandler testingHandler;
     private TestResultPresenter         presenter;
     private final TestServiceClient     service;
     private final RunTestActionDelegate delegate;
@@ -41,10 +43,12 @@ public class RunTestXMLAction extends JavaEditorAction
                             TestResultPresenter presenter,
                             FileTypeRegistry fileTypeRegistry,
                             TestServiceClient service,
-                            TestNGLocalizationConstant localization) {
+                            TestNGLocalizationConstant localization,
+                            TestingHandler testingHandler) {
         super(localization.actionRunXMLTitle(), localization.actionRunXMLDescription(), resources.testAllIcon(),
               editorAgent, fileTypeRegistry);
         this.notificationManager = notificationManager;
+        this.testingHandler = testingHandler;
         this.editorAgent = editorAgent;
         this.presenter = presenter;
         this.service = service;
@@ -88,5 +92,10 @@ public class RunTestXMLAction extends JavaEditorAction
     @Override
     public String getTestingFramework() {
         return "testng";
+    }
+
+    @Override
+    public TestingHandler getTestingHandler() {
+        return testingHandler;
     }
 }

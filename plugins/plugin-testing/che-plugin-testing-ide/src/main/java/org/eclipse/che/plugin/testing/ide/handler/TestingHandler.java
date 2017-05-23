@@ -12,8 +12,9 @@ package org.eclipse.che.plugin.testing.ide.handler;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.testing.shared.Constants;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
+import org.eclipse.che.api.testing.shared.messages.TestingMessageNames;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.testing.ide.messages.BuildTreeEnded;
 import org.eclipse.che.plugin.testing.ide.messages.ClientTestingMessage;
@@ -63,7 +64,7 @@ public class TestingHandler implements TestingMessageVisitor {
                 .methodName(Constants.TESTING_RPC_METHOD_NAME)
                 .paramsAsString()
                 .noResult()
-                .withOperation(this::handleTestingMessage);
+                .withConsumer(this::handleTestingMessage);
     }
 
 
@@ -81,6 +82,19 @@ public class TestingHandler implements TestingMessageVisitor {
 
     @Override
     public void visitTestingMessage(ClientTestingMessage message) {
+
+        if (TestingMessageNames.TESTING_STARTED.equals(message.getName())) {
+            if (processor != null) {
+                processor.onStartTesting();
+            }
+            return;
+        }
+        if (TestingMessageNames.FINISH_TESTING.equals(message.getName())) {
+            if (processor != null) {
+                processor.onFinishTesting();
+            }
+            return;
+        }
         Log.error(getClass(), "Unexpected test message: " + message.getName());
     }
 

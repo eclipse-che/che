@@ -10,15 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.messages;
 
-import org.eclipse.che.api.testing.shared.messages.TestingMessageNames;
-
 /**
  *
  */
 public class RootPresentationMessage extends ClientTestingMessage {
-    static {
-        messageConstructors.put(TestingMessageNames.ROOT_PRESENTATION, RootPresentationMessage::new);
-    }
 
     RootPresentationMessage() {
     }

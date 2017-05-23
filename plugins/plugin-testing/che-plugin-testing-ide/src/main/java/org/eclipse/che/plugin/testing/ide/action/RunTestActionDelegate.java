@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.action;
 
-import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -18,6 +18,8 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
+import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
+import org.eclipse.che.plugin.testing.ide.model.GeneralTestingEventsProcessor;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -42,6 +44,8 @@ public class RunTestActionDelegate {
         TestResultPresenter getPresenter();
         
         String getTestingFramework();
+
+        TestingHandler getTestingHandler();
     }
 
     public RunTestActionDelegate(Source source) {
@@ -52,22 +56,25 @@ public class RunTestActionDelegate {
         final StatusNotification notification = new StatusNotification("Running Tests...", PROGRESS, FLOAT_MODE);
         source.getNotificationManager().notify(notification);
         final Project project = source.getAppContext().getRootProject();
-//        parameters.put("updateClasspath", "true");
         context.setProjectPath(project.getPath());
         context.setFrameworkName(source.getTestingFramework());
 
-        Promise<String> testResultPromise = source.getService().runTests(context);
-        testResultPromise.then(result -> {
+        GeneralTestingEventsProcessor eventsProcessor = new GeneralTestingEventsProcessor(source.getTestingFramework(), source.getPresenter().getRootState());
+        source.getTestingHandler().setProcessor(eventsProcessor);
+        eventsProcessor.addListener(source.getPresenter().getEventListener());
+
+        JsonRpcPromise<Boolean> testResultPromise = source.getService().runTests(context);
+        testResultPromise.onSuccess(result -> {
                 notification.setStatus(SUCCESS);
-//                if (result.isSuccess()) {
-//                    notification.setTitle("Test runner executed successfully");
-//                    notification.setContent("All tests are passed");
-//                } else {
-//                    notification.setTitle("Test runner executed successfully with test failures.");
+            if (result) {
+                notification.setTitle("Test runner executed successfully.");
+                source.getPresenter().handleResponse();
+            } else {
+                notification.setTitle("Test runner failed to execute.");
 //                    notification.setContent(result.getFailureCount() + " test(s) failed.\n");
-//                }
-//                source.getPresenter().handleResponse(result);
-        }).catchError(exception -> {
+            }
+
+        }).onFailure(exception -> {
             final String errorMessage = (exception.getMessage() != null) ? exception.getMessage()
                     : "Failed to run test cases";
             notification.setContent(errorMessage);

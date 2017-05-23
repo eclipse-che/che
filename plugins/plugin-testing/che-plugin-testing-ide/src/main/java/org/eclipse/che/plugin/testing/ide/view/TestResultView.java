@@ -10,31 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.view;
 
-import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
+import org.eclipse.che.plugin.testing.ide.model.TestRootState;
+import org.eclipse.che.plugin.testing.ide.model.TestStateEventsListener;
 
 /**
  * View for the result of java tests.
  *
  * @author Mirage Abeysekara
  */
-public interface TestResultView extends View<TestResultView.ActionDelegate> {
+public interface TestResultView extends View<TestResultView.ActionDelegate>, TestStateEventsListener {
     /**
      * Sets whether this panel is visible.
      *
-     * @param visible
-     *            visible - true to show the object, false to hide it
+     * @param visible visible - true to show the object, false to hide it
      */
     void setVisible(boolean visible);
 
-    /**
-     * Activate Test results part.
-     *
-     * @param result
-     *            test results which comes from the server
-     */
-    void showResults(TestResult result);
+    TestRootState getRootState();
 
     interface ActionDelegate extends BaseActionDelegate {
     }

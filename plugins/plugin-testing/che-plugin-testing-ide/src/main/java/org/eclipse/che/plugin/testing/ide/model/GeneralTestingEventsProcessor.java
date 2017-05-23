@@ -312,6 +312,11 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
         if (testLocator != null) {
             testRootState.setTestLocator(testLocator);
         }
+        callRootPresentationAdded(testRootState);
+    }
+
+    private void callRootPresentationAdded(TestRootState testRootState) {
+        listeners.forEach(listener -> listener.onRootPresentationAdded(testRootState));
     }
 
     @Override
@@ -323,6 +328,17 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
             currentState.addStdOut(output, outputType);
         }
     }
+
+    @Override
+    public void onFinishTesting() {
+
+        //TODO check test tree finish state
+
+        testSuiteStack.clear();
+        testRootState.setFinished();
+        callTestingFinished(testRootState);
+    }
+
 
     private TestState findCurrentSuiteOrTest() {
         TestState result;

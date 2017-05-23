@@ -23,6 +23,7 @@ import org.eclipse.che.ide.resources.tree.ContainerNode;
 import org.eclipse.che.ide.resources.tree.FileNode;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
+import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.testng.ide.TestNGLocalizationConstant;
 import org.eclipse.che.plugin.testing.testng.ide.TestNGResources;
@@ -44,6 +45,7 @@ public class RunAllContextTestAction extends AbstractPerspectiveAction
     private final TestServiceClient     service;
     private final AppContext            appContext;
     private final SelectionAgent        selectionAgent;
+    private final TestingHandler testingHandler;
     private final RunTestActionDelegate delegate;
 
     @Inject
@@ -53,7 +55,8 @@ public class RunAllContextTestAction extends AbstractPerspectiveAction
                                    TestResultPresenter presenter,
                                    TestServiceClient service,
                                    SelectionAgent selectionAgent,
-                                   TestNGLocalizationConstant localization) {
+                                   TestNGLocalizationConstant localization,
+                                   TestingHandler testingHandler) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.actionRunAllTitle(),
               localization.actionRunAllDescription(), null, resources.testAllIcon());
         this.notificationManager = notificationManager;
@@ -61,6 +64,7 @@ public class RunAllContextTestAction extends AbstractPerspectiveAction
         this.service = service;
         this.appContext = appContext;
         this.selectionAgent = selectionAgent;
+        this.testingHandler = testingHandler;
         this.delegate = new RunTestActionDelegate(this);
     }
 
@@ -136,5 +140,10 @@ public class RunAllContextTestAction extends AbstractPerspectiveAction
     @Override
     public String getTestingFramework() {
         return "testng";
+    }
+
+    @Override
+    public TestingHandler getTestingHandler() {
+        return testingHandler;
     }
 }

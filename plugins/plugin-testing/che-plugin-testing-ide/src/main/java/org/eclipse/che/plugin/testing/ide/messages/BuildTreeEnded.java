@@ -10,15 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.messages;
 
-import org.eclipse.che.api.testing.shared.messages.TestingMessageNames;
-
 /**
  *
  */
 public class BuildTreeEnded extends ClientTestingMessage {
-    static {
-        messageConstructors.put(TestingMessageNames.BUILD_TREE_ENDED, BuildTreeEnded::new);
-    }
 
     BuildTreeEnded() {
     }

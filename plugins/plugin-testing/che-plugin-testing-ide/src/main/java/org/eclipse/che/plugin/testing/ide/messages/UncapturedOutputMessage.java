@@ -10,17 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.messages;
 
-import org.eclipse.che.api.testing.shared.messages.TestingMessageNames;
 import org.eclipse.che.plugin.testing.ide.model.Printer.OutputType;
 
 /**
  *
  */
 public class UncapturedOutputMessage extends ClientTestingMessage {
-
-    static {
-        messageConstructors.put(TestingMessageNames.UNCAPTURED_OUTPUT, UncapturedOutputMessage::new);
-    }
 
     UncapturedOutputMessage() {
     }

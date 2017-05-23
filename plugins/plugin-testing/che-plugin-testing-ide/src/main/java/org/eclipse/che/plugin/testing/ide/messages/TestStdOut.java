@@ -10,16 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.messages;
 
-import org.eclipse.che.api.testing.shared.messages.TestingMessageNames;
-
 /**
  *
  */
 public class TestStdOut extends BaseTestMessage {
-
-    static {
-        messageConstructors.put(TestingMessageNames.TEST_STD_OUT, TestStdOut::new);
-    }
 
     TestStdOut() {
     }

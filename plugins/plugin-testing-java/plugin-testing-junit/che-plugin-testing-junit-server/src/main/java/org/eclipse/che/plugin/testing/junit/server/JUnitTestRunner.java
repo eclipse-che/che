@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.junit.server;
 
-import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
@@ -39,11 +38,9 @@ public class JUnitTestRunner implements TestRunner {
     private static final String   JUNIT4X_RUNNER_CLASS = "org.junit.runner.JUnitCore";
     private static final String   JUNIT3X_RUNNER_CLASS = "junit.textui.TestRunner";
     private ClassLoader           projectClassLoader;
-    private ProjectManager        projectManager;
 
     @Inject
-    public JUnitTestRunner(ProjectManager projectManager) {
-        this.projectManager = projectManager;
+    public JUnitTestRunner() {
     }
 
     /**

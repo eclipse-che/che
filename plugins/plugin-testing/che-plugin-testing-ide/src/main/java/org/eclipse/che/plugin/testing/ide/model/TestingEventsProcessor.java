@@ -23,6 +23,7 @@ import org.eclipse.che.plugin.testing.ide.model.event.TestSuiteStartedEvent;
  */
 public interface TestingEventsProcessor {
 
+    void addListener(TestStateEventsListener listener);
 
     void onStartTesting();
 
@@ -55,4 +56,6 @@ public interface TestingEventsProcessor {
     void onRootPresentationAdded(String rootName, String comment, String location);
 
     void onUncapturedOutput(String output, Printer.OutputType outputType);
+
+    void onFinishTesting();
 }

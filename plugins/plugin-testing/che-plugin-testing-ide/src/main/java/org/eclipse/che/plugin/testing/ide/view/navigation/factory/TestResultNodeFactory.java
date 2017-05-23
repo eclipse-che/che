@@ -10,13 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.view.navigation.factory;
 
-import org.eclipse.che.api.testing.shared.TestResult;
-import org.eclipse.che.plugin.testing.ide.view.navigation.TestClassNavigation;
-import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultClassNode;
-import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultGroupNode;
-import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultMethodNode;
-
-import com.google.inject.assistedinject.Assisted;
+import org.eclipse.che.plugin.testing.ide.model.TestRootState;
+import org.eclipse.che.plugin.testing.ide.model.TestState;
+import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestRootNode;
+import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestStateNode;
 
 /**
  * Factory for providing test navigation tree nodes.
@@ -25,16 +22,7 @@ import com.google.inject.assistedinject.Assisted;
  */
 public interface TestResultNodeFactory {
 
-    TestResultGroupNode getTestResultGroupNode(TestResult result,
-                                               boolean showFailuresOnly,
-                                               Runnable showOnlyFailuresDelegate);
+    TestStateNode create(TestState testState);
 
-    TestResultClassNode getTestResultClassNodeNode(String className);
-
-    TestResultMethodNode getTestResultMethodNodeNode(boolean success,
-                                                     @Assisted("methodName") String methodName,
-                                                     @Assisted("stackTrace") String stackTrace,
-                                                     @Assisted("message") String message,
-                                                     int lineNumber,
-                                                     TestClassNavigation navigationHandler);
+    TestRootNode create(TestRootState testRootState);
 }

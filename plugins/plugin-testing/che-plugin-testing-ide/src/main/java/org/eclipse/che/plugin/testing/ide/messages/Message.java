@@ -10,17 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.messages;
 
-import org.eclipse.che.api.testing.shared.messages.TestingMessageNames;
-
 /**
  *
  */
 public class Message extends ClientTestingMessage {
-
-
-    static {
-        messageConstructors.put(TestingMessageNames.MESSAGE, Message::new);
-    }
 
     Message() {
     }

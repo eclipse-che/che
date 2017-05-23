@@ -10,16 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.messages;
 
-import org.eclipse.che.api.testing.shared.messages.TestingMessageNames;
-
 /**
  *
  */
 public class TestFinished extends BaseTestMessage {
-
-    static {
-        messageConstructors.put(TestingMessageNames.TEST_FINISHED, TestFinished::new);
-    }
 
     TestFinished() {
     }

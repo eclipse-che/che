@@ -10,16 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.messages;
 
-import org.eclipse.che.api.testing.shared.messages.TestingMessageNames;
-
 /**
  *
  */
 public class TestSuiteStarted extends BaseTestSuiteMessage {
-
-    static {
-        messageConstructors.put(TestingMessageNames.TEST_SUITE_STARTED, TestSuiteStarted::new);
-    }
 
     TestSuiteStarted() {
     }

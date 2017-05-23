@@ -19,6 +19,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
+import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.testng.ide.TestNGLocalizationConstant;
 import org.eclipse.che.plugin.testing.testng.ide.TestNGResources;
@@ -32,6 +33,7 @@ public class RunAllTestAction extends JavaEditorAction
     private final NotificationManager   notificationManager;
     private TestResultPresenter         presenter;
     private final TestServiceClient     service;
+    private final TestingHandler testingHandler;
     private final RunTestActionDelegate delegate;
 
     @Inject
@@ -41,12 +43,14 @@ public class RunAllTestAction extends JavaEditorAction
                             TestResultPresenter presenter,
                             FileTypeRegistry fileTypeRegistry,
                             TestServiceClient service,
-                            TestNGLocalizationConstant localization) {
+                            TestNGLocalizationConstant localization,
+                            TestingHandler testingHandler) {
         super(localization.actionRunAllTitle(), localization.actionRunAllDescription(), resources.testAllIcon(),
               editorAgent, fileTypeRegistry);
         this.notificationManager = notificationManager;
         this.presenter = presenter;
         this.service = service;
+        this.testingHandler = testingHandler;
         this.delegate = new RunTestActionDelegate(this);
     }
 
@@ -80,5 +84,10 @@ public class RunAllTestAction extends JavaEditorAction
     @Override
     public String getTestingFramework() {
         return "testng";
+    }
+
+    @Override
+    public TestingHandler getTestingHandler() {
+        return testingHandler;
     }
 }

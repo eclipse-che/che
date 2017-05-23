@@ -10,17 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.messages;
 
-import org.eclipse.che.api.testing.shared.messages.TestingMessageNames;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
  *
  */
 public class TestCount extends ClientTestingMessage {
-
-    static {
-        messageConstructors.put(TestingMessageNames.TEST_COUNT, TestCount::new);
-    }
 
     TestCount() {
     }

@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.fest.assertions.Condition;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -136,6 +137,7 @@ public class WorkspaceTest extends BaseTest {
         assertThat(dependencies).onProperty("artifactId").contains("junit", "hamcrest-core");
         assertThat(dependencies).onProperty("groupId").contains("junit", "org.hamcrest");
         assertThat(dependencies).onProperty("version").contains("4.12", "1.3");
+        Assert.fail();
     }
 
     @Test

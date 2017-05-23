@@ -10,16 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.messages;
 
-import org.eclipse.che.api.testing.shared.messages.TestingMessageNames;
-
 /**
  *
  */
 public class SuiteTreeNode extends BaseTestSuiteMessage {
-
-    static {
-        messageConstructors.put(TestingMessageNames.SUITE_TREE_NODE, SuiteTreeNode::new);
-    }
 
     SuiteTreeNode() {
     }

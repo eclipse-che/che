@@ -20,7 +20,7 @@ public class TestFinishedEvent extends TestNodeEvent {
     private final Integer duration;
 
     public TestFinishedEvent(TestFinished testFinished) {
-        super(getNodeId(testFinished), testFinished.getName());
+        super(getNodeId(testFinished), testFinished.getTestName());
 
         this.duration = testFinished.getTestDuration();
     }

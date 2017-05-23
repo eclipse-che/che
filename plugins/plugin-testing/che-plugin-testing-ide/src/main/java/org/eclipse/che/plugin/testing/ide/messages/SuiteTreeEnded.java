@@ -10,15 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.messages;
 
-import org.eclipse.che.api.testing.shared.messages.TestingMessageNames;
-
 /**
  *
  */
 public class SuiteTreeEnded extends BaseTestSuiteMessage {
-    static {
-        messageConstructors.put(TestingMessageNames.SUITE_TREE_ENDED, SuiteTreeEnded::new);
-    }
 
     SuiteTreeEnded() {
     }

@@ -37,14 +37,6 @@
                 <!--<g:Tree ui:field="resultTree"/>-->
             </g:FlowPanel>
         </g:west>
-        <g:center>
-            <g:DockLayoutPanel addStyleNames="{style.outputBackground}">
-                <g:center size="100%">
-                    <g:Label width="100%" ui:field="outputResult"
-                             debugId="test-runner-output" addStyleNames="{style.outputLabel}"/>
-                </g:center>
-            </g:DockLayoutPanel>
-        </g:center>
     </g:SplitLayoutPanel>
 
 </ui:UiBinder>

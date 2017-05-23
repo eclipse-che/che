@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.resources.tree.FileNode;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
+import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
@@ -41,6 +42,7 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
     private final TestServiceClient     service;
     private final AppContext            appContext;
     private final SelectionAgent        selectionAgent;
+    private final TestingHandler testingHandler;
     private final RunTestActionDelegate delegate;
 
     @Inject
@@ -50,7 +52,8 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
                                      TestResultPresenter presenter,
                                      TestServiceClient service,
                                      SelectionAgent selectionAgent,
-                                     JUnitTestLocalizationConstant localization) {
+                                     JUnitTestLocalizationConstant localization,
+                                     TestingHandler testingHandler) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.actionRunClassContextTitle(),
               localization.actionRunClassContextDescription(), null, resources.testIcon());
         this.notificationManager = notificationManager;
@@ -58,6 +61,7 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
         this.service = service;
         this.appContext = appContext;
         this.selectionAgent = selectionAgent;
+        this.testingHandler = testingHandler;
         this.delegate = new RunTestActionDelegate(this);
     }
 
@@ -127,5 +131,10 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
     @Override
     public String getTestingFramework() {
         return "junit";
+    }
+
+    @Override
+    public TestingHandler getTestingHandler() {
+        return testingHandler;
     }
 }

@@ -50,6 +50,8 @@ public class TestState implements Printable {
     private String stackTrace;
     private int duraton;
 
+    private String presentaton;
+
     public TestState(String testName, boolean isSuite, String locationURL) {
         this.name = testName;
         this.isSuite = isSuite;
@@ -133,10 +135,6 @@ public class TestState implements Printable {
         if (printer != null) {
             printer.onNewPrintable(printable);
         }
-    }
-
-    public void setParent(TestState parent) {
-        this.parent = parent;
     }
 
     @Override
@@ -309,5 +307,20 @@ public class TestState implements Printable {
         checkAndSetStackTrace(stackTrace);
         stateInfo = new TestIgnoredInfo(ignoreComment, stackTrace);
         callNewPrintable(stateInfo);
+    }
+
+    public TestState getParent() {
+        return parent;
+    }
+
+    public void setParent(TestState parent) {
+        this.parent = parent;
+    }
+
+    public String getPresentation() {
+        if (presentaton == null) {
+            presentaton = PresentationUtil.getPresentation(this);
+        }
+        return presentaton;
     }
 }

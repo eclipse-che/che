@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.testing.server;
 
-import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.testing.server.framework.TestFrameworkRegistry;
 import org.eclipse.che.api.testing.server.framework.TestMessagesOutputTransmitter;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
