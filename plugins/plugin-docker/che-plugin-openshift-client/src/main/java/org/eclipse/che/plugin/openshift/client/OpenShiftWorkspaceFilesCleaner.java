@@ -32,6 +32,8 @@ import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
+
 /**
  * Class used to remove workspace directories in Persistent Volume when a workspace
  * is delete while running on OpenShift. Deleted workspace directories are stored
@@ -93,5 +95,13 @@ public class OpenShiftWorkspaceFilesCleaner implements WorkspaceFilesCleaner {
         if (successful) {
             deleteQueue.removeAll(deleteQueueCopy);
         }
+    }
+
+    /**
+     * Clears the list of workspace directories to be deleted. Necessary for testing.
+     */
+    @VisibleForTesting
+    protected static void clearDeleteQueue() {
+        deleteQueue.clear();
     }
 }
