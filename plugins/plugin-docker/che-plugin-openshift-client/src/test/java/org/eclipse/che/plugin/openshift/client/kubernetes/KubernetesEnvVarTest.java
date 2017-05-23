@@ -44,7 +44,7 @@ public class KubernetesEnvVarTest {
 
         // Then
         List<String> keysAndValues = env.stream().map(k -> k.getName() + "=" + k.getValue()).collect(Collectors.toList());
-        assertTrue(Arrays.stream(envVariables).anyMatch(keysAndValues::contains));
+        assertTrue(Arrays.stream(envVariables).allMatch(keysAndValues::contains));
     }
 
 }

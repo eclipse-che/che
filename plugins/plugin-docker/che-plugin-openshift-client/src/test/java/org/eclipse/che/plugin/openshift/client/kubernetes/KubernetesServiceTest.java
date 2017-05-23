@@ -40,7 +40,7 @@ public class KubernetesServiceTest {
                 map(p -> Integer.toString(p.getPort()) +
                         "/" +
                         p.getProtocol()).collect(Collectors.toList());
-        assertTrue(imageExposedPorts.keySet().stream().anyMatch(portsAndProtocols::contains));
+        assertTrue(imageExposedPorts.keySet().stream().allMatch(portsAndProtocols::contains));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class KubernetesServiceTest {
                 map(p -> Integer.toString(p.getPort()) +
                         "/" +
                         p.getProtocol()).collect(Collectors.toList());
-        assertTrue(exposedPorts.keySet().stream().anyMatch(portsAndProtocols::contains));
+        assertTrue(exposedPorts.keySet().stream().allMatch(portsAndProtocols::contains));
     }
 
     @Test
@@ -73,13 +73,13 @@ public class KubernetesServiceTest {
         exposedPorts.put("4411/tcp",null);
         exposedPorts.put("4412/tcp",null);
         exposedPorts.put("8080/tcp",null);
-        exposedPorts.put("8888/tcp",null);
+        exposedPorts.put("8000/tcp",null);
         exposedPorts.put("9876/tcp",null);
 
         Set<String> expectedPortNames = new HashSet<>();
         expectedPortNames.add("sshd");
         expectedPortNames.add("wsagent");
-        expectedPortNames.add("wsagent-pda");
+        expectedPortNames.add("wsagent-jpda");
         expectedPortNames.add("terminal");
         expectedPortNames.add("exec-agent");
         expectedPortNames.add("tomcat");
@@ -92,7 +92,7 @@ public class KubernetesServiceTest {
                 map(p -> p.getName()).collect(Collectors.toList());
 
         // Then
-        assertTrue(actualPortNames.stream().anyMatch(expectedPortNames::contains));
+        assertTrue(actualPortNames.stream().allMatch(expectedPortNames::contains));
     }
 
     @Test
@@ -110,7 +110,7 @@ public class KubernetesServiceTest {
                 map(p -> p.getName()).collect(Collectors.toList());
 
         // Then
-        assertTrue(actualPortNames.stream().anyMatch(expectedPortNames::contains));
+        assertTrue(actualPortNames.stream().allMatch(expectedPortNames::contains));
     }
 
 }
