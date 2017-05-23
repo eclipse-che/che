@@ -38,6 +38,7 @@ import org.eclipse.che.maven.data.MavenBuild;
 import org.eclipse.che.maven.data.MavenBuildBase;
 import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.che.maven.data.MavenModel;
+import org.eclipse.che.maven.data.MavenModelRelPathTransformer;
 import org.eclipse.che.maven.data.MavenParent;
 import org.eclipse.che.maven.data.MavenPlugin;
 import org.eclipse.che.maven.data.MavenPluginExecution;
@@ -118,9 +119,14 @@ public class MavenModelUtil {
     }
 
     public static MavenModel convertProjectToModel(MavenProject project, List<DependencyNode> dependencyNodes, File localRepository) {
-        Model model = project.getModel();
-        return convertModel(model, project.getCompileSourceRoots(), project.getTestCompileSourceRoots(), project.getArtifacts(),
-                            project.getExtensionArtifacts(), localRepository);
+        final Model model = project.getModel();
+        final MavenModel genuineMavenModel = convertModel(model,
+                                                          project.getCompileSourceRoots(),
+                                                          project.getTestCompileSourceRoots(),
+                                                          project.getArtifacts(),
+                                                          project.getExtensionArtifacts(),
+                                                          localRepository);
+        return new MavenModelRelPathTransformer(project.getBasedir(), genuineMavenModel);
     }
 
     private static void convertBuild(MavenBuild mavenBuild, Build build, List<String> compileSourceRoots,
@@ -477,7 +483,7 @@ public class MavenModelUtil {
         result.setId(repository.getId());
         result.setName(repository.getName());
         result.setUrl(repository.getUrl());
-        if(repository.getLayout() == null){
+        if (repository.getLayout() == null) {
             result.setLayout("default");
         } else {
             result.setLayout(repository.getLayout());

@@ -76,4 +76,15 @@ public class MavenResource implements Serializable {
     public int hashCode() {
         return Objects.hash(directory, filtered, targetPath, includes, excludes);
     }
+
+    @Override
+    public String toString() {
+        return "MavenResource{" +
+               "directory='" + directory + '\'' +
+               ", filtered=" + filtered +
+               ", targetPath='" + targetPath + '\'' +
+               ", includes=" + includes +
+               ", excludes=" + excludes +
+               '}';
+    }
 }
