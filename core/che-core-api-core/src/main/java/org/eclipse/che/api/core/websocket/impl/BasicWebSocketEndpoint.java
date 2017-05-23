@@ -46,8 +46,8 @@ public class BasicWebSocketEndpoint {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("endpoint-id") String endpointId) {
-        LOG.info("Web socket session opened");
-        LOG.info("Endpoint: {}", endpointId);
+        LOG.debug("Web socket session opened");
+        LOG.debug("Endpoint: {}", endpointId);
 
         session.setMaxIdleTimeout(0);
 
@@ -66,7 +66,7 @@ public class BasicWebSocketEndpoint {
 
     @OnClose
     public void onClose(CloseReason closeReason, @PathParam("endpoint-id") String endpointId) {
-        LOG.info("Web socket session closed");
+        LOG.debug("Web socket session closed");
         LOG.debug("Endpoint: {}", endpointId);
         LOG.debug("Close reason: {}:{}", closeReason.getReasonPhrase(), closeReason.getCloseCode());
 
@@ -75,7 +75,7 @@ public class BasicWebSocketEndpoint {
 
     @OnError
     public void onError(Throwable t, @PathParam("endpoint-id") String endpointId) {
-        LOG.info("Web socket session error");
+        LOG.debug("Web socket session error");
         LOG.debug("Endpoint: {}", endpointId);
         LOG.debug("Error: {}", t);
     }

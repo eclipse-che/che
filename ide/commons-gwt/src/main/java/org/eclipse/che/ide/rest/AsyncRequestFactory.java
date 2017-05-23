@@ -213,7 +213,7 @@ public class AsyncRequestFactory {
     protected AsyncRequest doCreateRequest(RequestBuilder.Method method, String url, Object dtoBody, boolean async) {
         Preconditions.checkNotNull(method, "Request method should not be a null");
 
-        AsyncRequest asyncRequest = new AsyncRequest(method, url, async);
+        AsyncRequest asyncRequest = newAsyncRequest(method, url, async);
         if (dtoBody != null) {
             if (dtoBody instanceof List) {
                 asyncRequest.data(dtoFactory.toJson((List)dtoBody));
@@ -237,6 +237,20 @@ public class AsyncRequestFactory {
             asyncRequest.header(HTTPHeader.CONTENT_TYPE, MimeType.WILDCARD);
         }
         return asyncRequest;
+    }
+
+    /**
+     * A factory method which creates a new instance of {@link AsyncRequest}.
+     *
+     * @param method
+     *         the request method
+     * @param url
+     *         the url to go to
+     * @param async
+     *         whether this request is asynchronous in terms of Everrest polling strategy
+     */
+    protected AsyncRequest newAsyncRequest(RequestBuilder.Method method, String url, boolean async) {
+        return new AsyncRequest(method, url, async);
     }
 
     /**

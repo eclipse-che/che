@@ -38,7 +38,6 @@ import org.eclipse.che.ide.api.resources.ResourcePathComparator;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
@@ -49,7 +48,9 @@ import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
@@ -94,11 +95,12 @@ public class AppContextImpl implements AppContext,
      */
     private final List<StartUpAction> startAppActions;
 
-    private Workspace       userWorkspace;
-    private FactoryDto      factory;
-    private Path            projectsRoot;
-    private ActiveRuntime   runtime;
-    private ResourceManager resourceManager;
+    private Workspace           userWorkspace;
+    private FactoryDto          factory;
+    private Path                projectsRoot;
+    private ActiveRuntime       runtime;
+    private ResourceManager     resourceManager;
+    private Map<String, String> properties;
 
     @Inject
     public AppContextImpl(EventBus eventBus,
@@ -438,5 +440,13 @@ public class AppContextImpl implements AppContext,
     @Override
     public ActiveRuntime getActiveRuntime() {
         return runtime;
+    }
+
+    @Override
+    public Map<String, String> getProperties() {
+        if (properties == null) {
+            properties = new HashMap<>();
+        }
+        return properties;
     }
 }
