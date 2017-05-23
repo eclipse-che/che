@@ -27,7 +27,6 @@ import org.eclipse.che.ide.rest.StringMapUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -92,18 +91,6 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Getting info about workspace..."))
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
-    }
-
-    @Override
-    public Promise<List<WorkspaceDto>> getWorkspaces(final int skip, final int limit) {
-        return fetchWorkspaces().then((Function<List<WorkspaceDto>, List<WorkspaceDto>>)ArrayList::new);
-    }
-
-    private Promise<List<WorkspaceDto>> fetchWorkspaces() {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Getting info about workspaces..."))
-                                  .send(dtoUnmarshallerFactory.newListUnmarshaller(WorkspaceDto.class));
     }
 
     @Override
@@ -182,9 +169,9 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
 
     @Override
     public Promise<Map<String, String>> getSettings() {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + "/settings") //
-                                  .header(ACCEPT, APPLICATION_JSON) //
-                                  .header(CONTENT_TYPE, APPLICATION_JSON) //
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + "/settings")
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
                                   .send(new StringMapUnmarshaller());
     }
 }

@@ -62,18 +62,6 @@ public interface WorkspaceServiceClient {
     Promise<WorkspaceDto> getWorkspace(String namespace, String workspaceName);
 
     /**
-     * Gets all workspaces of current user.
-     *
-     * @param skip
-     *         the number of the items to skip
-     * @param limit
-     *         the limit of the items in the response, default is 30
-     * @return a promise that will provide a list of {@link WorkspaceDto}, or rejects with an error
-     * @see #getWorkspaces(int, int)
-     */
-    Promise<List<WorkspaceDto>> getWorkspaces(int skip, int limit);
-
-    /**
      * Starts workspace based on workspace id and environment.
      *
      * @param id

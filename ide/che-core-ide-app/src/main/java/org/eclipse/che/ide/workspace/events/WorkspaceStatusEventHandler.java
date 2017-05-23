@@ -11,18 +11,75 @@
 package org.eclipse.che.ide.workspace.events;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
-import org.eclipse.che.ide.bootstrap.WorkspaceStarter;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.actions.WorkspaceSnapshotNotifier;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.WsAgentStateController;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.context.AppContextImpl;
+import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.ide.workspace.start.StartWorkspaceNotification;
+
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT;
+import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME;
+import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STOPPING_WORKSPACE;
 
 @Singleton
 public class WorkspaceStatusEventHandler {
 
+    private final WorkspaceServiceClient               workspaceServiceClient;
+    private final AppContext                           appContext;
+    private final Provider<StartWorkspaceNotification> startWorkspaceNotificationProvider;
+    private final Provider<NotificationManager>        notificationManagerProvider;
+    private final Provider<WorkspaceSnapshotNotifier>  snapshotNotifierProvider;
+    private final LoaderPresenter                      wsStatusNotification;
+    private final WsAgentStateController               wsAgentStateController;
+    private final WsAgentURLModifier                   wsAgentURLModifier;
+    private final EventBus                             eventBus;
+    private final CoreLocalizationConstant             messages;
+
     @Inject
-    WorkspaceStatusEventHandler(RequestHandlerConfigurator configurator, WorkspaceStarter workspaceStarter) {
+    WorkspaceStatusEventHandler(RequestHandlerConfigurator configurator,
+                                WorkspaceServiceClient workspaceServiceClient,
+                                AppContext appContext,
+                                Provider<StartWorkspaceNotification> startWorkspaceNotificationProvider,
+                                Provider<NotificationManager> notificationManagerProvider,
+                                Provider<WorkspaceSnapshotNotifier> snapshotNotifierProvider,
+                                LoaderPresenter wsStatusNotification,
+                                WsAgentStateController wsAgentStateController,
+                                WsAgentURLModifier wsAgentURLModifier,
+                                EventBus eventBus,
+                                CoreLocalizationConstant messages) {
+        this.workspaceServiceClient = workspaceServiceClient;
+        this.appContext = appContext;
+        this.startWorkspaceNotificationProvider = startWorkspaceNotificationProvider;
+        this.notificationManagerProvider = notificationManagerProvider;
+        this.snapshotNotifierProvider = snapshotNotifierProvider;
+        this.wsStatusNotification = wsStatusNotification;
+        this.wsAgentStateController = wsAgentStateController;
+        this.wsAgentURLModifier = wsAgentURLModifier;
+        this.eventBus = eventBus;
+        this.messages = messages;
+
         configurator.newConfiguration()
                     .methodName("event:workspace-status:changed")
                     .paramsAsDto(WorkspaceStatusEvent.class)
@@ -30,7 +87,71 @@ public class WorkspaceStatusEventHandler {
                     .withConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
-                        workspaceStarter.checkWorkspaceStatus(event);
+                        handleWorkspaceStatusChanging(event);
                     });
+    }
+
+    /** Handles workspace status changing. */
+    public void handleWorkspaceStatusChanging(@Nullable WorkspaceStatusEvent serverEvent) {
+        workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
+            appContext.setWorkspace(workspace);
+
+            // FIXME: spi
+            ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf("/projects"));
+
+            if (workspace.getStatus() == RUNNING) {
+                wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
+                wsAgentStateController.initialize(appContext.getDevMachine());
+                wsAgentURLModifier.initialize(appContext.getDevMachine());
+
+                eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
+            } else if (workspace.getStatus() == STARTING) {
+                eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
+            } else if (workspace.getStatus() == STOPPED) {
+                eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
+            }
+
+            if (serverEvent != null) {
+                notify(serverEvent);
+            }
+        });
+    }
+
+    // TODO: move to the separate component that should listen appropriate events
+    private void notify(WorkspaceStatusEvent event) {
+        switch (event.getEventType()) {
+            case STARTING:
+                wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
+                break;
+            case RUNNING:
+                startWorkspaceNotificationProvider.get().hide();
+                wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
+                break;
+            case STOPPING:
+                wsStatusNotification.show(STOPPING_WORKSPACE);
+                break;
+            case STOPPED:
+                wsStatusNotification.setSuccess(STOPPING_WORKSPACE);
+                startWorkspaceNotificationProvider.get().show();
+                break;
+            case ERROR:
+                notificationManagerProvider.get().notify(messages.workspaceStartFailed(), FAIL, FLOAT_MODE);
+                startWorkspaceNotificationProvider.get().show();
+                break;
+            case SNAPSHOT_CREATING:
+                wsStatusNotification.show(CREATING_WORKSPACE_SNAPSHOT);
+                snapshotNotifierProvider.get().creationStarted();
+                break;
+            case SNAPSHOT_CREATED:
+                wsStatusNotification.setSuccess(CREATING_WORKSPACE_SNAPSHOT);
+                snapshotNotifierProvider.get().successfullyCreated();
+                break;
+            case SNAPSHOT_CREATION_ERROR:
+                wsStatusNotification.setError(CREATING_WORKSPACE_SNAPSHOT);
+                snapshotNotifierProvider.get().creationError("Snapshot creation error: " + event.getError());
+                break;
+            default:
+                break;
+        }
     }
 }

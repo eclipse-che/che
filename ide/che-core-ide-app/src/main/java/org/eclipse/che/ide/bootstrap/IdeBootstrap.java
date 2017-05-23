@@ -25,7 +25,7 @@ public class IdeBootstrap {
     private final DialogFactory dialogFactory;
 
     @Inject
-    public IdeBootstrap(DialogFactory dialogFactory) {
+    IdeBootstrap(DialogFactory dialogFactory) {
         this.dialogFactory = dialogFactory;
     }
 

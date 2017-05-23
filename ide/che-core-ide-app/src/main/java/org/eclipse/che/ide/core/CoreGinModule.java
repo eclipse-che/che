@@ -44,7 +44,7 @@ import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.ssh.SshServiceClientImpl;
 import org.eclipse.che.ide.api.user.AskCredentialsDialog;
-import org.eclipse.che.ide.bootstrap.DtoModule;
+import org.eclipse.che.ide.dto.DtoModule;
 import org.eclipse.che.ide.clipboard.ClipboardModule;
 import org.eclipse.che.ide.command.CommandApiModule;
 import org.eclipse.che.ide.connection.ConnectionClosedInformerImpl;

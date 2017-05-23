@@ -154,6 +154,7 @@ class GeneralIdeInitializer implements IdeInitializer {
         workspacePresenterProvider.get().go(mainPanel);
     }
 
+    // TODO: remove when dashboard will work
     private void createWs() {
         createWsPresenter.get().show(new Callback<Workspace, Exception>() {
             @Override

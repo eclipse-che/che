@@ -53,6 +53,8 @@ public class MachineEntityImpl implements MachineEntity {
         return machineDescriptor.getServers().get(WSAGENT_REFERENCE) != null;
     }
 
+    @Deprecated
+    @Override
     public String getId() {
         return name;
     }
@@ -62,6 +64,7 @@ public class MachineEntityImpl implements MachineEntity {
         return name;
     }
 
+    @Deprecated
     @Override
     public String getDisplayName() {
         return name;

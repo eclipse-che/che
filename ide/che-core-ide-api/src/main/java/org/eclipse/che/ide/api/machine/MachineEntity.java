@@ -25,12 +25,19 @@ public interface MachineEntity extends Machine {
     /** Returns {@code true} when the machine entity is development machine and {@code false} otherwise */
     boolean isDev();
 
+    /** @deprecated use {@link #getName()} */
+    @Deprecated
     String getId();
 
     /** Returns current machine's display name */
     String getName();
 
-    /** Returns current machine's display name */
+    /**
+     * Returns current machine's display name.
+     *
+     * @deprecated use {@link #getName()} instead
+     */
+    @Deprecated
     String getDisplayName();
 
     /** Returns machine specific properties. */
