@@ -65,9 +65,9 @@ public class LanguageServerRegistryServiceClient {
                                   .send(unmarshallerFactory.newListUnmarshaller(ExtendedInitializeResult.class));
     }
 
-    public void initializeServer(String path) {
+    public Promise<Void> initializeServer(String path) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + BASE_URI + "/initialize?path=" + path;
-        asyncRequestFactory.createPostRequest(requestUrl, null).send();
+        return asyncRequestFactory.createPostRequest(requestUrl, null).send();
     }
 
 }
