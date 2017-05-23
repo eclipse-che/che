@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.bootstrap;
+package org.eclipse.che.ide.dto;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
