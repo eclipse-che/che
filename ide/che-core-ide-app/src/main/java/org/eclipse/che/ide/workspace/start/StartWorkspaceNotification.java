@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.bootstrap.CurrentWorkspaceManager;
@@ -32,9 +33,9 @@ import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 @Singleton
 public class StartWorkspaceNotification {
 
-    private final WorkspaceStarterUiBinder uiBinder;
-    private final LoaderPresenter          loader;
-    private final CurrentWorkspaceManager  currentWorkspaceManager;
+    private final WorkspaceStarterUiBinder          uiBinder;
+    private final LoaderPresenter                   loader;
+    private final Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider;
 
     @UiField
     Button   button;
@@ -44,10 +45,10 @@ public class StartWorkspaceNotification {
     @Inject
     public StartWorkspaceNotification(LoaderPresenter loader,
                                       WorkspaceStarterUiBinder uiBinder,
-                                      CurrentWorkspaceManager currentWorkspaceManager) {
+                                      Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider) {
         this.loader = loader;
         this.uiBinder = uiBinder;
-        this.currentWorkspaceManager = currentWorkspaceManager;
+        this.currentWorkspaceManagerProvider = currentWorkspaceManagerProvider;
     }
 
     /** Displays a notification with a proposal to start current workspace. */
@@ -66,7 +67,7 @@ public class StartWorkspaceNotification {
     @UiHandler("button")
     void startClicked(ClickEvent e) {
         loader.setSuccess(LoaderPresenter.Phase.WORKSPACE_STOPPED);
-        currentWorkspaceManager.startWorkspace(restore.getValue());
+        currentWorkspaceManagerProvider.get().startWorkspace(restore.getValue());
     }
 
     interface WorkspaceStarterUiBinder extends UiBinder<Widget, StartWorkspaceNotification> {
