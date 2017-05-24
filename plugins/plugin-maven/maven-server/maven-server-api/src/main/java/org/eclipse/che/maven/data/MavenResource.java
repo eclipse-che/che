@@ -76,5 +76,4 @@ public class MavenResource implements Serializable {
     public int hashCode() {
         return Objects.hash(directory, filtered, targetPath, includes, excludes);
     }
-
 }
