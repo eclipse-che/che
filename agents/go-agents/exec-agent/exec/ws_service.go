@@ -134,7 +134,7 @@ type StartParams struct {
 
 func startProcessReqHF(params interface{}, t *rpc.Transmitter) error {
 	startParams := params.(StartParams)
-	command := Command{
+	command := process.Command{
 		Name:        startParams.Name,
 		CommandLine: startParams.CommandLine,
 		Type:        startParams.Type,
@@ -143,14 +143,14 @@ func startProcessReqHF(params interface{}, t *rpc.Transmitter) error {
 		return rpc.NewArgsError(err)
 	}
 
-	_, err := NewBuilder().
+	_, err := process.NewBuilder().
 		Cmd(command).
-		FirstSubscriber(Subscriber{
+		FirstSubscriber(process.Subscriber{
 			ID:      t.Channel.ID,
 			Mask:    parseTypes(startParams.EventTypes),
 			Channel: t.Channel.Events,
 		}).
-		BeforeEventsHook(func(process MachineProcess) {
+		BeforeEventsHook(func(process process.MachineProcess) {
 			t.Send(process)
 		}).
 		Start()
@@ -165,7 +165,7 @@ type KillParams struct {
 
 func killProcessReqHF(params interface{}, t *rpc.Transmitter) error {
 	killParams := params.(KillParams)
-	if err := Kill(killParams.Pid); err != nil {
+	if err := process.Kill(killParams.Pid); err != nil {
 		return asRPCError(err)
 	}
 	t.Send(&ProcessResult{
@@ -197,14 +197,14 @@ func subscribeReqHF(params interface{}, t *rpc.Transmitter) error {
 		return rpc.NewArgsError(errors.New("Required at least 1 valid event type"))
 	}
 
-	subscriber := Subscriber{
+	subscriber := process.Subscriber{
 		ID:      t.Channel.ID,
 		Mask:    mask,
 		Channel: t.Channel.Events,
 	}
 	// Check whether subscriber should see previous logs or not
 	if subscribeParams.After == "" {
-		if err := AddSubscriber(subscribeParams.Pid, subscriber); err != nil {
+		if err := process.AddSubscriber(subscribeParams.Pid, subscriber); err != nil {
 			return asRPCError(err)
 		}
 	} else {
@@ -212,7 +212,7 @@ func subscribeReqHF(params interface{}, t *rpc.Transmitter) error {
 		if err != nil {
 			return rpc.NewArgsError(errors.New("Bad format of 'after', " + err.Error()))
 		}
-		if err := RestoreSubscriber(subscribeParams.Pid, subscriber, after); err != nil {
+		if err := process.RestoreSubscriber(subscribeParams.Pid, subscriber, after); err != nil {
 			return err
 		}
 	}
@@ -231,7 +231,7 @@ type UnsubscribeParams struct {
 
 func unsubscribeReqHF(params interface{}, t *rpc.Transmitter) error {
 	unsubscribeParams := params.(UnsubscribeParams)
-	if err := RemoveSubscriber(unsubscribeParams.Pid, t.Channel.ID); err != nil {
+	if err := process.RemoveSubscriber(unsubscribeParams.Pid, t.Channel.ID); err != nil {
 		return asRPCError(err)
 	}
 	t.Send(&ProcessResult{
@@ -252,7 +252,7 @@ func updateSubscriberReqHF(params interface{}, t *rpc.Transmitter) error {
 	if updateParams.EventTypes == "" {
 		return rpc.NewArgsError(errors.New("'eventTypes' required for subscriber update"))
 	}
-	if err := UpdateSubscriber(updateParams.Pid, t.Channel.ID, maskFromTypes(updateParams.EventTypes)); err != nil {
+	if err := process.UpdateSubscriber(updateParams.Pid, t.Channel.ID, maskFromTypes(updateParams.EventTypes)); err != nil {
 		return asRPCError(err)
 	}
 	t.Send(&SubscribeResult{
@@ -292,7 +292,7 @@ func getProcessLogsReqHF(params interface{}, t *rpc.Transmitter) error {
 		return rpc.NewArgsError(errors.New("Bad format of 'till', " + err.Error()))
 	}
 
-	logs, err := ReadLogs(getLogsParams.Pid, from, till)
+	logs, err := process.ReadLogs(getLogsParams.Pid, from, till)
 	if err != nil {
 		return asRPCError(err)
 	}
@@ -328,7 +328,7 @@ type GetProcessParams struct {
 
 func getProcessReqHF(body interface{}, t *rpc.Transmitter) error {
 	params := body.(GetProcessParams)
-	p, err := Get(params.Pid)
+	p, err := process.Get(params.Pid)
 	if err != nil {
 		return asRPCError(err)
 	}
@@ -343,15 +343,15 @@ type GetProcessesParams struct {
 
 func getProcessesReqHF(body interface{}, t *rpc.Transmitter) error {
 	params := body.(GetProcessesParams)
-	t.Send(GetProcesses(params.All))
+	t.Send(process.GetProcesses(params.All))
 	return nil
 }
 
 func asRPCError(err error) error {
-	if npErr, ok := err.(*NoProcessError); ok {
-		return rpc.NewError(npErr.error, NoSuchProcessErrorCode)
-	} else if naErr, ok := err.(*NotAliveError); ok {
-		return rpc.NewError(naErr.error, ProcessNotAliveErrorCode)
+	if npErr, ok := err.(*process.NoProcessError); ok {
+		return rpc.NewError(npErr, NoSuchProcessErrorCode)
+	} else if naErr, ok := err.(*process.NotAliveError); ok {
+		return rpc.NewError(naErr, ProcessNotAliveErrorCode)
 	}
 	return err
 }

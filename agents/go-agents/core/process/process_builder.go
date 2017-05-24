@@ -9,7 +9,7 @@
 //   Codenvy, S.A. - initial API and implementation
 //
 
-package exec
+package process
 
 //ProcessBuilder simplifies creation of MachineProcess
 type ProcessBuilder struct {

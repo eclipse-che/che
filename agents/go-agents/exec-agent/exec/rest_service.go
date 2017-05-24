@@ -66,7 +66,7 @@ var HTTPRoutes = rest.RoutesGroup{
 }
 
 func startProcessHF(w http.ResponseWriter, r *http.Request, p rest.Params) error {
-	command := Command{}
+	command := process.Command{}
 	if err := restutil.ReadJSON(r, &command); err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func startProcessHF(w http.ResponseWriter, r *http.Request, p rest.Params) error
 
 	// If channel is provided then check whether it is ready to be
 	// first process subscriber and use it if it is
-	var subscriber *Subscriber
+	var subscriber *process.Subscriber
 	channelID := r.URL.Query().Get("channel")
 	if channelID != "" {
 		channel, ok := rpc.GetChannel(channelID)
@@ -84,24 +84,24 @@ func startProcessHF(w http.ResponseWriter, r *http.Request, p rest.Params) error
 			m := fmt.Sprintf("Channel with id '%s' doesn't exist. Process won't be started", channelID)
 			return rest.NotFound(errors.New(m))
 		}
-		subscriber = &Subscriber{
+		subscriber = &process.Subscriber{
 			ID:      channelID,
 			Mask:    parseTypes(r.URL.Query().Get("types")),
 			Channel: channel.Events,
 		}
 	}
 
-	pb := NewBuilder().Cmd(command)
+	pb := process.NewBuilder().Cmd(command)
 
 	if subscriber != nil {
 		pb.FirstSubscriber(*subscriber)
 	}
 
-	process, err := pb.Start()
+	proc, err := pb.Start()
 	if err != nil {
 		return err
 	}
-	return restutil.WriteJSON(w, process)
+	return restutil.WriteJSON(w, proc)
 }
 
 func getProcessHF(w http.ResponseWriter, r *http.Request, p rest.Params) error {
@@ -110,11 +110,11 @@ func getProcessHF(w http.ResponseWriter, r *http.Request, p rest.Params) error {
 		return rest.BadRequest(err)
 	}
 
-	process, err := Get(pid)
+	proc, err := process.Get(pid)
 	if err != nil {
 		return asHTTPError(err)
 	}
-	return restutil.WriteJSON(w, process)
+	return restutil.WriteJSON(w, proc)
 }
 
 func killProcessHF(w http.ResponseWriter, r *http.Request, p rest.Params) error {
@@ -122,7 +122,7 @@ func killProcessHF(w http.ResponseWriter, r *http.Request, p rest.Params) error 
 	if err != nil {
 		return rest.BadRequest(err)
 	}
-	if err := Kill(pid); err != nil {
+	if err := process.Kill(pid); err != nil {
 		return asHTTPError(err)
 	}
 	return nil
@@ -143,7 +143,7 @@ func getProcessLogsHF(w http.ResponseWriter, r *http.Request, p rest.Params) err
 		return err
 	}
 
-	logs, err := ReadLogs(logsParams.pid, logsParams.from, logsParams.till)
+	logs, err := process.ReadLogs(logsParams.pid, logsParams.from, logsParams.till)
 	if err != nil {
 		return asHTTPError(err)
 	}
@@ -216,12 +216,12 @@ func getProcessesHF(w http.ResponseWriter, r *http.Request, _ rest.Params) error
 	if err != nil {
 		all = false
 	}
-	return restutil.WriteJSON(w, GetProcesses(all))
+	return restutil.WriteJSON(w, process.GetProcesses(all))
 }
 
 func asHTTPError(err error) error {
-	if npErr, ok := err.(*NoProcessError); ok {
-		return rest.NotFound(npErr.error)
+	if npErr, ok := err.(*process.NoProcessError); ok {
+		return rest.NotFound(npErr)
 	}
 	return err
 }
