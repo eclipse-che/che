@@ -232,7 +232,7 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
 //        PathTranslator pathTranslator = new DefaultPathTranslator();
 //        pathTranslator.alignToBaseDirectory(result, projectDir);
 
-        return MavenModelUtil.convertModel(result);
+        return MavenModelUtil.convertModel(result, projectDir);
     }
 
     /**
@@ -315,7 +315,7 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
             new DefaultProfileInjector().injectProfile(nativeModel, each, null, null);
         }
 
-        return new ProfileApplicationResult(MavenModelUtil.convertModel(nativeModel),
+        return new ProfileApplicationResult(MavenModelUtil.convertModel(nativeModel, projectDir),
                                             new MavenExplicitProfiles(collectProfilesIds(activatedProfiles),
                                                                       collectProfilesIds(deactivatedProfiles))
         );
