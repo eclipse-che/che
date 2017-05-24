@@ -23,9 +23,10 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 @Singleton
-public class WorkspaceAgentOutputHandler {
+class WorkspaceAgentOutputHandler {
+
     @Inject
-    public void configureWorkspaceOutputMessageHandler(AppContext appContext, RequestHandlerConfigurator configurator, EventBus eventBus) {
+    void configureWorkspaceOutputMessageHandler(AppContext appContext, RequestHandlerConfigurator configurator, EventBus eventBus) {
         BiConsumer<String, List<String>> operation = (String endpointId, List<String> messages) -> {
             Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 

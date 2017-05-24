@@ -30,7 +30,7 @@ public class IdeBootstrap {
     }
 
     @Inject
-    void bootstrap(ExtensionInitializer extensionInitializer, WorkspaceStarter wsStarter, IdeInitializer ideInitializer) {
+    void bootstrap(ExtensionInitializer extensionInitializer, CurrentWorkspaceManager wsStarter, IdeInitializer ideInitializer) {
         ideInitializer.init()
                       .then(aVoid -> {
                           extensionInitializer.startExtensions();

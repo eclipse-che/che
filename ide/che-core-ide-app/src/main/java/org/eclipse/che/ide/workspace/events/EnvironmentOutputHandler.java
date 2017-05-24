@@ -20,9 +20,10 @@ import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
 @Singleton
-public class EnvironmentOutputHandler {
+class EnvironmentOutputHandler {
+
     @Inject
-    public EnvironmentOutputHandler(RequestHandlerConfigurator configurator, EventBus eventBus) {
+    EnvironmentOutputHandler(RequestHandlerConfigurator configurator, EventBus eventBus) {
         configurator.newConfiguration()
                     .methodName("event:environment-output:message")
                     .paramsAsDto(MachineLogMessageDto.class)

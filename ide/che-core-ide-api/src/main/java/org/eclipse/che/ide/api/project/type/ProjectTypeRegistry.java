@@ -13,21 +13,13 @@ package org.eclipse.che.ide.api.project.type;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.commons.annotation.Nullable;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
-/**
- * @author Vitaly Parfonov
- * @author Artem Zatsarynnyi
- */
+/** Registry of project types. */
 public interface ProjectTypeRegistry {
-
-    @Nullable
-    ProjectTypeDto getProjectType(@NotNull String id);
 
     List<ProjectTypeDto> getProjectTypes();
 
-    void register(ProjectTypeDto projectType);
-
-    void registerAll(List<ProjectTypeDto> projectTypesList);
+    @Nullable
+    ProjectTypeDto getProjectType(String id);
 }

@@ -27,18 +27,20 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.ide.actions.StartUpActionsParser;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.core.StandardComponentInitializer;
 import org.eclipse.che.ide.preferences.StyleInjector;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.theme.ThemeAgentImpl;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
+import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 
 /**
@@ -125,8 +127,9 @@ class GeneralIdeInitializer implements IdeInitializer {
     protected Promise<Void> initAppContext() {
         return getWorkspaceToStart()
                 .then((Function<WorkspaceDto, Void>)workspace -> {
-                    appContext.setWorkspace(workspace);
-//                  browserAddress.setAddress(workspace.getNamespace(), workspace.getConfig().getName());
+                    ((AppContextImpl)appContext).setWorkspace(workspace);
+                    ((AppContextImpl)appContext).setStartAppActions(StartUpActionsParser.getStartUpActions());
+                    browserAddress.setAddress(workspace.getNamespace(), workspace.getConfig().getName());
                     return null;
                 })
                 .catchError((Operation<PromiseError>)err -> {

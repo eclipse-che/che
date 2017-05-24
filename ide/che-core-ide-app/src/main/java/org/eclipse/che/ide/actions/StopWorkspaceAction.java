@@ -16,7 +16,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.bootstrap.CurrentWorkspaceManager;
 
 import javax.validation.constraints.NotNull;
 
@@ -27,22 +27,20 @@ import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.P
 /**
  * The class contains business logic to stop workspace.
  *
- * TODO combine with StopMachineAction or remove it. These two actions duplicate own logic
- *
  * @author Dmitry Shnurenko
  */
 public class StopWorkspaceAction extends AbstractPerspectiveAction {
 
-    private final WorkspaceServiceClient workspaceService;
+    private final CurrentWorkspaceManager workspaceManager;
     private final AppContext             appContext;
 
     @Inject
     public StopWorkspaceAction(CoreLocalizationConstant locale,
-                               WorkspaceServiceClient workspaceService,
-                               AppContext appContext) {
+                               AppContext appContext,
+                               CurrentWorkspaceManager workspaceManager) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), locale.stopWsTitle(), locale.stopWsDescription(), null, null);
         this.appContext = appContext;
-        this.workspaceService = workspaceService;
+        this.workspaceManager = workspaceManager;
     }
 
     @Override
@@ -56,6 +54,6 @@ public class StopWorkspaceAction extends AbstractPerspectiveAction {
     public void actionPerformed(ActionEvent event) {
         checkNotNull(appContext.getWorkspace().getId(), "Workspace id should not be null");
 
-        workspaceService.stop(appContext.getWorkspace().getId());
+        workspaceManager.stopWorkspace();
     }
 }
