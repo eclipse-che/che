@@ -16,7 +16,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
@@ -36,7 +35,6 @@ import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluation
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -103,9 +101,9 @@ public class DockerMachine implements Machine {
 
     @Inject
     public DockerMachine(DockerConnector docker,
-                         @Named("che.docker.registry") String registry,
-                         @Named("che.docker.namespace") @Nullable String registryNamespace,
-                         @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
+                         String registry,
+                         String registryNamespace,
+                         boolean snapshotUseRegistry,
                          @Assisted("container") String container,
                          @Assisted("image") String image,
                          ServerEvaluationStrategyProvider provider,

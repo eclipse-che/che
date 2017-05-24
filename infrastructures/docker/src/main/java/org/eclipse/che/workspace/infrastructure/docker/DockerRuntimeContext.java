@@ -201,7 +201,7 @@ public class DockerRuntimeContext extends RuntimeContext {
     }
 
     private void destroyRuntime(Map<String, String> stopOptions) throws InfrastructureException {
-        if (stopOptions != null && "true".equals(stopOptions.get("snapshot"))) {
+        if (stopOptions != null && "true".equals(stopOptions.get("create-snapshot"))) {
             List<SnapshotImpl> newSnapshots = new ArrayList<>(startSynchronizer.getMachines().size());
             for (Map.Entry<String, DockerMachine> dockerMachineEntry : startSynchronizer.removeMachines().entrySet()) {
                 try {
