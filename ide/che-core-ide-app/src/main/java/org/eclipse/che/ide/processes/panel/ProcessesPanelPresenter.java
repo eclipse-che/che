@@ -309,8 +309,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             if (TERMINAL_NODE.equals(child.getType()) && terminals.containsKey(child.getId())) {
                 onCloseTerminal(child);
             } else if (COMMAND_NODE.equals(child.getType()) && consoles.containsKey(child.getId())) {
-                onStopCommandProcess(child);
-                view.hideProcessOutput(child.getId());
+                OutputConsole console = consoles.get(child.getId());
+                removeConsole(console, child, () -> {});
             }
         }
 
@@ -320,7 +320,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     @Override
     public void onCloseTerminal(ProcessTreeNode node) {
         closeTerminal(node);
-        view.hideProcessOutput(node.getId());
+        view.removeWidget(node.getId());
     }
 
     @Override
@@ -438,17 +438,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         newTerminal.setVisible(true);
         newTerminal.connect();
-        newTerminal.setListener(new TerminalPresenter.TerminalStateListener() {
-            @Override
-            public void onExit() {
-                String terminalId = terminalNode.getId();
-                if (terminals.containsKey(terminalId)) {
-                    onStopProcess(terminalNode);
-                    terminals.remove(terminalId);
-                }
-                view.hideProcessOutput(terminalId);
-            }
-        });
+        newTerminal.setListener(() -> onCloseTerminal(terminalNode));
     }
 
     @Override
@@ -657,12 +647,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onCloseCommandOutputClick(final ProcessTreeNode node) {
-        closeCommandOutput(node, new SubPanel.RemoveCallback() {
-            @Override
-            public void remove() {
-                view.hideProcessOutput(node.getId());
-            }
-        });
+        closeCommandOutput(node, () -> {});
     }
 
     @Override
@@ -680,46 +665,39 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         if (console.isFinished()) {
-            console.close();
-            onStopProcess(node);
-            consoles.remove(commandId);
-            consoleCommands.remove(console);
-
-            removeCallback.remove();
-
-            if (console instanceof CommandOutputConsole) {
-                eventBus.fireEvent(new ProcessOutputClosedEvent(((CommandOutputConsole)console).getPid()));
-            }
-
-            return;
+            removeConsole(console, node, removeCallback);
+        } else {
+            dialogFactory.createConfirmDialog("",
+                                              localizationConstant.outputsConsoleViewStopProcessConfirmation(console.getTitle()),
+                                              getConfirmCloseConsoleCallback(console, node, removeCallback),
+                                              null).show();
         }
-
-        dialogFactory.createConfirmDialog("",
-                                          localizationConstant.outputsConsoleViewStopProcessConfirmation(console.getTitle()),
-                                          getConfirmCloseConsoleCallback(console, node, removeCallback),
-                                          null).show();
     }
 
     private ConfirmCallback getConfirmCloseConsoleCallback(final OutputConsole console,
                                                            final ProcessTreeNode node,
                                                            final SubPanel.RemoveCallback removeCallback) {
-        return new ConfirmCallback() {
-            @Override
-            public void accepted() {
-                console.stop();
-                onStopProcess(node);
-
-                console.close();
-                consoles.remove(node.getId());
-                consoleCommands.remove(console);
-
-                removeCallback.remove();
-
-                if (console instanceof CommandOutputConsole) {
-                    eventBus.fireEvent(new ProcessOutputClosedEvent(((CommandOutputConsole)console).getPid()));
-                }
-            }
+        return () -> {
+            console.stop();
+            removeConsole(console, node, removeCallback);
         };
+    }
+
+    private void removeConsole(final OutputConsole console,
+                               final ProcessTreeNode node,
+                               final SubPanel.RemoveCallback removeCallback) {
+        console.close();
+        onStopProcess(node);
+
+        consoles.remove(node.getId());
+        consoleCommands.remove(console);
+        view.removeWidget(node.getId());
+
+        removeCallback.remove();
+
+        if (console instanceof CommandOutputConsole) {
+            eventBus.fireEvent(new ProcessOutputClosedEvent(((CommandOutputConsole)console).getPid()));
+        }
     }
 
     private void onStopProcess(ProcessTreeNode node) {
@@ -987,13 +965,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
                     for (ProcessTreeNode child : children) {
                         if (COMMAND_NODE == child.getType()) {
-                            closeCommandOutput(child, new SubPanel.RemoveCallback() {
-                                @Override
-                                public void remove() {
-                                }
-                            });
+                            OutputConsole console = consoles.get(child.getId());
+                            removeConsole(console, child, () -> {});
                         } else if (TERMINAL_NODE == child.getType()) {
-                            closeTerminal(child);
+                            onCloseTerminal(child);
                         }
 
                         view.hideProcessOutput(child.getId());

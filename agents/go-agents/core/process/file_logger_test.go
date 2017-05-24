@@ -15,15 +15,12 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/eclipse/che/agents/go-agents/core/process"
 )
-
-var alphabet = []byte("abcdefgh123456789")
 
 func TestFileLoggerCreatesFileWhenFileDoesNotExist(t *testing.T) {
 	filename := os.TempDir() + string(os.PathSeparator) + randomName(10)
@@ -111,15 +108,6 @@ func TestLogsAreFlushedOnClose(t *testing.T) {
 	}
 	failIfDifferent(t, expectedStdout, stdout)
 	failIfDifferent(t, expectedStderr, stderr)
-}
-
-func randomName(length int) string {
-	rand.Seed(time.Now().UnixNano())
-	bytes := make([]byte, length)
-	for i := 0; i < length; i++ {
-		bytes[i] = alphabet[rand.Intn(len(alphabet))]
-	}
-	return string(bytes)
 }
 
 func removeFile(path string) {
