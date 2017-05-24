@@ -51,35 +51,25 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.prefixURI;
+import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.removePrefixUri;
+
 /**
  * Json RPC API for the textDoc
  * <p>
  * Dispatches onto the {@link LanguageServerRegistryImpl}.
  */
 @Singleton
-public class TextDocumentJsonRpcService {
-    private static final Logger LOG = LoggerFactory.getLogger(TextDocumentJsonRpcService.class);
-
-    private static final String FILE_PROJECTS = "file:///projects";
+public class TextDocumentService {
+    private static final Logger LOG = LoggerFactory.getLogger(TextDocumentService.class);
 
     private final LanguageServerRegistry     languageServerRegistry;
     private final RequestHandlerConfigurator requestHandler;
 
     @Inject
-    public TextDocumentJsonRpcService(LanguageServerRegistry languageServerRegistry, RequestHandlerConfigurator requestHandler) {
+    public TextDocumentService(LanguageServerRegistry languageServerRegistry, RequestHandlerConfigurator requestHandler) {
         this.languageServerRegistry = languageServerRegistry;
         this.requestHandler = requestHandler;
-    }
-
-    static String prefixURI(String relativePath) {
-        return FILE_PROJECTS + relativePath;
-    }
-
-    static String removePrefixUri(String uri) {
-        if (uri.startsWith(FILE_PROJECTS)) {
-            return uri.substring(FILE_PROJECTS.length());
-        }
-        return uri;
     }
 
     @PostConstruct
@@ -315,7 +305,7 @@ public class TextDocumentJsonRpcService {
 
     private <P> void dtoToNothing(String name, Class<P> pClass, Consumer<P> consumer) {
         requestHandler.newConfiguration()
-                      .methodName("textDocument/"+name)
+                      .methodName("textDocument/" + name)
                       .paramsAsDto(pClass)
                       .noResult()
                       .withConsumer(consumer);
