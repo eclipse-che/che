@@ -13,7 +13,7 @@ package org.eclipse.che.api.deploy;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-
+import com.redhat.bayesian.agent.BayesianAgent;
 import org.eclipse.che.api.agent.ExecAgent;
 import org.eclipse.che.api.agent.ExecAgentLauncher;
 import org.eclipse.che.api.agent.LSCSharpAgent;
@@ -126,6 +126,7 @@ public class WsMasterModule extends AbstractModule {
         agents.addBinding().to(UnisonAgent.class);
         agents.addBinding().to(ExecAgent.class);
         agents.addBinding().to(WsAgent.class);
+        agents.addBinding().to(BayesianAgent.class);
         agents.addBinding().to(LSPhpAgent.class);
         agents.addBinding().to(LSPythonAgent.class);
         agents.addBinding().to(LSJsonAgent.class);
