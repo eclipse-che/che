@@ -12,7 +12,7 @@ package org.eclipse.che.ide.ext.git.client.commit;
 
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedPanelView;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
 import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
@@ -56,7 +56,7 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
      * @param paths
      *         pats of nodes
      */
-    void checkCheckBoxes(Set<Path> paths);
+    void setMarkedCheckBoxes(Set<Path> paths);
 
     /**
      * Returns selected remote branch from branches drop-down list.
@@ -132,5 +132,5 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
     /**
      * Initialize changed panel.
      */
-    void setChangedPanelView(ChangedPanelView changedPanelView);
+    void setChangesPanelView(ChangesPanelView changesPanelView);
 }

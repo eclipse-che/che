@@ -8,26 +8,27 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.changedpanel;
+package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
+import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 import org.eclipse.che.ide.ui.smartTree.presentation.PresentationRenderer;
 
 import java.util.Map;
 import java.util.Set;
 
 /**
- * The view of {@link ChangedPanelPresenter}.
+ * The view of {@link ChangesPanelPresenter}.
  *
  * @author Igor Vinokur
  */
-public interface ChangedPanelView extends View<ChangedPanelView.ActionDelegate> {
-    /** Needs for delegate some function into Changed list view. */
+public interface ChangesPanelView extends View<ChangesPanelView.ActionDelegate> {
+
+    /** Needs for delegate some function into Changes list view. */
     interface ActionDelegate {
 
         /**
@@ -41,38 +42,21 @@ public interface ChangedPanelView extends View<ChangedPanelView.ActionDelegate> 
         /** Performs any actions appropriate in response to the user having pressed the 'Collapse all directories' button. */
         void onCollapseButtonClicked();
 
-        /**
-         * Performs any action in response to the user having select any node.
-         *
-         * @param node
-         *         selected node
-         */
-        void onNodeSelected(Node node);
-
         /** Performs any actions appropriate in response to the user double clicked on the file node. */
         void onFileNodeDoubleClicked(String file, Status status);
     }
 
     /**
-     * View changed files as list.
-     *
-     * @param files
-     *         Map of changed files with their status
+     * Add selection changed handler.
      */
-    void viewChangedFilesAsList(Map<String, Status> files);
+    void addSelectionHandler(SelectionChangedHandler handler);
+
+    void viewChangedFiles(Map<String, Status> files,  ViewMode viewMode);
 
     /**
      * Clear panel from old nodes.
      */
-    void clearNodeStorage();
-
-    /**
-     * View changed files as tree.
-     *
-     * @param files
-     *         Map of changed files with their status
-     */
-    void viewChangedFilesAsTree(Map<String, Status> files);
+    void resetPanelState();
 
     /** Expand all directories. */
     void expandAllDirectories();

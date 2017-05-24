@@ -14,9 +14,9 @@ import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
-import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedFileNode;
-import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedFolderNode;
-import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedPanelView;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangedFileNode;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangedFolderNode;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.ShiftableTextArea;
 import org.eclipse.che.ide.ui.smartTree.Tree;
@@ -64,7 +64,7 @@ public class CommitViewImpl extends Window implements CommitView {
     @UiField(provided = true)
     final TextArea message;
     @UiField
-    FlowPanel changedPanel;
+    FlowPanel changesPanel;
     @UiField
     CheckBox  amend;
     @UiField(provided = true)
@@ -77,19 +77,17 @@ public class CommitViewImpl extends Window implements CommitView {
     private Button             btnCommit;
     private Button             btnCancel;
     private ActionDelegate     delegate;
-    private ChangedPanelRender render;
-    private ChangedPanelView   changedPanelView;
+    private ChangesPanelRender render;
+    private ChangesPanelView   changesPanelView;
 
     /**
      * Create view.
      */
     @Inject
     protected CommitViewImpl(GitResources res,
-                             GitLocalizationConstant locale,
-                             ChangedPanelView changedPanelView) {
+                             GitLocalizationConstant locale) {
         this.res = res;
         this.locale = locale;
-        this.changedPanelView = changedPanelView;
         this.message = new ShiftableTextArea();
         this.ensureDebugId("git-commit-window");
 
@@ -107,7 +105,7 @@ public class CommitViewImpl extends Window implements CommitView {
 
         pushAfterCommit = new CheckBox();
         pushAfterCommit.setHTML(locale.commitPushCheckboxTitle());
-        pushAfterCommit.ensureDebugId("git-commit-push_after_commit");
+        pushAfterCommit.ensureDebugId("push-after-commit-check-box");
         pushAfterCommit.addValueChangeHandler(event -> remoteBranches.setEnabled(event.getValue()));
 
         pushAfterCommit.addStyleName(res.gitCSS().spacing());
@@ -228,17 +226,17 @@ public class CommitViewImpl extends Window implements CommitView {
     }
 
     @Override
-    public void setChangedPanelView(ChangedPanelView changedPanelView) {
-        this.render = new ChangedPanelRender(changedPanelView);
-        this.changedPanelView = changedPanelView;
-        changedPanelView.setTreeRender(render);
-        this.changedPanel.add(changedPanelView);
+    public void setChangesPanelView(ChangesPanelView changesPanelView) {
+        this.render = new ChangesPanelRender(changesPanelView);
+        this.changesPanelView = changesPanelView;
+        changesPanelView.setTreeRender(render);
+        this.changesPanel.add(changesPanelView);
     }
 
     @Override
-    public void checkCheckBoxes(Set<Path> paths) {
-        render.setNodePaths(changedPanelView.getNodePaths());
-        paths.forEach(path -> render.handleNodeCheckBox(path, false));
+    public void setMarkedCheckBoxes(Set<Path> paths) {
+        render.setNodePaths(changesPanelView.getNodePaths());
+        paths.forEach(path -> render.handleCheckBoxSelection(path, false));
     }
 
     @Override
@@ -246,16 +244,16 @@ public class CommitViewImpl extends Window implements CommitView {
         return remoteBranches.getSelectedValue();
     }
 
-    private class ChangedPanelRender extends DefaultPresentationRenderer<Node> {
+    private class ChangesPanelRender extends DefaultPresentationRenderer<Node> {
 
-        private final ChangedPanelView changedPanelView;
+        private final ChangesPanelView changesPanelView;
         private final Set<Path>        unselectedNodePaths;
 
         private Set<Path> allNodePaths;
 
-        ChangedPanelRender(ChangedPanelView changedPanelView) {
-            super(changedPanelView.getTreeStyles());
-            this.changedPanelView = changedPanelView;
+        ChangesPanelRender(ChangesPanelView changesPanelView) {
+            super(changesPanelView.getTreeStyles());
+            this.changesPanelView = changesPanelView;
             this.unselectedNodePaths = new HashSet<>();
             this.allNodePaths = new HashSet<>();
         }
@@ -276,8 +274,8 @@ public class CommitViewImpl extends Window implements CommitView {
             Event.sinkEvents(checkBoxElement, Event.ONCLICK);
             Event.setEventListener(checkBoxElement, event -> {
                 if (Event.ONCLICK == event.getTypeInt() && event.getTarget().getTagName().equalsIgnoreCase("label")) {
-                    handleNodeCheckBox(nodePath, checkBoxInputElement.isChecked());
-                    changedPanelView.refreshNodes();
+                    handleCheckBoxSelection(nodePath, checkBoxInputElement.isChecked());
+                    changesPanelView.refreshNodes();
                     delegate.onValueChanged();
                 }
             });
@@ -294,20 +292,24 @@ public class CommitViewImpl extends Window implements CommitView {
             unselectedNodePaths.addAll(paths);
         }
 
-        void handleNodeCheckBox(Path nodePath, boolean value) {
+        /**
+         * Mark all related to node check-boxes checked or unchecked according to node path and value.
+         * E.g. if parent check-box is marked as checked, all child check-boxes will be checked too, and vise-versa.
+         */
+        void handleCheckBoxSelection(Path nodePath, boolean value) {
             allNodePaths.stream()
                         .sorted(Comparator.comparing(Path::toString))
                         .filter(path -> !(path.equals(nodePath) || path.isEmpty()) && path.isPrefixOf(nodePath) &&
                                         !hasSelectedChildes(path))
-                        .forEach(path -> saveCheckBoxSelection(value, path));
+                        .forEach(path -> saveCheckBoxSelection(path, value));
 
             allNodePaths.stream().sorted((path1, path2) -> path2.toString().compareTo(path1.toString()))
                         .filter(path -> !path.isEmpty() &&
                                         (nodePath.isPrefixOf(path) || path.isPrefixOf(nodePath) && !hasSelectedChildes(path)))
-                        .forEach(path -> saveCheckBoxSelection(value, path));
+                        .forEach(path -> saveCheckBoxSelection(path, value));
         }
 
-        private void saveCheckBoxSelection(boolean checkBoxValue, Path path) {
+        private void saveCheckBoxSelection(Path path, boolean checkBoxValue) {
             if (checkBoxValue) {
                 unselectedNodePaths.add(path);
             } else {

@@ -8,24 +8,27 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.changedlist;
+package org.eclipse.che.ide.ext.git.client.compare.changeslist;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
-import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedFileNode;
-import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedFolderNode;
-import org.eclipse.che.ide.ext.git.client.compare.changedpanel.CallBack;
-import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedPanelPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangedFileNode;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangedFolderNode;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 
 import java.util.Map;
 
+import static com.google.common.collect.Iterables.getFirst;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -36,12 +39,11 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class ChangedListPresenter implements ChangedListView.ActionDelegate {
-    private final ChangedListView       view;
+public class ChangesListPresenter implements ChangesListView.ActionDelegate {
+    private final ChangesListView       view;
     private final NotificationManager   notificationManager;
-    private final ChangedPanelPresenter changedPanelPresenter;
+    private final ChangesPanelPresenter changesPanelPresenter;
     private final ComparePresenter      comparePresenter;
-    private final CallBack              callBack;
 
     private Project project;
     private String  file;
@@ -50,27 +52,33 @@ public class ChangedListPresenter implements ChangedListView.ActionDelegate {
     private Status  status;
 
     @Inject
-    public ChangedListPresenter(final ChangedListView view,
+    public ChangesListPresenter(ChangesListView view,
                                 ComparePresenter comparePresenter,
                                 NotificationManager notificationManager,
-                                ChangedPanelPresenter changedPanelPresenter) {
+                                ChangesPanelPresenter changesPanelPresenter) {
         this.comparePresenter = comparePresenter;
         this.view = view;
         this.notificationManager = notificationManager;
-        this.changedPanelPresenter = changedPanelPresenter;
+        this.changesPanelPresenter = changesPanelPresenter;
         this.view.setDelegate(this);
 
-        callBack = node -> {
-            if (node instanceof ChangedFolderNode) {
-                ChangedListPresenter.this.view.setEnableCompareButton(false);
+        SelectionChangedHandler handler = event -> {
+            Node node = getFirst(event.getSelection(), null);
+            if (node == null) {
                 return;
             }
-            ChangedListPresenter.this.view.setEnableCompareButton(true);
-            ChangedListPresenter.this.file = node.getName();
-            ChangedListPresenter.this.status = ((ChangedFileNode)node).getStatus();
+            if (node instanceof ChangedFolderNode) {
+                ChangesListPresenter.this.view.setEnableCompareButton(false);
+                return;
+            }
+            ChangesListPresenter.this.view.setEnableCompareButton(true);
+            ChangesListPresenter.this.file = node.getName();
+            ChangesListPresenter.this.status = ((ChangedFileNode)node).getStatus();
         };
 
-        this.view.setChangedPanelView(changedPanelPresenter.getView());
+        ChangesPanelView changesPanelView = changesPanelPresenter.getView();
+        changesPanelView.addSelectionHandler(handler);
+        this.view.setChangesPanelView(changesPanelView);
     }
 
     /**
@@ -93,7 +101,7 @@ public class ChangedListPresenter implements ChangedListView.ActionDelegate {
         view.setEnableCompareButton(false);
         view.showDialog();
 
-        changedPanelPresenter.show(changedFiles, callBack);
+        changesPanelPresenter.show(changedFiles);
     }
 
     @Override

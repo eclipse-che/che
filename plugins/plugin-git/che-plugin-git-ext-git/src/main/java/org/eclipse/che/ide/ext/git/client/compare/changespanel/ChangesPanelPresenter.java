@@ -8,13 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.changedpanel;
+package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
@@ -24,6 +22,8 @@ import java.util.Map;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.LIST;
+import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.TREE;
 
 /**
  * Presenter for displaying list of changed files.
@@ -31,20 +31,20 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  * @author Igor Vinokur
  * @author Vlad Zhukovskyi
  */
-public class ChangedPanelPresenter implements ChangedPanelView.ActionDelegate {
-    private final ChangedPanelView        view;
+public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
+
+    private final ChangesPanelView        view;
     private final AppContext              appContext;
     private final NotificationManager     notificationManager;
     private final ComparePresenter        comparePresenter;
     private final GitLocalizationConstant locale;
 
     private Map<String, Status> changedFiles;
-    private CallBack            callBack;
-    private boolean             treeViewEnabled;
+    private ViewMode            viewMode;
 
     @Inject
-    public ChangedPanelPresenter(GitLocalizationConstant locale,
-                                 ChangedPanelView view,
+    public ChangesPanelPresenter(GitLocalizationConstant locale,
+                                 ChangesPanelView view,
                                  AppContext appContext,
                                  NotificationManager notificationManager,
                                  ComparePresenter comparePresenter) {
@@ -54,7 +54,7 @@ public class ChangedPanelPresenter implements ChangedPanelView.ActionDelegate {
         this.notificationManager = notificationManager;
         this.comparePresenter = comparePresenter;
         this.view.setDelegate(this);
-        this.treeViewEnabled = true;
+        this.viewMode = TREE;
     }
 
     /**
@@ -63,22 +63,21 @@ public class ChangedPanelPresenter implements ChangedPanelView.ActionDelegate {
      * @param changedFiles
      *         Map with files and their status
      */
-    public void show(Map<String, Status> changedFiles, @Nullable CallBack callBack) {
+    public void show(Map<String, Status> changedFiles) {
         this.changedFiles = changedFiles;
-        this.callBack = callBack;
         if (changedFiles.isEmpty()) {
             view.setTextToChangeViewModeButton(locale.changeListRowListViewButtonText());
             view.setEnabledChangeViewModeButton(false);
             view.setEnableExpandCollapseButtons(false);
-            view.clearNodeStorage();
+            view.resetPanelState();
         } else {
             view.setEnabledChangeViewModeButton(true);
-            view.setEnableExpandCollapseButtons(treeViewEnabled);
+            view.setEnableExpandCollapseButtons(viewMode == TREE);
             viewChangedFiles();
         }
     }
 
-    public ChangedPanelView getView() {
+    public ChangesPanelView getView() {
         return view;
     }
 
@@ -98,9 +97,9 @@ public class ChangedPanelPresenter implements ChangedPanelView.ActionDelegate {
 
     @Override
     public void onChangeViewModeButtonClicked() {
-        treeViewEnabled = !treeViewEnabled;
+        viewMode = viewMode == TREE ? LIST : TREE;
+        view.setEnableExpandCollapseButtons(viewMode == TREE);
         viewChangedFiles();
-        view.setEnableExpandCollapseButtons(treeViewEnabled);
     }
 
     @Override
@@ -113,20 +112,9 @@ public class ChangedPanelPresenter implements ChangedPanelView.ActionDelegate {
         view.collapseAllDirectories();
     }
 
-    @Override
-    public void onNodeSelected(Node node) {
-        if (callBack != null) {
-            callBack.onNodeSelected(node);
-        }
-    }
-
     private void viewChangedFiles() {
-        if (treeViewEnabled) {
-            view.viewChangedFilesAsTree(changedFiles);
-            view.setTextToChangeViewModeButton(locale.changeListRowListViewButtonText());
-        } else {
-            view.viewChangedFilesAsList(changedFiles);
-            view.setTextToChangeViewModeButton(locale.changeListGroupByDirectoryButtonText());
-        }
+        view.viewChangedFiles(changedFiles, viewMode);
+        view.setTextToChangeViewModeButton(viewMode == TREE ? locale.changeListRowListViewButtonText()
+                                                            : locale.changeListGroupByDirectoryButtonText());
     }
 }

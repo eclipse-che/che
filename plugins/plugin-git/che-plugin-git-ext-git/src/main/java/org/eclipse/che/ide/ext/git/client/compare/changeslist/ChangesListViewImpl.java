@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.changedlist;
+package org.eclipse.che.ide.ext.git.client.compare.changeslist;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -22,24 +22,24 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
-import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedPanelView;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
 import org.eclipse.che.ide.ui.window.Window;
 
 /**
- * Implementation of {@link ChangedListView}.
+ * Implementation of {@link ChangesListView}.
  *
  * @author Igor Vinokur
  */
 @Singleton
-public class ChangedListViewImpl extends Window implements ChangedListView {
+public class ChangesListViewImpl extends Window implements ChangesListView {
 
     @UiField
-    FlowPanel changedPanel;
+    FlowPanel changesPanel;
 
-    interface ChangedListViewImplUiBinder extends UiBinder<Widget, ChangedListViewImpl> {
+    interface ChangesListViewImplUiBinder extends UiBinder<Widget, ChangesListViewImpl> {
     }
 
-    private static ChangedListViewImplUiBinder uiBinder = GWT.create(ChangedListViewImplUiBinder.class);
+    private static ChangesListViewImplUiBinder uiBinder = GWT.create(ChangesListViewImplUiBinder.class);
 
     private final GitLocalizationConstant locale;
 
@@ -47,7 +47,7 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
     private Button         btnCompare;
 
     @Inject
-    protected ChangedListViewImpl(GitLocalizationConstant locale) {
+    protected ChangesListViewImpl(GitLocalizationConstant locale) {
         this.locale = locale;
         this.setTitle(locale.changeListTitle());
 
@@ -94,8 +94,8 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
     }
 
     @Override
-    public void setChangedPanelView(ChangedPanelView changedPanelView) {
-        changedPanel.add(changedPanelView);
+    public void setChangesPanelView(ChangesPanelView changesPanelView) {
+        changesPanel.add(changesPanelView);
     }
 
     private void createButtons() {

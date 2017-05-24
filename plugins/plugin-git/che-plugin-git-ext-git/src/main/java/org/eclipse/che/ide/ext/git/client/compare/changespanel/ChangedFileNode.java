@@ -8,14 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.changedpanel;
+package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedPanelView.ActionDelegate;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView.ActionDelegate;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.resource.Path;

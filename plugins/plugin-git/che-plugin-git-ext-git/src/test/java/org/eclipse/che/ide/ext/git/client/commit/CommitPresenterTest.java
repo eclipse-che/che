@@ -26,7 +26,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
-import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedPanelPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -66,7 +66,7 @@ public class CommitPresenterTest extends BaseTest {
     @Mock
     private DateTimeFormatter     dateTimeFormatter;
     @Mock
-    private ChangedPanelPresenter changedPanelPresenter;
+    private ChangesPanelPresenter changesPanelPresenter;
 
     private CommitPresenter presenter;
 
@@ -76,7 +76,7 @@ public class CommitPresenterTest extends BaseTest {
 
         presenter = spy(new CommitPresenter(view,
                                             service,
-                                            changedPanelPresenter,
+                                            changesPanelPresenter,
                                             constant,
                                             notificationManager,
                                             dialogFactory,
@@ -160,12 +160,12 @@ public class CommitPresenterTest extends BaseTest {
 
         verify(view).setEnableAmendCheckBox(true);
         verify(view).setEnablePushAfterCommitCheckBox(true);
-        verify(changedPanelPresenter).show(eq(singletonMap("file", MODIFIED)), eq(null));
+        verify(changesPanelPresenter).show(eq(singletonMap("file", MODIFIED)));
         verify(view).focusInMessageField();
         verify(view).setEnableCommitButton(eq(DISABLE_BUTTON));
         verify(view).getMessage();
         verify(view).showDialog();
-        verify(view).checkCheckBoxes(anySet());
+        verify(view).setMarkedCheckBoxes(anySet());
     }
 
     @Test
@@ -187,12 +187,12 @@ public class CommitPresenterTest extends BaseTest {
 
         verify(view).setEnableAmendCheckBox(false);
         verify(view).setEnablePushAfterCommitCheckBox(false);
-        verify(changedPanelPresenter).show(eq(singletonMap("file", ADDED)), eq(null));
+        verify(changesPanelPresenter).show(eq(singletonMap("file", ADDED)));
         verify(view).focusInMessageField();
         verify(view).setEnableCommitButton(eq(DISABLE_BUTTON));
         verify(view).getMessage();
         verify(view).showDialog();
-        verify(view).checkCheckBoxes(anySet());
+        verify(view).setMarkedCheckBoxes(anySet());
     }
 
     @Test

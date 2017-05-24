@@ -8,17 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.changedlist;
+package org.eclipse.che.ide.ext.git.client.compare.changeslist;
 
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedPanelView;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
 
 /**
- * The view of {@link ChangedListPresenter}.
+ * The view of {@link ChangesListPresenter}.
  *
  * @author Igor Vinokur
  */
-public interface ChangedListView extends View<ChangedListView.ActionDelegate> {
+public interface ChangesListView extends View<ChangesListView.ActionDelegate> {
     /** Needs for delegate some function into Changed list view. */
     interface ActionDelegate {
         /** Performs any actions appropriate in response to the user having pressed the 'Close' button. */
@@ -43,7 +43,7 @@ public interface ChangedListView extends View<ChangedListView.ActionDelegate> {
     void setEnableCompareButton(boolean enabled);
 
     /**
-     * Initialize changed panel.
+     * Initialize changes panel.
      */
-    void setChangedPanelView(ChangedPanelView changedPanelView);
+    void setChangesPanelView(ChangesPanelView changesPanelView);
 }

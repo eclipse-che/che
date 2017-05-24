@@ -30,7 +30,7 @@
             </g:FlowPanel>
         </g:north>
         <g:center>
-            <g:LayoutPanel ui:field="changedPanel" addStyleNames="{res.gitCSS.simpleListContainer}" debugId="git-compare-changed_files"/>
+            <g:LayoutPanel ui:field="changesPanel" addStyleNames="{res.gitCSS.simpleListContainer}" debugId="git-compare-changed_files"/>
         </g:center>
     </g:DockLayoutPanel>
 </ui:UiBinder>

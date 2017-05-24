@@ -28,7 +28,7 @@ import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.ext.git.client.compare.changedpanel.ChangedPanelPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 
@@ -65,7 +65,7 @@ import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 public class CommitPresenter implements CommitView.ActionDelegate {
     private static final String COMMIT_COMMAND_NAME = "Git commit";
 
-    private final ChangedPanelPresenter   changedPanelPresenter;
+    private final ChangesPanelPresenter   changesPanelPresenter;
     private final DialogFactory           dialogFactory;
     private final AppContext              appContext;
     private final CommitView              view;
@@ -81,9 +81,9 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     private List<String> filesToCommit;
 
     @Inject
-    public CommitPresenter(final CommitView view,
+    public CommitPresenter(CommitView view,
                            GitServiceClient service,
-                           ChangedPanelPresenter changedPanelPresenter,
+                           ChangesPanelPresenter changesPanelPresenter,
                            GitLocalizationConstant constant,
                            NotificationManager notificationManager,
                            DialogFactory dialogFactory,
@@ -92,7 +92,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                            GitOutputConsoleFactory gitOutputConsoleFactory,
                            ProcessesPanelPresenter processesPanelPresenter) {
         this.view = view;
-        this.changedPanelPresenter = changedPanelPresenter;
+        this.changesPanelPresenter = changesPanelPresenter;
         this.dialogFactory = dialogFactory;
         this.appContext = appContext;
         this.dateTimeFormatter = dateTimeFormatter;
@@ -104,7 +104,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         this.notificationManager = notificationManager;
 
         this.filesToCommit = new ArrayList<>();
-        this.view.setChangedPanelView(changedPanelPresenter.getView());
+        this.view.setChangesPanelView(changesPanelPresenter.getView());
     }
 
     public void showDialog(Project project) {
@@ -173,9 +173,9 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         view.setEnableCommitButton(!view.getMessage().isEmpty());
         view.focusInMessageField();
         view.showDialog();
-        changedPanelPresenter.show(files, null);
-        view.checkCheckBoxes(stream(appContext.getResources()).map(resource -> resource.getLocation().removeFirstSegments(1))
-                                                              .collect(Collectors.toSet()));
+        changesPanelPresenter.show(files);
+        view.setMarkedCheckBoxes(stream(appContext.getResources()).map(resource -> resource.getLocation().removeFirstSegments(1))
+                                                                  .collect(Collectors.toSet()));
     }
 
     private Map<String, Status> toFileStatusMap(@Nullable String diff) {

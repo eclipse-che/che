@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.changedpanel;
+package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -32,30 +32,31 @@ import org.eclipse.che.ide.ui.smartTree.SelectionModel;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.compare.NameComparator;
+import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 import org.eclipse.che.ide.ui.smartTree.presentation.PresentationRenderer;
 
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.TREE;
+
 /**
- * Implementation of {@link ChangedPanelView}.
+ * Implementation of {@link ChangesPanelView}.
  *
  * @author Igor Vinokur
  */
-public class ChangedPanelViewImpl extends Composite implements ChangedPanelView {
-    interface TreeViewImplUiBinder extends UiBinder<DockLayoutPanel, ChangedPanelViewImpl> {
+public class ChangesPanelViewImpl extends Composite implements ChangesPanelView {
+    interface TreeViewImplUiBinder extends UiBinder<DockLayoutPanel, ChangesPanelViewImpl> {
     }
 
     private static TreeViewImplUiBinder uiBinder = GWT.create(TreeViewImplUiBinder.class);
 
     @UiField
-    LayoutPanel changedPanel;
+    LayoutPanel changesPanel;
     @UiField
     Button      changeViewModeButton;
     @UiField
@@ -74,7 +75,7 @@ public class ChangedPanelViewImpl extends Composite implements ChangedPanelView 
     private final NodesResources nodesResources;
 
     @Inject
-    public ChangedPanelViewImpl(GitResources resources,
+    public ChangesPanelViewImpl(GitResources resources,
                                 GitLocalizationConstant locale,
                                 NodesResources nodesResources) {
         this.res = resources;
@@ -89,13 +90,7 @@ public class ChangedPanelViewImpl extends Composite implements ChangedPanelView 
         tree = new Tree(nodeStorage, nodeLoader);
         SelectionModel selectionModel = tree.getSelectionModel();
         selectionModel.setSelectionMode(SelectionModel.Mode.SINGLE);
-        selectionModel.addSelectionChangedHandler(event -> {
-            List<Node> selection = event.getSelection();
-            if (!selection.isEmpty()) {
-                delegate.onNodeSelected(selection.get(0));
-            }
-        });
-        changedPanel.add(tree);
+        changesPanel.add(tree);
 
         createButtons();
     }
@@ -106,23 +101,25 @@ public class ChangedPanelViewImpl extends Composite implements ChangedPanelView 
     }
 
     @Override
-    public void viewChangedFilesAsList(@NotNull Map<String, Status> items) {
-        NodeStorage nodeStorage = tree.getNodeStorage();
-        nodeStorage.clear();
-        items.keySet().forEach(file -> nodeStorage.add(new ChangedFileNode(file, items.get(file), nodesResources, delegate, false)));
+    public void addSelectionHandler(SelectionChangedHandler handler) {
+        tree.getSelectionModel().addSelectionChangedHandler(handler);
     }
 
     @Override
-    public void clearNodeStorage() {
+    public void viewChangedFiles(Map<String, Status> files, ViewMode viewMode) {
+        NodeStorage nodeStorage = tree.getNodeStorage();
+        nodeStorage.clear();
+        if (viewMode == TREE) {
+            getGroupedNodes(files).forEach(nodeStorage::add);
+            tree.expandAll();
+        } else {
+            files.keySet().forEach(file -> nodeStorage.add(new ChangedFileNode(file, files.get(file), nodesResources, delegate, false)));
+        }
+    }
+
+    @Override
+    public void resetPanelState() {
         tree.getNodeStorage().clear();
-    }
-
-    @Override
-    public void viewChangedFilesAsTree(@NotNull Map<String, Status> items) {
-        NodeStorage nodeStorage = tree.getNodeStorage();
-        nodeStorage.clear();
-        fetchGroupedNodes(items).forEach(nodeStorage::add);
-        tree.expandAll();
     }
 
     @Override
@@ -183,7 +180,7 @@ public class ChangedPanelViewImpl extends Composite implements ChangedPanelView 
         collapseButton.addClickHandler(clickEvent -> delegate.onCollapseButtonClicked());
     }
 
-    private List<Node> fetchGroupedNodes(Map<String, Status> items) {
+    private List<Node> getGroupedNodes(Map<String, Status> items) {
         List<String> allFiles = new ArrayList<>(items.keySet());
         List<String> allFolders = new ArrayList<>();
         for (String file : allFiles) {
