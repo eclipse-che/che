@@ -27,7 +27,7 @@ import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.workspace.events.WorkspaceStatusEventHandler;
+import org.eclipse.che.ide.workspace.WorkspaceStatusHandler;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
@@ -53,7 +53,7 @@ public class CurrentWorkspaceManager {
     private final Provider<NotificationManager> notificationManagerProvider;
     private final IdeInitializer                ideInitializer;
     private final CoreLocalizationConstant      messages;
-    private final WorkspaceStatusEventHandler   wsStatusEventHandler;
+    private final WorkspaceStatusHandler        wsStatusHandler;
     private final AppContext                    appContext;
 
     @Inject
@@ -64,7 +64,7 @@ public class CurrentWorkspaceManager {
                             Provider<NotificationManager> notificationManagerProvider,
                             IdeInitializer ideInitializer,
                             CoreLocalizationConstant messages,
-                            WorkspaceStatusEventHandler wsStatusEventHandler,
+                            WorkspaceStatusHandler wsStatusHandler,
                             AppContext appContext) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.browserAddress = browserAddress;
@@ -73,7 +73,7 @@ public class CurrentWorkspaceManager {
         this.notificationManagerProvider = notificationManagerProvider;
         this.ideInitializer = ideInitializer;
         this.messages = messages;
-        this.wsStatusEventHandler = wsStatusEventHandler;
+        this.wsStatusHandler = wsStatusHandler;
         this.appContext = appContext;
     }
 
@@ -115,7 +115,7 @@ public class CurrentWorkspaceManager {
         final WorkspaceStatus workspaceStatus = workspace.getStatus();
 
         if (workspaceStatus == RUNNING) {
-            wsStatusEventHandler.handleWorkspaceStatusChanged();
+            wsStatusHandler.handleWorkspaceStatusChanged();
         } else if (workspaceStatus == STOPPED || workspaceStatus == STOPPING) {
             wsStatusNotification.show(STARTING_WORKSPACE_RUNTIME);
 
