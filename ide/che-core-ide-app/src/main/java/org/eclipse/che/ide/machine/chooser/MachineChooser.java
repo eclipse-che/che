@@ -21,24 +21,22 @@ import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.api.promises.client.js.ResolveFunction;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.ActiveRuntime;
-import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Provides a simple mechanism for the user to choose a {@link Machine}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Provides a simple mechanism for the user to choose a {@link Machine}. */
 public class MachineChooser implements MachineChooserView.ActionDelegate {
 
     private final MachineChooserView view;
     private final AppContext         appContext;
     private final PromiseProvider    promiseProvider;
 
-    private ResolveFunction<MachineEntity> resolveFunction;
-    private RejectFunction                 rejectFunction;
+    private ResolveFunction<MachineImpl> resolveFunction;
+    private RejectFunction               rejectFunction;
 
     @Inject
     public MachineChooser(MachineChooserView view,
@@ -56,14 +54,15 @@ public class MachineChooser implements MachineChooserView.ActionDelegate {
      * <p><b>Note:</b> if there is only one machine running in the workspace
      * then returned promise will be resolved with that machine without asking user.
      *
-     * @return promise that will be resolved with a chosen {@link MachineEntity}
+     * @return promise that will be resolved with a chosen {@link MachineImpl}
      * or rejected in case machine selection has been cancelled.
      */
-    public Promise<MachineEntity> show() {
-        final ActiveRuntime runtime = appContext.getActiveRuntime();
+    public Promise<MachineImpl> show() {
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final RuntimeImpl runtime = workspace.getRuntime();
 
         if (runtime != null) {
-            final List<MachineEntity> machines = runtime.getMachines();
+            final List<? extends MachineImpl> machines = new ArrayList<>(runtime.getMachines().values());
 
             if (machines.size() == 1) {
                 return promiseProvider.resolve(machines.get(0));
@@ -74,14 +73,14 @@ public class MachineChooser implements MachineChooserView.ActionDelegate {
 
         view.show();
 
-        return promiseProvider.create(Executor.create((ExecutorBody<MachineEntity>)(resolve, reject) -> {
+        return promiseProvider.create(Executor.create((ExecutorBody<MachineImpl>)(resolve, reject) -> {
             resolveFunction = resolve;
             rejectFunction = reject;
         }));
     }
 
     @Override
-    public void onMachineSelected(MachineEntity machine) {
+    public void onMachineSelected(MachineImpl machine) {
         view.close();
 
         resolveFunction.apply(machine);

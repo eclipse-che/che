@@ -13,7 +13,6 @@ package org.eclipse.che.ide.api.app;
 import com.google.common.annotations.Beta;
 
 import org.eclipse.che.api.core.model.factory.Factory;
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.ide.api.machine.ActiveRuntime;
@@ -21,6 +20,7 @@ import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.resource.Path;
 
 import java.util.List;
@@ -181,13 +181,11 @@ public interface AppContext {
 
     String getWorkspaceId();
 
-    /**
-     * Returns {@link Workspace} instance of current workspace.
-     *
-     * @return current workspace
-     */
-    Workspace getWorkspace();
+    /** Returns the current workspace. */
+    WorkspaceImpl getWorkspace();
 
+    /** @deprecated use {@link WorkspaceImpl#getRuntime()} */
+    @Deprecated
     ActiveRuntime getActiveRuntime();
 
     String getMasterEndpoint();

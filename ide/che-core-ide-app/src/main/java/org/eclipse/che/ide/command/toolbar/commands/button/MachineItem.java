@@ -14,16 +14,16 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
-/** Item contains {@link CommandImpl} and {@link MachineEntity}. */
+/** Item contains {@link CommandImpl} and {@link MachineImpl}. */
 public class MachineItem extends AbstractMenuItem {
 
-    private final MachineEntity machine;
-    private final String        name;
+    private final MachineImpl machine;
+    private final String      name;
 
     @AssistedInject
-    public MachineItem(@Assisted CommandImpl command, @Assisted MachineEntity machine) {
+    public MachineItem(@Assisted CommandImpl command, @Assisted MachineImpl machine) {
         super(command);
 
         this.machine = machine;
@@ -43,7 +43,7 @@ public class MachineItem extends AbstractMenuItem {
         return name;
     }
 
-    public MachineEntity getMachine() {
+    public MachineImpl getMachine() {
         return machine;
     }
 }

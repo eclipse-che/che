@@ -20,8 +20,13 @@ import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.machine.events.MachineCreatingEvent;
+import org.eclipse.che.ide.api.machine.events.MachineRunningEvent;
 import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
@@ -86,14 +91,25 @@ public class EnvironmentStatusHandler {
     }
 
     private void handleMachineCreating(String machineName) {
-        final ActiveRuntime activeRuntime = appContext.getActiveRuntime();
-        final Optional<MachineEntity> machine = activeRuntime.getMachineByName(machineName);
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final RuntimeImpl runtime = workspace.getRuntime();
+
+        if (runtime == null) {
+            return;
+        }
+
+        final Optional<MachineImpl> machine = runtime.getMachineByName(machineName);
 
         if (machine.isPresent()) {
             subscribeToMachineOutput(machineName);
-
-            eventBus.fireEvent(new MachineStateEvent(machine.get(), CREATING));
+            eventBus.fireEvent(new MachineCreatingEvent(machine.get()));
         }
+
+
+        // fire deprecated MachineStateEvent for backward compatibility
+        final ActiveRuntime activeRuntime = appContext.getActiveRuntime();
+        final Optional<MachineEntity> machineEntity = activeRuntime.getMachineByName(machineName);
+        machineEntity.ifPresent(m -> eventBus.fireEvent(new MachineStateEvent(m, CREATING)));
     }
 
     private void subscribeToMachineOutput(String machineName) {
@@ -109,10 +125,23 @@ public class EnvironmentStatusHandler {
     }
 
     private void handleMachineRunning(String machineName) {
-        final ActiveRuntime activeRuntime = appContext.getActiveRuntime();
-        final Optional<MachineEntity> machine = activeRuntime.getMachineByName(machineName);
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final RuntimeImpl runtime = workspace.getRuntime();
 
-        machine.ifPresent(machineEntity -> eventBus.fireEvent(new MachineStateEvent(machineEntity, RUNNING)));
+        if (runtime == null) {
+            return;
+        }
+
+        final Optional<MachineImpl> machine = runtime.getMachineByName(machineName);
+
+        machine.ifPresent(m -> eventBus.fireEvent(new MachineRunningEvent(m)));
+
+
+        // fire deprecated MachineStateEvent for backward compatibility
+        final ActiveRuntime activeRuntime = appContext.getActiveRuntime();
+        final Optional<MachineEntity> machineEntity = activeRuntime.getMachineByName(machineName);
+
+        machineEntity.ifPresent(m -> eventBus.fireEvent(new MachineStateEvent(m, RUNNING)));
     }
 
     private void handleMachineError(MachineStatusEvent event) {

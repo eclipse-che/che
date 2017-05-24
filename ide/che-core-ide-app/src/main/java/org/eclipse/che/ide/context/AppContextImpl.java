@@ -38,6 +38,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.ResourceManagerInitializer;
@@ -94,7 +95,7 @@ public class AppContextImpl implements AppContext,
      */
     private final List<StartUpAction> startAppActions;
 
-    private Workspace           userWorkspace;
+    private WorkspaceImpl       workspace;
     private FactoryDto          factory;
     private Path                projectsRoot;
     private ActiveRuntime       runtime;
@@ -132,30 +133,30 @@ public class AppContextImpl implements AppContext,
     }-*/;
 
     @Override
-    public Workspace getWorkspace() {
-        return userWorkspace;
+    public WorkspaceImpl getWorkspace() {
+        return workspace;
     }
 
     /** Sets the current workspace. */
     public void setWorkspace(Workspace workspace) {
+        this.workspace = new WorkspaceImpl(workspace);
+
         if (workspace != null) {
-            userWorkspace = workspace;
             if (workspace.getRuntime() != null) {
                 runtime = new ActiveRuntime(workspace);
             }
         } else {
-            userWorkspace = null;
             runtime = null;
         }
     }
 
     @Override
     public String getWorkspaceId() {
-        if (userWorkspace == null) {
+        if (workspace == null) {
             throw new IllegalArgumentException(getClass() + " Workspace can not be null.");
         }
 
-        return userWorkspace.getId();
+        return workspace.getId();
     }
 
     @Override
@@ -228,7 +229,7 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public String getWorkspaceName() {
-        return userWorkspace.getConfig().getName();
+        return workspace.getConfig().getName();
     }
 
     /** {@inheritDoc} */

@@ -15,20 +15,14 @@ import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
-public class ProcessStartedEvent extends GwtEvent<ProcessStartedEvent.Handler> {
+public class MachineCreatingEvent extends GwtEvent<MachineCreatingEvent.Handler> {
 
-    public static final Type<ProcessStartedEvent.Handler> TYPE = new Type<>();
+    public static final Type<MachineCreatingEvent.Handler> TYPE = new Type<>();
 
-    private final int         processID;
     private final MachineImpl machine;
 
-    public ProcessStartedEvent(int processID, MachineImpl machine) {
-        this.processID = processID;
-        this.machine = machine;
-    }
-
-    public int getProcessID() {
-        return processID;
+    public MachineCreatingEvent(MachineImpl workspace) {
+        this.machine = workspace;
     }
 
     public MachineImpl getMachine() {
@@ -36,17 +30,16 @@ public class ProcessStartedEvent extends GwtEvent<ProcessStartedEvent.Handler> {
     }
 
     @Override
-    public Type<ProcessStartedEvent.Handler> getAssociatedType() {
+    public Type<Handler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onProcessStarted(this);
+        handler.onMachineCreating(this);
     }
 
     public interface Handler extends EventHandler {
-
-        void onProcessStarted(ProcessStartedEvent event);
+        void onMachineCreating(MachineCreatingEvent event);
     }
 }

@@ -22,8 +22,10 @@ import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandProducer;
 import org.eclipse.che.ide.api.constraints.Constraints;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -94,9 +96,7 @@ public class CommandProducerActionManager implements WsAgentStateHandler {
 
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
-        for (CommandProducer commandProducer : commandProducers) {
-            createActionsForProducer(commandProducer);
-        }
+        commandProducers.forEach(this::createActionsForProducer);
     }
 
     @Override
@@ -105,7 +105,10 @@ public class CommandProducerActionManager implements WsAgentStateHandler {
 
     /** Creates actions for the given {@link CommandProducer}. */
     private void createActionsForProducer(CommandProducer producer) {
-        Action action = commandProducerActionFactory.create(producer.getName(), producer, appContext.getDevMachine());
+        final DevMachine devMachine = appContext.getDevMachine();
+        Action action = commandProducerActionFactory.create(producer.getName(),
+                                                            producer,
+                                                            new MachineImpl(devMachine.getName(), devMachine));
 
         actionManager.registerAction(producer.getName(), action);
 

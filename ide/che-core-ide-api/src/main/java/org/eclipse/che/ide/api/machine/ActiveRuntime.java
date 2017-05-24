@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.workspace.shared.Utils;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,9 @@ import java.util.Optional;
 
 /**
  * @author Vitalii Parfonov
+ * @deprecated use {@link org.eclipse.che.ide.api.workspace.model.RuntimeImpl}
  */
+@Deprecated
 public class ActiveRuntime {
 
     private DevMachine                 devMachine;
@@ -54,10 +57,12 @@ public class ActiveRuntime {
         return devMachine;
     }
 
+    /** @deprecated use {@link RuntimeImpl#getMachines()} */
     public List<MachineEntity> getMachines() {
         return new ArrayList<>(machines.values());
     }
 
+    /** @deprecated use {@link org.eclipse.che.ide.api.workspace.model.RuntimeImpl#getMachineByName(String)} */
     public Optional<MachineEntity> getMachineByName(String name) {
         return Optional.ofNullable(machines.get(name));
     }

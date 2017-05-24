@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.command.producer;
 
 import org.eclipse.che.ide.api.command.CommandProducer;
-import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
 /**
  * Factory for creating {@link CommandProducerAction} instances.
@@ -21,5 +21,5 @@ import org.eclipse.che.ide.api.machine.MachineEntity;
 public interface CommandProducerActionFactory {
 
     /** Creates action for executing command produced by the specified {@code commandProducer}. */
-    CommandProducerAction create(String name, CommandProducer commandProducer, MachineEntity machine);
+    CommandProducerAction create(String name, CommandProducer commandProducer, MachineImpl machine);
 }

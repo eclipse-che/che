@@ -23,9 +23,10 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.Action;
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.websocket.WebSocket;
 import org.eclipse.che.ide.websocket.events.ConnectionClosedHandler;
@@ -37,7 +38,9 @@ import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 import org.eclipse.che.requirejs.ModuleHolder;
 
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
+import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -58,7 +61,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     private final Object                          source;
     private final NotificationManager             notificationManager;
     private final CoreLocalizationConstant        locale;
-    private final MachineEntity                   machine;
+    private final MachineImpl                     machine;
     private final TerminalInitializePromiseHolder terminalHolder;
     private final ModuleHolder                    moduleHolder;
 
@@ -74,7 +77,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     public TerminalPresenter(TerminalView view,
                              NotificationManager notificationManager,
                              CoreLocalizationConstant locale,
-                             @Assisted MachineEntity machine,
+                             @Assisted MachineImpl machine,
                              @Assisted Object source,
                              final TerminalInitializePromiseHolder terminalHolder,
                              final ModuleHolder moduleHolder) {
@@ -104,7 +107,15 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
             terminalHolder.getInitializerPromise().then(new Operation<Void>() {
                 @Override
                 public void apply(Void arg) throws OperationException {
-                    connectToTerminalWebSocket(machine.getTerminalUrl());
+                    final Optional<ServerImpl> terminalServer = machine.getServerByName(TERMINAL_REFERENCE);
+
+                    if (terminalServer.isPresent()) {
+                        final String terminalServerURL = terminalServer.get().getUrl();
+                        // FIXME: spi
+                        connectToTerminalWebSocket(terminalServerURL.replaceFirst("http", "ws") + "/pty");
+                    } else {
+                        throw new OperationException("Machine " + machine.getName() + " doesn't provide terminal server.");
+                    }
                 }
             }).catchError(new Operation<PromiseError>() {
                 @Override
