@@ -16,12 +16,17 @@ import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
+import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.PushParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
@@ -31,10 +36,12 @@ import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluation
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -79,23 +86,26 @@ public class DockerMachine implements Machine {
      */
     public static final String USER_TOKEN = "USER_TOKEN";
 
+    /**
+     * Prefix of image repository, used to identify that the image is a machine saved to snapshot.
+     */
+    public static final String MACHINE_SNAPSHOT_PREFIX = "machine_snapshot_";
+
     private final String                           container;
     private final DockerConnector                  docker;
     private final String                           image;
     private final DockerMachineStopDetector        dockerMachineStopDetector;
-    // TODO spi snapshot #5101
-//    private final String                           registry;
-//    private final String                           registryNamespace;
-//    private final boolean                          snapshotUseRegistry;
+    private final String                           registry;
+    private final String                           registryNamespace;
+    private final boolean                          snapshotUseRegistry;
     private final ContainerInfo                    info;
     private final ServerEvaluationStrategyProvider provider;
 
     @Inject
     public DockerMachine(DockerConnector docker,
-                         // TODO spi snapshot #5101
-//                         @Named("che.docker.registry") String registry,
-//                         @Named("che.docker.namespace") @Nullable String registryNamespace,
-//                         @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
+                         @Named("che.docker.registry") String registry,
+                         @Named("che.docker.namespace") @Nullable String registryNamespace,
+                         @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
                          @Assisted("container") String container,
                          @Assisted("image") String image,
                          ServerEvaluationStrategyProvider provider,
@@ -103,6 +113,9 @@ public class DockerMachine implements Machine {
         this.container = container;
         this.docker = docker;
         this.image = image;
+        this.registry = registry;
+        this.registryNamespace = registryNamespace;
+        this.snapshotUseRegistry = snapshotUseRegistry;
         this.dockerMachineStopDetector = dockerMachineStopDetector;
         try {
             this.info = docker.inspectContainer(container);
@@ -168,8 +181,8 @@ public class DockerMachine implements Machine {
                '}';
     }
 
-    /* TODO spi snapshot #5101
-    public MachineSource saveToSnapshot() throws MachineException {
+
+    public DockerMachineSource saveToSnapshot() throws InfrastructureException {
         try {
             String image = generateRepository();
             if(!snapshotUseRegistry) {
@@ -188,22 +201,21 @@ public class DockerMachine implements Machine {
             final ProgressLineFormatterImpl lineFormatter = new ProgressLineFormatterImpl();
             final String digest = docker.push(pushParams,
                                               progressMonitor -> {
-                                                  try {
-                                                      outputConsumer.writeLine(lineFormatter.format(progressMonitor));
-                                                  } catch (IOException ignored) {
-                                                  }
+//                                                  try {
+//                                                      outputConsumer.writeLine(lineFormatter.format(progressMonitor));
+//                                                  } catch (IOException ignored) {
+//                                                  }
                                               });
             docker.removeImage(RemoveImageParams.create(fullRepo).withForce(false));
             return new DockerMachineSource(image).withRegistry(registry).withDigest(digest).withTag(LATEST_TAG);
         } catch (IOException ioEx) {
-            throw new MachineException(ioEx);
+            throw new InfrastructureException(ioEx);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MachineException(e.getLocalizedMessage(), e);
+            throw new InfrastructureException(e.getLocalizedMessage(), e);
         }
     }
 
-    @VisibleForTesting
     protected void commitContainer(String repository, String tag) throws IOException {
         String comment = format("Suspended at %1$ta %1$tb %1$td %1$tT %1$tZ %1$tY",
                                 System.currentTimeMillis());
@@ -218,8 +230,8 @@ public class DockerMachine implements Machine {
 
     private String generateRepository() {
         if (registryNamespace != null) {
-            return registryNamespace + '/' + DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX + NameGenerator.generate(null, 16);
+            return registryNamespace + '/' + MACHINE_SNAPSHOT_PREFIX + NameGenerator.generate(null, 16);
         }
-        return DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX + NameGenerator.generate(null, 16);
-    }*/
+        return MACHINE_SNAPSHOT_PREFIX + NameGenerator.generate(null, 16);
+    }
 }

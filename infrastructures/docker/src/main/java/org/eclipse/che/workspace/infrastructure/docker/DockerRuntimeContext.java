@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.workspace.server.URLRewriter;
+import org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
@@ -30,11 +31,15 @@ import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundE
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotException;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.net.URL;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -69,6 +74,7 @@ public class DockerRuntimeContext extends RuntimeContext {
     private final StartSynchronizer startSynchronizer;
     private final String            devMachineName;
     private final ContextsStorage   contextsStorage;
+    private final SnapshotDao       snapshotDao;
 
     @Inject
     public DockerRuntimeContext(@Assisted DockerRuntimeInfrastructure infrastructure,
@@ -81,7 +87,8 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 URLRewriter urlRewriter,
                                 AgentSorter agentSorter,
                                 AgentRegistry agentRegistry,
-                                ContextsStorage contextsStorage)
+                                ContextsStorage contextsStorage,
+                                SnapshotDao snapshotDao)
             throws ValidationException, InfrastructureException {
         super(environment, identity, infrastructure, agentSorter, agentRegistry, null);
         this.devMachineName = Utils.getDevMachineName(environment);
@@ -91,6 +98,7 @@ public class DockerRuntimeContext extends RuntimeContext {
         this.startQueue = new ArrayDeque<>(orderedServices);
         this.urlRewriter = urlRewriter;
         this.contextsStorage = contextsStorage;
+        this.snapshotDao = snapshotDao;
         this.startSynchronizer = new StartSynchronizer();
     }
 
@@ -121,7 +129,7 @@ public class DockerRuntimeContext extends RuntimeContext {
             boolean runtimeDestroyingNeeded = !startSynchronizer.isStopCalled();
             if (runtimeDestroyingNeeded) {
                 try {
-                    destroyRuntime();
+                    destroyRuntime(null);
                 } catch (Exception destExc) {
                     LOG.error(destExc.getLocalizedMessage(), destExc);
                 }
@@ -141,7 +149,7 @@ public class DockerRuntimeContext extends RuntimeContext {
     protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
         startSynchronizer.interruptStartThread();
         try {
-            destroyRuntime();
+            destroyRuntime(stopOptions);
         } finally {
             contextsStorage.remove(this);
         }
@@ -192,17 +200,57 @@ public class DockerRuntimeContext extends RuntimeContext {
                                          startSynchronizer.getMachines());
     }
 
-    private void destroyRuntime() throws InfrastructureException {
-        for (Map.Entry<String, DockerMachine> dockerMachineEntry : startSynchronizer.removeMachines().entrySet()) {
+    private void destroyRuntime(Map<String, String> stopOptions) throws InfrastructureException {
+        if (stopOptions != null && "true".equals(stopOptions.get("snapshot"))) {
+            List<SnapshotImpl> newSnapshots = new ArrayList<>(startSynchronizer.getMachines().size());
+            for (Map.Entry<String, DockerMachine> dockerMachineEntry : startSynchronizer.removeMachines().entrySet()) {
+                try {
+                    SnapshotImpl snapshot = SnapshotImpl.builder()
+                                                        .generateId()
+                                                        .setType("docker") //TODO: do we need that at all?
+                                                        .setWorkspaceId(identity.getWorkspaceId())
+                                                        .setDescription(identity.getEnvName())
+                                                        .setDev(dockerMachineEntry.getKey().equals(devMachineName))
+                                                        .setEnvName(identity.getEnvName())
+                                                        .setMachineName(dockerMachineEntry.getKey())
+                                                        .useCurrentCreationDate()
+                                                        .build();
+                    DockerMachineSource machineSource = dockerMachineEntry.getValue().saveToSnapshot();
+                    snapshot.setMachineSource(new MachineSourceImpl(machineSource));
+                    newSnapshots.add(snapshot);
+                } catch (InfrastructureException e) {
+                    LOG.error(format("Error occurs on snapshotting of docker machine '%s' in workspace '%s'. Container '%s'",
+                                     dockerMachineEntry.getKey(),
+                                     getIdentity().getWorkspaceId(),
+                                     dockerMachineEntry.getValue().getContainer()),
+                              e);
+                    throw e;
+                }
+            }
             try {
-                // TODO spi snapshot #5101
-                dockerMachineEntry.getValue().destroy();
-            } catch (InfrastructureException e) {
-                LOG.error(format("Error occurs on destroying of docker machine '%s' in workspace '%s'. Container '%s'",
-                                 dockerMachineEntry.getKey(),
-                                 getIdentity().getWorkspaceId(),
-                                 dockerMachineEntry.getValue().getContainer()),
-                          e);
+                List<SnapshotImpl> removed = snapshotDao.replaceSnapshots(identity.getWorkspaceId(),
+                                                                          identity.getEnvName(),
+                                                                          newSnapshots);
+                if (!removed.isEmpty()) {
+                    LOG.info("Removing old snapshots binaries, workspace id '{}', snapshots to remove '{}'", identity.getWorkspaceId(),
+                             removed.size());
+                    //removeBinaries(removed);
+                }
+            } catch (SnapshotException e) {
+                LOG.error(format("Couldn't remove existing snapshots metadata for workspace '%s'", identity.getWorkspaceId()), e);
+                //removeBinaries(newSnapshots);
+            }
+        } else {
+            for (Map.Entry<String, DockerMachine> dockerMachineEntry : startSynchronizer.removeMachines().entrySet()) {
+                try {
+                    dockerMachineEntry.getValue().destroy();
+                } catch (InfrastructureException e) {
+                    LOG.error(format("Error occurs on destroying of docker machine '%s' in workspace '%s'. Container '%s'",
+                                     dockerMachineEntry.getKey(),
+                                     getIdentity().getWorkspaceId(),
+                                     dockerMachineEntry.getValue().getContainer()),
+                              e);
+                }
             }
         }
         // TODO what happens when context throws exception here
