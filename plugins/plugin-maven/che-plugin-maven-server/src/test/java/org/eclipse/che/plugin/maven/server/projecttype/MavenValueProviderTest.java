@@ -84,7 +84,7 @@ public class MavenValueProviderTest {
     }
 
 
-    @Test(enabled=false)
+    @Test
     public void getArtifactIdFromMavenProject() throws Exception {
         String artifactId = NameGenerator.generate("artifactId-", 6);
         when(mavenKey.getArtifactId()).thenReturn(artifactId);
@@ -98,7 +98,7 @@ public class MavenValueProviderTest {
     }
 
 
-    @Test(enabled=false)
+    @Test
     public void getGroupIdFromMavenProject() throws Exception {
         String groupId = NameGenerator.generate("groupId-", 6);
         when(mavenKey.getGroupId()).thenReturn(groupId);
@@ -112,7 +112,7 @@ public class MavenValueProviderTest {
     }
 
 
-    @Test(enabled=false)
+    @Test
     public void getVersionFromMavenProject() throws Exception {
         String versionId = NameGenerator.generate("version-", 6);
         when(mavenKey.getVersion()).thenReturn(versionId);
@@ -126,7 +126,7 @@ public class MavenValueProviderTest {
     }
 
 
-    @Test(enabled=false)
+    @Test
     public void getPackagingFromMavenProject() throws Exception {
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
         when(mavenProject.getPackaging()).thenReturn("war");
@@ -138,7 +138,7 @@ public class MavenValueProviderTest {
         Assert.assertEquals(pkgs.get(0), "war");
     }
 
-    @Test(enabled=false)
+    @Test
     public void getPackagingFromMavenProjectIfNotSet() throws Exception {
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
         List<String> pkgs = mavenValueProvider.getValues(MavenAttributes.PACKAGING);
@@ -150,7 +150,7 @@ public class MavenValueProviderTest {
     }
 
 
-    @Test(enabled=false)
+    @Test
     public void getParentArtifactFromMavenProject() throws Exception {
         String parentArtifact = NameGenerator.generate("parentArtifact", 6);
         when(parentKey.getArtifactId()).thenReturn(parentArtifact);
@@ -164,7 +164,7 @@ public class MavenValueProviderTest {
     }
 
 
-    @Test(enabled=false)
+    @Test
     public void getParentVersionFromMavenProject() throws Exception {
         String parentVersionId = NameGenerator.generate("parent-version-", 6);
         when(parentKey.getVersion()).thenReturn(parentVersionId);
@@ -177,7 +177,7 @@ public class MavenValueProviderTest {
         Assert.assertEquals(versions.get(0), parentVersionId);
     }
 
-    @Test(enabled=false)
+    @Test
     public void getParentGroupFromMavenProject() throws Exception {
         String groupId = NameGenerator.generate("parent-group-", 6);
         when(parentKey.getGroupId()).thenReturn(groupId);
@@ -190,7 +190,7 @@ public class MavenValueProviderTest {
         Assert.assertEquals(values.get(0), groupId);
     }
 
-    @Test(enabled=false)
+    @Test
     public void getSourceFromMavenProject() throws Exception {
         final List<String> strings = singletonList("src");
         when(mavenProject.getSources()).thenReturn(strings);
@@ -202,7 +202,7 @@ public class MavenValueProviderTest {
         Assert.assertEquals(sources, strings);
     }
 
-    @Test(enabled=false)
+    @Test
     public void getSourceFromMavenProjectIfNotSet() throws Exception {
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
         List<String> sources = mavenValueProvider.getValues(Constants.SOURCE_FOLDER);
@@ -212,7 +212,7 @@ public class MavenValueProviderTest {
         Assert.assertEquals(sources, singletonList(MavenAttributes.DEFAULT_SOURCE_FOLDER));
     }
 
-    @Test(enabled=false)
+    @Test
     public void getTestSourceFromMavenProject() throws Exception {
         List<String> strings = singletonList("src/test");
         when(mavenProject.getTestSources()).thenReturn(strings);
@@ -224,7 +224,7 @@ public class MavenValueProviderTest {
         Assert.assertEquals(sources, strings);
     }
 
-    @Test(enabled=false)
+    @Test
     public void getTestSourceFromMavenProjectIfNotSet() throws Exception {
         when(mavenProjectManager.getMavenProject(anyString())).thenReturn(mavenProject);
         List<String> sources = mavenValueProvider.getValues(MavenAttributes.TEST_SOURCE_FOLDER);
