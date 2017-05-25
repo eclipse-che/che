@@ -14,6 +14,7 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
@@ -161,32 +162,44 @@ public class DockerRuntimeContext extends RuntimeContext {
     }
 
     private DockerMachine startMachine(String name,
-                                       DockerContainerConfig container,
+                                       DockerContainerConfig containerConfig,
                                        Map<String, String> startOptions,
                                        boolean isDev) throws InfrastructureException {
         DockerMachine dockerMachine;
         // TODO property name
-        if ("true".equals(startOptions.get("recover"))) {
+        if ("true".equals(startOptions.get("restore"))) {
+            MachineSourceImpl machineSource = null;
             try {
-                // TODO set snapshot stuff #5101
-//        container = normalizeSource(container, null);
+
+                SnapshotImpl snapshot = snapshotDao.getSnapshot(identity.getWorkspaceId(),
+                                                                identity.getEnvName(),
+                                                                name);
+                machineSource = snapshot.getMachineSource();
+                // Snapshot image location has SHA-256 digest which needs to be removed,
+                // otherwise it will be pulled without tag and cause problems
+                String imageName = machineSource.getLocation();
+                if (imageName.contains("@sha256:")) {
+                    machineSource.setLocation(imageName.substring(0, imageName.indexOf('@')));
+                }
+
+                DockerContainerConfig imageContainerConfig = normalizeSource(containerConfig, machineSource);
                 dockerMachine = serviceStarter.startService(dockerEnvironment.getNetwork(),
                                                    name,
-                                                   container,
+                                                   imageContainerConfig,
                                                    identity,
                                                    isDev);
-            } catch (SourceNotFoundException e) {
+            } catch (NotFoundException | SnapshotException | SourceNotFoundException e) {
                 // slip to start without recovering
                 dockerMachine = serviceStarter.startService(dockerEnvironment.getNetwork(),
                                                             name,
-                                                            container,
+                                                            containerConfig,
                                                             identity,
                                                             isDev);
             }
         } else {
             dockerMachine = serviceStarter.startService(dockerEnvironment.getNetwork(),
                                                         name,
-                                                        container,
+                                                        containerConfig,
                                                         identity,
                                                         isDev);
         }
@@ -202,7 +215,7 @@ public class DockerRuntimeContext extends RuntimeContext {
 
     private void destroyRuntime(Map<String, String> stopOptions) throws InfrastructureException {
         if (stopOptions != null && "true".equals(stopOptions.get("create-snapshot"))) {
-            List<SnapshotImpl> newSnapshots = new ArrayList<>(startSynchronizer.getMachines().size());
+            List<SnapshotImpl> newSnapshots = new ArrayList<>();
             for (Map.Entry<String, DockerMachine> dockerMachineEntry : startSynchronizer.removeMachines().entrySet()) {
                 try {
                     SnapshotImpl snapshot = SnapshotImpl.builder()
@@ -257,7 +270,6 @@ public class DockerRuntimeContext extends RuntimeContext {
         dockerNetworkLifecycle.destroyNetwork(dockerEnvironment.getNetwork());
     }
 
-    // TODO Do not remove, will be used in snapshot #5101
     private DockerContainerConfig normalizeSource(DockerContainerConfig containerConfig,
                                                   MachineSource machineSource) {
         DockerContainerConfig serviceWithNormalizedSource = new DockerContainerConfig(containerConfig);
