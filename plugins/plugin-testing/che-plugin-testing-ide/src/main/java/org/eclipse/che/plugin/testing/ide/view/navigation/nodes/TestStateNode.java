@@ -17,7 +17,9 @@ import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
+import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.eclipse.che.plugin.testing.ide.model.TestState;
+import org.eclipse.che.plugin.testing.ide.model.info.TestStateDescription;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -28,14 +30,15 @@ import java.util.List;
  */
 public class TestStateNode extends AbstractTreeNode implements HasPresentation {
 
+    private final PromiseProvider promiseProvider;
+    private final TestResources testResources;
+    private final TestState testState;
     private NodePresentation nodePresentation;
 
-    private final PromiseProvider promiseProvider;
-    private final TestState testState;
-
     @Inject
-    public TestStateNode(PromiseProvider promiseProvider, @Assisted TestState testState) {
+    public TestStateNode(PromiseProvider promiseProvider, TestResources testResources, @Assisted TestState testState) {
         this.promiseProvider = promiseProvider;
+        this.testResources = testResources;
         this.testState = testState;
     }
 
@@ -53,7 +56,9 @@ public class TestStateNode extends AbstractTreeNode implements HasPresentation {
     protected Promise<List<Node>> getChildrenImpl() {
         List<Node> child = new ArrayList<>();
         for (TestState state : testState.getChildren()) {
-            child.add(new TestStateNode(promiseProvider, state));
+            if (!state.isConfig() || !state.isPassed()) {
+                child.add(new TestStateNode(promiseProvider, testResources, state));
+            }
         }
         return promiseProvider.resolve(child);
     }
@@ -65,6 +70,17 @@ public class TestStateNode extends AbstractTreeNode implements HasPresentation {
     @Override
     public void updatePresentation(NodePresentation presentation) {
         presentation.setPresentableText(testState.getPresentation());
+        if (testState.isSuite()) {
+            return;
+        }
+        if (testState.getDescription() == TestStateDescription.PASSED) {
+            presentation.setPresentableTextCss("color: green;");
+        } else if (testState.getDescription() == TestStateDescription.IGNORED) {
+            presentation.setPresentableTextCss("text-decoration: line-through;\n" +
+                    "    color: yellow;");
+        } else if (testState.getDescription() == TestStateDescription.FAILED || testState.getDescription() == TestStateDescription.ERROR) {
+            presentation.setPresentableTextCss("color: red;");
+        }
     }
 
     @Override

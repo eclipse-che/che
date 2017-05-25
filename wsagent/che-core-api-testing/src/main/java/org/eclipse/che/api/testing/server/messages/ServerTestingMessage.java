@@ -37,14 +37,11 @@ import static org.eclipse.che.api.testing.shared.Constants.NAME;
  */
 public class ServerTestingMessage implements TestingMessage {
 
-
     public static final ServerTestingMessage TESTING_STARTED = new ServerTestingMessage(TestingMessageNames.TESTING_STARTED);
     public static final ServerTestingMessage FINISH_TESTING = new ServerTestingMessage(TestingMessageNames.FINISH_TESTING);
-
     public static final String TESTING_MESSAGE_START = "@@<";
     public static final String TESTING_MESSAGE_END = ">";
-
-
+    private static final char ESCAPE_SEPARATOR = '!';
     private static final Gson GSON = new Gson();
 
     private String messageName;
@@ -77,13 +74,73 @@ public class ServerTestingMessage implements TestingMessage {
             if (jsonObject.has(ATTRIBUTES)) {
                 Set<Map.Entry<String, JsonElement>> entries = jsonObject.getAsJsonObject(ATTRIBUTES).entrySet();
                 for (Map.Entry<String, JsonElement> entry : entries) {
-                    attributes.put(entry.getKey(), entry.getValue().getAsString());
+                    attributes.put(entry.getKey(), unescape(entry.getValue().getAsString()));
                 }
             }
 
             return new ServerTestingMessage(name, attributes);
         } catch (Throwable t) {
             throw new RuntimeException(t);
+        }
+    }
+
+    private static String unescape(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        int finaleLenght = calulateUnescapedLenght(text);
+        int length = text.length();
+        char[] result = new char[finaleLenght];
+        int resultPos = 0;
+        for (int i = 0; i < length; i++) {
+            char c = text.charAt(i);
+            if (c == ESCAPE_SEPARATOR && i < length - 1) {
+                char nextChar = text.charAt(i + 1);
+                char unescape = unescape(nextChar);
+                if (unescape != 0) {
+                    c = unescape;
+                    i++;
+                }
+
+            }
+            result[resultPos++] = c;
+        }
+
+
+        return new String(result);
+    }
+
+    private static int calulateUnescapedLenght(String text) {
+        int result = 0;
+        int lenght = text.length();
+
+        for (int i = 0; i < lenght; i++) {
+            char c = text.charAt(i);
+            if (c == ESCAPE_SEPARATOR && i < lenght - 1) {
+                char nextChar = text.charAt(i + 1);
+                if (unescape(nextChar) != 0) {
+                    i++;
+                }
+            }
+            result++;
+        }
+        return result;
+    }
+
+    private static char unescape(char c) {
+        switch (c) {
+            case 'n':
+                return '\n';
+            case 'r':
+                return '\r';
+            case 'x':
+                return '\u0085';
+            case 'l':
+                return '\u2028';
+            case 'p':
+                return '\u2029';
+            default:
+                return 0;
         }
     }
 

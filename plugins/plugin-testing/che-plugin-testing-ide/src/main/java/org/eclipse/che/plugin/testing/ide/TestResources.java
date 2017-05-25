@@ -10,15 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide;
 
-import org.vectomatic.dom.svg.ui.SVGResource;
-
 import com.google.gwt.resources.client.ClientBundle;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Resources for test extension.
  *
  * @author Mirage Abeysekara
- * 
  */
 public interface TestResources extends ClientBundle {
 

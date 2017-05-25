@@ -10,18 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide;
 
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
-
-import java.util.Set;
-
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.extension.Extension;
-import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.Set;
+
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
 
 /**
  * Java test extension.
@@ -33,10 +31,10 @@ import com.google.inject.Singleton;
 public class TestingExtension {
 
     @Inject
-    public TestingExtension(ActionManager actionManager, 
+    public TestingExtension(ActionManager actionManager,
                             TestLocalizationConstant localization,
-                            Set<TestAction> testActions,
-                            TestingHandler testingHandler) {
+                            Set<TestAction> testActions) {
+
         DefaultActionGroup runMenu = (DefaultActionGroup) actionManager.getAction(GROUP_RUN);
         DefaultActionGroup testMainMenu = new DefaultActionGroup(localization.actionGroupMenuName(), true,
                 actionManager);

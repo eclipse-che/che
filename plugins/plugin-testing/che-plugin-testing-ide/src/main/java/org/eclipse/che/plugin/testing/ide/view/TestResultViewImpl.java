@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
+import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
@@ -101,6 +102,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         });
 
         resultTree.setAutoExpand(true);
+        resultTree.getNodeLoader().setUseCaching(false);
 
         resultTree.getElement().getStyle().setWidth(100, Style.Unit.PCT);
         resultTree.getElement().getStyle().setHeight(100, Style.Unit.PCT);
@@ -119,7 +121,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
 
     @Override
     public void onTestingFinished(TestRootState testRootState) {
-
+        resultTree.refresh(findNodeByState(testRootState));
     }
 
     private void addSuiteOrTest(TestState testState) {
@@ -191,17 +193,28 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
 
     @Override
     public void onTestFinished(TestState testState) {
-
+        handleTestMethodEnded(testState);
     }
 
     @Override
     public void onTestFailed(TestState testState) {
-
+        handleTestMethodEnded(testState);
     }
 
     @Override
     public void onTestIgnored(TestState testState) {
+        handleTestMethodEnded(testState);
+    }
 
+    private void handleTestMethodEnded(TestState testState) {
+        TestStateNode nodeByState = findNodeByState(testState);
+        if (nodeByState == null) {
+            return;
+        }
+        if (testState.isConfig()) {
+            resultTree.getNodeStorage().remove(nodeByState);
+        }
+        resultTree.refresh(nodeByState);
     }
 
     @Override
@@ -224,42 +237,9 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         return testRootState;
     }
 
-    private void buildTree() {
-//        resultTree.getNodeStorage().clear();
-//        outputResult.setText("");
-//        TestResultGroupNode root = nodeFactory.getTestResultGroupNode(lastTestResult, showFailuresOnly, new Runnable() {
-//            @Override
-//            public void run() {
-//                showFailuresOnly = !showFailuresOnly;
-//                buildTree();
-//            }
-//        });
-//        HashMap<String, List<Node>> classNodeHashMap = new LinkedHashMap<>();
-//        for (TestCase testCase : lastTestResult.getTestCases()) {
-//            if (!testCase.isFailed() && showFailuresOnly) {
-//                continue;
-//            }
-//            if (!classNodeHashMap.containsKey(testCase.getClassName())) {
-//                List<Node> methodNodes = new ArrayList<>();
-//                classNodeHashMap.put(testCase.getClassName(), methodNodes);
-//            }
-//            classNodeHashMap.get(testCase.getClassName())
-//                    .add(nodeFactory.getTestResultMethodNodeNode(!testCase.isFailed(), testCase.getMethod(), testCase.getTrace(),
-//                            testCase.getMessage(), testCase.getFailingLine(), this));
-//        }
-//        List<Node> classNodes = new ArrayList<>();
-//        for (Map.Entry<String, List<Node>> entry : classNodeHashMap.entrySet()) {
-//            TestResultClassNode classNode = nodeFactory.getTestResultClassNodeNode(entry.getKey());
-//            classNode.setChildren(entry.getValue());
-//            classNodes.add(classNode);
-//        }
-//        root.setChildren(classNodes);
-//        resultTree.getNodeStorage().add(root);
-//        resultTree.expandAll();
-    }
-
     @Override
     public void gotoClass(final String packagePath, String className, String methodName, int line) {
+        CompilationUnit cu = null;
 //        if (lastTestResult == null) {
 //            return;
 //        }

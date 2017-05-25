@@ -262,6 +262,10 @@ public class TestState implements Printable {
         addPrintableAfterLastTest(printer -> printer.print(err, Printer.OutputType.STDERR));
     }
 
+    public boolean isConfig() {
+        return config;
+    }
+
     public void setConfig(boolean config) {
         this.config = config;
     }
@@ -322,5 +326,12 @@ public class TestState implements Printable {
             presentaton = PresentationUtil.getPresentation(this);
         }
         return presentaton;
+    }
+
+    public boolean isPassed() {
+        return stateInfo.getDescription() == TestStateDescription.SKIPPED ||
+                stateInfo.getDescription() == TestStateDescription.COMPLETED ||
+                stateInfo.getDescription() == TestStateDescription.PASSED;
+
     }
 }

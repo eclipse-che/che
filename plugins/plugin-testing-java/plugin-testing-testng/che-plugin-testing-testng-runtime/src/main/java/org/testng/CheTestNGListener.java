@@ -11,6 +11,8 @@
 package org.testng;
 
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -227,7 +229,7 @@ public class CheTestNGListener {
         internalOnTestFailure(createWrapper(result));
     }
 
-    private void internalOnTestFailure(TestResultWrapper wrapper) {
+    public void internalOnTestFailure(TestResultWrapper wrapper) {
         if (!parametersMap.containsKey(wrapper)) {
             internalOnTestStart(wrapper);
         }
@@ -239,7 +241,9 @@ public class CheTestNGListener {
         if (throwable != null) {
             String failMessage = throwable.getMessage();
             //TODO add message replacement with 'Expected[] but Found[]'
+            String stackTrace = getStackTrace(throwable);
             params.put("message", failMessage);
+            params.put("details", stackTrace);
         } else {
             params.put("message", "");
         }
@@ -247,6 +251,13 @@ public class CheTestNGListener {
         out.println();
         testFailed(out, params);
         onTestFinished(wrapper);
+    }
+
+    private String getStackTrace(Throwable throwable) {
+        StringWriter writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(writer);
+        throwable.printStackTrace(printWriter);
+        return writer.getBuffer().toString();
     }
 
     public void onTestSkipped(ITestResult result) {

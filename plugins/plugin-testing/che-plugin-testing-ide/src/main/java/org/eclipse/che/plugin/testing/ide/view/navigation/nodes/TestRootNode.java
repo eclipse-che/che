@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.testing.ide.view.navigation.nodes;
 
 import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.eclipse.che.plugin.testing.ide.model.TestRootState;
 import org.eclipse.che.plugin.testing.ide.model.TestState;
 
@@ -25,8 +26,8 @@ public class TestRootNode extends TestStateNode {
     private final TestRootState testState;
 
     @Inject
-    public TestRootNode(PromiseProvider promiseProvider, @Assisted TestRootState testState) {
-        super(promiseProvider, testState);
+    public TestRootNode(PromiseProvider promiseProvider, TestResources testResources, @Assisted TestRootState testState) {
+        super(promiseProvider, testResources, testState);
         this.testState = testState;
     }
 
