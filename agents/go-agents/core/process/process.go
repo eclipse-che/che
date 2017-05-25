@@ -9,7 +9,7 @@
 //   Codenvy, S.A. - initial API and implementation
 //
 
-package exec
+package process
 
 import (
 	"errors"
@@ -22,7 +22,6 @@ import (
 	"syscall"
 	"time"
 
-	proc "github.com/eclipse/che/agents/go-agents/core/process"
 	"github.com/eclipse/che/agents/go-agents/core/rpc"
 )
 
@@ -43,14 +42,44 @@ const (
 
 var (
 	prevPid uint64
-	// LogsDir directory where logs of processes should be stored
-	LogsDir string
 
+	// the directory under which all the logs are written
+	logsDir string
+
+	// in memory storage of alive & dead processes
 	processes = &processesMap{items: make(map[uint64]*MachineProcess)}
-	logsDist  = NewLogsDistributor()
-	// ShellInterpreter is shell that executes commands
-	ShellInterpreter = DefaultShellInterpreter
+
+	// used by process to point to the file for a process with given pid
+	logsDistributor LogsDistributor = NewLogsDistributor()
+
+	// shell that executes commands
+	shellInterpreter = DefaultShellInterpreter
 )
+
+// SetLogsDir sets the path to the directory to write logs to.
+func SetLogsDir(dir string) {
+	logsDir = dir
+}
+
+// WipeLogs removes logs dir and all the files and directories under it.
+func WipeLogs() error {
+	return os.RemoveAll(logsDir)
+}
+
+// SetLogsDistributor changes the default strategy of logs distribution to a given one.
+func SetLogsDistributor(ld LogsDistributor) {
+	if ld != nil {
+		logsDistributor = ld
+	}
+}
+
+// SetShellInterpreter changes the default
+// shell interpreter which is '/bin/bash' to the given one.
+func SetShellInterpreter(si string) {
+	if si != "" {
+		shellInterpreter = si
+	}
+}
 
 // Command represents command that is used in command execution API
 type Command struct {
@@ -61,7 +90,6 @@ type Command struct {
 
 // MachineProcess defines machine process model
 type MachineProcess struct {
-
 	// The virtual id of the process, it is guaranteed that pid
 	// is always unique, while NativePid may occur twice or more(when including dead processes)
 	Pid uint64 `json:"pid"`
@@ -96,22 +124,22 @@ type MachineProcess struct {
 
 	// Stdout/stderr pumper.
 	// If process is not alive then the pumper value is set to nil
-	pumper *proc.LogsPumper
+	pumper *LogsPumper
 
 	// Process subscribers, all the outgoing events are go through those subscribers.
 	// If process is not alive then the subscribers value is set to nil
 	subs []*Subscriber
 
-	// Process file logger
-	fileLogger *proc.FileLogger
+	// Process file logger.
+	// The value is set only if process logs directory is configured
+	fileLogger *FileLogger
 
 	// Process mutex should be used to sync process data
 	// or block on process related operations such as events publications
 	mutex *sync.RWMutex
 
-	// When the process was last time used by client
-	lastUsed     time.Time
-	lastUsedLock sync.RWMutex
+	// The time when the process died
+	deathTime time.Time
 
 	// Called once before any of process events is published
 	// and after process is started
@@ -144,95 +172,101 @@ type processesMap struct {
 }
 
 // Start starts MachineProcess
-func Start(process MachineProcess) (MachineProcess, error) {
+func Start(newProcess MachineProcess) (MachineProcess, error) {
 	// wrap command to be able to kill child processes see https://github.com/golang/go/issues/8854
-	cmd := exec.Command("setsid", ShellInterpreter, "-c", process.CommandLine)
+	cmd := exec.Command("setsid", shellInterpreter, "-c", newProcess.CommandLine)
 
 	// getting stdout pipe
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return process, err
+		return newProcess, err
 	}
 
 	// getting stderr pipe
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		return process, err
+		return newProcess, err
 	}
 
 	// starting a new process
 	err = cmd.Start()
 	if err != nil {
-		return process, err
+		return newProcess, err
 	}
 
 	// increment current pid & assign it to the value
 	pid := atomic.AddUint64(&prevPid, 1)
 
-	// Figure out the place for logs file
-	dir, err := logsDist.DirForPid(LogsDir, pid)
+	// set shared data
+	newProcess.Pid = pid
+	newProcess.Alive = true
+	newProcess.NativePid = cmd.Process.Pid
+
+	// create an internal copy of the new process
+	internalProcess := newProcess
+
+	pumper := NewPumper(stdout, stderr)
+	fileLogger, err := newFileLogger(pid)
 	if err != nil {
-		return process, err
-	}
-	filename := fmt.Sprintf("%s%cpid-%d", dir, os.PathSeparator, pid)
-
-	fileLogger, err := proc.NewLogger(filename)
-	if err != nil {
-		return process, err
+		return newProcess, err
 	}
 
-	// save process
-	process.Pid = pid
-	process.Alive = true
-	process.NativePid = cmd.Process.Pid
-	process.command = cmd
-	process.pumper = proc.NewPumper(stdout, stderr)
-	process.logfileName = filename
-	process.fileLogger = fileLogger
-	process.mutex = &sync.RWMutex{}
-	process.updateLastUsedTime()
-
-	processes.Lock()
-	processes.items[pid] = &process
-	processes.Unlock()
+	// set internal data
+	internalProcess.command = cmd
+	internalProcess.pumper = pumper
+	internalProcess.mutex = &sync.RWMutex{}
+	if fileLogger != nil {
+		internalProcess.fileLogger = fileLogger
+		internalProcess.logfileName = fileLogger.filename
+	}
 
 	// register logs consumers
-	process.pumper.AddConsumer(fileLogger)
-	process.pumper.AddConsumer(&process)
+	if fileLogger != nil {
+		pumper.AddConsumer(fileLogger)
+	}
+	pumper.AddConsumer(&internalProcess)
 
-	if process.beforeEventsHook != nil {
-		process.beforeEventsHook(process)
+	// save(publish) process instance
+	processes.Lock()
+	processes.items[pid] = &internalProcess
+	processes.Unlock()
+
+	if newProcess.beforeEventsHook != nil {
+		newProcess.beforeEventsHook(newProcess)
 	}
 
 	// before pumping is started publish process_started event
 	startPublished := make(chan bool)
 	go func() {
-		process.notifySubs(newStartedEvent(process), ProcessStatusBit)
+		internalProcess.notifySubs(newStartedEvent(newProcess), ProcessStatusBit)
 		startPublished <- true
 	}()
 
 	// start pumping after start event is published 'pumper.Pump' is blocking
 	go func() {
 		<-startPublished
-		process.pumper.Pump()
+		pumper.Pump()
 	}()
 
-	return process, nil
+	return newProcess, nil
 }
 
 // Get retrieves process by pid.
 // If process doesn't exist then error of type NoProcessError is returned.
 func Get(pid uint64) (MachineProcess, error) {
 	p, ok := directGet(pid)
-	if ok {
-		return *p, nil
+	if !ok {
+		return MachineProcess{}, noProcess(pid)
 	}
-	return MachineProcess{}, noProcess(pid)
+	p.mutex.RLock()
+	defer p.mutex.RUnlock()
+	return *p, nil
+
 }
 
 // GetProcesses retrieves list of processes.
 // If parameter all is true then returns all processes,
-// otherwice returns only live processes
+// otherwise returns only live processes
 func GetProcesses(all bool) []MachineProcess {
 	processes.RLock()
 	defer processes.RUnlock()
@@ -270,22 +304,26 @@ func Kill(pid uint64) error {
 // ReadLogs reads process logs between [from, till] inclusive.
 // Returns an error if any error occurs during logs reading.
 // If process doesn't exist error of type NoProcessError is returned.
-func ReadLogs(pid uint64, from time.Time, till time.Time) ([]*proc.LogMessage, error) {
+func ReadLogs(pid uint64, from time.Time, till time.Time) ([]*LogMessage, error) {
 	p, ok := directGet(pid)
 	if !ok {
 		return nil, noProcess(pid)
 	}
-	fl := p.fileLogger
-	if p.Alive {
-		fl.Flush()
+
+	p.mutex.RLock()
+	reader, err := newLogsReader(p, from, till)
+	p.mutex.RUnlock()
+
+	if err != nil {
+		return nil, err
 	}
-	return proc.NewLogsReader(p.logfileName).From(from).Till(till).ReadLogs()
+	return reader.ReadLogs()
 }
 
 // ReadAllLogs reads all process logs.
 // Returns an error if any error occurs during logs reading.
 // If process doesn't exist error of type NoProcessError is returned.
-func ReadAllLogs(pid uint64) ([]*proc.LogMessage, error) {
+func ReadAllLogs(pid uint64) ([]*LogMessage, error) {
 	return ReadLogs(pid, time.Time{}, time.Now())
 }
 
@@ -296,11 +334,13 @@ func RemoveSubscriber(pid uint64, id string) error {
 	if !ok {
 		return noProcess(pid)
 	}
+
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
 	if !p.Alive {
 		return notAlive(pid)
 	}
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
 	for idx, sub := range p.subs {
 		if sub.ID == id {
 			p.subs = append(p.subs[0:idx], p.subs[idx+1:]...)
@@ -348,9 +388,12 @@ func RestoreSubscriber(pid uint64, subscriber Subscriber, after time.Time) error
 	defer p.mutex.Unlock()
 
 	// Read logs between after and now
-	logs, err := ReadLogs(pid, after, time.Now())
-	if err != nil {
-		return err
+	var logs []*LogMessage
+	reader, err := newLogsReader(p, after, time.Now())
+	if err == nil {
+		if logs, err = reader.ReadLogs(); err != nil {
+			return err
+		}
 	}
 
 	// If process is dead there is no need to subscribe to it
@@ -370,7 +413,7 @@ func RestoreSubscriber(pid uint64, subscriber Subscriber, after time.Time) error
 	for i := 0; i < len(logs); i++ {
 		message := logs[i]
 		if message.Time.After(after) {
-			if message.Kind == proc.StdoutKind {
+			if message.Kind == StdoutKind {
 				subscriber.Channel <- newStdoutEvent(p.Pid, message.Text, message.Time)
 			} else {
 				subscriber.Channel <- newStderrEvent(p.Pid, message.Text, message.Time)
@@ -430,8 +473,10 @@ func (process *MachineProcess) Close() {
 	// Cleanup machine process resources before dead event is sent
 	process.mutex.Lock()
 	process.Alive = false
+	process.deathTime = time.Now()
 	process.command = nil
 	process.pumper = nil
+	process.fileLogger = nil
 	process.mutex.Unlock()
 
 	process.notifySubs(newDiedEvent(*process), ProcessStatusBit)
@@ -439,8 +484,6 @@ func (process *MachineProcess) Close() {
 	process.mutex.Lock()
 	process.subs = nil
 	process.mutex.Unlock()
-
-	process.updateLastUsedTime()
 }
 
 func (process *MachineProcess) notifySubs(event *rpc.Event, typeBit uint64) {
@@ -455,12 +498,6 @@ func (process *MachineProcess) notifySubs(event *rpc.Event, typeBit uint64) {
 		}
 	}
 	process.mutex.RUnlock()
-}
-
-func (process *MachineProcess) updateLastUsedTime() {
-	process.lastUsedLock.Lock()
-	process.lastUsed = time.Now()
-	process.lastUsedLock.Unlock()
 }
 
 // Writes to a channel and returns true if write is successful,
@@ -479,10 +516,39 @@ func directGet(pid uint64) (*MachineProcess, bool) {
 	processes.RLock()
 	defer processes.RUnlock()
 	item, ok := processes.items[pid]
-	if ok {
-		item.updateLastUsedTime()
-	}
 	return item, ok
+}
+
+// Creates a new logs reader for given process.
+func newLogsReader(p *MachineProcess, from time.Time, till time.Time) (*LogsReader, error) {
+	if p.logfileName == "" {
+		return nil, fmt.Errorf("Logs file for process '%d' is missing", p.Pid)
+	}
+	if p.Alive {
+		p.fileLogger.Flush()
+	}
+	return NewLogsReader(p.logfileName).From(from).Till(till), nil
+}
+
+// Creates a new file logger for given pid.
+func newFileLogger(pid uint64) (*FileLogger, error) {
+	if logsDir == "" {
+		return nil, nil
+	}
+
+	// Figure out the place for logs file
+	dir, err := logsDistributor.DirForPid(logsDir, pid)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO extract file process name generation to the strategy interface(consider LogsDistributor)
+	filename := fmt.Sprintf("%s%cpid-%d", dir, os.PathSeparator, pid)
+	fileLogger, err := NewLogger(filename)
+	if err != nil {
+		return nil, err
+	}
+	return fileLogger, nil
 }
 
 // Returns an error indicating that process with given pid doesn't exist

@@ -83,14 +83,16 @@ func (fl *FileLogger) writeLine(message *LogMessage) {
 }
 
 func (fl *FileLogger) doFlush() {
-	f, err := os.OpenFile(fl.filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
-	if err != nil {
-		log.Printf("Couldn't open file '%s' for flushing the buffer. %s \n", fl.filename, err.Error())
-	} else {
-		defer closeFile(f)
-		_, err = fl.buffer.WriteTo(f)
+	if fl.buffer.Len() > 0 {
+		f, err := os.OpenFile(fl.filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
 		if err != nil {
-			log.Printf("Error appears on flushing data to file '%s'. %s \n", fl.filename, err.Error())
+			log.Printf("Couldn't open file '%s' for flushing the buffer. %s \n", fl.filename, err.Error())
+		} else {
+			defer closeFile(f)
+			_, err = fl.buffer.WriteTo(f)
+			if err != nil {
+				log.Printf("Error appears on flushing data to file '%s'. %s \n", fl.filename, err.Error())
+			}
 		}
 	}
 }
