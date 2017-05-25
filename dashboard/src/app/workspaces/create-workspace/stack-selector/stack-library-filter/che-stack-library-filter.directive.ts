@@ -9,10 +9,11 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheStackLibraryFilterController} from './che-stack-library-filter.controller';
 
 /**
  * @ngdoc directive
- * @name projects.create.directive:cheStackLibraryFilter
+ * @name workspace.create.directive:cheStackLibraryFilter
  * @restrict E
  * @element
  *
@@ -23,21 +24,21 @@
  */
 export class CheStackLibraryFilter implements ng.IDirective {
   restrict = 'E';
-  templateUrl = 'app/workspaces/workspace-details/select-stack/stack-library/stack-library-filter/che-stack-library-filter.html';
+  templateUrl = 'app/workspaces/create-workspace/stack-selector/stack-library-filter/che-stack-library-filter.html';
   controller = 'CheStackLibraryFilterController';
   controllerAs = 'cheStackLibraryFilterCtrl';
   bindToController = true;
   scope = {
     stackTags: '=',
+    selectedTags: '=?',
     onTagsChanges: '&'
   };
 
 
-  link($scope: ng.IScope, element: any) {
-    let ctrl = (<any>$scope).cheStackLibraryFilterCtrl;
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, attrs: ng.IAttributes, ctrl: CheStackLibraryFilterController) {
     ctrl.selectSuggestion = (index: number) => {
       let selectionClass = 'stack-library-filter-suggestion-selected',
-        suggestionElements = element.find('.stack-library-filter-suggestions md-chip');
+        suggestionElements = $element.find('.stack-library-filter-suggestions md-chip');
 
       // clear previously selected suggestion
       suggestionElements.removeClass(selectionClass);
@@ -47,7 +48,7 @@ export class CheStackLibraryFilter implements ng.IDirective {
     };
 
     // select suggestion by keys
-    element.bind('keypress keydown', (event: any) => {
+    $element.bind('keypress keydown', (event: any) => {
       if (event.which === 38) {
         // on press 'up'
         // select prev suggestion

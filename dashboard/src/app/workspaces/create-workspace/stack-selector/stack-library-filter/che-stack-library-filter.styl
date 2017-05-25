@@ -1,5 +1,30 @@
 .stack-library-filter
-  padding-bottom 10px
+  padding 10px
+  min-width 500px
+
+  div
+    user-select none
+
+  .stack-library-filter-label
+    display inline-block
+    color $primary-color
+    line-height 35px
+
+  .stack-library-filter-description
+    display inline-block
+    font-size 12px
+    color $disabled-color
+    line-height 20px
+
+  .stack-library-filter-description-bold
+    font-weight bold
+
+  .stack-library-filter-hidden
+    visibility hidden
+
+  .stack-library-filter-suggestions-row
+    display inline-block
+    line-height 27px
 
   .md-chip-input-container
     margin 0 !important
@@ -12,6 +37,13 @@
       text-transform uppercase
 
 .stack-library-filter
+  & > div:first-child
+    height 110px
+    margin-bottom 10px
+    & > div
+      height inherit
+    .stack-library-filter-tags
+      padding-bottom 2px
   .md-chips
     padding 0 0 2px 0
     margin-right 0
@@ -122,18 +154,3 @@
 
       .stack-library-filter-suggestion-text
         border-color $che-green-color
-
-// other
-.stack-library-filter-description
-  font-size 12px
-  color $disabled-color
-  line-height 20px
-
-.stack-library-filter-description-bold
-  font-weight bold
-
-.stack-library-filter-hidden
-  visibility hidden
-
-.stack-library-filter-suggestions-row
-  line-height 27px

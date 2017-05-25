@@ -110,7 +110,7 @@ export class ChePanel {
 
     template = template + '{{chePanelCtrl.title}}</div>';
     if (attrs['cheTooltip']) {
-      template = template + '<div><i class="fa fa-info-circle che-panel-title-tooltip-icon" tooltip-placement="right" tooltip="{{chePanelCtrl.tooltip}}"></i></div>';
+      template = template + '<div><i class="fa fa-info-circle che-panel-title-tooltip-icon" tooltip-placement="right" uib-tooltip="{{chePanelCtrl.tooltip}}"></i></div>';
     }
 
     template = template + '<div flex layout="column"><div class="che-panel-title-top">&nbsp;</div><div class="che-panel-title-bottom">&nbsp;</div></div>';

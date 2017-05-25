@@ -63,8 +63,8 @@ import {CheWorkspaceRamAllocationSlider} from './workspace-ram-slider/che-worksp
 import {WorkspaceStatus} from './workspace-status/workspace-status.directive';
 import {WorkspaceStatusIndicator} from './workspace-status/workspace-status-indicator.directive';
 
-import {CheStackLibraryFilterController} from './workspace-details/select-stack/stack-library/stack-library-filter/che-stack-library-filter.controller';
-import {CheStackLibraryFilter}     from './workspace-details/select-stack/stack-library/stack-library-filter/che-stack-library-filter.directive';
+import {CheStackLibraryFilterController} from './create-workspace/stack-selector/stack-library-filter/che-stack-library-filter.controller';
+import {CheStackLibraryFilter}     from './create-workspace/stack-selector/stack-library-filter/che-stack-library-filter.directive';
 import {WorkspaceEnvironmentsController} from './workspace-details/environments/environments.controller';
 import {WorkspaceEnvironments} from './workspace-details/environments/environments.directive';
 import {WorkspaceMachineConfigController} from './workspace-details/environments/machine-config/machine-config.controller';

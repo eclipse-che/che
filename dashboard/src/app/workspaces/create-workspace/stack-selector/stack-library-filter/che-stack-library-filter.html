@@ -1,7 +1,7 @@
 <div layout="column" flex="100" class="stack-library-filter">
     <div layout="row" flex="100" layout-align="start center">
-      <div flex="15" layout="column">
-        <div>Filter: </div>
+      <div flex="25" layout="column">
+        <div class="stack-library-filter-label">Input tags:</div>
         <div class="stack-library-filter-description">
           You can filter the stacks by selecting technologies.
         </div>
@@ -29,7 +29,7 @@
       </div>
     </div>
     <div layout="row" flex="100" layout-align="start center" class="stack-library-filter-suggestions-row" ng-class="{'stack-library-filter-hidden': !cheStackLibraryFilterCtrl.suggestions.length}">
-      <label flex="15">Suggestions: </label>
+      <label flex="25">Suggestions: </label>
       <div layout="column" flex="85">
         <md-chips ng-model="cheStackLibraryFilterCtrl.suggestions"
                   class="stack-library-filter-suggestions"

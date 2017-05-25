@@ -15,17 +15,17 @@
  * @author Oleksii Kurinnyi
  */
 export class CheStackLibraryFilterController {
+  selectSuggestion: Function;
+  suggestions: Array<string>;
+  selectedIndex: number;
 
   private $scope: ng.IScope;
   private $timeout: ng.ITimeoutService;
-  private selectedIndex: number;
   private chip: string;
   private keys: Array<string>;
   private stackTags: Array<string>;
-  private suggestions: Array<string>;
   private selectedTags: Array<string>;
   private onTagsChanges: Function;
-  private selectSuggestion: Function;
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
@@ -35,9 +35,11 @@ export class CheStackLibraryFilterController {
     this.$timeout = $timeout;
     this.chip = '';
     this.suggestions = [];
-    this.selectedTags = [];
     this.selectedIndex = -1;
 
+    if (!angular.isArray(this.selectedTags)) {
+      this.selectedTags = [];
+    }
     this.keys = [$mdConstant.KEY_CODE.ENTER, $mdConstant.KEY_CODE.COMMA];
   }
 
