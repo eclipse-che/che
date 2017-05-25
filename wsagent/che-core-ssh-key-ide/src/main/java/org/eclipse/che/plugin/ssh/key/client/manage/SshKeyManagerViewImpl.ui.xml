@@ -40,16 +40,13 @@
 
         .button-layout {
             min-width: 20px;
-            flex-grow: 0;
-            -webkit-flex-grow: 0;
-            flex-shrink: 0;
-            -webkit-flex-shrink: 0;
+            height: 20px;
             padding: 0 3px;
         }
 
         .button-layout svg {
             width: 14px;
-            height: 22px;
+            height: 20px;
             text-align: center;
             padding-left: 3px;
             fill: buttonFontColor;
