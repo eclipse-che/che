@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.ActiveRuntime;
@@ -60,8 +60,8 @@ public class EnvironmentStatusHandler {
     }
 
     public void handleEnvironmentStatusChanged(MachineStatusEvent event) {
-        final String machineId = event.getMachineId();
-        final String workspaceId = event.getWorkspaceId();
+        final String machineId = event.getMachineName();
+        final String workspaceId = event.getIdentity().getWorkspaceId();
 
         workspaceServiceClient.getWorkspace(workspaceId).then(workspace -> {
             RuntimeDto workspaceRuntime = workspace.getRuntime();
@@ -72,13 +72,13 @@ public class EnvironmentStatusHandler {
             ((AppContextImpl)appContext).setWorkspace(workspace);
 
             switch (event.getEventType()) {
-                case CREATING:
+                case STARTING:
                     handleMachineCreating(machineId);
                     break;
                 case RUNNING:
                     handleMachineRunning(machineId);
                     break;
-                case ERROR:
+                case FAILED:
                     handleMachineError(event);
                     break;
             }

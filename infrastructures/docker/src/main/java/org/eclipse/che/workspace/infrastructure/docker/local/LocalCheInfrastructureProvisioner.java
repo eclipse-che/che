@@ -13,9 +13,9 @@ package org.eclipse.che.workspace.infrastructure.docker.local;
 import com.google.common.base.Strings;
 
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.inject.CheBootstrap;

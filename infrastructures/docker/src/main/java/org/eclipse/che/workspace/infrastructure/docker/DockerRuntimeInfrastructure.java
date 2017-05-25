@@ -14,9 +14,10 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentNormalizer;
@@ -49,8 +50,9 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                        InfrastructureProvisioner infrastructureProvisioner,
                                        EnvironmentNormalizer environmentNormalizer,
                                        Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers,
-                                       RuntimeFactory runtimeFactory) {
-        super("docker", environmentParsers.keySet());
+                                       RuntimeFactory runtimeFactory,
+                                       EventService eventService) {
+        super("docker", environmentParsers.keySet(), eventService);
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
         this.dockerEnvironmentParser = dockerEnvironmentParser;
         this.startStrategy = startStrategy;

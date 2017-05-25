@@ -218,7 +218,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal imple
 //				}
 			}
 //		} catch (BadLocationException e) {
-//			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
+//			throw new CoreException(JavaUIStatus.createError(IStatus.FAILED, e));
 //		}
 	}
 

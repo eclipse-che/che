@@ -274,7 +274,7 @@ public class JavaDocLocations {
 	}
 
 //	private static JavaUIException createException(Throwable t, String message) {
-//		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
+//		return new JavaUIException(JavaUIStatus.createError(IStatus.FAILED, message, t));
 //	}
 
 //	private static Map<IPath, String> loadOldForCompatibility() {

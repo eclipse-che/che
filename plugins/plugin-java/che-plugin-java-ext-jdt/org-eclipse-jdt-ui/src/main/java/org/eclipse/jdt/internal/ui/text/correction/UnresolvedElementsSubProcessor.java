@@ -702,7 +702,7 @@ public class UnresolvedElementsSubProcessor {
 //							file.create(new BufferedInputStream(new FileInputStream(bundleFile)), false, pm);
 //							return new DeleteResourceChange(file.getFullPath(), false);
 //						} catch (FileNotFoundException e) {
-//							throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), e.getMessage()));
+//							throw new CoreException(new Status(IStatus.FAILED, JavaPlugin.getPluginId(), e.getMessage()));
 //						}
 //					}
 //					@Override

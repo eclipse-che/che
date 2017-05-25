@@ -1548,7 +1548,7 @@ public class JavaModelManager {
         }
         // backward compatibility
 //        if (isDeprecatedOption(optionName)) {
-//            return JavaCore.ERROR;
+//            return JavaCore.FAILED;
 //        }
         int optionLevel = getOptionLevel(optionName);
         if (optionLevel != UNKNOWN_OPTION) {

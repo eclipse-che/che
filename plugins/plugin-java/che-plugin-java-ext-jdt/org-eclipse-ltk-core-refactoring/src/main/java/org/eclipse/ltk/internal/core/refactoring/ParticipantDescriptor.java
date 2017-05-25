@@ -51,16 +51,16 @@ public class ParticipantDescriptor {
 
 	public IStatus checkSyntax() {
 //		if (fConfigurationElement.getAttribute(ID) == null) {
-//			return new Status(IStatus.ERROR, RefactoringCorePlugin.getPluginId(), IStatus.ERROR,
+//			return new Status(IStatus.FAILED, RefactoringCorePlugin.getPluginId(), IStatus.FAILED,
 //				RefactoringCoreMessages.ParticipantDescriptor_error_id_missing, null);
 //		}
 //		if (fConfigurationElement.getAttribute(NAME) == null) {
-//			return new Status(IStatus.ERROR, RefactoringCorePlugin.getPluginId(), IStatus.ERROR,
+//			return new Status(IStatus.FAILED, RefactoringCorePlugin.getPluginId(), IStatus.FAILED,
 //				Messages.format( RefactoringCoreMessages.ParticipantDescriptor_error_name_missing, getId()),
 //				null);
 //		}
 //		if (fConfigurationElement.getAttribute(CLASS) == null) {
-//			return new Status(IStatus.ERROR, RefactoringCorePlugin.getPluginId(), IStatus.ERROR,
+//			return new Status(IStatus.FAILED, RefactoringCorePlugin.getPluginId(), IStatus.FAILED,
 //				Messages.format( RefactoringCoreMessages.ParticipantDescriptor_error_class_missing, getId()),
 //				null);
 //		}

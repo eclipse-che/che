@@ -8,23 +8,30 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared.dto;
+package org.eclipse.che.api.workspace.shared.dto;
 
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Describes snapshot creation information
+ * Describes how to access to exposed ports for servers inside machine
  *
  * @author Alexander Garagatyi
  */
 @DTO
-public interface NewSnapshotDescriptor {
-    /**
-     * Description of machine saved in snapshot
-     */
-    String getDescription();
+public interface ServerDto extends Server {
 
-    void setDescription(String description);
+    @Override
+    String getUrl();
 
-    NewSnapshotDescriptor withDescription(String description);
+    void setUrl(String url);
+
+    ServerDto withUrl(String url);
+
+    @Override
+    ServerStatus getStatus();
+
+    ServerDto withStatus(ServerStatus status);
+
 }

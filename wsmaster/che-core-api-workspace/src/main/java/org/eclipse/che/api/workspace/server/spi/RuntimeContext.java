@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.rest.HttpRequestHelper;
 import org.slf4j.Logger;
 
@@ -39,20 +40,19 @@ public abstract class RuntimeContext {
     private static final Logger LOG = getLogger(RuntimeInfrastructure.class);
 
     protected final Environment           environment;
-    protected final RuntimeIdentity       identity;
+    protected final RuntimeIdentity   identity;
     protected final RuntimeInfrastructure infrastructure;
     // TODO other than WorkspaceStatus impl
     private         WorkspaceStatus       state;
     protected final InternalRecipe        recipe;
     protected final Map<String, InternalMachineConfig> internalMachines = new HashMap<>();
-    protected final URL statusChannel;
+    //protected final URL statusChannel;
 
     public RuntimeContext(Environment environment,
                           RuntimeIdentity identity,
                           RuntimeInfrastructure infrastructure,
                           AgentSorter agentSorter,
-                          AgentRegistry agentRegistry,
-                          String statusChannel)
+                          AgentRegistry agentRegistry)
             throws ValidationException, InfrastructureException {
         this.environment = environment;
         this.identity = identity;
@@ -63,15 +63,6 @@ public abstract class RuntimeContext {
         for(Map.Entry<String, ? extends MachineConfig> entry : effectiveMachines.entrySet()) {
             internalMachines.put(entry.getKey(), new InternalMachineConfig(entry.getValue(), agentRegistry, agentSorter));
         }
-
-        URL tmp;
-        try {
-            tmp = new URL(statusChannel);
-        } catch (MalformedURLException e) {
-            tmp = null;
-            LOG.error("URL building error for RuntimeContext status channel: " + infrastructure.getName() + " : " +  e.getMessage());
-        }
-        this.statusChannel = tmp;
 
     }
 
@@ -164,17 +155,18 @@ public abstract class RuntimeContext {
                                                   UnsupportedOperationException;
 
 
-    /**
-     * Status Channel URL should be passed by Workspace API level. It is used for events about any kind of status changes, such as:
-     * - Agent installing statuses
-     * - Servers statuses
-     * - Infrastructure specific events
-     * Infrastructure MUST NOT use this channel for long-lived output (process stdout, logs etc)
-     * @return URL of status channel
-     */
-    public URL getStatusChannel() {
-        return statusChannel;
-    }
+
+//    /**
+//     * Status Channel URL should be passed by Workspace API level. It is used for events about any kind of status changes, such as:
+//     * - Agent installing statuses
+//     * - Servers statuses
+//     * - Infrastructure specific events
+//     * Infrastructure MUST NOT use this channel for long-lived output (process stdout, logs etc)
+//     * @return URL of status channel
+//     */
+//    public URL getStatusChannel() {
+//        return statusChannel;
+//    }
 
 
     /**
@@ -182,18 +174,18 @@ public abstract class RuntimeContext {
      * It is not necessary that all of this information is used for identifying
      * Runtime outside of SPI framework (in practice workspace ID looks like enough)
      *
-     * @return the RuntimeIdentity
+     * @return the RuntimeIdentityImpl
      */
     public RuntimeIdentity getIdentity() {
         return identity;
     }
 
-    /**
-     * @return incoming Workspace Environment
-     */
-    public Environment getEnvironment() {
-        return environment;
-    }
+//    /**
+//     * @return incoming Workspace Environment
+//     */
+//    public Environment getEnvironment() {
+//        return environment;
+//    }
 
     /**
      * @return RuntimeInfrastructure the Context created from

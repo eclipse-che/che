@@ -131,7 +131,7 @@ public abstract class TeamHook extends InternalTeamHook {
 	 * @param location a file system path where the file should be linked
 	 * @return a status object with code <code>IStatus.OK</code>
 	 * 	if linking is allowed, otherwise a status object with severity
-	 * 	<code>IStatus.ERROR</code> indicating why the creation is not allowed.
+	 * 	<code>IStatus.FAILED</code> indicating why the creation is not allowed.
 	 * @see org.eclipse.core.resources.IResource#ALLOW_MISSING_LOCAL
 	 */
 	public IStatus validateCreateLink(IFile file, int updateFlags, IPath location) {
@@ -161,7 +161,7 @@ public abstract class TeamHook extends InternalTeamHook {
 	 * @param location a file system URI where the file should be linked
 	 * @return a status object with code <code>IStatus.OK</code>
 	 * 	if linking is allowed, otherwise a status object with severity
-	 * 	<code>IStatus.ERROR</code> indicating why the creation is not allowed.
+	 * 	<code>IStatus.FAILED</code> indicating why the creation is not allowed.
 	 * @see org.eclipse.core.resources.IResource#ALLOW_MISSING_LOCAL
 	 * @since 3.2
 	 */
@@ -195,7 +195,7 @@ public abstract class TeamHook extends InternalTeamHook {
 	 * @param location a file system path where the folder should be linked
 	 * @return a status object with code <code>IStatus.OK</code>
 	 * 	if linking is allowed, otherwise a status object with severity
-	 * 	<code>IStatus.ERROR</code> indicating why the creation is not allowed.
+	 * 	<code>IStatus.FAILED</code> indicating why the creation is not allowed.
 	 * @see org.eclipse.core.resources.IResource#ALLOW_MISSING_LOCAL
 	 */
 	public IStatus validateCreateLink(IFolder folder, int updateFlags, IPath location) {
@@ -225,7 +225,7 @@ public abstract class TeamHook extends InternalTeamHook {
 	 * @param location a file system path where the folder should be linked
 	 * @return a status object with code <code>IStatus.OK</code>
 	 * 	if linking is allowed, otherwise a status object with severity
-	 * 	<code>IStatus.ERROR</code> indicating why the creation is not allowed.
+	 * 	<code>IStatus.FAILED</code> indicating why the creation is not allowed.
 	 * @see org.eclipse.core.resources.IResource#ALLOW_MISSING_LOCAL
 	 * @since 3.2
 	 */

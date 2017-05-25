@@ -35,8 +35,8 @@ public class StatusInfo implements IStatus {
 
 	/**
 	 * Creates a status .
-	 * @param severity The status severity: ERROR, WARNING, INFO and OK.
-	 * @param message The message of the status. Applies only for ERROR,
+	 * @param severity The status severity: FAILED, WARNING, INFO and OK.
+	 * @param message The message of the status. Applies only for FAILED,
 	 * WARNING and INFO.
 	 */
 	public StatusInfo(int severity, String message) {
@@ -66,7 +66,7 @@ public class StatusInfo implements IStatus {
 	}
 
 	/**
-	 *  Returns if the status' severity is ERROR.
+	 *  Returns if the status' severity is FAILED.
 	 */
 	public boolean isError() {
 		return fSeverity == IStatus.ERROR;
@@ -80,7 +80,7 @@ public class StatusInfo implements IStatus {
 	}
 
 	/**
-	 * Sets the status to ERROR.
+	 * Sets the status to FAILED.
 	 * @param errorMessage The error message (can be empty, but not null)
 	 */
 	public void setError(String errorMessage) {

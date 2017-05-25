@@ -348,7 +348,7 @@ public class RuntimesTest {
 //            // then
 //            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
 //                                                   .withWorkspaceId(workspace.getId())
-//                                                   .withEventType(EventType.ERROR)
+//                                                   .withEventType(EventType.FAILED)
 //                                                   .withPrevStatus(WorkspaceStatus.STARTING));
 //        }
 //    }
@@ -406,7 +406,7 @@ public class RuntimesTest {
 //            // then
 //            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
 //                                                   .withWorkspaceId(workspace.getId())
-//                                                   .withEventType(WorkspaceStatusEvent.EventType.ERROR)
+//                                                   .withEventType(WorkspaceStatusEvent.EventType.FAILED)
 //                                                   .withPrevStatus(WorkspaceStatus.STOPPING)
 //                                                   .withError("Test error"));
 //        }
@@ -755,7 +755,7 @@ public class RuntimesTest {
 //
 //    public static class TestRuntimeInfra extends RuntimeInfrastructure {
 //
-//        private Map<RuntimeIdentity, InternalRuntime> runtimes = new HashMap<>();
+//        private Map<RuntimeIdentityImpl, InternalRuntime> runtimes = new HashMap<>();
 //
 //        public TestRuntimeInfra() throws ValidationException {
 //            super("test", singleton("test"));
@@ -767,17 +767,17 @@ public class RuntimesTest {
 //        }
 //
 //        @Override
-//        public Set<RuntimeIdentity> getIdentities() {
+//        public Set<RuntimeIdentityImpl> getIdentities() {
 //            return runtimes.keySet();
 //        }
 //
 //        @Override
-//        public InternalRuntime getRuntime(RuntimeIdentity id) {
+//        public InternalRuntime getRuntime(RuntimeIdentityImpl id) {
 //            return runtimes.get(id);
 //        }
 //
 //        @Override
-//        public RuntimeContext prepare(RuntimeIdentity id, Environment environment) throws ValidationException, ApiException, IOException {
+//        public RuntimeContext prepare(RuntimeIdentityImpl id, Environment environment) throws ValidationException, ApiException, IOException {
 //            return new TestRuntimeContext(environment, id, this);
 //        }
 //
@@ -785,13 +785,13 @@ public class RuntimesTest {
 
 //
 //        @Override
-//        public void stop(RuntimeIdentity runtimeId, Map<String, String> options) {
+//        public void stop(RuntimeIdentityImpl runtimeId, Map<String, String> options) {
 //            LOG.info("Stopped " + runtimeId.getWorkspaceId());
 //        }
 //
 //
 //        @Override
-//        public Runtime start(RuntimeIdentity runtimeId, Environment environment, MessageConsumer<MachineLogMessage> logger,
+//        public Runtime start(RuntimeIdentityImpl runtimeId, Environment environment, MessageConsumer<MachineLogMessage> logger,
 //                                      Map<String, String> options, Subject subject)
 //                throws NotFoundException, ConflictException, ServerException {
 //
@@ -801,13 +801,13 @@ public class RuntimesTest {
 //        }
 //
 //        @Override
-//        public Map<RuntimeIdentity, Runtime> getAll() {
+//        public Map<RuntimeIdentityImpl, Runtime> getAll() {
 //            return runtimes;
 //        }
 //    }
 //
 //    public static class TestRuntimeContext extends RuntimeContext {
-//        public TestRuntimeContext(Environment environment, RuntimeIdentity identity,
+//        public TestRuntimeContext(Environment environment, RuntimeIdentityImpl identity,
 //                                  RuntimeInfrastructure infrastructure) throws ApiException, IOException, ValidationException {
 //            super(environment, identity, infrastructure, null);
 //        }

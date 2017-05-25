@@ -14,9 +14,10 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 
 import java.util.Collections;
@@ -24,8 +25,8 @@ import java.util.Collections;
 @Singleton
 public class DummyRuntimeInfrastructure extends RuntimeInfrastructure {
 
-    public DummyRuntimeInfrastructure() {
-        super("dummy", Collections.singletonList("dummy"));
+    public DummyRuntimeInfrastructure(EventService eventService) {
+        super("dummy", Collections.singletonList("dummy"), eventService);
     }
 
     @Override

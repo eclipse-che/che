@@ -20,13 +20,14 @@ import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
@@ -66,7 +67,7 @@ public class WorkspaceRuntimes {
     private final ImmutableMap<String, RuntimeInfrastructure> infraByRecipe;
 
     private final ConcurrentMap<String, InternalRuntime> runtimes;
-    private final EventService                           eventsService;
+    private final EventService                           eventService;
     private final WorkspaceSharedPool                    sharedPool;
 
     @Inject
@@ -74,7 +75,7 @@ public class WorkspaceRuntimes {
                              Set<RuntimeInfrastructure> infrastructures,
                              WorkspaceSharedPool sharedPool) {
         this.runtimes = new ConcurrentHashMap<>();
-        this.eventsService = eventsService;
+        this.eventService = eventsService;
         this.sharedPool = sharedPool;
 
         // TODO: consider extracting to a strategy interface(1. pick the last, 2. fail with conflict)
@@ -93,6 +94,7 @@ public class WorkspaceRuntimes {
             }
         }
         infraByRecipe = ImmutableMap.copyOf(tmp);
+
     }
 
     @PostConstruct
@@ -112,7 +114,7 @@ public class WorkspaceRuntimes {
         }
     }
 
-    //TODO do we need some validation on start
+    //TODO do we need some validation on start?
     private InternalRuntime validate(InternalRuntime runtime) {
         return runtime;
     }
@@ -232,11 +234,11 @@ public class WorkspaceRuntimes {
                                                                              InfrastructureException,
                                                                              ConflictException {
 
-        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                        .withWorkspaceId(workspaceId)
-                                        .withPrevStatus(WorkspaceStatus.RUNNING)
-                                        .withStatus(WorkspaceStatus.STOPPING)
-                                        .withEventType(EventType.STOPPING));
+        eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                       .withWorkspaceId(workspaceId)
+                                       .withPrevStatus(WorkspaceStatus.RUNNING)
+                                       .withStatus(WorkspaceStatus.STOPPING)
+                                       .withEventType(EventType.STOPPING));
 
         InternalRuntime runtime = runtimes.get(workspaceId);
         if (runtime == null) {
@@ -252,7 +254,7 @@ public class WorkspaceRuntimes {
                                                      .withPrevStatus(WorkspaceStatus.STOPPING);
         event.setStatus(WorkspaceStatus.STOPPED);
         event.setEventType(EventType.STOPPED);
-        eventsService.publish(event);
+        eventService.publish(event);
     }
 
     /**
@@ -308,11 +310,11 @@ public class WorkspaceRuntimes {
                                         "' because its status is 'RUNNING'");
         }
 
-        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                        .withWorkspaceId(workspaceId)
-                                        .withStatus(WorkspaceStatus.STARTING)
-                                        .withEventType(EventType.STARTING)
-                                        .withPrevStatus(WorkspaceStatus.STOPPED));
+        eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                       .withWorkspaceId(workspaceId)
+                                       .withStatus(WorkspaceStatus.STARTING)
+                                       .withEventType(EventType.STARTING)
+                                       .withPrevStatus(WorkspaceStatus.STOPPED));
 
 
         // Start environment
@@ -321,7 +323,7 @@ public class WorkspaceRuntimes {
         }
 
         Subject subject = EnvironmentContext.getCurrent().getSubject();
-        RuntimeIdentity runtimeId = new RuntimeIdentity(workspaceId, envName, subject.getUserName());
+        RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, subject.getUserName());
 
         try {
             InternalRuntime runtime = infra.prepare(runtimeId, environment).start(options);
@@ -333,11 +335,11 @@ public class WorkspaceRuntimes {
             }
 
             runtimes.put(workspaceId, runtime);
-            eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                            .withWorkspaceId(workspaceId)
-                                            .withStatus(WorkspaceStatus.RUNNING)
-                                            .withEventType(EventType.RUNNING)
-                                            .withPrevStatus(WorkspaceStatus.STARTING));
+            eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                           .withWorkspaceId(workspaceId)
+                                           .withStatus(WorkspaceStatus.RUNNING)
+                                           .withEventType(EventType.RUNNING)
+                                           .withPrevStatus(WorkspaceStatus.STARTING));
         } catch (InternalInfrastructureException e) {
             LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
             throw new InfrastructureException(e.getMessage(), e);

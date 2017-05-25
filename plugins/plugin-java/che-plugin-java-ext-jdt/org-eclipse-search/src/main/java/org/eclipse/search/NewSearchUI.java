@@ -67,7 +67,7 @@ public class NewSearchUI {
 //			if (status != null) {
 //				if (!status.isOK())
 //					SearchPlugin.log(status);
-//				if (status.getSeverity() == IStatus.ERROR) {
+//				if (status.getSeverity() == IStatus.FAILED) {
 //					ErrorDialog.openError(SearchPlugin.getActiveWorkbenchShell(), SearchMessages.NewSearchUI_error_title, SearchMessages
 //							.NewSearchUI_error_label, status);
 //				}
