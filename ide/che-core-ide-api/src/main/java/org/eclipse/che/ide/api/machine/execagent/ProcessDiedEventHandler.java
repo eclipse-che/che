@@ -31,7 +31,7 @@ public class ProcessDiedEventHandler extends AbstractExecAgentEventHandler<Proce
                     .methodName("process_died")
                     .paramsAsDto(ProcessDiedEventDto.class)
                     .noResult()
-                    .withConsumer(this);
+                    .withBiConsumer(this);
     }
 
     @Override
