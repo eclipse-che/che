@@ -20,8 +20,6 @@
     <ui:with field='res' type='org.eclipse.che.plugin.ssh.key.client.SshResources'/>
     <ui:style src="org/eclipse/che/ide/api/ui/style.css">
 
-        @eval buttonFontColor org.eclipse.che.ide.api.theme.Style.getButtonFontColor();
-
         .alignRight {
             float: right;
         }
