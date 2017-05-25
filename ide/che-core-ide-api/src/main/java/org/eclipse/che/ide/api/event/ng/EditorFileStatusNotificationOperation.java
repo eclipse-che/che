@@ -71,7 +71,7 @@ public class EditorFileStatusNotificationOperation implements BiConsumer<String,
                     .methodName("event:file-state-changed")
                     .paramsAsDto(FileStateUpdateDto.class)
                     .noResult()
-                    .withConsumer(this);
+                    .withBiConsumer(this);
     }
 
     public void inject(NotificationManager notificationManager) {

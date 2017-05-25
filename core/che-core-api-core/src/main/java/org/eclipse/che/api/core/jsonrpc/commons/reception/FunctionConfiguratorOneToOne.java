@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.slf4j.Logger;
 
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -48,12 +49,12 @@ public class FunctionConfiguratorOneToOne<P, R> {
     }
 
     /**
-     * Define a function to be applied
+     * Define a binary function to be applied
      *
      * @param biFunction
      *         function
      */
-    public void withFunction(BiFunction<String, P, R> biFunction) {
+    public void withBiFunction(BiFunction<String, P, R> biFunction) {
         checkNotNull(biFunction, "Request function must not be null");
 
         LOGGER.debug("Configuring incoming request binary: " +
@@ -62,5 +63,16 @@ public class FunctionConfiguratorOneToOne<P, R> {
                      "result object class: " + rClass);
 
         handlerManager.registerOneToOne(method, pClass, rClass, biFunction);
+    }
+
+
+    /**
+     * Define a function to be applied
+     *
+     * @param function
+     *         function
+     */
+    public void withFunction(Function<P, R> function) {
+       withBiFunction((s, p) -> function.apply(p));
     }
 }

@@ -256,7 +256,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                     .methodName(EVENT_DEBUGGER_MESSAGE_SUSPEND)
                     .paramsAsDto(SuspendEventDto.class)
                     .noResult()
-                    .withConsumer((endpointId, event) -> {
+                    .withBiConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received suspend message from endpoint: " + endpointId);
                         onEventListReceived(event);
                     });
@@ -265,7 +265,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                     .methodName(EVENT_DEBUGGER_MESSAGE_DISCONNECT)
                     .paramsAsDto(DisconnectEventDto.class)
                     .noResult()
-                    .withConsumer((endpointId, event) -> {
+                    .withBiConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received disconnect message from endpoint: " + endpointId);
                         onEventListReceived(event);
                     });
@@ -274,7 +274,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                     .methodName(EVENT_DEBUGGER_MESSAGE_BREAKPOINT)
                     .paramsAsDto(BreakpointActivatedEventDto.class)
                     .noResult()
-                    .withConsumer((endpointId, event) -> {
+                    .withBiConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received breakpoint activated message from endpoint: " + endpointId);
                         onEventListReceived(event);
                     });
