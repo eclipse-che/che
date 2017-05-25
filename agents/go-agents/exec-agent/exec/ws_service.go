@@ -118,7 +118,7 @@ var RPCRoutes = rpc.RoutesGroup{
 	},
 }
 
-// ProcessResult represents result of start process call
+// ProcessResult result of operation performed on process
 type ProcessResult struct {
 	Pid  uint64 `json:"pid"`
 	Text string `json:"text"`
@@ -143,17 +143,13 @@ func startProcessReqHF(params interface{}, t *rpc.Transmitter) error {
 		return rpc.NewArgsError(err)
 	}
 
-	_, err := process.NewBuilder().
-		Cmd(command).
-		FirstSubscriber(process.Subscriber{
-			ID:      t.Channel.ID,
-			Mask:    parseTypes(startParams.EventTypes),
-			Channel: t.Channel.Events,
-		}).
-		BeforeEventsHook(func(process process.MachineProcess) {
-			t.Send(process)
-		}).
-		Start()
+	pb := process.NewBuilder()
+	pb.Cmd(command)
+	pb.Subscribe(t.Channel.ID, parseTypes(startParams.EventTypes), t.Channel.Events)
+	pb.BeforeEventsHook(func(process process.MachineProcess) {
+		t.Send(process)
+	})
+	_, err := pb.Start()
 	return err
 }
 

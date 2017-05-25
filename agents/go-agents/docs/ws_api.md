@@ -497,7 +497,8 @@ When everything is okay
     "commandLine": "printf \n1\n2\n3\"",
     "type": "test",
     "alive": false,
-    "nativePid": 13158
+    "nativePid": 13158,
+    "exitCode": 0
   }
 }    
 ```
@@ -549,7 +550,8 @@ otherwise only _alive_ processes will be returned
       "commandLine": "printf \"1\n2\n3\"",
       "type": "test",
       "alive": false,
-      "nativePid": 13553
+      "nativePid": 13553,
+      "exitCode": 0
     },
     {
       "pid": 2,
@@ -557,7 +559,8 @@ otherwise only _alive_ processes will be returned
       "commandLine": "printf \"\n3\n2\n1\"",
       "type": "test2",
       "alive": false,
-      "nativePid": 13561
+      "nativePid": 13561,
+      "exitCode": 0
     }
   ]
 }
