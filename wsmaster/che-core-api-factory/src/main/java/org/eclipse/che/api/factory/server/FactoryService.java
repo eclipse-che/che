@@ -139,64 +139,6 @@ public class FactoryService extends Service {
         this.factoryParametersResolvers = factoryParametersResolverHolder.getFactoryParametersResolvers();
     }
 
-    /**
-     * @deprecated this is a legacy method for functionality that is no longer exists.
-     * use {@link #saveFactory(FactoryDto)}
-     */
-    @POST
-    @Consumes(MULTIPART_FORM_DATA)
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Create a new factory based on configuration and factory images",
-                  notes = "The field 'factory' is required")
-    @ApiResponses({@ApiResponse(code = 200, message = "Factory successfully created"),
-                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
-                   @ApiResponse(code = 403, message = "The user does not have rights to create factory"),
-                   @ApiResponse(code = 409, message = "When factory with given name and creator already exists"),
-                   @ApiResponse(code = 500, message = "Internal server error occurred")})
-    @Deprecated
-    public FactoryDto saveFactory(Iterator<FileItem> formData) throws ForbiddenException,
-                                                                      ConflictException,
-                                                                      BadRequestException,
-                                                                      ServerException {
-        try {
-            final Set<FactoryImage> images = new HashSet<>();
-            FactoryDto factory = null;
-            while (formData.hasNext()) {
-                final FileItem item = formData.next();
-                switch (item.getFieldName()) {
-                    case ("factory"): {
-                        try (InputStream factoryData = item.getInputStream()) {
-                            factory = factoryBuilder.build(factoryData);
-                        } catch (JsonSyntaxException ex) {
-                            throw new BadRequestException("Invalid JSON value of the field 'factory' provided");
-                        }
-                        break;
-                    }
-                    case ("image"): {
-                        try (InputStream imageData = item.getInputStream()) {
-                            final FactoryImage image = createImage(imageData,
-                                                                   item.getContentType(),
-                                                                   NameGenerator.generate(null, 16));
-                            if (image.hasContent()) {
-                                images.add(image);
-                            }
-                        }
-                        break;
-                    }
-                    default:
-                        //DO NOTHING
-                }
-            }
-            requiredNotNull(factory, "factory configuration");
-            processDefaults(factory);
-            AddExecAgentInEnvironmentUtil.addExecAgent(factory.getWorkspace());
-            createValidator.validateOnCreate(factory);
-            return injectLinks(asDto(factoryManager.saveFactory(factory, images)), images);
-        } catch (IOException ioEx) {
-            throw new ServerException(ioEx.getLocalizedMessage(), ioEx);
-        }
-    }
-
     @POST
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
