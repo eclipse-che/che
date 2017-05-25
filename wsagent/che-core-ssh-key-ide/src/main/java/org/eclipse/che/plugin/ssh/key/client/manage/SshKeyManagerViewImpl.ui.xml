@@ -19,6 +19,9 @@
              type='org.eclipse.che.plugin.ssh.key.client.SshKeyLocalizationConstant'/>
     <ui:with field='res' type='org.eclipse.che.plugin.ssh.key.client.SshResources'/>
     <ui:style>
+
+        @eval buttonFontColor org.eclipse.che.ide.api.theme.Style.getButtonFontColor();
+
         .alignRight {
             float: right;
         }
@@ -45,8 +48,11 @@
         }
 
         .button-layout svg {
-            width: 20px;
+            width: 14px;
             height: 22px;
+            text-align: center;
+            padding-left: 3px;
+            fill: buttonFontColor;
         }
     </ui:style>
     <g:DockLayoutPanel unit="PX" width="100%" height="100%">
