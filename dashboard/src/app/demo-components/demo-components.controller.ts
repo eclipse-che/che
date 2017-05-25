@@ -10,7 +10,7 @@
  */
 'use strict';
 
-enum Tab {Font, Panel, Selecter, Icons, Buttons, Input, List, Label_container, Stack_selector};
+enum Tab {Font, Panel, Selecter, Icons, Buttons, Input, List, Label_container, Stack_selector, Popover};
 
 /**
  * This class is handling the controller for the demo of components
@@ -36,6 +36,8 @@ export class DemoComponentsController {
   number: number;
   numberIsChanged: number;
 
+  placement: any;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
@@ -49,7 +51,23 @@ export class DemoComponentsController {
     } else {
       this.selectedIndex = Tab.Font;
     }
-
+    this.placement = {
+      options: [
+        'top',
+        'top-left',
+        'top-right',
+        'bottom',
+        'bottom-left',
+        'bottom-right',
+        'left',
+        'left-top',
+        'left-bottom',
+        'right',
+        'right-top',
+        'right-bottom'
+      ],
+      selected: 'top'
+    };
     this.init();
   }
 

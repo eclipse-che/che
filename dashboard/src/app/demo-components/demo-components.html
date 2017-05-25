@@ -182,7 +182,8 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
         </textarea>
 
         <p>Selected value of toggle is : {{demoComponentsController.selectedToggle}}</p>
-        <che-toggle ng-init="demoComponentsController.selectedToggle='Public'" ng-model="demoComponentsController.selectedToggle">
+        <che-toggle ng-init="demoComponentsController.selectedToggle='Public'"
+                    ng-model="demoComponentsController.selectedToggle">
           <che-toggle-button che-font-icon="fa fa-lock" che-title="Public"></che-toggle-button>
           <che-toggle-button che-font-icon="fa fa-unlock" che-title="Private"></che-toggle-button>
         </che-toggle>
@@ -369,12 +370,37 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
     <md-tab label="Stack Selector"
             md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Stack_selector)">
       <div layout="column">
-        <che-label-container che-label-name="{{createProjectCtrl.workspaces.length ? 'Select Workspace' : 'Select Stack'}}"
-                             che-label-description="{{createProjectCtrl.workspaces.length ? 'Select existing workspace or create it from stack' : 'Select stack'}}, recipe or image used to define your environment runtime. Workspace environments are used to build and run your project.">
+        <che-label-container
+          che-label-name="{{createProjectCtrl.workspaces.length ? 'Select Workspace' : 'Select Stack'}}"
+          che-label-description="{{createProjectCtrl.workspaces.length ? 'Select existing workspace or create it from stack' : 'Select stack'}}, recipe or image used to define your environment runtime. Workspace environments are used to build and run your project.">
           <stack-selector></stack-selector>
         </che-label-container>
       </div>
     </md-tab>
-
+    <md-tab label="Popover"
+            md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Popover)">
+      <textarea demo-source-render>
+        <!-- toggle-button-popover -->
+        <toggle-button-popover button-title="PopupTags"
+                               button-value="isOpen"
+                               button-font-icon="fa fa-sliders">
+          <che-stack-library-filter stack-tags="['tag1', 'tag2', 'tag3', 'tag4']"
+                                    selected-tags="selectedTags">
+          </che-stack-library-filter>
+        </toggle-button-popover>
+        <button class="btn btn-default" ng-click="isOpen = !isOpen">Change popover state</button>
+      </textarea>
+      <p>
+        <label><h4>Popover placement</h4></label>
+        <select class="form-control" ng-model="demoComponentsController.placement.selected"
+                ng-options="options as options for options in demoComponentsController.placement.options"></select>
+      </p>
+      <textarea demo-source-render>
+        <!-- html-popover-placement -->
+        <button popover-placement="{{demoComponentsController.placement.selected}}"
+                uib-popover-html="'<b>HTML!!!</b>, <i>inline</i>'"
+                class="btn btn-default">HTML Popover (inline)</button>
+      </textarea>
+    </md-tab>
   </md-tabs>
 </md-content>

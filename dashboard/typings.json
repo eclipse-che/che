@@ -13,11 +13,7 @@
     "jquery": "github:DefinitelyTyped/DefinitelyTyped/jquery/jquery.d.ts#bb051830df88f5a55dcf06b7fe85bf6b62cc97f2",
     "js-yaml": "registry:dt/js-yaml#3.5.2+20160316171810",
     "karma-jasmine": "github:DefinitelyTyped/DefinitelyTyped/karma-jasmine/karma-jasmine.d.ts#bb051830df88f5a55dcf06b7fe85bf6b62cc97f2",
-    "lodash": "registry:global/lodash#4.0.0+20160723033700",
     "moment": "github:DefinitelyTyped/DefinitelyTyped/moment/moment.d.ts#bb051830df88f5a55dcf06b7fe85bf6b62cc97f2",
     "moment-node": "github:DefinitelyTyped/DefinitelyTyped/moment/moment-node.d.ts#bb051830df88f5a55dcf06b7fe85bf6b62cc97f2"
-  },
-  "dependencies": {
-    "lodash": "registry:dt/lodash#4.14.0+20170324155812"
   }
 }

@@ -77,7 +77,7 @@ import {ToggleSingleButton} from './toggle-button/toggle-single-button.directive
 import {CheToggleJoinedButton} from './toggle-button/che-toggle-joined-button.directive';
 import {CheToggleJoined} from './toggle-button/che-toggle-joined.directive';
 import {CheChipsList} from './chips-list/chips-list.directive';
-
+import {CheToggleButtonPopover} from './popover/che-toggle-button-popover.directive';
 import {CheEditor} from './editor/che-editor.directive';
 import {CheEditorController} from './editor/che-editor.controller';
 import {PagingButtons} from './paging-button/paging-button.directive';
@@ -180,6 +180,8 @@ export class WidgetConfig {
       .directive('cheChipsList', CheChipsList)
       // editor
       .controller('CheEditorController', CheEditorController)
-      .directive('cheEditor', CheEditor);
+      .directive('cheEditor', CheEditor)
+      // popover
+      .directive('toggleButtonPopover', CheToggleButtonPopover);
   }
 }

@@ -14,22 +14,12 @@
  * Defines a directive for the clipboard.
  * @author Oleksii Orel
  */
-export class CheClipboard {
-
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    this.replace = true;
-    this.templateUrl = 'components/widget/copy-clipboard/che-clipboard.html';
-
-    // scope value
-    this.scope = {
-      value: '=cheValue'
-    };
-
-  }
+export class CheClipboard  implements ng.IDirective {
+  restrict = 'E';
+  replace = true;
+  templateUrl = 'components/widget/copy-clipboard/che-clipboard.html';
+  scope = {
+    value: '=cheValue'
+  };
 
 }

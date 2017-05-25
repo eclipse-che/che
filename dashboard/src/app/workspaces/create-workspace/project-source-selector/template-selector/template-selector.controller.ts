@@ -101,7 +101,7 @@ export class TemplateSelectorController implements IProjectSourceSelectorService
     }
 
     const stack = this.stackSelectorSvc.getStackById(stackId);
-    this.stackTags = stack.tags;
+    this.stackTags = stack ? stack.tags : [];
 
     this.filterAndSortTemplates();
     this.updateNumberOfSelectedTemplates();
