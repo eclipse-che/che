@@ -175,10 +175,20 @@ public class ProcessTreeNode {
      * The set of nodes.
      */
     public enum ProcessNodeType {
-        ROOT_NODE,
-        MACHINE_NODE,
-        COMMAND_NODE,
-        TERMINAL_NODE
+        ROOT_NODE("root"),
+        MACHINE_NODE("machine"),
+        COMMAND_NODE("command"),
+        TERMINAL_NODE("terminal");
+
+        private String value;
+
+        ProcessNodeType(String value) {
+            this.value = value;
+        }
+
+        public String getStringValue() {
+            return value;
+        }
     }
 
 }

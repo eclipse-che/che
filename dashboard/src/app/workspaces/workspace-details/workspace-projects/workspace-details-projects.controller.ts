@@ -29,10 +29,6 @@ export class WorkspaceDetailsProjectsCtrl {
   workspaceName: string;
   projectFilter: any;
   profileCreationDate: any;
-  projectsSelectedStatus: any;
-  isNoSelected: boolean;
-  isAllSelected: boolean;
-  isBulkChecked: boolean;
   workspace: che.IWorkspace;
   projects: Array<che.IProject>;
 
@@ -42,18 +38,25 @@ export class WorkspaceDetailsProjectsCtrl {
   private cheNotification: CheNotification;
   private $mdDialog: ng.material.IDialogService;
   private confirmDialogService: ConfirmDialogService;
+  private cheListHelper: che.widget.ICheListHelper;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($route: ng.route.IRouteService, cheAPI: CheAPI, cheNotification: CheNotification, $mdDialog: ng.material.IDialogService, $log: ng.ILogService, $q: ng.IQService, confirmDialogService: ConfirmDialogService) {
+  constructor($route: ng.route.IRouteService, cheAPI: CheAPI, cheNotification: CheNotification, $mdDialog: ng.material.IDialogService, $log: ng.ILogService, $q: ng.IQService, confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.cheWorkspace = cheAPI.getWorkspace();
     this.cheNotification = cheNotification;
     this.$mdDialog = $mdDialog;
     this.$log = $log;
     this.$q = $q;
     this.confirmDialogService = confirmDialogService;
+
+    const helperId = 'workspace-details-projects';
+    this.cheListHelper = cheListHelperFactory.getHelper(helperId);
+    $scope.$on('$destroy', () => {
+      cheListHelperFactory.removeHelper(helperId);
+    });
 
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
@@ -63,10 +66,6 @@ export class WorkspaceDetailsProjectsCtrl {
 
     this.profileCreationDate = preferences['che:created'];
     this.projectFilter = {name: ''};
-    this.projectsSelectedStatus = {};
-    this.isNoSelected = true;
-    this.isAllSelected = false;
-    this.isBulkChecked = false;
 
     let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey);
     promise.then(() => {
@@ -76,6 +75,16 @@ export class WorkspaceDetailsProjectsCtrl {
         this.updateProjectsData();
       }
     });
+  }
+
+  /**
+   * Callback when name is changed.
+   *
+   * @param str {string} a string to filter projects names
+   */
+  onSearchChanged(str: string): void {
+    this.projectFilter.name = str;
+    this.cheListHelper.applyFilter('name', this.projectFilter);
   }
 
   updateProjectsData(): void {
@@ -90,84 +99,20 @@ export class WorkspaceDetailsProjectsCtrl {
       }
     });
     this.workspaceId = this.workspace.id;
-  }
 
-  /**
-   * Check all projects in list
-   */
-  selectAllProjects(): void {
-    this.projects.forEach((project: che.IProject) => {
-      this.projectsSelectedStatus[project.name] = true;
-    });
-  }
-
-  /**
-   * Uncheck all projects in list
-   */
-  deselectAllProjects(): void {
-    this.projects.forEach((project: che.IProject) => {
-      this.projectsSelectedStatus[project.name] = false;
-    });
-  }
-
-  /**
-   * Change bulk selection value
-   */
-  changeBulkSelection(): void {
-    if (this.isBulkChecked) {
-      this.deselectAllProjects();
-      this.isBulkChecked = false;
-    } else {
-      this.selectAllProjects();
-      this.isBulkChecked = true;
-    }
-    this.updateSelectedStatus();
-  }
-
-  /**
-   * Update project selected status
-   */
-  updateSelectedStatus(): void {
-    this.isNoSelected = true;
-    this.isAllSelected = true;
-
-    this.projects.forEach((project: che.IProject) => {
-      if (this.projectsSelectedStatus[project.name]) {
-        this.isNoSelected = false;
-      } else {
-        this.isAllSelected = false;
-      }
-    });
-
-    if (this.isNoSelected) {
-      this.isBulkChecked = false;
-      return;
-    }
-
-    if (this.isAllSelected) {
-      this.isBulkChecked = true;
-    }
+    this.cheListHelper.setList(this.projects, 'name');
   }
 
   /**
    * Delete all selected projects
    */
   deleteSelectedProjects(): void {
-    let projectsSelectedStatusKeys = Object.keys(this.projectsSelectedStatus);
-    let checkedProjectsKeys = [];
+    const selectedProjects = this.cheListHelper.getSelectedItems(),
+          selectedProjectsNames = selectedProjects.map((project: che.IProject) => {
+            return project.name;
+          });
 
-    if (!projectsSelectedStatusKeys.length) {
-      this.cheNotification.showError('No such projects.');
-      return;
-    }
-
-    projectsSelectedStatusKeys.forEach((key: string) => {
-      if (this.projectsSelectedStatus[key] === true) {
-        checkedProjectsKeys.push(key);
-      }
-    });
-
-    let queueLength = checkedProjectsKeys.length;
+    const queueLength = selectedProjectsNames.length;
     if (!queueLength) {
       this.cheNotification.showError('No such project.');
       return;
@@ -175,27 +120,25 @@ export class WorkspaceDetailsProjectsCtrl {
 
     let confirmationPromise = this.showDeleteProjectsConfirmation(queueLength);
     confirmationPromise.then(() => {
-      let numberToDelete = queueLength;
+      const numberToDelete = queueLength;
+      const deleteProjectPromises = [];
       let isError = false;
-      let deleteProjectPromises = [];
       let currentProjectName;
 
-      let workspaceAgent = this.cheWorkspace.getWorkspaceAgent(this.workspace.id);
+      const workspaceAgent = this.cheWorkspace.getWorkspaceAgent(this.workspace.id);
 
       if (!workspaceAgent) {
         this.cheNotification.showError('Workspace isn\'t run. Cannot delete any project.');
         return;
       }
-      let projectService = workspaceAgent.getProject();
+      const projectService = workspaceAgent.getProject();
 
-      checkedProjectsKeys.forEach((projectName: string) => {
+      selectedProjectsNames.forEach((projectName: string) => {
         currentProjectName = projectName;
-        this.projectsSelectedStatus[projectName] = false;
+        this.cheListHelper.itemsSelectionStatus[projectName] = false;
 
-        let promise = projectService.remove(projectName);
-        promise.then(() => {
-          queueLength--;
-        }, (error: any) => {
+        const promise = projectService.remove(projectName);
+        promise.catch((error: any) => {
           isError = true;
           this.$log.error('Cannot delete project: ', error);
         });
@@ -205,7 +148,6 @@ export class WorkspaceDetailsProjectsCtrl {
       this.$q.all(deleteProjectPromises).finally(() => {
         this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey).then(() => {
           this.updateProjectsData();
-          this.updateSelectedStatus();
         }, (error: any) => {
           if (error.status === 304) {
             this.updateProjectsData();

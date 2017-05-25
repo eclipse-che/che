@@ -13,6 +13,8 @@ package org.eclipse.che.plugin.maven.server;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+
+import org.eclipse.che.maven.data.MavenExplicitProfiles;
 import org.eclipse.che.commons.lang.execution.CommandLine;
 import org.eclipse.che.commons.lang.execution.JavaParameters;
 import org.eclipse.che.commons.lang.execution.ProcessExecutor;
@@ -24,6 +26,7 @@ import org.eclipse.che.maven.server.MavenServerDownloadListener;
 import org.eclipse.che.maven.server.MavenServerLogger;
 import org.eclipse.che.maven.server.MavenSettings;
 import org.eclipse.che.maven.server.MavenTerminal;
+import org.eclipse.che.maven.server.ProfileApplicationResult;
 import org.eclipse.che.plugin.maven.server.rmi.RmiClient;
 import org.eclipse.che.plugin.maven.server.rmi.RmiObjectWrapper;
 import org.eclipse.che.rmi.RmiObject;
@@ -37,6 +40,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -120,6 +124,13 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
 
     public MavenModel interpolateModel(MavenModel model, File projectDir) {
         return perform(() -> getOrCreateWrappedObject().interpolateModel(model, projectDir));
+    }
+
+    public ProfileApplicationResult applyProfiles(MavenModel model,
+                                                  File projectDir,
+                                                  MavenExplicitProfiles explicitProfiles,
+                                                  Collection<String> alwaysOnProfiles) {
+        return perform(() -> getOrCreateWrappedObject().applyProfiles(model, projectDir, explicitProfiles, alwaysOnProfiles));
     }
 
     @PreDestroy

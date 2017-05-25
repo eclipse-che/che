@@ -101,6 +101,7 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditorOperations;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
+import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
 import org.eclipse.che.ide.api.hotkeys.HasHotKeyItems;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
@@ -131,7 +132,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.Boolean.parseBoolean;
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStartEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -174,16 +174,17 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     private final EditorMultiPartStackPresenter          editorMultiPartStackPresenter;
     private final EditorLocalizationConstants            constant;
     private final EditorWidgetFactory<OrionEditorWidget> editorWidgetFactory;
-    private final EditorInitializePromiseHolder editorModule;
-    private final TextEditorPartView            editorView;
-    private final EventBus                      generalEventBus;
-    private final FileTypeIdentifier            fileTypeIdentifier;
-    private final QuickAssistantFactory         quickAssistantFactory;
-    private final WorkspaceAgent                workspaceAgent;
-    private final NotificationManager           notificationManager;
-    private final AppContext                    appContext;
-    private final SignatureHelpView             signatureHelpView;
-    private final EditorContextMenu             contextMenu;
+    private final EditorInitializePromiseHolder          editorModule;
+    private final TextEditorPartView                     editorView;
+    private final EventBus                               generalEventBus;
+    private final FileTypeIdentifier                     fileTypeIdentifier;
+    private final QuickAssistantFactory                  quickAssistantFactory;
+    private final WorkspaceAgent                         workspaceAgent;
+    private final NotificationManager                    notificationManager;
+    private final AppContext                             appContext;
+    private final SignatureHelpView                      signatureHelpView;
+    private final EditorContextMenu                      contextMenu;
+    private final ClientServerEventService               clientServerEventService;
 
     private final AnnotationRendering rendering = new AnnotationRendering();
     private HasKeyBindings           keyBindingsManager;
@@ -223,7 +224,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                                 final NotificationManager notificationManager,
                                 final AppContext appContext,
                                 final SignatureHelpView signatureHelpView,
-                                final EditorContextMenu contextMenu) {
+                                final EditorContextMenu contextMenu,
+                                final ClientServerEventService clientServerEventService) {
         this.codeAssistantFactory = codeAssistantFactory;
         this.deletedFilesController = deletedFilesController;
         this.breakpointManager = breakpointManager;
@@ -244,6 +246,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         this.appContext = appContext;
         this.signatureHelpView = signatureHelpView;
         this.contextMenu = contextMenu;
+        this.clientServerEventService = clientServerEventService;
 
         keyBindingsManager = new TemporaryKeyBindingsManager();
 
@@ -361,20 +364,19 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             final Path relPath = document.getFile().getLocation().removeFirstSegments(movedFrom.segmentCount());
             final Path newPath = delta.getToPath().append(relPath);
 
-            appContext.getWorkspaceRoot().getFile(newPath).then(new Operation<Optional<File>>() {
-                @Override
-                public void apply(Optional<File> file) throws OperationException {
-                    if (file.isPresent()) {
-                        final Path location = document.getFile().getLocation();
-                        deletedFilesController.add(location.toString());
-                        generalEventBus.fireEvent(newFileTrackingStartEvent(file.get().getLocation().toString()));
+            appContext.getWorkspaceRoot().getFile(newPath).then(optional -> {
+                if (optional.isPresent()) {
+                    final Path location = document.getFile().getLocation();
+                    deletedFilesController.add(location.toString());
 
-                        document.setFile(file.get());
-                        input.setFile(file.get());
-                        updateTabReference(file.get(), location);
-
-                        updateContent();
-                    }
+                    File file = optional.get();
+                    clientServerEventService.sendFileTrackingStartEvent(file.getLocation().toString())
+                                            .then(aVoid -> {
+                                                document.setFile(file);
+                                                input.setFile(file);
+                                                updateTabReference(file, location);
+                                                updateContent();
+                                            });
                 }
             });
         }

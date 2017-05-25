@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-ide-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.11.0-SNAPSHOT</version>
+        <version>5.12.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-gwt-logger</artifactId>
     <name>Che Core :: Commons :: GWT Logger</name>
@@ -50,6 +50,9 @@
             <resource>
                 <directory>src/main/resources</directory>
             </resource>
+            <resource>
+                <directory>${project.build.outputDirectory}/org/eclipse/che/ide/logger/slf4j/emulation</directory>
+            </resource>
         </resources>
         <plugins>
             <plugin>
@@ -61,6 +64,40 @@
                         <exclude>**/org/eclipse/che/ide/logger/slf4j/emulation/**</exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.slf4j</groupId>
+                                    <artifactId>slf4j-api</artifactId>
+                                    <classifier>sources</classifier>
+                                    <type>jar</type>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${project.build.outputDirectory}/org/eclipse/che/ide/logger/slf4j/emulation
+                                    </outputDirectory>
+                                    <includes>
+                                        org/slf4j/helpers/FormattingTuple.java,
+                                        org/slf4j/helpers/MarkerIgnoringBase.java,
+                                        org/slf4j/helpers/MessageFormatter.java,
+                                        org/slf4j/ILoggerFactory.java,
+                                        org/slf4j/Logger.java,
+                                        org/slf4j/Marker.java
+                                    </includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

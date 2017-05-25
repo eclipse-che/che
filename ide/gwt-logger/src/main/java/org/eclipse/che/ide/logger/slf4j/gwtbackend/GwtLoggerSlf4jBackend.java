@@ -17,166 +17,170 @@ import org.slf4j.helpers.MessageFormatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static java.util.logging.Level.FINE;
+import static java.util.logging.Level.FINEST;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Level.WARNING;
+
 /**
- * A wrapper over {@link java.util.logging.Logger java.util.logging.Logger}
- * supported since GWT 2.1.
+ * A wrapper over {@link java.util.logging.Logger} supported since GWT 2.1.
  */
 public class GwtLoggerSlf4jBackend extends MarkerIgnoringBase {
     private final Logger logger;
 
     public GwtLoggerSlf4jBackend(String name) {
-        this.name = name;
         logger = Logger.getLogger(name);
     }
 
     @Override
     public boolean isTraceEnabled() {
-        return logger.isLoggable(Level.FINEST);
+        return logger.isLoggable(FINEST);
     }
 
     @Override
     public void trace(String msg) {
-        log(Level.FINEST, msg, null);
+        log(FINEST, msg, null);
     }
 
     @Override
     public void trace(String format, Object arg) {
-        formatAndLog(Level.FINEST, format, arg);
+        formatAndLog(FINEST, format, arg);
     }
 
     @Override
     public void trace(String format, Object arg1, Object arg2) {
-        formatAndLog(Level.FINEST, format, arg1, arg2);
+        formatAndLog(FINEST, format, arg1, arg2);
     }
 
     @Override
     public void trace(String format, Object... argArray) {
-        formatAndLog(Level.FINEST, format, argArray);
+        formatAndLog(FINEST, format, argArray);
     }
 
     @Override
     public void trace(String msg, Throwable t) {
-        log(Level.FINEST, msg, t);
+        log(FINEST, msg, t);
     }
 
     @Override
     public boolean isDebugEnabled() {
-        return logger.isLoggable(Level.FINE);
+        return logger.isLoggable(FINE);
     }
 
     @Override
     public void debug(String msg) {
-        log(Level.FINE, msg, null);
+        log(FINE, msg, null);
     }
 
     @Override
     public void debug(String format, Object arg) {
-        formatAndLog(Level.FINE, format, arg);
+        formatAndLog(FINE, format, arg);
     }
 
     @Override
     public void debug(String format, Object arg1, Object arg2) {
-        formatAndLog(Level.FINE, format, arg1, arg2);
+        formatAndLog(FINE, format, arg1, arg2);
     }
 
     @Override
     public void debug(String format, Object... argArray) {
-        formatAndLog(Level.FINE, format, argArray);
+        formatAndLog(FINE, format, argArray);
     }
 
     @Override
     public void debug(String msg, Throwable t) {
-        log(Level.FINE, msg, t);
+        log(FINE, msg, t);
     }
 
     @Override
     public boolean isInfoEnabled() {
-        return logger.isLoggable(Level.INFO);
+        return logger.isLoggable(INFO);
     }
 
     @Override
     public void info(String msg) {
-        log(Level.INFO, msg, null);
+        log(INFO, msg, null);
     }
 
     @Override
     public void info(String format, Object arg) {
-        formatAndLog(Level.INFO, format, arg);
+        formatAndLog(INFO, format, arg);
     }
 
     @Override
     public void info(String format, Object arg1, Object arg2) {
-        formatAndLog(Level.INFO, format, arg1, arg2);
+        formatAndLog(INFO, format, arg1, arg2);
     }
 
     @Override
     public void info(String format, Object... argArray) {
-        formatAndLog(Level.INFO, format, argArray);
+        formatAndLog(INFO, format, argArray);
     }
 
     @Override
     public void info(String msg, Throwable t) {
-        log(Level.INFO, msg, t);
+        log(INFO, msg, t);
     }
 
     @Override
     public boolean isWarnEnabled() {
-        return logger.isLoggable(Level.WARNING);
+        return logger.isLoggable(WARNING);
     }
 
     @Override
     public void warn(String msg) {
-        log(Level.WARNING, msg, null);
+        log(WARNING, msg, null);
     }
 
     @Override
     public void warn(String format, Object arg) {
-        formatAndLog(Level.WARNING, format, arg);
+        formatAndLog(WARNING, format, arg);
     }
 
     @Override
     public void warn(String format, Object arg1, Object arg2) {
-        formatAndLog(Level.WARNING, format, arg1, arg2);
+        formatAndLog(WARNING, format, arg1, arg2);
     }
 
     @Override
     public void warn(String format, Object... argArray) {
-        formatAndLog(Level.WARNING, format, argArray);
+        formatAndLog(WARNING, format, argArray);
     }
 
     @Override
     public void warn(String msg, Throwable t) {
-        log(Level.WARNING, msg, t);
+        log(WARNING, msg, t);
     }
 
     @Override
     public boolean isErrorEnabled() {
-        return logger.isLoggable(Level.SEVERE);
+        return logger.isLoggable(SEVERE);
     }
 
     @Override
     public void error(String msg) {
-        log(Level.SEVERE, msg, null);
+        log(SEVERE, msg, null);
     }
 
     @Override
     public void error(String format, Object arg) {
-        formatAndLog(Level.SEVERE, format, arg);
+        formatAndLog(SEVERE, format, arg);
     }
 
     @Override
     public void error(String format, Object arg1, Object arg2) {
-        formatAndLog(Level.SEVERE, format, arg1, arg2);
+        formatAndLog(SEVERE, format, arg1, arg2);
     }
 
     @Override
     public void error(String format, Object... argArray) {
-        formatAndLog(Level.SEVERE, format, argArray);
+        formatAndLog(SEVERE, format, argArray);
     }
 
     @Override
     public void error(String msg, Throwable t) {
-        log(Level.SEVERE, msg, t);
+        log(SEVERE, msg, t);
     }
 
     private void log(Level level, String msg, Throwable t) {

@@ -42,7 +42,7 @@
                            aria-label="Name of the workspace"
                            ng-model="workspaceDetailsController.newName"
                            ng-change="workspaceDetailsController.updateName(workspaceNameForm)"
-                           ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 }, allowInvalid: true }"
+                           ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 }, allowInvalid: true }"
                            required
                            custom-validator="workspaceDetailsController.isNameUnique($value)"
                            ng-minlength="3"
