@@ -156,6 +156,11 @@
             top: 0px;
             right: 0px;
             bottom: 0px;
+
+            /* enable text selection*/
+            -moz-user-select: text;
+            -webkit-user-select: text;
+            user-select: text;
         }
 
         .console pre {

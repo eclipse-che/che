@@ -32,7 +32,7 @@ public class ProcessStdErrEventHandler extends AbstractExecAgentEventHandler<Pro
                     .methodName("process_stderr")
                     .paramsAsDto(ProcessStdErrEventDto.class)
                     .noResult()
-                    .withConsumer(this);
+                    .withBiConsumer(this);
     }
 
     @Override

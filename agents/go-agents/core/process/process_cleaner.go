@@ -9,7 +9,7 @@
 //   Codenvy, S.A. - initial API and implementation
 //
 
-package exec
+package process
 
 import (
 	"log"
@@ -33,7 +33,7 @@ func NewCleaner(period int, threshold int) *Cleaner {
 
 // CleanPeriodically schedules cleanups of processes that exited
 // more than CleanupThreshold time before cleanup.
-// This function is syncronious.
+// This function is synchronous.
 func (pc *Cleaner) CleanPeriodically() {
 	ticker := time.NewTicker(pc.CleanupPeriod)
 	defer ticker.Stop()
@@ -42,13 +42,24 @@ func (pc *Cleaner) CleanPeriodically() {
 	}
 }
 
-// CleanOnce cleanups processes that exited more than CleanupThreshold time ago
+// CleanOnce cleanups processes that died before Time.Now() minus CleanupThreshold.
+//
+//  process1.deathTime = 2
+//  process2.deathTime = 5
+//
+//                    death bound           now
+//                         v                 v
+// timeline -> 1 --- 2 --- 3 --- 4 --- 5 --- 6 --- 7 ->
+//                   ^                 ^
+//                process1          process2
+//
+// the method execution will remove the process1.
 func (pc *Cleaner) CleanOnce() {
-	deadPoint := time.Now().Add(-pc.CleanupThreshold)
+	deathBound := time.Now().Add(-pc.CleanupThreshold)
 	processes.Lock()
 	for _, mp := range processes.items {
-		mp.lastUsedLock.RLock()
-		if !mp.Alive && mp.lastUsed.Before(deadPoint) {
+		mp.mutex.RLock()
+		if !mp.Alive && mp.deathTime.Before(deathBound) {
 			delete(processes.items, mp.Pid)
 			if err := os.Remove(mp.logfileName); err != nil {
 				if !os.IsNotExist(err) {
@@ -56,7 +67,7 @@ func (pc *Cleaner) CleanOnce() {
 				}
 			}
 		}
-		mp.lastUsedLock.RUnlock()
+		mp.mutex.RUnlock()
 	}
 	processes.Unlock()
 }
