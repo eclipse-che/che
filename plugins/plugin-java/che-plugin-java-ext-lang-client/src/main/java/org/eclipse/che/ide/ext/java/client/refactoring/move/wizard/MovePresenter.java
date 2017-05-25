@@ -12,7 +12,6 @@ package org.eclipse.che.ide.ext.java.client.refactoring.move.wizard;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;

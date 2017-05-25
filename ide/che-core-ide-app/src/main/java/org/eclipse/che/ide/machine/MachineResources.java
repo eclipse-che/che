@@ -12,7 +12,6 @@ package org.eclipse.che.ide.machine;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**

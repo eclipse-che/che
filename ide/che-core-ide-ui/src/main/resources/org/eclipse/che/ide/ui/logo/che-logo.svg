@@ -11,9 +11,9 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<svg id="svg3077" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     xmlns="http://www.w3.org/2000/svg" height="100%" width="100%" version="1.1" xmlns:cc="http://creativecommons.org/ns#"
-     xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="0 0 225 57">
+<svg id="svg3077"
+     xmlns="http://www.w3.org/2000/svg" height="100%" width="100%" version="1.1"
+     viewBox="0 0 225 57">
     <g fill-rule="evenodd" stroke="none" stroke-width="1" fill="none">
         <g>
             <path d="M0.032227,30.88l-0.032227-17.087,23.853-13.793,23.796,13.784-14.691,8.51-9.062-5.109-23.864,13.695z" fill="#fdb940"/>

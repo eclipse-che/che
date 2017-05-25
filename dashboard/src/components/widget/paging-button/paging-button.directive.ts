@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {RemotePageLabels} from '../../api/paging-resource/remote-page-labels';
+import {RemotePageLabels} from "../../api/paging-resource/remote-page-labels";
 
 
 interface IPagingButtonsScope extends ng.IScope {

@@ -10,9 +10,9 @@
  */
 'use strict';
 
-import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
-import {ChePreferences} from '../../../../components/api/che-preferences.factory';
-import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {ConfirmDialogService} from "../../../../components/service/confirm-dialog/confirm-dialog.service";
+import {ChePreferences} from "../../../../components/api/che-preferences.factory";
+import {CheNotification} from "../../../../components/notification/che-notification.factory";
 
 /**
  * @ngdoc controller

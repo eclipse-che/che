@@ -9,12 +9,12 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheAPI} from '../../../components/api/che-api.factory';
-import {CheNotification} from '../../../components/notification/che-notification.factory';
-import {CheWorkspace} from '../../../components/api/che-workspace.factory';
-import {CheNamespaceRegistry, INamespace} from '../../../components/api/namespace/che-namespace-registry.factory';
-import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
-import {CheBranding} from '../../../components/branding/che-branding.factory';
+import {CheAPI} from "../../../components/api/che-api.factory";
+import {CheNotification} from "../../../components/notification/che-notification.factory";
+import {CheWorkspace} from "../../../components/api/che-workspace.factory";
+import {CheNamespaceRegistry, INamespace} from "../../../components/api/namespace/che-namespace-registry.factory";
+import {ConfirmDialogService} from "../../../components/service/confirm-dialog/confirm-dialog.service";
+import {CheBranding} from "../../../components/branding/che-branding.factory";
 
 /**
  * @ngdoc controller

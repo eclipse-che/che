@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.traefik;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.name.Named;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.commons.annotation.Nullable;

@@ -13,12 +13,11 @@ package org.eclipse.che.plugin.maven.server;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-
-import org.eclipse.che.maven.data.MavenExplicitProfiles;
 import org.eclipse.che.commons.lang.execution.CommandLine;
 import org.eclipse.che.commons.lang.execution.JavaParameters;
 import org.eclipse.che.commons.lang.execution.ProcessExecutor;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
+import org.eclipse.che.maven.data.MavenExplicitProfiles;
 import org.eclipse.che.maven.data.MavenModel;
 import org.eclipse.che.maven.server.MavenRemoteServer;
 import org.eclipse.che.maven.server.MavenServer;

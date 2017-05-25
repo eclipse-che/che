@@ -9,9 +9,9 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheHttpBackend} from './test/che-http-backend';
-import {CheAPIBuilder} from './builder/che-api-builder.factory';
-import {CheFactory} from './che-factory.factory';
+import {CheHttpBackend} from "./test/che-http-backend";
+import {CheAPIBuilder} from "./builder/che-api-builder.factory";
+import {CheFactory} from "./che-factory.factory";
 
 /**
  * Test of the Codenvy Factory API

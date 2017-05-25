@@ -10,15 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.processes;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import elemental.dom.Element;
 import elemental.dom.Node;
 import elemental.events.Event;
 import elemental.events.EventListener;
 import elemental.html.SpanElement;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.ide.CoreLocalizationConstant;

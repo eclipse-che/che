@@ -406,8 +406,6 @@ public class MavenProject {
         public List<MavenResource> resources;
         public List<MavenResource> testResources;
 
-        public String outputDirectory;
-
         public List<String> profilesIds;
         public List<String> activeProfiles;
         public List<String> inactiveProfiles;

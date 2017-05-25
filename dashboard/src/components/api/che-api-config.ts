@@ -10,29 +10,29 @@
  */
 'use strict';
 
-import {CheAPI} from './che-api.factory';
-import {CheWorkspace} from './che-workspace.factory';
-import {CheProjectTemplate} from './che-project-template.factory';
-import {CheRecipe} from './che-recipe.factory';
-import {CheRecipeTemplate} from './che-recipe-template.factory';
-import {CheFactory} from './che-factory.factory';
-import {CheStack} from './che-stack.factory';
-import {CheWebsocket} from './che-websocket.factory';
-import {CheProfile} from './che-profile.factory';
-import {ChePreferences} from './che-preferences.factory';
-import {CheService} from './che-service.factory';
-import {CheHttpBackendProviderFactory} from './test/che-http-backend-provider.factory'
-import {CheFactoryTemplate} from './che-factory-template.factory';
-import {CheHttpBackendFactory} from './test/che-http-backend.factory';
-import {CheAPIBuilder} from './builder/che-api-builder.factory';
-import {CheRemote} from './remote/che-remote.factory';
-import {CheOAuthProvider} from './che-o-auth-provider.factory';
-import {CheEnvironmentRegistry} from './environment/che-environment-registry.factory';
-import {CheAgent} from './che-agent.factory';
-import {CheSsh} from './che-ssh.factory';
-import {CheNamespaceRegistry} from './namespace/che-namespace-registry.factory';
-import {CheUser} from './che-user.factory';
-import {ChePageObject} from './paging-resource/page-object.factory';
+import {CheAPI} from "./che-api.factory";
+import {CheWorkspace} from "./che-workspace.factory";
+import {CheProjectTemplate} from "./che-project-template.factory";
+import {CheRecipe} from "./che-recipe.factory";
+import {CheRecipeTemplate} from "./che-recipe-template.factory";
+import {CheFactory} from "./che-factory.factory";
+import {CheStack} from "./che-stack.factory";
+import {CheWebsocket} from "./che-websocket.factory";
+import {CheProfile} from "./che-profile.factory";
+import {ChePreferences} from "./che-preferences.factory";
+import {CheService} from "./che-service.factory";
+import {CheHttpBackendProviderFactory} from "./test/che-http-backend-provider.factory";
+import {CheFactoryTemplate} from "./che-factory-template.factory";
+import {CheHttpBackendFactory} from "./test/che-http-backend.factory";
+import {CheAPIBuilder} from "./builder/che-api-builder.factory";
+import {CheRemote} from "./remote/che-remote.factory";
+import {CheOAuthProvider} from "./che-o-auth-provider.factory";
+import {CheEnvironmentRegistry} from "./environment/che-environment-registry.factory";
+import {CheAgent} from "./che-agent.factory";
+import {CheSsh} from "./che-ssh.factory";
+import {CheNamespaceRegistry} from "./namespace/che-namespace-registry.factory";
+import {CheUser} from "./che-user.factory";
+import {ChePageObject} from "./paging-resource/page-object.factory";
 
 export class ApiConfig {
 
