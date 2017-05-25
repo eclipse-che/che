@@ -11,38 +11,42 @@
 
 package process
 
-//ProcessBuilder simplifies creation of MachineProcess
-type ProcessBuilder struct {
+import (
+	"github.com/eclipse/che/agents/go-agents/core/rpc"
+)
+
+//Builder simplifies creation of MachineProcess
+type Builder struct {
 	command          Command
 	beforeEventsHook func(p MachineProcess)
-	firstSubscriber  *Subscriber
+	subscribers      []*Subscriber
 }
 
 // NewBuilder creates new instance of ProcessBuilder
-func NewBuilder() *ProcessBuilder {
-	return &ProcessBuilder{}
+func NewBuilder() *Builder {
+	return &Builder{}
 }
 
 // Cmd sets command of process
-func (pb *ProcessBuilder) Cmd(command Command) *ProcessBuilder {
+func (pb *Builder) Cmd(command Command) *Builder {
 	pb.command = command
 	return pb
 }
 
 // CmdLine sets command line of process
-func (pb *ProcessBuilder) CmdLine(cmdLine string) *ProcessBuilder {
+func (pb *Builder) CmdLine(cmdLine string) *Builder {
 	pb.command.CommandLine = cmdLine
 	return pb
 }
 
 // CmdType sets type of command that creates a process
-func (pb *ProcessBuilder) CmdType(cmdType string) *ProcessBuilder {
+func (pb *Builder) CmdType(cmdType string) *Builder {
 	pb.command.Type = cmdType
 	return pb
 }
 
 // CmdName sets name of command that creates a process
-func (pb *ProcessBuilder) CmdName(cmdName string) *ProcessBuilder {
+func (pb *Builder) CmdName(cmdName string) *Builder {
 	pb.command.Name = cmdName
 	return pb
 }
@@ -50,32 +54,39 @@ func (pb *ProcessBuilder) CmdName(cmdName string) *ProcessBuilder {
 // BeforeEventsHook sets the hook which will be called once before
 // process subscribers notified with any of the process events,
 // and after process is started.
-func (pb *ProcessBuilder) BeforeEventsHook(hook func(p MachineProcess)) *ProcessBuilder {
+func (pb *Builder) BeforeEventsHook(hook func(p MachineProcess)) *Builder {
 	pb.beforeEventsHook = hook
 	return pb
 }
 
-//FirstSubscriber sets first logs subscriber of process
-func (pb *ProcessBuilder) FirstSubscriber(subscriber Subscriber) *ProcessBuilder {
-	pb.firstSubscriber = &subscriber
+//Subscribe subscribes to the process events.
+func (pb *Builder) Subscribe(id string, mask uint64, channel chan *rpc.Event) *Builder {
+	pb.subscribers = append(pb.subscribers, &Subscriber{
+		ID:      id,
+		Mask:    mask,
+		Channel: channel,
+	})
 	return pb
 }
 
+//SubscribeDefault subscribes to the process events using process.DefaultMask.
+func (pb *Builder) SubscribeDefault(id string, channel chan *rpc.Event) *Builder {
+	return pb.Subscribe(id, DefaultMask, channel)
+}
+
 // Build creates MachineProcess from this builder
-func (pb *ProcessBuilder) Build() MachineProcess {
+func (pb *Builder) Build() MachineProcess {
 	p := MachineProcess{
 		Name:             pb.command.Name,
 		CommandLine:      pb.command.CommandLine,
 		Type:             pb.command.Type,
 		beforeEventsHook: pb.beforeEventsHook,
-	}
-	if pb.firstSubscriber != nil {
-		p.subs = []*Subscriber{pb.firstSubscriber}
+		subs:             pb.subscribers,
 	}
 	return p
 }
 
 // Start creates MachineProcess from this builder and starts this process
-func (pb *ProcessBuilder) Start() (MachineProcess, error) {
+func (pb *Builder) Start() (MachineProcess, error) {
 	return Start(pb.Build())
 }

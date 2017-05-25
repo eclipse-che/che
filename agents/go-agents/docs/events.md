@@ -92,7 +92,8 @@ it appears only once for one process
     "pid": 1,
     "nativePid": 22164,
     "name": "print",
-    "commandLine": "printf \"\n1\n2\n3\""
+    "commandLine": "printf \"\n1\n2\n3\"",
+    "exitCode" : 0
   }
 }
 ```
