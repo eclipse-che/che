@@ -308,10 +308,10 @@ get_che_data_from_host() {
 }
 
 get_che_server_container_id() {
-  # Returning `hostname` doesn't work when running Che on OpenShift/Kubernetes.
+  # Returning `hostname` doesn't work when running Che on OpenShift/Kubernetes/Docker Cloud.
   # In these cases `hostname` correspond to the pod ID that is different from
   # the container ID
-  hostname
+  echo $(basename "$(head /proc/1/cgroup || hostname)");
 }
 
 is_docker_for_mac_or_windows() {
