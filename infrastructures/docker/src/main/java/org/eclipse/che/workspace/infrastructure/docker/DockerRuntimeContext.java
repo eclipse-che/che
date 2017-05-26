@@ -41,6 +41,7 @@ import javax.inject.Inject;
 import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -67,15 +68,16 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class DockerRuntimeContext extends RuntimeContext {
     private static final Logger LOG = getLogger(DockerRuntimeContext.class);
 
-    private final NetworkLifecycle  dockerNetworkLifecycle;
-    private final MachineStarter    serviceStarter;
-    private final DockerEnvironment dockerEnvironment;
-    private final URLRewriter       urlRewriter;
-    private final Queue<String>     startQueue;
-    private final StartSynchronizer startSynchronizer;
-    private final String            devMachineName;
-    private final ContextsStorage   contextsStorage;
-    private final SnapshotDao       snapshotDao;
+    private final NetworkLifecycle     dockerNetworkLifecycle;
+    private final MachineStarter       serviceStarter;
+    private final DockerEnvironment    dockerEnvironment;
+    private final URLRewriter          urlRewriter;
+    private final Queue<String>        startQueue;
+    private final StartSynchronizer    startSynchronizer;
+    private final String               devMachineName;
+    private final ContextsStorage      contextsStorage;
+    private final SnapshotDao          snapshotDao;
+    private final DockerRegistryClient dockerRegistryClient;
 
     @Inject
     public DockerRuntimeContext(@Assisted DockerRuntimeInfrastructure infrastructure,
@@ -89,7 +91,8 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 AgentSorter agentSorter,
                                 AgentRegistry agentRegistry,
                                 ContextsStorage contextsStorage,
-                                SnapshotDao snapshotDao)
+                                SnapshotDao snapshotDao,
+                                DockerRegistryClient dockerRegistryClient)
             throws ValidationException, InfrastructureException {
         super(environment, identity, infrastructure, agentSorter, agentRegistry);
         this.devMachineName = Utils.getDevMachineName(environment);
@@ -100,6 +103,7 @@ public class DockerRuntimeContext extends RuntimeContext {
         this.urlRewriter = urlRewriter;
         this.contextsStorage = contextsStorage;
         this.snapshotDao = snapshotDao;
+        this.dockerRegistryClient = dockerRegistryClient;
         this.startSynchronizer = new StartSynchronizer();
     }
 
@@ -170,7 +174,6 @@ public class DockerRuntimeContext extends RuntimeContext {
         if ("true".equals(startOptions.get("restore"))) {
             MachineSourceImpl machineSource = null;
             try {
-
                 SnapshotImpl snapshot = snapshotDao.getSnapshot(identity.getWorkspaceId(),
                                                                 identity.getEnvName(),
                                                                 name);
@@ -247,11 +250,11 @@ public class DockerRuntimeContext extends RuntimeContext {
                 if (!removed.isEmpty()) {
                     LOG.info("Removing old snapshots binaries, workspace id '{}', snapshots to remove '{}'", identity.getWorkspaceId(),
                              removed.size());
-                    //removeBinaries(removed);
+                    removeBinaries(removed);
                 }
             } catch (SnapshotException e) {
                 LOG.error(format("Couldn't remove existing snapshots metadata for workspace '%s'", identity.getWorkspaceId()), e);
-                //removeBinaries(newSnapshots);
+                removeBinaries(newSnapshots);
             }
         } else {
             for (Map.Entry<String, DockerMachine> dockerMachineEntry : startSynchronizer.removeMachines().entrySet()) {
@@ -292,6 +295,23 @@ public class DockerRuntimeContext extends RuntimeContext {
             }
         }
         return serviceWithNormalizedSource;
+    }
+
+    /**
+     * Removes binaries of all the snapshots, continues to remove
+     * snapshots if removal of binaries for a single snapshot fails.
+     *
+     * @param snapshots
+     *         the list of snapshots to remove binaries
+     */
+    public void removeBinaries(Collection<? extends SnapshotImpl> snapshots) {
+        for (SnapshotImpl snapshot : snapshots) {
+            try {
+                dockerRegistryClient.removeInstanceSnapshot(snapshot.getMachineSource());
+            } catch (SnapshotException x) {
+                LOG.error(format("Couldn't remove snapshot '%s', workspace id '%s'", snapshot.getId(), snapshot.getWorkspaceId()), x);
+            }
+        }
     }
 
     // TODO rework to agent launchers

@@ -176,6 +176,7 @@ public class DockerMachine implements Machine {
                ", image='" + image + '\'' +
                ", registry='" + registry + '\'' +
                ", registryNamespace='" + registryNamespace + '\'' +
+               ", snapshotUseRegistry='" + snapshotUseRegistry  +
                ", info=" + info +
                ", provider=" + provider +
                '}';
