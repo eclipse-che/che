@@ -1894,8 +1894,8 @@ tag if no children*/);
 //                                && !JavaCore.IGNORE.equals(option)) {
 //                                boolean opStartsWithProject = projectName.equals(otherEntry.getPath().segment(0));
 //                                String otherPathMsg = opStartsWithProject ? otherEntry.getPath().removeFirstSegments(1).toString() : otherEntry.getPath().makeRelative().toString();
-//                                if (JavaCore.ERROR.equals(option)) {
-//                                    return new JavaModelStatus(IStatus.ERROR, IJavaModelStatusConstants.OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE,
+//                                if (JavaCore.FAILED.equals(option)) {
+//                                    return new JavaModelStatus(IStatus.FAILED, IJavaModelStatusConstants.OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE,
 //                                                               Messages.bind(Messages.classpath_cannotUseDistinctSourceFolderAsOutput, new String[] {
 //                                                                       entryPathMsg, otherPathMsg, projectName }));
 //                                }
@@ -1923,7 +1923,7 @@ tag if no children*/);
 //        }
 //
 //        // NOTE: The above code that checks for IJavaModelStatusConstants.OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, can be configured to return
-//        // a WARNING status and hence should be at the end of this validation method. Any other code that might return a more severe ERROR should be
+//        // a WARNING status and hence should be at the end of this validation method. Any other code that might return a more severe FAILED should be
 //        // inserted before the mentioned code.
 //        if (cachedStatus != null) return cachedStatus;
 

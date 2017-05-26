@@ -59,7 +59,7 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
 public class OutputConsoleViewImpl extends Composite implements OutputConsoleView, ScrollHandler {
 
     private final List<Pair<RegExp, String>> output2Color = newArrayList(new Pair<>(compile("\\[\\s*(DOCKER)\\s*\\]"), "#4EABFF"),
-                                                                         new Pair<>(compile("\\[\\s*(ERROR)\\s*\\]"), "#FF2727"),
+                                                                         new Pair<>(compile("\\[\\s*(FAILED)\\s*\\]"), "#FF2727"),
                                                                          new Pair<>(compile("\\[\\s*(WARN)\\s*\\]"), "#F5A623"),
                                                                          new Pair<>(compile("\\[\\s*(STDOUT)\\s*\\]"), "#8ED72B"),
                                                                          new Pair<>(compile("\\[\\s*(STDERR)\\s*\\]"), "#FF4343"));

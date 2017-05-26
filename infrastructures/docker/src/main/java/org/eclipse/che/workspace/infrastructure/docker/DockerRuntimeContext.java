@@ -17,13 +17,13 @@ import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.api.workspace.shared.Utils;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
@@ -83,7 +83,7 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 AgentRegistry agentRegistry,
                                 ContextsStorage contextsStorage)
             throws ValidationException, InfrastructureException {
-        super(environment, identity, infrastructure, agentSorter, agentRegistry, null);
+        super(environment, identity, infrastructure, agentSorter, agentRegistry);
         this.devMachineName = Utils.getDevMachineName(environment);
         this.dockerEnvironment = dockerEnvironment;
         this.dockerNetworkLifecycle = dockerNetworkLifecycle;

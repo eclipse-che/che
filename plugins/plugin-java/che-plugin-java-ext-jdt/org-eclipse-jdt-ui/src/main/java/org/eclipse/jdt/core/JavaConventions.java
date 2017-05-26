@@ -754,7 +754,7 @@ public final class JavaConventions {
 			}
 		} else {
 			// compliance is not valid
-			errors.add(new JavaModelStatus(IStatus.ERROR, Util.bind("convention.compiler.invalidCompilerOption", compliance==null?"":compliance, JavaCore.COMPILER_COMPLIANCE))); //$NON-NLS-1$ //$NON-NLS-2$
+			errors.add(new JavaModelStatus(IStatus.FAILED, Util.bind("convention.compiler.invalidCompilerOption", compliance==null?"":compliance, JavaCore.COMPILER_COMPLIANCE))); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		// Verify source value and set default for target if necessary
@@ -774,7 +774,7 @@ public final class JavaConventions {
 			sourceLevel = ClassFileConstants.JDK1_3;
 		} else {
 			// source is not valid
-			errors.add(new JavaModelStatus(IStatus.ERROR, Util.bind("convention.compiler.invalidCompilerOption", source==null?"":source, JavaCore.COMPILER_SOURCE))); //$NON-NLS-1$ //$NON-NLS-2$
+			errors.add(new JavaModelStatus(IStatus.FAILED, Util.bind("convention.compiler.invalidCompilerOption", source==null?"":source, JavaCore.COMPILER_SOURCE))); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		// Verify target value
@@ -782,7 +782,7 @@ public final class JavaConventions {
 			 targetLevel = CompilerOptions.versionToJdkLevel(target);
 			 if (targetLevel == 0) {
 				// target is not valid
-				errors.add(new JavaModelStatus(IStatus.ERROR, Util.bind("convention.compiler.invalidCompilerOption", target==null?"":target, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM))); //$NON-NLS-1$ //$NON-NLS-2$
+				errors.add(new JavaModelStatus(IStatus.FAILED, Util.bind("convention.compiler.invalidCompilerOption", target==null?"":target, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM))); //$NON-NLS-1$ //$NON-NLS-2$
 			 }
 		}
 
@@ -790,24 +790,24 @@ public final class JavaConventions {
 		if (complianceLevel != 0 && sourceLevel != 0 && targetLevel != 0) {
 			// target must be 1.5 if source is 1.5
 			if (sourceLevel >= ClassFileConstants.JDK1_5 && targetLevel < ClassFileConstants.JDK1_5) {
-				errors.add(new JavaModelStatus(IStatus.ERROR, Util.bind("convention.compiler.incompatibleTargetForSource", target, JavaCore.VERSION_1_5))); //$NON-NLS-1$
+				errors.add(new JavaModelStatus(IStatus.FAILED, Util.bind("convention.compiler.incompatibleTargetForSource", target, JavaCore.VERSION_1_5))); //$NON-NLS-1$
 			}
 	   		else
 		   		// target must be 1.4 if source is 1.4
 	   			if (sourceLevel >= ClassFileConstants.JDK1_4 && targetLevel < ClassFileConstants.JDK1_4) {
-					errors.add(new JavaModelStatus(IStatus.ERROR, Util.bind("convention.compiler.incompatibleTargetForSource", target, JavaCore.VERSION_1_4))); //$NON-NLS-1$
+					errors.add(new JavaModelStatus(IStatus.FAILED, Util.bind("convention.compiler.incompatibleTargetForSource", target, JavaCore.VERSION_1_4))); //$NON-NLS-1$
 	   		}
 			// target cannot be greater than compliance level
 			if (complianceLevel < targetLevel){
-				errors.add(new JavaModelStatus(IStatus.ERROR, Util.bind("convention.compiler.incompatibleComplianceForTarget", compliance, JavaCore.VERSION_1_4))); //$NON-NLS-1$
+				errors.add(new JavaModelStatus(IStatus.FAILED, Util.bind("convention.compiler.incompatibleComplianceForTarget", compliance, JavaCore.VERSION_1_4))); //$NON-NLS-1$
 			}
 			// compliance must be 1.5 if source is 1.5
 			if (source.equals(JavaCore.VERSION_1_5) && complianceLevel < ClassFileConstants.JDK1_5) {
-				errors.add(new JavaModelStatus(IStatus.ERROR, Util.bind("convention.compiler.incompatibleComplianceForSource", compliance, JavaCore.VERSION_1_5))); //$NON-NLS-1$
+				errors.add(new JavaModelStatus(IStatus.FAILED, Util.bind("convention.compiler.incompatibleComplianceForSource", compliance, JavaCore.VERSION_1_5))); //$NON-NLS-1$
 			} else
 				// compliance must be 1.4 if source is 1.4
 				if (source.equals(JavaCore.VERSION_1_4) && complianceLevel < ClassFileConstants.JDK1_4) {
-					errors.add(new JavaModelStatus(IStatus.ERROR, Util.bind("convention.compiler.incompatibleComplianceForSource", compliance, JavaCore.VERSION_1_4))); //$NON-NLS-1$
+					errors.add(new JavaModelStatus(IStatus.FAILED, Util.bind("convention.compiler.incompatibleComplianceForSource", compliance, JavaCore.VERSION_1_4))); //$NON-NLS-1$
 			}
 		}
 

@@ -104,7 +104,7 @@ export class WorkspaceSshAction {
                 return ssh.getPair("workspace", foundWorkspaceDTO.getId());
             }).then((sshPairDto : org.eclipse.che.api.ssh.shared.dto.SshPairDto) => {
 
-                let machines : Array<org.eclipse.che.api.machine.shared.dto.MachineDto> = foundWorkspaceDTO.getRuntime().getMachines();
+                let machines : Array<org.eclipse.che.api.workspace.shared.dto.MachineDto> = foundWorkspaceDTO.getRuntime().getMachines();
                 let runtime: org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto = this.getSelectedMachine(machines).getRuntime();
                 let user : string = runtime.getProperties().get("config.user");
                 if (user === "") {
@@ -135,7 +135,7 @@ export class WorkspaceSshAction {
         });
     }
 
-    private getSelectedMachine(machines : Array<org.eclipse.che.api.machine.shared.dto.MachineDto>) : org.eclipse.che.api.machine.shared.dto.MachineDto {
+    private getSelectedMachine(machines : Array<org.eclipse.che.api.workspace.shared.dto.MachineDto>) : org.eclipse.che.api.workspace.shared.dto.MachineDto {
         for(let i : number=0; i<machines.length; i++) {
             if (machines[i].getConfig().getName() === this.machineName) {
               return machines[i];

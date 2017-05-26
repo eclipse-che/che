@@ -12,8 +12,8 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import javax.inject.Inject;

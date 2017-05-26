@@ -275,7 +275,7 @@ final class MoveViewImpl extends Window implements MoveView {
      *
      * @param severity
      *         the severity to search for. Must be one of <code>FATAL
-     *         </code>, <code>ERROR</code>, <code>WARNING</code> or <code>INFO</code>
+     *         </code>, <code>FAILED</code>, <code>WARNING</code> or <code>INFO</code>
      * @param entries
      *         list of refactoring status
      * @return the entry that matches the search criteria

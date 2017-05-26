@@ -651,7 +651,7 @@ public class CheEnvironmentEngineTest {
 //        // then
 //        for (Instance instance : instances) {
 //            verify(eventService).publish(newDto(MachineStatusEvent.class)
-//                                                 .withEventType(MachineStatusEvent.EventType.CREATING)
+//                                                 .withEventType(MachineStatusEvent.EventType.STARTING)
 //                                                 .withDev(instance.getConfig().isDev())
 //                                                 .withMachineName(instance.getConfig().getName())
 //                                                 .withMachineId(instance.getId())
@@ -841,7 +841,7 @@ public class CheEnvironmentEngineTest {
 //
 //        // then
 //        verify(eventService).publish(newDto(MachineStatusEvent.class)
-//                                             .withEventType(MachineStatusEvent.EventType.CREATING)
+//                                             .withEventType(MachineStatusEvent.EventType.STARTING)
 //                                             .withDev(config.isDev())
 //                                             .withMachineName(config.getName())
 //                                             .withMachineId("newMachineId")
@@ -918,7 +918,7 @@ public class CheEnvironmentEngineTest {
 //
 //        // then
 //        verify(eventService).publish(newDto(MachineStatusEvent.class)
-//                                             .withEventType(MachineStatusEvent.EventType.CREATING)
+//                                             .withEventType(MachineStatusEvent.EventType.STARTING)
 //                                             .withDev(instance.getConfig().isDev())
 //                                             .withMachineName(instance.getConfig().getName())
 //                                             .withMachineId(instance.getId())

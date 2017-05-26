@@ -233,6 +233,7 @@ public class AppContextImpl implements AppContext,
         });
     }
 
+    @Deprecated
     @Override
     public String getWorkspaceName() {
         return workspace.getConfig().getName();
