@@ -23,6 +23,8 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.context.AppContextImpl;
+import org.eclipse.che.ide.context.CurrentUserImpl;
 import org.eclipse.che.ide.preferences.PreferencesManagerImpl;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -42,7 +44,6 @@ import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 @Singleton
 class CurrentUserInitializer {
 
-    private final CurrentUser              currentUser;
     private final PreferencesManager       preferencesManager;
     private final CoreLocalizationConstant messages;
     private final AppContext               appContext;
@@ -50,13 +51,11 @@ class CurrentUserInitializer {
     private final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
 
     @Inject
-    CurrentUserInitializer(CurrentUser currentUser,
-                           PreferencesManagerImpl preferencesManager,
+    CurrentUserInitializer(PreferencesManagerImpl preferencesManager,
                            CoreLocalizationConstant messages,
                            AppContext appContext,
                            AsyncRequestFactory asyncRequestFactory,
                            DtoUnmarshallerFactory dtoUnmarshallerFactory) {
-        this.currentUser = currentUser;
         this.preferencesManager = preferencesManager;
         this.messages = messages;
         this.appContext = appContext;
@@ -65,29 +64,31 @@ class CurrentUserInitializer {
     }
 
     Promise<Void> init() {
-        return loadProfile().thenPromise(aVoid -> loadPreferences());
+        final CurrentUserImpl user = new CurrentUserImpl();
+
+        return loadProfile().thenPromise(profile -> {
+            user.setId(profile.getUserId());
+
+            return loadPreferences();
+        }).then((Function<Map<String, String>, Void>)preferences -> {
+            user.setPreferences(preferences);
+
+            ((AppContextImpl)appContext).setCurrentUser(user);
+
+            return null;
+        });
     }
 
-    private Promise<Void> loadProfile() {
-        return getUserProfile()
-                .then((Function<ProfileDto, Void>)profile -> {
-                    currentUser.setProfile(profile);
-                    return null;
-                })
-                .catchError((Operation<PromiseError>)arg -> {
-                    throw new OperationException("Unable to load user's profile: " + arg.getCause());
-                });
+    private Promise<ProfileDto> loadProfile() {
+        return getUserProfile().catchError((Operation<PromiseError>)arg -> {
+            throw new OperationException("Unable to load user's profile: " + arg.getCause());
+        });
     }
 
-    private Promise<Void> loadPreferences() {
-        return preferencesManager.loadPreferences()
-                                 .then((Function<Map<String, String>, Void>)preferences -> {
-                                     currentUser.setPreferences(preferences);
-                                     return null;
-                                 })
-                                 .catchError((Operation<PromiseError>)arg -> {
-                                     throw new OperationException(messages.unableToLoadPreference() + ": " + arg.getCause());
-                                 });
+    private Promise<Map<String, String>> loadPreferences() {
+        return preferencesManager.loadPreferences().catchError((Operation<PromiseError>)arg -> {
+            throw new OperationException(messages.unableToLoadPreference() + ": " + arg.getCause());
+        });
     }
 
     private Promise<ProfileDto> getUserProfile() {

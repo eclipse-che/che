@@ -15,8 +15,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
+import org.eclipse.che.ide.api.factory.model.FactoryImpl;
 import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
@@ -87,7 +88,7 @@ public class AppContextImpl implements AppContext,
     private final List<Project>  rootProjects      = newArrayList();
     private final List<Resource> selectedResources = newArrayList();
 
-    private final CurrentUser currentUser;
+    private CurrentUser currentUser;
 
     /**
      * List of actions with parameters which comes from startup URL.
@@ -96,7 +97,7 @@ public class AppContextImpl implements AppContext,
     private final List<StartUpAction> startAppActions;
 
     private WorkspaceImpl       workspace;
-    private FactoryDto          factory;
+    private FactoryImpl         factory;
     private Path                projectsRoot;
     private ActiveRuntime       runtime;
     private ResourceManager     resourceManager;
@@ -107,14 +108,12 @@ public class AppContextImpl implements AppContext,
                           QueryParameters queryParameters,
                           ResourceManager.ResourceManagerFactory resourceManagerFactory,
                           Provider<EditorAgent> editorAgentProvider,
-                          Provider<AppStateManager> appStateManager,
-                          CurrentUser currentUser) {
+                          Provider<AppStateManager> appStateManager) {
         this.eventBus = eventBus;
         this.queryParameters = queryParameters;
         this.resourceManagerFactory = resourceManagerFactory;
         this.editorAgentProvider = editorAgentProvider;
         this.appStateManager = appStateManager;
-        this.currentUser = currentUser;
         this.startAppActions = new ArrayList<>();
 
         projectsInImport = new ArrayList<>();
@@ -161,7 +160,14 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public CurrentUser getCurrentUser() {
+        if (currentUser == null) {
+            throw new IllegalStateException(getClass() + " Current Workspace can not be null.");
+        }
         return currentUser;
+    }
+
+    public void setCurrentUser(CurrentUser user) {
+        this.currentUser = user;
     }
 
     @Override
@@ -189,12 +195,12 @@ public class AppContextImpl implements AppContext,
     }
 
     @Override
-    public FactoryDto getFactory() {
+    public FactoryImpl getFactory() {
         return factory;
     }
 
-    public void setFactory(FactoryDto factory) {
-        this.factory = factory;
+    public void setFactory(Factory factory) {
+        this.factory = new FactoryImpl(factory);
     }
 
     @Override
@@ -440,6 +446,7 @@ public class AppContextImpl implements AppContext,
         return APP_ID;
     }
 
+    @Deprecated
     @Override
     public ActiveRuntime getActiveRuntime() {
         return runtime;

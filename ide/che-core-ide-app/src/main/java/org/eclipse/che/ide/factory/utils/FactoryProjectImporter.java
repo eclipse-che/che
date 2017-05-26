@@ -14,17 +14,16 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.git.shared.GitCheckoutEvent;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.factory.model.FactoryImpl;
 import org.eclipse.che.ide.api.importer.AbstractImporter;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -37,6 +36,7 @@ import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.api.user.Credentials;
+import org.eclipse.che.ide.api.workspace.model.ProjectConfigImpl;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.RestContext;
@@ -86,7 +86,7 @@ public class FactoryProjectImporter extends AbstractImporter {
     private final OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry;
     private final DtoUnmarshallerFactory      dtoUnmarshallerFactory;
 
-    private FactoryDto          factory;
+    private FactoryImpl         factory;
     private AsyncCallback<Void> callback;
 
     @Inject
@@ -111,7 +111,7 @@ public class FactoryProjectImporter extends AbstractImporter {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
     }
 
-    public void startImporting(FactoryDto factory, AsyncCallback<Void> callback) {
+    public void startImporting(FactoryImpl factory, AsyncCallback<Void> callback) {
         this.callback = callback;
         this.factory = factory;
         importProjects();
@@ -152,7 +152,7 @@ public class FactoryProjectImporter extends AbstractImporter {
      */
     private void importProjects(Set<String> projectsToImport) {
         final List<Promise<Project>> promises = new ArrayList<>();
-        for (final ProjectConfigDto projectConfig : factory.getWorkspace().getProjects()) {
+        for (final ProjectConfigImpl projectConfig : factory.getWorkspace().getProjects()) {
             if (projectsToImport.contains(projectConfig.getName())) {
                 promises.add(startImport(Path.valueOf(projectConfig.getPath()), projectConfig.getSource()).thenPromise(
                         new Function<Project, Promise<Project>>() {

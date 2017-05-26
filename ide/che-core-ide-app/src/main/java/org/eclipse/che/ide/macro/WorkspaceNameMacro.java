@@ -60,6 +60,6 @@ public class WorkspaceNameMacro implements Macro {
     /** {@inheritDoc} */
     @Override
     public Promise<String> expand() {
-        return promises.resolve(appContext.getWorkspaceName());
+        return promises.resolve(appContext.getWorkspace().getConfig().getName());
     }
 }

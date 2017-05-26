@@ -12,14 +12,14 @@ package org.eclipse.che.ide.api.app;
 
 import com.google.common.annotations.Beta;
 
-import org.eclipse.che.api.core.model.factory.Factory;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.ide.api.factory.model.FactoryImpl;
 import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceConfigImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.resource.Path;
 
@@ -112,8 +112,9 @@ public interface AppContext {
      * @return the workspace name
      * @see WorkspaceConfigDto#getName()
      * @since 4.3.0
+     * @deprecated use {@link WorkspaceConfigImpl#getName()}
      */
-    @Beta
+    @Deprecated
     String getWorkspaceName();
 
     /**
@@ -142,7 +143,7 @@ public interface AppContext {
     List<StartUpAction> getStartAppActions();
 
     /**
-     * Returns current user.
+     * Returns the current user.
      *
      * @return current user
      */
@@ -172,19 +173,19 @@ public interface AppContext {
     void removeProjectFromImporting(String pathToProject);
 
     /**
-     * Returns {@link Factory} instance which id was set on startup,
+     * Returns {@link FactoryImpl} instance which id was set on startup,
      * or {@code null} if no factory was specified.
      *
      * @return loaded factory or {@code null}
      */
-    FactoryDto getFactory();
+    FactoryImpl getFactory();
 
     String getWorkspaceId();
 
     /** Returns the current workspace. */
     WorkspaceImpl getWorkspace();
 
-    /** @deprecated use {@link WorkspaceImpl#getRuntime()} */
+    /** @deprecated use {@link #getWorkspace()} and {@link WorkspaceImpl#getRuntime()} */
     @Deprecated
     ActiveRuntime getActiveRuntime();
 
