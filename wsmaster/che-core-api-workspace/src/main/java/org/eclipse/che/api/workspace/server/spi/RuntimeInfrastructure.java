@@ -15,6 +15,8 @@ import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.notification.EventService;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -28,13 +30,15 @@ import java.util.Set;
  */
 public abstract class RuntimeInfrastructure {
 
-    protected final Set<String> recipeTypes;
-    protected final String      name;
+    protected final     Set<String>  recipeTypes;
+    protected final     String       name;
+    protected final EventService eventService;
 
-    public RuntimeInfrastructure(String name, Collection<String> types) {
+    public RuntimeInfrastructure(String name, Collection<String> types, EventService eventService) {
         Preconditions.checkArgument(!types.isEmpty());
         this.name = Objects.requireNonNull(name);
         this.recipeTypes = ImmutableSet.copyOf(types);
+        this.eventService = eventService;
     }
 
     /**
@@ -51,6 +55,15 @@ public abstract class RuntimeInfrastructure {
     public final Set<String> getRecipeTypes() {
         return recipeTypes;
     }
+
+    /**
+     *
+     * @return EventService
+     */
+    public final EventService getEventService() {
+        return eventService;
+    }
+
 
     /**
      * An Infrastructure implementation should be able to preliminary estimate incoming Environment.
@@ -95,7 +108,7 @@ public abstract class RuntimeInfrastructure {
      * after shutting down Master server.
      *
      * @param id
-     *         the RuntimeIdentity
+     *         the RuntimeIdentityImpl
      * @return the Runtime
      * @throws UnsupportedOperationException
      *         if implementation does not support runtimes tracking
@@ -112,7 +125,7 @@ public abstract class RuntimeInfrastructure {
      * On the second phase Runtime is created with RuntimeContext.start() which is supposedly "long" method
      *
      * @param id
-     *         the RuntimeIdentity
+     *         the RuntimeIdentityImpl
      * @param environment
      *         incoming Environment (configuration)
      * @return new RuntimeContext object

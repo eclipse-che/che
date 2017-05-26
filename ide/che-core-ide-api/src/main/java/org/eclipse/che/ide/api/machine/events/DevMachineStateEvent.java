@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.machine.events;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 
 /**
  * Event that describes the fact that dev machine state has been changed.
@@ -43,7 +43,7 @@ public class DevMachineStateEvent extends GwtEvent<DevMachineStateEvent.Handler>
     /** Type class used to register this event. */
     public static Type<DevMachineStateEvent.Handler> TYPE = new Type<>();
     private final MachineStatusEvent.EventType status;
-    private final String                       machineId;
+    //private final String                       machineId;
     private final String                       workspaceId;
     private final String                       machineName;
     private final String                       error;
@@ -56,8 +56,8 @@ public class DevMachineStateEvent extends GwtEvent<DevMachineStateEvent.Handler>
      */
     public DevMachineStateEvent(MachineStatusEvent event) {
         this.status = event.getEventType();
-        this.machineId = event.getMachineId();
-        this.workspaceId = event.getWorkspaceId();
+        //this.machineId = event.getMachineId();
+        this.workspaceId = event.getIdentity().getWorkspaceId();
         this.machineName = event.getMachineName();
         this.error = event.getError();
     }
@@ -72,9 +72,9 @@ public class DevMachineStateEvent extends GwtEvent<DevMachineStateEvent.Handler>
         return status;
     }
 
-    public String getMachineId() {
-        return machineId;
-    }
+//    public String getMachineId() {
+//        return machineId;
+//    }
 
     public String getWorkspaceId() {
         return workspaceId;
@@ -94,9 +94,9 @@ public class DevMachineStateEvent extends GwtEvent<DevMachineStateEvent.Handler>
             case RUNNING:
                 handler.onDevMachineStarted(this);
                 break;
-            case DESTROYED:
-                handler.onDevMachineDestroyed(this);
-                break;
+//            case DESTROYED:
+//                handler.onDevMachineDestroyed(this);
+//                break;
         }
     }
 

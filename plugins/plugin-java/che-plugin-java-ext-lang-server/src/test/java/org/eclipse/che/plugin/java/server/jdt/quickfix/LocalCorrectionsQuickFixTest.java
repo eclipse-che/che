@@ -6319,8 +6319,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //    @Test
 //	public void testHidingVariable1() throws Exception {
 //		Hashtable hashtable= JavaCore.getOptions();
-//		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
-//		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
+//		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.FAILED);
+//		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.FAILED);
 //		JavaCore.setOptions(hashtable);
 //
 //		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -6344,8 +6344,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //    @Test
 //	public void testHidingVariable2() throws Exception {
 //		Hashtable hashtable= JavaCore.getOptions();
-//		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
-//		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
+//		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.FAILED);
+//		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.FAILED);
 //		JavaCore.setOptions(hashtable);
 //
 //		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -6368,8 +6368,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //    @Test
 //	public void testHidingVariable3() throws Exception {
 //		Hashtable hashtable= JavaCore.getOptions();
-//		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
-//		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
+//		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.FAILED);
+//		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.FAILED);
 //		JavaCore.setOptions(hashtable);
 //
 //		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -6393,8 +6393,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //
 //	public void testHidingVariable4() throws Exception {
 //		Hashtable hashtable= JavaCore.getOptions();
-//		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
-//		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
+//		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.FAILED);
+//		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.FAILED);
 //		JavaCore.setOptions(hashtable);
 //
 //		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -6419,8 +6419,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //
 //	public void testHidingVariable5() throws Exception {
 //		Hashtable hashtable= JavaCore.getOptions();
-//		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
-//		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
+//		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.FAILED);
+//		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.FAILED);
 //		JavaCore.setOptions(hashtable);
 //
 //		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -6446,8 +6446,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //
 //	public void testHidingVariable6() throws Exception {
 //		Hashtable hashtable= JavaCore.getOptions();
-//		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
-//		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
+//		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.FAILED);
+//		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.FAILED);
 //		JavaCore.setOptions(hashtable);
 //
 //		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

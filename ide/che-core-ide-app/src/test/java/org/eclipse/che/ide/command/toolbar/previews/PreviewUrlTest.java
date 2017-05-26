@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.command.toolbar.previews;
 
 import org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto;
-import org.eclipse.che.api.machine.shared.dto.ServerDto;
+import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.junit.Before;

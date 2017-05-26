@@ -10,29 +10,34 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.spi;
 
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+
 /**
  * @author gazarenkov
  */
-public final class RuntimeIdentity {
+public final class RuntimeIdentityImpl implements RuntimeIdentity {
 
     private final String workspaceId;
     private final String envName;
     private final String owner;
 
-    public RuntimeIdentity(String workspaceId, String envName, String owner) {
+    public RuntimeIdentityImpl(String workspaceId, String envName, String owner) {
         this.workspaceId = workspaceId;
         this.envName = envName;
         this.owner = owner;
     }
 
+    @Override
     public String getWorkspaceId() {
         return workspaceId;
     }
 
+    @Override
     public String getEnvName() {
         return envName;
     }
 
+    @Override
     public String getOwner() {
         return owner;
     }
@@ -44,14 +49,14 @@ public final class RuntimeIdentity {
 
     @Override
     public boolean equals(Object obj) {
-        if(! (obj instanceof RuntimeIdentity) )
+        if(! (obj instanceof RuntimeIdentityImpl) )
             return false;
-        RuntimeIdentity other = (RuntimeIdentity) obj;
+        RuntimeIdentityImpl other = (RuntimeIdentityImpl) obj;
         return workspaceId.equals(other.workspaceId) && envName.equals(other.envName);
     }
 
     @Override
     public String toString() {
-        return "RuntimeIdentity: { workspace: " + workspaceId + " environment: " + envName + " owner: " + owner +" }";
+        return "RuntimeIdentityImpl: { workspace: " + workspaceId + " environment: " + envName + " owner: " + owner +" }";
     }
 }

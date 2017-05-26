@@ -8,9 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared.dto.event;
+package org.eclipse.che.api.workspace.shared.dto.event;
 
-import org.eclipse.che.api.core.notification.EventOrigin;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -19,22 +19,16 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Eugene Voevodin
  * @author Alexander Garagatyi
  */
-@EventOrigin("machine")
+//@EventOrigin("machine")
 @DTO
 public interface MachineStatusEvent {
     enum EventType {
-        CREATING,
+        STARTING,
         RUNNING,
-        DESTROYING,
-        DESTROYED,
-        ERROR
+        STOPPED,
+        FAILED
     }
 
-    boolean isDev();
-
-    MachineStatusEvent withDev(boolean isDev);
-
-    void setDev(boolean isDev);
 
     EventType getEventType();
 
@@ -42,23 +36,22 @@ public interface MachineStatusEvent {
 
     MachineStatusEvent withEventType(EventType eventType);
 
-    String getMachineId();
-
-    void setMachineId(String machineId);
-
-    MachineStatusEvent withMachineId(String machineId);
-
     String getError();
 
     void setError(String error);
 
     MachineStatusEvent withError(String error);
 
-    String getWorkspaceId();
-
-    MachineStatusEvent withWorkspaceId(String workspaceId);
 
     String getMachineName();
 
     MachineStatusEvent withMachineName(String machineName);
+
+    /**
+     * @return runtime identity
+     */
+    RuntimeIdentityDto getIdentity();
+
+    MachineStatusEvent withIdentity(RuntimeIdentityDto identity);
+
 }

@@ -70,7 +70,7 @@ public final class ContributedProcessorDescriptor {
 //		IConfigurationElement[] children= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
 //		if (children.length > 1) {
 //			String id= fConfigurationElement.getAttribute(ID);
-//			return new StatusInfo(IStatus.ERROR, "Only one < enablement > element allowed. Disabling " + id); //$NON-NLS-1$
+//			return new StatusInfo(IStatus.FAILED, "Only one < enablement > element allowed. Disabling " + id); //$NON-NLS-1$
 //		}
 		return new StatusInfo(IStatus.OK, "Syntactically correct quick assist/fix processor"); //$NON-NLS-1$
 	}
@@ -118,7 +118,7 @@ public final class ContributedProcessorDescriptor {
 //					} else {
 //						String message= "Invalid extension to " + fConfigurationElement.getName() //$NON-NLS-1$
 //						+ ". Must extends '" + expectedType.getName() + "'." + fConfigurationElement.getContributor().getName(); //$NON-NLS-1$ //$NON-NLS-2$
-//						JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.ID_PLUGIN, message));
+//						JavaPlugin.log(new Status(IStatus.FAILED, JavaPlugin.ID_PLUGIN, message));
 //						fStatus= Boolean.FALSE;
 //						return null;
 //					}

@@ -2299,7 +2299,7 @@ public class Util {
 //            try {
 //                URI locationURI = file.getLocationURI();
 //                if (locationURI == null)
-//                    throw new CoreException(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, Messages
+//                    throw new CoreException(new Status(IStatus.FAILED, JavaCore.PLUGIN_ID, Messages
 //                            .bind(Messages.file_notFound, file.getFullPath().toString())));
 //                length = EFS.getStore(locationURI).fetchInfo().getLength();
 //            } catch (CoreException e) {

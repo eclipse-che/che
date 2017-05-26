@@ -164,7 +164,7 @@ public class Utils {
     }
 
     public static void appendProblem(StringBuffer problems, IProblem problem, char[] source, int problemCount) {
-        problems.append(problemCount + (problem.isError() ? ". ERROR" : ". WARNING"));
+        problems.append(problemCount + (problem.isError() ? ". FAILED" : ". WARNING"));
         problems.append(" in " + new String(problem.getOriginatingFileName()));
         if (source != null) {
             problems.append(((DefaultProblem)problem).errorReportSource(source));

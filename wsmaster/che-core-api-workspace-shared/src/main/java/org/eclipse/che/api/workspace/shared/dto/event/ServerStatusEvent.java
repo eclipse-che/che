@@ -8,30 +8,37 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared.dto;
+package org.eclipse.che.api.workspace.shared.dto.event;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Describes how to access to exposed ports for servers inside machine
- *
- * @author Alexander Garagatyi
+ * @author gazarenkov
  */
 @DTO
-public interface ServerDto extends Server {
+public interface ServerStatusEvent {
 
-    @Override
-    String getUrl();
-
-    void setUrl(String url);
-
-    ServerDto withUrl(String url);
-
-    @Override
     ServerStatus getStatus();
 
-    ServerDto withStatus(ServerStatus status);
+    ServerStatusEvent withStatus(ServerStatus status);
+
+
+    String getServerName();
+
+    ServerStatusEvent withServerName(String serverName);
+
+
+    String getMachineName();
+
+    ServerStatusEvent withMachineName(String machineName);
+
+    /**
+     * @return runtime identity
+     */
+    RuntimeIdentityDto getIdentity();
+
+    ServerStatusEvent withIdentity(RuntimeIdentityDto identity);
 
 }

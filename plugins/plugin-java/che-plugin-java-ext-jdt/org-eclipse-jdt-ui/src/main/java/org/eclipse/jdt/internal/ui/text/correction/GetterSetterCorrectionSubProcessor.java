@@ -145,7 +145,7 @@ public class GetterSetterCorrectionSubProcessor {
 //				if (fNoDialog) {
 //					IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 //					final RefactoringExecutionHelper helper =
-//							new RefactoringExecutionHelper(refactoring, RefactoringStatus.ERROR, RefactoringSaveHelper.SAVE_REFACTORING,
+//							new RefactoringExecutionHelper(refactoring, RefactoringStatus.FAILED, RefactoringSaveHelper.SAVE_REFACTORING,
 //														   JavaPlugin.getActiveWorkbenchShell(), window);
 //					if (Display.getCurrent() != null) {
 //						try {
