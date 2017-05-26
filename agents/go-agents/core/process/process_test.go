@@ -21,7 +21,6 @@ import (
 
 	"fmt"
 	"github.com/eclipse/che/agents/go-agents/core/process"
-	"github.com/eclipse/che/agents/go-agents/core/rpc"
 	"sync"
 )
 
@@ -74,8 +73,8 @@ func TestAddSubscriber(t *testing.T) {
 	pb.CmdLine("printf \"" + strings.Join(outputLines, "\n") + "\"")
 
 	// add a new subscriber
-	eventsChan := make(chan *rpc.Event)
-	pb.SubscribeDefault("test", eventsChan)
+	eventsChan := make(chan process.Event)
+	pb.SubscribeDefault("test", &channelEventConsumer{eventsChan})
 
 	// start a new process
 	if _, err := pb.Start(); err != nil {
@@ -87,9 +86,9 @@ func TestAddSubscriber(t *testing.T) {
 	var received []string
 	go func() {
 		event := <-eventsChan
-		for event.EventType != process.DiedEventType {
-			if event.EventType == process.StdoutEventType {
-				out := event.Body.(*process.OutputEventBody)
+		for event.Type() != process.DiedEventType {
+			if event.Type() == process.StdoutEventType {
+				out := event.(*process.OutputEvent)
 				received = append(received, out.Text)
 			}
 			event = <-eventsChan
@@ -117,9 +116,9 @@ func TestRestoreSubscriberForDeadProcess(t *testing.T) {
 	defer process.WipeLogs()
 
 	// Read all the data from channel
-	channel := make(chan *rpc.Event)
+	channel := make(chan process.Event)
 	done := make(chan bool)
-	var received []*rpc.Event
+	var received []process.Event
 	go func() {
 		statusReceived := false
 		timeoutReached := false
@@ -127,7 +126,7 @@ func TestRestoreSubscriberForDeadProcess(t *testing.T) {
 			select {
 			case v := <-channel:
 				received = append(received, v)
-				if v.EventType == process.DiedEventType {
+				if v.Type() == process.DiedEventType {
 					statusReceived = true
 				}
 			case <-time.After(time.Second):
@@ -138,9 +137,9 @@ func TestRestoreSubscriberForDeadProcess(t *testing.T) {
 	}()
 
 	_ = process.RestoreSubscriber(p.Pid, process.Subscriber{
-		ID:      "test",
-		Mask:    process.DefaultMask,
-		Channel: channel,
+		ID:       "test",
+		Mask:     process.DefaultMask,
+		Consumer: &channelEventConsumer{channel: channel},
 	}, beforeStart)
 
 	<-done
@@ -148,14 +147,14 @@ func TestRestoreSubscriberForDeadProcess(t *testing.T) {
 	if len(received) != 2 {
 		t.Fatalf("Expected to recieve 2 events but got %d", len(received))
 	}
-	e1Type := received[0].EventType
-	e1Text := received[0].Body.(*process.OutputEventBody).Text
-	if received[0].EventType != process.StdoutEventType || e1Text != "test" {
+	e1Type := received[0].Type()
+	e1Text := received[0].(*process.OutputEvent).Text
+	if received[0].Type() != process.StdoutEventType || e1Text != "test" {
 		t.Fatalf("Expected to receieve output event with text 'test', but got '%s' event with text %s",
 			e1Type,
 			e1Text)
 	}
-	if received[1].EventType != process.DiedEventType {
+	if received[1].Type() != process.DiedEventType {
 		t.Fatal("Expected to get 'process_died' event")
 	}
 }
@@ -228,11 +227,10 @@ func TestProcessExitCodeIs0IfFinishedOk(t *testing.T) {
 		t.Fatalf("Expected process exit code to be 0, but it is %d", p.ExitCode)
 	}
 
-	diedEvent := captor.events[len(captor.events)-1]
-	if body, ok := diedEvent.Body.(*process.DiedEventBody); !ok {
-		t.Fatalf("Expected last captured event to be process died event, but it is %s", diedEvent.EventType)
-	} else if body.ExitCode != 0 {
-		t.Fatalf("Expected process died event exit code to be 0, but it is %d", body.ExitCode)
+	if diedEvent, ok := captor.events[len(captor.events)-1].(*process.DiedEvent); !ok {
+		t.Fatalf("Expected last captured event to be process died event, but it is %s", diedEvent.Type())
+	} else if diedEvent.ExitCode != 0 {
+		t.Fatalf("Expected process died event exit code to be 0, but it is %d", diedEvent.ExitCode)
 	}
 }
 
@@ -245,15 +243,14 @@ func TestProcessExitCodeIsNot0IfFinishedNotOk(t *testing.T) {
 		t.Fatalf("Expected process exit code to be > 0, but it is %d", p.ExitCode)
 	}
 
-	diedEvent := captor.events[len(captor.events)-1]
-	if body, ok := diedEvent.Body.(*process.DiedEventBody); !ok {
-		t.Fatalf("Expected last captured event to be process died event, but it is %s", diedEvent.EventType)
-	} else if body.ExitCode <= 0 {
-		t.Fatalf("Expected process died event exit code to be > 0, but it is %d", body.ExitCode)
+	if diedEvent, ok := captor.events[len(captor.events)-1].(*process.DiedEvent); !ok {
+		t.Fatalf("Expected last captured event to be process died event, but it is %s", diedEvent.Type())
+	} else if diedEvent.ExitCode <= 0 {
+		t.Fatalf("Expected process died event exit code to be > 0, but it is %d", diedEvent.ExitCode)
 	}
 }
 
-func checkEventsOrder(t *testing.T, events []*rpc.Event, types ...string) {
+func checkEventsOrder(t *testing.T, events []process.Event, types ...string) {
 	if len(types) != len(events) {
 		t.Fatalf("Expected receive %d events while received %d", len(types), len(events))
 	}
@@ -262,9 +259,9 @@ func checkEventsOrder(t *testing.T, events []*rpc.Event, types ...string) {
 	}
 }
 
-func failIfEventTypeIsDifferent(t *testing.T, event *rpc.Event, expectedType string) {
-	if event.EventType != expectedType {
-		t.Fatalf("Expected event type to be '%s' but it is '%s'", expectedType, event.EventType)
+func failIfEventTypeIsDifferent(t *testing.T, event process.Event, expectedType string) {
+	if event.Type() != expectedType {
+		t.Fatalf("Expected event type to be '%s' but it is '%s'", expectedType, event.Type())
 	}
 }
 
@@ -287,7 +284,7 @@ func doStartAndWaitTestProcess(cmd string, logsDir string, eventsCaptor *eventsC
 	pb.CmdName("test")
 	pb.CmdType("test")
 	pb.CmdLine(cmd)
-	pb.SubscribeDefault("events-captor", eventsCaptor.eventsChan)
+	pb.SubscribeDefault("events-captor", eventsCaptor)
 
 	p, err := pb.Start()
 	if err != nil {
@@ -337,11 +334,11 @@ type eventsCaptor struct {
 	sync.Mutex
 
 	// Result events.
-	events []*rpc.Event
+	events []process.Event
 
 	// Events channel. Close of this channel considered as immediate interruption,
 	// to hold until execution completes use captor.wait(timeout) channel.
-	eventsChan chan *rpc.Event
+	eventsChan chan process.Event
 
 	// Channel used as internal approach to interrupt capturing.
 	interruptChan chan bool
@@ -354,22 +351,22 @@ type eventsCaptor struct {
 	deathEventType string
 }
 
-func (ec *eventsCaptor) addEvent(e *rpc.Event) {
+func (ec *eventsCaptor) addEvent(e process.Event) {
 	ec.Lock()
 	defer ec.Unlock()
 	ec.events = append(ec.events, e)
 }
 
-func (ec *eventsCaptor) capturedEvents() []*rpc.Event {
+func (ec *eventsCaptor) capturedEvents() []process.Event {
 	ec.Lock()
 	defer ec.Unlock()
-	cp := make([]*rpc.Event, len(ec.events))
+	cp := make([]process.Event, len(ec.events))
 	copy(cp, ec.events)
 	return cp
 }
 
 func (ec *eventsCaptor) capture() {
-	ec.eventsChan = make(chan *rpc.Event)
+	ec.eventsChan = make(chan process.Event)
 	ec.interruptChan = make(chan bool)
 	ec.done = make(chan bool)
 
@@ -379,7 +376,7 @@ func (ec *eventsCaptor) capture() {
 			case event, ok := <-ec.eventsChan:
 				if ok {
 					ec.addEvent(event)
-					if event.EventType == ec.deathEventType {
+					if event.Type() == ec.deathEventType {
 						// death event reached - capturing is done
 						ec.done <- true
 						return
@@ -404,3 +401,12 @@ func (ec *eventsCaptor) wait(timeout time.Duration) chan bool {
 	}()
 	return ec.done
 }
+
+func (ec *eventsCaptor) Accept(e process.Event) { ec.eventsChan <- e }
+
+// A consumer that redirects all the incoming events to the channel.
+type channelEventConsumer struct {
+	channel chan process.Event
+}
+
+func (c *channelEventConsumer) Accept(e process.Event) { c.channel <- e }

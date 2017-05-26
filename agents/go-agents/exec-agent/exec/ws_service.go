@@ -145,7 +145,7 @@ func startProcessReqHF(params interface{}, t *rpc.Transmitter) error {
 
 	pb := process.NewBuilder()
 	pb.Cmd(command)
-	pb.Subscribe(t.Channel.ID, parseTypes(startParams.EventTypes), t.Channel.Events)
+	pb.Subscribe(t.Channel.ID, parseTypes(startParams.EventTypes), &rpcProcessEventConsumer{t.Channel.Events})
 	pb.BeforeEventsHook(func(process process.MachineProcess) {
 		t.Send(process)
 	})
@@ -194,9 +194,9 @@ func subscribeReqHF(params interface{}, t *rpc.Transmitter) error {
 	}
 
 	subscriber := process.Subscriber{
-		ID:      t.Channel.ID,
-		Mask:    mask,
-		Channel: t.Channel.Events,
+		ID:       t.Channel.ID,
+		Mask:     mask,
+		Consumer: &rpcProcessEventConsumer{t.Channel.Events},
 	}
 	// Check whether subscriber should see previous logs or not
 	if subscribeParams.After == "" {
@@ -295,7 +295,7 @@ func getProcessLogsReqHF(params interface{}, t *rpc.Transmitter) error {
 
 	limit := DefaultLogsPerPageLimit
 	if getLogsParams.Limit != 0 {
-		if limit < 1 {
+		if getLogsParams.Limit < 1 {
 			return rpc.NewArgsError(errors.New("Required 'limit' to be > 0"))
 		}
 		limit = getLogsParams.Limit
@@ -303,7 +303,7 @@ func getProcessLogsReqHF(params interface{}, t *rpc.Transmitter) error {
 
 	skip := 0
 	if getLogsParams.Skip != 0 {
-		if skip < 0 {
+		if getLogsParams.Skip < 0 {
 			return rpc.NewArgsError(errors.New("Required 'skip' to be >= 0"))
 		}
 		skip = getLogsParams.Skip
