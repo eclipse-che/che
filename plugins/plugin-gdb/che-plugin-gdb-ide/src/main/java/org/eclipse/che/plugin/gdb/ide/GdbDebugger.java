@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -64,7 +65,8 @@ public class GdbDebugger extends AbstractDebugger {
                        DebuggerManager debuggerManager,
                        NotificationManager notificationManager,
                        BreakpointManager breakpointManager,
-                       AppContext appContext) {
+                       AppContext appContext,
+                       RequestHandlerManager requestHandlerManager) {
 
         super(service,
               transmitter,
@@ -76,7 +78,8 @@ public class GdbDebugger extends AbstractDebugger {
               debuggerManager,
               notificationManager,
               breakpointManager,
-              ID);
+              ID,
+              requestHandlerManager);
         this.locale = locale;
         this.appContext = appContext;
     }

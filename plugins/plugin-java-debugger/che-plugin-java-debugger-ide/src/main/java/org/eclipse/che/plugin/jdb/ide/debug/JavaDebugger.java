@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
@@ -60,7 +61,8 @@ public class JavaDebugger extends AbstractDebugger {
                         DebuggerManager debuggerManager,
                         NotificationManager notificationManager,
                         FileTypeRegistry fileTypeRegistry,
-                        BreakpointManager breakpointManager) {
+                        BreakpointManager breakpointManager,
+                        RequestHandlerManager requestHandlerManager) {
         super(service,
               transmitter,
               configurator,
@@ -71,7 +73,8 @@ public class JavaDebugger extends AbstractDebugger {
               debuggerManager,
               notificationManager,
               breakpointManager,
-              ID);
+              ID,
+              requestHandlerManager);
         this.fqnResolverFactory = fqnResolverFactory;
         this.fileTypeRegistry = fileTypeRegistry;
     }
