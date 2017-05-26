@@ -27,13 +27,13 @@ public interface ContainerNameGenerator {
      *         unique workspace id, see more (@link WorkspaceConfig#getId)
      * @param machineId
      *         unique machine id, see more {@link Machine#getId()}
-     * @param namespace
+     * @param ownerName
      *         name of the user who is docker container owner
      * @param machineName
      *         name of the workspace machine, see more {@link MachineConfig#getName()}
      */
     String generateContainerName(String workspaceId,
                                  String machineId,
-                                 String namespace,
+                                 String ownerName,
                                  String machineName);
 }
