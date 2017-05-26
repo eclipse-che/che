@@ -249,7 +249,7 @@ public class TestServiceClient {
                 sb.append(URL.encode(e.getKey())).append('=').append(URL.encode(e.getValue()));
             }
         }
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/che/testing/run/?projectPath=" + projectPath
+        String url = appContext.getDevAgentEndpoint() + "/che/testing/run/?projectPath=" + projectPath
                      + "&testFramework=" + testFramework + "&" + sb.toString();
         return asyncRequestFactory.createGetRequest(url).header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(TestResult.class));

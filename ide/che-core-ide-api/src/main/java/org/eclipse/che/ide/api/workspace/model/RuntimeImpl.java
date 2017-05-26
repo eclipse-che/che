@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,13 +23,14 @@ import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 
 /** Data object for {@link Runtime}. */
 public class RuntimeImpl implements Runtime {
 
     private final String                             activeEnv;
-    private       Map<String, ? extends MachineImpl> machines;
     private final String                             owner;
+    private       Map<String, ? extends MachineImpl> machines;
     private       List<Warning>                      warnings;
 
     public RuntimeImpl(String activeEnv,
@@ -59,11 +61,27 @@ public class RuntimeImpl implements Runtime {
 
     @Override
     public Map<String, ? extends MachineImpl> getMachines() {
+        if (machines == null) {
+            machines = new HashMap<>();
+        }
         return machines;
     }
 
+    // TODO: if IDE was initialized successfully then there's must be ws-agent running in the runtime.
+    // Consider to get ws-agent server without Optional
+    // AppContext.getWsAgentServer() ???
+    /** Returns ws-agent server. */
+    public Optional<ServerImpl> getWsAgentServer() {
+        return getMachines().values()
+                            .stream()
+                            .filter(m -> m.getServerByName(WSAGENT_REFERENCE).isPresent())
+                            .findAny()
+                            .map(devMachine -> devMachine.getServerByName(WSAGENT_REFERENCE))
+                            .orElse(null);
+    }
+
     public Optional<MachineImpl> getMachineByName(String name) {
-        return Optional.ofNullable(machines.get(name));
+        return Optional.ofNullable(getMachines().get(name));
     }
 
     @Override

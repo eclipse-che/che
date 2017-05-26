@@ -39,7 +39,6 @@ import org.eclipse.che.ide.api.user.Credentials;
 import org.eclipse.che.ide.api.workspace.model.ProjectConfigImpl;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.util.ExceptionUtils;
 import org.eclipse.che.ide.util.StringUtils;
 import org.eclipse.che.ide.websocket.MessageBus;
@@ -95,7 +94,6 @@ public class FactoryProjectImporter extends AbstractImporter {
                                   AskCredentialsDialog askCredentialsDialog,
                                   CoreLocalizationConstant locale,
                                   ImportProjectNotificationSubscriberFactory subscriberFactory,
-                                  @RestContext String restContext,
                                   DialogFactory dialogFactory,
                                   OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry,
                                   MessageBusProvider messageBusProvider,
@@ -104,7 +102,7 @@ public class FactoryProjectImporter extends AbstractImporter {
         this.notificationManager = notificationManager;
         this.askCredentialsDialog = askCredentialsDialog;
         this.locale = locale;
-        this.restContext = restContext;
+        this.restContext = appContext.getMasterEndpoint();
         this.dialogFactory = dialogFactory;
         this.oAuth2AuthenticatorRegistry = oAuth2AuthenticatorRegistry;
         this.messageBusProvider = messageBusProvider;

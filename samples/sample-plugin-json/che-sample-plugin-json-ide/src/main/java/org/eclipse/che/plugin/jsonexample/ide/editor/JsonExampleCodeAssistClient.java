@@ -52,7 +52,7 @@ public class JsonExampleCodeAssistClient {
     }
 
     public void computeProposals(AsyncRequestCallback<List<String>> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/json-example-completions/";
+        String url = appContext.getDevAgentEndpoint() + "/json-example-completions/";
         asyncRequestFactory
                 .createGetRequest(url, false)
                 .loader(loaderFactory.newLoader("Loading example completions..."))

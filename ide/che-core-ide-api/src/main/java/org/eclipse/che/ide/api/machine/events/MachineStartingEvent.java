@@ -15,13 +15,13 @@ import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
-public class MachineCreatingEvent extends GwtEvent<MachineCreatingEvent.Handler> {
+public class MachineStartingEvent extends GwtEvent<MachineStartingEvent.Handler> {
 
-    public static final Type<MachineCreatingEvent.Handler> TYPE = new Type<>();
+    public static final Type<MachineStartingEvent.Handler> TYPE = new Type<>();
 
     private final MachineImpl machine;
 
-    public MachineCreatingEvent(MachineImpl workspace) {
+    public MachineStartingEvent(MachineImpl workspace) {
         this.machine = workspace;
     }
 
@@ -36,10 +36,10 @@ public class MachineCreatingEvent extends GwtEvent<MachineCreatingEvent.Handler>
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onMachineCreating(this);
+        handler.onMachineStarting(this);
     }
 
     public interface Handler extends EventHandler {
-        void onMachineCreating(MachineCreatingEvent event);
+        void onMachineStarting(MachineStartingEvent event);
     }
 }

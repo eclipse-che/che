@@ -12,6 +12,7 @@ package org.eclipse.che.ide.api.machine;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.machine.shared.Constants;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
@@ -29,6 +30,7 @@ public class DevMachine extends MachineEntityImpl {
     }
 
     // FIXME: spi
+    @Deprecated
     public String getWsAgentWebSocketUrl() {
         return getWsAgentBaseUrl().replaceFirst("http", "ws") + "/ws";
 //        for (Link link : machineLinks) {
@@ -45,7 +47,9 @@ public class DevMachine extends MachineEntityImpl {
 
     /**
      * @return return base URL to the ws agent REST services. URL will be always without trailing slash
+     * @deprecated use {@link AppContext#getDevAgentEndpoint()}
      */
+    @Deprecated
     public String getWsAgentBaseUrl() {
         MachineServer server = getServer(Constants.WSAGENT_REFERENCE);
         if (server != null) {

@@ -53,15 +53,18 @@ public class ActiveRuntime {
         }
     }
 
+    @Deprecated
     public DevMachine getDevMachine() {
         return devMachine;
     }
 
+    @Deprecated
     /** @deprecated use {@link RuntimeImpl#getMachines()} */
     public List<MachineEntity> getMachines() {
         return new ArrayList<>(machines.values());
     }
 
+    @Deprecated
     /** @deprecated use {@link org.eclipse.che.ide.api.workspace.model.RuntimeImpl#getMachineByName(String)} */
     public Optional<MachineEntity> getMachineByName(String name) {
         return Optional.ofNullable(machines.get(name));

@@ -221,18 +221,17 @@ public class CommandManagerImpl implements CommandManager {
                                               @Nullable String commandLine,
                                               Map<String, String> attributes,
                                               ApplicableContext context) {
-        final Optional<CommandType> commandType = commandTypeRegistry.getCommandTypeById(typeId);
-
-        if (!commandType.isPresent()) {
-            return promiseProvider.reject(new Exception("Unknown command type: '" + typeId + "'"));
-        }
 
         final Map<String, String> attr = new HashMap<>(attributes);
-        attr.put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, commandType.get().getPreviewUrlTemplate());
         attr.put(COMMAND_GOAL_ATTRIBUTE_NAME, goalId);
 
+        final Optional<CommandType> commandType = commandTypeRegistry.getCommandTypeById(typeId);
+        commandType.ifPresent(type -> attr.put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, commandType.get().getPreviewUrlTemplate()));
+
+        final String commandLineTemplate = commandType.map(CommandType::getCommandLineTemplate).orElse("");
+
         return createCommand(new CommandImpl(commandNameGenerator.generate(typeId, name),
-                                             commandLine != null ? commandLine : commandType.get().getCommandLineTemplate(),
+                                             commandLine != null ? commandLine : commandLineTemplate,
                                              typeId,
                                              attr,
                                              context));
@@ -254,11 +253,6 @@ public class CommandManagerImpl implements CommandManager {
         final ApplicableContext context = command.getApplicableContext();
         if (!context.isWorkspaceApplicable() && context.getApplicableProjects().isEmpty()) {
             return promiseProvider.reject(new Exception("Command has to be applicable to the workspace or at least one project"));
-        }
-
-        final Optional<CommandType> commandType = commandTypeRegistry.getCommandTypeById(command.getType());
-        if (!commandType.isPresent()) {
-            return promiseProvider.reject(new Exception("Unknown command type: '" + command.getType() + "'"));
         }
 
         final CommandImpl newCommand = new CommandImpl(command);

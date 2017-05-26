@@ -105,7 +105,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public Promise<ExtendedCompletionList> completion(TextDocumentPositionParams position) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/completion";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/completion";
         Unmarshallable<ExtendedCompletionList> unmarshaller = unmarshallerFactory.newUnmarshaller(ExtendedCompletionList.class);
         return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)position).toJson()).send(unmarshaller);
@@ -118,7 +118,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public Promise<ExtendedCompletionItem> resolveCompletionItem(CompletionItem completionItem) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/completionItem/resolve";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/completionItem/resolve";
         Unmarshallable<ExtendedCompletionItem> unmarshaller = unmarshallerFactory.newUnmarshaller(ExtendedCompletionItem.class);
         return asyncRequestFactory.createPostRequest(requestUrl, completionItem)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -132,7 +132,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public Promise<List<SymbolInformation>> documentSymbol(DocumentSymbolParams params) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/documentSymbol";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/documentSymbol";
         Unmarshallable<List<SymbolInformation>> unmarshaller = unmarshallerFactory.newListUnmarshaller(SymbolInformation.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -147,7 +147,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public Promise<List<Location>> references(ReferenceParams params) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/references";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/references";
         Unmarshallable<List<Location>> unmarshaller = unmarshallerFactory.newListUnmarshaller(Location.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -162,7 +162,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public Promise<List<Location>> definition(TextDocumentPositionParams params) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/definition";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/definition";
         Unmarshallable<List<Location>> unmarshaller = unmarshallerFactory.newListUnmarshaller(Location.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -177,7 +177,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public Promise<Hover> hover(TextDocumentPositionParams params) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/hover";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/hover";
         Unmarshallable<Hover> unmarshaller = unmarshallerFactory.newUnmarshaller(Hover.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -192,7 +192,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public Promise<SignatureHelp> signatureHelp(TextDocumentPositionParams params) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/signatureHelp";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/signatureHelp";
         Unmarshallable<SignatureHelp> unmarshaller = unmarshallerFactory.newUnmarshaller(SignatureHelp.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -207,7 +207,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public Promise<List<TextEdit>> formatting(DocumentFormattingParams params) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/formatting";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/formatting";
         Unmarshallable<List<TextEdit>> unmarshaller = unmarshallerFactory.newListUnmarshaller(TextEdit.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -222,7 +222,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public Promise<List<TextEdit>> rangeFormatting(DocumentRangeFormattingParams params) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/rangeFormatting";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/rangeFormatting";
         Unmarshallable<List<TextEdit>> unmarshaller = unmarshallerFactory.newListUnmarshaller(TextEdit.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -237,7 +237,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public Promise<List<TextEdit>> onTypeFormatting(DocumentOnTypeFormattingParams params) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/onTypeFormatting";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/onTypeFormatting";
         Unmarshallable<List<TextEdit>> unmarshaller = unmarshallerFactory.newListUnmarshaller(TextEdit.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -252,7 +252,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public void didChange(DidChangeTextDocumentParams change) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didChange";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/didChange";
         asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)change).toJson()).send();
     }
@@ -264,7 +264,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public void didOpen(DidOpenTextDocumentParams openEvent) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didOpen";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/didOpen";
         asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)openEvent).toJson()).send();
     }
@@ -276,7 +276,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public void didClose(DidCloseTextDocumentParams closeEvent) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didClose";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/didClose";
         asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)closeEvent).toJson()).send();
     }
@@ -288,7 +288,7 @@ public class TextDocumentServiceClient {
      * @return
      */
     public void didSave(DidSaveTextDocumentParams saveEvent) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didSave";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/didSave";
         asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)saveEvent).toJson()).send();
     }
@@ -302,7 +302,7 @@ public class TextDocumentServiceClient {
      * @return a {@link Promise} of an array of {@link DocumentHighlightDTO} which will be computed by the language server.
      */
     public Promise<DocumentHighlight> documentHighlight(TextDocumentPositionParams position) {
-        final String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/documentHighlight";
+        final String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/documentHighlight";
         final Unmarshallable<DocumentHighlight> unmarshaller = unmarshallerFactory.newUnmarshaller(DocumentHighlight.class);
         return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)position).toJson()).send(unmarshaller);
@@ -311,7 +311,7 @@ public class TextDocumentServiceClient {
 
 
     public Promise<List<Command>> codeAction(CodeActionParams params) {
-        final String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/codeAction";
+        final String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/textDocument/codeAction";
         final Unmarshallable<List<Command>> unmarshaller = unmarshallerFactory.newListUnmarshaller(Command.class);
         return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)params).toJson()).send(unmarshaller);

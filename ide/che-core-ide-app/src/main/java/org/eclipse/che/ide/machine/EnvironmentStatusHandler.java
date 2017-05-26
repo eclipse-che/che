@@ -15,13 +15,13 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
+import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.MachineEntity;
-import org.eclipse.che.ide.api.machine.events.MachineCreatingEvent;
 import org.eclipse.che.ide.api.machine.events.MachineRunningEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStartingEvent;
 import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
@@ -65,7 +65,7 @@ public class EnvironmentStatusHandler {
     }
 
     public void handleEnvironmentStatusChanged(MachineStatusEvent event) {
-        final String machineId = event.getMachineName();
+        final String machineName = event.getMachineName();
         final String workspaceId = event.getIdentity().getWorkspaceId();
 
         workspaceServiceClient.getWorkspace(workspaceId).then(workspace -> {
@@ -78,10 +78,10 @@ public class EnvironmentStatusHandler {
 
             switch (event.getEventType()) {
                 case STARTING:
-                    handleMachineCreating(machineId);
+                    handleMachineStarting(machineName);
                     break;
                 case RUNNING:
-                    handleMachineRunning(machineId);
+                    handleMachineRunning(machineName);
                     break;
                 case FAILED:
                     handleMachineError(event);
@@ -90,7 +90,7 @@ public class EnvironmentStatusHandler {
         });
     }
 
-    private void handleMachineCreating(String machineName) {
+    private void handleMachineStarting(String machineName) {
         final WorkspaceImpl workspace = appContext.getWorkspace();
         final RuntimeImpl runtime = workspace.getRuntime();
 
@@ -102,7 +102,7 @@ public class EnvironmentStatusHandler {
 
         if (machine.isPresent()) {
             subscribeToMachineOutput(machineName);
-            eventBus.fireEvent(new MachineCreatingEvent(machine.get()));
+            eventBus.fireEvent(new MachineStartingEvent(machine.get()));
         }
 
 

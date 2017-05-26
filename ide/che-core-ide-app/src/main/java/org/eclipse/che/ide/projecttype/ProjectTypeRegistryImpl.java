@@ -85,7 +85,7 @@ public class ProjectTypeRegistryImpl implements ProjectTypeRegistry {
     }
 
     private Promise<List<ProjectTypeDto>> fetchProjectTypes() {
-        final String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/project-type";
+        final String url = appContext.getDevAgentEndpoint() + "/project-type";
 
         return asyncRequestFactory.createGetRequest(url)
                                   .header(ACCEPT, APPLICATION_JSON)

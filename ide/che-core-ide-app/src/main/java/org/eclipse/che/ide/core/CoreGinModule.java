@@ -65,8 +65,6 @@ import org.eclipse.che.ide.preferences.PreferencesApiModule;
 import org.eclipse.che.ide.processes.ProcessesGinModule;
 import org.eclipse.che.ide.project.ProjectApiModule;
 import org.eclipse.che.ide.resources.ResourceApiModule;
-import org.eclipse.che.ide.rest.RestContext;
-import org.eclipse.che.ide.rest.RestContextProvider;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
 import org.eclipse.che.ide.selection.SelectionAgentImpl;
 import org.eclipse.che.ide.statepersistance.PersistenceApiModule;
@@ -133,9 +131,6 @@ public class CoreGinModule extends AbstractGinModule {
         GinMapBinder.newMapBinder(binder(), String.class, FqnProvider.class);
 
         bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
-
-        //TODO: don't remove binding until not fix Codenvy and other packaging  
-        bind(String.class).annotatedWith(RestContext.class).toProvider(RestContextProvider.class).in(Singleton.class);
 
         install(new GinFactoryModuleBuilder().build(LoaderFactory.class));
         install(new GinFactoryModuleBuilder().build(PopupLoaderFactory.class));

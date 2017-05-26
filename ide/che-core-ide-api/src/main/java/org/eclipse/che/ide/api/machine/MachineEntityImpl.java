@@ -81,9 +81,9 @@ public class MachineEntityImpl implements MachineEntity {
     @Override
     public String getTerminalUrl() {
         // FIXME: spi
-        final MachineServer terminalServer = getServer(Constants.TERMINAL_REFERENCE);
-        if (terminalServer != null) {
-            return terminalServer.getUrl().replaceFirst("http", "ws") + "/pty";
+        final MachineServer server = getServer(Constants.TERMINAL_REFERENCE);
+        if (server != null) {
+            return server.getUrl().replaceFirst("http", "ws") + "/pty";
         }
 
         //should not be
@@ -96,9 +96,9 @@ public class MachineEntityImpl implements MachineEntity {
     @Override
     public String getExecAgentUrl() {
         // FIXME: spi
-        final MachineServer terminalServer = getServer(Constants.EXEC_AGENT_REFERENCE);
-        if (terminalServer != null) {
-            return terminalServer.getUrl().replaceFirst("http", "ws") + "/connect";
+        final MachineServer server = getServer(Constants.EXEC_AGENT_REFERENCE);
+        if (server != null) {
+            return server.getUrl().replaceFirst("http", "ws") + "/connect";
         }
 
         //should not be

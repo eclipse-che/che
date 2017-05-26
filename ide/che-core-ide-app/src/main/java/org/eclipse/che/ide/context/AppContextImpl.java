@@ -87,15 +87,12 @@ public class AppContextImpl implements AppContext,
 
     private final List<Project>  rootProjects      = newArrayList();
     private final List<Resource> selectedResources = newArrayList();
-
-    private CurrentUser currentUser;
-
     /**
      * List of actions with parameters which comes from startup URL.
      * Can be processed after IDE initialization as usual after starting ws-agent.
      */
     private final List<StartUpAction> startAppActions;
-
+    private CurrentUser currentUser;
     private WorkspaceImpl       workspace;
     private FactoryImpl         factory;
     private Path                projectsRoot;
@@ -210,11 +207,6 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public void initResourceManager() {
-        if (runtime.getDevMachine() == null) {
-            //should never happened, but anyway
-            Log.error(AppContextImpl.class, "Dev machine is not initialized");
-        }
-
         if (!rootProjects.isEmpty()) {
             for (Project project : rootProjects) {
                 eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
@@ -222,7 +214,7 @@ public class AppContextImpl implements AppContext,
             rootProjects.clear();
         }
 
-        resourceManager = resourceManagerFactory.newResourceManager(runtime.getDevMachine());
+        resourceManager = resourceManagerFactory.newResourceManager();
         resourceManager.getWorkspaceProjects().then(projects -> {
             rootProjects.clear();
             addAll(rootProjects, projects);
@@ -416,12 +408,6 @@ public class AppContextImpl implements AppContext,
             rootProjects.clear();
             resourceManager = null;
         });
-
-        clearRuntime();
-    }
-
-    private void clearRuntime() {
-        runtime = null;
     }
 
     @Override
@@ -437,7 +423,7 @@ public class AppContextImpl implements AppContext,
     public String getDevAgentEndpoint() {
         String fromUrl = queryParameters.getByName("agent");
         if (fromUrl == null || fromUrl.isEmpty())
-            return runtime.getDevMachine().getWsAgentBaseUrl();
+            return getDevMachine().getWsAgentBaseUrl();
         else
             return fromUrl;
     }

@@ -76,7 +76,7 @@ public class GitHubClientServiceImpl implements GitHubClientService {
 
 
     private String baseUrl() {
-        return appContext.getDevMachine().getWsAgentBaseUrl() + "/github";
+        return appContext.getDevAgentEndpoint() + "/github";
     }
 
     @Override

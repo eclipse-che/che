@@ -43,7 +43,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.ActivateProcessOutputEvent;
-import org.eclipse.che.ide.api.machine.events.MachineCreatingEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStartingEvent;
 import org.eclipse.che.ide.api.machine.events.MachineRunningEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
@@ -108,7 +108,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                                       OutputConsole.ActionDelegate,
                                                                       WorkspaceStartedEvent.Handler,
                                                                       WorkspaceStoppedEvent.Handler,
-                                                                      MachineCreatingEvent.Handler,
+                                                                      MachineStartingEvent.Handler,
                                                                       MachineRunningEvent.Handler,
                                                                       WsAgentStateHandler,
                                                                       EnvironmentOutputEvent.Handler,
@@ -191,7 +191,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
-        eventBus.addHandler(MachineCreatingEvent.TYPE, this);
+        eventBus.addHandler(MachineStartingEvent.TYPE, this);
         eventBus.addHandler(MachineRunningEvent.TYPE, this);
         eventBus.addHandler(EnvironmentOutputEvent.TYPE, this);
         eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
@@ -277,7 +277,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     @Override
-    public void onMachineCreating(MachineCreatingEvent event) {
+    public void onMachineStarting(MachineStartingEvent event) {
         provideMachineNode(event.getMachine(), false);
     }
 

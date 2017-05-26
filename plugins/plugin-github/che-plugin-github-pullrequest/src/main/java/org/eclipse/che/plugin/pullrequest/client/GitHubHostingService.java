@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.plugin.github.ide.GitHubClientService;
 import org.eclipse.che.plugin.github.shared.GitHubPullRequest;
 import org.eclipse.che.plugin.github.shared.GitHubPullRequestCreationInput;
@@ -79,8 +78,7 @@ public class GitHubHostingService implements VcsHostingService {
     private final String                  baseUrl;
 
     @Inject
-    public GitHubHostingService(@NotNull @RestContext final String baseUrl,
-                                @NotNull final AppContext appContext,
+    public GitHubHostingService(@NotNull final AppContext appContext,
                                 @NotNull final DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                 @NotNull final DtoFactory dtoFactory,
                                 @NotNull final GitHubClientService gitHubClientService,
@@ -90,7 +88,7 @@ public class GitHubHostingService implements VcsHostingService {
         this.dtoFactory = dtoFactory;
         this.gitHubClientService = gitHubClientService;
         this.templates = templates;
-        this.baseUrl = baseUrl;
+        this.baseUrl = appContext.getMasterEndpoint();
     }
 
     @Override

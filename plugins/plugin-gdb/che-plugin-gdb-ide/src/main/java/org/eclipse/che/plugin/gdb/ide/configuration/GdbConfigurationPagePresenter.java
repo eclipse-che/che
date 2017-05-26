@@ -14,11 +14,11 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
 
 import java.util.ArrayList;
@@ -97,15 +97,15 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
         view.setPortEnableState(!devHost);
         view.setHostEnableState(!devHost);
 
-        List<MachineEntity> machines = getMachines();
+        List<MachineImpl> machines = getMachines();
         if (!machines.isEmpty()) {
             setHosts(machines);
         }
     }
 
-    private void setHosts(List<MachineEntity> machines) {
+    private void setHosts(List<MachineImpl> machines) {
         Map<String, String> hosts = new HashMap<>();
-        for (MachineEntity machine : machines) {
+        for (MachineImpl machine : machines) {
             String host = machine.getProperties().get("network.ipAddress");
             if (host == null) {
                 continue;
@@ -118,13 +118,13 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
         view.setHostsList(hosts);
     }
 
-    private List<MachineEntity> getMachines() {
-        Workspace workspace = appContext.getWorkspace();
+    private List<MachineImpl> getMachines() {
+        WorkspaceImpl workspace = appContext.getWorkspace();
         if (workspace == null || workspace.getRuntime() == null) {
             return emptyList();
         }
 
-        return new ArrayList<>(appContext.getActiveRuntime().getMachines());
+        return new ArrayList<>(workspace.getRuntime().getMachines().values());
     }
 
     @Override

@@ -48,7 +48,7 @@ public class ClasspathUpdaterServiceClientImpl implements ClasspathUpdaterServic
 
     @Override
     public Promise<Void> setRawClasspath(String projectPath, List<ClasspathEntryDto> entries) {
-        final String url = appContext.getDevMachine().getWsAgentBaseUrl() + pathToService + "update?projectpath=" + projectPath;
+        final String url = appContext.getDevAgentEndpoint() + pathToService + "update?projectpath=" + projectPath;
         return asyncRequestFactory.createPostRequest(url, entries)
                                   .loader(loader)
                                   .send();

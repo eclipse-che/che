@@ -508,7 +508,7 @@ public class ProjectServiceClient {
      * @since 4.4.0
      */
     private String getBaseUrl() {
-        return appContext.getDevMachine().getWsAgentBaseUrl() + PROJECT;
+        return appContext.getDevAgentEndpoint() + PROJECT;
     }
 
     /**

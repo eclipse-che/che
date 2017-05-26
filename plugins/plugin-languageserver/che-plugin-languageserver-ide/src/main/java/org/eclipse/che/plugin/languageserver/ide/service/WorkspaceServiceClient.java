@@ -54,7 +54,7 @@ public class WorkspaceServiceClient {
      * @return
      */
     public Promise<List<SymbolInformation>> symbol(WorkspaceSymbolParams params) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/workspace/symbol";
+        String requestUrl = appContext.getDevAgentEndpoint() + "/languageserver/workspace/symbol";
         Unmarshallable<List<SymbolInformation>> unmarshaller = unmarshallerFactory.newListUnmarshaller(SymbolInformation.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
