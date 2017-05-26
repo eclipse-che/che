@@ -21,8 +21,6 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
-
-	"github.com/eclipse/che/agents/go-agents/core/rpc"
 )
 
 const (
@@ -30,10 +28,10 @@ const (
 	StdoutBit = 1 << iota
 	// StderrBit is set when subscriber is interested in stdout logs
 	StderrBit = 1 << iota
-	// ProcessStatusBit is set when subscriber is interested in a process events
-	ProcessStatusBit = 1 << iota
+	// StatusBit is set when subscriber is interested in a process events
+	StatusBit = 1 << iota
 	// DefaultMask is set by default and identifies receiving of both logs and events of a process
-	DefaultMask = StderrBit | StdoutBit | ProcessStatusBit
+	DefaultMask = StderrBit | StdoutBit | StatusBit
 
 	// DefaultShellInterpreter is default shell that executes commands
 	// unless another one is configured
@@ -150,11 +148,11 @@ type MachineProcess struct {
 	beforeEventsHook func(process MachineProcess)
 }
 
-// Subscriber receives process logs.
+// Subscriber receives process events.
 type Subscriber struct {
-	ID      string
-	Mask    uint64
-	Channel chan *rpc.Event
+	ID       string
+	Mask     uint64
+	Consumer EventConsumer
 }
 
 // NoProcessError is returned when requested process doesn't exist.
@@ -243,7 +241,7 @@ func Start(newProcess MachineProcess) (MachineProcess, error) {
 	// before pumping is started publish process_started event
 	startPublished := make(chan bool)
 	go func() {
-		internalProcess.notifySubs(newStartedEvent(newProcess), ProcessStatusBit)
+		internalProcess.notifySubs(newStartedEvent(newProcess), StatusBit)
 		startPublished <- true
 	}()
 
@@ -419,16 +417,16 @@ func RestoreSubscriber(pid uint64, subscriber Subscriber, after time.Time) error
 		message := logs[i]
 		if message.Time.After(after) {
 			if message.Kind == StdoutKind {
-				subscriber.Channel <- newStdoutEvent(p.Pid, message.Text, message.Time)
+				subscriber.Consumer.Accept(newStdoutEvent(p.Pid, message.Text, message.Time))
 			} else {
-				subscriber.Channel <- newStderrEvent(p.Pid, message.Text, message.Time)
+				subscriber.Consumer.Accept(newStderrEvent(p.Pid, message.Text, message.Time))
 			}
 		}
 	}
 
 	// Publish died event after logs are published and process is dead
 	if !p.Alive {
-		subscriber.Channel <- newDiedEvent(*p)
+		subscriber.Consumer.Accept(newDiedEvent(*p))
 	}
 
 	return nil
@@ -489,19 +487,19 @@ func (process *MachineProcess) Close() {
 	process.ExitCode = exitCode
 	process.mutex.Unlock()
 
-	process.notifySubs(newDiedEvent(*process), ProcessStatusBit)
+	process.notifySubs(newDiedEvent(*process), StatusBit)
 
 	process.mutex.Lock()
 	process.subs = nil
 	process.mutex.Unlock()
 }
 
-func (process *MachineProcess) notifySubs(event *rpc.Event, typeBit uint64) {
+func (process *MachineProcess) notifySubs(event Event, typeBit uint64) {
 	process.mutex.RLock()
 	subs := process.subs
 	for _, subscriber := range subs {
 		// Check whether subscriber needs such kind of event and then try to notify it
-		if subscriber.Mask&typeBit == typeBit && !tryWrite(subscriber.Channel, event) {
+		if subscriber.Mask&typeBit == typeBit && !tryAccept(subscriber.Consumer, event) {
 			// Impossible to write to the channel, remove the channel from the subscribers list.
 			// It may happen when writing to the closed channel
 			defer RemoveSubscriber(process.Pid, subscriber.ID)
@@ -512,13 +510,13 @@ func (process *MachineProcess) notifySubs(event *rpc.Event, typeBit uint64) {
 
 // Writes to a channel and returns true if write is successful,
 // otherwise if write to the channel failed e.g. channel is closed then returns false.
-func tryWrite(eventsChan chan *rpc.Event, event *rpc.Event) (ok bool) {
+func tryAccept(consumer EventConsumer, event Event) (ok bool) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok = false
 		}
 	}()
-	eventsChan <- event
+	consumer.Accept(event)
 	return true
 }
 
