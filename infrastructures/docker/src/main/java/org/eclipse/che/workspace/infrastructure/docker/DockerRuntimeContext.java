@@ -79,7 +79,7 @@ public class DockerRuntimeContext extends RuntimeContext {
     private final SnapshotDao          snapshotDao;
     private final DockerRegistryClient dockerRegistryClient;
 
-    @Inject
+    @Inject                                                                                                                         
     public DockerRuntimeContext(@Assisted DockerRuntimeInfrastructure infrastructure,
                                 @Assisted RuntimeIdentity identity,
                                 @Assisted Environment environment,
@@ -218,44 +218,7 @@ public class DockerRuntimeContext extends RuntimeContext {
 
     private void destroyRuntime(Map<String, String> stopOptions) throws InfrastructureException {
         if (stopOptions != null && "true".equals(stopOptions.get("create-snapshot"))) {
-            List<SnapshotImpl> newSnapshots = new ArrayList<>();
-            for (Map.Entry<String, DockerMachine> dockerMachineEntry : startSynchronizer.removeMachines().entrySet()) {
-                try {
-                    SnapshotImpl snapshot = SnapshotImpl.builder()
-                                                        .generateId()
-                                                        .setType("docker") //TODO: do we need that at all?
-                                                        .setWorkspaceId(identity.getWorkspaceId())
-                                                        .setDescription(identity.getEnvName())
-                                                        .setDev(dockerMachineEntry.getKey().equals(devMachineName))
-                                                        .setEnvName(identity.getEnvName())
-                                                        .setMachineName(dockerMachineEntry.getKey())
-                                                        .useCurrentCreationDate()
-                                                        .build();
-                    DockerMachineSource machineSource = dockerMachineEntry.getValue().saveToSnapshot();
-                    snapshot.setMachineSource(new MachineSourceImpl(machineSource));
-                    newSnapshots.add(snapshot);
-                } catch (SnapshotException e) {
-                    LOG.error(format("Error occurs on snapshotting of docker machine '%s' in workspace '%s'. Container '%s'",
-                                     dockerMachineEntry.getKey(),
-                                     getIdentity().getWorkspaceId(),
-                                     dockerMachineEntry.getValue().getContainer()),
-                              e);
-                    throw new InfrastructureException(e.getLocalizedMessage(), e);
-                }
-            }
-            try {
-                List<SnapshotImpl> removed = snapshotDao.replaceSnapshots(identity.getWorkspaceId(),
-                                                                          identity.getEnvName(),
-                                                                          newSnapshots);
-                if (!removed.isEmpty()) {
-                    LOG.info("Removing old snapshots binaries, workspace id '{}', snapshots to remove '{}'", identity.getWorkspaceId(),
-                             removed.size());
-                    removeBinaries(removed);
-                }
-            } catch (SnapshotException e) {
-                LOG.error(format("Couldn't remove existing snapshots metadata for workspace '%s'", identity.getWorkspaceId()), e);
-                removeBinaries(newSnapshots);
-            }
+            snapshotMachines(startSynchronizer.removeMachines());
         } else {
             for (Map.Entry<String, DockerMachine> dockerMachineEntry : startSynchronizer.removeMachines().entrySet()) {
                 try {
@@ -304,13 +267,58 @@ public class DockerRuntimeContext extends RuntimeContext {
      * @param snapshots
      *         the list of snapshots to remove binaries
      */
-    public void removeBinaries(Collection<? extends SnapshotImpl> snapshots) {
+    private void removeBinaries(Collection<? extends SnapshotImpl> snapshots) {
         for (SnapshotImpl snapshot : snapshots) {
             try {
                 dockerRegistryClient.removeInstanceSnapshot(snapshot.getMachineSource());
             } catch (SnapshotException x) {
                 LOG.error(format("Couldn't remove snapshot '%s', workspace id '%s'", snapshot.getId(), snapshot.getWorkspaceId()), x);
             }
+        }
+    }
+
+    /**
+     * Prepare snapshots of all active machines.
+     * @param machines
+     *         the active machines map
+     */
+    private void snapshotMachines(Map<String, DockerMachine> machines) {
+        List<SnapshotImpl> newSnapshots = new ArrayList<>();
+        for (Map.Entry<String, DockerMachine> dockerMachineEntry : machines.entrySet()) {
+            SnapshotImpl snapshot = SnapshotImpl.builder()
+                                                .generateId()
+                                                .setType("docker") //TODO: do we need that at all?
+                                                .setWorkspaceId(identity.getWorkspaceId())
+                                                .setDescription(identity.getEnvName())
+                                                .setDev(dockerMachineEntry.getKey().equals(devMachineName))
+                                                .setEnvName(identity.getEnvName())
+                                                .setMachineName(dockerMachineEntry.getKey())
+                                                .useCurrentCreationDate()
+                                                .build();
+            try {
+                DockerMachineSource machineSource = dockerMachineEntry.getValue().saveToSnapshot();
+                snapshot.setMachineSource(new MachineSourceImpl(machineSource));
+                newSnapshots.add(snapshot);
+            } catch (SnapshotException e) {
+                LOG.error(format("Error occurs on snapshotting of docker machine '%s' in workspace '%s'. Container '%s'",
+                                 dockerMachineEntry.getKey(),
+                                 getIdentity().getWorkspaceId(),
+                                 dockerMachineEntry.getValue().getContainer()),
+                          e);
+            }
+        }
+        try {
+            List<SnapshotImpl> removed = snapshotDao.replaceSnapshots(identity.getWorkspaceId(),
+                                                                      identity.getEnvName(),
+                                                                      newSnapshots);
+            if (!removed.isEmpty()) {
+                LOG.info("Removing old snapshots binaries, workspace id '{}', snapshots to remove '{}'", identity.getWorkspaceId(),
+                         removed.size());
+                removeBinaries(removed);
+            }
+        } catch (SnapshotException e) {
+            LOG.error(format("Couldn't remove existing snapshots metadata for workspace '%s'", identity.getWorkspaceId()), e);
+            removeBinaries(newSnapshots);
         }
     }
 
