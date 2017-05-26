@@ -251,6 +251,9 @@ init() {
       sudo chown -R ${CHE_USER} ${CHE_LOCAL_CONF_DIR}
     fi
   else
+    if [ ! -d /conf ]; then
+        mkdir -p /conf
+    fi
     echo "Using embedded che.properties... Copying template to ${CHE_LOCAL_CONF_DIR}/che.properties"
     cp -rf "${CHE_HOME}/conf/che.properties" ${CHE_LOCAL_CONF_DIR}/che.properties
   fi
