@@ -11,41 +11,37 @@
 
 package process
 
-import (
-	"github.com/eclipse/che/agents/go-agents/core/rpc"
-)
-
-//Builder simplifies creation of MachineProcess
+//Builder simplifies creation of MachineProcess.
 type Builder struct {
 	command          Command
 	beforeEventsHook func(p MachineProcess)
 	subscribers      []*Subscriber
 }
 
-// NewBuilder creates new instance of ProcessBuilder
+// NewBuilder creates new instance of ProcessBuilder.
 func NewBuilder() *Builder {
 	return &Builder{}
 }
 
-// Cmd sets command of process
+// Cmd sets command of process.
 func (pb *Builder) Cmd(command Command) *Builder {
 	pb.command = command
 	return pb
 }
 
-// CmdLine sets command line of process
+// CmdLine sets command line of process.
 func (pb *Builder) CmdLine(cmdLine string) *Builder {
 	pb.command.CommandLine = cmdLine
 	return pb
 }
 
-// CmdType sets type of command that creates a process
+// CmdType sets type of command that creates a process.
 func (pb *Builder) CmdType(cmdType string) *Builder {
 	pb.command.Type = cmdType
 	return pb
 }
 
-// CmdName sets name of command that creates a process
+// CmdName sets name of command that creates a process.
 func (pb *Builder) CmdName(cmdName string) *Builder {
 	pb.command.Name = cmdName
 	return pb
@@ -60,21 +56,21 @@ func (pb *Builder) BeforeEventsHook(hook func(p MachineProcess)) *Builder {
 }
 
 //Subscribe subscribes to the process events.
-func (pb *Builder) Subscribe(id string, mask uint64, channel chan *rpc.Event) *Builder {
+func (pb *Builder) Subscribe(id string, mask uint64, consumer EventConsumer) *Builder {
 	pb.subscribers = append(pb.subscribers, &Subscriber{
-		ID:      id,
-		Mask:    mask,
-		Channel: channel,
+		ID:       id,
+		Mask:     mask,
+		Consumer: consumer,
 	})
 	return pb
 }
 
 //SubscribeDefault subscribes to the process events using process.DefaultMask.
-func (pb *Builder) SubscribeDefault(id string, channel chan *rpc.Event) *Builder {
-	return pb.Subscribe(id, DefaultMask, channel)
+func (pb *Builder) SubscribeDefault(id string, consumer EventConsumer) *Builder {
+	return pb.Subscribe(id, DefaultMask, consumer)
 }
 
-// Build creates MachineProcess from this builder
+// Build creates MachineProcess from this builder.
 func (pb *Builder) Build() MachineProcess {
 	p := MachineProcess{
 		Name:             pb.command.Name,
@@ -86,7 +82,7 @@ func (pb *Builder) Build() MachineProcess {
 	return p
 }
 
-// Start creates MachineProcess from this builder and starts this process
+// Start creates MachineProcess from this builder and starts this process.
 func (pb *Builder) Start() (MachineProcess, error) {
 	return Start(pb.Build())
 }

@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-// LogKind reperesents kind of source of log line - stdout or stderr
+// LogKind represents kind of source of log line - stdout or stderr
 type LogKind int
 
 const (

@@ -85,7 +85,8 @@ func startProcessHF(w http.ResponseWriter, r *http.Request, p rest.Params) error
 			m := fmt.Sprintf("Channel with id '%s' doesn't exist. Process won't be started", channelID)
 			return rest.NotFound(errors.New(m))
 		}
-		pb.Subscribe(channelID, parseTypes(r.URL.Query().Get("types")), channel.Events)
+		eventsConsumer := &rpcProcessEventConsumer{channel.Events}
+		pb.Subscribe(channelID, parseTypes(r.URL.Query().Get("types")), eventsConsumer)
 	}
 
 	proc, err := pb.Start()
