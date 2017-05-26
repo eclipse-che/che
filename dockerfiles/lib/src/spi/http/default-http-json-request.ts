@@ -42,7 +42,7 @@ export class DefaultHttpJsonRequest implements HttpJsonRequest {
             headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json;charset=UTF-8',
-                'Cookie': 'session-access-key=' + this.authData.getToken()
+                'Authorization': this.authData.getToken()
             }
         };
 
