@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.spi.dummy;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ValidationException;
@@ -25,6 +26,7 @@ import java.util.Collections;
 @Singleton
 public class DummyRuntimeInfrastructure extends RuntimeInfrastructure {
 
+    @Inject
     public DummyRuntimeInfrastructure(EventService eventService) {
         super("dummy", Collections.singletonList("dummy"), eventService);
     }

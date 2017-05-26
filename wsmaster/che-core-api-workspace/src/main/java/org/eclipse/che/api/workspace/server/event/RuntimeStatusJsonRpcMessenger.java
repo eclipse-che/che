@@ -64,7 +64,7 @@ public class RuntimeStatusJsonRpcMessenger implements EventSubscriber<RuntimeSta
     private void configureSubscribeHandler(RequestHandlerConfigurator configurator) {
 
         configurator.newConfiguration()
-                    .methodName("workspace/subscribe")
+                    .methodName("runtime/subscribe")
                     .paramsAsString()
                     .noResult()
                     .withConsumer((endpointId, workspaceId) -> {
@@ -76,7 +76,7 @@ public class RuntimeStatusJsonRpcMessenger implements EventSubscriber<RuntimeSta
     @Inject
     private void configureUnSubscribeHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
-                    .methodName("workspace/unSubscribe")
+                    .methodName("runtime/unSubscribe")
                     .paramsAsString()
                     .noResult()
                     .withConsumer((endpointId, workspaceId) -> {

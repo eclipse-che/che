@@ -64,7 +64,7 @@ public class MachineStatusJsonRpcMessenger implements EventSubscriber<MachineSta
     private void configureSubscribeHandler(RequestHandlerConfigurator configurator) {
 
         configurator.newConfiguration()
-                    .methodName("workspace/subscribe")
+                    .methodName("machine/subscribe")
                     .paramsAsString()
                     .noResult()
                     .withConsumer((endpointId, workspaceId) -> {
@@ -76,7 +76,7 @@ public class MachineStatusJsonRpcMessenger implements EventSubscriber<MachineSta
     @Inject
     private void configureUnSubscribeHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
-                    .methodName("workspace/unSubscribe")
+                    .methodName("machine/unSubscribe")
                     .paramsAsString()
                     .noResult()
                     .withConsumer((endpointId, workspaceId) -> {
