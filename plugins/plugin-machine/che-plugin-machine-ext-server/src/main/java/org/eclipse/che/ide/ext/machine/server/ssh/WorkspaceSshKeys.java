@@ -83,8 +83,11 @@ public class WorkspaceSshKeys {
                 try {
                     final User user = userManager.getByName(workspaceCreatedEvent.getWorkspace().getNamespace());
                     userId = user.getId();
-                } catch (NotFoundException | ServerException e) {
-                    LOG.error("Unable to get owner of the workspace {} with namespace {}", workspaceCreatedEvent.getWorkspace().getId(), workspaceCreatedEvent.getWorkspace().getNamespace());
+                } catch (NotFoundException ignored) {
+                    // namespace can be different from username
+                    return;
+                } catch (ServerException e) {
+                    LOG.warn("Unable to get owner of the workspace {} with namespace {}", workspaceCreatedEvent.getWorkspace().getId(), workspaceCreatedEvent.getWorkspace().getNamespace());
                     return;
                 }
 
@@ -94,8 +97,8 @@ public class WorkspaceSshKeys {
                                             workspaceCreatedEvent.getWorkspace().getId());
                 } catch (ServerException | ConflictException e) {
                     // Conflict shouldn't happen as workspace id is new each time.
-                    LOG.error("Unable to generate a default ssh pair for the workspace with ID {}",
-                                            workspaceCreatedEvent.getWorkspace().getId(), e);
+                    LOG.warn("Unable to generate a default ssh pair for the workspace with ID {}",
+                             workspaceCreatedEvent.getWorkspace().getId(), e);
                 }
             }
         });
