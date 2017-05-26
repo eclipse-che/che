@@ -79,7 +79,7 @@ public class DockerRuntimeContext extends RuntimeContext {
     private final SnapshotDao          snapshotDao;
     private final DockerRegistryClient dockerRegistryClient;
 
-    @Inject                                                                                                                         
+    @Inject
     public DockerRuntimeContext(@Assisted DockerRuntimeInfrastructure infrastructure,
                                 @Assisted RuntimeIdentity identity,
                                 @Assisted Environment environment,
