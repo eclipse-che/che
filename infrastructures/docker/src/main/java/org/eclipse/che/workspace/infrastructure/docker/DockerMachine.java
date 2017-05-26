@@ -30,6 +30,7 @@ import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotException;
 import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyProvider;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static java.lang.String.format;
+import static org.eclipse.che.workspace.infrastructure.docker.DockerRegistryClient.MACHINE_SNAPSHOT_PREFIX;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -83,11 +85,6 @@ public class DockerMachine implements Machine {
      * Environment variable that will be setup in developer machine and contains user token.
      */
     public static final String USER_TOKEN = "USER_TOKEN";
-
-    /**
-     * Prefix of image repository, used to identify that the image is a machine saved to snapshot.
-     */
-    public static final String MACHINE_SNAPSHOT_PREFIX = "machine_snapshot_";
 
     private final String                           container;
     private final DockerConnector                  docker;
@@ -183,7 +180,7 @@ public class DockerMachine implements Machine {
     }
 
 
-    public DockerMachineSource saveToSnapshot() throws InfrastructureException {
+    public DockerMachineSource saveToSnapshot() throws SnapshotException {
         try {
             String image = generateRepository();
             if(!snapshotUseRegistry) {
@@ -210,10 +207,10 @@ public class DockerMachine implements Machine {
             docker.removeImage(RemoveImageParams.create(fullRepo).withForce(false));
             return new DockerMachineSource(image).withRegistry(registry).withDigest(digest).withTag(LATEST_TAG);
         } catch (IOException ioEx) {
-            throw new InfrastructureException(ioEx);
+            throw new SnapshotException(ioEx);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new InfrastructureException(e.getLocalizedMessage(), e);
+            throw new SnapshotException(e.getLocalizedMessage(), e);
         }
     }
 

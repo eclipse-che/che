@@ -234,13 +234,13 @@ public class DockerRuntimeContext extends RuntimeContext {
                     DockerMachineSource machineSource = dockerMachineEntry.getValue().saveToSnapshot();
                     snapshot.setMachineSource(new MachineSourceImpl(machineSource));
                     newSnapshots.add(snapshot);
-                } catch (InfrastructureException e) {
+                } catch (SnapshotException e) {
                     LOG.error(format("Error occurs on snapshotting of docker machine '%s' in workspace '%s'. Container '%s'",
                                      dockerMachineEntry.getKey(),
                                      getIdentity().getWorkspaceId(),
                                      dockerMachineEntry.getValue().getContainer()),
                               e);
-                    throw e;
+                    throw new InfrastructureException(e.getLocalizedMessage(), e);
                 }
             }
             try {
