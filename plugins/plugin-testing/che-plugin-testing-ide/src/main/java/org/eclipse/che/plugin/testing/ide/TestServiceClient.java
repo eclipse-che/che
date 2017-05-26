@@ -184,7 +184,7 @@ public class TestServiceClient {
                             final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
                             final String machineId = machine.getId();
 
-                            processesPanelPresenter.addCommandOutput(machineId, console);
+                            processesPanelPresenter.addCommandOutput(console);
                             ExecAgentConsumer<ProcessStartResponseDto> processPromise = execAgentCommandManager.startProcess(machineId,
                                                                                                                              expandedCommand);
                             processPromise.then(startResonse -> {

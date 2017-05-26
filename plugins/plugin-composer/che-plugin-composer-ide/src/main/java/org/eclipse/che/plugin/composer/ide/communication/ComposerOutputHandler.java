@@ -89,7 +89,7 @@ public class ComposerOutputHandler {
                 public void onMessage(String message) {
                     Log.info(getClass(), message);
                     ComposerOutput archetypeOutput = factory.createDtoFromJson(message, ComposerOutput.class);
-                    processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), outputConsole);
+                    processesPanelPresenter.addCommandOutput(outputConsole);
                     switch (archetypeOutput.getState()) {
                         case START:
                             outputConsole.clearOutputsButtonClicked();

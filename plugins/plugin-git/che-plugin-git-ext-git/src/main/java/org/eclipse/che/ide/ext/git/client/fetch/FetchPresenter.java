@@ -101,7 +101,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
      * local).
      */
     private void updateRemotes() {
-        service.remoteList(appContext.getDevMachine(), project.getLocation(), null, true).then(new Operation<List<Remote>>() {
+        service.remoteList(project.getLocation(), null, true).then(new Operation<List<Remote>>() {
             @Override
             public void apply(List<Remote> remotes) throws OperationException {
                 view.setRepositories(remotes);
@@ -114,7 +114,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
             public void apply(PromiseError error) throws OperationException {
                 GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
                 console.printError(constant.remoteListFailed());
-                processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                processesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(constant.remoteListFailed(), FAIL, FLOAT_MODE);
                 view.setEnableFetchButton(false);
             }
@@ -128,7 +128,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
      *         is a remote mode
      */
     private void updateBranches(@NotNull final BranchListMode remoteMode) {
-        service.branchList(appContext.getDevMachine(), project.getLocation(), remoteMode).then(new Operation<List<Branch>>() {
+        service.branchList(project.getLocation(), remoteMode).then(new Operation<List<Branch>>() {
             @Override
             public void apply(List<Branch> branches) throws OperationException {
                 if (LIST_REMOTE.equals(remoteMode)) {
@@ -150,7 +150,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
                 final String errorMessage = error.getMessage() != null ? error.getMessage() : constant.branchesListFailed();
                 GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
                 console.printError(errorMessage);
-                processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                processesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
                 view.setEnableFetchButton(false);
             }
@@ -165,12 +165,12 @@ public class FetchPresenter implements FetchView.ActionDelegate {
         final StatusNotification notification = notificationManager.notify(constant.fetchProcess(), PROGRESS, FLOAT_MODE);
         final GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
 
-        service.fetch(appContext.getDevMachine(), project.getLocation(), view.getRepositoryName(), getRefs(), view.isRemoveDeletedRefs())
+        service.fetch(project.getLocation(), view.getRepositoryName(), getRefs(), view.isRemoveDeletedRefs())
                 .then(new Operation<Void>() {
                     @Override
                     public void apply(Void ignored) throws OperationException {
                         console.print(constant.fetchSuccess(remoteUrl));
-                        processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                        processesPanelPresenter.addCommandOutput(console);
                         notification.setStatus(SUCCESS);
                         notification.setTitle(constant.fetchSuccess(remoteUrl));
                     }
@@ -179,7 +179,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
                     @Override
                     public void apply(PromiseError error) throws OperationException {
                         handleError(error.getCause(), remoteUrl, notification, console);
-                        processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                        processesPanelPresenter.addCommandOutput(console);
                     }
                 });
         view.close();

@@ -67,9 +67,6 @@ public class RuntimeImpl implements Runtime {
         return machines;
     }
 
-    // TODO: if IDE was initialized successfully then there's must be ws-agent running in the runtime.
-    // Consider to get ws-agent server without Optional
-    // AppContext.getWsAgentServer() ???
     /** Returns ws-agent server. */
     public Optional<ServerImpl> getWsAgentServer() {
         return getMachines().values()

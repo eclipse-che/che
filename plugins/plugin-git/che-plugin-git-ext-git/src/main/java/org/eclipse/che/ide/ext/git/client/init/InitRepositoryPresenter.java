@@ -66,11 +66,11 @@ public class InitRepositoryPresenter {
     public void initRepository(final Project project) {
         final GitOutputConsole console = gitOutputConsoleFactory.create(INIT_COMMAND_NAME);
 
-        service.init(appContext.getDevMachine(), project.getLocation(), false).then(new Operation<Void>() {
+        service.init(project.getLocation(), false).then(new Operation<Void>() {
             @Override
             public void apply(Void ignored) throws OperationException {
                 console.print(constant.initSuccess());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(constant.initSuccess());
 
                 project.synchronize();
@@ -79,7 +79,7 @@ public class InitRepositoryPresenter {
             @Override
             public void apply(PromiseError error) throws OperationException {
                 handleError(error.getCause(), console);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
             }
         });
     }

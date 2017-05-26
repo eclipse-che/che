@@ -47,7 +47,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.List;
 
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -195,9 +194,5 @@ public abstract class BaseTest {
         when(throwable.getMessage()).thenReturn("error");
 
         when(project.synchronize()).thenReturn(synchronizePromise);
-
-        DevMachine devMachine = mock(DevMachine.class);
-        when(devMachine.getId()).thenReturn("id");
-        when(appContext.getDevMachine()).thenReturn(devMachine);
     }
 }

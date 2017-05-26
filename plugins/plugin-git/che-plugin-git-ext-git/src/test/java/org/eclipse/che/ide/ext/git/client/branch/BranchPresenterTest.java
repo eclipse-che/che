@@ -98,7 +98,7 @@ public class BranchPresenterTest extends BaseTest {
         when(selectedBranch.isRemote()).thenReturn(IS_REMOTE);
         when(selectedBranch.isActive()).thenReturn(IS_ACTIVE);
 
-        when(service.branchList(anyObject(), anyObject(), anyObject())).thenReturn(branchListPromise);
+        when(service.branchList(anyObject(), anyObject())).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
     }
@@ -107,7 +107,7 @@ public class BranchPresenterTest extends BaseTest {
     public void testShowBranchesWhenGetBranchesRequestIsSuccessful() throws Exception {
         final List<Branch> branches = Collections.singletonList(selectedBranch);
 
-        when(service.branchList(anyObject(), anyObject(), anyObject())).thenReturn(branchListPromise);
+        when(service.branchList(anyObject(), anyObject())).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
 
@@ -134,7 +134,7 @@ public class BranchPresenterTest extends BaseTest {
     public void testOnRenameClickedWhenLocalBranchSelected() throws Exception {
         reset(selectedBranch);
 
-        when(service.branchRename(anyObject(), anyObject(), anyString(), anyString())).thenReturn(voidPromise);
+        when(service.branchRename(anyObject(), anyString(), anyString())).thenReturn(voidPromise);
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
 
@@ -163,7 +163,7 @@ public class BranchPresenterTest extends BaseTest {
     public void testOnRenameClickedWhenRemoteBranchSelectedAndUserConfirmRename() throws Exception {
         reset(selectedBranch);
 
-        when(service.branchRename(anyObject(), anyObject(), anyString(), anyString())).thenReturn(voidPromise);
+        when(service.branchRename(anyObject(), anyString(), anyString())).thenReturn(voidPromise);
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
 
@@ -191,7 +191,7 @@ public class BranchPresenterTest extends BaseTest {
         voidPromiseCaptor.getValue().apply(null);
 
         verify(selectedBranch, times(2)).getDisplayName();
-        verify(service, times(2)).branchList(anyObject(), anyObject(), eq(LIST_ALL));
+        verify(service, times(2)).branchList(anyObject(), eq(LIST_ALL));
         verify(console, never()).printError(anyString());
         verify(notificationManager, never()).notify(anyString());
         verify(constant, never()).branchRenameFailed();
@@ -205,7 +205,7 @@ public class BranchPresenterTest extends BaseTest {
 
     @Test
     public void testOnDeleteClickedWhenBranchDeleteRequestIsSuccessful() throws Exception {
-        when(service.branchDelete(anyObject(), any(Path.class), anyString(), anyBoolean())).thenReturn(voidPromise);
+        when(service.branchDelete(any(Path.class), anyString(), anyBoolean())).thenReturn(voidPromise);
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
 
@@ -216,7 +216,7 @@ public class BranchPresenterTest extends BaseTest {
         voidPromiseCaptor.getValue().apply(null);
 
         verify(selectedBranch).getName();
-        verify(service, times(2)).branchList(anyObject(), anyObject(), eq(LIST_ALL));
+        verify(service, times(2)).branchList(anyObject(), eq(LIST_ALL));
         verify(constant, never()).branchDeleteFailed();
         verify(console, never()).printError(anyString());
         verify(notificationManager, never()).notify(anyString());
@@ -224,7 +224,7 @@ public class BranchPresenterTest extends BaseTest {
 
     @Test
     public void testOnCheckoutClickedWhenSelectedNotRemoteBranch() throws Exception {
-        when(service.checkout(anyObject(), any(Path.class), any(CheckoutRequest.class))).thenReturn(voidPromise);
+        when(service.checkout(any(Path.class), any(CheckoutRequest.class))).thenReturn(voidPromise);
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
 
@@ -243,7 +243,7 @@ public class BranchPresenterTest extends BaseTest {
 
     @Test
     public void testOnCheckoutClickedWhenSelectedRemoteBranch() throws Exception {
-        when(service.checkout(anyObject(), any(Path.class), any(CheckoutRequest.class))).thenReturn(voidPromise);
+        when(service.checkout(any(Path.class), any(CheckoutRequest.class))).thenReturn(voidPromise);
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
 
@@ -261,7 +261,7 @@ public class BranchPresenterTest extends BaseTest {
 
     @Test
     public void testOnCreateClickedWhenBranchCreateRequestIsSuccessful() throws Exception {
-        when(service.branchCreate(anyObject(), any(Path.class), anyString(), anyString())).thenReturn(branchPromise);
+        when(service.branchCreate(any(Path.class), anyString(), anyString())).thenReturn(branchPromise);
         when(branchPromise.then(any(Operation.class))).thenReturn(branchPromise);
         when(branchPromise.catchError(any(Operation.class))).thenReturn(branchPromise);
 
@@ -279,8 +279,8 @@ public class BranchPresenterTest extends BaseTest {
         branchCaptor.getValue().apply(selectedBranch);
 
         verify(constant).branchTypeNew();
-        verify(service).branchCreate(anyObject(), any(Path.class), anyString(), anyString());
-        verify(service, times(2)).branchList(anyObject(), anyObject(), eq(LIST_ALL));
+        verify(service).branchCreate(any(Path.class), anyString(), anyString());
+        verify(service, times(2)).branchList(anyObject(), eq(LIST_ALL));
     }
 
     @Test

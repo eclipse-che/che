@@ -515,6 +515,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         return sshServer != null ? sshServer.getUrl() : null;
     }
 
+    public void addCommandOutput(OutputConsole outputConsole) {
+        addCommandOutput(appContext.getDevMachine().getName(), outputConsole);
+    }
+
     /**
      * Adds command node to process tree and displays command output
      *

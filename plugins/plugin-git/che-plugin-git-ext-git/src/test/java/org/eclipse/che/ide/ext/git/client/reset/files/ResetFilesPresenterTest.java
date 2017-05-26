@@ -67,7 +67,7 @@ public class ResetFilesPresenterTest extends BaseTest {
         when(indexFile.withIndexed(anyBoolean())).thenReturn(indexFile);
         when(indexFile.withPath(anyString())).thenReturn(indexFile);
         when(indexFile.getPath()).thenReturn("foo");
-        when(service.getStatus(anyObject(), any(Path.class))).thenReturn(statusPromise);
+        when(service.getStatus(any(Path.class))).thenReturn(statusPromise);
         when(statusPromise.then(any(Operation.class))).thenReturn(statusPromise);
         when(statusPromise.catchError(any(Operation.class))).thenReturn(statusPromise);
         when(appContext.getResources()).thenReturn(new Resource[]{});
@@ -163,7 +163,7 @@ public class ResetFilesPresenterTest extends BaseTest {
         when(status.getChanged()).thenReturn(changes);
         when(status.getRemoved()).thenReturn(changes);
 
-        when(service.reset(anyObject(), any(Path.class), anyString(), any(ResetRequest.ResetType.class), anyObject())).thenReturn(voidPromise);
+        when(service.reset(any(Path.class), anyString(), any(ResetRequest.ResetType.class), anyObject())).thenReturn(voidPromise);
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
 
@@ -192,7 +192,7 @@ public class ResetFilesPresenterTest extends BaseTest {
         when(status.getChanged()).thenReturn(changes);
         when(status.getRemoved()).thenReturn(changes);
 
-        when(service.reset(anyObject(), any(Path.class), anyString(), any(ResetRequest.ResetType.class), anyObject())).thenReturn(voidPromise);
+        when(service.reset(any(Path.class), anyString(), any(ResetRequest.ResetType.class), anyObject())).thenReturn(voidPromise);
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
 
