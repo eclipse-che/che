@@ -117,6 +117,12 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.everrest.ETagResponseFilter.class);
         bind(org.eclipse.che.api.agent.server.AgentRegistryService.class);
 
+        // temporary solution
+        bind(org.eclipse.che.api.workspace.server.event.RuntimeStatusJsonRpcMessenger.class).asEagerSingleton();
+        bind(org.eclipse.che.api.workspace.server.event.MachineStatusJsonRpcMessenger.class).asEagerSingleton();
+        bind(org.eclipse.che.api.workspace.server.event.ServerStatusJsonRpcMessenger.class).asEagerSingleton();
+        //
+
         bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)
                 .to(org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl.class);
         bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)

@@ -12,7 +12,7 @@ package org.eclipse.che.ide.command.palette;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.api.workspace.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;

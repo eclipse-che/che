@@ -11,7 +11,7 @@
 package org.eclipse.che.api.workspace.server;
 
 import com.google.common.collect.ImmutableMap;
-
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -26,7 +26,7 @@ import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
@@ -66,15 +66,15 @@ public class WorkspaceRuntimes {
     private final ImmutableMap<String, RuntimeInfrastructure> infraByRecipe;
 
     private final ConcurrentMap<String, InternalRuntime> runtimes;
-    private final EventService                           eventsService;
+    private final EventService                           eventService;
     private final WorkspaceSharedPool                    sharedPool;
 
     @Inject
-    public WorkspaceRuntimes(EventService eventsService,
+    public WorkspaceRuntimes(EventService eventService,
                              Set<RuntimeInfrastructure> infrastructures,
                              WorkspaceSharedPool sharedPool) {
         this.runtimes = new ConcurrentHashMap<>();
-        this.eventsService = eventsService;
+        this.eventService = eventService;
         this.sharedPool = sharedPool;
 
         // TODO: consider extracting to a strategy interface(1. pick the last, 2. fail with conflict)
@@ -112,7 +112,7 @@ public class WorkspaceRuntimes {
         }
     }
 
-    //TODO do we need some validation on start
+    //TODO do we need some validation on start?
     private InternalRuntime validate(InternalRuntime runtime) {
         return runtime;
     }
@@ -203,14 +203,14 @@ public class WorkspaceRuntimes {
                                         "' because its status is 'RUNNING'");
         }
 
-        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+        eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                         .withWorkspaceId(workspaceId)
                                         .withStatus(WorkspaceStatus.STARTING)
                                         .withEventType(EventType.STARTING)
                                         .withPrevStatus(WorkspaceStatus.STOPPED));
 
         Subject subject = EnvironmentContext.getCurrent().getSubject();
-        RuntimeIdentity runtimeId = new RuntimeIdentity(workspaceId, envName, subject.getUserName());
+        RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, subject.getUserName());
         try {
             RuntimeContext runtimeContext = infra.prepare(runtimeId, environment);
 
@@ -228,7 +228,7 @@ public class WorkspaceRuntimes {
                     runtimeContext.start(options);
 
 
-                    eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                    eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                                     .withWorkspaceId(workspaceId)
                                                     .withStatus(WorkspaceStatus.RUNNING)
                                                     .withEventType(EventType.RUNNING)
@@ -271,7 +271,7 @@ public class WorkspaceRuntimes {
                                                                              InfrastructureException,
                                                                              ConflictException {
 
-        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+        eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                         .withWorkspaceId(workspaceId)
                                         .withPrevStatus(WorkspaceStatus.RUNNING)
                                         .withStatus(WorkspaceStatus.STOPPING)
@@ -286,7 +286,7 @@ public class WorkspaceRuntimes {
 
         runtimes.remove(workspaceId);
 
-        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+        eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                         .withWorkspaceId(workspaceId)
                                         .withPrevStatus(WorkspaceStatus.STOPPING)
                                         .withStatus(WorkspaceStatus.STOPPED)

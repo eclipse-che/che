@@ -11,25 +11,30 @@
 package org.eclipse.che.ide.workspace.events;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.ide.machine.EnvironmentStatusHandler;
 import org.eclipse.che.ide.util.loging.Log;
 
 @Singleton
-public class EnvironmentStatusEventHandler {
+class EnvironmentStatusEventHandler {
+
     @Inject
-    public void configureEnvironmentStatusHandler(RequestHandlerConfigurator configurator, EventBus eventBus) {
+    void configureEnvironmentStatusHandler(RequestHandlerConfigurator configurator, Provider<EnvironmentStatusHandler> handlerProvider) {
         configurator.newConfiguration()
                     .methodName("event:environment-status:changed")
                     .paramsAsDto(MachineStatusEvent.class)
                     .noResult()
                     .withConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
-                        eventBus.fireEvent(new MachineStatusChangedEvent(event));
+
+                        // Since EnvironmentStatusEventHandler instantiated by GIN eagerly,
+                        // it may be really expensive to instantiate EnvironmentStatusHandler with all it's dependencies.
+                        // So defer that work.
+                        handlerProvider.get().handleEnvironmentStatusChanged(event);
                     });
     }
 }

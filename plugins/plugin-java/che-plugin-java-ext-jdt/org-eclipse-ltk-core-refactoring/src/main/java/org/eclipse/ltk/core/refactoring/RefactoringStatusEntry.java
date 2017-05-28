@@ -201,7 +201,7 @@ public class RefactoringStatusEntry {
 	/**
 	 * Returns whether the entry represents an error or not.
 	 *
-	 * @return <code>true</code> if (severity ==<code>RefactoringStatus.ERROR</code>).
+	 * @return <code>true</code> if (severity ==<code>RefactoringStatus.FAILED</code>).
 	 */
 	public boolean isError() {
 		return fSeverity == RefactoringStatus.ERROR;

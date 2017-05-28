@@ -95,6 +95,10 @@ public class MavenProject {
         return info.testResources;
     }
 
+    public String getOutputDirectory() {
+        return info.outputDirectory;
+    }
+
     public String getName() {
         String name = info.name;
         if (name == null) {
@@ -207,6 +211,7 @@ public class MavenProject {
         newInfo.properties = model.getProperties();
         newInfo.filters = model.getBuild().getFilters();
 
+        newInfo.outputDirectory = model.getBuild().getOutputDirectory();
 
         Set<MavenRemoteRepository> remoteRepositories = new HashSet<>();
         Set<MavenArtifact> extensions = new HashSet<>();
@@ -395,6 +400,8 @@ public class MavenProject {
         public List<String>        testSources;
         public List<MavenResource> resources;
         public List<MavenResource> testResources;
+
+        public String outputDirectory;
 
         public List<String> profilesIds;
         public List<String> activeProfiles;

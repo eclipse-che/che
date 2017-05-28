@@ -24,11 +24,11 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.NewProjectConfigImpl;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
-import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistry;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizard;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardFactory;
+import org.eclipse.che.ide.projecttype.wizard.ProjectWizardRegistry;
 import org.eclipse.che.ide.projecttype.wizard.categoriespage.CategoriesPagePresenter;
 import org.eclipse.che.ide.resource.Path;
 
@@ -36,6 +36,7 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.IMPORT;
@@ -227,13 +228,13 @@ public class ProjectWizardPresenter implements Wizard.UpdateDelegate,
             return wizardsCache.get(projectType);
         }
 
-        final ProjectWizardRegistrar wizardRegistrar = wizardRegistry.getWizardRegistrar(projectType.getId());
-        if (wizardRegistrar == null) {
+        final Optional<ProjectWizardRegistrar> wizardRegistrar = wizardRegistry.getWizardRegistrar(projectType.getId());
+        if (!wizardRegistrar.isPresent()) {
             // should never occur
             throw new IllegalStateException("WizardRegistrar for the project type " + projectType.getId() + " isn't registered.");
         }
 
-        List<Provider<? extends WizardPage<MutableProjectConfig>>> pageProviders = wizardRegistrar.getWizardPages();
+        List<Provider<? extends WizardPage<MutableProjectConfig>>> pageProviders = wizardRegistrar.get().getWizardPages();
         final ProjectWizard projectWizard = createDefaultWizard(configDto, wizardMode);
         for (Provider<? extends WizardPage<MutableProjectConfig>> provider : pageProviders) {
             projectWizard.addPage(provider.get(), 1, false);

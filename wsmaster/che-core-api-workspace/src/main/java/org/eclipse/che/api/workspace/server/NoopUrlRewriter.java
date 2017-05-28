@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 
 import java.net.MalformedURLException;
 import java.net.URL;

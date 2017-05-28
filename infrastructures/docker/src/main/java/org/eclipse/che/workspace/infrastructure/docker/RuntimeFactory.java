@@ -14,8 +14,8 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import java.util.List;

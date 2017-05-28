@@ -17,7 +17,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-import org.eclipse.che.ide.actions.StartUpActionsParser;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
@@ -115,7 +114,7 @@ public class AppContextImpl implements AppContext,
         this.editorAgentProvider = editorAgentProvider;
         this.appStateManager = appStateManager;
         this.currentUser = currentUser;
-        this.startAppActions = StartUpActionsParser.getStartUpActions();
+        this.startAppActions = new ArrayList<>();
 
         projectsInImport = new ArrayList<>();
 
@@ -137,7 +136,7 @@ public class AppContextImpl implements AppContext,
         return userWorkspace;
     }
 
-    @Override
+    /** Sets the current workspace. */
     public void setWorkspace(Workspace workspace) {
         if (workspace != null) {
             userWorkspace = workspace;
@@ -184,12 +183,15 @@ public class AppContextImpl implements AppContext,
         return startAppActions;
     }
 
+    public void setStartAppActions(List<StartUpAction> startAppActions) {
+        this.startAppActions.addAll(startAppActions);
+    }
+
     @Override
     public FactoryDto getFactory() {
         return factory;
     }
 
-    @Override
     public void setFactory(FactoryDto factory) {
         this.factory = factory;
     }

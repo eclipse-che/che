@@ -12,7 +12,7 @@ package org.eclipse.che.api.workspace.server;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,9 +27,9 @@ import java.net.URL;
 public interface URLRewriter {
 
     /**
-     * Rewrites URL according to Strategy rules. May depend on RuntimeIdentity(workspace, owner,..) and name (some id)
+     * Rewrites URL according to Strategy rules. May depend on RuntimeIdentityImpl(workspace, owner,..) and name (some id)
      * of this particular URL
-     * @param identity RuntimeIdentity (may be null)
+     * @param identity RuntimeIdentityImpl (may be null)
      * @param name symbolic name of the server (may be null)
      * @param url URL to rewrite
      * @return Result

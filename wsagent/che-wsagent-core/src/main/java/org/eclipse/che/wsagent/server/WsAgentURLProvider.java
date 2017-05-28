@@ -12,8 +12,8 @@ package org.eclipse.che.wsagent.server;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.ServerDto;
+import org.eclipse.che.api.workspace.shared.dto.MachineDto;
+import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
