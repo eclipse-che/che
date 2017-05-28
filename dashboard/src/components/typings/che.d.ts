@@ -32,9 +32,13 @@ declare namespace che {
       tabName: string;
     }
 
+    export interface IRoute extends ng.route.IRoute {
+      title: string | {(...args: any[]) : string};
+    }
+
     export interface IRouteProvider extends ng.route.IRouteProvider {
-      accessWhen: (path: string, route: any) => ng.IPromise<any>;
-      accessOtherWise: (route: any) => ng.IPromise<any>;
+      accessWhen?: (path: string, route: IRoute) => IRouteProvider;
+      accessOtherWise?: (route: IRoute) => IRouteProvider;
     }
   }
 
@@ -210,10 +214,14 @@ declare namespace che {
     description: string;
     source?: IProjectSource;
     path?: string;
-    commands?: Array<any>;
+    commands?: Array<IWorkspaceCommand>;
+    mixins: Array<any>;
+    modules: Array<any>;
+    problems: Array<any>;
     projectType?: string;
     type?: string;
     tags?: Array<string>;
+    category?: string;
     attributes?: any;
     options?: Array<any>;
     workspaceId?: string;

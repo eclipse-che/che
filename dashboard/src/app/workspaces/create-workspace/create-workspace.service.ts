@@ -14,7 +14,7 @@ import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import IdeSvc from '../../ide/ide.service';
 import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
 import {StackSelectorSvc} from './stack-selector/stack-selector.service';
-import {TemplateSelectorSvc} from './project-selector/template-selector/template-selector.service';
+import {ProjectSourceSelectorService} from './project-source-selector/project-source-selector.service';
 
 /**
  * This class is handling the service for workspace creation.
@@ -47,13 +47,13 @@ export class CreateWorkspaceSvc {
    */
   private namespaceSelectorSvc: NamespaceSelectorSvc;
   /**
+   * Project selector service.
+   */
+  private projectSourceSelectorService: ProjectSourceSelectorService;
+  /**
    * Stack selector service.
    */
   private stackSelectorSvc: StackSelectorSvc;
-  /**
-   * Template selector service.
-   */
-  private templateSelectorSvc: TemplateSelectorSvc;
   /**
    * The list of workspaces by namespace.
    */
@@ -65,7 +65,7 @@ export class CreateWorkspaceSvc {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, templateSelectorSvc: TemplateSelectorSvc) {
+  constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, projectSourceSelectorService: ProjectSourceSelectorService) {
     this.$location = $location;
     this.$log = $log;
     this.$q = $q;
@@ -73,7 +73,7 @@ export class CreateWorkspaceSvc {
     this.ideSvc = ideSvc;
     this.namespaceSelectorSvc = namespaceSelectorSvc;
     this.stackSelectorSvc = stackSelectorSvc;
-    this.templateSelectorSvc = templateSelectorSvc;
+    this.projectSourceSelectorService = projectSourceSelectorService;
 
     this.workspacesByNamespace = {};
   }
@@ -151,11 +151,7 @@ export class CreateWorkspaceSvc {
    */
   createWorkspace(workspaceConfig: che.IWorkspaceConfig): ng.IPromise<any> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
-          templateNames = this.templateSelectorSvc.getTemplateNames();
-
-    const projectTemplates = this.templateSelectorSvc.getTemplates().filter((projectTemplate: che.IProjectTemplate) => {
-      return templateNames.indexOf(projectTemplate.name) !== -1;
-    });
+          projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
     return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, {}).then((workspace: che.IWorkspace) => {
 

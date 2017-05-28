@@ -53,6 +53,9 @@ import {NamespaceSelectorController} from './create-workspace/namespace-selector
 import {NamespaceSelectorSvc} from './create-workspace/namespace-selector/namespace-selector.service';
 import {NamespaceSelector} from './create-workspace/namespace-selector/namespace-selector.directive';
 
+import {ProjectSourceSelectorController} from './create-workspace/project-source-selector/project-source-selector.controller';
+import {ProjectSourceSelectorService} from './create-workspace/project-source-selector/project-source-selector.service';
+import {ProjectSourceSelector} from './create-workspace/project-source-selector/project-source-selector.directive';
 import {ImportBlankProjectController} from './create-workspace/project-source-selector/import-blank-project/import-blank-project.controller';
 import {ImportBlankProjectService} from './create-workspace/project-source-selector/import-blank-project/import-blank-project.service';
 import {ImportBlankProject} from './create-workspace/project-source-selector/import-blank-project/import-blank-project.directive';
@@ -189,6 +192,9 @@ export class WorkspacesConfig {
     register.service('namespaceSelectorSvc', NamespaceSelectorSvc);
     register.directive('namespaceSelector', NamespaceSelector);
 
+    register.controller('ProjectSourceSelectorController', ProjectSourceSelectorController);
+    register.service('projectSourceSelectorService', ProjectSourceSelectorService);
+    register.directive('projectSourceSelector', ProjectSourceSelector);
     register.controller('ImportBlankProjectController', ImportBlankProjectController);
     register.service('importBlankProjectService', ImportBlankProjectService);
     register.directive('importBlankProject', ImportBlankProject);
