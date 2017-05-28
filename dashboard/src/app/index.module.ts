@@ -31,6 +31,8 @@ import {ProxySettingsConfig} from './proxy/proxy-settings.constant';
 import {WorkspacesConfig} from './workspaces/workspaces-config';
 import {StacksConfig} from './stacks/stacks-config';
 import {DemoComponentsController} from './demo-components/demo-components.controller';
+import {CheBranding} from '../components/branding/che-branding.factory';
+import {ChePreferences} from '../components/api/che-preferences.factory';
 
 
 // init module
@@ -40,17 +42,17 @@ let initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngT
 
 
 // add a global resolve flag on all routes (user needs to be resolved first)
-initModule.config(['$routeProvider', ($routeProvider) => {
-  $routeProvider.accessWhen = (path, route) => {
+initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
+  $routeProvider.accessWhen = (path: string, route: che.route.IRoute) => {
     route.resolve || (route.resolve = {});
-    route.resolve.app = ['cheBranding', '$q', 'chePreferences', (cheBranding, $q, chePreferences) => {
+    (route.resolve as any).app = ['cheBranding', '$q', 'chePreferences', (cheBranding: CheBranding, $q: ng.IQService, chePreferences: ChePreferences) => {
       let deferred = $q.defer();
       if (chePreferences.getPreferences()) {
         deferred.resolve();
       } else {
         chePreferences.fetchPreferences().then(() => {
           deferred.resolve();
-        }, (error) => {
+        }, (error: any) => {
           deferred.reject(error);
         });
       }
@@ -61,16 +63,16 @@ initModule.config(['$routeProvider', ($routeProvider) => {
     return $routeProvider.when(path, route);
   };
 
-  $routeProvider.accessOtherWise = (route) => {
+  $routeProvider.accessOtherWise = (route: che.route.IRoute) => {
     route.resolve || (route.resolve = {});
-    route.resolve.app = ['$q', 'chePreferences', ($q, chePreferences) => {
+    (route.resolve as any).app = ['$q', 'chePreferences', ($q: ng.IQService, chePreferences: ChePreferences) => {
       let deferred = $q.defer();
       if (chePreferences.getPreferences()) {
         deferred.resolve();
       } else {
         chePreferences.fetchPreferences().then(() => {
           deferred.resolve();
-        }, (error) => {
+        }, (error: any) => {
           deferred.reject(error);
         });
       }

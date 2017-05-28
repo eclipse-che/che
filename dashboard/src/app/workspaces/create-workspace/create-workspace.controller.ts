@@ -16,7 +16,6 @@ import {IEnvironmentManagerMachine} from '../../../components/api/environment/en
 import {CreateWorkspaceSvc} from './create-workspace.service';
 import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
 import {StackSelectorSvc} from './stack-selector/stack-selector.service';
-import {TemplateSelectorSvc} from './project-selector/template-selector/template-selector.service';
 import {RandomSvc} from '../../../components/utils/random.service';
 
 /**
@@ -41,10 +40,6 @@ export class CreateWorkspaceController {
    * Stack selector service.
    */
   private stackSelectorSvc: StackSelectorSvc;
-  /**
-   * Template selector service.
-   */
-  private templateSelectorSvc: TemplateSelectorSvc;
   /**
    * Generator for random strings.
    */
@@ -86,12 +81,11 @@ export class CreateWorkspaceController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor(cheEnvironmentRegistry: CheEnvironmentRegistry, createWorkspaceSvc: CreateWorkspaceSvc, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, templateSelectorSvc: TemplateSelectorSvc, randomSvc: RandomSvc) {
+  constructor(cheEnvironmentRegistry: CheEnvironmentRegistry, createWorkspaceSvc: CreateWorkspaceSvc, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, randomSvc: RandomSvc) {
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.createWorkspaceSvc = createWorkspaceSvc;
     this.namespaceSelectorSvc = namespaceSelectorSvc;
     this.stackSelectorSvc = stackSelectorSvc;
-    this.templateSelectorSvc = templateSelectorSvc;
     this.randomSvc = randomSvc;
 
     this.usedNamesList = [];

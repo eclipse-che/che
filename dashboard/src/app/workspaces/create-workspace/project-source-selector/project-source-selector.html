@@ -4,11 +4,13 @@
   <div class="che-template-checker">
     <toggle-single-button class="add-project"
                           che-title="Add or Import Project"
+                          che-multiline-title
                           che-font-icon="fa fa-plus"
                           che-on-change="projectSourceSelectorController.updateData({buttonState: state, buttonType: projectSourceSelectorController.buttonType.ADD_PROJECT})"
                           ng-init="projectSourceSelectorController.selectedButtonType = projectSourceSelectorController.buttonType.ADD_PROJECT"
                           che-value="projectSourceSelectorController.buttonValues['ADD_PROJECT']"></toggle-single-button>
-    <toggle-single-button ng-repeat="projectTemplate in projectSourceSelectorController.projectTemplates"
+    <toggle-single-button class="project-metadata"
+                          ng-repeat="projectTemplate in projectSourceSelectorController.projectTemplates"
                           che-title="{{projectTemplate.name}}"
                           che-state="false"
                           che-font-icon="chefont cheico-project"
@@ -23,7 +25,7 @@
 
     <div ng-if="projectSourceSelectorController.selectedButtonType === projectSourceSelectorController.buttonType.ADD_PROJECT">
       <ng-form name="projectSourceSelectorForm">
-        <div class="project-source-selector-popover">
+        <div class="project-source-selector-popover-content">
           <!-- Source toggle -->
           <div class="project-source-selector-popover-toggle-buttons">
             <che-toggle-joined ng-model="projectSourceSelectorController.selectedSource"
@@ -54,14 +56,24 @@
             <import-zip-project
               ng-if="projectSourceSelectorController.selectedSource === projectSourceSelectorController.projectSource.ZIP"></import-zip-project>
           </div>
+
           <md-divider class="project-source-selector-divider"></md-divider>
-          <che-button-primary che-button-title="Add"
-                              ng-disabled="projectSourceSelectorForm.$invalid"
-                              ng-click="projectSourceSelectorController.addProjectTemplate()"></che-button-primary>
+
+          <div class="project-source-selector-button"
+               flex layout="row" layout-align="end center">
+            <!-- todo Cancel button -->
+            <che-button-cancel-flat che-button-title="Cancel"
+                                    name="cancelButton"
+                                    ng-click="projectSourceSelectorController.cancelProjectTemplate()"></che-button-cancel-flat>
+            <che-button-primary che-button-title="Add"
+                                name="addButton"
+                                ng-disabled="projectSourceSelectorForm.$invalid"
+                                ng-click="projectSourceSelectorController.addProjectTemplate()"></che-button-primary>
+          </div>
         </div>
       </ng-form>
     </div>
-    <div ng-if="projectSourceSelectorController.selectedButtonType === projectSourceSelectorController.buttonType.PROJECT_TEMPLATE">
+    <div ng-if="projectSourceSelectorController.selectedButtonType === projectSourceSelectorController.buttonType.PROJECT_TEMPLATE" class="project-source-selector-popover-content">
       <ng-form name="projectTemplateForm"
                ng-if="projectSourceSelectorController.projectTemplateCopy">
 
@@ -70,22 +82,17 @@
 
         <md-divider class="project-metadata-divider"></md-divider>
 
-        <div flex layout="row" layout-align="center stretch">
+        <div  flex layout="row" layout-align="center stretch"
+              class="project-source-selector-button">
           <div flex layout="row" layout-align="start center">
-            <!-- todo -->
-            <!-- che-button-delete-simple -->
-            <che-button-cancel-flat che-button-title="Remove"
-                                    name="removeButton"
-                                    ng-click="projectSourceSelectorController.removeTemplate()"></che-button-cancel-flat>
+            <che-button-danger che-button-title="Remove"
+                               name="removeButton"
+                               ng-click="projectSourceSelectorController.removeTemplate()"></che-button-danger>
           </div>
           <div flex layout="row" layout-align="end center">
-            <!-- todo -->
-            <!-- che-button-cancel-simple -->
             <che-button-cancel-flat che-button-title="Cancel"
                                     name="cancelButton"
                                     ng-click="projectSourceSelectorController.restoreMetadata()"></che-button-cancel-flat>
-            <!-- todo -->
-            <!-- che-button-primary-simple -->
             <che-button-primary che-button-title="Save"
                                 name="saveButton"
                                 ng-disabled="projectTemplateForm.$invalid"
