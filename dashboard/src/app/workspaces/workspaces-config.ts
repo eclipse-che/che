@@ -62,6 +62,10 @@ import {ImportGitProject} from './create-workspace/project-source-selector/impor
 import {ImportZipProjectController} from './create-workspace/project-source-selector/import-zip-project/import-zip-project.controller';
 import {ImportZipProjectService} from './create-workspace/project-source-selector/import-zip-project/import-zip-project.service';
 import {ImportZipProject} from './create-workspace/project-source-selector/import-zip-project/import-zip-project.directive';
+import {ImportGithubProjectController} from './create-workspace/project-source-selector/import-github-project/import-github-project.controller';
+import {ImportGithubProjectService} from './create-workspace/project-source-selector/import-github-project/import-github-project.service';
+import {ImportGithubProject} from './create-workspace/project-source-selector/import-github-project/import-github-project.directive';
+import {GithubRepositoryItem} from './create-workspace/project-source-selector/import-github-project/github-repository-item/github-repository-item.directive';
 import {TemplateSelectorController} from './create-workspace/project-source-selector/template-selector/template-selector.controller';
 import {TemplateSelectorSvc} from './create-workspace/project-source-selector/template-selector/template-selector.service';
 import {TemplateSelector} from './create-workspace/project-source-selector/template-selector/template-selector.directive';
@@ -188,6 +192,10 @@ export class WorkspacesConfig {
     register.controller('ImportGitProjectController', ImportGitProjectController);
     register.service('importGitProjectService', ImportGitProjectService);
     register.directive('importGitProject', ImportGitProject);
+    register.controller('ImportGithubProjectController', ImportGithubProjectController);
+    register.service('importGithubProjectService', ImportGithubProjectService);
+    register.directive('importGithubProject', ImportGithubProject);
+    register.directive('githubRepositoryItem', GithubRepositoryItem);
     register.controller('ImportZipProjectController', ImportZipProjectController);
     register.service('importZipProjectService', ImportZipProjectService);
     register.directive('importZipProject', ImportZipProject);
