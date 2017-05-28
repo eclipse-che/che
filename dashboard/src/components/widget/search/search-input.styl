@@ -16,8 +16,11 @@
   i:before
     font-size 16px
 
-  .search-icon i
-    color darken($stroke-color, 17%) !important
+  .search-icon
+    padding-left 10px
+
+    i
+      color darken($stroke-color, 17%) !important
 
   .close-icon i
     color $default-color
@@ -38,16 +41,16 @@
   .search-input input::-webkit-input-placeholder
     position relative
     right 8px
-    color $label-secondary-color
+    color $list-action-color
     text-transform capitalize
-    text-align center
+    text-align right
 
   .search-input input::-moz-placeholder
     position relative
     right 8px
-    color $label-secondary-color
+    color $list-action-color
     text-transform capitalize
-    text-align center
+    text-align right
 
   & > *
     margin 0 5px 0 5px
