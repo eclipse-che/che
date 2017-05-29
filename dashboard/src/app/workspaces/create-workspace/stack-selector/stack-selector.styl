@@ -21,25 +21,40 @@
           font-size 28px
 
   .stack-selector-list
+    background-color $stack-selector-list-header-background
+    border-top 1px solid $stack-selector-list-header-border
+    border-radius 2px
     margin-top 20px
 
-    md-content
+    & > div
+      position relative
+      margin-top 40px
       che-box-shadow()
+
+      & > div
+        overflow-y auto
+        max-height 307px
+
+      .che-list-header
+        .che-list-header-additional
+          display none
+        .che-list-item-row
+          margin -40px 0 0 0
+        .che-list-header-column > *
+          position absolute
+          line-height 40px
+          top -40px
+
+      .che-list-content
+        .stack-selector-item-ram-offset
+          line-height 50px
+        .stack-selector-item-icon
+          line-height inherit
 
     .stack-selector-icon-column
       width 100px !important
 
-    .stack-selector-title-ram-offset
-      padding-left 89px
-
-    .stack-selector-list-header
-      border 1px solid $stack-selector-list-header-border
-      border-bottom none
-      border-radius 2px 2px 0 0
-      background-color $stack-selector-list-header-background
-
     .stack-selector-stack-list
-      max-height 500px
       margin 0
 
       .che-list
