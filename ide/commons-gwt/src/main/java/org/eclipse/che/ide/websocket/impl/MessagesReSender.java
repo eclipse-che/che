@@ -33,46 +33,47 @@ public class MessagesReSender {
     private final Map<String, List<String>> messageRegistry = new HashMap<>();
 
     private final WebSocketConnectionManager connectionManager;
+    private final UrlResolver                urlResolver;
+
 
     @Inject
-    public MessagesReSender(WebSocketConnectionManager connectionManager) {
+    public MessagesReSender(WebSocketConnectionManager connectionManager, UrlResolver urlResolver) {
         this.connectionManager = connectionManager;
+        this.urlResolver = urlResolver;
     }
 
     /**
      * Add message that is to be sent when a connection defined be the URL
      * is opened again.
      *
-     * @param url
-     *         url of a web socket connection
+     * @param endpointId
+     *         endpointId of websocket connection
      * @param message
      *         plain text message
      */
-    public void add(String url, String message) {
-        if (!messageRegistry.containsKey(url)) {
-            final LinkedList<String> newList = new LinkedList<>();
-            messageRegistry.put(url, newList);
-        }
+    public void add(String endpointId, String message) {
+        List<String> messages = messageRegistry.computeIfAbsent(endpointId, k -> new LinkedList<>());
 
-        final List<String> webSocketTransmissions = messageRegistry.get(url);
-        if (webSocketTransmissions.size() <= MAX_MESSAGES) {
-            webSocketTransmissions.add(message);
+        if (messages.size() <= MAX_MESSAGES) {
+            messages.add(message);
         }
     }
 
     public void reSend(String url) {
-        if (!messageRegistry.containsKey(url)) {
+        String endpointId = urlResolver.resolve(url);
+
+        if (!messageRegistry.containsKey(endpointId)) {
             return;
         }
 
-        final List<String> messages = messageRegistry.get(url);
+        List<String> messages = messageRegistry.get(endpointId);
         if (messages.isEmpty()) {
             return;
         }
 
-        Log.info(getClass(), "Going to resend websocket messaged: " + messages);
+        Log.debug(getClass(), "Going to resend websocket messaged: " + messages);
 
-        final List<String> backing = new ArrayList<>(messages);
+        List<String> backing = new ArrayList<>(messages);
         messages.clear();
 
         for (String message : backing) {

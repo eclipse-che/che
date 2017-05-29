@@ -23,6 +23,8 @@ import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.LanguageServ
 import org.eclipse.che.plugin.languageserver.ide.editor.signature.LanguageServerSignatureHelpFactory;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
+import org.eclipse.che.plugin.languageserver.ide.service.PublishDiagnosticsReceiver;
+import org.eclipse.che.plugin.languageserver.ide.service.ShowMessageJsonRpcReceiver;
 
 /**
  * @author Anatolii Bazko
@@ -41,6 +43,9 @@ public class LanguageServerGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(LanguageServerReconcileStrategyFactory.class));
         install(new GinFactoryModuleBuilder().build(LanguageServerSignatureHelpFactory.class));
         bind(LanguageServerRegistry.class);
+
+        bind(PublishDiagnosticsReceiver.class).asEagerSingleton();
+        bind(ShowMessageJsonRpcReceiver.class).asEagerSingleton();
     }
 
 }

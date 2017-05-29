@@ -531,6 +531,7 @@ public class DockerConnector {
      */
     public Exec createExec(final CreateExecParams params) throws IOException {
         final ExecConfig execConfig = new ExecConfig().withCmd(params.getCmd())
+                                                      .withUser(params.getUser())
                                                       .withAttachStderr(params.isDetach() == Boolean.FALSE)
                                                       .withAttachStdout(params.isDetach() == Boolean.FALSE);
         byte[] entityBytesArray = toJson(execConfig).getBytes(StandardCharsets.UTF_8);

@@ -28,7 +28,7 @@ class WorkspaceStatusEventHandler {
                     .methodName("event:workspace-status:changed")
                     .paramsAsDto(WorkspaceStatusEvent.class)
                     .noResult()
-                    .withConsumer((endpointId, event) -> {
+                    .withBiConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
                         // Since WorkspaceStatusEventHandler instantiated by GIN eagerly,

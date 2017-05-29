@@ -67,7 +67,7 @@ public class MachineStatusJsonRpcMessenger implements EventSubscriber<MachineSta
                     .methodName("machine/subscribe")
                     .paramsAsString()
                     .noResult()
-                    .withConsumer((endpointId, workspaceId) -> {
+                    .withBiConsumer((endpointId, workspaceId) -> {
                         endpointIds.putIfAbsent(endpointId, newConcurrentHashSet());
                         endpointIds.get(endpointId).add(workspaceId);
                     });
@@ -79,7 +79,7 @@ public class MachineStatusJsonRpcMessenger implements EventSubscriber<MachineSta
                     .methodName("machine/unSubscribe")
                     .paramsAsString()
                     .noResult()
-                    .withConsumer((endpointId, workspaceId) -> {
+                    .withBiConsumer((endpointId, workspaceId) -> {
                         Set<String> workspaceIds = endpointIds.get(endpointId);
                         if (workspaceIds != null) {
                             workspaceIds.remove(workspaceId);
