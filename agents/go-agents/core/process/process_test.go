@@ -21,7 +21,7 @@ import (
 
 	"fmt"
 	"github.com/eclipse/che/agents/go-agents/core/process"
-	"sync"
+	"github.com/eclipse/che/agents/go-agents/core/process/processtest"
 )
 
 const (
@@ -193,7 +193,7 @@ func TestReadProcessLogs(t *testing.T) {
 }
 
 func TestLogsAreNotWrittenIfLogsDirIsNotSet(t *testing.T) {
-	p := doStartAndWaitTestProcess(testCmd, "", &eventsCaptor{deathEventType: process.DiedEventType}, t)
+	p := doStartAndWaitTestProcess(testCmd, "", processtest.NewEventsCaptor(process.DiedEventType), t)
 
 	_, err := process.ReadAllLogs(p.Pid)
 	if err == nil {
@@ -207,7 +207,7 @@ func TestLogsAreNotWrittenIfLogsDirIsNotSet(t *testing.T) {
 }
 
 func TestAllProcessLifeCycleEventsArePublished(t *testing.T) {
-	eventsCaptor := &eventsCaptor{deathEventType: process.DiedEventType}
+	eventsCaptor := processtest.NewEventsCaptor(process.DiedEventType)
 	doStartAndWaitTestProcess("printf \"first_line\nsecond_line\"", "", eventsCaptor, t)
 
 	expected := []string{
@@ -216,18 +216,19 @@ func TestAllProcessLifeCycleEventsArePublished(t *testing.T) {
 		process.StdoutEventType,
 		process.DiedEventType,
 	}
-	checkEventsOrder(t, eventsCaptor.events, expected...)
+	checkEventsOrder(t, eventsCaptor.Events(), expected...)
 }
 
 func TestProcessExitCodeIs0IfFinishedOk(t *testing.T) {
-	captor := &eventsCaptor{deathEventType: process.DiedEventType}
+	captor := processtest.NewEventsCaptor(process.DiedEventType)
 	p := doStartAndWaitTestProcess("echo test", "", captor, t)
 
 	if p.ExitCode != 0 {
 		t.Fatalf("Expected process exit code to be 0, but it is %d", p.ExitCode)
 	}
 
-	if diedEvent, ok := captor.events[len(captor.events)-1].(*process.DiedEvent); !ok {
+	events := captor.Events()
+	if diedEvent, ok := events[len(events)-1].(*process.DiedEvent); !ok {
 		t.Fatalf("Expected last captured event to be process died event, but it is %s", diedEvent.Type())
 	} else if diedEvent.ExitCode != 0 {
 		t.Fatalf("Expected process died event exit code to be 0, but it is %d", diedEvent.ExitCode)
@@ -235,7 +236,7 @@ func TestProcessExitCodeIs0IfFinishedOk(t *testing.T) {
 }
 
 func TestProcessExitCodeIsNot0IfFinishedNotOk(t *testing.T) {
-	captor := &eventsCaptor{deathEventType: process.DiedEventType}
+	captor := processtest.NewEventsCaptor(process.DiedEventType)
 	// starting non-existing command(hopefully)
 	p := doStartAndWaitTestProcess("test-process-cmd-"+randomName(10), "", captor, t)
 
@@ -243,7 +244,8 @@ func TestProcessExitCodeIsNot0IfFinishedNotOk(t *testing.T) {
 		t.Fatalf("Expected process exit code to be > 0, but it is %d", p.ExitCode)
 	}
 
-	if diedEvent, ok := captor.events[len(captor.events)-1].(*process.DiedEvent); !ok {
+	events := captor.Events()
+	if diedEvent, ok := events[len(events)-1].(*process.DiedEvent); !ok {
 		t.Fatalf("Expected last captured event to be process died event, but it is %s", diedEvent.Type())
 	} else if diedEvent.ExitCode <= 0 {
 		t.Fatalf("Expected process died event exit code to be > 0, but it is %d", diedEvent.ExitCode)
@@ -266,19 +268,19 @@ func failIfEventTypeIsDifferent(t *testing.T, event process.Event, expectedType 
 }
 
 func startAndWaitTestProcess(cmd string, t *testing.T) process.MachineProcess {
-	p := doStartAndWaitTestProcess(cmd, "", &eventsCaptor{deathEventType: process.DiedEventType}, t)
+	p := doStartAndWaitTestProcess(cmd, "", processtest.NewEventsCaptor(process.DiedEventType), t)
 	return p
 }
 
 func startAndWaitTestProcessWritingLogsToTmpDir(cmd string, t *testing.T) process.MachineProcess {
-	p := doStartAndWaitTestProcess(cmd, tmpFile(), &eventsCaptor{deathEventType: process.DiedEventType}, t)
+	p := doStartAndWaitTestProcess(cmd, tmpFile(), processtest.NewEventsCaptor(process.DiedEventType), t)
 	return p
 }
 
-func doStartAndWaitTestProcess(cmd string, logsDir string, eventsCaptor *eventsCaptor, t *testing.T) process.MachineProcess {
+func doStartAndWaitTestProcess(cmd string, logsDir string, eventsCaptor *processtest.EventsCaptor, t *testing.T) process.MachineProcess {
 	process.SetLogsDir(logsDir)
 
-	eventsCaptor.capture()
+	eventsCaptor.Capture()
 
 	pb := process.NewBuilder()
 	pb.CmdName("test")
@@ -288,12 +290,12 @@ func doStartAndWaitTestProcess(cmd string, logsDir string, eventsCaptor *eventsC
 
 	p, err := pb.Start()
 	if err != nil {
-		eventsCaptor.wait(0)
+		eventsCaptor.Wait(0)
 		t.Fatal(err)
 	}
 
 	// wait process for a little while
-	if ok := <-eventsCaptor.wait(time.Second * 2); !ok {
+	if ok := <-eventsCaptor.Wait(time.Second * 2); !ok {
 		t.Log("The process doesn't finish its execution in 2 seconds. Trying to kill it")
 		if err := process.Kill(p.Pid); err != nil {
 			t.Logf("Failed to kill process, native pid = %d", p.NativePid)
@@ -328,81 +330,6 @@ func randomName(length int) string {
 	}
 	return string(bytes)
 }
-
-// Helps to capture process events and wait for them.
-type eventsCaptor struct {
-	sync.Mutex
-
-	// Result events.
-	events []process.Event
-
-	// Events channel. Close of this channel considered as immediate interruption,
-	// to hold until execution completes use captor.wait(timeout) channel.
-	eventsChan chan process.Event
-
-	// Channel used as internal approach to interrupt capturing.
-	interruptChan chan bool
-
-	// Captor sends true if finishes reaching deathEventType
-	// and false if interrupted while waiting for event of deathEventType.
-	done chan bool
-
-	// The last event after which events capturing stopped.
-	deathEventType string
-}
-
-func (ec *eventsCaptor) addEvent(e process.Event) {
-	ec.Lock()
-	defer ec.Unlock()
-	ec.events = append(ec.events, e)
-}
-
-func (ec *eventsCaptor) capturedEvents() []process.Event {
-	ec.Lock()
-	defer ec.Unlock()
-	cp := make([]process.Event, len(ec.events))
-	copy(cp, ec.events)
-	return cp
-}
-
-func (ec *eventsCaptor) capture() {
-	ec.eventsChan = make(chan process.Event)
-	ec.interruptChan = make(chan bool)
-	ec.done = make(chan bool)
-
-	go func() {
-		for {
-			select {
-			case event, ok := <-ec.eventsChan:
-				if ok {
-					ec.addEvent(event)
-					if event.Type() == ec.deathEventType {
-						// death event reached - capturing is done
-						ec.done <- true
-						return
-					}
-				} else {
-					// events channel closed interrupt immediately
-					ec.done <- false
-					return
-				}
-			case <-ec.interruptChan:
-				close(ec.eventsChan)
-			}
-		}
-	}()
-}
-
-// Waits a timeout and if deadTypeEvent wasn't reached interrupts captor.
-func (ec *eventsCaptor) wait(timeout time.Duration) chan bool {
-	go func() {
-		<-time.NewTimer(timeout).C
-		ec.interruptChan <- true
-	}()
-	return ec.done
-}
-
-func (ec *eventsCaptor) Accept(e process.Event) { ec.eventsChan <- e }
 
 // A consumer that redirects all the incoming events to the channel.
 type channelEventConsumer struct {
