@@ -25,7 +25,7 @@ class EnvironmentStatusEventHandler {
     @Inject
     void configureEnvironmentStatusHandler(RequestHandlerConfigurator configurator, Provider<EnvironmentStatusHandler> handlerProvider) {
         configurator.newConfiguration()
-                    .methodName("event:environment-status:changed")
+                    .methodName("machine/statusChanged")
                     .paramsAsDto(MachineStatusEvent.class)
                     .noResult()
                     .withBiConsumer((endpointId, event) -> {

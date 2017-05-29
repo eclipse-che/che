@@ -10,94 +10,34 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.event;
 
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.core.notification.RemoteSubscriptionManager;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.google.common.collect.Sets.newConcurrentHashSet;
-
 /**
  * Send workspace events using JSON RPC to the clients
  */
 @Singleton
-public class MachineStatusJsonRpcMessenger implements EventSubscriber<MachineStatusEvent> {
-    private final RequestTransmitter transmitter;
-    private final EventService       eventService;
-
-    private final Map<String, Set<String>> endpointIds = new ConcurrentHashMap<>();
+public class MachineStatusJsonRpcMessenger {
+    private final RemoteSubscriptionManager remoteSubscriptionManager;
 
     @Inject
-    public MachineStatusJsonRpcMessenger(RequestTransmitter transmitter, EventService eventService) {
-        this.transmitter = transmitter;
-        this.eventService = eventService;
-    }
-
-    @Override
-    public void onEvent(MachineStatusEvent event) {
-        send(event);
-    }
-
-    public void send(MachineStatusEvent event) {
-        String id = event.getIdentity().getWorkspaceId();
-        endpointIds.entrySet()
-                   .stream()
-                   .filter(it -> it.getValue().contains(id))
-                   .map(Map.Entry::getKey)
-                   .forEach(it -> transmitter.newRequest()
-                                             .endpointId(it)
-                                             .methodName("machine/statusChanged")
-                                             .paramsAsDto(event)
-                                             .sendAndSkipResult());
-    }
-
-    @Inject
-    private void configureSubscribeHandler(RequestHandlerConfigurator configurator) {
-
-        configurator.newConfiguration()
-                    .methodName("machine/subscribe")
-                    .paramsAsString()
-                    .noResult()
-                    .withBiConsumer((endpointId, workspaceId) -> {
-                        endpointIds.putIfAbsent(endpointId, newConcurrentHashSet());
-                        endpointIds.get(endpointId).add(workspaceId);
-                    });
-    }
-
-    @Inject
-    private void configureUnSubscribeHandler(RequestHandlerConfigurator configurator) {
-        configurator.newConfiguration()
-                    .methodName("machine/unSubscribe")
-                    .paramsAsString()
-                    .noResult()
-                    .withBiConsumer((endpointId, workspaceId) -> {
-                        Set<String> workspaceIds = endpointIds.get(endpointId);
-                        if (workspaceIds != null) {
-                            workspaceIds.remove(workspaceId);
-
-                            if (workspaceIds.isEmpty()) {
-                                endpointIds.remove(endpointId);
-                            }
-                        }
-                    });
+    public MachineStatusJsonRpcMessenger(RemoteSubscriptionManager remoteSubscriptionManager) {
+        this.remoteSubscriptionManager = remoteSubscriptionManager;
     }
 
     @PostConstruct
-    private void subscribe() {
-        eventService.subscribe(this);
+    private void postConstruct() {
+        remoteSubscriptionManager.register("machine/statusChanged", MachineStatusEvent.class, this::predicate);
     }
 
-    @PreDestroy
-    private void unsubscribe() {
-        eventService.unsubscribe(this);
+    private boolean predicate(MachineStatusEvent event, Map<String, String> scope) {
+        return event.getIdentity().getWorkspaceId().equals(scope.get("workspaceId"));
     }
 }
