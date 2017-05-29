@@ -31,7 +31,7 @@ import java.util.Objects;
  * @author Anton Korneta
  */
 @Entity(name = "Ide")
-@Table(name = "ide")
+@Table(name = "che_factory_ide")
 public class IdeImpl implements Ide {
 
     @Id
@@ -40,15 +40,15 @@ public class IdeImpl implements Ide {
     private Long id;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "onapploaded_id")
+    @JoinColumn(name = "on_app_loaded_id")
     private OnAppLoadedImpl onAppLoaded;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "onprojectsloaded_id")
+    @JoinColumn(name = "on_projects_loaded_id")
     private OnProjectsLoadedImpl onProjectsLoaded;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "onappclosed_id")
+    @JoinColumn(name = "on_app_closed_id")
     private OnAppClosedImpl onAppClosed;
 
     public IdeImpl() {}

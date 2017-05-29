@@ -226,4 +226,22 @@ declare namespace _che {
     label: string;
     location: string;
   }
+
+  export interface IUser {
+    id: string;
+    name: string;
+    email: string;
+    aliases: Array<string>;
+  }
+
+  export interface IFactory {
+    id: string;
+    name?: string;
+    v: string;
+    workspace: IWorkspaceConfig;
+    creator: any;
+    ide?: any;
+    button?: any;
+    policies?: any;
+  }
 }

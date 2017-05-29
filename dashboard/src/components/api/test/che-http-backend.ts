@@ -30,6 +30,14 @@ export class CheHttpBackend {
   private defaultProfilePrefs: any;
   private defaultBranding: any;
   private defaultPreferences: any;
+  private defaultUser: che.IUser;
+  private userIdMap: Map<string, che.IUser>;
+  private userEmailMap: Map<string, che.IUser>;
+  private factoriesMap: Map<string, che.IFactory>;
+  private pageMaxItem: number;
+  private pageSkipCount: number;
+
+
 
   private   isAutoSnapshot: boolean = false;
   private   isAutoRestore: boolean = false;
@@ -49,6 +57,13 @@ export class CheHttpBackend {
     this.projectTypesWorkspaces = new Map();
     this.workspaceAgentMap = new Map();
     this.stacks = [];
+
+    this.defaultUser = {};
+    this.userIdMap = new Map();
+    this.userEmailMap = new Map();
+    this.factoriesMap = new Map();
+    this.pageMaxItem = 5;
+    this.pageSkipCount = 0;
 
     this.defaultProfile = cheAPIBuilder.getProfileBuilder().withId('idDefaultUser').withEmail('eclipseChe@eclipse.org').withFirstName('FirstName').withLastName('LastName').build();
     this.defaultProfilePrefs = {};
@@ -112,6 +127,27 @@ export class CheHttpBackend {
 
     this.httpBackend.when('POST', '/api/analytics/log/session-usage').respond(200, {});
 
+    // change password
+    this.httpBackend.when('POST', '/api/user/password').respond(() => {
+      return [200, {success: true, errors: []}];
+    });
+
+    // create new user
+    this.httpBackend.when('POST', '/api/user').respond(() => {
+      return [200, {success: true, errors: []}];
+    });
+
+    this.httpBackend.when('GET', '/api/user').respond(this.defaultUser);
+
+    let userIdKeys = this.userIdMap.keys();
+    for (let key of userIdKeys) {
+      this.httpBackend.when('GET', '/api/user/' + key).respond(this.userIdMap.get(key));
+    }
+
+    let userEmailKeys = this.userEmailMap.keys();
+    for (let key of userEmailKeys) {
+      this.httpBackend.when('GET', '/api/user/find?email=' + key).respond(this.userEmailMap.get(key));
+    }
   }
 
   /**
@@ -386,4 +422,84 @@ export class CheHttpBackend {
     this.httpBackend.when('POST', this.workspaceAgentMap.get(workspaceId) + '/svn/info?workspaceId='+workspaceId).respond(svnInfo);
   }
 
+  /**
+   * Setup Backend for factories
+   */
+  factoriesBackendSetup() {
+    this.setup();
+
+    let allFactories = [];
+    let pageFactories = [];
+
+    let factoriesKeys = this.factoriesMap.keys();
+    for (let key of factoriesKeys) {
+      let factory = this.factoriesMap.get(key);
+      this.httpBackend.when('GET', '/api/factory/' + factory.id).respond(factory);
+      this.httpBackend.when('DELETE', '/api/factory/' + factory.id).respond(() => {
+        return [200, {success: true, errors: []}];
+      });
+      allFactories.push(factory);
+    }
+
+    if (this.defaultUser) {
+      this.httpBackend.when('GET', '/api/user').respond(this.defaultUser);
+
+      if (allFactories.length >  this.pageSkipCount) {
+        if(allFactories.length > this.pageSkipCount + this.pageMaxItem) {
+          pageFactories = allFactories.slice(this.pageSkipCount, this.pageSkipCount + this.pageMaxItem);
+        } else {
+          pageFactories = allFactories.slice(this.pageSkipCount);
+        }
+      }
+      this.httpBackend.when('GET', '/api/factory/find?creator.userId=' + this.defaultUser.id + '&maxItems=' + this.pageMaxItem + '&skipCount=' + this.pageSkipCount).respond(pageFactories);
+    }
+  }
+
+  /**
+   * Add the given factory
+   * @param factory
+   */
+  addUserFactory(factory) {
+    this.factoriesMap.set(factory.id, factory);
+  }
+
+  /**
+   * Sets max objects on response
+   * @param pageMaxItem
+   */
+  setPageMaxItem(pageMaxItem) {
+    this.pageMaxItem = pageMaxItem;
+  }
+
+  /**
+   * Sets skip count of values
+   * @param pageSkipCount
+   */
+  setPageSkipCount(pageSkipCount) {
+    this.pageSkipCount = pageSkipCount;
+  }
+
+  /**
+   * Add the given user
+   * @param user
+   */
+  setDefaultUser(user) {
+    this.defaultUser = user;
+  }
+
+  /**
+   * Add the given user to userIdMap
+   * @param user
+   */
+  addUserById(user) {
+    this.userIdMap.set(user.id, user);
+  }
+
+  /**
+   * Add the given user to userEmailMap
+   * @param user
+   */
+  addUserEmail(user) {
+    this.userEmailMap.set(user.email, user);
+  }
 }
