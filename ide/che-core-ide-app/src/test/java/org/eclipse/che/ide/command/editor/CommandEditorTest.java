@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -45,7 +44,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
@@ -176,8 +174,6 @@ public class CommandEditorTest {
     public void shouldSaveCommand() throws Exception {
         when(commandManager.updateCommand(anyString(), eq(editor.editedCommand))).thenReturn(commandPromise);
         when(commandPromise.then(any(Operation.class))).thenReturn(commandPromise);
-        EditorPartPresenter editorPartPresenter = Mockito.mock(EditorPartPresenter.class);
-        when(editorAgent.getActiveEditor()).thenReturn(editorPartPresenter);
 
         editor.doSave();
 
@@ -186,7 +182,6 @@ public class CommandEditorTest {
         operationCaptor.getValue().apply(editedCommand);
 
         verify(view).setSaveEnabled(false);
-        verify(editorPartPresenter).onFileChanged();
     }
 
     @Test(expected = OperationException.class)

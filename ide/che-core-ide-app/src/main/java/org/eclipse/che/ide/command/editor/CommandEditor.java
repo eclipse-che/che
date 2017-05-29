@@ -31,7 +31,6 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -220,8 +219,6 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     @Override
     public void doSave(AsyncCallback<EditorInput> callback) {
         commandManager.updateCommand(initialCommandName, editedCommand).then(arg -> {
-            updateDirtyState(false);
-
             // according to the CommandManager#updateCommand contract
             // command's name after updating may differ from the proposed name
             // in order to prevent name duplication
@@ -229,12 +226,10 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
             if (!initialCommandName.equals(editedCommand.getName())) {
                 input.setFile(nodeFactory.newCommandFileNode(editedCommand));
+                initialCommandName = editedCommand.getName();
             }
 
-            final EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-            if (activeEditor != null) {
-                activeEditor.onFileChanged();
-            }
+            updateDirtyState(false);
 
             view.setSaveEnabled(false);
 
