@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandProducer;
-import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
 /**
  * Action for executing command which produced by {@link CommandProducer}.
@@ -29,18 +28,15 @@ import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 public class CommandProducerAction extends Action {
 
     private final CommandProducer commandProducer;
-    private final MachineImpl     machine;
     private final CommandExecutor commandExecutor;
 
     @Inject
     public CommandProducerAction(@Assisted String name,
                                  @Assisted CommandProducer commandProducer,
-                                 @Assisted MachineImpl machine,
                                  CommandExecutor commandExecutor) {
         super(name);
 
         this.commandProducer = commandProducer;
-        this.machine = machine;
         this.commandExecutor = commandExecutor;
     }
 
@@ -51,7 +47,7 @@ public class CommandProducerAction extends Action {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        CommandImpl command = commandProducer.createCommand(machine);
-        commandExecutor.executeCommand(command, machine);
+        CommandImpl command = commandProducer.createCommand();
+        commandExecutor.executeCommand(command);
     }
 }

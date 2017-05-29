@@ -25,7 +25,6 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Folder;
@@ -81,8 +80,6 @@ public abstract class BaseTest {
     protected Project                 project;
     @Mock
     protected AppContext              appContext;
-    @Mock
-    protected DevMachine              devMachine;
     @Mock
     protected GitServiceClient        service;
     @Mock
