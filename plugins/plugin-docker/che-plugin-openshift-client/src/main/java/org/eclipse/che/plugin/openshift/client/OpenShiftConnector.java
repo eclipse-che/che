@@ -68,6 +68,7 @@ import org.eclipse.che.plugin.docker.client.json.NetworkCreated;
 import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
 import org.eclipse.che.plugin.docker.client.json.network.ContainerInNetwork;
+import org.eclipse.che.plugin.docker.client.json.network.EndpointConfig;
 import org.eclipse.che.plugin.docker.client.json.network.Ipam;
 import org.eclipse.che.plugin.docker.client.json.network.IpamConfig;
 import org.eclipse.che.plugin.docker.client.json.network.Network;
@@ -167,6 +168,7 @@ public class OpenShiftConnector extends DockerConnector {
     private static final String CHE_CONTAINER_IDENTIFIER_LABEL_KEY       = "cheContainerIdentifier";
     private static final String CHE_DEFAULT_EXTERNAL_ADDRESS             = "172.17.0.1";
     private static final String CHE_WORKSPACE_ID_ENV_VAR                 = "CHE_WORKSPACE_ID";
+    private static final String CHE_IS_DEV_MACHINE_ENV_VAR               = "CHE_IS_DEV_MACHINE";
     private static final int CHE_WORKSPACE_AGENT_PORT                    = 4401;
     private static final int CHE_TERMINAL_AGENT_PORT                     = 4411;
     private static final String DOCKER_PROTOCOL_PORT_DELIMITER           = "/";
@@ -303,9 +305,6 @@ public class OpenShiftConnector extends DockerConnector {
         String containerName = KubernetesStringUtils.convertToContainerName(createContainerParams.getContainerName());
         String workspaceID = getCheWorkspaceId(createContainerParams);
 
-        // Generate workspaceID if CHE_WORKSPACE_ID env var does not exist
-        workspaceID = workspaceID.isEmpty() ? KubernetesStringUtils.generateWorkspaceID() : workspaceID;
-
         // imageForDocker is the docker version of the image repository. It's needed for other
         // OpenShiftConnector API methods, but is not acceptable as an OpenShift name
         String imageForDocker = createContainerParams.getContainerConfig().getImage();
@@ -350,7 +349,10 @@ public class OpenShiftConnector extends DockerConnector {
         String[] volumes = createContainerParams.getContainerConfig().getHostConfig().getBinds();
 
         Map<String, String> additionalLabels = createContainerParams.getContainerConfig().getLabels();
-
+        String networkName = createContainerParams.getContainerConfig().getHostConfig().getNetworkMode();
+        EndpointConfig endpointConfig = createContainerParams.getContainerConfig().getNetworkingConfig().getEndpointsConfig().get(networkName);
+        String[] endpointAliases = endpointConfig != null ? endpointConfig.getAliases() : new String[0];
+        
         Map<String, Quantity> resourceLimits = new HashMap<>();
         if (!isNullOrEmpty(cheWorkspaceMemoryLimit)) {
             LOG.info("Che property 'che.openshift.workspace.memory.override' "
@@ -368,18 +370,32 @@ public class OpenShiftConnector extends DockerConnector {
             resourceRequests.put("memory", new Quantity(cheWorkspaceMemoryRequest));
         }
 
+        String deploymentName;
+        String serviceName;
+        if (isDevMachine(createContainerParams)) {
+            serviceName = deploymentName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
+        } else {
+            if (endpointAliases.length > 0) {
+                serviceName = endpointAliases[0];
+                deploymentName = CHE_OPENSHIFT_RESOURCES_PREFIX + serviceName;
+            } else {
+                // Should never happen
+                serviceName = deploymentName = CHE_OPENSHIFT_RESOURCES_PREFIX + KubernetesStringUtils.generateWorkspaceID();
+            }
+        }
+        
         String containerID;
         OpenShiftClient openShiftClient = new DefaultOpenShiftClient();
-        try {
-            createOpenShiftService(workspaceID, exposedPorts, additionalLabels);
-            String deploymentName = createOpenShiftDeployment(workspaceID,
-                                                              dockerPullSpec,
-                                                              containerName,
-                                                              exposedPorts,
-                                                              envVariables,
-                                                              volumes,
-                                                              resourceLimits,
-                                                              resourceRequests);
+        try {            
+            createOpenShiftService(deploymentName, serviceName, exposedPorts, additionalLabels, endpointAliases);
+            createOpenShiftDeployment(deploymentName,
+                                                dockerPullSpec,
+                                                containerName,
+                                                exposedPorts,
+                                                envVariables,
+                                                volumes,
+                                                resourceLimits,
+                                                resourceRequests);
 
             containerID = waitAndRetrieveContainerID(deploymentName);
             if (containerID == null) {
@@ -390,7 +406,6 @@ public class OpenShiftConnector extends DockerConnector {
             // in an inconsistent state.
             LOG.info("Error while creating Pod, removing deployment");
             LOG.info(e.getMessage());
-            String deploymentName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
             cleanUpWorkspaceResources(deploymentName);
             openShiftClient.resource(imageStreamTag).delete();
             throw e;
@@ -1096,13 +1111,20 @@ public class OpenShiftConnector extends DockerConnector {
         return workspaceID.replaceFirst("workspace","");
     }
 
-    private void createOpenShiftService(String workspaceID,
+    private boolean isDevMachine(CreateContainerParams createContainerParams) {
+        Stream<String> env = Arrays.stream(createContainerParams.getContainerConfig().getEnv());
+        return Boolean.parseBoolean(env.filter(v -> v.startsWith(CHE_IS_DEV_MACHINE_ENV_VAR) && v.contains("="))
+                                .map(v -> v.split("=",2)[1])
+                                .findFirst()
+                                .orElse("false"));
+    }
+    
+    private void createOpenShiftService(String deploymentName,
+                                        String serviceName,
                                         Set<String> exposedPorts,
-                                        Map<String, String> additionalLabels) {
-
-        String serviceName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
-
-        Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, serviceName);
+                                        Map<String, String> additionalLabels,
+                                        String[] endpointAliases) {
+        Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
         List<ServicePort> ports = KubernetesService.getServicePortsFrom(exposedPorts);
 
         try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
@@ -1123,19 +1145,25 @@ public class OpenShiftConnector extends DockerConnector {
             LOG.info("OpenShift service {} created", service.getMetadata().getName());
 
             for (ServicePort port : ports) {
-                createOpenShiftRoute(serviceName, port.getName(), workspaceID);
+                createOpenShiftRoute(serviceName, deploymentName, port.getName());
             }
         }
     }
 
     private void createOpenShiftRoute(String serviceName,
-                                      String serverRef,
-                                      String workspaceName) {
-
-        OpenShiftRouteCreator.createRoute(openShiftCheProjectName, workspaceName, cheServerExternalAddress, serverRef, serviceName, secureRoutes);
+                                      String deploymentName,
+                                      String serverRef) {
+        String routeId = serviceName.replaceFirst(CHE_OPENSHIFT_RESOURCES_PREFIX, "");
+        OpenShiftRouteCreator.createRoute(openShiftCheProjectName, 
+                                          cheServerExternalAddress, 
+                                          serverRef, 
+                                          serviceName, 
+                                          deploymentName, 
+                                          routeId, 
+                                          secureRoutes);
     }
 
-    private String createOpenShiftDeployment(String workspaceID,
+    private void createOpenShiftDeployment(String deploymentName,
                                              String imageName,
                                              String sanitizedContainerName,
                                              Set<String> exposedPorts,
@@ -1144,7 +1172,6 @@ public class OpenShiftConnector extends DockerConnector {
                                              Map<String, Quantity> resourceLimits,
                                              Map<String, Quantity> resourceRequests) throws OpenShiftException {
 
-        String deploymentName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
         LOG.info("Creating OpenShift deployment {}", deploymentName);
 
         Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
@@ -1165,7 +1192,7 @@ public class OpenShiftConnector extends DockerConnector {
                                         .withPrivileged(false)
                                     .endSecurityContext()
                                     .withLivenessProbe(getLivenessProbeFrom(exposedPorts))
-                                    .withVolumeMounts(getVolumeMountsFrom(volumes, workspaceID))
+                                    .withVolumeMounts(getVolumeMountsFrom(volumes))
                                     .withNewResources()
                                         .withLimits(resourceLimits)
                                         .withRequests(resourceRequests)
@@ -1174,7 +1201,7 @@ public class OpenShiftConnector extends DockerConnector {
 
         PodSpec podSpec = new PodSpecBuilder()
                                  .withContainers(container)
-                                 .withVolumes(getVolumesFrom(volumes, workspaceID))
+                                 .withVolumes(getVolumesFrom(volumes))
                                  .build();
 
         Deployment deployment = new DeploymentBuilder()
@@ -1204,7 +1231,6 @@ public class OpenShiftConnector extends DockerConnector {
         }
 
         LOG.info("OpenShift deployment {} created", deploymentName);
-        return deployment.getMetadata().getName();
     }
 
     /**
@@ -1453,7 +1479,7 @@ public class OpenShiftConnector extends DockerConnector {
         return workspaceSubpath;
     }
 
-    private List<VolumeMount> getVolumeMountsFrom(String[] volumes, String workspaceID) {
+    private List<VolumeMount> getVolumeMountsFrom(String[] volumes) {
         List<VolumeMount> vms = new ArrayList<>();
         PersistentVolumeClaim pvc = getClaimCheWorkspace();
         if (pvc != null) {
@@ -1470,7 +1496,7 @@ public class OpenShiftConnector extends DockerConnector {
         return vms;
     }
 
-    private List<Volume> getVolumesFrom(String[] volumes, String workspaceID) {
+    private List<Volume> getVolumesFrom(String[] volumes) {
         List<Volume> vs = new ArrayList<>();
         PersistentVolumeClaim pvc = getClaimCheWorkspace();
         if (pvc != null) {
