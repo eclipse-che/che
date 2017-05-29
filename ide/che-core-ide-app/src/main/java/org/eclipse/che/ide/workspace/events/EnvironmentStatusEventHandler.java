@@ -28,7 +28,7 @@ class EnvironmentStatusEventHandler {
                     .methodName("event:environment-status:changed")
                     .paramsAsDto(MachineStatusEvent.class)
                     .noResult()
-                    .withConsumer((endpointId, event) -> {
+                    .withBiConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
                         // Since EnvironmentStatusEventHandler instantiated by GIN eagerly,

@@ -25,7 +25,6 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
-import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
 
@@ -82,12 +81,9 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
             Promise<ExtendedInitializeResult> promise =
                     registry.getOrInitializeServer(resource.getRelatedProject().get().getPath(), resource.getExtension(),
                                                    resource.getLocation().toString());
-            final MessageLoader loader = loaderFactory.newLoader("Initializing Language Server for " + resource.getExtension());
-            loader.show();
             return promise.thenPromise(new Function<ExtendedInitializeResult, Promise<EditorPartPresenter>>() {
                 @Override
                 public Promise<EditorPartPresenter> apply(ExtendedInitializeResult arg) throws FunctionException {
-                    loader.hide();
                     if (editorBuilder == null) {
                         Log.debug(AbstractTextEditorProvider.class, "No builder registered for default editor type - giving up.");
                         return Promises.<EditorPartPresenter>resolve(null);

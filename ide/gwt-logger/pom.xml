@@ -83,16 +83,13 @@
                                     <classifier>sources</classifier>
                                     <type>jar</type>
                                     <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.outputDirectory}/org/eclipse/che/ide/logger/slf4j/emulation
-                                    </outputDirectory>
-                                    <includes>
-                                        org/slf4j/helpers/FormattingTuple.java,
+                                    <outputDirectory>${project.build.outputDirectory}/org/eclipse/che/ide/logger/slf4j/emulation</outputDirectory>
+                                    <includes>org/slf4j/helpers/FormattingTuple.java,
                                         org/slf4j/helpers/MarkerIgnoringBase.java,
                                         org/slf4j/helpers/MessageFormatter.java,
                                         org/slf4j/ILoggerFactory.java,
                                         org/slf4j/Logger.java,
-                                        org/slf4j/Marker.java
-                                    </includes>
+                                        org/slf4j/Marker.java</includes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

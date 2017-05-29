@@ -28,7 +28,7 @@ class EnvironmentOutputHandler {
                     .methodName("event:environment-output:message")
                     .paramsAsDto(MachineLogMessageDto.class)
                     .noResult()
-                    .withConsumer((endpointId, log) -> {
+                    .withBiConsumer((endpointId, log) -> {
                         Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
                         eventBus.fireEvent(new EnvironmentOutputEvent(log.getContent(), log.getMachineName()));
                     });
