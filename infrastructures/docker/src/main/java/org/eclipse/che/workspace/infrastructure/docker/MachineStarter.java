@@ -135,6 +135,8 @@ public class MachineStarter {
     private final Set<String>                                   additionalNetworks;
     private final String                                        parentCgroup;
     private final String                                        cpusetCpus;
+    private final String                                        registry;
+    private final String                                        registryNamespace;
     private final long                                          cpuPeriod;
     private final long                                          cpuQuota;
     private final WindowsPathEscaper                            windowsPathEscaper;
@@ -153,6 +155,8 @@ public class MachineStarter {
                           @Named("che.docker.always_pull_image") boolean doForcePullImage,
                           @Named("che.docker.privileged") boolean privilegedMode,
                           @Named("che.docker.pids_limit") int pidsLimit,
+                          @Named("che.docker.registry") String registry,
+                          @Named("che.docker.namespace") @Nullable String registryNamespace,
                           @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
                           @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
                           @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
@@ -188,6 +192,8 @@ public class MachineStarter {
         this.cpuPeriod = cpuPeriod;
         this.cpuQuota = cpuQuota;
         this.windowsPathEscaper = windowsPathEscaper;
+        this.registryNamespace = registryNamespace;
+        this.registry = registry;
         this.pidsLimit = pidsLimit;
         this.dnsResolvers = dnsResolvers;
         this.buildArgs = buildArgs;
@@ -335,6 +341,9 @@ public class MachineStarter {
                                                       workspaceId);
 
             return new DockerMachine(docker,
+                                     registry,
+                                     registryNamespace,
+                                     snapshotUseRegistry,
                                      container,
                                      image,
                                      serverEvaluationStrategyProvider,
