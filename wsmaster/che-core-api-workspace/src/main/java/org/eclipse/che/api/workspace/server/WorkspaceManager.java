@@ -28,6 +28,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -334,7 +335,7 @@ public class WorkspaceManager {
         //final boolean autoRestore = restoreAttr == null ? defaultAutoRestore : parseBoolean(restoreAttr);
         //startAsync(workspace, envName, firstNonNull(restore, autoRestore));
         //&& !getSnapshot(workspaceId).isEmpty());
-        startAsync(workspace, envName, options);
+        startAsync(workspace, envName, options).complete(null);
         return normalizeState(workspace, true);
     }
 
@@ -483,16 +484,17 @@ public class WorkspaceManager {
         final String env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
 
         states.put(workspace.getId(), WorkspaceStatus.STARTING);
-        return runtimes.startAsync(workspace, env, firstNonNull(options, Collections.emptyMap()))
-                       .thenRunAsync(() -> {
-                           states.put(workspace.getId(), WorkspaceStatus.RUNNING);
+        Runnable afterStart = ThreadLocalPropagateContext.wrap(() -> {
+            states.put(workspace.getId(), WorkspaceStatus.RUNNING);
 
-                           LOG.info("Workspace '{}:{}' with id '{}' started by user '{}'",
-                                    workspace.getNamespace(),
-                                    workspace.getConfig().getName(),
-                                    workspace.getId(),
-                                    sessionUserNameOr("undefined"));
-                       })
+            LOG.info("Workspace '{}:{}' with id '{}' started by user '{}'",
+                     workspace.getNamespace(),
+                     workspace.getConfig().getName(),
+                     workspace.getId(),
+                     sessionUserNameOr("undefined"));
+        });
+        return runtimes.startAsync(workspace, env, firstNonNull(options, Collections.emptyMap()))
+                       .thenRunAsync(afterStart)
                        .exceptionally(ex -> {
                            if (workspace.isTemporary()) {
                                removeWorkspaceQuietly(workspace);

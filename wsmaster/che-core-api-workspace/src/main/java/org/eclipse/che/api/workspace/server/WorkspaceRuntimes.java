@@ -11,7 +11,7 @@
 package org.eclipse.che.api.workspace.server;
 
 import com.google.common.collect.ImmutableMap;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -20,6 +20,7 @@ import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
@@ -31,6 +32,7 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
@@ -204,10 +206,10 @@ public class WorkspaceRuntimes {
         }
 
         eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                        .withWorkspaceId(workspaceId)
-                                        .withStatus(WorkspaceStatus.STARTING)
-                                        .withEventType(EventType.STARTING)
-                                        .withPrevStatus(WorkspaceStatus.STOPPED));
+                                       .withWorkspaceId(workspaceId)
+                                       .withStatus(WorkspaceStatus.STARTING)
+                                       .withEventType(EventType.STARTING)
+                                       .withPrevStatus(WorkspaceStatus.STOPPED));
 
         Subject subject = EnvironmentContext.getCurrent().getSubject();
         RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, subject.getUserName());
@@ -221,24 +223,22 @@ public class WorkspaceRuntimes {
                         + RuntimeInfrastructure.class);
             }
             runtimes.put(workspaceId, runtime);
-
-            CompletableFuture<Void> completableFuture = new CompletableFuture();
-            completableFuture.thenRunAsync(() -> {
+            Runnable startWorkspace = ThreadLocalPropagateContext.wrap(() -> {
                 try {
                     runtimeContext.start(options);
 
 
                     eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                                    .withWorkspaceId(workspaceId)
-                                                    .withStatus(WorkspaceStatus.RUNNING)
-                                                    .withEventType(EventType.RUNNING)
-                                                    .withPrevStatus(WorkspaceStatus.STARTING));
+                                                   .withWorkspaceId(workspaceId)
+                                                   .withStatus(WorkspaceStatus.RUNNING)
+                                                   .withEventType(EventType.RUNNING)
+                                                   .withPrevStatus(WorkspaceStatus.STARTING));
                 } catch (InfrastructureException e) {
                     LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
-                    completableFuture.completeExceptionally(new InfrastructureException(e.getMessage(), e));
+                    new RuntimeException(e);
                 }
-            }, sharedPool.getExecutor());
-            return completableFuture;
+            });
+            return CompletableFuture.runAsync(startWorkspace, sharedPool.getExecutor());
             //TODO made complete rework of exceptions.
         } catch (ValidationException e) {
             LOG.error(e.getLocalizedMessage(), e);
@@ -272,10 +272,10 @@ public class WorkspaceRuntimes {
                                                                              ConflictException {
 
         eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                        .withWorkspaceId(workspaceId)
-                                        .withPrevStatus(WorkspaceStatus.RUNNING)
-                                        .withStatus(WorkspaceStatus.STOPPING)
-                                        .withEventType(EventType.STOPPING));
+                                       .withWorkspaceId(workspaceId)
+                                       .withPrevStatus(WorkspaceStatus.RUNNING)
+                                       .withStatus(WorkspaceStatus.STOPPING)
+                                       .withEventType(EventType.STOPPING));
 
         InternalRuntime runtime = runtimes.get(workspaceId);
         if (runtime == null) {
@@ -287,10 +287,10 @@ public class WorkspaceRuntimes {
         runtimes.remove(workspaceId);
 
         eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                        .withWorkspaceId(workspaceId)
-                                        .withPrevStatus(WorkspaceStatus.STOPPING)
-                                        .withStatus(WorkspaceStatus.STOPPED)
-                                        .withEventType(EventType.STOPPED));
+                                       .withWorkspaceId(workspaceId)
+                                       .withPrevStatus(WorkspaceStatus.STOPPING)
+                                       .withStatus(WorkspaceStatus.STOPPED)
+                                       .withEventType(EventType.STOPPED));
     }
 
     /**
