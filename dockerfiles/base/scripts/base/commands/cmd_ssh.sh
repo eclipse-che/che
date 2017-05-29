@@ -15,7 +15,7 @@ help_cmd_ssh() {
   text "\n"
   text "Connect to a workspace in ${CHE_MINI_PRODUCT_NAME} over SSH\n"
   text "\n"
-  text "WORKSPACE:             Accepts workspace name, ID, or namespace:ws-name\n"
+  text "WORKSPACE:             Accepts workspace ID or namespace/ws-name\n"
   text "                       List all workspaces with 'action list-workspaces'\n"
   text "\n"
   text "MACHINE:               Choose machine (default is dev machine) if workspace as multiple containers\n"

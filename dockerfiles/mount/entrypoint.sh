@@ -28,7 +28,7 @@ Usage on Linux
             -u \$(id -u \${USER})
             -v <local-mount>/:/mnthost eclipse/che-mount <workspace-id|workspace-name>
 
-     <workspace-id|workspace-name> ID or Name of the workspace or namespace:workspace-name
+     <workspace-id|workspace-name> ID of the workspace or namespace/workspace-name
 
 Usage on Mac or Windows:
   docker run --rm -it --cap-add SYS_ADMIN --device /dev/fuse
@@ -36,7 +36,7 @@ Usage on Mac or Windows:
             -v <path-to-sync-profile>:/profile
             -v <local-mount>/:/mnthost eclipse/che-mount <workspace-id|workspace-name>
 
-     <workspace-id|workspace-name> ID or Name of the workspace or namespace:workspace-name
+     <workspace-id|workspace-name> ID of the workspace or namespace/workspace-name
 "
  UNISON_REPEAT_DELAY_IN_SEC=2
  WORKSPACE_NAME=

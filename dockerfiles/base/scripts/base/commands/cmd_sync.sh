@@ -15,7 +15,7 @@ help_cmd_sync() {
   text "\n"
   text "Synchronizes a ${CHE_MINI_PRODUCT_NAME} workspace to a local path mounted to ':/sync'\n"
   text "\n"
-  text "WORKSPACE:             Accepts workspace name, ID, or namespace:ws-name\n"
+  text "WORKSPACE:             Accepts workspace ID or namespace/ws-name\n"
   text "                       List all workspaces with 'action list-workspaces'\n"
   text "\n"
   text "PARAMETERS:\n"
