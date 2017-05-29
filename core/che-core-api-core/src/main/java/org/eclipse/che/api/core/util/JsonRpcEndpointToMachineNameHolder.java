@@ -17,7 +17,6 @@ import javax.inject.Singleton;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.util.Collections.emptySet;
@@ -33,7 +32,7 @@ public class JsonRpcEndpointToMachineNameHolder {
                     .methodName("event:environment-output:subscribe-by-machine-name")
                     .paramsAsString()
                     .noResult()
-                    .withConsumer((endpointId, workspaceIdPlusMachineName) -> {
+                    .withBiConsumer((endpointId, workspaceIdPlusMachineName) -> {
                         endpointIds.putIfAbsent(endpointId, newConcurrentHashSet());
                         endpointIds.get(endpointId).add(workspaceIdPlusMachineName);
                     });
@@ -44,7 +43,7 @@ public class JsonRpcEndpointToMachineNameHolder {
                     .methodName("event:environment-output:un-subscribe-by-machine-name")
                     .paramsAsString()
                     .noResult()
-                    .withConsumer((endpointId, workspaceIdPlusMachineName) -> {
+                    .withBiConsumer((endpointId, workspaceIdPlusMachineName) -> {
                         endpointIds.getOrDefault(endpointId, emptySet()).remove(workspaceIdPlusMachineName);
                         endpointIds.entrySet().removeIf(entry -> entry.getValue().isEmpty());
                     });

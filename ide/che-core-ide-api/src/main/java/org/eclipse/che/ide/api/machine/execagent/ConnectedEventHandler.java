@@ -32,7 +32,7 @@ public class ConnectedEventHandler implements BiConsumer<String, ConnectedEventD
                     .methodName("connected")
                     .paramsAsDto(ConnectedEventDto.class)
                     .noResult()
-                    .withConsumer(this);
+                    .withBiConsumer(this);
     }
 
     @Override

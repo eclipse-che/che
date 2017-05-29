@@ -42,6 +42,8 @@ public class JsonRpcMessageReceiverTest {
     JsonRpcQualifier        jsonRpcQualifier;
     @Mock
     JsonRpcUnmarshaller     jsonRpcUnmarshaller;
+    @Mock
+    RequestProcessor        requestProcessor;
     @InjectMocks
     JsonRpcMessageReceiver  jsonRpcMessageReceiver;
 
@@ -96,6 +98,6 @@ public class JsonRpcMessageReceiverTest {
 
         jsonRpcMessageReceiver.receive(ENDPOINT_ID, MESSAGE);
 
-        verify(requestDispatcher).dispatch(eq(ENDPOINT_ID), any(JsonRpcRequest.class));
+        verify(requestProcessor).process(any());
     }
 }
