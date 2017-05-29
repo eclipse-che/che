@@ -31,6 +31,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -231,7 +232,10 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
             }
 
 
-            editorAgent.getActiveEditor().onFileChanged();
+            final EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+            if (activeEditor != null) {
+                activeEditor.onFileChanged();
+            }
 
             view.setSaveEnabled(false);
 
