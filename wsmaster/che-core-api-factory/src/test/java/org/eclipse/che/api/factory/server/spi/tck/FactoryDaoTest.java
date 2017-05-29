@@ -250,7 +250,6 @@ public class FactoryDaoTest {
                                                         Button.Type.LOGO);
         final AuthorImpl creator = new AuthorImpl(userId, timeMs);
         final PoliciesImpl policies = new PoliciesImpl("referrer", "perClick", timeMs, timeMs + 1000);
-        final Set<FactoryImage> images = new HashSet<>();
         final List<ActionImpl> a1 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key1", "value1"))));
         final OnAppLoadedImpl onAppLoaded = new OnAppLoadedImpl(a1);
         final List<ActionImpl> a2 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key2", "value2"))));
@@ -265,7 +264,6 @@ public class FactoryDaoTest {
                                                .setButton(factoryButton)
                                                .setCreator(creator)
                                                .setPolicies(policies)
-                                               .setImages(images)
                                                .setIde(ide)
                                                .build();
         factory.setWorkspace(createWorkspaceConfig(index));

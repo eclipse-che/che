@@ -575,7 +575,7 @@ public class FactoryServiceTest {
                 ));
 
         when(factoryManager.saveFactory(any(FactoryDto.class)))
-                .thenAnswer(invocation -> new FactoryImpl((Factory)invocation.getArguments()[0], null));
+                .thenAnswer(invocation -> new FactoryImpl((Factory)invocation.getArguments()[0]));
         doReturn(factoryDto).when(factoryBuilderSpy).build(any(InputStream.class));
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)

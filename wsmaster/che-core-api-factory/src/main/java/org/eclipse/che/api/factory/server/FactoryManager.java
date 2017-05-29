@@ -58,7 +58,7 @@ public class FactoryManager {
     public Factory saveFactory(Factory factory) throws ConflictException,
                                                                                  ServerException {
         requireNonNull(factory);
-        final FactoryImpl newFactory = new FactoryImpl(factory, null);
+        final FactoryImpl newFactory = new FactoryImpl(factory);
         newFactory.setId(NameGenerator.generate("factory", 16));
         if (isNullOrEmpty(newFactory.getName())) {
            newFactory.setName(NameGenerator.generate("f", 9));
@@ -90,7 +90,7 @@ public class FactoryManager {
         requireNonNull(update);
         final AuthorImpl creator = factoryDao.getById(update.getId()).getCreator();
         return factoryDao.update(FactoryImpl.builder()
-                                            .from(new FactoryImpl(update, null))
+                                            .from(new FactoryImpl(update))
                                             .setCreator(new AuthorImpl(creator.getUserId(), creator.getCreated()))
                                             .build());
     }
