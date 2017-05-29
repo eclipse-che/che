@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.dto.EventSubscription;
-import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.ide.dto.DtoFactory;
 
 import java.util.Map;
 
