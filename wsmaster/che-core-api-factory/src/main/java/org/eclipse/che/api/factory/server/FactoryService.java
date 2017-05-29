@@ -17,9 +17,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonSyntaxException;
 
-import org.apache.commons.fileupload.FileItem;
 import org.eclipse.che.api.agent.server.filters.AddExecAgentInEnvironmentUtil;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
@@ -40,7 +38,6 @@ import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.URLEncodedUtils;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -73,13 +70,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Boolean.parseBoolean;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.eclipse.che.api.factory.server.FactoryLinksHelper.createLinks;
 
 /**
@@ -157,7 +151,7 @@ public class FactoryService extends Service {
         processDefaults(factory);
         AddExecAgentInEnvironmentUtil.addExecAgent(factory.getWorkspace());
         createValidator.validateOnCreate(factory);
-        return injectLinks(asDto(factoryManager.saveFactory(factory)), null);
+        return injectLinks(asDto(factoryManager.saveFactory(factory)));
     }
 
     @GET
@@ -184,7 +178,7 @@ public class FactoryService extends Service {
         if (validate) {
             acceptValidator.validateOnAccept(factoryDto);
         }
-        return injectLinks(factoryDto, factoryManager.getFactoryImages(factoryId));
+        return injectLinks(factoryDto);
     }
 
     @GET
@@ -219,7 +213,7 @@ public class FactoryService extends Service {
         checkArgument(!query.isEmpty(), "Query must contain at least one attribute");
         final List<FactoryDto> factories = new ArrayList<>();
         for (Factory factory : factoryManager.getByAttribute(maxItems, skipCount, query)) {
-            factories.add(injectLinks(asDto(factory), null));
+            factories.add(injectLinks(asDto(factory)));
         }
         return factories;
     }
@@ -254,8 +248,7 @@ public class FactoryService extends Service {
         factoryBuilder.checkValid(update, true);
         // validate the new content
         createValidator.validateOnCreate(update);
-        return injectLinks(asDto(factoryManager.updateFactory(update)),
-                           factoryManager.getFactoryImages(factoryId));
+        return injectLinks(asDto(factoryManager.updateFactory(update)));
     }
 
     @DELETE
@@ -331,7 +324,7 @@ public class FactoryService extends Service {
                 if (validate) {
                     acceptValidator.validateOnAccept(factory);
                 }
-                return injectLinks(factory, null);
+                return injectLinks(factory);
             }
         }
         // no match
@@ -339,10 +332,9 @@ public class FactoryService extends Service {
     }
 
     /**
-     * Injects factory links. If factory is named then accept named link will be injected,
-     * if {@code images} is not null and not empty then image links will be injected
+     * Injects factory links. If factory is named then accept named link will be injected.
      */
-    private FactoryDto injectLinks(FactoryDto factory, Set<FactoryImage> images) {
+    private FactoryDto injectLinks(FactoryDto factory) {
         String username = null;
         if (factory.getCreator() != null && factory.getCreator().getUserId() != null) {
             try {
@@ -351,9 +343,7 @@ public class FactoryService extends Service {
                 // when impossible to get username then named factory link won't be injected
             }
         }
-        return factory.withLinks(images != null && !images.isEmpty()
-                                 ? createLinks(factory, images, getServiceContext(), username)
-                                 : createLinks(factory, getServiceContext(), username));
+        return factory.withLinks(createLinks(factory, getServiceContext(), username));
     }
 
     /**

@@ -22,8 +22,6 @@ import org.eclipse.che.commons.lang.Pair;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.core.UriBuilder;
-import java.net.URI;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,29 +43,10 @@ public class FactoryManager {
     }
 
     /**
-     * Stores {@link Factory} instance.
-     *
-     * @param factory
-     *         instance of factory which would be stored
-     * @return factory which has been stored
-     * @throws NullPointerException
-     *         when {@code factory} is null
-     * @throws ConflictException
-     *         when any conflict occurs (e.g Factory with given name already exists for {@code creator})
-     * @throws ServerException
-     *         when any server errors occurs
-     */
-    public Factory saveFactory(Factory factory) throws ConflictException, ServerException {
-        return saveFactory(factory, null);
-    }
-
-    /**
      * Stores {@link Factory} instance and related set of {@link FactoryImage}.
      *
      * @param factory
      *         instance of factory which would be stored
-     * @param images
-     *         factory images which would be stored
      * @return factory which has been stored
      * @throws NullPointerException
      *         when {@code factory} is null
@@ -76,10 +55,10 @@ public class FactoryManager {
      * @throws ServerException
      *         when any server errors occurs
      */
-    public Factory saveFactory(Factory factory, Set<FactoryImage> images) throws ConflictException,
+    public Factory saveFactory(Factory factory) throws ConflictException,
                                                                                  ServerException {
         requireNonNull(factory);
-        final FactoryImpl newFactory = new FactoryImpl(factory, images);
+        final FactoryImpl newFactory = new FactoryImpl(factory, null);
         newFactory.setId(NameGenerator.generate("factory", 16));
         if (isNullOrEmpty(newFactory.getName())) {
            newFactory.setName(NameGenerator.generate("f", 9));
@@ -88,7 +67,7 @@ public class FactoryManager {
     }
 
     /**
-     * Updates factory accordance to the new configuration.
+     * Updates factory in accordance to the new configuration.
      *
      * <p>Note: Updating uses replacement strategy,
      * therefore existing factory would be replaced with given update {@code update}
@@ -106,37 +85,12 @@ public class FactoryManager {
      *         when any server error occurs
      */
     public Factory updateFactory(Factory update) throws ConflictException,
-                                                        NotFoundException,
-                                                        ServerException {
-        requireNonNull(update);
-        return updateFactory(update, null);
-    }
-
-    /**
-     * Updates factory and its images accordance to the new configuration.
-     *
-     * <p>Note: Updating uses replacement strategy,
-     * therefore existing factory would be replaced with given update {@code update}
-     *
-     * @param update
-     *         factory update
-     * @return updated factory
-     * @throws NullPointerException
-     *         when {@code update} is null
-     * @throws ConflictException
-     *         when any conflict occurs (e.g Factory with given name already exists for {@code creator})
-     * @throws NotFoundException
-     *         when factory with given id not found
-     * @throws ServerException
-     *         when any server error occurs
-     */
-    public Factory updateFactory(Factory update, Set<FactoryImage> images) throws ConflictException,
                                                                                   NotFoundException,
                                                                                   ServerException {
         requireNonNull(update);
         final AuthorImpl creator = factoryDao.getById(update.getId()).getCreator();
         return factoryDao.update(FactoryImpl.builder()
-                                            .from(new FactoryImpl(update, images))
+                                            .from(new FactoryImpl(update, null))
                                             .setCreator(new AuthorImpl(creator.getUserId(), creator.getCreated()))
                                             .build());
     }
@@ -173,45 +127,6 @@ public class FactoryManager {
                                              ServerException {
         requireNonNull(id);
         return factoryDao.getById(id);
-    }
-
-    /**
-     * Gets factory images by given factory and image ids.
-     *
-     * @param factoryId
-     *         factory identifier
-     * @param imageId
-     *         image identifier
-     * @return factory images or empty set if no image found by given {@code imageId}
-     * @throws NotFoundException
-     *         when specified factory not found
-     * @throws ServerException
-     *         when any server errors occurs
-     */
-    public Set<FactoryImage> getFactoryImages(String factoryId, String imageId) throws NotFoundException,
-                                                                                       ServerException {
-        requireNonNull(factoryId);
-        requireNonNull(imageId);
-        return getFactoryImages(factoryId).stream()
-                                          .filter(image -> imageId.equals(image.getName()))
-                                          .collect(Collectors.toSet());
-    }
-
-    /**
-     * Gets all the factory images.
-     *
-     * @param factoryId
-     *         factory identifier
-     * @return factory images or empty set if no image found for factory
-     * @throws NotFoundException
-     *         when specified factory not found
-     * @throws ServerException
-     *         when any server errors occurs
-     */
-    public Set<FactoryImage> getFactoryImages(String factoryId) throws NotFoundException,
-                                                                       ServerException {
-        requireNonNull(factoryId);
-        return factoryDao.getById(factoryId).getImages();
     }
 
     /**

@@ -233,7 +233,6 @@ public class FactoryServiceTest {
         final Factory factory = createFactory();
         final FactoryDto factoryDto = asDto(factory, user);
         when(factoryManager.getById(FACTORY_ID)).thenReturn(factory);
-        when(factoryManager.getFactoryImages(FACTORY_ID)).thenReturn(emptySet());
 
         final Response response = given().when()
 //                                         .expect()
@@ -248,7 +247,6 @@ public class FactoryServiceTest {
         final Factory factory = createFactory();
         final FactoryDto factoryDto = asDto(factory, user);
         when(factoryManager.getById(FACTORY_ID)).thenReturn(factory);
-        when(factoryManager.getFactoryImages(FACTORY_ID)).thenReturn(emptySet());
         doNothing().when(acceptValidator).validateOnAccept(any(FactoryDto.class));
 
         final Response response = given().when()
