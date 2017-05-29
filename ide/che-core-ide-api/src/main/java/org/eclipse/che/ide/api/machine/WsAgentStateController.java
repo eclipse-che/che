@@ -160,6 +160,9 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         }
         messageBusCallbacks.clear();
 
+
+
+
         for (AsyncCallback<DevMachine> callback : devMachineCallbacks) {
             callback.onSuccess(devMachine);
         }
