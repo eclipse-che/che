@@ -16,7 +16,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
-import org.eclipse.che.api.factory.server.snippet.SnippetGenerator;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
@@ -29,13 +28,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.che.api.factory.shared.Constants.HTML_SNIPPET_TYPE;
-import static org.eclipse.che.api.factory.shared.Constants.IFRAME_SNIPPET_TYPE;
-import static org.eclipse.che.api.factory.shared.Constants.MARKDOWN_SNIPPET_TYPE;
-import static org.eclipse.che.api.factory.shared.Constants.URL_SNIPPET_TYPE;
 
 /**
  * @author Anton Korneta
@@ -238,56 +232,5 @@ public class FactoryManager {
                                                                 int skipCount,
                                                                 List<Pair<String, String>> attributes) throws ServerException {
         return (T)factoryDao.getByAttribute(maxItems, skipCount, attributes);
-    }
-
-    /**
-     * Gets factory snippet by factory id and snippet type.
-     * If snippet type is not set, "url" type will be used as default.
-     *
-     * @param factoryId
-     *         id of factory
-     * @param snippetType
-     *         type of snippet
-     * @param baseUri
-     *         URI from which will be created snippet
-     * @return snippet content or null when snippet type not found.
-     * @throws NotFoundException
-     *         when factory with specified id doesn't not found
-     * @throws ServerException
-     *         when any server error occurs during snippet creation
-     */
-    public String getFactorySnippet(String factoryId,
-                                    String snippetType,
-                                    URI baseUri) throws NotFoundException,
-                                                        ServerException {
-        requireNonNull(factoryId);
-        final String baseUrl = UriBuilder.fromUri(baseUri)
-                                         .replacePath("")
-                                         .build()
-                                         .toString();
-        switch (firstNonNull(snippetType, URL_SNIPPET_TYPE)) {
-            case URL_SNIPPET_TYPE:
-                return UriBuilder.fromUri(baseUri)
-                                 .replacePath("factory")
-                                 .queryParam("id", factoryId)
-                                 .build()
-                                 .toString();
-            case HTML_SNIPPET_TYPE:
-                return SnippetGenerator.generateHtmlSnippet(baseUrl, factoryId);
-            case IFRAME_SNIPPET_TYPE:
-                return SnippetGenerator.generateiFrameSnippet(baseUrl, factoryId);
-            case MARKDOWN_SNIPPET_TYPE:
-                final Set<FactoryImage> images = getFactoryImages(factoryId);
-                final String imageId = (images.size() > 0) ? images.iterator().next().getName()
-                                                           : null;
-                try {
-                    return SnippetGenerator.generateMarkdownSnippet(baseUrl, getById(factoryId), imageId);
-                } catch (IllegalArgumentException e) {
-                    throw new ServerException(e.getLocalizedMessage());
-                }
-            default:
-                // when the specified type is not supported
-                return null;
-        }
     }
 }

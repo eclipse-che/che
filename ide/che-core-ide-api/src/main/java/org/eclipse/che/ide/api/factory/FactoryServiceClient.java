@@ -39,16 +39,6 @@ public interface FactoryServiceClient {
     Promise<FactoryDto> getFactory(@NotNull String factoryId, boolean validate);
 
     /**
-     * @param factoryId
-     *         Factory's id
-     * @param type
-     *         snippet's type (markdown, html, etc)
-     * @param callback
-     *         callback which returns snippet of the factory or exception if occurred
-     */
-    void getFactorySnippet(@NotNull String factoryId, @NotNull String type, @NotNull AsyncRequestCallback<String> callback);
-
-    /**
      * Retrieves factory object prototype for given project with it's attributes. It's not the stored factory object.
      *
      * @param workspaceId

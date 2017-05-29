@@ -100,21 +100,6 @@ public class FactoryLinksHelper {
                                  null,
                                  APPLICATION_JSON,
                                  RETRIEVE_FACTORY_REL_ATT));
-
-            // creation of snippet links
-            links.addAll(SNIPPET_TYPES.stream()
-                                     .map(snippet -> createLink(HttpMethod.GET,
-                                                                uriBuilder.clone()
-                                                                          .path(FactoryService.class,
-                                                                                "getFactorySnippet")
-                                                                          .queryParam("type", snippet)
-                                                                          .build(factoryId)
-                                                                          .toString(),
-                                                                null,
-                                                                TEXT_PLAIN,
-                                                                SNIPPET_REL_ATT + '/' + snippet))
-                                     .collect(toList()));
-
             // creation of accept factory link
             final Link createWorkspace = createLink(HttpMethod.GET,
                                                     uriBuilder.clone()

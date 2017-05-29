@@ -142,8 +142,7 @@ public class FactoryService extends Service {
     @POST
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Create a new factory based on configuration",
-                  notes = "Factory will be created without images")
+    @ApiOperation(value = "Create a new factory based on configuration")
     @ApiResponses({@ApiResponse(code = 200, message = "Factory successfully created"),
                    @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 403, message = "User does not have rights to create factory"),
@@ -156,6 +155,7 @@ public class FactoryService extends Service {
         requiredNotNull(factory, "Factory configuration");
         factoryBuilder.checkValid(factory);
         processDefaults(factory);
+        AddExecAgentInEnvironmentUtil.addExecAgent(factory.getWorkspace());
         createValidator.validateOnCreate(factory);
         return injectLinks(asDto(factoryManager.saveFactory(factory)), null);
     }
@@ -272,75 +272,6 @@ public class FactoryService extends Service {
                               String id) throws ForbiddenException,
                                                 ServerException {
         factoryManager.removeFactory(id);
-    }
-
-    /**
-     * @deprecated this is a legacy method for functionality that is no longer exists.
-     * There is no alternative for this method.
-     */
-    @GET
-    @Path("/{id}/image")
-    @Produces("image/*")
-    @ApiOperation(value = "Get factory image",
-                  notes = "If image identifier is not specified then first found image will be returned")
-    @ApiResponses({@ApiResponse(code = 200, message = "Response contains requested factory image"),
-                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
-                   @ApiResponse(code = 404, message = "Factory or factory image not found"),
-                   @ApiResponse(code = 500, message = "Internal server error")})
-    @Deprecated
-    public Response getImage(@ApiParam(value = "Factory identifier")
-                             @PathParam("id")
-                             String factoryId,
-                             @ApiParam(value = "Image identifier")
-                             @QueryParam("imgId")
-                             String imageId) throws NotFoundException,
-                                                    BadRequestException,
-                                                    ServerException {
-        final Set<FactoryImage> images;
-        if (isNullOrEmpty(imageId)) {
-            if ((images = factoryManager.getFactoryImages(factoryId)).isEmpty()) {
-                LOG.warn("Default image for factory {} is not found.", factoryId);
-                throw new NotFoundException("Default image for factory " + factoryId + " is not found.");
-            }
-        } else {
-            if ((images = factoryManager.getFactoryImages(factoryId, imageId)).isEmpty()) {
-                LOG.warn("Image with id {} is not found.", imageId);
-                throw new NotFoundException("Image with id " + imageId + " is not found.");
-            }
-        }
-        final FactoryImage image = images.iterator().next();
-        return Response.ok(image.getImageData(), image.getMediaType()).build();
-    }
-
-    /**
-     * @deprecated this is a legacy method for functionality that is no longer exists.
-     * There is no alternative for this method.
-     */
-    @GET
-    @Path("/{id}/snippet")
-    @Produces(TEXT_PLAIN)
-    @ApiOperation(value = "Get factory snippet",
-                  notes = "If snippet type is not specified then default 'url' will be used")
-    @ApiResponses({@ApiResponse(code = 200, message = "Response contains requested factory snippet"),
-                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
-                   @ApiResponse(code = 404, message = "Factory or factory snippet not found"),
-                   @ApiResponse(code = 500, message = "Internal server error")})
-    @Deprecated
-    public String getFactorySnippet(@ApiParam(value = "Factory identifier")
-                                    @PathParam("id")
-                                    String factoryId,
-                                    @ApiParam(value = "Snippet type",
-                                              required = true,
-                                              allowableValues = "url, html, iframe, markdown",
-                                              defaultValue = "url")
-                                    @DefaultValue("url")
-                                    @QueryParam("type")
-                                    String type) throws NotFoundException,
-                                                        BadRequestException,
-                                                        ServerException {
-        final String factorySnippet = factoryManager.getFactorySnippet(factoryId, type, uriInfo.getBaseUri());
-        checkArgument(factorySnippet != null, "Snippet type \"" + type + "\" is unsupported.");
-        return factorySnippet;
     }
 
     @GET
