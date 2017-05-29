@@ -28,7 +28,7 @@ type Event interface {
 	Type() string
 }
 
-// EventConsumer provides ability to handle process events.
+// EventConsumer is a process events client.
 type EventConsumer interface {
 	Accept(event Event)
 }
@@ -42,6 +42,7 @@ type StartedEvent struct {
 	CommandLine string    `json:"commandLine"`
 }
 
+// Type returns StartedEventType.
 func (se *StartedEvent) Type() string { return StartedEventType }
 
 func newStartedEvent(mp MachineProcess) *StartedEvent {
@@ -64,6 +65,7 @@ type DiedEvent struct {
 	ExitCode    int       `json:"exitCode"`
 }
 
+// Type returns DiedEventType.
 func (de *DiedEvent) Type() string { return DiedEventType }
 
 func newDiedEvent(mp MachineProcess) *DiedEvent {
@@ -86,6 +88,7 @@ type OutputEvent struct {
 	_type string
 }
 
+// Type returns one of StdoutEventType, StderrEventType.
 func (se *OutputEvent) Type() string { return se._type }
 
 func newStderrEvent(pid uint64, text string, when time.Time) Event {
