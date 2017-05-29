@@ -22,7 +22,4 @@
     <artifactId>che-plugin-dashboard-parent</artifactId>
     <packaging>pom</packaging>
     <name>Che Plugin :: Dashboard :: Parent</name>
-    <modules>
-        <module>che-plugin-ext-dashboard</module>
-    </modules>
 </project>
