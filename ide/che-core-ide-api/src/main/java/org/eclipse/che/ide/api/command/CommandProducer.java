@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.command;
 
-import org.eclipse.che.ide.api.machine.MachineEntity;
-
 /**
  * Defines the requirements for a component which can produce the commands from the current context.
  * <p>For every registered {@link CommandProducer} an appropriate action
@@ -34,8 +32,7 @@ public interface CommandProducer {
 
     /**
      * Creates a command from the current context.
-     * Target for command execution will be provided through {@code machine} parameter.
      * Called when user performs corresponded action.
      */
-    CommandImpl createCommand(MachineEntity machine);
+    CommandImpl createCommand();
 }

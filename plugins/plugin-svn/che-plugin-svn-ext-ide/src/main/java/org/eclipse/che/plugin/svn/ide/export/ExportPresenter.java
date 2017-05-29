@@ -155,7 +155,7 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
     }
 
     private void openExportPopup(Path project, Path exportPath, String revision, StatusNotification notification) {
-        final StringBuilder url = new StringBuilder(appContext.getDevMachine().getWsAgentBaseUrl() + "/svn/"
+        final StringBuilder url = new StringBuilder(appContext.getDevAgentEndpoint() + "/svn/"
                                                     + appContext.getDevMachine().getId() + "/export" + project.toString());
         char separator = '?';
         if (!".".equals(exportPath.toString())) {

@@ -95,7 +95,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
         selectedReference = null;
         view.setEnableMergeButton(false);
 
-        service.branchList(appContext.getDevMachine(), project.getLocation(), LIST_LOCAL).then(new Operation<List<Branch>>() {
+        service.branchList(project.getLocation(), LIST_LOCAL).then(new Operation<List<Branch>>() {
             @Override
             public void apply(List<Branch> branches) throws OperationException {
                 List<Reference> references = new ArrayList<>();
@@ -111,12 +111,12 @@ public class MergePresenter implements MergeView.ActionDelegate {
             @Override
             public void apply(PromiseError error) throws OperationException {
                 console.printError(error.getMessage());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
             }
         });
 
-        service.branchList(appContext.getDevMachine(), project.getLocation(), LIST_REMOTE).then(new Operation<List<Branch>>() {
+        service.branchList(project.getLocation(), LIST_REMOTE).then(new Operation<List<Branch>>() {
             @Override
             public void apply(List<Branch> branches) throws OperationException {
                 List<Reference> references = new ArrayList<>();
@@ -133,7 +133,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
             @Override
             public void apply(PromiseError error) throws OperationException {
                 console.printError(error.getMessage());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
             }
         });
@@ -154,12 +154,12 @@ public class MergePresenter implements MergeView.ActionDelegate {
 
         final GitOutputConsole console = gitOutputConsoleFactory.create(MERGE_COMMAND_NAME);
 
-        service.merge(appContext.getDevMachine(), project.getLocation(), selectedReference.getDisplayName())
+        service.merge(project.getLocation(), selectedReference.getDisplayName())
                .then(new Operation<MergeResult>() {
                    @Override
                    public void apply(MergeResult result) throws OperationException {
                        console.print(formMergeMessage(result));
-                       consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                       consolesPanelPresenter.addCommandOutput(console);
                        notificationManager.notify(formMergeMessage(result));
 
                        project.synchronize();
@@ -179,7 +179,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                     return;
                 }
                 console.printError(error.getMessage());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(constant.mergeFailed(), FAIL, FLOAT_MODE);
             }
         });

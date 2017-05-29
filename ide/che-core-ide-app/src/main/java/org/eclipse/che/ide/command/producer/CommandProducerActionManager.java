@@ -19,7 +19,6 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandProducer;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
@@ -44,7 +43,6 @@ public class CommandProducerActionManager implements WsAgentStateHandler {
 
     private final ActionManager                actionManager;
     private final CommandProducerActionFactory commandProducerActionFactory;
-    private final AppContext                   appContext;
     private final Resources                    resources;
     private final ProducerMessages             messages;
 
@@ -56,12 +54,10 @@ public class CommandProducerActionManager implements WsAgentStateHandler {
     public CommandProducerActionManager(EventBus eventBus,
                                         ActionManager actionManager,
                                         CommandProducerActionFactory commandProducerActionFactory,
-                                        AppContext appContext,
                                         Resources resources,
                                         ProducerMessages messages) {
         this.actionManager = actionManager;
         this.commandProducerActionFactory = commandProducerActionFactory;
-        this.appContext = appContext;
         this.resources = resources;
         this.messages = messages;
 
@@ -94,9 +90,7 @@ public class CommandProducerActionManager implements WsAgentStateHandler {
 
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
-        for (CommandProducer commandProducer : commandProducers) {
-            createActionsForProducer(commandProducer);
-        }
+        commandProducers.forEach(this::createActionsForProducer);
     }
 
     @Override
@@ -105,7 +99,7 @@ public class CommandProducerActionManager implements WsAgentStateHandler {
 
     /** Creates actions for the given {@link CommandProducer}. */
     private void createActionsForProducer(CommandProducer producer) {
-        Action action = commandProducerActionFactory.create(producer.getName(), producer, appContext.getDevMachine());
+        Action action = commandProducerActionFactory.create(producer.getName(), producer);
 
         actionManager.registerAction(producer.getName(), action);
 

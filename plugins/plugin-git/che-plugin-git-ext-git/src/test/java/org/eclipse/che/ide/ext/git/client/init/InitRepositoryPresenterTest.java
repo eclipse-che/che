@@ -47,7 +47,7 @@ public class InitRepositoryPresenterTest extends BaseTest {
                                                 service,
                                                 appContext);
 
-        when(service.init(anyObject(), any(Path.class), anyBoolean())).thenReturn(voidPromise);
+        when(service.init(any(Path.class), anyBoolean())).thenReturn(voidPromise);
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
     }
@@ -61,7 +61,7 @@ public class InitRepositoryPresenterTest extends BaseTest {
 
         verify(gitOutputConsoleFactory).create(eq(INIT_COMMAND_NAME));
         verify(console).print(eq(constant.initSuccess()));
-        verify(processesPanelPresenter).addCommandOutput(anyString(), eq(console));
+        verify(processesPanelPresenter).addCommandOutput(eq(console));
         verify(notificationManager).notify(anyString());
 
         verify(project).synchronize();
@@ -77,7 +77,7 @@ public class InitRepositoryPresenterTest extends BaseTest {
         verify(constant).initFailed();
         verify(gitOutputConsoleFactory).create(INIT_COMMAND_NAME);
         verify(console).printError(anyObject());
-        verify(processesPanelPresenter).addCommandOutput(anyString(), eq(console));
+        verify(processesPanelPresenter).addCommandOutput(eq(console));
         verify(notificationManager).notify(anyString(), any(StatusNotification.Status.class), anyObject());
     }
 }

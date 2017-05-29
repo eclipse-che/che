@@ -25,7 +25,6 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Folder;
@@ -47,7 +46,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.List;
 
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -82,8 +80,6 @@ public abstract class BaseTest {
     protected Project                 project;
     @Mock
     protected AppContext              appContext;
-    @Mock
-    protected DevMachine              devMachine;
     @Mock
     protected GitServiceClient        service;
     @Mock
@@ -195,9 +191,5 @@ public abstract class BaseTest {
         when(throwable.getMessage()).thenReturn("error");
 
         when(project.synchronize()).thenReturn(synchronizePromise);
-
-        DevMachine devMachine = mock(DevMachine.class);
-        when(devMachine.getId()).thenReturn("id");
-        when(appContext.getDevMachine()).thenReturn(devMachine);
     }
 }

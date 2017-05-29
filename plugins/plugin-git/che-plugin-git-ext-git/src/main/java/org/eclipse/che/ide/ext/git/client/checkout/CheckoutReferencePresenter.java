@@ -87,7 +87,7 @@ public class CheckoutReferencePresenter implements CheckoutReferenceView.ActionD
     @Override
     public void onCheckoutClicked(final String reference) {
 
-        service.checkout(appContext.getDevMachine(), project.getLocation(), dtoFactory.createDto(CheckoutRequest.class).withName(reference))
+        service.checkout(project.getLocation(), dtoFactory.createDto(CheckoutRequest.class).withName(reference))
                .then(new Operation<Void>() {
                    @Override
                    public void apply(Void arg) throws OperationException {
@@ -107,7 +107,7 @@ public class CheckoutReferencePresenter implements CheckoutReferenceView.ActionD
                                                    : constant.checkoutFailed();
                        GitOutputConsole console = gitOutputConsoleFactory.create(CHECKOUT_COMMAND_NAME);
                        console.printError(errorMessage);
-                       consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                       consolesPanelPresenter.addCommandOutput(console);
                        notificationManager.notify(constant.checkoutFailed(), FAIL, FLOAT_MODE);
                        view.close();
                    }

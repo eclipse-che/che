@@ -87,11 +87,11 @@ public class AddRemoteRepositoryPresenterTest extends BaseTest {
         when(appContext.getRootProject()).thenReturn(mock(Project.class));
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
-        when(service.remoteAdd(anyObject(), anyObject(), anyString(), anyString())).thenReturn(voidPromise);
+        when(service.remoteAdd(anyObject(), anyString(), anyString())).thenReturn(voidPromise);
         when(view.getUrl()).thenReturn(" " + REMOTE_URI + " ");
 
         presenter.onOkClicked();
 
-        verify(service).remoteAdd(anyObject(), anyObject(), anyString(), eq(REMOTE_URI));
+        verify(service).remoteAdd(anyObject(), anyString(), eq(REMOTE_URI));
     }
 }

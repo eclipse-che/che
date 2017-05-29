@@ -137,7 +137,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
     }
 
     private void renameBranch(String newName) {
-        service.branchRename(appContext.getDevMachine(), project.getLocation(), selectedBranch.getDisplayName(), newName)
+        service.branchRename(project.getLocation(), selectedBranch.getDisplayName(), newName)
                .then(new Operation<Void>() {
                    @Override
                    public void apply(Void ignored) throws OperationException {
@@ -164,7 +164,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
     @Override
     public void onDeleteClicked() {
 
-        service.branchDelete(appContext.getDevMachine(), project.getLocation(), selectedBranch.getName(), true).then(new Operation<Void>() {
+        service.branchDelete(project.getLocation(), selectedBranch.getName(), true).then(new Operation<Void>() {
             @Override
             public void apply(Void ignored) throws OperationException {
                 getBranches();
@@ -187,7 +187,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
             checkoutRequest.setName(selectedBranch.getDisplayName());
         }
 
-        service.checkout(appContext.getDevMachine(), project.getLocation(), checkoutRequest).then(new Operation<Void>() {
+        service.checkout(project.getLocation(), checkoutRequest).then(new Operation<Void>() {
             @Override
             public void apply(Void ignored) throws OperationException {
                 getBranches();
@@ -204,7 +204,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
 
     /** Get the list of branches. */
     private void getBranches() {
-        service.branchList(appContext.getDevMachine(), project.getLocation(), LIST_ALL).then(new Operation<List<Branch>>() {
+        service.branchList(project.getLocation(), LIST_ALL).then(new Operation<List<Branch>>() {
             @Override
             public void apply(List<Branch> branches) throws OperationException {
                 if (branches.isEmpty()) {
@@ -234,7 +234,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
                     return;
                 }
 
-                service.branchCreate(appContext.getDevMachine(), project.getLocation(), value, null).then(new Operation<Branch>() {
+                service.branchCreate(project.getLocation(), value, null).then(new Operation<Branch>() {
                     @Override
                     public void apply(Branch branch) throws OperationException {
                         getBranches();
@@ -306,7 +306,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
 
         GitOutputConsole console = gitOutputConsoleFactory.create(commandName);
         printGitMessage(errorMessage, console);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+        consolesPanelPresenter.addCommandOutput(console);
         notificationManager.notify(errorMessage, FAIL, FLOAT_MODE);
     }
 

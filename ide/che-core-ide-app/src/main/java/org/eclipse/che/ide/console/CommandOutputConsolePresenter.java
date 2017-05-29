@@ -27,10 +27,10 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -52,20 +52,16 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     private final MachineResources        resources;
     private final CommandImpl             command;
     private final EventBus                eventBus;
-    private final MachineEntity           machine;
+    private final MachineImpl             machine;
     private final CommandExecutor         commandExecutor;
     private final ExecAgentCommandManager execAgentCommandManager;
-
-    private int            pid;
-    private boolean        finished;
-
+    private final List<ActionDelegate> actionDelegates = new ArrayList<>();
+    private int     pid;
+    private boolean finished;
     /** Wrap text or not */
-    private boolean wrapText = false;
-
+    private boolean wrapText     = false;
     /** Follow output when printing text */
     private boolean followOutput = true;
-
-    private final List<ActionDelegate> actionDelegates = new ArrayList<>();
 
     @Inject
     public CommandOutputConsolePresenter(final OutputConsoleView view,
@@ -75,7 +71,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                                          EventBus eventBus,
                                          ExecAgentCommandManager execAgentCommandManager,
                                          @Assisted CommandImpl command,
-                                         @Assisted MachineEntity machine) {
+                                         @Assisted MachineImpl machine) {
         this.view = view;
         this.resources = resources;
         this.execAgentCommandManager = execAgentCommandManager;
@@ -204,7 +200,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
     @Override
     public void stop() {
-        execAgentCommandManager.killProcess(machine.getId(), pid);
+        execAgentCommandManager.killProcess(machine.getName(), pid);
     }
 
     @Override
@@ -222,7 +218,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         if (isFinished()) {
             commandExecutor.executeCommand(command, machine);
         } else {
-            execAgentCommandManager.killProcess(machine.getId(), pid)
+            execAgentCommandManager.killProcess(machine.getName(), pid)
                                    .onSuccess(() -> commandExecutor.executeCommand(command, machine));
         }
     }
@@ -268,8 +264,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     /**
      * Returns the console text.
      *
-     * @return
-     *          console text
+     * @return console text
      */
     public String getText() {
         return view.getText();

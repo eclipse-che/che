@@ -13,7 +13,9 @@ package org.eclipse.che.ide.command.toolbar.commands.button;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.ui.menubutton.ItemsProvider;
 import org.eclipse.che.ide.ui.menubutton.MenuItem;
 import org.eclipse.che.ide.util.Pair;
@@ -21,6 +23,7 @@ import org.eclipse.che.ide.util.Pair;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -76,7 +79,12 @@ public class ExecuteCommandButtonItemsProvider implements ItemsProvider {
     @Override
     public boolean isGroup(MenuItem item) {
         if (item instanceof CommandItem) {
-            return appContext.getActiveRuntime().getMachines().size() > 1;
+            final WorkspaceImpl workspace = appContext.getWorkspace();
+            final RuntimeImpl runtime = workspace.getRuntime();
+
+            if (runtime != null) {
+                return runtime.getMachines().size() > 1;
+            }
         }
 
         return false;
@@ -87,12 +95,18 @@ public class ExecuteCommandButtonItemsProvider implements ItemsProvider {
         List<MenuItem> items = new ArrayList<>();
 
         if (parent instanceof CommandItem) {
-            CommandImpl command = ((CommandItem)parent).getCommand();
-            List<MachineEntity> machines = appContext.getActiveRuntime().getMachines();
+            final WorkspaceImpl workspace = appContext.getWorkspace();
+            final RuntimeImpl runtime = workspace.getRuntime();
 
-            items.addAll(machines.stream()
-                                 .map(machine -> menuItemsFactory.newMachineItem(command, machine))
-                                 .collect(toList()));
+            if (runtime != null) {
+                final CommandImpl command = ((CommandItem)parent).getCommand();
+                final Map<String, ? extends MachineImpl> machines = runtime.getMachines();
+
+                items.addAll(machines.values()
+                                     .stream()
+                                     .map(machine -> menuItemsFactory.newMachineItem(command, machine))
+                                     .collect(toList()));
+            }
         }
 
         return Pair.of(items, null);

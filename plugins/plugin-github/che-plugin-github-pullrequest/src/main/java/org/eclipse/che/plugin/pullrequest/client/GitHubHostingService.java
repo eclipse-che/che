@@ -10,17 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.pullrequest.client;
 
-import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.HostingServiceTemplates;
-import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoCommitsInPullRequestException;
-import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoHistoryInCommonException;
-import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoPullRequestException;
-import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoUserForkException;
-import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.PullRequestAlreadyExistsException;
-import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.ServiceUtil;
-import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
-import org.eclipse.che.plugin.pullrequest.shared.dto.HostUser;
-import org.eclipse.che.plugin.pullrequest.shared.dto.PullRequest;
-import org.eclipse.che.plugin.pullrequest.shared.dto.Repository;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -37,7 +26,6 @@ import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.plugin.github.ide.GitHubClientService;
 import org.eclipse.che.plugin.github.shared.GitHubPullRequest;
 import org.eclipse.che.plugin.github.shared.GitHubPullRequestCreationInput;
@@ -45,6 +33,17 @@ import org.eclipse.che.plugin.github.shared.GitHubPullRequestList;
 import org.eclipse.che.plugin.github.shared.GitHubRepository;
 import org.eclipse.che.plugin.github.shared.GitHubRepositoryList;
 import org.eclipse.che.plugin.github.shared.GitHubUser;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.HostingServiceTemplates;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoCommitsInPullRequestException;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoHistoryInCommonException;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoPullRequestException;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoUserForkException;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.PullRequestAlreadyExistsException;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.ServiceUtil;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
+import org.eclipse.che.plugin.pullrequest.shared.dto.HostUser;
+import org.eclipse.che.plugin.pullrequest.shared.dto.PullRequest;
+import org.eclipse.che.plugin.pullrequest.shared.dto.Repository;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -79,8 +78,7 @@ public class GitHubHostingService implements VcsHostingService {
     private final String                  baseUrl;
 
     @Inject
-    public GitHubHostingService(@NotNull @RestContext final String baseUrl,
-                                @NotNull final AppContext appContext,
+    public GitHubHostingService(@NotNull final AppContext appContext,
                                 @NotNull final DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                 @NotNull final DtoFactory dtoFactory,
                                 @NotNull final GitHubClientService gitHubClientService,
@@ -90,7 +88,7 @@ public class GitHubHostingService implements VcsHostingService {
         this.dtoFactory = dtoFactory;
         this.gitHubClientService = gitHubClientService;
         this.templates = templates;
-        this.baseUrl = baseUrl;
+        this.baseUrl = appContext.getMasterEndpoint();
     }
 
     @Override
@@ -473,7 +471,7 @@ public class GitHubHostingService implements VcsHostingService {
             return Promises.reject(JsPromiseError.create("Error accessing current workspace"));
         }
         final String authUrl = baseUrl
-                               + "/oauth/authenticate?oauth_provider=github&userId=" + user.getProfile().getUserId()
+                               + "/oauth/authenticate?oauth_provider=github&userId=" + user.getId()
                                + "&scope=user,repo,write:public_key&redirect_after_login="
                                + Window.Location.getProtocol() + "//"
                                + Window.Location.getHost() + "/ws/"

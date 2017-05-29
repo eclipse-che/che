@@ -24,8 +24,8 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.mvp.Presenter;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.command.goal.DebugGoal;
 import org.eclipse.che.ide.command.goal.RunGoal;
 import org.eclipse.che.ide.command.toolbar.CommandCreationGuide;
@@ -84,7 +84,7 @@ public class ExecuteCommandPresenter implements Presenter, ExecuteCommandView.Ac
     }
 
     @Override
-    public void onCommandExecute(CommandImpl command, MachineEntity machine) {
+    public void onCommandExecute(CommandImpl command, MachineImpl machine) {
         commandExecutorProvider.get().executeCommand(command, machine);
     }
 

@@ -15,24 +15,23 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.resource.Path;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
@@ -109,7 +108,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         final Path relPath = file.getLocation().removeFirstSegments(project.get().getLocation().segmentCount());
 
         if (status.equals(DELETED)) {
-            service.showFileContent(appContext.getDevMachine(), project.get().getLocation(), relPath, revision)
+            service.showFileContent(project.get().getLocation(), relPath, revision)
                    .then(new Operation<ShowFileContentResponse>() {
                        @Override
                        public void apply(ShowFileContentResponse content) throws OperationException {
@@ -125,7 +124,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                        }
                    });
         } else {
-            service.showFileContent(appContext.getDevMachine(), project.get().getLocation(), relPath, revision)
+            service.showFileContent(project.get().getLocation(), relPath, revision)
                    .then(new Operation<ShowFileContentResponse>() {
                        @Override
                        public void apply(ShowFileContentResponse content) throws OperationException {
@@ -160,12 +159,11 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                                             @Nullable final String revisionB) {
         this.compareWithLatest = false;
 
-        final DevMachine devMachine = appContext.getDevMachine();
         final Path projectLocation = appContext.getRootProject().getLocation();
 
         view.setTitle(file.toString());
         if (status == Status.ADDED) {
-            service.showFileContent(devMachine, projectLocation, file, revisionB)
+            service.showFileContent(projectLocation, file, revisionB)
                    .then(new Operation<ShowFileContentResponse>() {
                        @Override
                        public void apply(ShowFileContentResponse response) throws OperationException {
@@ -181,7 +179,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                        }
                    });
         } else if (status == Status.DELETED) {
-            service.showFileContent(devMachine, projectLocation, file, revisionA)
+            service.showFileContent(projectLocation, file, revisionA)
                    .then(new Operation<ShowFileContentResponse>() {
                        @Override
                        public void apply(ShowFileContentResponse response) throws OperationException {
@@ -196,11 +194,11 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                        }
                    });
         } else {
-            service.showFileContent(devMachine, projectLocation, file, revisionA)
+            service.showFileContent(projectLocation, file, revisionA)
                    .then(new Operation<ShowFileContentResponse>() {
                        @Override
                        public void apply(final ShowFileContentResponse contentAResponse) throws OperationException {
-                           service.showFileContent(devMachine, projectLocation, file, revisionB)
+                           service.showFileContent(projectLocation, file, revisionB)
                                   .then(new Operation<ShowFileContentResponse>() {
                                       @Override
                                       public void apply(ShowFileContentResponse contentBResponse) throws OperationException {

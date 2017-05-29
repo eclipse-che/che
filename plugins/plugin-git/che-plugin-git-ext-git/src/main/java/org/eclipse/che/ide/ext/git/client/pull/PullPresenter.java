@@ -97,7 +97,7 @@ public class PullPresenter implements PullView.ActionDelegate {
 
         view.setEnablePullButton(false);
 
-        service.remoteList(appContext.getDevMachine(), project.getLocation(), null, true)
+        service.remoteList(project.getLocation(), null, true)
                .then(new Operation<List<Remote>>() {
                    @Override
                    public void apply(List<Remote> remotes) throws OperationException {
@@ -125,7 +125,7 @@ public class PullPresenter implements PullView.ActionDelegate {
      */
     private void updateBranches(@NotNull final BranchListMode remoteMode) {
 
-        service.branchList(appContext.getDevMachine(), project.getLocation(), remoteMode).then(new Operation<List<Branch>>() {
+        service.branchList(project.getLocation(), remoteMode).then(new Operation<List<Branch>>() {
             @Override
             public void apply(List<Branch> branches) throws OperationException {
                 if (LIST_REMOTE.equals(remoteMode)) {
@@ -158,12 +158,12 @@ public class PullPresenter implements PullView.ActionDelegate {
         final StatusNotification notification =
                 notificationManager.notify(constant.pullProcess(), PROGRESS, FLOAT_MODE);
 
-        service.pull(appContext.getDevMachine(), project.getLocation(), getRefs(), view.getRepositoryName()).then(new Operation<PullResponse>() {
+        service.pull(project.getLocation(), getRefs(), view.getRepositoryName()).then(new Operation<PullResponse>() {
             @Override
             public void apply(PullResponse response) throws OperationException {
                 GitOutputConsole console = gitOutputConsoleFactory.create(PULL_COMMAND_NAME);
                 console.print(response.getCommandOutput(), GREEN_COLOR);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
                 notification.setStatus(SUCCESS);
                 if (response.getCommandOutput().contains("Already up-to-date")) {
                     notification.setTitle(constant.pullUpToDate());
@@ -230,7 +230,7 @@ public class PullPresenter implements PullView.ActionDelegate {
 
         GitOutputConsole console = gitOutputConsoleFactory.create(commandName);
         console.printError(errorMessage);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+        consolesPanelPresenter.addCommandOutput(console);
         notificationManager.notify(errorMessage, FAIL, FLOAT_MODE);
     }
 

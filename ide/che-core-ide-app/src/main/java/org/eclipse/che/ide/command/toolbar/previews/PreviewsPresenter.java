@@ -23,15 +23,14 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.mvp.Presenter;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 
 /** Drives the UI for displaying preview URLs of the running processes. */
@@ -85,16 +84,16 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
     private void updateView() {
         view.removeAllURLs();
 
-        final ActiveRuntime runtime = appContext.getActiveRuntime();
+        final RuntimeImpl runtime = appContext.getWorkspace().getRuntime();
 
         if (runtime == null) {
             return;
         }
 
         runtime.getMachines()
+               .keySet()
                .stream()
-               .map(MachineEntity::getId)
-               .map(id -> execAgentClient.getProcesses(id, false))
+               .map(machineName -> execAgentClient.getProcesses(machineName, false))
                .forEach(promise -> promise.onSuccess(processes -> processes.stream()
                                                                            .map(GetProcessesResponseDto::getName)
                                                                            .map(this::getPreviewUrlByName)

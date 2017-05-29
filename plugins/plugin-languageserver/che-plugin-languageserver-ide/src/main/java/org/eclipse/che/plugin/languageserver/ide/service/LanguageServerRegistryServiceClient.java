@@ -49,7 +49,7 @@ public class LanguageServerRegistryServiceClient {
      * @return all supported languages
      */
     public Promise<List<LanguageDescription>> getSupportedLanguages() {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + BASE_URI + "/supported";
+        String requestUrl = appContext.getDevAgentEndpoint() + BASE_URI + "/supported";
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .send(unmarshallerFactory.newListUnmarshaller(LanguageDescription.class));
@@ -59,14 +59,14 @@ public class LanguageServerRegistryServiceClient {
      * @return all registered languages
      */
     public Promise<List<ExtendedInitializeResult>> getRegisteredLanguages() {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + BASE_URI + "/registered";
+        String requestUrl = appContext.getDevAgentEndpoint() + BASE_URI + "/registered";
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .send(unmarshallerFactory.newListUnmarshaller(ExtendedInitializeResult.class));
     }
 
     public Promise<Void> initializeServer(String path) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + BASE_URI + "/initialize?path=" + path;
+        String requestUrl = appContext.getDevAgentEndpoint() + BASE_URI + "/initialize?path=" + path;
         return asyncRequestFactory.createPostRequest(requestUrl, null).send();
     }
 

@@ -19,7 +19,9 @@ import java.util.Map;
  * Defines machine entity on client side.
  *
  * @author Roman Nikitenko
+ * @deprecated use {@link org.eclipse.che.ide.api.workspace.model.MachineImpl}
  */
+@Deprecated
 public interface MachineEntity extends Machine {
 
     /** Returns {@code true} when the machine entity is development machine and {@code false} otherwise */
@@ -44,9 +46,11 @@ public interface MachineEntity extends Machine {
     Map<String, String> getProperties();
 
     /** Returns url to connects to special WebSocket which allows get information from terminal on server side. */
+    @Deprecated
     String getTerminalUrl();
 
     /** Returns url to connects to special WebSocket which allows execute command on given machine */
+    @Deprecated
     String getExecAgentUrl();
 
     /** Returns mapping of exposed ports to {@link Server}. */
@@ -55,7 +59,12 @@ public interface MachineEntity extends Machine {
     /** Returns {@link Server} by reference or null if it not exists. */
     Server getServer(String ref);
 
-    /** Returns {@link Machine descriptor} */
+    /**
+     * Returns {@link Machine descriptor}.
+     *
+     * @deprecated use {@link org.eclipse.che.ide.api.workspace.model.MachineImpl}
+     */
+    @Deprecated
     Machine getDescriptor();
 
 }

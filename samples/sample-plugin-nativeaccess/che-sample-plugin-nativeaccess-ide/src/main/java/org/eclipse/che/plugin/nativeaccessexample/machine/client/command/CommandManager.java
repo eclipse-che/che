@@ -13,12 +13,10 @@ package org.eclipse.che.plugin.nativeaccessexample.machine.client.command;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -52,11 +50,11 @@ public class CommandManager {
      * Execute the the given command command within the workspace Docker container.
      */
     public void execute(String commandLine) {
-        final Machine machine = appContext.getDevMachine().getDescriptor();
+        final DevMachine machine = appContext.getDevMachine();
         if (machine == null) {
             return;
         }
-        String machineID = machine.getId();
+        String machineID = machine.getName();
         final CommandDto command = dtoFactory.createDto(CommandDto.class)
                 .withName("some-command")
                 .withCommandLine(commandLine)

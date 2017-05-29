@@ -13,7 +13,6 @@ package org.eclipse.che.ide.resources.impl;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
@@ -36,7 +35,6 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.QueryExpression;
@@ -141,9 +139,9 @@ public final class ResourceManager {
      * Link to the workspace content root. Immutable among the workspace life.
      */
     private final Container                workspaceRoot;
+    private final AppContext               appContext;
     private final WsAgentURLModifier       urlModifier;
     private final ClientServerEventService clientServerEventService;
-    private       DevMachine               devMachine;
     /**
      * Internal store, which caches requested resources from the server.
      */
@@ -155,8 +153,7 @@ public final class ResourceManager {
     private ProjectConfigDto[] cachedConfigs;
 
     @Inject
-    public ResourceManager(@Assisted DevMachine devMachine,
-                           ProjectServiceClient ps,
+    public ResourceManager(ProjectServiceClient ps,
                            EventBus eventBus,
                            EditorAgent editorAgent,
                            DeletedFilesController deletedFilesController,
@@ -166,8 +163,8 @@ public final class ResourceManager {
                            ProjectTypeRegistry typeRegistry,
                            ResourceStore store,
                            WsAgentURLModifier urlModifier,
-                           ClientServerEventService clientServerEventService) {
-        this.devMachine = devMachine;
+                           ClientServerEventService clientServerEventService,
+                           AppContext appContext) {
         this.ps = ps;
         this.eventBus = eventBus;
         this.editorAgent = editorAgent;
@@ -181,6 +178,7 @@ public final class ResourceManager {
         this.clientServerEventService = clientServerEventService;
 
         this.workspaceRoot = resourceFactory.newFolderImpl(Path.ROOT, this);
+        this.appContext = appContext;
     }
 
     /**
@@ -1170,7 +1168,7 @@ public final class ResourceManager {
     protected String getUrl(Resource resource) {
         checkArgument(!resource.getLocation().isRoot(), "Workspace root doesn't have export URL");
 
-        final String baseUrl = devMachine.getWsAgentBaseUrl() + "/project/export";
+        final String baseUrl = appContext.getDevAgentEndpoint() + "/project/export";
 
         if (resource.getResourceType() == FILE) {
             return baseUrl + "/file" + resource.getLocation();
@@ -1196,6 +1194,6 @@ public final class ResourceManager {
     }
 
     public interface ResourceManagerFactory {
-        ResourceManager newResourceManager(DevMachine devMachine);
+        ResourceManager newResourceManager();
     }
 }

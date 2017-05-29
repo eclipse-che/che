@@ -149,7 +149,7 @@ public class MavenMessagesHandler {
                 public void onMessage(String message) {
                     Log.info(getClass(), message);
                     ArchetypeOutput archetypeOutput = factory.createDtoFromJson(message, ArchetypeOutput.class);
-                    processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), outputConsole);
+                    processesPanelPresenter.addCommandOutput(outputConsole);
                     switch (archetypeOutput.getState()) {
                         case START:
                             outputConsole.clearOutputsButtonClicked();

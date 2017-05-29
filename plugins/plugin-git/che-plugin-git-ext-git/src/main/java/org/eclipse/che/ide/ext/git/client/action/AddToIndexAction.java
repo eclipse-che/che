@@ -71,10 +71,9 @@ public class AddToIndexAction extends GitAction {
     public void actionPerformed(ActionEvent e) {
         final Resource[] resources = appContext.getResources();
         checkState(resources != null);
-        final DevMachine devMachine = appContext.getDevMachine();
         final GitOutputConsole console = gitOutputConsoleFactory.create(constant.addToIndexCommandName());
-        consolesPanelPresenter.addCommandOutput(devMachine.getId(), console);
-        service.getStatus(devMachine, appContext.getRootProject().getLocation())
+        consolesPanelPresenter.addCommandOutput(console);
+        service.getStatus(appContext.getRootProject().getLocation())
                .then(status -> {
                    if (containsInSelected(status.getUntracked())) {
                        presenter.showDialog();
@@ -99,7 +98,7 @@ public class AddToIndexAction extends GitAction {
             Path path = resources[i].getLocation().removeFirstSegments(1);
             paths[i] = path.segmentCount() == 0 ? Path.EMPTY : path;
         }
-        service.add(appContext.getDevMachine(), appContext.getRootProject().getLocation(), false, paths)
+        service.add(appContext.getRootProject().getLocation(), false, paths)
                .then(voidArg -> {
                    console.print(constant.addSuccess());
                    notificationManager.notify(constant.addSuccess());

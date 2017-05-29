@@ -27,6 +27,8 @@ import java.util.Objects;
 
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 
+/** @deprecated use {@link org.eclipse.che.ide.api.workspace.model.MachineImpl} */
+@Deprecated
 public class MachineEntityImpl implements MachineEntity {
 
     protected final Machine                    machineDescriptor;
@@ -75,12 +77,13 @@ public class MachineEntityImpl implements MachineEntity {
         return runtimeProperties;
     }
 
+    @Deprecated
     @Override
     public String getTerminalUrl() {
         // FIXME: spi
-        final MachineServer terminalServer = getServer(Constants.TERMINAL_REFERENCE);
-        if (terminalServer != null) {
-            return terminalServer.getUrl().replaceFirst("http", "ws") + "/pty";
+        final MachineServer server = getServer(Constants.TERMINAL_REFERENCE);
+        if (server != null) {
+            return server.getUrl().replaceFirst("http", "ws") + "/pty";
         }
 
         //should not be
@@ -89,12 +92,13 @@ public class MachineEntityImpl implements MachineEntity {
         throw new RuntimeException(message);
     }
 
+    @Deprecated
     @Override
     public String getExecAgentUrl() {
         // FIXME: spi
-        final MachineServer terminalServer = getServer(Constants.EXEC_AGENT_REFERENCE);
-        if (terminalServer != null) {
-            return terminalServer.getUrl().replaceFirst("http", "ws") + "/connect";
+        final MachineServer server = getServer(Constants.EXEC_AGENT_REFERENCE);
+        if (server != null) {
+            return server.getUrl().replaceFirst("http", "ws") + "/connect";
         }
 
         //should not be

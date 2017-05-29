@@ -19,7 +19,6 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -497,12 +496,9 @@ public class GithubImporterPagePresenterTest {
     public void onLoadRepoClickedWhenAuthorizeIsFailed() throws Exception {
         String userId = "userId";
         CurrentUser user = mock(CurrentUser.class);
-        ProfileDto profile = mock(ProfileDto.class);
 
         when(appContext.getCurrentUser()).thenReturn(user);
-        when(user.getProfile()).thenReturn(profile);
-        when(profile.getUserId()).thenReturn(userId);
-
+        when(user.getId()).thenReturn(userId);
 
         final Throwable exception = mock(UnauthorizedException.class);
         doAnswer(new Answer() {
@@ -550,12 +546,10 @@ public class GithubImporterPagePresenterTest {
         final Throwable exception = mock(UnauthorizedException.class);
         String userId = "userId";
         CurrentUser user = mock(CurrentUser.class);
-        ProfileDto profile = mock(ProfileDto.class);
         doReturn(exception).when(promiseError).getCause();
 
         when(appContext.getCurrentUser()).thenReturn(user);
-        when(user.getProfile()).thenReturn(profile);
-        when(profile.getUserId()).thenReturn(userId);
+        when(user.getId()).thenReturn(userId);
 
         presenter.onLoadRepoClicked();
 

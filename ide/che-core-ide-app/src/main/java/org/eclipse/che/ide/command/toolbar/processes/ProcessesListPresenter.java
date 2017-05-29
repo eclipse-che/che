@@ -18,15 +18,16 @@ import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.ActivateProcessOutputEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.mvp.Presenter;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.command.toolbar.CommandCreationGuide;
 
 import javax.inject.Inject;
@@ -106,23 +107,26 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
         view.clearList();
         runningProcesses.clear();
 
-        final ActiveRuntime runtime = appContext.getActiveRuntime();
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final RuntimeImpl runtime = workspace.getRuntime();
 
-        if (runtime != null) {
-            for (MachineEntity machine : runtime.getMachines()) {
-                execAgentClient.getProcesses(machine.getId(), false).onSuccess(processes -> {
-                    for (GetProcessesResponseDto p : processes) {
-                        final Process process = new ProcessImpl(p.getName(),
-                                                                p.getCommandLine(),
-                                                                p.getPid(),
-                                                                p.isAlive(),
-                                                                machine);
-                        runningProcesses.put(process.getPid(), process);
+        if (runtime == null) {
+            return;
+        }
 
-                        view.addProcess(process);
-                    }
-                });
-            }
+        for (MachineImpl machine : runtime.getMachines().values()) {
+            execAgentClient.getProcesses(machine.getName(), false).onSuccess(processes -> {
+                for (GetProcessesResponseDto p : processes) {
+                    final Process process = new ProcessImpl(p.getName(),
+                                                            p.getCommandLine(),
+                                                            p.getPid(),
+                                                            p.isAlive(),
+                                                            machine);
+                    runningProcesses.put(process.getPid(), process);
+
+                    view.addProcess(process);
+                }
+            });
         }
     }
 
@@ -134,8 +138,8 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
      * @param machine
      *         machine where process were run or currently running
      */
-    private void addProcessToList(int pid, MachineEntity machine) {
-        execAgentClient.getProcess(machine.getId(), pid).onSuccess(processDto -> {
+    private void addProcessToList(int pid, MachineImpl machine) {
+        execAgentClient.getProcess(machine.getName(), pid).onSuccess(processDto -> {
             final Process process = new ProcessImpl(processDto.getName(),
                                                     processDto.getCommandLine(),
                                                     processDto.getPid(),
@@ -165,7 +169,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
 
     @Override
     public void onStopProcess(Process process) {
-        execAgentClient.killProcess(process.getMachine().getId(), process.getPid());
+        execAgentClient.killProcess(process.getMachine().getName(), process.getPid());
     }
 
     @Override
