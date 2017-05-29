@@ -28,6 +28,7 @@ public class CreateExecParams {
     private String   container;
     private Boolean  detach;
     private String[] cmd;
+    private String   user;
 
     /**
      * Creates arguments holder with required parameters.
@@ -95,6 +96,18 @@ public class CreateExecParams {
         return this;
     }
 
+    /**
+     * Runs exec command as given user.
+     *
+     * @param user
+     *         The user, and optionally, group to run the exec process inside the container.
+     *         Format is one of: user, user:group, uid, or uid:gid.
+     */
+    public CreateExecParams withUser(String user) {
+        this.user = user;
+        return this;
+    }
+
     public String getContainer() {
         return container;
     }
@@ -108,26 +121,24 @@ public class CreateExecParams {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof CreateExecParams)) {
-            return false;
-        }
-        final CreateExecParams that = (CreateExecParams)obj;
-        return Objects.equals(container, that.container)
-               && Objects.equals(detach, that.detach)
-               && Arrays.equals(cmd, that.cmd);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CreateExecParams that = (CreateExecParams)o;
+        return Objects.equals(container, that.container) &&
+               Objects.equals(detach, that.detach) &&
+               Arrays.equals(cmd, that.cmd) &&
+               Objects.equals(user, that.user);
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Objects.hashCode(container);
-        hash = 31 * hash + Objects.hashCode(detach);
-        hash = 31 * hash + Arrays.hashCode(cmd);
-        return hash;
+        return Objects.hash(container, detach, Arrays.hashCode(cmd), user);
+    }
+
+    public String getUser() {
+        return user;
+
     }
 
     @Override
