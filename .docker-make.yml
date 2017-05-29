@@ -1,0 +1,105 @@
+builds:
+  base:
+    context: /dockerfiles/base
+    dockerfile: Dockerfile
+    pushes:
+      - "on_branch:master=eclipse/che-base:nightly"
+
+  lib-dto:
+    context: /dockerfiles/lib
+    dockerfile: Dockerfile.dto
+    extract:
+      - /tmp/dto/:./dto.tar
+
+  lib:
+    context: /dockerfiles/lib
+    dockerfile: Dockerfile
+    depends_on:
+      - lib-dto
+    pushes:
+      - "on_branch:master=eclipse/che-lib:nightly"
+
+  action:
+    context: /dockerfiles/action
+    dockerfile: Dockerfile
+    depends_on:
+      - lib
+    rewrite_from: lib
+    pushes:
+      - "on_branch:master=eclipse/che-action:nightly"
+
+  bats:
+    context: /dockerfiles/bats
+    dockerfile: Dockerfile
+    pushes:
+      - "on_branch:master=eclipse/che-bats:nightly"
+
+  che-build:
+    context: /
+    dockerfile: assembly/assembly-main/Dockerfile
+    extract:
+      - /usr/src/che/assembly/assembly-main/target/eclipse-che/.:./dockerfiles/che/eclipse-che.tar
+    dockerignore:
+      - .git
+      - dockerfiles
+
+  che:
+    context: /dockerfiles/che
+    dockerfile: Dockerfile
+    depends_on:
+      - che-build
+    pushes:
+      - "on_branch:master=eclipse/che-server:nightly"
+
+  # *********************************************
+  cli:
+    context: /dockerfiles/cli
+    dockerfile: Dockerfile
+    depends_on:
+      - base
+    rewrite_from: base
+    pushes:
+      - "on_branch:master=eclipse/che-cli:nightly"
+      - "on_branch:master=eclipse/che:nightly"
+
+  dev:
+    context: /dockerfiles/dev
+    dockerfile: Dockerfile
+    pushes:
+      - "on_branch:master=eclipse/che-dev:nightly"
+
+  dir:
+    context: /dockerfiles/dir
+    dockerfile: Dockerfile
+    depends_on:
+      - lib
+    rewrite_from: lib
+    pushes:
+      - "on_branch:master=eclipse/che-dir:nightly"
+
+  init:
+    context: /dockerfiles/init
+    dockerfile: Dockerfile
+    pushes:
+      - "on_branch:master=eclipse/che-init:nightly"
+
+  ip:
+    context: /dockerfiles/ip
+    dockerfile: Dockerfile
+    pushes:
+      - "on_branch:master=eclipse/che-ip:nightly"
+
+  mount:
+    context: /dockerfiles/mount
+    dockerfile: Dockerfile
+    pushes:
+      - "on_branch:master=eclipse/che-mount:nightly"
+
+  test:
+    context: /dockerfiles/test
+    dockerfile: Dockerfile
+    depends_on:
+      - lib
+    rewrite_from: lib
+    pushes:
+      - "on_branch:master=eclipse/che-test:nightly"
