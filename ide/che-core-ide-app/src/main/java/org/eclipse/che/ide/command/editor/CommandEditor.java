@@ -231,7 +231,6 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                 input.setFile(nodeFactory.newCommandFileNode(editedCommand));
             }
 
-
             final EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
             if (activeEditor != null) {
                 activeEditor.onFileChanged();
