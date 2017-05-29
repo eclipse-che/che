@@ -29,6 +29,8 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
+import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
@@ -43,6 +45,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.che.api.languageserver.shared.ProjectExtensionKey.createProjectKey;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 
 /**
@@ -51,6 +55,8 @@ import static org.eclipse.che.api.languageserver.shared.ProjectExtensionKey.crea
 @Singleton
 public class LanguageServerRegistry {
     private final EventBus                            eventBus;
+    private       LoaderFactory                       loaderFactory;
+    private       NotificationManager                 notificationManager;
     private final LanguageServerRegistryServiceClient client;
 
     private final Map<ProjectExtensionKey, ExtendedInitializeResult>                      projectToInitResult;
@@ -58,8 +64,12 @@ public class LanguageServerRegistry {
 
     @Inject
     public LanguageServerRegistry(EventBus eventBus,
+                                  LoaderFactory loaderFactory,
+                                  NotificationManager notificationManager,
                                   LanguageServerRegistryServiceClient client) {
         this.eventBus = eventBus;
+        this.loaderFactory = loaderFactory;
+        this.notificationManager = notificationManager;
         this.client = client;
         this.projectToInitResult = new HashMap<>();
         this.callbackMap = new HashMap<>();
@@ -87,14 +97,16 @@ public class LanguageServerRegistry {
             return Promises.resolve(projectToInitResult.get(key));
         } else {
             //call initialize service
-            client.initializeServer(filePath);
-            //wait for response
-            return CallbackPromiseHelper.createFromCallback(new CallbackPromiseHelper.Call<ExtendedInitializeResult, Throwable>() {
-                @Override
-                public void makeCall(Callback<ExtendedInitializeResult, Throwable> callback) {
-                    callbackMap.put(key, callback);
-                }
+            final MessageLoader loader = loaderFactory.newLoader("Initializing Language Server for " + ext);
+            loader.show();
+            client.initializeServer(filePath).then(arg -> {
+                loader.hide();
+            }).catchError(arg -> {
+                notificationManager.notify("Initializing Language Server for " + ext, arg.getMessage(), FAIL, EMERGE_MODE);
+                loader.hide();
             });
+            //wait for response
+            return CallbackPromiseHelper.createFromCallback(callback -> callbackMap.put(key, callback));
         }
     }
 
@@ -149,7 +161,7 @@ public class LanguageServerRegistry {
                         @Override
                         protected void onErrorReceived(Throwable exception) {
                             notificationManager.notify(exception.getMessage(),
-                                                       StatusNotification.Status.FAIL,
+                                                       FAIL,
                                                        StatusNotification.DisplayMode.NOT_EMERGE_MODE);
                         }
                     });

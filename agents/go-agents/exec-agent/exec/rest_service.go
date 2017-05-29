@@ -74,9 +74,10 @@ func startProcessHF(w http.ResponseWriter, r *http.Request, p rest.Params) error
 		return rest.BadRequest(err)
 	}
 
+	pb := process.NewBuilder().Cmd(command)
+
 	// If channel is provided then check whether it is ready to be
 	// first process subscriber and use it if it is
-	var subscriber *process.Subscriber
 	channelID := r.URL.Query().Get("channel")
 	if channelID != "" {
 		channel, ok := rpc.GetChannel(channelID)
@@ -84,17 +85,7 @@ func startProcessHF(w http.ResponseWriter, r *http.Request, p rest.Params) error
 			m := fmt.Sprintf("Channel with id '%s' doesn't exist. Process won't be started", channelID)
 			return rest.NotFound(errors.New(m))
 		}
-		subscriber = &process.Subscriber{
-			ID:      channelID,
-			Mask:    parseTypes(r.URL.Query().Get("types")),
-			Channel: channel.Events,
-		}
-	}
-
-	pb := process.NewBuilder().Cmd(command)
-
-	if subscriber != nil {
-		pb.FirstSubscriber(*subscriber)
+		pb.Subscribe(channelID, parseTypes(r.URL.Query().Get("types")), channel.Events)
 	}
 
 	proc, err := pb.Start()

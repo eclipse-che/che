@@ -32,7 +32,7 @@ public class ProcessStdOutEventHandler extends AbstractExecAgentEventHandler<Pro
                     .methodName("process_stdout")
                     .paramsAsDto(ProcessStdOutEventDto.class)
                     .noResult()
-                    .withConsumer(this);
+                    .withBiConsumer(this);
     }
 
     @Override

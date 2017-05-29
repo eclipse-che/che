@@ -36,7 +36,7 @@ public class EditorFileOperationHandler {
                     .methodName(INCOMING_METHOD)
                     .paramsAsDto(FileTrackingOperationDto.class)
                     .resultAsEmpty()
-                    .withFunction(this::handleFileTrackingOperation);
+                    .withBiFunction(this::handleFileTrackingOperation);
     }
 
     private Void handleFileTrackingOperation(String endpointId, FileTrackingOperationDto operation) {

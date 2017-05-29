@@ -13,9 +13,9 @@ package exec
 
 import (
 	"errors"
+	"github.com/eclipse/che/agents/go-agents/core/process"
 	"strconv"
 	"strings"
-	"github.com/eclipse/che/agents/go-agents/core/process"
 )
 
 const (
