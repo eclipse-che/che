@@ -14,6 +14,8 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.core.notification.RemoteSubscriptionManager;
+import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 
 import javax.annotation.PostConstruct;
@@ -30,74 +32,20 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
  * Send workspace events using JSON RPC to the clients
  */
 @Singleton
-public class RuntimeStatusJsonRpcMessenger implements EventSubscriber<RuntimeStatusEvent> {
-    private final RequestTransmitter transmitter;
-    private final EventService       eventService;
-
-    private final Map<String, Set<String>> endpointIds = new ConcurrentHashMap<>();
+public class RuntimeStatusJsonRpcMessenger {
+    private final RemoteSubscriptionManager remoteSubscriptionManager;
 
     @Inject
-    public RuntimeStatusJsonRpcMessenger(RequestTransmitter transmitter, EventService eventService) {
-        this.transmitter = transmitter;
-        this.eventService = eventService;
-    }
-
-    @Override
-    public void onEvent(RuntimeStatusEvent event) {
-        send(event);
-    }
-
-    public void send(RuntimeStatusEvent event) {
-        String id = event.getIdentity().getWorkspaceId();
-        endpointIds.entrySet()
-                   .stream()
-                   .filter(it -> it.getValue().contains(id))
-                   .map(Map.Entry::getKey)
-                   .forEach(it -> transmitter.newRequest()
-                                             .endpointId(it)
-                                             .methodName("runtime/statusChanged")
-                                             .paramsAsDto(event)
-                                             .sendAndSkipResult());
-    }
-
-    @Inject
-    private void configureSubscribeHandler(RequestHandlerConfigurator configurator) {
-
-        configurator.newConfiguration()
-                    .methodName("runtime/subscribe")
-                    .paramsAsString()
-                    .noResult()
-                    .withBiConsumer((endpointId, workspaceId) -> {
-                        endpointIds.putIfAbsent(endpointId, newConcurrentHashSet());
-                        endpointIds.get(endpointId).add(workspaceId);
-                    });
-    }
-
-    @Inject
-    private void configureUnSubscribeHandler(RequestHandlerConfigurator configurator) {
-        configurator.newConfiguration()
-                    .methodName("runtime/unSubscribe")
-                    .paramsAsString()
-                    .noResult()
-                    .withBiConsumer((endpointId, workspaceId) -> {
-                        Set<String> workspaceIds = endpointIds.get(endpointId);
-                        if (workspaceIds != null) {
-                            workspaceIds.remove(workspaceId);
-
-                            if (workspaceIds.isEmpty()) {
-                                endpointIds.remove(endpointId);
-                            }
-                        }
-                    });
+    public RuntimeStatusJsonRpcMessenger(RemoteSubscriptionManager remoteSubscriptionManager) {
+        this.remoteSubscriptionManager = remoteSubscriptionManager;
     }
 
     @PostConstruct
-    private void subscribe() {
-        eventService.subscribe(this);
+    private void postConstruct() {
+        remoteSubscriptionManager.register("runtime/statusChanged", RuntimeStatusEvent.class, this::predicate);
     }
 
-    @PreDestroy
-    private void unsubscribe() {
-        eventService.unsubscribe(this);
+    private boolean predicate(RuntimeStatusEvent event, Map<String, String> scope) {
+        return event.getIdentity().getWorkspaceId().equals(scope.get("workspaceId"));
     }
 }

@@ -8,15 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.workspace.runtime;
+package org.eclipse.che.api.core.notification.dto;
 
-/**
- * @author gazarenkov
- */
-public interface RuntimeIdentity {
-    String getWorkspaceId();
+import org.eclipse.che.dto.shared.DTO;
 
-    String getEnvName();
+import java.util.Map;
 
-    String getOwner();
+@DTO
+public interface EventSubscription {
+    String getMethod();
+
+    EventSubscription withMethod(String method);
+
+    Map<String, String> getScope();
+
+    EventSubscription withScope(Map<String, String> scope);
 }
