@@ -25,7 +25,7 @@ class WorkspaceStatusEventHandler {
     @Inject
     WorkspaceStatusEventHandler(RequestHandlerConfigurator configurator, Provider<WorkspaceStatusHandler> handlerProvider) {
         configurator.newConfiguration()
-                    .methodName("event:workspace-status:changed")
+                    .methodName("workspace/statusChanged")
                     .paramsAsDto(WorkspaceStatusEvent.class)
                     .noResult()
                     .withBiConsumer((endpointId, event) -> {
