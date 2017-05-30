@@ -93,6 +93,9 @@ public class ProjectApiModule extends AbstractModule {
 
         bind(FileWatcherNotificationHandler.class).to(DefaultFileWatcherNotificationHandler.class);
 
+        bind(EditorChangesTracker.class).asEagerSingleton();
+        bind(EditorWorkingCopyManager.class).asEagerSingleton();
+
         configureVfsFilters(excludeMatcher);
         configureVfsFilters(fileWatcherExcludes);
         configureVfsEvent();

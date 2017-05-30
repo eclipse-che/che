@@ -89,14 +89,11 @@ public class EditorGroupSynchronizationImplTest {
         when(((TextEditor)openedEditor1).getDocument()).thenReturn(document);
         when(((TextEditor)openedEditor2).getDocument()).thenReturn(document);
 
+        when(document.getContents()).thenReturn("some content");
+
         when(documentEventBus.addHandler((Event.Type<Object>)anyObject(), anyObject())).thenReturn(handlerRegistration);
 
         editorGroupSynchronization = new EditorGroupSynchronizationImpl(eventBus, documentStorage, notificationManager);
-
-        editorGroupSynchronization.addEditor(activeEditor);
-        editorGroupSynchronization.addEditor(openedEditor1);
-        editorGroupSynchronization.addEditor(openedEditor2);
-        editorGroupSynchronization.onActiveEditorChanged(activeEditor);
     }
 
     @Test
@@ -109,20 +106,34 @@ public class EditorGroupSynchronizationImplTest {
     }
 
     @Test
-    public void shouldRemoveEditorFromGroup() {
-        when(activeEditor.isDirty()).thenReturn(true);
+    public void shouldUpdateContentAtAddingEditorWhenGroupHasUnsavedData() {
+        editorGroupSynchronization.addEditor(openedEditor1);
+        reset(documentEventBus);
+        when(((TextEditor)openedEditor1).getDocument()).thenReturn(document);
+        when(((EditorWithAutoSave)openedEditor1).isAutoSaveEnabled()).thenReturn(false);
 
+        editorGroupSynchronization.addEditor(activeEditor);
+        editorGroupSynchronization.onActiveEditorChanged(activeEditor);
+
+        verify((EditorWithAutoSave)openedEditor1).isAutoSaveEnabled();
+        verify(document, times(2)).getContents();
+        verify(document).replace(anyInt(), anyInt(), anyString());
+        verify(documentEventBus).addHandler(Matchers.<DocumentChangeEvent.Type>anyObject(), eq(editorGroupSynchronization));
+    }
+
+    @Test
+    public void shouldRemoveEditorFromGroup() {
         editorGroupSynchronization.addEditor(activeEditor);
 
         editorGroupSynchronization.removeEditor(activeEditor);
 
-        //should save content before closing (autosave will not have time to do it)
-        verify(activeEditor).doSave();
         verify(handlerRegistration).removeHandler();
     }
 
     @Test
     public void shouldRemoveAllEditorsFromGroup() {
+        addEditorsToGroup();
+
         editorGroupSynchronization.unInstall();
 
         verify(handlerRegistration, times(3)).removeHandler();
@@ -151,6 +162,7 @@ public class EditorGroupSynchronizationImplTest {
         when(documentChangeEvent.getDocument()).thenReturn(documentHandle1);
         when(documentHandle1.isSameAs(documentHandle)).thenReturn(true);
 
+        addEditorsToGroup();
         editorGroupSynchronization.onDocumentChange(documentChangeEvent);
 
         verify(document, times(2)).replace(eq(offset), eq(removeCharCount), eq(text));
@@ -158,10 +170,20 @@ public class EditorGroupSynchronizationImplTest {
 
     @Test
     public void shouldResolveAutoSave() {
+        addEditorsToGroup();
+
         // AutoSave for active editor should always be enabled,
         // but AutoSave for other editors with the same path should be disabled
         verify(((EditorWithAutoSave)activeEditor)).enableAutoSave();
         verify(((EditorWithAutoSave)openedEditor1)).disableAutoSave();
         verify(((EditorWithAutoSave)openedEditor2)).disableAutoSave();
+    }
+
+    private void addEditorsToGroup() {
+        editorGroupSynchronization.addEditor(openedEditor1);
+        editorGroupSynchronization.addEditor(openedEditor2);
+        editorGroupSynchronization.addEditor(activeEditor);
+
+        editorGroupSynchronization.onActiveEditorChanged(activeEditor);
     }
 }

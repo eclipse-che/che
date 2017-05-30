@@ -24,7 +24,6 @@ import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -67,8 +66,6 @@ import org.eclipse.che.ide.api.editor.texteditor.ContentInitializedHandler;
 import org.eclipse.che.ide.api.editor.texteditor.EditorWidget;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.LineStyler;
-import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent;
-import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent.EditorSettingsChangedHandler;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
@@ -97,7 +94,6 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionStyleOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.StatusMessageReporterOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.UiUtilsOverlay;
-import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesManager;
 import org.eclipse.che.ide.editor.preferences.keymaps.KeyMapsPreferencePresenter;
 import org.eclipse.che.ide.status.message.StatusMessageReporter;
 import org.eclipse.che.ide.util.browser.UserAgent;
@@ -136,6 +132,7 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
     private final ContentAssistWidgetFactory contentAssistWidgetFactory;
     private final DialogFactory              dialogFactory;
     private final PreferencesManager         preferencesManager;
+    private final OrionSettingsController orionSettingsController;
 
     @UiField
     SimplePanel        panel;
@@ -152,7 +149,6 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
 
     private OrionDocument           embeddedDocument;
     private OrionKeyModeOverlay     cheContentAssistMode;
-    private EditorPropertiesManager editorPropertiesManager;
 
     private Keymap              keymap;
     private ContentAssistWidget assistWidget;
@@ -172,7 +168,6 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
     public OrionEditorWidget(final ModuleHolder moduleHolder,
                              final KeyModeInstances keyModeInstances,
                              final EventBus eventBus,
-                             final EditorPropertiesManager editorPropertiesManager,
                              final Provider<OrionCodeEditWidgetOverlay> orionCodeEditWidgetProvider,
                              final ContentAssistWidgetFactory contentAssistWidgetFactory,
                              final DialogFactory dialogFactory,
@@ -181,16 +176,16 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
                              @Assisted final WidgetInitializedCallback widgetInitializedCallback,
                              final Provider<OrionEditorOptionsOverlay> editorOptionsProvider,
                              final StatusMessageReporter statusMessageReporter,
-                             final IncrementalFindReportStatusObserver incrementalFindObserver) {
+                             final IncrementalFindReportStatusObserver incrementalFindObserver,
+                             final OrionSettingsController orionSettingsController) {
         this.contentAssistWidgetFactory = contentAssistWidgetFactory;
         this.moduleHolder = moduleHolder;
         this.keyModeInstances = keyModeInstances;
         this.eventBus = eventBus;
         this.dialogFactory = dialogFactory;
         this.preferencesManager = preferencesManager;
+        this.orionSettingsController = orionSettingsController;
         initWidget(UIBINDER.createAndBindUi(this));
-
-        this.editorPropertiesManager = editorPropertiesManager;
 
         this.uiUtilsOverlay = moduleHolder.getModule("UiUtils");
 
@@ -211,13 +206,6 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
         statusMessageReporter.registerObserver(incrementalFindObserver);
 
         registerPromptFunction();
-        eventBus.addHandler(EditorSettingsChangedEvent.TYPE, new EditorSettingsChangedHandler() {
-            @Override
-            public void onEditorSettingsChanged(EditorSettingsChangedEvent event) {
-                final JSONObject properties = editorPropertiesManager.getJsonEditorProperties();
-                editorViewOverlay.updateSettings(properties.getJavaScriptObject());
-            }
-        });
     }
 
     private OrionEditorOptionsOverlay initEditorOptions(OrionEditorOptionsOverlay orionEditorOptionsOverlay,
@@ -281,9 +269,7 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
     @Override
     public void setReadOnly(final boolean isReadOnly) {
         editorViewOverlay.setReadonly(isReadOnly);
-
-        final JSONObject properties = editorPropertiesManager.getJsonEditorProperties();
-        editorViewOverlay.updateSettings(properties.getJavaScriptObject());
+        orionSettingsController.updateSettings();
     }
 
     @Override
@@ -797,6 +783,7 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
         public void apply(OrionEditorViewOverlay arg) throws OperationException {
             editorViewOverlay = arg;
             editorOverlay = arg.getEditor();
+            orionSettingsController.setEditorViewOverlay(arg);
 
             final OrionContentAssistOverlay contentAssist = editorOverlay.getContentAssist();
             eventBus.addHandler(SelectionChangedEvent.TYPE, new SelectionChangedHandler() {
@@ -830,9 +817,7 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
             assistWidget = contentAssistWidgetFactory.create(OrionEditorWidget.this, cheContentAssistMode);
             gutter = initBreakpointRuler(moduleHolder);
 
-            final JSONObject editorProperties = editorPropertiesManager.getJsonEditorProperties();
-            editorViewOverlay.updateSettings(editorProperties.getJavaScriptObject());
-
+            orionSettingsController.updateSettings();
             widgetInitializedCallback.initialized(OrionEditorWidget.this);
         }
     }

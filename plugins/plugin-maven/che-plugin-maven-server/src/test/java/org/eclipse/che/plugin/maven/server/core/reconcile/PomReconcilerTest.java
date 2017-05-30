@@ -8,16 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.server;
+package org.eclipse.che.plugin.maven.server.core.reconcile;
 
 import com.google.gson.JsonObject;
 import com.google.inject.Provider;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.project.server.EditorWorkingCopyManager;
 import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.maven.server.MavenTerminal;
+import org.eclipse.che.plugin.maven.server.BaseTest;
+import org.eclipse.che.plugin.maven.server.MavenWrapperManager;
 import org.eclipse.che.plugin.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.plugin.maven.server.core.MavenCommunication;
 import org.eclipse.che.plugin.maven.server.core.MavenExecutorService;
@@ -25,8 +30,6 @@ import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
 import org.eclipse.che.plugin.maven.server.core.MavenWorkspace;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
-import org.eclipse.che.plugin.maven.server.projecttype.MavenValueProvider;
-import org.eclipse.che.plugin.maven.server.rest.MavenServerService;
 import org.eclipse.che.plugin.maven.server.rmi.MavenServerManagerTest;
 import org.eclipse.che.plugin.maven.shared.MessageType;
 import org.eclipse.che.plugin.maven.shared.dto.NotificationMessage;
@@ -41,6 +44,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,15 +54,17 @@ import static org.mockito.Mockito.when;
  */
 public class PomReconcilerTest extends BaseTest {
 
-
-    private MavenProjectManager projectManager;
+    private MavenProjectManager mavenProjectManager;
     private MavenWorkspace      mavenWorkspace;
-    private MavenValueProvider  mavenValueProvider;
+    private PomReconciler       pomReconciler;
 
     @BeforeMethod
     public void setUp() throws Exception {
         Provider<ProjectRegistry> projectRegistryProvider = (Provider<ProjectRegistry>)mock(Provider.class);
         when(projectRegistryProvider.get()).thenReturn(projectRegistry);
+
+        RequestTransmitter requestTransmitter = mock(RequestTransmitter.class);
+
         MavenServerManagerTest.MyMavenServerProgressNotifier mavenNotifier = new MavenServerManagerTest.MyMavenServerProgressNotifier();
         MavenTerminal terminal = new MavenTerminal() {
             @Override
@@ -75,15 +81,15 @@ public class PomReconcilerTest extends BaseTest {
         mavenServerManager.setLocalRepository(localRepository);
 
         MavenWrapperManager wrapperManager = new MavenWrapperManager(mavenServerManager);
-        projectManager =
+        mavenProjectManager =
                 new MavenProjectManager(wrapperManager, mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
-
-
+        Provider<ProjectManager> projectManagerProvider = (Provider<ProjectManager>)mock(Provider.class);
+        when(projectManagerProvider.get()).thenReturn(pm);
 
         ClasspathManager classpathManager =
-                new ClasspathManager(root.getAbsolutePath(), wrapperManager, projectManager, terminal, mavenNotifier);
+                new ClasspathManager(root.getAbsolutePath(), wrapperManager, mavenProjectManager, terminal, mavenNotifier);
 
-        mavenWorkspace = new MavenWorkspace(projectManager, mavenNotifier, new MavenExecutorService(), projectRegistryProvider,
+        mavenWorkspace = new MavenWorkspace(mavenProjectManager, mavenNotifier, new MavenExecutorService(), projectRegistryProvider,
                                             new MavenCommunication() {
                                                 @Override
                                                 public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed) {
@@ -100,18 +106,20 @@ public class PomReconcilerTest extends BaseTest {
 
                                                 }
                                             }, classpathManager, eventService, new EclipseWorkspaceProvider());
-
+        EditorWorkingCopyManager editorWorkingCopyManager =
+                new EditorWorkingCopyManager(projectManagerProvider, eventService, requestTransmitter);
+        pomReconciler =
+                new PomReconciler(projectManagerProvider, mavenProjectManager, editorWorkingCopyManager, eventService, requestTransmitter);
     }
 
     @Test
     public void testProblemPosition() throws Exception {
-        MavenServerService serverService = new MavenServerService(null, projectRegistry, pm, projectManager, null, null);
         FolderEntry testProject = createTestProject("A", "");
         VirtualFileEntry child = testProject.getChild("pom.xml");
         String newContent = getPomContent("<ss");
         child.getVirtualFile().updateContent(newContent);
 
-        List<Problem> problems = serverService.reconcilePom("/A/pom.xml");
+        List<Problem> problems = pomReconciler.reconcile("/A/pom.xml");
         assertThat(problems).isNotEmpty();
         Problem problem = problems.get(0);
 
@@ -122,11 +130,10 @@ public class PomReconcilerTest extends BaseTest {
 
     @Test
     public void testReconcilePomWhenMavenProjectIsNotFound() throws Exception {
-        MavenServerService serverService = new MavenServerService(null, projectRegistry, pm, projectManager, null, null);
         FolderEntry testProject = createTestProject(PROJECT_NAME, "");
         VirtualFileEntry pom = testProject.getChild("pom.xml");
 
-        List<Problem> problems = serverService.reconcilePom(String.format("/%s/pom.xml", PROJECT_NAME));
+        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
 
         assertThat(problems).isEmpty();
         assertThat(pom).isNotNull();
@@ -140,14 +147,13 @@ public class PomReconcilerTest extends BaseTest {
                             "        <version>3.8.1</version>\n" +
                             "        <scope>test</scope>\n" +
                             "    </dependency>\n";
-        MavenServerService serverService = new MavenServerService(null, projectRegistry, pm, projectManager, null, null);
         FolderEntry testProject = createTestProject(PROJECT_NAME, getPomContentWithDependency(dependency));
         VirtualFileEntry pom = testProject.getChild("pom.xml");
         IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
         mavenWorkspace.update(Collections.singletonList(project));
         mavenWorkspace.waitForUpdate();
 
-        List<Problem> problems = serverService.reconcilePom(String.format("/%s/pom.xml", PROJECT_NAME));
+        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
 
         assertThat(problems).isEmpty();
         assertThat(pom).isNotNull();
@@ -161,14 +167,13 @@ public class PomReconcilerTest extends BaseTest {
                                   "        <version>33333333.8.1</version>\n" +
                                   "        <scope>test</scope>\n" +
                                   "    </dependency>\n";
-        MavenServerService serverService = new MavenServerService(null, projectRegistry, pm, projectManager, null, null);
         FolderEntry testProject = createTestProject(PROJECT_NAME, getPomContentWithDependency(brokenDependency));
         VirtualFileEntry pom = testProject.getChild("pom.xml");
         IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
         mavenWorkspace.update(Collections.singletonList(project));
         mavenWorkspace.waitForUpdate();
 
-        List<Problem> problems = serverService.reconcilePom(String.format("/%s/pom.xml", PROJECT_NAME));
+        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
 
         assertThat(problems).hasSize(1);
         assertThat(problems.get(0).isError()).isTrue();
@@ -183,14 +188,13 @@ public class PomReconcilerTest extends BaseTest {
                                   "        <version>3.8.1</version>\n" +
                                   "        <scope>test</scope>\n" +
                                   "    </dependency>\n";
-        MavenServerService serverService = new MavenServerService(null, projectRegistry, pm, projectManager, null, null);
         FolderEntry testProject = createTestProject(PROJECT_NAME, getPomContentWithDependency(brokenDependency));
         VirtualFileEntry pom = testProject.getChild("pom.xml");
         IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
         mavenWorkspace.update(Collections.singletonList(project));
         mavenWorkspace.waitForUpdate();
 
-        List<Problem> problems = serverService.reconcilePom(String.format("/%s/pom.xml", PROJECT_NAME));
+        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
 
         assertThat(problems).hasSize(1);
         assertThat(problems.get(0).isError()).isTrue();
@@ -205,14 +209,13 @@ public class PomReconcilerTest extends BaseTest {
                                   "        <version>3.8.1</version>\n" +
                                   "        <scope>test</scope>\n" +
                                   "    </dependency>\n";
-        MavenServerService serverService = new MavenServerService(null, projectRegistry, pm, projectManager, null, null);
         FolderEntry testProject = createTestProject(PROJECT_NAME, getPomContentWithDependency(brokenDependency));
         VirtualFileEntry pom = testProject.getChild("pom.xml");
         IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
         mavenWorkspace.update(Collections.singletonList(project));
         mavenWorkspace.waitForUpdate();
 
-        List<Problem> problems = serverService.reconcilePom(String.format("/%s/pom.xml", PROJECT_NAME));
+        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
 
         assertThat(problems).hasSize(1);
         assertThat(problems.get(0).isError()).isTrue();
@@ -220,13 +223,13 @@ public class PomReconcilerTest extends BaseTest {
     }
 
     private String getPomContentWithDependency(String dependency) {
-        return String.format("<groupId>org.eclipse.che.examples</groupId>\n" +
-                             "<artifactId>web-java-spring</artifactId>\n" +
-                             "<packaging>war</packaging>\n" +
-                             "<version>1.0-SNAPSHOT</version>\n" +
-                             "<name>SpringDemo</name>" +
-                             "<dependencies>\n" +
-                             "%s" +
-                             "</dependencies>", dependency);
+        return format("<groupId>org.eclipse.che.examples</groupId>\n" +
+                      "<artifactId>web-java-spring</artifactId>\n" +
+                      "<packaging>war</packaging>\n" +
+                      "<version>1.0-SNAPSHOT</version>\n" +
+                      "<name>SpringDemo</name>" +
+                      "<dependencies>\n" +
+                      "%s" +
+                      "</dependencies>", dependency);
     }
 }
