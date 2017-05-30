@@ -22,13 +22,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
 
 import static java.util.Collections.emptySet;
 
 @Singleton
 public class RemoteSubscriptionManager {
-    private final Map<String, Set<SubscriptionContext>> subscriptionContexts = new HashMap<>();
+    private final Map<String, Set<SubscriptionContext>> subscriptionContexts = new ConcurrentHashMap<>();
 
     private final EventService       eventService;
     private final RequestTransmitter requestTransmitter;
@@ -56,7 +57,7 @@ public class RemoteSubscriptionManager {
     }
 
     public <T> void register(String method, Class<T> eventType, BiPredicate<T, Map<String, String>> biPredicate) {
-        eventService.subscribe(event -> subscriptionContexts.get(method)
+        eventService.subscribe(event -> subscriptionContexts.getOrDefault(method, new HashSet<>())
                                                             .stream()
                                                             .filter(context -> biPredicate.test(event, context.scope))
                                                             .forEach(context -> transmit(context.endpointId, method, event)),
