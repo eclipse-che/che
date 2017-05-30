@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.git.client.commit;
 import org.eclipse.che.api.git.shared.GitUser;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
@@ -71,15 +70,14 @@ public class CommitPresenterTest extends BaseTest {
         when(view.getMessage()).thenReturn(EMPTY_TEXT);
 
         when(appContext.getResources()).thenReturn(new Resource[]{});
-        when(appContext.getDevMachine()).thenReturn(mock(DevMachine.class));
         when(appContext.getRootProject()).thenReturn(mock(Project.class));
 
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
         when(revisionPromise.then(any(Operation.class))).thenReturn(revisionPromise);
         when(revisionPromise.catchError(any(Operation.class))).thenReturn(revisionPromise);
-        when(service.add(any(DevMachine.class), any(Path.class), anyBoolean(), any(Path[].class))).thenReturn(voidPromise);
-        when(service.commit(any(DevMachine.class), any(Path.class), anyString(), anyBoolean(), any(Path[].class), anyBoolean()))
+        when(service.add(any(Path.class), anyBoolean(), any(Path[].class))).thenReturn(voidPromise);
+        when(service.commit(any(Path.class), anyString(), anyBoolean(), any(Path[].class), anyBoolean()))
                 .thenReturn(revisionPromise);
     }
 
@@ -166,7 +164,7 @@ public class CommitPresenterTest extends BaseTest {
         verify(voidPromise).then(voidPromiseCaptor.capture());
         voidPromiseCaptor.getValue().apply(null);
 
-        verify(service).add(any(DevMachine.class), any(Path.class), anyBoolean(), any(Path[].class));
+        verify(service).add(any(Path.class), anyBoolean(), any(Path[].class));
         verify(presenter).doCommit(anyString(), anyBoolean(), anyBoolean(), anyBoolean());
     }
 
@@ -178,7 +176,7 @@ public class CommitPresenterTest extends BaseTest {
         presenter.showDialog(project);
         presenter.onCommitClicked();
 
-        verify(service, never()).add(any(DevMachine.class), any(Path.class), anyBoolean(), any(Path[].class));
+        verify(service, never()).add(any(Path.class), anyBoolean(), any(Path[].class));
         verify(presenter).doCommit(anyString(), anyBoolean(), anyBoolean(), anyBoolean());
     }
 

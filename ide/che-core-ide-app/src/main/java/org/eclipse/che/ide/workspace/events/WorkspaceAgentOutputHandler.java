@@ -30,7 +30,7 @@ class WorkspaceAgentOutputHandler {
         BiConsumer<String, List<String>> operation = (String endpointId, List<String> messages) -> {
             Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
-            if (appContext.getActiveRuntime() == null || appContext.getDevMachine() == null) {
+            if (appContext.getWorkspace().getRuntime() == null || appContext.getDevMachine() == null) {
                 Log.error(getClass(), "Runtime or dev machine is not properly initialized for this action");
                 return;
             }
@@ -40,13 +40,13 @@ class WorkspaceAgentOutputHandler {
                 return;
             }
 
-            eventBus.fireEvent(new EnvironmentOutputEvent(messages.get(0), appContext.getDevMachine().getDisplayName()));
+            eventBus.fireEvent(new EnvironmentOutputEvent(messages.get(0), appContext.getDevMachine().getName()));
         };
 
         configurator.newConfiguration()
                     .methodName("event:ws-agent-output:message")
                     .paramsAsListOfString()
                     .noResult()
-                    .withConsumer(operation);
+                    .withBiConsumer(operation);
     }
 }

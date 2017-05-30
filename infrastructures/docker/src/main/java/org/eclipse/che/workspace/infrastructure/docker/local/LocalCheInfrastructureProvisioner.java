@@ -33,6 +33,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -44,6 +45,8 @@ import static org.eclipse.che.api.workspace.shared.Utils.getDevMachineName;
  * @author Alexander Garagatyi
  */
 public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProvisioner {
+    private static final List<String> SNAPSHOT_EXCLUDED_DIRECTORIES = Arrays.asList("/tmp");
+
     private final WorkspaceFolderPathProvider  workspaceFolderPathProvider;
     private final WindowsPathEscaper           pathEscaper;
     private final String                       projectFolderPath;
@@ -116,6 +119,13 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         String dockerExtConfVolume = dockerExtConfBindingProvider.get();
         if (dockerExtConfVolume != null) {
             devMachineVolumes.add(dockerExtConfVolume);
+        }
+        // create volume for each directory to exclude from a snapshot
+        List<String> volumes;
+        for (DockerContainerConfig service : internalEnv.getServices().values()) {
+            volumes = new ArrayList<>(service.getVolumes());
+            volumes.addAll(SNAPSHOT_EXCLUDED_DIRECTORIES);
+            service.setVolumes(volumes);
         }
         HashMap<String, String> environmentVars = new HashMap<>(devMachine.getEnvironment());
         environmentVars.put(CheBootstrap.CHE_LOCAL_CONF_DIR, DockerExtConfBindingProvider.EXT_CHE_LOCAL_CONF_DIR);

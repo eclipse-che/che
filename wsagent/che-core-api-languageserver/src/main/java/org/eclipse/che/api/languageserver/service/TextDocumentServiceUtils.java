@@ -8,30 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.rest;
-
-import com.google.inject.Provider;
+package org.eclipse.che.api.languageserver.service;
 
 /**
- * Getting setting by native JS
- * $wnd.IDE.config.restContext
- *
- * @author Vitaly Parfonov
+ * Text document service utilities
  */
-@Deprecated
-public class RestContextProvider implements Provider<String> {
+class TextDocumentServiceUtils {
+    private static final String FILE_PROJECTS = "file:///projects";
 
-
-    @Override
-    public String get() {
-        return getRestContext();
+    static String prefixURI(String relativePath) {
+        return FILE_PROJECTS + relativePath;
     }
 
-    private static native String getRestContext() /*-{
-        if ($wnd.IDE && $wnd.IDE.config) {
-            return $wnd.IDE.config.restContext;
-        } else {
-            return null;
-        }
-    }-*/;
+    static String removePrefixUri(String uri) {
+        return uri.startsWith(FILE_PROJECTS) ? uri.substring(FILE_PROJECTS.length()) : uri;
+    }
 }

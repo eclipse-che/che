@@ -13,11 +13,9 @@ package process
 
 import (
 	"time"
-
-	"github.com/eclipse/che/agents/go-agents/core/rpc"
 )
 
-// Types of process events
+// Types of process events.
 const (
 	StartedEventType = "process_started"
 	DiedEventType    = "process_died"
@@ -25,67 +23,88 @@ const (
 	StderrEventType  = "process_stderr"
 )
 
-// StatusEventBody is body of event that informs about process status
-type StatusEventBody struct {
-	rpc.Timed
-	Pid         uint64 `json:"pid"`
-	NativePid   int    `json:"nativePid"`
-	Name        string `json:"name"`
-	CommandLine string `json:"commandLine"`
+// Event is a common interface for all the process events.
+type Event interface {
+	Type() string
 }
 
-// OutputEventBody is body of event that informs about process output
-type OutputEventBody struct {
-	rpc.Timed
-	Pid  uint64 `json:"pid"`
-	Text string `json:"text"`
+// EventConsumer is a process events client.
+type EventConsumer interface {
+	Accept(event Event)
 }
 
-// DiedEventBody is a body of event that informs about process death
-type DiedEventBody struct {
-	StatusEventBody
-	ExitCode int `json:"exitCode"`
+// StartedEvent published once when process is started.
+type StartedEvent struct {
+	Time        time.Time `json:"time"`
+	Pid         uint64    `json:"pid"`
+	NativePid   int       `json:"nativePid"`
+	Name        string    `json:"name"`
+	CommandLine string    `json:"commandLine"`
 }
 
-func newStderrEvent(pid uint64, text string, when time.Time) *rpc.Event {
-	return rpc.NewEvent(StderrEventType, &OutputEventBody{
-		Timed: rpc.Timed{Time: when},
-		Pid:   pid,
-		Text:  text,
-	})
-}
+// Type returns StartedEventType.
+func (se *StartedEvent) Type() string { return StartedEventType }
 
-func newStdoutEvent(pid uint64, text string, when time.Time) *rpc.Event {
-	return rpc.NewEvent(StdoutEventType, &OutputEventBody{
-		Timed: rpc.Timed{Time: when},
-		Pid:   pid,
-		Text:  text,
-	})
-}
-
-func newStatusEvent(mp MachineProcess, status string) *rpc.Event {
-	return rpc.NewEvent(status, &StatusEventBody{
-		Timed:       rpc.Timed{Time: time.Now()},
+func newStartedEvent(mp MachineProcess) *StartedEvent {
+	return &StartedEvent{
+		Time:        time.Now(),
 		Pid:         mp.Pid,
 		NativePid:   mp.NativePid,
 		Name:        mp.Name,
 		CommandLine: mp.CommandLine,
-	})
+	}
 }
 
-func newStartedEvent(mp MachineProcess) *rpc.Event {
-	return newStatusEvent(mp, StartedEventType)
+// DiedEvent published once after process death.
+type DiedEvent struct {
+	Time        time.Time `json:"time"`
+	Pid         uint64    `json:"pid"`
+	NativePid   int       `json:"nativePid"`
+	Name        string    `json:"name"`
+	CommandLine string    `json:"commandLine"`
+	ExitCode    int       `json:"exitCode"`
 }
 
-func newDiedEvent(mp MachineProcess) *rpc.Event {
-	return rpc.NewEvent(DiedEventType, &DiedEventBody{
-		StatusEventBody: StatusEventBody{
-			Timed:       rpc.Timed{Time: time.Now()},
-			Pid:         mp.Pid,
-			NativePid:   mp.NativePid,
-			Name:        mp.Name,
-			CommandLine: mp.CommandLine,
-		},
-		ExitCode: mp.ExitCode,
-	})
+// Type returns DiedEventType.
+func (de *DiedEvent) Type() string { return DiedEventType }
+
+func newDiedEvent(mp MachineProcess) *DiedEvent {
+	return &DiedEvent{
+		Time:        time.Now(),
+		Pid:         mp.Pid,
+		NativePid:   mp.NativePid,
+		Name:        mp.Name,
+		CommandLine: mp.CommandLine,
+		ExitCode:    mp.ExitCode,
+	}
+}
+
+// OutputEvent is published each time when process writes to stdout or stderr.
+type OutputEvent struct {
+	Time time.Time `json:"time"`
+	Pid  uint64    `json:"pid"`
+	Text string    `json:"text"`
+
+	_type string
+}
+
+// Type returns one of StdoutEventType, StderrEventType.
+func (se *OutputEvent) Type() string { return se._type }
+
+func newStderrEvent(pid uint64, text string, when time.Time) Event {
+	return &OutputEvent{
+		Time:  when,
+		Pid:   pid,
+		Text:  text,
+		_type: StderrEventType,
+	}
+}
+
+func newStdoutEvent(pid uint64, text string, when time.Time) Event {
+	return &OutputEvent{
+		Time:  when,
+		Pid:   pid,
+		Text:  text,
+		_type: StdoutEventType,
+	}
 }

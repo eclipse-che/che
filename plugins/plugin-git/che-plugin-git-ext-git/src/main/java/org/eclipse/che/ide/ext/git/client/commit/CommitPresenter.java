@@ -117,7 +117,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     }
 
     private void addSelectedAndCommit(final String message, final boolean commitAll, final boolean amend) {
-        service.add(appContext.getDevMachine(), project.getLocation(), false, toRelativePaths(appContext.getResources()))
+        service.add(project.getLocation(), false, toRelativePaths(appContext.getResources()))
                .then(new Operation<Void>() {
                    @Override
                    public void apply(Void ignored) throws OperationException {
@@ -141,8 +141,8 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     void doCommit(final String message, final boolean addAll, final boolean commitAll, final boolean amend) {
         final Resource[] resources = appContext.getResources();
         checkState(resources != null);
-        service.commit(appContext.getDevMachine(),
-                       project.getLocation(),
+        service.commit(
+                project.getLocation(),
                        message,
                        addAll,
                        commitAll ? new Path[]{} : toRelativePaths(resources),
@@ -173,7 +173,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         }
         GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
         console.print(message);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+        consolesPanelPresenter.addCommandOutput(console);
         notificationManager.notify(message);
         view.setMessage("");
     }
@@ -188,7 +188,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         String errorMessage = (exceptionMessage != null && !exceptionMessage.isEmpty()) ? exceptionMessage : constant.commitFailed();
         GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
         console.printError(errorMessage);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+        consolesPanelPresenter.addCommandOutput(console);
         notificationManager.notify(constant.commitFailed(), errorMessage, FAIL, FLOAT_MODE);
     }
 
@@ -208,7 +208,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     /** {@inheritDoc} */
     @Override
     public void setAmendCommitMessage() {
-        service.log(appContext.getDevMachine(), project.getLocation(), null, false)
+        service.log(project.getLocation(), null, false)
                .then(new Operation<LogResponse>() {
                    @Override
                    public void apply(LogResponse log) throws OperationException {

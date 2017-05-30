@@ -99,11 +99,11 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
 
         checkState(!isNullOrEmpty(resources));
 
-        service.remove(appContext.getDevMachine(), project.getLocation(), toRelativePaths(resources), view.isRemoved()).then(new Operation<Void>() {
+        service.remove(project.getLocation(), toRelativePaths(resources), view.isRemoved()).then(new Operation<Void>() {
             @Override
             public void apply(Void ignored) throws OperationException {
                 console.print(constant.removeFilesSuccessfull());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(constant.removeFilesSuccessfull());
 
                 project.synchronize();
@@ -112,7 +112,7 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
             @Override
             public void apply(PromiseError error) throws OperationException {
                 handleError(error.getCause(), console);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
             }
         });
 
@@ -142,7 +142,7 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
     private void handleError(@NotNull Throwable e, GitOutputConsole console) {
         String errorMessage = (e.getMessage() != null && !e.getMessage().isEmpty()) ? e.getMessage() : constant.removeFilesFailed();
         console.printError(errorMessage);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+        consolesPanelPresenter.addCommandOutput(console);
         notificationManager.notify(constant.removeFilesFailed(), FAIL, FLOAT_MODE);
     }
 

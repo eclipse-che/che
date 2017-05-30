@@ -17,18 +17,18 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.SubscriptionManagerClient;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.workspace.WorkspaceStatusHandler;
 
+import java.util.Map;
+
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
@@ -55,6 +55,7 @@ public class CurrentWorkspaceManager {
     private final CoreLocalizationConstant      messages;
     private final WorkspaceStatusHandler        wsStatusHandler;
     private final AppContext                    appContext;
+    private final SubscriptionManagerClient     subscriptionManagerClient;
 
     @Inject
     CurrentWorkspaceManager(WorkspaceServiceClient workspaceServiceClient,
@@ -65,7 +66,8 @@ public class CurrentWorkspaceManager {
                             IdeInitializer ideInitializer,
                             CoreLocalizationConstant messages,
                             WorkspaceStatusHandler wsStatusHandler,
-                            AppContext appContext) {
+                            AppContext appContext,
+                            SubscriptionManagerClient subscriptionManagerClient) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.browserAddress = browserAddress;
         this.transmitter = transmitter;
@@ -75,6 +77,7 @@ public class CurrentWorkspaceManager {
         this.messages = messages;
         this.wsStatusHandler = wsStatusHandler;
         this.appContext = appContext;
+        this.subscriptionManagerClient = subscriptionManagerClient;
     }
 
     // TODO: handle errors while workspace starting (show message dialog)
@@ -93,19 +96,22 @@ public class CurrentWorkspaceManager {
     }
 
     private void subscribeToEvents(String workspaceId) {
-        subscribe(WS_STATUS_ERROR_MSG, "event:workspace-status:subscribe", workspaceId);
+        workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
+                              .then(skip -> {
+                                  String endpointId = "ws-master";
+                                  String method = "workspace/statusChanged";
+                                  Map<String, String> scope = singletonMap("workspaceId", workspaceId);
+                                  subscriptionManagerClient.subscribe(endpointId, method, scope);
+                              });
+
+
+//        subscribe(WS_STATUS_ERROR_MSG, "event:workspace-status:subscribe", workspaceId);
 //        subscribe(WS_AGENT_OUTPUT_ERROR_MSG, "event:ws-agent-output:subscribe", workspaceId);
 //        subscribe(ENV_STATUS_ERROR_MSG, "event:environment-status:subscribe", workspaceId);
     }
 
     private void subscribe(String it, String methodName, String id) {
-        workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
-                              .then((Operation<WorkspaceDto>)skip -> transmitter.newRequest()
-                                                                                .endpointId("ws-master")
-                                                                                .methodName(methodName)
-                                                                                .paramsAsString(id)
-                                                                                .sendAndSkipResult())
-                              .catchError((Operation<PromiseError>)error -> Log.error(getClass(), it + ": " + error.getMessage()));
+
     }
 
     /** Starts the workspace with the default environment. */

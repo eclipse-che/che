@@ -25,10 +25,10 @@ class EnvironmentStatusEventHandler {
     @Inject
     void configureEnvironmentStatusHandler(RequestHandlerConfigurator configurator, Provider<EnvironmentStatusHandler> handlerProvider) {
         configurator.newConfiguration()
-                    .methodName("event:environment-status:changed")
+                    .methodName("machine/statusChanged")
                     .paramsAsDto(MachineStatusEvent.class)
                     .noResult()
-                    .withConsumer((endpointId, event) -> {
+                    .withBiConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
                         // Since EnvironmentStatusEventHandler instantiated by GIN eagerly,

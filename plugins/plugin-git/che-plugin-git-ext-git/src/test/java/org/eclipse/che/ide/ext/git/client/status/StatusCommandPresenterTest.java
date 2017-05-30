@@ -59,7 +59,7 @@ public class StatusCommandPresenterTest extends BaseTest {
                                                constant,
                                                notificationManager);
 
-        when(service.statusText(anyObject(), any(Path.class), any(StatusFormat.class))).thenReturn(stringPromise);
+        when(service.statusText(any(Path.class), any(StatusFormat.class))).thenReturn(stringPromise);
         when(stringPromise.then(any(Operation.class))).thenReturn(stringPromise);
         when(stringPromise.catchError(any(Operation.class))).thenReturn(stringPromise);
     }
@@ -74,7 +74,7 @@ public class StatusCommandPresenterTest extends BaseTest {
         stringCaptor.getValue().apply("");
 
         verify(console, times(2)).print(anyString());
-        verify(processesPanelPresenter).addCommandOutput(anyString(), anyObject());
+        verify(processesPanelPresenter).addCommandOutput(anyObject());
     }
 
     @Test

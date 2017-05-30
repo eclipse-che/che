@@ -484,17 +484,16 @@ public class WorkspaceManager {
         final String env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
 
         states.put(workspace.getId(), WorkspaceStatus.STARTING);
-        Runnable afterStart = ThreadLocalPropagateContext.wrap(() -> {
-            states.put(workspace.getId(), WorkspaceStatus.RUNNING);
-
-            LOG.info("Workspace '{}:{}' with id '{}' started by user '{}'",
-                     workspace.getNamespace(),
-                     workspace.getConfig().getName(),
-                     workspace.getId(),
-                     sessionUserNameOr("undefined"));
-        });
         return runtimes.startAsync(workspace, env, firstNonNull(options, Collections.emptyMap()))
-                       .thenRunAsync(afterStart)
+                       .thenRunAsync(ThreadLocalPropagateContext.wrap(() -> {
+                           states.put(workspace.getId(), WorkspaceStatus.RUNNING);
+
+                           LOG.info("Workspace '{}:{}' with id '{}' started by user '{}'",
+                                    workspace.getNamespace(),
+                                    workspace.getConfig().getName(),
+                                    workspace.getId(),
+                                    sessionUserNameOr("undefined"));
+                       }))
                        .exceptionally(ex -> {
                            if (workspace.isTemporary()) {
                                removeWorkspaceQuietly(workspace);

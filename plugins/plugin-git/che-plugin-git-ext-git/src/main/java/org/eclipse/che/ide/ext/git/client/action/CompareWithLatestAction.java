@@ -89,8 +89,8 @@ public class CompareWithLatestAction extends GitAction {
                                                 .removeTrailingSeparator()
                                                 .toString();
 
-        service.diff(appContext.getDevMachine(),
-                     project.getLocation(),
+        service.diff(
+                project.getLocation(),
                      selectedItemPath.isEmpty() ? null : singletonList(selectedItemPath),
                      NAME_STATUS, false, 0, REVISION, false)
                .then(new Operation<String>() {

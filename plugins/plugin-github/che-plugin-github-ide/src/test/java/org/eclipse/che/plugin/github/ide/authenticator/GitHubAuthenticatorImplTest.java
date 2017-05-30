@@ -16,8 +16,6 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
-import org.eclipse.che.api.user.shared.dto.ProfileDto;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
@@ -142,14 +140,12 @@ public class GitHubAuthenticatorImplTest {
         SshKeyUploader sshKeyUploader = mock(SshKeyUploader.class);
 
         CurrentUser user = mock(CurrentUser.class);
-        ProfileDto profile = mock(ProfileDto.class);
         when(view.isGenerateKeysSelected()).thenReturn(true);
 
         when(registry.getUploader(GITHUB_HOST)).thenReturn(sshKeyUploader);
 
         when(appContext.getCurrentUser()).thenReturn(user);
-        when(user.getProfile()).thenReturn(profile);
-        when(profile.getUserId()).thenReturn(userId);
+        when(user.getId()).thenReturn(userId);
 
         gitHubAuthenticator.onAuthenticated(authStatus);
 
@@ -165,11 +161,9 @@ public class GitHubAuthenticatorImplTest {
         OAuthStatus authStatus = mock(OAuthStatus.class);
 
         CurrentUser user = mock(CurrentUser.class);
-        ProfileDto profile = mock(ProfileDto.class);
         when(view.isGenerateKeysSelected()).thenReturn(false);
         when(appContext.getCurrentUser()).thenReturn(user);
-        when(user.getProfile()).thenReturn(profile);
-        when(profile.getUserId()).thenReturn(userId);
+        when(user.getId()).thenReturn(userId);
 
         gitHubAuthenticator.authenticate(null, getCallBack());
         gitHubAuthenticator.onAuthenticated(authStatus);
@@ -185,13 +179,11 @@ public class GitHubAuthenticatorImplTest {
         SshKeyUploader keyProvider = mock(SshKeyUploader.class);
 
         CurrentUser user = mock(CurrentUser.class);
-        ProfileDto profile = mock(ProfileDto.class);
         when(view.isGenerateKeysSelected()).thenReturn(true);
         when(registry.getUploader(GITHUB_HOST)).thenReturn(keyProvider);
 
         when(appContext.getCurrentUser()).thenReturn(user);
-        when(user.getProfile()).thenReturn(profile);
-        when(profile.getUserId()).thenReturn(userId);
+        when(user.getId()).thenReturn(userId);
 
         gitHubAuthenticator.authenticate(null, getCallBack());
         gitHubAuthenticator.onAuthenticated(authStatus);
@@ -214,14 +206,12 @@ public class GitHubAuthenticatorImplTest {
         SshKeyUploader keyProvider = mock(SshKeyUploader.class);
 
         CurrentUser user = mock(CurrentUser.class);
-        ProfileDto profile = mock(ProfileDto.class);
         MessageDialog messageDialog = mock(MessageDialog.class);
         when(view.isGenerateKeysSelected()).thenReturn(true);
         when(registry.getUploader(GITHUB_HOST)).thenReturn(keyProvider);
 
         when(appContext.getCurrentUser()).thenReturn(user);
-        when(user.getProfile()).thenReturn(profile);
-        when(profile.getUserId()).thenReturn(userId);
+        when(user.getId()).thenReturn(userId);
         when(dialogFactory.createMessageDialog(anyString(), anyString(), Matchers.<ConfirmCallback>anyObject())).thenReturn(messageDialog);
 
         gitHubAuthenticator.authenticate(null, getCallBack());
@@ -249,14 +239,12 @@ public class GitHubAuthenticatorImplTest {
         SshKeyUploader keyUploader = mock(SshKeyUploader.class);
 
         CurrentUser user = mock(CurrentUser.class);
-        ProfileDto profile = mock(ProfileDto.class);
         MessageDialog messageDialog = mock(MessageDialog.class);
         when(view.isGenerateKeysSelected()).thenReturn(true);
         when(registry.getUploader(GITHUB_HOST)).thenReturn(keyUploader);
 
         when(appContext.getCurrentUser()).thenReturn(user);
-        when(user.getProfile()).thenReturn(profile);
-        when(profile.getUserId()).thenReturn(userId);
+        when(user.getId()).thenReturn(userId);
         when(dialogFactory.createMessageDialog(anyString(), anyString(), Matchers.<ConfirmCallback>anyObject())).thenReturn(messageDialog);
         when(pair.getName()).thenReturn(GITHUB_HOST);
         when(pair.getService()).thenReturn(SshKeyManagerPresenter.VCS_SSH_SERVICE);

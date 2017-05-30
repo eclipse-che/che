@@ -15,8 +15,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
+import org.eclipse.che.ide.api.factory.model.FactoryImpl;
 import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
@@ -38,6 +39,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.ResourceManagerInitializer;
@@ -85,17 +87,14 @@ public class AppContextImpl implements AppContext,
 
     private final List<Project>  rootProjects      = newArrayList();
     private final List<Resource> selectedResources = newArrayList();
-
-    private final CurrentUser currentUser;
-
     /**
      * List of actions with parameters which comes from startup URL.
      * Can be processed after IDE initialization as usual after starting ws-agent.
      */
     private final List<StartUpAction> startAppActions;
-
-    private Workspace           userWorkspace;
-    private FactoryDto          factory;
+    private CurrentUser currentUser;
+    private WorkspaceImpl       workspace;
+    private FactoryImpl         factory;
     private Path                projectsRoot;
     private ActiveRuntime       runtime;
     private ResourceManager     resourceManager;
@@ -106,14 +105,12 @@ public class AppContextImpl implements AppContext,
                           QueryParameters queryParameters,
                           ResourceManager.ResourceManagerFactory resourceManagerFactory,
                           Provider<EditorAgent> editorAgentProvider,
-                          Provider<AppStateManager> appStateManager,
-                          CurrentUser currentUser) {
+                          Provider<AppStateManager> appStateManager) {
         this.eventBus = eventBus;
         this.queryParameters = queryParameters;
         this.resourceManagerFactory = resourceManagerFactory;
         this.editorAgentProvider = editorAgentProvider;
         this.appStateManager = appStateManager;
-        this.currentUser = currentUser;
         this.startAppActions = new ArrayList<>();
 
         projectsInImport = new ArrayList<>();
@@ -132,35 +129,42 @@ public class AppContextImpl implements AppContext,
     }-*/;
 
     @Override
-    public Workspace getWorkspace() {
-        return userWorkspace;
+    public WorkspaceImpl getWorkspace() {
+        return workspace;
     }
 
     /** Sets the current workspace. */
     public void setWorkspace(Workspace workspace) {
+        this.workspace = new WorkspaceImpl(workspace);
+
         if (workspace != null) {
-            userWorkspace = workspace;
             if (workspace.getRuntime() != null) {
                 runtime = new ActiveRuntime(workspace);
             }
         } else {
-            userWorkspace = null;
             runtime = null;
         }
     }
 
     @Override
     public String getWorkspaceId() {
-        if (userWorkspace == null) {
+        if (workspace == null) {
             throw new IllegalArgumentException(getClass() + " Workspace can not be null.");
         }
 
-        return userWorkspace.getId();
+        return workspace.getId();
     }
 
     @Override
     public CurrentUser getCurrentUser() {
+        if (currentUser == null) {
+            throw new IllegalStateException(getClass() + " Current Workspace can not be null.");
+        }
         return currentUser;
+    }
+
+    public void setCurrentUser(CurrentUser user) {
+        this.currentUser = user;
     }
 
     @Override
@@ -188,12 +192,12 @@ public class AppContextImpl implements AppContext,
     }
 
     @Override
-    public FactoryDto getFactory() {
+    public FactoryImpl getFactory() {
         return factory;
     }
 
-    public void setFactory(FactoryDto factory) {
-        this.factory = factory;
+    public void setFactory(Factory factory) {
+        this.factory = new FactoryImpl(factory);
     }
 
     @Override
@@ -203,11 +207,6 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public void initResourceManager() {
-        if (runtime.getDevMachine() == null) {
-            //should never happened, but anyway
-            Log.error(AppContextImpl.class, "Dev machine is not initialized");
-        }
-
         if (!rootProjects.isEmpty()) {
             for (Project project : rootProjects) {
                 eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
@@ -215,7 +214,7 @@ public class AppContextImpl implements AppContext,
             rootProjects.clear();
         }
 
-        resourceManager = resourceManagerFactory.newResourceManager(runtime.getDevMachine());
+        resourceManager = resourceManagerFactory.newResourceManager();
         resourceManager.getWorkspaceProjects().then(projects -> {
             rootProjects.clear();
             addAll(rootProjects, projects);
@@ -226,9 +225,10 @@ public class AppContextImpl implements AppContext,
         });
     }
 
+    @Deprecated
     @Override
     public String getWorkspaceName() {
-        return userWorkspace.getConfig().getName();
+        return workspace.getConfig().getName();
     }
 
     /** {@inheritDoc} */
@@ -408,12 +408,6 @@ public class AppContextImpl implements AppContext,
             rootProjects.clear();
             resourceManager = null;
         });
-
-        clearRuntime();
-    }
-
-    private void clearRuntime() {
-        runtime = null;
     }
 
     @Override
@@ -429,7 +423,7 @@ public class AppContextImpl implements AppContext,
     public String getDevAgentEndpoint() {
         String fromUrl = queryParameters.getByName("agent");
         if (fromUrl == null || fromUrl.isEmpty())
-            return runtime.getDevMachine().getWsAgentBaseUrl();
+            return getDevMachine().getWsAgentBaseUrl();
         else
             return fromUrl;
     }
@@ -439,6 +433,7 @@ public class AppContextImpl implements AppContext,
         return APP_ID;
     }
 
+    @Deprecated
     @Override
     public ActiveRuntime getActiveRuntime() {
         return runtime;

@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +36,7 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
     private static final MachineChooserViewImplUiBinder UI_BINDER = GWT.create(MachineChooserViewImplUiBinder.class);
 
     /** Map that contains all shown machines. */
-    private final Map<String, MachineEntity> machinesById;
+    private final Map<String, MachineImpl> machinesById;
 
     @UiField
     ListBox machinesList;
@@ -70,7 +70,7 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
             final String selectedMachineId = machinesList.getSelectedValue();
 
             if (selectedMachineId != null) {
-                final MachineEntity selectedMachine = machinesById.get(selectedMachineId);
+                final MachineImpl selectedMachine = machinesById.get(selectedMachineId);
 
                 if (selectedMachine != null) {
                     delegate.onMachineSelected(selectedMachine);
@@ -85,7 +85,7 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
                 final String selectedMachineId = machinesList.getSelectedValue();
 
                 if (selectedMachineId != null) {
-                    final MachineEntity selectedMachine = machinesById.get(selectedMachineId);
+                    final MachineImpl selectedMachine = machinesById.get(selectedMachineId);
 
                     if (selectedMachine != null) {
                         delegate.onMachineSelected(selectedMachine);
@@ -120,13 +120,13 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
     }
 
     @Override
-    public void setMachines(List<MachineEntity> machines) {
+    public void setMachines(List<? extends MachineImpl> machines) {
         machinesList.clear();
         machinesById.clear();
 
         machines.forEach(machine -> {
-            machinesById.put(machine.getId(), machine);
-            machinesList.addItem(machine.getName(), machine.getId());
+            machinesById.put(machine.getName(), machine);
+            machinesList.addItem(machine.getName());
         });
 
         machinesList.setVisibleItemCount(machines.size());

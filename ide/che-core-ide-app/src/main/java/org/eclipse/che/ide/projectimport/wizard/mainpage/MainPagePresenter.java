@@ -206,7 +206,7 @@ public class MainPagePresenter extends AbstractWizardPage<MutableProjectConfig> 
 
     /** Fetch project importers from the server. */
     private void fetchProjectImporters(AsyncRequestCallback<ProjectImporterData> callback) {
-        asyncRequestFactory.createGetRequest(appContext.getDevMachine().getWsAgentBaseUrl() + "/project-importers")
+        asyncRequestFactory.createGetRequest(appContext.getDevAgentEndpoint() + "/project-importers")
                            .header(HTTPHeader.CONTENT_TYPE, MimeType.APPLICATION_JSON)
                            .send(callback);
     }

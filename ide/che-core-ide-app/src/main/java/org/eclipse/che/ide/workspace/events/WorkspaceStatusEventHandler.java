@@ -25,10 +25,10 @@ class WorkspaceStatusEventHandler {
     @Inject
     WorkspaceStatusEventHandler(RequestHandlerConfigurator configurator, Provider<WorkspaceStatusHandler> handlerProvider) {
         configurator.newConfiguration()
-                    .methodName("event:workspace-status:changed")
+                    .methodName("workspace/statusChanged")
                     .paramsAsDto(WorkspaceStatusEvent.class)
                     .noResult()
-                    .withConsumer((endpointId, event) -> {
+                    .withBiConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
                         // Since WorkspaceStatusEventHandler instantiated by GIN eagerly,

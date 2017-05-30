@@ -12,6 +12,7 @@ package org.eclipse.che.ide.api.machine;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 
 import java.util.Objects;
 
@@ -20,7 +21,9 @@ import java.util.Objects;
  *
  * @author Vitalii Parfonov
  * @link Server
+ * @deprecated use {@link org.eclipse.che.ide.api.workspace.model.ServerImpl}
  */
+@Deprecated
 public class MachineServer implements Server {
 
     private final String ref;
@@ -31,15 +34,21 @@ public class MachineServer implements Server {
         url = dto.getUrl();
     }
 
+    /** @deprecated use {@link ServerImpl#getName()} */
+    @Deprecated
     public String getRef() {
         return ref;
     }
 
+    /** @deprecated use {@link ServerImpl#getUrl()} */
+    @Deprecated
     @Override
     public String getUrl() {
         return url;
     }
 
+    /** @deprecated use {@link ServerImpl#getStatus()} */
+    @Deprecated
     @Override
     public ServerStatus getStatus() {
         return ServerStatus.UNKNOWN;

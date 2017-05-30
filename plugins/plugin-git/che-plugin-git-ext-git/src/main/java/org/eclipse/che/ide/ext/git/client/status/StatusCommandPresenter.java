@@ -70,7 +70,7 @@ public class StatusCommandPresenter {
 
     /** Show status. */
     public void showStatus(Project project) {
-        service.statusText(appContext.getDevMachine(), project.getLocation(), LONG).then(new Operation<String>() {
+        service.statusText(project.getLocation(), LONG).then(new Operation<String>() {
             @Override
             public void apply(String status) throws OperationException {
                 printGitStatus(status);
@@ -110,6 +110,6 @@ public class StatusCommandPresenter {
             console.print(line);
         }
 
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+        consolesPanelPresenter.addCommandOutput(console);
     }
 }

@@ -90,7 +90,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
     public void showDialog(Project project) {
         this.project = project;
 
-        service.getStatus(appContext.getDevMachine(), project.getLocation()).then(new Operation<Status>() {
+        service.getStatus(project.getLocation()).then(new Operation<Status>() {
             @Override
             public void apply(Status status) throws OperationException {
                 if (status.isClean()) {
@@ -138,7 +138,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
                 String errorMassage = error.getMessage() != null ? error.getMessage() : constant.statusFailed();
                 GitOutputConsole console = gitOutputConsoleFactory.create(STATUS_COMMAND_NAME);
                 console.printError(errorMassage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(errorMassage);
             }
         });
@@ -163,17 +163,17 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
         if (paths.length == 0) {
             view.close();
             console.print(constant.nothingToReset());
-            consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+            consolesPanelPresenter.addCommandOutput(console);
             notificationManager.notify(constant.nothingToReset());
             return;
         }
         view.close();
 
-        service.reset(appContext.getDevMachine(), project.getLocation(), "HEAD", ResetType.MIXED, paths).then(new Operation<Void>() {
+        service.reset(project.getLocation(), "HEAD", ResetType.MIXED, paths).then(new Operation<Void>() {
             @Override
             public void apply(Void ignored) throws OperationException {
                 console.print(constant.resetFilesSuccessfully());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(constant.resetFilesSuccessfully());
             }
         }).catchError(new Operation<PromiseError>() {
@@ -181,7 +181,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
             public void apply(PromiseError error) throws OperationException {
                 String errorMassage = error.getMessage() != null ? error.getMessage() : constant.resetFilesFailed();
                 console.printError(errorMassage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(errorMassage);
             }
         });

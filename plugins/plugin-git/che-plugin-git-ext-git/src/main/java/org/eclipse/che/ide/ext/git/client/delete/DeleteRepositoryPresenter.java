@@ -64,11 +64,11 @@ public class DeleteRepositoryPresenter {
     public void deleteRepository(final Project project) {
         final GitOutputConsole console = gitOutputConsoleFactory.create(DELETE_REPO_COMMAND_NAME);
 
-        service.deleteRepository(appContext.getDevMachine(), project.getLocation()).then(new Operation<Void>() {
+        service.deleteRepository(project.getLocation()).then(new Operation<Void>() {
             @Override
             public void apply(Void ignored) throws OperationException {
                 console.print(constant.deleteGitRepositorySuccess());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(constant.deleteGitRepositorySuccess());
 
                 project.synchronize();
@@ -77,7 +77,7 @@ public class DeleteRepositoryPresenter {
             @Override
             public void apply(PromiseError error) throws OperationException {
                 console.printError(error.getMessage());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(constant.failedToDeleteRepository(), FAIL, FLOAT_MODE);
             }
         });

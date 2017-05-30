@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.machine.chooser;
 
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
 import java.util.List;
 
@@ -29,13 +29,13 @@ public interface MachineChooserView extends View<MachineChooserView.ActionDelega
     void close();
 
     /** Sets the machines to display in the view. */
-    void setMachines(List<MachineEntity> machines);
+    void setMachines(List<? extends MachineImpl> machines);
 
     /** The action delegate for this view. */
     interface ActionDelegate {
 
         /** Called when machine is selected. */
-        void onMachineSelected(MachineEntity machine);
+        void onMachineSelected(MachineImpl machine);
 
         /** Called when machine selection has been canceled. Note that view will be already closed. */
         void onCanceled();

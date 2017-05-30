@@ -17,10 +17,10 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.CommandOutputConsole;
 import org.eclipse.che.ide.machine.chooser.MachineChooser;
@@ -54,7 +54,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     @Override
-    public void executeCommand(Command command, MachineEntity machine) {
+    public void executeCommand(Command command, MachineImpl machine) {
         final String name = command.getName();
         final String type = command.getType();
         final String commandLine = command.getCommandLine();
@@ -63,7 +63,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         macroProcessor.expandMacros(commandLine).then(expandedCommandLine -> {
             final CommandImpl expandedCommand = new CommandImpl(name, expandedCommandLine, type, attributes);
             final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
-            final String machineId = machine.getId();
+            final String machineId = machine.getName();
 
             processesPanelPresenter.addCommandOutput(machineId, console);
 
@@ -77,7 +77,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     @Override
     public void executeCommand(CommandImpl command) {
-        final MachineEntity selectedMachine = getSelectedMachine();
+        final MachineImpl selectedMachine = getSelectedMachine();
 
         if (selectedMachine != null) {
             executeCommand(command, selectedMachine);
@@ -90,14 +90,14 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     /** Returns the currently selected machine or {@code null} if none. */
     @Nullable
-    private MachineEntity getSelectedMachine() {
+    private MachineImpl getSelectedMachine() {
         final Selection<?> selection = selectionAgent.getSelection();
 
         if (selection != null && !selection.isEmpty() && selection.isSingleSelection()) {
             final Object possibleNode = selection.getHeadElement();
 
-            if (possibleNode instanceof MachineEntity) {
-                return (MachineEntity)possibleNode;
+            if (possibleNode instanceof MachineImpl) {
+                return (MachineImpl)possibleNode;
             }
         }
 

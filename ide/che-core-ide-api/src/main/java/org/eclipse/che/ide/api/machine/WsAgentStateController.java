@@ -137,7 +137,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
      */
     private void checkHttpConnection() {
         //here we add trailing slash because {@link org.eclipse.che.api.core.rest.ApiInfoService} mapped in this way
-        String url = devMachine.getWsAgentBaseUrl() + '/';
+        String url = appContext.getDevAgentEndpoint() + '/';
         asyncRequestFactory.createGetRequest(url).send().then(ignored -> {
             checkWsConnection();
         }).catchError(ignored -> {

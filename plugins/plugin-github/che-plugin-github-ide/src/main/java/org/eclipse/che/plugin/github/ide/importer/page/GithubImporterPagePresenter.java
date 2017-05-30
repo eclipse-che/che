@@ -312,7 +312,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
     private void authorize() {
         showProcessing(true);
         gitHubAuthenticator.authenticate(
-                OAuth2AuthenticatorUrlProvider.get(baseUrl, "github", appContext.getCurrentUser().getProfile().getUserId(),
+                OAuth2AuthenticatorUrlProvider.get(baseUrl, "github", appContext.getCurrentUser().getId(),
                                                    Lists.asList("user", new String[]{"repo", "write:public_key"})),
                 new AsyncCallback<OAuthStatus>() {
                     @Override

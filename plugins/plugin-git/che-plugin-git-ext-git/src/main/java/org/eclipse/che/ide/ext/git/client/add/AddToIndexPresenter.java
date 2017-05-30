@@ -18,7 +18,6 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -88,7 +87,6 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
     /** {@inheritDoc} */
     @Override
     public void onAddClicked() {
-        DevMachine devMachine = appContext.getDevMachine();
         Resource[] resources = appContext.getResources();
         Path projectLocation = appContext.getRootProject().getLocation();
         Path[] paths = new Path[resources.length];
@@ -97,8 +95,8 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
             paths[i] = path.segmentCount() == 0 ? Path.EMPTY : path;
         }
         final GitOutputConsole console = gitOutputConsoleFactory.create(constant.addToIndexCommandName());
-        consolesPanelPresenter.addCommandOutput(devMachine.getId(), console);
-        service.add(devMachine, projectLocation, view.isUpdated(), paths)
+        consolesPanelPresenter.addCommandOutput(console);
+        service.add(projectLocation, view.isUpdated(), paths)
                .then(new Operation<Void>() {
                    @Override
                    public void apply(Void arg) throws OperationException {

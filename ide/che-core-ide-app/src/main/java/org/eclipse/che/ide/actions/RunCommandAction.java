@@ -18,6 +18,7 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.util.loging.Log;
 
 
@@ -61,6 +62,7 @@ public class RunCommandAction extends Action {
 
         commandManager.getCommand(name)
                       .ifPresent(command -> commandExecutor.executeCommand(command,
-                                                                           appContext.getDevMachine()));
+                                                                           new MachineImpl(appContext.getDevMachine().getName(),
+                                                                                           appContext.getDevMachine())));
     }
 }

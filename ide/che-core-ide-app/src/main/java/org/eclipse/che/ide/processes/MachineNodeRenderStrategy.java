@@ -22,7 +22,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.monitoring.MachineMonitors;
 import org.eclipse.che.ide.terminal.AddTerminalClickHandler;
@@ -71,8 +71,8 @@ public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy,
     }
 
     private SpanElement createMachineElement(final ProcessTreeNode node) {
-        final MachineEntity machine = (MachineEntity)node.getData();
-        final String machineId = machine.getId();
+        final MachineImpl machine = (MachineImpl)node.getData();
+        final String machineId = machine.getName();
 
         SpanElement root = Elements.createSpanElement();
 

@@ -88,7 +88,7 @@ public class TestingHandler {
                     TestingOutput archetypeOutput = factory.createDtoFromJson(message, TestingOutput.class);
                     switch (archetypeOutput.getState()) {
                         case SESSION_START:
-                            processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), outputConsole);
+                            processesPanelPresenter.addCommandOutput(outputConsole);
                             outputConsole.clearOutputsButtonClicked();
                         case DETAIL:
                             outputConsole.printText(archetypeOutput.getOutput());

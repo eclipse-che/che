@@ -20,18 +20,24 @@ import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperation
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
+import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
 
 /**
@@ -85,26 +91,37 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
     }
 
     private void internalInitialize() {
-        DevMachine devMachine = appContext.getDevMachine();
-        String devMachineId = devMachine.getId();
-        String wsAgentWebSocketUrl = devMachine.getWsAgentWebSocketUrl();
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final RuntimeImpl runtime = workspace.getRuntime();
 
-        String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + appContext.getAppId());
-        String execAgentUrl = devMachine.getExecAgentUrl();
+        if (runtime == null) {
+            return;
+        }
 
-        initializer.initialize("ws-agent", singletonMap("url", wsAgentUrl));
-        initializer.initialize(devMachineId, singletonMap("url", execAgentUrl));
+        for (MachineImpl machine : runtime.getMachines().values()) {
+            machine.getServerByName(EXEC_AGENT_REFERENCE)
+                   .ifPresent(server -> {
+                       String execAgentServerURL = server.getUrl();
+                       execAgentServerURL = execAgentServerURL.replaceFirst("http", "ws") + "/connect"; // FIXME: spi
+                       initializer.initialize(machine.getName(), singletonMap("url", execAgentServerURL));
+                   });
 
-        for (MachineEntity machineEntity : appContext.getActiveRuntime().getMachines()) {
-            if (!machineEntity.isDev()) {
-                initializer.initialize(machineEntity.getId(), singletonMap("url", machineEntity.getExecAgentUrl()));
-                execAgentCommandManager.getProcesses(machineEntity.getId(), false)
+            final Optional<ServerImpl> wsAgentServer = machine.getServerByName(WSAGENT_REFERENCE);
+
+            if (wsAgentServer.isPresent()) {
+                final String wsAgentBaseUrl = wsAgentServer.get().getUrl() + "/api"; // FIXME: spi
+                final String wsAgentWebSocketUrl = wsAgentBaseUrl.replaceFirst("http", "ws") + "/ws"; // FIXME: spi
+                final String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + appContext.getAppId());
+
+                initializer.initialize("ws-agent", singletonMap("url", wsAgentUrl));
+            } else {
+                execAgentCommandManager.getProcesses(machine.getName(), false)
                                        .onSuccess(processes -> {
                                            Consumer<Integer> pidConsumer = pid -> execAgentCommandManager
-                                                   .getProcessLogs(machineEntity.getId(), pid, null, null, 50, 0)
+                                                   .getProcessLogs(machine.getName(), pid, null, null, 50, 0)
                                                    .onSuccess(logs -> logs.forEach(log -> {
                                                        String fixedLog = log.getText().replaceAll("\\[STDOUT\\] ", "");
-                                                       String machineName = machineEntity.getDisplayName();
+                                                       String machineName = machine.getName();
                                                        eventBus.fireEvent(new EnvironmentOutputEvent(fixedLog, machineName));
                                                    }));
 

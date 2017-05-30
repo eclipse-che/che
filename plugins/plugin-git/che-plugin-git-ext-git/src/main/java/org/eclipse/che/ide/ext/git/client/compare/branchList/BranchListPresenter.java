@@ -120,8 +120,8 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                                                     .removeTrailingSeparator()
                                                     .toString();
 
-        service.diff(appContext.getDevMachine(),
-                     project.getLocation(),
+        service.diff(
+                project.getLocation(),
                      selectedItemPath.isEmpty() ? null : singletonList(selectedItemPath),
                      NAME_STATUS,
                      false,
@@ -184,7 +184,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
 
     /** Get list of branches from selected project. */
     private void getBranches() {
-        service.branchList(appContext.getDevMachine(), project.getLocation(), LIST_ALL).then(new Operation<List<Branch>>() {
+        service.branchList(project.getLocation(), LIST_ALL).then(new Operation<List<Branch>>() {
             @Override
             public void apply(List<Branch> branches) throws OperationException {
                 view.setBranches(branches);
@@ -196,7 +196,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                 final String errorMessage = (error.getMessage() != null) ? error.getMessage() : locale.branchesListFailed();
                 GitOutputConsole console = gitOutputConsoleFactory.create(BRANCH_LIST_COMMAND_NAME);
                 console.printError(errorMessage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                consolesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(locale.branchesListFailed(), FAIL, NOT_EMERGE_MODE);
             }
         });

@@ -16,13 +16,13 @@ import (
 	"time"
 )
 
-// LogKind reperesents kind of source of log line - stdout or stderr
+// LogKind represents kind of source of log line - stdout or stderr.
 type LogKind int
 
 const (
-	// StdoutKind match logs produced by stdout of a process
+	// StdoutKind match logs produced by stdout of a process.
 	StdoutKind LogKind = iota
-	// StderrKind match logs produced by stderr of a process
+	// StderrKind match logs produced by stderr of a process.
 	StderrKind
 )
 
@@ -30,7 +30,7 @@ const (
 // Single date format keeps API consistent
 var DateTimeFormat = time.RFC3339Nano
 
-// LogMessage represents single log entry with timestamp and source of log
+// LogMessage represents single log entry with timestamp and source of log.
 type LogMessage struct {
 	Kind LogKind   `json:"kind"`
 	Time time.Time `json:"time"`
@@ -40,7 +40,7 @@ type LogMessage struct {
 // ParseTime parses string into Time.
 // If time string is empty, then time provided as an argument is returned.
 // If time string is invalid, then appropriate error is returned.
-// If time string is valid then parsed time is returned
+// If time string is valid then parsed time is returned.
 func ParseTime(timeStr string, defTime time.Time) (time.Time, error) {
 	if timeStr == "" {
 		return defTime, nil

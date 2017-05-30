@@ -58,7 +58,7 @@ public class DownloadWsAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        downloadContainer.setUrl(wsAgentURLModifier.modify(appContext.getDevMachine().getWsAgentBaseUrl() + "/project/export/"));
+        downloadContainer.setUrl(wsAgentURLModifier.modify(appContext.getDevAgentEndpoint() + "/project/export/"));
     }
 
     /** {@inheritDoc} */

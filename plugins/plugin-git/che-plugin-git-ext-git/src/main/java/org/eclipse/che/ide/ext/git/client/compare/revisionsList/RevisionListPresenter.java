@@ -127,7 +127,7 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
 
     /** Get list of revisions. */
     private void getRevisions() {
-        service.log(appContext.getDevMachine(), project.getLocation(), new Path[]{selectedFilePath}, false)
+        service.log(project.getLocation(), new Path[]{selectedFilePath}, false)
                .then(new Operation<LogResponse>() {
                    @Override
                    public void apply(LogResponse log) throws OperationException {
@@ -149,8 +149,8 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
     }
 
     private void compare() {
-        service.diff(appContext.getDevMachine(),
-                     project.getLocation(),
+        service.diff(
+                project.getLocation(),
                      singletonList(selectedFilePath.toString()),
                      NAME_STATUS,
                      false,

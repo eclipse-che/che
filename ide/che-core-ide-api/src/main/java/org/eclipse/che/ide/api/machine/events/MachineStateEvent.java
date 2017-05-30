@@ -18,10 +18,12 @@ import org.eclipse.che.ide.api.machine.MachineEntity;
 /**
  * Event that describes the fact that machine state has been changed.
  *
- * @author Artem Zatsarynnyi
+ * @deprecated use {@link MachineStartingEvent}, {@link MachineRunningEvent}
  */
+@Deprecated
 public class MachineStateEvent extends GwtEvent<MachineStateEvent.Handler> {
 
+    /** @deprecated use {@link MachineStartingEvent.Handler}, {@link MachineRunningEvent.Handler} */
     public interface Handler extends EventHandler {
 
         /**

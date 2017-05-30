@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.processes;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.UUID;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -53,10 +53,10 @@ public class ProcessTreeNode {
 
         switch (type) {
             case MACHINE_NODE:
-                if (data instanceof MachineEntity) {
-                    MachineEntity machine = (MachineEntity) data;
-                    id = machine.getId();
-                    displayName = machine.getDisplayName();
+                if (data instanceof MachineImpl) {
+                    MachineImpl machine = (MachineImpl) data;
+                    id = machine.getName();
+                    displayName = machine.getName();
                 } else {
                     throw new IllegalArgumentException("Data type is not a machine setting default value");
                 }

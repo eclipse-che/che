@@ -64,7 +64,7 @@ public class ProjectTreeTracker {
                     .methodName(INCOMING_METHOD)
                     .paramsAsDto(ProjectTreeTrackingOperationDto.class)
                     .noResult()
-                    .withConsumer(getProjectTreeTrackingOperationConsumer());
+                    .withBiConsumer(getProjectTreeTrackingOperationConsumer());
     }
 
     private BiConsumer<String, ProjectTreeTrackingOperationDto> getProjectTreeTrackingOperationConsumer() {

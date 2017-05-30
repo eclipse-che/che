@@ -8,17 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.auth;
+package org.eclipse.che.api.core.notification.dto;
 
-import org.eclipse.che.api.auth.shared.dto.OAuthToken;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.dto.shared.DTO;
 
-/**
- * @author Sergii Leschenko
- */
-public interface OAuthServiceClient {
-    void invalidateToken(String oauthProvider, AsyncRequestCallback<Void> callback);
+import java.util.Map;
 
-    void getToken(String oauthProvider, AsyncRequestCallback<OAuthToken> callback);
+@DTO
+public interface EventSubscription {
+    String getMethod();
 
+    EventSubscription withMethod(String method);
+
+    Map<String, String> getScope();
+
+    EventSubscription withScope(Map<String, String> scope);
 }
