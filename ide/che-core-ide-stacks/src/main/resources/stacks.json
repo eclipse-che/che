@@ -528,7 +528,7 @@
     "id": "node-default",
     "creator": "ide",
     "name": "Node",
-    "description": "Default Node Stack with Node 0.12.",
+    "description": "Default Node Stack with Node 7.",
     "scope": "general",
     "tags": [
       "Ubuntu",
@@ -545,27 +545,27 @@
     "components": [
       {
         "name": "Node.JS",
-        "version": "0.12.9"
+        "version": "7.7.3"
       },
       {
         "name": "NPM",
-        "version": "---"
+        "version": "4.4.1"
       },
       {
         "name": "Gulp",
-        "version": "---"
+        "version": "3.9.1"
       },
       {
         "name": "Bower",
-        "version": "---"
+        "version": "1.8.0"
       },
       {
         "name": "Grunt",
-        "version": "---"
+        "version": "1.2.0"
       },
       {
         "name": "Yeoman",
-        "version": "---"
+        "version": "1.8.5"
       }
     ],
     "source": {
