@@ -33,9 +33,9 @@ public class RmiServer {
         if (RmiServer.remote != null) {
             throw new AssertionError("This server is already started!");
         }
-
         RmiServer.remote = remote;
 
+        System.err.println("Maven Server try to select port");
         int port = -1;
         Random random = new Random();
         Registry registry = null;
@@ -51,14 +51,16 @@ public class RmiServer {
             }
 
         }
-
+        System.err.println("Maven Server port selected: " + port);
         Remote exportObject = UnicastRemoteObject.exportObject(remote, port);
         String exportName = remote.getClass().getSimpleName() + Integer.toHexString(exportObject.hashCode());
+        System.err.println("Maven Server remote object exported.");
         try {
             registry.bind(exportName, exportObject);
             String portName = port + "/" + exportName;
             System.out.println("Port/Name:" + portName);
             int twoMinutes = 2 * 60 * 1000;
+            System.err.println("Maven Server port and name printed");
             Object lock = new Object();
             while(true){
                 synchronized (lock){

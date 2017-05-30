@@ -89,6 +89,7 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
         return () -> {
             JavaParameters parameters = buildMavenServerParameters();
             CommandLine command = parameters.createCommand();
+            LOG.debug("Creating new Executor for: " + parameters.getJavaExecutable());
             return new ProcessHandler(command.createProcess());
         };
     }

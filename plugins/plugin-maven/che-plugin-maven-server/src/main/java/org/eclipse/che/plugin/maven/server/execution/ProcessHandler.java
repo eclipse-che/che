@@ -91,6 +91,7 @@ public class ProcessHandler implements Executor {
             @Override
             public void onStart(ProcessEvent event) {
                 try {
+                    LOG.debug("Maven server JVM Started");
                     OutputReader stdOutReader = createStdOutReader();
                     stdOutReader.start();
 
@@ -160,6 +161,7 @@ public class ProcessHandler implements Executor {
     }
 
     private void notifyOnText(String text, ProcessOutputType type) {
+        LOG.debug(type.name() + " " + text);
         listenerNotifier.onText(new ProcessEvent(this, text), type);
     }
 
