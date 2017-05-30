@@ -587,7 +587,7 @@ public class WorkspaceManager {
     private WorkspaceImpl normalizeState(WorkspaceImpl workspace, boolean includeRuntimes) throws ServerException {
         WorkspaceStatus status = states.get(workspace.getId());
         if (status != null) {
-            if (status.equals(WorkspaceStatus.RUNNING) && includeRuntimes) {
+            if (!status.equals(WorkspaceStatus.STOPPED) && includeRuntimes) {
                 try {
                     workspace.setRuntime(runtimes.get(workspace.getId()));
                 } catch (NotFoundException e) {

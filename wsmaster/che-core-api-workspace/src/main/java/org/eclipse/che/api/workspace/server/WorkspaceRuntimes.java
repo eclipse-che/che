@@ -223,7 +223,7 @@ public class WorkspaceRuntimes {
                         + RuntimeInfrastructure.class);
             }
             runtimes.put(workspaceId, runtime);
-            Runnable startWorkspace = ThreadLocalPropagateContext.wrap(() -> {
+            return CompletableFuture.runAsync(ThreadLocalPropagateContext.wrap(() -> {
                 try {
                     runtimeContext.start(options);
 
@@ -237,8 +237,7 @@ public class WorkspaceRuntimes {
                     LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
                     new RuntimeException(e);
                 }
-            });
-            return CompletableFuture.runAsync(startWorkspace, sharedPool.getExecutor());
+            }), sharedPool.getExecutor());
             //TODO made complete rework of exceptions.
         } catch (ValidationException e) {
             LOG.error(e.getLocalizedMessage(), e);
