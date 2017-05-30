@@ -49,7 +49,7 @@ public class DefaultAgentLauncher implements AgentLauncher {
 //            //process.start(lineConsumer);
 //        } catch (Throwable e) {
 //            try {
-//                machine.getLogger().writeLine(format("[FAILED] %s", e.getMessage()));
+//                machine.getLogger().writeLine(format("[ERROR] %s", e.getMessage()));
 //            } catch (IOException ignored) {
 //            }
 //        } finally {

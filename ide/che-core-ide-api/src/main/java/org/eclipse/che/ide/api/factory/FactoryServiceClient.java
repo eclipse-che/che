@@ -39,16 +39,6 @@ public interface FactoryServiceClient {
     Promise<FactoryDto> getFactory(@NotNull String factoryId, boolean validate);
 
     /**
-     * @param factoryId
-     *         Factory's id
-     * @param type
-     *         snippet's type (markdown, html, etc)
-     * @param callback
-     *         callback which returns snippet of the factory or exception if occurred
-     */
-    void getFactorySnippet(@NotNull String factoryId, @NotNull String type, @NotNull AsyncRequestCallback<String> callback);
-
-    /**
      * Retrieves factory object prototype for given project with it's attributes. It's not the stored factory object.
      *
      * @param workspaceId
@@ -81,12 +71,14 @@ public interface FactoryServiceClient {
     Promise<FactoryDto> saveFactory(@NotNull FactoryDto factory);
 
     /**
-     * Save factory to storage.
+     * Find factory by given search parameters.
      *
      * @param skipCount
      *         the number of the items to skip
      * @param maxItems
-     *         the limit of the items in the response, default is 30
+     *         the limit of the items in the response, default is 30ber of the items to skip
+     * @param params
+     *         parameters to search factory by
      * @return a promise that will provide a list of {@link FactoryDto}s, or rejects with an error
      */
     Promise<List<FactoryDto>> findFactory(Integer skipCount, Integer maxItems, List<Pair<String, String>> params);

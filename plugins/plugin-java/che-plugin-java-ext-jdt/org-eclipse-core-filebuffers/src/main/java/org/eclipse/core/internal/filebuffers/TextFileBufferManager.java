@@ -128,7 +128,7 @@ public class TextFileBufferManager implements ITextFileBufferManager {
 //
 //		fileBuffer= createFileBuffer(fileStore);
 //		if (fileBuffer == null)
-//			throw new CoreException(new Status(IStatus.FAILED, FileBuffersPlugin.PLUGIN_ID, IFileBufferStatusCodes.CREATION_FAILED, FileBuffersMessages.FileBufferManager_error_canNotCreateFilebuffer, null));
+//			throw new CoreException(new Status(IStatus.ERROR, FileBuffersPlugin.PLUGIN_ID, IFileBufferStatusCodes.CREATION_FAILED, FileBuffersMessages.FileBufferManager_error_canNotCreateFilebuffer, null));
 //
 //		fileBuffer.create(fileStore, monitor);
 //
@@ -487,7 +487,7 @@ public class TextFileBufferManager implements ITextFileBufferManager {
 //						}
 //					}
 //					public void handleException(Throwable t) {
-//						IStatus status= new Status(IStatus.FAILED, FileBuffersPlugin.PLUGIN_ID, IStatus.OK, FileBuffersMessages.TextFileBufferManager_error_documentSetupFailed, t);
+//						IStatus status= new Status(IStatus.ERROR, FileBuffersPlugin.PLUGIN_ID, IStatus.OK, FileBuffersMessages.TextFileBufferManager_error_documentSetupFailed, t);
 //						FileBuffersPlugin.getDefault().log(status);
 //					}
 //				};
@@ -517,7 +517,7 @@ public class TextFileBufferManager implements ITextFileBufferManager {
 //						runnableResult[0]= factory.createDocument();
 //					}
 //					public void handleException(Throwable t) {
-//						IStatus status= new Status(IStatus.FAILED, FileBuffersPlugin.PLUGIN_ID, IStatus.OK, FileBuffersMessages.TextFileBufferManager_error_documentFactoryFailed, t);
+//						IStatus status= new Status(IStatus.ERROR, FileBuffersPlugin.PLUGIN_ID, IStatus.OK, FileBuffersMessages.TextFileBufferManager_error_documentFactoryFailed, t);
 //						FileBuffersPlugin.getDefault().log(status);
 //					}
 //				};
