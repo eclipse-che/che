@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.IStatus;
  * <p>
  * Additionally a problem severity is managed. Severities are ordered as follows:
  * <code>OK</code> &lt; <code>INFO</code> &lt; <code>WARNING</code> &lt; <code>
- * FAILED</code> &lt; <code>FATAL</code>. The status's problem severity is the maximum
+ * ERROR</code> &lt; <code>FATAL</code>. The status's problem severity is the maximum
  * of the severities of all entries. If the status doesn't have any entry the status's
  * severity is <code>OK</code>.
  * </p>
@@ -199,7 +199,7 @@ public class RefactoringStatus {
 	 * entry matches.
 	 *
 	 * @param severity the severity to search for. Must be one of <code>FATAL
-	 *  </code>, <code>FAILED</code>, <code>WARNING</code> or <code>INFO</code>
+	 *  </code>, <code>ERROR</code>, <code>WARNING</code> or <code>INFO</code>
 	 * @return the entry that matches the search criteria
 	 */
 	public RefactoringStatusEntry getEntryMatchingSeverity(int severity) {
@@ -242,7 +242,7 @@ public class RefactoringStatus {
 	 * the first one is returned. Returns <code>null</code> if no entry matches.
 	 *
 	 * @param severity the severity to search for. Must be one of <code>FATAL
-	 *  </code>, <code>FAILED</code>, <code>WARNING</code> or <code>INFO</code>
+	 *  </code>, <code>ERROR</code>, <code>WARNING</code> or <code>INFO</code>
 	 * @return the message of the entry that matches the search criteria
 	 */
 	public String getMessageMatchingSeverity(int severity) {
@@ -330,7 +330,7 @@ public class RefactoringStatus {
 	}
 
 	/**
-	 * Creates a new <code>RefactoringStatus</code> with one <code>FAILED</code> entry
+	 * Creates a new <code>RefactoringStatus</code> with one <code>ERROR</code> entry
 	 * filled with the given message.
 	 *
 	 * @param msg the message of the error entry
@@ -343,7 +343,7 @@ public class RefactoringStatus {
 	}
 
 	/**
-	 * Creates a <code>RefactoringStatus</code> with one <code>FAILED</code> entry
+	 * Creates a <code>RefactoringStatus</code> with one <code>ERROR</code> entry
 	 * fill with the given message and context.
 	 *
 	 * @param msg the message of the error entry
@@ -500,9 +500,9 @@ public class RefactoringStatus {
 	}
 
 	/**
-	 * Adds an <code>FAILED</code> entry filled with the given message to this status.
+	 * Adds an <code>ERROR</code> entry filled with the given message to this status.
 	 * If the current severity is <code>OK</code>, <code>INFO</code> or <code>WARNING
-	 * </code> it will be changed to <code>FAILED</code>. It will remain unchanged
+	 * </code> it will be changed to <code>ERROR</code>. It will remain unchanged
 	 * otherwise.
 	 *
 	 * @param msg the message of the error entry
@@ -514,9 +514,9 @@ public class RefactoringStatus {
 	}
 
 	/**
-	 * Adds an <code>FAILED</code> entry filled with the given message and context to
+	 * Adds an <code>ERROR</code> entry filled with the given message and context to
 	 * this status. If the current severity is <code>OK</code>, <code>INFO</code> or
-	 * <code>WARNING</code> it will be changed to <code>FAILED</code>. It will remain
+	 * <code>WARNING</code> it will be changed to <code>ERROR</code>. It will remain
 	 * unchanged otherwise.
 	 *
 	 * @param msg the message of the error entry
@@ -628,10 +628,10 @@ public class RefactoringStatus {
 
 	/**
 	 * Returns <code>true</code> if the current severity is <code>
-	 * FATAL</code> or <code>FAILED</code>.
+	 * FATAL</code> or <code>ERROR</code>.
 	 *
 	 * @return <code>true</code> if the current severity is <code>
-	 *  FATAL</code> or <code>FAILED</code>; otherwise <code>false
+	 *  FATAL</code> or <code>ERROR</code>; otherwise <code>false
 	 *  </code> is returned
 	 */
 	public boolean hasError() {
@@ -640,10 +640,10 @@ public class RefactoringStatus {
 
 	/**
 	 * Returns <code>true</code> if the current severity is <code>
-	 * FATAL</code>, <code>FAILED</code> or <code>WARNING</code>.
+	 * FATAL</code>, <code>ERROR</code> or <code>WARNING</code>.
 	 *
 	 * @return <code>true</code> if the current severity is <code>
-	 *  FATAL</code>, <code>FAILED</code> or <code>WARNING</code>;
+	 *  FATAL</code>, <code>ERROR</code> or <code>WARNING</code>;
 	 *  otherwise <code>false</code> is returned
 	 */
 	public boolean hasWarning() {
@@ -652,11 +652,11 @@ public class RefactoringStatus {
 
 	/**
 	 * Returns <code>true</code> if the current severity is <code>
-	 * FATAL</code>, <code>FAILED</code>, <code>WARNING</code> or
+	 * FATAL</code>, <code>ERROR</code>, <code>WARNING</code> or
 	 * <code>INFO</code>.
 	 *
 	 * @return <code>true</code> if the current severity is <code>
-	 *  FATAL</code>, <code>FAILED</code>, <code>WARNING</code> or
+	 *  FATAL</code>, <code>ERROR</code>, <code>WARNING</code> or
 	 *  <code>INFO</code>; otherwise <code>false</code> is returned
 	 */
 	public boolean hasInfo() {

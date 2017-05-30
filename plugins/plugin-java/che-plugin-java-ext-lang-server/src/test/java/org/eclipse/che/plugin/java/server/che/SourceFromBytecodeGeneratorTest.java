@@ -147,7 +147,7 @@ public class SourceFromBytecodeGeneratorTest extends BaseTest {
         String source = new SourcesFromBytecodeGenerator().generateSource(enumType);
         assertThat(source).contains("\n" +
                                                "public final enum DispatcherType {\n" +
-                                               "    FORWARD, INCLUDE, REQUEST, ASYNC, FAILED;\n" +
+                                               "    FORWARD, INCLUDE, REQUEST, ASYNC, ERROR;\n" +
                                                "\n" +
                                                "    public static javax.servlet.DispatcherType[] values() { /* compiled code */ }\n" +
                                                "\n" +

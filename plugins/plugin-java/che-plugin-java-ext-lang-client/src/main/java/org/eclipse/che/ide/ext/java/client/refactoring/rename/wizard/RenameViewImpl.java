@@ -366,7 +366,7 @@ final class RenameViewImpl extends Window implements RenameView {
      *
      * @param severity
      *         the severity to search for. Must be one of <code>FATAL
-     *         </code>, <code>FAILED</code>, <code>WARNING</code> or <code>INFO</code>
+     *         </code>, <code>ERROR</code>, <code>WARNING</code> or <code>INFO</code>
      * @param entries
      *         list of refactoring status
      * @return the entry that matches the search criteria
