@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,10 @@ import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 
 import java.io.File;
 
+/**
+ * @deprecated VFS components are now considered deprecated and will be replaced by standard JDK routines.
+ */
+@Deprecated
 public interface FileWatcherNotificationHandler {
     void handleFileWatcherEvent(FileWatcherEventType eventType, File watchRoot, String subPath, boolean isDir);
 

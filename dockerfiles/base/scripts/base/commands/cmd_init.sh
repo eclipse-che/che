@@ -9,10 +9,38 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_init() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} init [PARAMETERS]\n"
+  text "\n"
+  text "Initializes a directory with a new ${CHE_MINI_PRODUCT_NAME} installation\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --accept-license                  If license acceptance required, auto accepts during installation\n"
+  text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
+  text "  --no-force                        Updates images if matching tag not found in local cache\n"
+  text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+  text "  --reinit                          Reinitialize an existing installation overwriting defaults\n"
+  text "\n"
+}
+
+pre_cmd_init() {
+  :
+}
+
+post_cmd_init() {
+  :
+}
+
 cmd_init() {
 
   # set an initial value for the flag
-  FORCE_UPDATE="--no-force"
+  if is_nightly && ! is_fast && ! skip_pull; then 
+    FORCE_UPDATE="--pull"
+  else
+    FORCE_UPDATE="--no-force"
+  fi
+
   AUTO_ACCEPT_LICENSE="false"
   REINIT="false"
 
@@ -45,22 +73,18 @@ cmd_init() {
     warning "($CHE_MINI_PRODUCT_NAME init): 'nightly' installations cannot be upgraded to non-nightly versions"
   fi
 
-  cmd_download $FORCE_UPDATE
-
-  if [ -z ${IMAGE_INIT+x} ]; then
-    get_image_manifest $CHE_VERSION
-  fi
+  cmd_lifecycle download $FORCE_UPDATE
 
   if require_license; then
     if [[ "${AUTO_ACCEPT_LICENSE}" = "false" ]]; then
       info ""
       info "init" "Do you accept the ${CHE_FORMAL_PRODUCT_NAME} license? (${CHE_LICENSE_URL})"
       text "\n"
-      read -p "      I accept the license: [Y/n] " -n 1 -r
-      text "\n"
+      read -p "      I accept the license: [Y/n] " -r || { error "Shell is not in interactive mode. Add -i flag to the docker run command"; return 2; }
       if [[ $REPLY =~ ^[Nn]$ ]]; then
         return 2;
       fi
+      text "\n"
     fi
   fi
 
@@ -81,14 +105,16 @@ cmd_init() {
   fi
 
   # in development mode we use init files from repo otherwise we use it from docker image
-  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
-    docker_run -v "${CHE_HOST_CONFIG}":/copy \
-               -v "${CHE_HOST_DEVELOPMENT_REPO}"/dockerfiles/init:/files \
-               -v "${CHE_HOST_DEVELOPMENT_REPO}"/dockerfiles/init/manifests/${CHE_MINI_PRODUCT_NAME}.env:/etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.env \
-                   $IMAGE_INIT
-  else
-    docker_run -v "${CHE_HOST_CONFIG}":/copy $IMAGE_INIT
+  INIT_RUN_PARAMETERS=""
+  if local_repo; then
+    if [ -d "/repo/dockerfiles/init/manifests" ]; then
+      INIT_RUN_PARAMETERS=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init\":/files"
+      INIT_RUN_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests/${CHE_MINI_PRODUCT_NAME}.env\":/etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.env"
+    fi
   fi
+  GENERATE_INIT_COMMAND="docker_run -v \"${CHE_HOST_CONFIG}\":/copy ${INIT_RUN_PARAMETERS} $IMAGE_INIT"
+  log $GENERATE_INIT_COMMAND
+  eval $GENERATE_INIT_COMMAND
 
   # If this is is a reinit, we should not overwrite these core template files.
   # If this is an initial init, then we have to override some values
@@ -101,12 +127,11 @@ cmd_init() {
     info "init" "  ${CHE_PRODUCT_NAME}_VERSION=${CHE_VERSION}"
     info "init" "  ${CHE_PRODUCT_NAME}_CONFIG=${CHE_HOST_CONFIG}"
     info "init" "  ${CHE_PRODUCT_NAME}_INSTANCE=${CHE_HOST_INSTANCE}"
-    if [ "${CHE_DEVELOPMENT_MODE}" == "on" ]; then
-      info "init" "  ${CHE_PRODUCT_NAME}_ENVIRONMENT=development"
-      info "init" "  ${CHE_PRODUCT_NAME}_DEVELOPMENT_REPO=${CHE_HOST_DEVELOPMENT_REPO}"
+    if local_repo; then
+      info "init" "  ${CHE_PRODUCT_NAME}_REPO=${CHE_HOST_DEVELOPMENT_REPO}"
+    fi
+    if local_repo || local_assembly; then
       info "init" "  ${CHE_PRODUCT_NAME}_ASSEMBLY=${CHE_ASSEMBLY}"
-    else
-      info "init" "  ${CHE_PRODUCT_NAME}_ENVIRONMENT=production"
     fi
   fi
 
@@ -114,6 +139,25 @@ cmd_init() {
   echo "$CHE_VERSION" > "${CHE_CONTAINER_INSTANCE}/${CHE_VERSION_FILE}"
 }
 
+cmd_init_reinit_pre_action() {
+  
+  # One time only, set the value of CHE_HOST within the environment file.
+  sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HOST=.*|${CHE_PRODUCT_NAME}_HOST=${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+
+  if [[ ! ${HTTP_PROXY} = "" ]]; then
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HTTP_PROXY=.*|${CHE_PRODUCT_NAME}_HTTP_PROXY=${HTTP_PROXY}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_WORKSPACE_HTTP__PROXY=.*|${CHE_PRODUCT_NAME}_WORKSPACE_HTTP__PROXY=${HTTP_PROXY}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+  fi
+  if [[ ! ${HTTPS_PROXY} = "" ]]; then
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HTTPS_PROXY=.*|${CHE_PRODUCT_NAME}_HTTPS_PROXY=${HTTPS_PROXY}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_WORKSPACE_HTTPS__PROXY=.*|${CHE_PRODUCT_NAME}_WORKSPACE_HTTPS__PROXY=${HTTPS_PROXY}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+  fi
+  if [[ ! ${HTTP_PROXY} = "" ]] ||
+     [[ ! ${HTTPS_PROXY} = "" ]]; then
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_NO_PROXY=.*|${CHE_PRODUCT_NAME}_NO_PROXY=${NO_PROXY},${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_WORKSPACE_NO__PROXY=.*|${CHE_PRODUCT_NAME}_WORKSPACE_NO__PROXY=che-host,${NO_PROXY},${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+  fi
+}
 
 require_license() {
   if [[ "${CHE_LICENSE}" = "true" ]]; then

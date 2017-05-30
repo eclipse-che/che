@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,8 +18,6 @@ import org.eclipse.che.ide.api.editor.EditorWithErrors;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionsSource;
 import org.eclipse.che.ide.api.editor.keymap.Keymap;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
-import org.eclipse.che.ide.api.editor.texteditor.EditorWidget;
-import org.eclipse.che.ide.api.editor.texteditor.HasNotificationPanel;
 
 /**
  * View interface for the text editors components.
@@ -69,6 +67,14 @@ public interface TextEditorPartView extends RequiresResize, IsWidget, HasNotific
      *         the widget to display
      */
     void showPlaceHolder(Widget placeHolder);
+
+    /**
+     * Sets whether the info panel is visible.
+     *
+     * @param visible
+     *         {@code true} to show the info panel, {@code false} to hide it
+     */
+    void setInfoPanelVisible(boolean visible);
 
     /**
      * Sets the initial state of the info panel.

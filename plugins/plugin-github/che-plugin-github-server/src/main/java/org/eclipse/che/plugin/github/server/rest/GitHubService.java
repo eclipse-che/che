@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.exception.GitException;
-import org.eclipse.che.api.ssh.server.SshServiceClient;
 import org.eclipse.che.api.ssh.shared.dto.GenerateSshPairRequest;
 import org.eclipse.che.api.ssh.shared.model.SshPair;
 import org.eclipse.che.plugin.github.server.GitHubDTOFactory;
@@ -29,6 +28,7 @@ import org.eclipse.che.plugin.github.shared.GitHubPullRequestList;
 import org.eclipse.che.plugin.github.shared.GitHubRepository;
 import org.eclipse.che.plugin.github.shared.GitHubRepositoryList;
 import org.eclipse.che.plugin.github.shared.GitHubUser;
+import org.eclipse.che.plugin.ssh.key.SshServiceClient;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;

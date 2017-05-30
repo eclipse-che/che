@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,16 +19,14 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.user.UserServiceClient;
 import org.eclipse.che.api.user.shared.dto.ProfileDto;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
+import org.eclipse.che.ide.api.user.UserServiceClient;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -140,7 +138,7 @@ public class GithubImporterPagePresenterTest {
         doReturn("AccountName").when(gitHubUser).getName();
         doReturn("AccountLogin").when(gitHubUser).getLogin();
         when(gitHubAuthenticatorRegistry.getAuthenticator(eq("github"))).thenReturn(gitHubAuthenticator);
-        presenter = spy(new GithubImporterPagePresenter(view, gitHubAuthenticatorRegistry, gitHubClientService, dtoFactory, "", appContext,
+        presenter = spy(new GithubImporterPagePresenter(view, gitHubAuthenticatorRegistry, gitHubClientService, dtoFactory, appContext,
                                                         locale));
         doReturn(Collections.singletonList(gitHubUser)).when(presenter).toOrgList(any(JsArrayMixed.class));
         doReturn(Collections.emptyList()).when(presenter).toRepoList(any(JsArrayMixed.class));

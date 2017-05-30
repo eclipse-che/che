@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import static org.testng.Assert.assertNotNull;
  * @author Yevhenii Voevodin
  */
 @Listeners(TckListener.class)
+@Test(suiteName = "tck")
 public class TckComponentsTest {
 
     @Inject

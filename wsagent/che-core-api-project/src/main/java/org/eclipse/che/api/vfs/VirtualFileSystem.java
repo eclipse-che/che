@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,10 @@ import org.eclipse.che.api.vfs.search.SearcherProvider;
  * Only children of root folder may be accessible through this API.
  *
  * @author andrew00x
+ *
+ * @deprecated VFS components are now considered deprecated and will be replaced by standard JDK routines.
  */
+@Deprecated
 public interface VirtualFileSystem {
     /**
      * Get root folder of virtual file system. Any files in higher level than root are not accessible through virtual file system API.

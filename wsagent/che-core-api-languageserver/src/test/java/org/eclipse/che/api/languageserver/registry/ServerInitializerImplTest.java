@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,15 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import io.typefox.lsapi.InitializeParams;
-import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.ServerCapabilities;
-import io.typefox.lsapi.services.LanguageServer;
-
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
-import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsMessenger;
-import org.eclipse.che.api.languageserver.messager.ShowMessageMessenger;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.lsp4j.InitializeParams;
+import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.services.LanguageServer;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -46,10 +44,6 @@ public class ServerInitializerImplTest {
     @Mock
     private ServerInitializerObserver           observer;
     @Mock
-    private PublishDiagnosticsParamsMessenger   publishDiagnosticsParamsMessenger;
-    @Mock
-    private ShowMessageMessenger          showMessageParamsMessenger;
-    @Mock
     private LanguageDescription                 languageDescription;
     @Mock
     private LanguageServerLauncher              launcher;
@@ -57,12 +51,14 @@ public class ServerInitializerImplTest {
     private LanguageServer                      server;
     @Mock
     private CompletableFuture<InitializeResult> completableFuture;
+    @Mock
+    private EventService                        eventService;
 
-    private ServerInitializerImpl initializer;
+    private ServerInitializerImpl               initializer;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        initializer = spy(new ServerInitializerImpl(publishDiagnosticsParamsMessenger, showMessageParamsMessenger));
+        initializer = spy(new ServerInitializerImpl(eventService));
     }
 
     @Test
@@ -72,7 +68,7 @@ public class ServerInitializerImplTest {
         when(completableFuture.get()).thenReturn(mock(InitializeResult.class));
 
         when(launcher.getLanguageDescription()).thenReturn(languageDescription);
-        when(launcher.launch(anyString())).thenReturn(server);
+        when(launcher.launch(anyString(), any())).thenReturn(server);
         doNothing().when(initializer).registerCallbacks(server);
 
         initializer.addObserver(observer);

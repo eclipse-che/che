@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,11 +24,6 @@ import javax.inject.Singleton;
 import java.util.List;
 import java.util.Objects;
 
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.START;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.STOP;
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStartEvent;
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStopEvent;
-
 /**
  * File open/close event listener aimed to wrap {@link FileEvent} into {@link FileTrackingEvent}
  * which is consumed by {@link ClientServerEventService} and sent to server side for further
@@ -41,24 +36,24 @@ public class FileOpenCloseEventListener {
 
     @Inject
     public FileOpenCloseEventListener(final Provider<EditorAgent> editorAgentProvider,
-                                      final DeletedFilesController deletedFilesController,
-                                      final EventBus eventBus) {
+                                      final EventBus eventBus,
+                                      final ClientServerEventService clientServerEventService) {
 
         Log.debug(getClass(), "Adding file event listener");
         eventBus.addHandler(FileEvent.TYPE, new FileEvent.FileEventHandler() {
             @Override
             public void onFileOperation(FileEvent event) {
                 final Path path = event.getFile().getLocation();
+                final EditorAgent editorAgent = editorAgentProvider.get();
 
                 switch (event.getOperationType()) {
                     case OPEN: {
                         processFileOpen(path);
-
                         break;
                     }
                     case CLOSE: {
                         final EditorPartPresenter closingEditor = event.getEditorTab().getRelativeEditorPart();
-                        final List<EditorPartPresenter> openedEditors = editorAgentProvider.get().getOpenedEditors();
+                        final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
 
                         processFileClose(closingEditor, openedEditors, path);
 
@@ -68,7 +63,7 @@ public class FileOpenCloseEventListener {
             }
 
             private void processFileOpen(Path path) {
-                eventBus.fireEvent(newFileTrackingStartEvent(path.toString()));
+                clientServerEventService.sendFileTrackingStartEvent(path.toString());
             }
 
             private void processFileClose(EditorPartPresenter closingEditor, List<EditorPartPresenter> openedEditors, Path path) {
@@ -79,9 +74,7 @@ public class FileOpenCloseEventListener {
                     }
                 }
 
-                deletedFilesController.remove(closingEditor.getEditorInput().getFile().getLocation().toString());
-                eventBus.fireEvent(newFileTrackingStopEvent(path.toString()));
-
+                clientServerEventService.sendFileTrackingStopEvent(path.toString());
             }
         });
     }

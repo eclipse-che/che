@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,7 +94,7 @@ public class RecipeRetrieverTest {
      */
     @Test
     public void checkWithLocation() throws MachineException {
-        String LOCATION = "http://eclipse.org/my-che.recipe";
+        String LOCATION = "https://eclipse.org/my-che.recipe";
         when(machineSource.getLocation()).thenReturn(LOCATION);
         recipeRetriever.getRecipe(machineConfig);
         verify(recipeDownloader).getRecipe(machineConfig);

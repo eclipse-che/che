@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.github.server;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
+import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -113,7 +113,7 @@ public class GitHubKeyUploader implements SshKeyUploader {
         LOG.debug("Upload key response code: {}", responseCode);
 
         if (responseCode != HttpURLConnection.HTTP_CREATED) {
-            throw new IOException(String.format("%d: Failed to upload public key to http://github.com/", responseCode));
+            throw new IOException(String.format("%d: Failed to upload public key to https://github.com/", responseCode));
         }
     }
 

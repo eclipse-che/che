@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,11 +11,15 @@
 package org.eclipse.che.ide.part.explorer.project;
 
 import com.google.common.collect.Sets;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.DelayedTask;
@@ -41,14 +45,18 @@ import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent.MarkerChangedHandler;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView.ActionDelegate;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.node.SyntheticNodeUpdateEvent;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeExpandNodeEvent;
+import org.eclipse.che.ide.ui.smartTree.event.CollapseNodeEvent;
+import org.eclipse.che.ide.ui.smartTree.event.ExpandNodeEvent;
 import org.eclipse.che.ide.ui.smartTree.event.PostLoadEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
@@ -60,6 +68,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
+import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.STOP;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -78,34 +88,39 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                                                        ResourceChangedHandler,
                                                                        MarkerChangedHandler,
                                                                        SyntheticNodeUpdateEvent.SyntheticNodeUpdateHandler {
+    private static final int PART_SIZE = 500;
     private final ProjectExplorerView      view;
+    private final EventBus                 eventBus;
     private final ResourceNode.NodeFactory nodeFactory;
     private final SettingsProvider         settingsProvider;
     private final CoreLocalizationConstant locale;
     private final Resources                resources;
     private final TreeExpander             treeExpander;
-
-    private UpdateTask updateTask = new UpdateTask();
-    private Set<Path> expandQueue = new HashSet<>();
-
-    private static final int PART_SIZE = 500;
-
+    private final RequestTransmitter       requestTransmitter;
+    private final DtoFactory               dtoFactory;
+    private UpdateTask updateTask  = new UpdateTask();
+    private Set<Path>  expandQueue = new HashSet<>();
     private boolean hiddenFilesAreShown;
 
     @Inject
     public ProjectExplorerPresenter(final ProjectExplorerView view,
-                                    EventBus eventBus,
-                                    CoreLocalizationConstant locale,
-                                    Resources resources,
+                                    final EventBus eventBus,
+                                    final CoreLocalizationConstant locale,
+                                    final Resources resources,
                                     final ResourceNode.NodeFactory nodeFactory,
                                     final SettingsProvider settingsProvider,
                                     final AppContext appContext,
-                                    final WorkspaceAgent workspaceAgent) {
+                                    final Provider<WorkspaceAgent> workspaceAgentProvider,
+                                    final RequestTransmitter requestTransmitter,
+                                    final DtoFactory dtoFactory) {
         this.view = view;
+        this.eventBus = eventBus;
         this.nodeFactory = nodeFactory;
         this.settingsProvider = settingsProvider;
         this.locale = locale;
         this.resources = resources;
+        this.requestTransmitter = requestTransmitter;
+        this.dtoFactory = dtoFactory;
         this.view.setDelegate(this);
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
@@ -153,16 +168,65 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
         registerNative();
 
-        final PartStack partStack = checkNotNull(workspaceAgent.getPartStack(PartStackType.NAVIGATION),
-                                                 "Navigation part stack should not be a null");
-        partStack.addPart(this);
-        partStack.setActivePart(this);
-
         // when ide has already initialized, then we force set focus to the current part
         eventBus.addHandler(ExtensionsInitializedEvent.getType(), new ExtensionsInitializedHandler() {
             @Override
             public void onExtensionsInitialized(ExtensionsInitializedEvent event) {
                 partStack.setActivePart(ProjectExplorerPresenter.this);
+            }
+        });
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                final PartStack partStack = checkNotNull(workspaceAgentProvider.get().getPartStack(PartStackType.NAVIGATION),
+                                                         "Navigation part stack should not be a null");
+                partStack.addPart(ProjectExplorerPresenter.this);
+                partStack.setActivePart(ProjectExplorerPresenter.this);
+            }
+        });
+    }
+
+    @Inject
+    public void initFileWatchers() {
+        final String endpointId = "ws-agent";
+        final String method = "track:project-tree";
+
+        getTree().addExpandHandler(new ExpandNodeEvent.ExpandNodeHandler() {
+            @Override
+            public void onExpand(ExpandNodeEvent event) {
+                Node node = event.getNode();
+
+                if (node instanceof ResourceNode) {
+                    Resource data = ((ResourceNode)node).getData();
+                    requestTransmitter.newRequest()
+                                      .endpointId(endpointId)
+                                      .methodName(method)
+                                      .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
+                                                             .withPath(data.getLocation().toString())
+                                                             .withType(START))
+                                      .sendAndSkipResult();
+
+                }
+            }
+        });
+
+        getTree().addCollapseHandler(new CollapseNodeEvent.CollapseNodeHandler() {
+            @Override
+            public void onCollapse(CollapseNodeEvent event) {
+                Node node = event.getNode();
+
+                if (node instanceof ResourceNode) {
+                    Resource data = ((ResourceNode)node).getData();
+                    requestTransmitter.newRequest()
+                                      .endpointId(endpointId)
+                                      .methodName(method)
+                                      .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
+                                                             .withPath(data.getLocation().toString())
+                                                             .withType(STOP))
+                                      .sendAndSkipResult();
+
+                }
             }
         });
     }
@@ -175,10 +239,14 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
         ProjectExplorer.expandAll = $entry(function () {
             that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doExpand()();
-        })
+        });
 
         ProjectExplorer.collapseAll = $entry(function () {
             that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doCollapse()();
+        });
+
+        ProjectExplorer.reveal = $entry(function (path) {
+            that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doReveal(*)(path);
         })
 
         $wnd.IDE.ProjectExplorer = ProjectExplorer;
@@ -196,6 +264,10 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         }
     }
 
+    private void doReveal(String path) {
+        eventBus.fireEvent(new RevealResourceEvent(Path.valueOf(path)));
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public void onResourceChanged(ResourceChangedEvent event) {
@@ -207,7 +279,22 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         // process root projects, they have only one segment in path
         if (resource.getLocation().segmentCount() == 1) {
             if (delta.getKind() == ADDED) {
-                tree.getNodeStorage().add(nodeFactory.newContainerNode((Container)resource, nodeSettings));
+                if ((delta.getFlags() & (MOVED_FROM | MOVED_TO)) != 0) {
+                    Node node = getNode(delta.getFromPath());
+                    if (node != null) {
+                        boolean expanded = tree.isExpanded(node);
+
+                        tree.getNodeStorage().remove(node);
+
+                        node = nodeFactory.newContainerNode((Container)resource, nodeSettings);
+                        tree.getNodeStorage().add(node);
+                        if (expanded) {
+                            tree.setExpanded(node, true);
+                        }
+                    }
+                } else if (getNode(resource.getLocation()) == null) {
+                    tree.getNodeStorage().add(nodeFactory.newContainerNode((Container)resource, nodeSettings));
+                }
             } else if (delta.getKind() == REMOVED) {
                 Node node = getNode(resource.getLocation());
 
@@ -296,12 +383,6 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     }
 
     /** {@inheritDoc} */
-    @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
-    /** {@inheritDoc} */
     @NotNull
     @Override
     public String getTitle() {
@@ -372,6 +453,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     @Deprecated
     public void showHiddenFiles(boolean show) {
         hiddenFilesAreShown = show;
+        settingsProvider.getSettings().setShowHiddenFiles(show);
         view.showHiddenFilesForAllExpandedNodes(show);
     }
 

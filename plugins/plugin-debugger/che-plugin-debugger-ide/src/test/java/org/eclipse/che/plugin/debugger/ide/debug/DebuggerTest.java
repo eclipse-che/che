@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,11 @@ import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.reception.ConsumerConfiguratorOneToNone;
+import org.eclipse.che.api.core.jsonrpc.commons.reception.ResultConfiguratorFromOne;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
@@ -44,6 +49,7 @@ import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -54,8 +60,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
-import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.plugin.debugger.ide.BaseTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,7 +79,9 @@ import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
@@ -103,21 +109,27 @@ public class DebuggerTest extends BaseTest {
     public static final String PATH        = "test/src/main/java/Test.java";
 
     @Mock
-    private DebuggerServiceClient service;
+    private DebuggerServiceClient      service;
     @Mock
-    private DtoFactory            dtoFactory;
+    private DtoFactory                 dtoFactory;
     @Mock
-    private LocalStorageProvider  localStorageProvider;
+    private LocalStorageProvider       localStorageProvider;
     @Mock
-    private MessageBusProvider    messageBusProvider;
+    private EventBus                   eventBus;
     @Mock
-    private EventBus              eventBus;
+    private ActiveFileHandler          activeFileHandler;
     @Mock
-    private ActiveFileHandler     activeFileHandler;
+    private DebuggerManager            debuggerManager;
     @Mock
-    private DebuggerManager       debuggerManager;
+    private NotificationManager        notificationManager;
     @Mock
-    private BreakpointManager     breakpointManager;
+    private BreakpointManager          breakpointManager;
+    @Mock(answer = RETURNS_DEEP_STUBS)
+    private RequestTransmitter         transmitter;
+    @Mock
+    private RequestHandlerConfigurator configurator;
+    @Mock
+    private RequestHandlerManager      requestHandlerManager;
 
     @Mock
     private Promise<Void>         promiseVoid;
@@ -127,17 +139,17 @@ public class DebuggerTest extends BaseTest {
     private PromiseError          promiseError;
 
     @Mock
-    private VirtualFile        file;
+    private VirtualFile       file;
     @Mock
-    private LocalStorage       localStorage;
+    private LocalStorage      localStorage;
     @Mock
-    private DebuggerObserver   observer;
+    private DebuggerObserver  observer;
     @Mock
-    private LocationDto        locationDto;
+    private LocationDto       locationDto;
     @Mock
-    private BreakpointDto      breakpointDto;
+    private BreakpointDto     breakpointDto;
     @Mock
-    private Optional<Project>  optional;
+    private Optional<Project> optional;
 
     @Captor
     private ArgumentCaptor<WsAgentStateHandler>             extServerStateHandlerCaptor;
@@ -170,20 +182,17 @@ public class DebuggerTest extends BaseTest {
         doReturn(breakpointDto).when(dtoFactory).createDto(BreakpointDto.class);
         doReturn(locationDto).when(breakpointDto).getLocation();
 
-        doReturn(messageBus).when(messageBusProvider).getMachineMessageBus();
-
         doReturn(localStorage).when(localStorageProvider).get();
         doReturn(DEBUG_INFO).when(localStorage).getItem(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_SESSION_KEY);
         doReturn(debugSessionDto).when(dtoFactory).createDtoFromJson(anyString(), eq(DebugSessionDto.class));
 
-        doReturn(PATH).when(file).getPath();
+        doReturn(Path.valueOf(PATH)).when(file).getLocation();
 
-        debugger = new TestDebugger(service, dtoFactory, localStorageProvider, messageBusProvider, eventBus,
-                                    activeFileHandler, debuggerManager, "id");
+        debugger = new TestDebugger(service, transmitter, configurator, dtoFactory, localStorageProvider, eventBus,
+                                    activeFileHandler, debuggerManager, notificationManager, "id");
         doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
         doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
-        // setup messageBus
         verify(eventBus).addHandler(eq(WsAgentStateEvent.TYPE), extServerStateHandlerCaptor.capture());
         extServerStateHandlerCaptor.getValue().onWsAgentStarted(WsAgentStateEvent.createWsAgentStartedEvent());
 
@@ -197,12 +206,26 @@ public class DebuggerTest extends BaseTest {
     public void testAttachDebugger() throws Exception {
         debugger.setDebugSession(null);
 
+
         final String debugSessionJson = "debugSession";
         doReturn(debugSessionJson).when(dtoFactory).toJson(debugSessionDto);
         doReturn(mock(StartActionDto.class)).when(dtoFactory).createDto(StartActionDto.class);
 
         Map<String, String> connectionProperties = mock(Map.class);
         Promise<DebugSessionDto> promiseDebuggerInfo = mock(Promise.class);
+
+        org.eclipse.che.api.core.jsonrpc.commons.reception.MethodNameConfigurator methodNameConfigurator = mock(
+                org.eclipse.che.api.core.jsonrpc.commons.reception.MethodNameConfigurator.class);
+        org.eclipse.che.api.core.jsonrpc.commons.reception.ParamsConfigurator paramsConfigurator = mock(
+                org.eclipse.che.api.core.jsonrpc.commons.reception.ParamsConfigurator.class);
+
+        ResultConfiguratorFromOne resultConfiguratorFromOne = mock(ResultConfiguratorFromOne.class);
+        ConsumerConfiguratorOneToNone operationConfiguratorOneToNone = mock(ConsumerConfiguratorOneToNone.class);
+
+        doReturn(methodNameConfigurator).when(configurator).newConfiguration();
+        doReturn(paramsConfigurator).when(methodNameConfigurator).methodName(anyString());
+        doReturn(resultConfiguratorFromOne).when(paramsConfigurator).paramsAsDto(anyObject());
+        doReturn(operationConfiguratorOneToNone).when(resultConfiguratorFromOne).noResult();
 
         doReturn(promiseDebuggerInfo).when(service).connect("id", connectionProperties);
         doReturn(promiseVoid).when(promiseDebuggerInfo).then((Function<DebugSessionDto, Void>)any());
@@ -227,7 +250,6 @@ public class DebuggerTest extends BaseTest {
 
         assertTrue(debugger.isConnected());
         verify(localStorage).setItem(eq(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_SESSION_KEY), eq(debugSessionJson));
-        verify(messageBus).subscribe(eq("id:events:"), any(SubscriptionHandler.class));
     }
 
     @Test
@@ -244,13 +266,10 @@ public class DebuggerTest extends BaseTest {
         doReturn(promiseVoid).when(service).disconnect(SESSION_ID);
         doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>)any());
 
-        doReturn(true).when(messageBus).isHandlerSubscribed(any(), any());
-
         debugger.disconnect();
 
         assertFalse(debugger.isConnected());
         verify(localStorage).setItem(eq(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_SESSION_KEY), eq(""));
-        verify(messageBus, times(1)).unsubscribe(anyString(), any());
 
         verify(promiseVoid).then(operationVoidCaptor.capture());
         verify(promiseVoid).catchError(operationPromiseErrorCaptor.capture());
@@ -580,22 +599,27 @@ public class DebuggerTest extends BaseTest {
     private class TestDebugger extends AbstractDebugger {
 
         public TestDebugger(DebuggerServiceClient service,
+                            RequestTransmitter transmitter,
+                            RequestHandlerConfigurator configurator,
                             DtoFactory dtoFactory,
                             LocalStorageProvider localStorageProvider,
-                            MessageBusProvider messageBusProvider,
                             EventBus eventBus,
                             ActiveFileHandler activeFileHandler,
                             DebuggerManager debuggerManager,
+                            NotificationManager notificationManager,
                             String id) {
             super(service,
+                  transmitter,
+                  configurator,
                   dtoFactory,
                   localStorageProvider,
-                  messageBusProvider,
                   eventBus,
                   activeFileHandler,
                   debuggerManager,
+                  notificationManager,
                   breakpointManager,
-                  id);
+                  id,
+                  requestHandlerManager);
         }
 
         @Override

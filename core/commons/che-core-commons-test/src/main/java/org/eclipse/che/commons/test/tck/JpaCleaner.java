@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.che.commons.test.tck;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.persistence.EntityManagerFactory;
 
 /**
@@ -26,10 +27,10 @@ import javax.persistence.EntityManagerFactory;
  */
 public class JpaCleaner implements TckResourcesCleaner {
     @Inject
-    private EntityManagerFactory entityManagerFactory;
+    private Provider<EntityManagerFactory> entityManagerFactory;
 
     @Override
     public void clean() {
-        entityManagerFactory.close();
+        entityManagerFactory.get().close();
     }
 }

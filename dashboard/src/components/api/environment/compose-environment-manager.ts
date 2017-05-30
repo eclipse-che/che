@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 'use strict';
 
 import {EnvironmentManager} from './environment-manager';
+import {IEnvironmentManagerMachine} from './environment-manager-machine';
+import {ComposeParser, IComposeRecipe} from './compose-parser';
 
 /**
  * This is the implementation of environment manager that handles the docker compose format.
@@ -50,19 +52,13 @@ import {EnvironmentManager} from './environment-manager';
  *  @author Ann Shumilova
  */
 
-interface IComposeRecipe {
-  services: {
-    [machineName: string]: any
-  };
-}
-
 export class ComposeEnvironmentManager extends EnvironmentManager {
-  $log: ng.ILogService;
+  parser: ComposeParser;
 
   constructor($log: ng.ILogService) {
-    super();
+    super($log);
 
-    this.$log = $log;
+    this.parser = new ComposeParser();
   }
 
   get editorMode(): string {
@@ -78,7 +74,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
   _parseRecipe(content: string): IComposeRecipe {
     let recipe = null;
     try {
-      recipe = this._validate(jsyaml.load(content));
+      recipe = this.parser.parse(content);
     } catch (e) {
       this.$log.error(e);
     }
@@ -86,39 +82,16 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
   }
 
   /**
-   * Validate given recipe
-   *
-   * @param {IComposeRecipe} recipe
-   * @returns {IComposeRecipe | *}
-   * @private
-   */
-  _validate(recipe: IComposeRecipe): IComposeRecipe | void {
-    if (!recipe.services) {
-      throw new Error('Recipe should contain services section.');
-    }
-
-    let services: any = Object.keys(recipe.services);
-    services.forEach((serviceName: string) => {
-      let serviceFields: any = Object.keys(recipe.services[serviceName] || {});
-      if (!serviceFields || (serviceFields.includes('build') === false && serviceFields.includes('image') === false)) {
-        throw new Error('Service \'' + serviceName + '\' should contain \'build\' or \'image\' section.');
-      }
-    });
-
-    return recipe;
-  }
-
-  /**
    * Dumps recipe object
    *
-   * @param recipe {object} recipe object
+   * @param recipe {IComposeRecipe} recipe object
    * @returns {string} recipe content
    */
 
   _stringifyRecipe(recipe: IComposeRecipe): string {
     let content = '';
     try {
-      content = jsyaml.dump(recipe);
+      content = this.parser.dump(recipe);
     } catch (e) {
       this.$log.error(e);
     }
@@ -129,12 +102,13 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
   /**
    * Retrieves the list of machines.
    *
-   * @param environment environment's configuration
-   * @returns {Array} list of machines defined in environment
+   * @param {che.IWorkspaceEnvironment} environment environment's configuration
+   * @param {any=} runtime runtime of active environment
+   * @returns {IEnvironmentManagerMachine[]} list of machines defined in environment
    */
-  getMachines(environment: any): any[] {
+  getMachines(environment: che.IWorkspaceEnvironment, runtime?: any): IEnvironmentManagerMachine[] {
     let recipe: any = null,
-        machines: any[] = [],
+        machines: IEnvironmentManagerMachine[] = super.getMachines(environment, runtime),
         machineNames: string[] = [];
 
     if (environment.recipe.content) {
@@ -149,19 +123,26 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
     }
 
     machineNames.forEach((machineName: string) => {
-      let machine: any = {};
-      if (environment.machines && environment.machines[machineName]) {
-        machine = angular.copy(environment.machines[machineName]);
+      let machine: IEnvironmentManagerMachine = machines.find((_machine: IEnvironmentManagerMachine) => {
+        return _machine.name === machineName;
+      });
+
+      if (!machine) {
+        machine = { name: machineName };
+        machines.push(machine);
       }
-      machine.name = machineName;
+
       machine.recipe = recipe ? recipe.services[machineName] : recipe;
+
+      if (environment.machines && environment.machines[machineName]) {
+        angular.merge(machine, environment.machines[machineName]);
+      }
 
       // memory
       let memoryLimitBytes = this.getMemoryLimit(machine);
       if (memoryLimitBytes === -1 && recipe) {
         this.setMemoryLimit(machine, recipe.services[machineName].mem_limit);
       }
-      machines.push(machine);
     });
 
     return machines;
@@ -170,18 +151,18 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
   /**
    * Provides the environment configuration based on machines format.
    *
-   * @param environment origin of the environment to be edited
-   * @param machines the list of machines
-   * @returns environment's configuration
+   * @param {che.IWorkspaceEnvironment} environment origin of the environment to be edited
+   * @param {IEnvironmentManagerMachine} machines the list of machines
+   * @returns {che.IWorkspaceEnvironment} environment's configuration
    */
-  getEnvironment(environment: any, machines: any[]): any {
+  getEnvironment(environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[]): che.IWorkspaceEnvironment {
     let newEnvironment = super.getEnvironment(environment, machines);
 
     if (newEnvironment.recipe.content) {
       let recipe: IComposeRecipe = this._parseRecipe(newEnvironment.recipe.content);
 
       if (recipe) {
-        machines.forEach((machine: any) => {
+        machines.forEach((machine: IEnvironmentManagerMachine) => {
           let machineName = machine.name;
           if (!recipe.services[machineName]) {
             return;
@@ -190,6 +171,9 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
             recipe.services[machineName].environment = angular.copy(machine.recipe.environment);
           } else {
             delete recipe.services[machineName].environment;
+          }
+          if (machine.recipe.image) {
+            recipe.services[machineName].image = machine.recipe.image;
           }
         });
 
@@ -207,10 +191,10 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
   /**
    * Returns object which contains docker image or link to docker file and build context.
    *
-   * @param machine {object}
+   * @param {IEnvironmentManagerMachine} machine
    * @returns {*}
    */
-  getSource(machine: any): any {
+  getSource(machine: IEnvironmentManagerMachine): any {
     if (!machine.recipe) {
       return null;
     }
@@ -223,22 +207,35 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
   }
 
   /**
+   * Updates machine's image
+   *
+   * @param {IEnvironmentManagerMachine} machine
+   * @param {String} image
+   */
+  setSource(machine: IEnvironmentManagerMachine, image: string) {
+    if (!machine.recipe) {
+      return;
+    }
+    machine.recipe.image = image;
+  }
+
+  /**
    * Returns true if environment recipe content is present.
    *
-   * @param machine {object}
+   * @param {IEnvironmentManagerMachine} machine
    * @returns {boolean}
    */
-  canEditEnvVariables(machine: any): boolean {
+  canEditEnvVariables(machine: IEnvironmentManagerMachine): boolean {
     return !!machine.recipe;
   }
 
   /**
    * Returns object with environment variables.
    *
-   * @param machine {object}
+   * @param {IEnvironmentManagerMachine} machine
    * @returns {*}
    */
-  getEnvVariables(machine: any): any {
+  getEnvVariables(machine: IEnvironmentManagerMachine): any {
     if (!machine.recipe) {
       return null;
     }
@@ -249,10 +246,10 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
   /**
    * Updates machine with new environment variables.
    *
-   * @param machine {object}
-   * @param envVariables {object}
+   * @param {IEnvironmentManagerMachine} machine
+   * @param {any} envVariables
    */
-  setEnvVariables(machine: any, envVariables: any): void {
+  setEnvVariables(machine: IEnvironmentManagerMachine, envVariables: any): void {
     if (!machine.recipe) {
       return;
     }
@@ -265,29 +262,19 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
   }
 
   /**
-   * Returns true if machine can be renamed.
-   *
-   * @param machine {object}
-   * @returns {boolean}
-   */
-  canRenameMachine(machine: any): boolean {
-    return !!machine.recipe;
-  }
-
-  /**
    * Renames machine.
    *
-   * @param environment {object}
-   * @param oldName {string}
-   * @param newName {string}
-   * @returns {*} new environment
+   * @param {che.IWorkspaceEnvironment} environment
+   * @param {string} oldName
+   * @param {string} newName
+   * @returns {che.IWorkspaceEnvironment} new environment
    */
-  renameMachine(environment: any, oldName: string, newName: string): any {
+  renameMachine(environment: che.IWorkspaceEnvironment, oldName: string, newName: string): che.IWorkspaceEnvironment {
     try {
       let recipe: IComposeRecipe = this._parseRecipe(environment.recipe.content);
 
       // fix relations to other machines in recipe
-      Object.keys(recipe.services).forEach((serviceName: any) => {
+      Object.keys(recipe.services).forEach((serviceName: string) => {
         if (serviceName === oldName) {
           return;
         }
@@ -334,28 +321,18 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
   }
 
   /**
-   * Returns true if machine can be deleted.
-   *
-   * @param machine {object}
-   * @returns {boolean}
-   */
-  canDeleteMachine(machine: any): boolean {
-    return !!machine.recipe;
-  }
-
-  /**
    * Removes machine.
    *
-   * @param environment {object}
-   * @param name {string} name of machine
-   * @returns {*} new environment
+   * @param {che.IWorkspaceEnvironment} environment
+   * @param {string} name name of machine
+   * @returns {che.IWorkspaceEnvironment} new environment
    */
-  deleteMachine(environment: any, name: string): any {
+  deleteMachine(environment: che.IWorkspaceEnvironment, name: string): che.IWorkspaceEnvironment {
     try {
       let recipe: IComposeRecipe = this._parseRecipe(environment.recipe.content);
 
       // fix relations to other machines in recipe
-      Object.keys(recipe.services).forEach((serviceName: any) => {
+      Object.keys(recipe.services).forEach((serviceName: string) => {
         if (serviceName === name) {
           return;
         }

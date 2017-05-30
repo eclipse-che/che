@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,8 @@ import com.google.gwt.resources.client.CssResource.NotStrict;
 import com.google.gwt.resources.client.TextResource;
 
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
+import org.eclipse.che.ide.command.CommandResources;
+import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.menu.MenuResources;
 import org.eclipse.che.ide.notification.NotificationResources;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardResources;
@@ -46,7 +48,9 @@ public interface Resources extends Tree.Resources,
                                    CellTreeResources,
                                    CategoriesList.Resources,
                                    ButtonLoaderResources,
-                                   ProjectWizardResources {
+                                   ProjectWizardResources,
+                                   MachineResources,
+                                   CommandResources {
 
     @Source({"Core.css", "org/eclipse/che/ide/ui/constants.css", "org/eclipse/che/ide/api/ui/style.css"})
     @NotStrict
@@ -208,5 +212,8 @@ public interface Resources extends Tree.Resources,
         String createWsTagsPopup();
 
         String tagsPanel();
+
+        @ClassName("codeassistant-highlight")
+        String codeassistantHighlight();
     }
 }

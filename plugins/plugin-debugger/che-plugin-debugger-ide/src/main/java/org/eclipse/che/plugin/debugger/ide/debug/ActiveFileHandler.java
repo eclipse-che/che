@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,23 +12,28 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 
 /**
- * Responsible to open files in editor when debugger stopped at breakpoint.
+ * Handles resources is being debugged.
+ *
+ * @see Location#getTarget()
+ * @see Location#getLineNumber()
  *
  * @author Anatoliy Bazko
  */
 public interface ActiveFileHandler {
 
     /**
-     * Open file, scroll to the debug line and do some actions from {@code callback}
+     * Opens resource is being debugged and scrolls to the position {@link Location#getLineNumber()}.
+     * If resource has been found then {@link AsyncCallback#onSuccess(Object)} must be invoked
+     * and {@link AsyncCallback#onFailure(Throwable)} otherwise.
      *
      * @param location
-     *         location to the source file. See more {@link Location}
+     *         the location of the resource is being debugged
      * @param callback
-     *         some action which should be performed after opening file
+     *         the callback
      */
     void openFile(Location location, AsyncCallback<VirtualFile> callback);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,11 +11,13 @@
 'use strict';
 
 import {Register} from '../components/utils/register';
+import {FactoryConfig} from './factories/factories-config';
 
 import {ComponentsConfig} from '../components/components-config';
 
 import {AdminsConfig} from './admin/admin-config';
 import {AdministrationConfig} from './administration/administration-config';
+import {DiagnosticsConfig} from './diagnostics/diagnostics-config';
 import {CheColorsConfig} from './colors/che-color.constant';
 import {CheOutputColorsConfig} from './colors/che-output-colors.constant';
 import {CheCountriesConfig} from './constants/che-countries.constant';
@@ -28,6 +30,7 @@ import {ProjectsConfig} from './projects/projects-config';
 import {ProxySettingsConfig} from './proxy/proxy-settings.constant';
 import {WorkspacesConfig} from './workspaces/workspaces-config';
 import {StacksConfig} from './stacks/stacks-config';
+import {DemoComponentsCtrl} from './demo-components/demo-components.controller';
 
 
 // init module
@@ -113,8 +116,8 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
     $rootScope.waitingLoaded = false;
     $rootScope.showIDE = false;
 
-    workspaceDetailsService.addSection('Projects', '<workspace-details-projects></workspace-details-projects>', 'icon-ic_inbox_24px');
-    workspaceDetailsService.addSection('SSH', '<workspace-details-ssh></workspace-details-ssh>', 'icon-ic_vpn_key_24px');
+    workspaceDetailsService.addPage('Projects', '<workspace-details-projects></workspace-details-projects>', 'icon-ic_inbox_24px');
+    workspaceDetailsService.addPage('SSH', '<workspace-details-ssh></workspace-details-ssh>', 'icon-ic_vpn_key_24px');
 
     // here only to create instances of these components
     cheIdeFetcher;
@@ -359,6 +362,10 @@ initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($rou
 
 var instanceRegister = new Register(initModule);
 
+if (DEV) {
+  instanceRegister.controller('DemoComponentsCtrl', DemoComponentsCtrl);
+}
+
 new ProxySettingsConfig(instanceRegister);
 new CheColorsConfig(instanceRegister);
 new CheOutputColorsConfig(instanceRegister);
@@ -368,9 +375,11 @@ new ComponentsConfig(instanceRegister);
 new AdminsConfig(instanceRegister);
 new AdministrationConfig(instanceRegister);
 new IdeConfig(instanceRegister);
+new DiagnosticsConfig(instanceRegister);
 
 new NavbarConfig(instanceRegister);
 new ProjectsConfig(instanceRegister);
 new WorkspacesConfig(instanceRegister);
 new DashboardConfig(instanceRegister);
 new StacksConfig(instanceRegister);
+new FactoryConfig(instanceRegister);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -171,6 +171,9 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("redo.description")
     String redoDescription();
+
+    @Key("softWrap")
+    String softWrap();
 
     @Key("uploadFile.name")
     String uploadFileName();
@@ -351,6 +354,12 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.projectConfiguration.title")
     String actionProjectConfigurationTitle();
 
+    @Key("action.previewImage.description")
+    String actionPreviewImageDescription();
+
+    @Key("action.previewImage.title")
+    String actionPreviewImageTitle();
+
     @Key("action.findAction.description")
     String actionFindActionDescription();
 
@@ -362,6 +371,24 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("action.showHiddenFiles.description")
     String actionShowHiddenFilesDescription();
+
+    @Key("action.maximizePart.title")
+    String actionMaximizePartTitle();
+
+    @Key("action.maximizePart.description")
+    String actionMaximizePartDescription();
+
+    @Key("action.restorePart.title")
+    String actionRestorePartTitle();
+
+    @Key("action.restorePart.description")
+    String actionRestorePartDescription();
+
+    @Key("action.minimizePart.title")
+    String actionMinimizePartTitle();
+
+    @Key("action.minimizePart.description")
+    String actionMinimizePartDescription();
 
     /* NewResource */
     @Key("newResource.title")
@@ -394,6 +421,9 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("messages.fileToOpenIsNotSpecified")
     String fileToOpenIsNotSpecified();
+
+    @Key("messages.fileToOpenLineIsNotANumber")
+    String fileToOpenLineIsNotANumber();
 
     @Key("messages.canNotOpenNodeWithoutParams")
     String canNotOpenNodeWithoutParams();
@@ -871,6 +901,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("macro.editor.current.file.name.description")
     String macroEditorCurrentFileNameDescription();
 
+    @Key("macro.editor.current.file.base.name.description")
+    String macroEditorCurrentFileBaseNameDescription();
+
     @Key("macro.editor.current.file.path.description")
     String macroEditorCurrentFilePathDescription();
 
@@ -879,6 +912,9 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("macro.explorer.current.file.name.description")
     String macroExplorerCurrentFileNameDescription();
+
+    @Key("macro.explorer.current.file.base.name.description")
+    String macroExplorerCurrentFileBaseNameDescription();
 
     @Key("macro.explorer.current.project.name.description")
     String macroExplorerCurrentProjectNameDescription();
@@ -900,4 +936,258 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("empty.state.no.files")
     String emptyStateNoFiles();
+
+    @Key("authentication.dialog.title")
+    String authenticationDialogTitle();
+
+    @Key("authentication.dialog.username")
+    String authenticationDialogUsername();
+
+    @Key("authentication.dialog.password")
+    String authenticationDialogPassword();
+
+    @Key("authentication.dialog.authenticate.button")
+    String authenticationDialogAuthenticate();
+
+    @Key("authentication.dialog.rejected.by.user")
+    String authenticationDialogRejectedByUser();
+
+
+    /* Factories */
+    @Key("projects.import.configuring.cloning")
+    String cloningSource();
+
+    @Key("create.factory.action.title")
+    String createFactoryActionTitle();
+
+    @Key("create.factory.already.exist")
+    String createFactoryAlreadyExist();
+
+    @Key("create.factory.unable.create.from.current.workspace")
+    String createFactoryFromCurrentWorkspaceFailed();
+
+    @Key("create.factory.form.title")
+    String createFactoryTitle();
+
+    @Key("create.factory.label.name")
+    String createFactoryName();
+
+    @Key("create.factory.label.link")
+    String createFactoryLink();
+
+    @Key("create.factory.button.create")
+    String createFactoryButton();
+
+    @Key("create.factory.button.close")
+    String createFactoryButtonClose();
+
+    @Key("create.factory.configure.button.tooltip")
+    String createFactoryConfigureTooltip();
+
+    @Key("create.factory.launch.button.tooltip")
+    String createFactoryLaunchTooltip();
+
+
+    @Key("import.config.view.name")
+    String importFromConfigurationName();
+
+    @Key("import.config.view.description")
+    String importFromConfigurationDescription();
+
+    @Key("project.import.configured.cloned")
+    String clonedSource(String projectName);
+
+    @Key("import.config.form.button.import")
+    String importButton();
+
+    @Key("import.config.view.title")
+    String importFromConfigurationTitle();
+
+    @Key("import.config.form.prompt")
+    String configFileTitle();
+
+    @Key("project.already.imported")
+    String projectAlreadyImported(String projectName);
+
+    @Key("project.import.cloned.with.checkout")
+    String clonedSourceWithCheckout(String projectName, String repoName, String ref, String branch);
+
+    @Key("project.import.cloned.with.checkout.start.point")
+    String clonedWithCheckoutOnStartPoint(String projectName, String repoName, String startPoint, String branch);
+
+    @Key("project.import.configuring.cloning")
+    String cloningSource(String projectName);
+
+    @Key("project.import.ssh.key.upload.failed.title")
+    String cloningSourceSshKeyUploadFailedTitle();
+
+    @Key("project.import.ssh.key.upload.failed.text")
+    String cloningSourcesSshKeyUploadFailedText();
+
+    @Key("message.ssh.key.not.found.text")
+    String acceptSshNotFoundText();
+
+    @Key("project.import.cloning.failed.without.start.point")
+    String cloningSourceWithCheckoutFailed(String branch, String repoName);
+
+    @Key("project.import.cloning.failed.with.start.point")
+    String cloningSourceCheckoutFailed(String project, String branch);
+
+    @Key("project.import.cloning.failed.title")
+    String cloningSourceFailedTitle(String projectName);
+
+    @Key("project.import.configuring.failed")
+    String configuringSourceFailed(String projectName);
+
+    @Key("welcome.preferences.title")
+    String welcomePreferencesTitle();
+
+    @Key("export.config.view.name")
+    String exportConfigName();
+
+    @Key("export.config.view.description")
+    String exportConfigDescription();
+
+    @Key("export.config.error.message")
+    String exportConfigErrorMessage();
+
+    @Key("export.config.dialog.not.under.vcs.title")
+    String exportConfigDialogNotUnderVcsTitle();
+
+    @Key("export.config.dialog.not.under.vcs.text")
+    String exportConfigDialogNotUnderVcsText();
+
+    @Key("messages.server.failure")
+    String messagesServerFailure();
+
+    @Key("connection.closed.dialog.title")
+    String connectionClosedDialogTitle();
+
+    @Key("macro.current.project.path.description")
+    String macroCurrentProjectPathDescription();
+
+    @Key("macro.current.project.relpath.description")
+    String macroCurrentProjectRelpathDescription();
+
+    @Key("macro.machine.dev.hostname.description")
+    String macroMachineDevHostnameDescription();
+
+    @Key("failed.to.connect.the.terminal")
+    String failedToConnectTheTerminal();
+
+    @Key("connection.failed.with.terminal")
+    String connectionFailedWithTerminal();
+
+    @Key("terminal.error.connection")
+    String terminalErrorConnection();
+
+    @Key("terminal.can.not.load.script")
+    String terminalCanNotLoadScript();
+
+    @Key("terminal.restart.trying")
+    String terminalTryRestarting();
+
+    @Key("terminal.error.start")
+    String terminalErrorStart();
+
+    @Key("view.processes.title")
+    String viewProcessesTitle();
+
+    @Key("view.processes.tooltip")
+    String viewProcessesTooltip();
+
+    @Key("messages.machine.not.found")
+    String machineNotFound(String machineId);
+
+    @Key("ssh.connect.info")
+    String sshConnectInfo(String machineName, String machineHost, String machinePort, String workspaceName, String userName, String sshKeyDetails);
+
+    @Key("ssh.connect.ssh.key.available")
+    String sshConnectInfoPrivateKey(String privateKey);
+
+    @Key("ssh.connect.ssh.key.not.available")
+    String sshConnectInfoNoPrivateKey();
+
+    @Key("failed.to.execute.command")
+    String failedToExecuteCommand();
+
+    /* OutputsContainerView */
+    @Key("view.outputsConsole.stopProcessConfirmation")
+    String outputsConsoleViewStopProcessConfirmation(String processName);
+
+    @Key("view.processes.terminal.node.title")
+    String viewProcessesTerminalNodeTitle(String terminalIndex);
+
+    @Key("failed.to.get.processes")
+    String failedToGetProcesses(String machineId);
+
+    @Key("control.runCommand.empty.params")
+    String runCommandEmptyParamsMessage();
+
+    @Key("control.runCommand.empty.name")
+    String runCommandEmptyNameMessage();
+
+    @Key("control.terminal.new")
+    String newTerminal();
+
+    @Key("control.terminal.create.description")
+    String newTerminalDescription();
+
+    @Key("control.connect.ssh")
+    String connectViaSSH();
+
+    @Key("action.showConsoleTree.title")
+    String actionShowConsoleTreeTitle();
+
+    @Key("control.rerun.title")
+    String reRunControlTitle();
+
+    @Key("control.rerun.description")
+    String reRunControlDescription();
+
+    @Key("control.stop.title")
+    String stopControlTitle();
+
+    @Key("control.stop.description")
+    String stopControlDescription();
+
+    @Key("control.close.title")
+    String closeControlTitle();
+
+    @Key("control.close.description")
+    String closeControlDescription();
+
+    @Key("consoles.reRunButton.tooltip")
+    String consolesReRunButtonTooltip();
+
+    @Key("consoles.stopButton.tooltip")
+    String consolesStopButtonTooltip();
+
+    @Key("consoles.clearOutputsButton.tooltip")
+    String consolesClearOutputsButtonTooltip();
+
+    @Key("consoles.wrapTextButton.tooltip")
+    String consolesWrapTextButtonTooltip();
+
+    @Key("consoles.autoScrollButton.tooltip")
+    String consolesAutoScrollButtonTooltip();
+
+    @Key("view.processes.command.title")
+    String viewProcessesCommandTitle();
+
+    @Key("view.stop.process.tooltip")
+    String viewStropProcessTooltip();
+
+    @Key("view.new.terminal.tooltip")
+    String viewNewTerminalTooltip();
+
+    @Key("view.machine.running.tooltip")
+    String viewMachineRunningTooltip();
+
+    @Key("view.close.processOutput.tooltip")
+    String viewCloseProcessOutputTooltip();
+
+    @Key("failed.to.find.machine")
+    String failedToFindMachine(String machineId);
+
 }

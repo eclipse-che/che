@@ -9,10 +9,36 @@
 #   Tyler Jewell - Initial Implementation
 #
 
-cmd_upgrade() {
-  debug $FUNCNAME
+help_cmd_upgrade() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} upgrade [PARAMETERS]\n"
+  text "\n"
+  text "Upgrades ${CHE_MINI_PRODUCT_NAME} from one version to another while protecting user workspace data"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --skip-backup        Skip backup of user data before performing upgrade\n"
+}
 
+pre_cmd_upgrade() {
+  :
+}
+
+post_cmd_upgrade() {
+  :
+}
+
+cmd_upgrade() {
   CHE_IMAGE_VERSION=$(get_image_version)
+  DO_BACKUP="true"
+  ARGS=""
+
+  for var in $@; do
+    if [[ "$var" == *"--skip-backup"* ]]; then
+              DO_BACKUP="false"
+              continue
+    fi
+    ARGS+="$var "
+  done
 
   # If we got here, this means:
   #   image version > configured & installed version
@@ -33,17 +59,19 @@ cmd_upgrade() {
   info "upgrade" "Downloading done."
 
   if get_server_container_id "${CHE_SERVER_CONTAINER_NAME}" >> "${LOGS}" 2>&1; then
-    info "upgrade" "Stopping currently running instance..."
-    CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id ${CHE_SERVER_CONTAINER_NAME})
-    if server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
-      cmd_stop
-    fi
+    error "$CHE_MINI_PRODUCT_NAME is running. Stop before performing an upgrade."
+    return 2;
   fi
-  info "upgrade" "Preparing backup..."
-  cmd_backup
+
+  if [[ "${DO_BACKUP}" == "true" ]]; then
+    info "upgrade" "Preparing backup..."
+    cmd_lifecycle backup
+  else
+    info "upgrade" "Skipping backup"
+  fi
 
   info "upgrade" "Reinitializing the system with your configuration..."
-  cmd_init --accept-license --reinit
+  cmd_lifecycle init --accept-license --reinit
 
-  cmd_start
+  cmd_lifecycle start ${ARGS}
 }

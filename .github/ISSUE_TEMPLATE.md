@@ -1,25 +1,15 @@
-[Short description of problem here]
+<!--- 
+Replace this comment with a description of the problem.
+
+Please help us by providing all of the details listed below. A complete and thoughtful issue request with research on possible root causes and diagnostics goes a very long way in helping us rapidly get your issues resolved. 
+--> 
 
 **Reproduction Steps:**
 
-1. [First Step]
-2. [Second Step]
-3. [Other Steps...]
+**OS and version:**    
 
-**Expected behavior:**
+**Diagnostics:** 
+<!-- Provide output of 'docker run <DOCKER_OPTIONS> eclise/che info' -->
 
-[Describe expected behavior here]
-
-**Observed behavior:**
-
-[Describe observed behavior here]
-
-**Che version:**    [Enter Che version here]   
-**OS and version:** [Enter OS name and version here]   
-**Docker version:** [Enter your Docker version here `docker version` on CLI]   
-**Che install:**    [Vagrant, Docker container, server (zip), Bitnami, Yatta, or Codenvy?]   
-
-**Additional information:**
-
-* Problem started happening recently, didn't happen in an older version of Che: [Yes/No]
-* Problem can be reliably reproduced, doesn't happen randomly: [Yes/No]
+<!-- If asked, provide a support bundle with 'docker run <DOCKER_OPTIONS> eclise/che info --bundle' -->
+<!-- If asked, provide CLI debugging info by adding '--trace' to your commands -->

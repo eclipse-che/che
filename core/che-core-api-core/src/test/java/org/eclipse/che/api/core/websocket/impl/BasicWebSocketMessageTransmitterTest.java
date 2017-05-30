@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,17 +69,6 @@ public class BasicWebSocketMessageTransmitterTest {
         verify(session).getBasicRemote();
         verify(remote).sendText(MESSAGE);
         verify(reSender, never()).add(eq(ENDPOINT_ID), anyString());
-    }
-
-    @Test
-    public void shouldSendBroadcastingMessageIfSessionIsOpen() throws IOException {
-        transmitter.transmit(MESSAGE);
-
-        verify(session, never()).getBasicRemote();
-        verify(remote, never()).sendText(MESSAGE);
-        verify(reSender, never()).add(any(), anyString());
-
-        verify(registry).getSessions();
     }
 
     @Test

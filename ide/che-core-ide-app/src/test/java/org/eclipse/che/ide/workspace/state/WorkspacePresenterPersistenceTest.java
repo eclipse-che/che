@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.workspace.state;
 
+import com.google.inject.Provider;
 import elemental.json.Json;
 import elemental.json.JsonObject;
 
@@ -57,6 +58,10 @@ public class WorkspacePresenterPersistenceTest {
     private PartPresenter             part1;
 
     private WorkspacePresenter presenter;
+
+    @Mock
+    private Provider<PerspectiveManager>    perspectiveManagerProvider;
+
     private PerspectiveManager perspectiveManager;
 
     @Before
@@ -65,8 +70,11 @@ public class WorkspacePresenterPersistenceTest {
         map.put("perspective1", perspective1);
         map.put("perspective2", perspective2);
         perspectiveManager = new PerspectiveManager(map, "perspective1");
+
+        when(perspectiveManagerProvider.get()).thenReturn(perspectiveManager);
+
         presenter = new WorkspacePresenter(workspaceView,
-                                           perspectiveManager,
+                                           perspectiveManagerProvider,
                                            mainMenuPresenter,
                                            statusPanelGroupPresenter,
                                            toolbarPresenter,
@@ -98,4 +106,5 @@ public class WorkspacePresenterPersistenceTest {
 
         verify(perspective1).loadState(perspective1State);
     }
+
 }

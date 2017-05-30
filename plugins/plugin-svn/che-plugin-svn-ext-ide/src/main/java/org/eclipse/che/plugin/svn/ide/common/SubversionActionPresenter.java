@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,9 +22,9 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.subversion.Credentials;
-import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
-import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.api.user.Credentials;
+import org.eclipse.che.ide.api.user.AskCredentialsDialog;
+import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
@@ -48,7 +48,7 @@ public class SubversionActionPresenter {
     private final   StatusColors                             statusColors;
     private final   SubversionExtensionLocalizationConstants locale;
     private final   NotificationManager                      notificationManager;
-    private final   SubversionCredentialsDialog              credentialsDialog;
+    private final   AskCredentialsDialog                     credentialsDialog;
 
     protected SubversionActionPresenter(AppContext appContext,
                                         SubversionOutputConsoleFactory consoleFactory,
@@ -56,7 +56,7 @@ public class SubversionActionPresenter {
                                         StatusColors statusColors,
                                         SubversionExtensionLocalizationConstants locale,
                                         NotificationManager notificationManager,
-                                        SubversionCredentialsDialog credentialsDialog) {
+                                        AskCredentialsDialog credentialsDialog) {
         this.appContext = appContext;
         this.consoleFactory = consoleFactory;
         this.consolesPanelPresenter = processesPanelPresenter;

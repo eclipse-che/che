@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,8 +22,7 @@ import org.eclipse.che.ide.resource.Path;
  * Implementation for {@link VirtualFile} which describe resource which doesn't exist on file system and is auto generated.
  * For example it may be effective version of such resource.
  * <p/>
- * This file is read only and doesn't have link to the content url.
- * Calling {@link #updateContent(String)} will cause {@link UnsupportedOperationException}.
+ * This file doesn't have link to the content url.
  *
  * @author Vlad Zhukovskiy
  * @see VirtualFile
@@ -46,13 +45,8 @@ public class SyntheticFile implements VirtualFile {
     }
 
     @Override
-    public String getPath() {
-        return name;
-    }
-
-    @Override
     public Path getLocation() {
-        return Path.valueOf(getPath());
+        return Path.valueOf(name);
     }
 
     @Override
@@ -63,11 +57,6 @@ public class SyntheticFile implements VirtualFile {
     @Override
     public String getDisplayName() {
         return displayName;
-    }
-
-    @Override
-    public String getMediaType() {
-        return null;
     }
 
     @Override
@@ -87,7 +76,9 @@ public class SyntheticFile implements VirtualFile {
 
     @Override
     public Promise<Void> updateContent(String content) {
-        throw new UnsupportedOperationException("Synthetic file is read only");
+        this.content = content;
+
+        return Promises.resolve(null);
     }
 
     @Override

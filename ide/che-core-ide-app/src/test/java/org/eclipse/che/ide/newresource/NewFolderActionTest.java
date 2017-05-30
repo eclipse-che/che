@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.newresource;
 
-import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
@@ -20,6 +20,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Folder;
@@ -46,15 +47,17 @@ public class NewFolderActionTest {
     @Mock
     CoreLocalizationConstant coreLocalizationConstant;
     @Mock
-    Resources resources;
+    Resources                resources;
     @Mock
-    DialogFactory dialogFactory;
+    DialogFactory            dialogFactory;
     @Mock
-    EventBus eventBus;
+    EventBus                 eventBus;
     @Mock
-    AppContext appContext;
+    AppContext               appContext;
     @Mock
-    NotificationManager notificationManager;
+    NotificationManager      notificationManager;
+    @Mock
+    Provider<EditorAgent>    editorAgentProvider;
 
     @Mock
     Resource  file;
@@ -72,12 +75,14 @@ public class NewFolderActionTest {
                                      resources,
                                      dialogFactory,
                                      eventBus,
-                                     appContext, notificationManager);
+                                     appContext,
+                                     notificationManager,
+                                     editorAgentProvider);
     }
 
     @Test
     public void testShouldCreateFolderIfSelectedFile() throws Exception {
-        when(file.getParent()).thenReturn(Optional.of(parent));
+        when(file.getParent()).thenReturn(parent);
         when(appContext.getResource()).thenReturn(file);
         when(parent.newFolder(anyString())).thenReturn(folderPromise);
         when(folderPromise.then(any(Operation.class))).thenReturn(folderPromise);
@@ -104,7 +109,7 @@ public class NewFolderActionTest {
     @Test(expected = IllegalStateException.class)
     public void testShouldThrowExceptionIfFileDoesNotContainParent() throws Exception {
         when(appContext.getResource()).thenReturn(file);
-        when(file.getParent()).thenReturn(Optional.<Container>absent());
+        when(file.getParent()).thenReturn(null);
 
         action.createFolder("name");
     }

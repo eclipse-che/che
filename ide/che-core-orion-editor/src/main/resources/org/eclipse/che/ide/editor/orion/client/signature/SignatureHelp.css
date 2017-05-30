@@ -1,0 +1,119 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+.main .parameter-hints-widget {
+    z-index: 10;
+}
+
+.parameter-hints-widget {
+    font-size: 10px;
+    /*width: 440px;*/
+    z-index: 10;
+}
+
+.visible {
+    -webkit-transition: left .05s ease-in-out;
+    -moz-transition: left .05s ease-in-out;
+    -o-transition: left .05s ease-in-out;
+    transition: left .05s ease-in-out;
+}
+
+.wrapper {
+    position: relative;
+    bottom: 0;
+    max-width: 440px;
+    padding: 0 0.5em 0 0.5em;
+}
+
+.multiple .wrapper {
+    min-height: 3.3em;
+    padding: 0 0em 0 2em;
+}
+
+.buttons {
+    position: absolute;
+    display: none;
+    bottom: 0;
+    left: 0;
+}
+
+.multiple .buttons {
+    display: block;
+}
+
+.button {
+    position: absolute;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+.previous {
+    bottom: 24px;
+    /*background-image: url('arrow-up.svg');*/
+
+}
+
+.previous svg {
+    transform: rotate(-90deg);
+}
+
+.next {
+    bottom: 0;
+    /*background-image: url('arrow-down.svg');*/
+}
+
+.next svg {
+    transform: rotate(90deg);
+}
+
+.overloads {
+    position: absolute;
+    display: none;
+    font-size: 10px;
+    text-align: center;
+    bottom: 14px;
+    left: 0;
+    width: 22px;
+    height: 12px;
+    line-height: 12px;
+    opacity: 0.5;
+}
+
+.overloads {
+    display: block;
+}
+
+.signatures {
+    overflow: hidden;
+}
+
+.parameter {
+    display: inline-block;
+}
+
+.active {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.documentation {
+    max-height: 14px;
+    overflow: hidden;
+    color: #629755;
+    text-overflow: ellipsis;
+}
+
+.documentation-parameter > .parameter {
+    font-weight: bold;
+    margin-right: 0.5em;
+}

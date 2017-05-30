@@ -35,6 +35,12 @@ export class RecipeBuilder {
         if (cheStructWorkspace) {
             if (cheStructWorkspace.runtime) {
                 if (cheStructWorkspace.runtime.docker) {
+
+                    // make it backward compliant
+                    if (cheStructWorkspace.runtime.docker.content) {
+                        cheStructWorkspace.runtime.docker.dockerfile = cheStructWorkspace.runtime.docker.content;
+                    }
+
                     if (cheStructWorkspace.runtime.docker.image) {
                         return {"contentType": "text/x-dockerfile", "type": "dockerimage", "location": cheStructWorkspace.runtime.docker.image};
                     } else if (cheStructWorkspace.runtime.docker.content) {
@@ -42,6 +48,18 @@ export class RecipeBuilder {
                             "contentType": "text/x-dockerfile",
                             "type": "dockerfile",
                             "content": cheStructWorkspace.runtime.docker.content
+                        };
+                    } else if (cheStructWorkspace.runtime.docker.dockerfile) {
+                        return {
+                            "contentType": "text/x-dockerfile",
+                            "type": "dockerfile",
+                            "content": cheStructWorkspace.runtime.docker.dockerfile
+                        };
+                    } else if (cheStructWorkspace.runtime.docker.composefile) {
+                        return {
+                            "contentType": "application/x-yaml",
+                            "type": "compose",
+                            "content": cheStructWorkspace.runtime.docker.composefile
                         };
                     } else if (cheStructWorkspace.runtime.docker.location) {
                         return {

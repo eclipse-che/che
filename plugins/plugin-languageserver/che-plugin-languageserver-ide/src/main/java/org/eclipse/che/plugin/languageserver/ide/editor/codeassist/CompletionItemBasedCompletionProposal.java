@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,17 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
-import io.typefox.lsapi.ServerCapabilities;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -31,11 +29,17 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.icon.Icon;
+import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
-import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
 
 import java.util.List;
+
+import static org.eclipse.che.ide.api.theme.Style.theme;
 
 /**
  * @author Anatolii Bazko
@@ -43,19 +47,19 @@ import java.util.List;
  */
 public class CompletionItemBasedCompletionProposal implements CompletionProposal {
 
-    private CompletionItemDTO               completionItem;
     private final TextDocumentServiceClient documentServiceClient;
-    private final TextDocumentIdentifierDTO documentId;
+    private final TextDocumentIdentifier    documentId;
     private final LanguageServerResources   resources;
     private final Icon                      icon;
     private final ServerCapabilities        serverCapabilities;
     private final List<Match>               highlights;
     private final int                       offset;
-    private boolean resolved;
+    private       ExtendedCompletionItem    completionItem;
+    private       boolean                   resolved;
 
-    CompletionItemBasedCompletionProposal(CompletionItemDTO completionItem,
+    CompletionItemBasedCompletionProposal(ExtendedCompletionItem completionItem,
                                           TextDocumentServiceClient documentServiceClient,
-                                          TextDocumentIdentifierDTO documentId,
+                                          TextDocumentIdentifier documentId,
                                           LanguageServerResources resources,
                                           Icon icon,
                                           ServerCapabilities serverCapabilities,
@@ -75,9 +79,9 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     @Override
     public void getAdditionalProposalInfo(final AsyncCallback<Widget> callback) {
         if (completionItem.getDocumentation() == null && canResolve()) {
-            resolve().then(new Operation<CompletionItemDTO>() {
+            resolve().then(new Operation<ExtendedCompletionItem>() {
                 @Override
-                public void apply(CompletionItemDTO item) throws OperationException {
+                public void apply(ExtendedCompletionItem item) throws OperationException {
                     completionItem = item;
                     resolved = true;
                     callback.onSuccess(createAdditionalInfoWidget());
@@ -99,54 +103,57 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
             documentation = "No documentation found.";
         }
 
-        Label label = new Label(documentation);
-        label.setWordWrap(true);
-        label.getElement().getStyle().setFontSize(13, Style.Unit.PX);
-        label.getElement().getStyle().setMarginLeft(4, Style.Unit.PX);
-        label.setSize("100%", "100%");
-        return label;
+        HTML widget = new HTML(documentation);
+        widget.setWordWrap(true);
+        widget.getElement().getStyle().setColor(theme.completionPopupItemTextColor());
+        widget.getElement().getStyle().setFontSize(13, Style.Unit.PX);
+        widget.getElement().getStyle().setMarginLeft(4, Style.Unit.PX);
+        widget.getElement().getStyle().setOverflow(Overflow.AUTO);
+        widget.getElement().getStyle().setProperty("userSelect", "text");
+        widget.setHeight("100%");
+        return widget;
     }
 
     @Override
     public String getDisplayString() {
         SafeHtmlBuilder builder = new SafeHtmlBuilder();
-        
+
         String label = completionItem.getLabel();
         int pos = 0;
         for (Match highlight : highlights) {
             if (highlight.getStart() == highlight.getEnd()) {
                 continue;
             }
-            
+
             if (pos < highlight.getStart()) {
                 appendPlain(builder, label.substring(pos, highlight.getStart()));
             }
-            
+
             appendHighlighted(builder, label.substring(highlight.getStart(), highlight.getEnd()));
             pos = highlight.getEnd();
         }
-        
+
         if (pos < label.length()) {
             appendPlain(builder, label.substring(pos));
         }
-        
+
         if (completionItem.getDetail() != null) {
             appendDetail(builder, completionItem.getDetail());
         }
-        
+
         return builder.toSafeHtml().asString();
     }
-    
+
     private void appendPlain(SafeHtmlBuilder builder, String text) {
         builder.appendEscaped(text);
     }
-    
+
     private void appendHighlighted(SafeHtmlBuilder builder, String text) {
         builder.appendHtmlConstant("<span class=\"" + resources.css().codeassistantHighlight() + "\">");
         builder.appendEscaped(text);
         builder.appendHtmlConstant("</span>");
     }
-    
+
     private void appendDetail(SafeHtmlBuilder builder, String text) {
         builder.appendHtmlConstant(" <span class=\"" + resources.css().codeassistantDetail() + "\">");
         builder.appendEscaped(text);
@@ -170,17 +177,17 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
                serverCapabilities.getCompletionProvider().getResolveProvider();
     }
 
-    private Promise<CompletionItemDTO> resolve() {
+    private Promise<ExtendedCompletionItem> resolve() {
         completionItem.setTextDocumentIdentifier(documentId);
         return documentServiceClient.resolveCompletionItem(completionItem);
     }
 
     private static class CompletionImpl implements Completion {
 
-        private CompletionItemDTO completionItem;
-        private int               offset;
+        private CompletionItem completionItem;
+        private int            offset;
 
-        public CompletionImpl(CompletionItemDTO completionItem, int offset) {
+        public CompletionImpl(CompletionItem completionItem, int offset) {
             this.completionItem = completionItem;
             this.offset = offset;
         }
@@ -188,7 +195,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
         @Override
         public void apply(Document document) {
             if (completionItem.getTextEdit() != null) {
-                RangeDTO range = completionItem.getTextEdit().getRange();
+                Range range = completionItem.getTextEdit().getRange();
                 int startOffset = document.getIndexFromPosition(
                         new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()));
                 int endOffset = offset + document.getIndexFromPosition(
@@ -202,7 +209,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
         @Override
         public LinearRange getSelection(Document document) {
-            RangeDTO range = completionItem.getTextEdit().getRange();
+            Range range = completionItem.getTextEdit().getRange();
             int startOffset = document
                                       .getIndexFromPosition(new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()))
                               + completionItem.getTextEdit().getNewText().length();

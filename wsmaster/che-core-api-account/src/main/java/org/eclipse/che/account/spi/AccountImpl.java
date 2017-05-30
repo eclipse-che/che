@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,11 +11,9 @@
 package org.eclipse.che.account.spi;
 
 import org.eclipse.che.account.shared.model.Account;
-import org.eclipse.che.account.spi.jpa.AccountEntityListener;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -38,7 +36,6 @@ import java.util.Objects;
         }
 )
 @Table(name = "account")
-@EntityListeners(AccountEntityListener.class)
 public class AccountImpl implements Account {
 
     @Id

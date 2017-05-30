@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ export class WorkspaceEnvironmentsController {
   };
 
   stackId: string;
+  workspaceRuntime: any;
   workspaceConfig: che.IWorkspaceConfig;
   environment: any;
   environmentName: string;
@@ -53,7 +54,7 @@ export class WorkspaceEnvironmentsController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry) {
+  constructor(private $q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry) {
     this.$mdDialog = $mdDialog;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
 
@@ -90,7 +91,7 @@ export class WorkspaceEnvironmentsController {
     this.recipe = this.environment.recipe;
     if (!this.recipe || !(this.recipe.content || this.recipe.location)) {
       this.machines = [];
-      delete this.devMachineName;
+      this.devMachineName = null;
       delete this.machinesViewStatus[this.environmentName];
       return;
     }
@@ -99,7 +100,7 @@ export class WorkspaceEnvironmentsController {
 
     this.editorOptions.mode = this.environmentManager.editorMode;
 
-    this.machines = this.environmentManager.getMachines(this.environment);
+    this.machines = this.environmentManager.getMachines(this.environment, this.workspaceRuntime);
     this.devMachineName = this.getDevMachineName();
 
     if (!this.machinesViewStatus[this.environmentName]) {
@@ -161,7 +162,7 @@ export class WorkspaceEnvironmentsController {
    */
   changeMachineDev(machineName: string): ng.IPromise<any> {
     if (!machineName) {
-      return;
+      return this.$q.reject('Machine name is not defined.');
     }
 
     // remove ws-agent from machine which is the dev machine now
@@ -174,6 +175,9 @@ export class WorkspaceEnvironmentsController {
     let machine = this.machines.find((machine: any) => {
       return machine.name === machineName;
     });
+    if (!machine) {
+      return this.$q.reject('Machine is not found.')
+    }
 
     // add ws-agent to current machine agents list
     this.environmentManager.setDev(machine, true);
@@ -184,6 +188,9 @@ export class WorkspaceEnvironmentsController {
 
     this.doUpdateEnvironments();
     this.init();
+    /*tslist: disable*/
+    return this.$q.resolve();
+    /*tslist: enable*/
   }
 
   /**
@@ -202,8 +209,6 @@ export class WorkspaceEnvironmentsController {
    * Callback which is called in order to rename specified machine
    * @param oldName
    * @param newName
-   *
-   * @returns {ng.IPromise<any>}
    */
   updateMachineName(oldName: string, newName: string): void {
     let newEnvironment = this.environmentManager.renameMachine(this.environment, oldName, newName);
@@ -247,6 +252,10 @@ export class WorkspaceEnvironmentsController {
     // for compose recipe
     // check if there are machines without memory limit
     let environment = this.workspaceConfig.environments[this.environmentName];
+    if (!environment) {
+      return;
+    }
+
     if (environment.recipe && environment.recipe.type === 'compose') {
       let recipeType = environment.recipe.type,
         environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
@@ -280,7 +289,7 @@ export class WorkspaceEnvironmentsController {
 
   /**
    * Show dialog to add a new machine to config
-   * @param $event
+   * @param $event {MouseEvent}
    */
   showAddMachineDialog($event: MouseEvent): void {
     this.$mdDialog.show({
@@ -296,6 +305,19 @@ export class WorkspaceEnvironmentsController {
       },
       templateUrl: 'app/workspaces/workspace-details/environments/add-machine-dialog/add-machine-dialog.html'
     });
+  }
+
+  /**
+   * Gets location URL
+   *
+   * @returns {string}
+   */
+  getLocationUrl(): string {
+    let url: string = '';
+    if (this.environment && this.environment.recipe.location && /^https?:\/\//i.test(this.environment.recipe.location)) {
+      url = this.environment.recipe.location;
+    }
+    return url;
   }
 
   /**

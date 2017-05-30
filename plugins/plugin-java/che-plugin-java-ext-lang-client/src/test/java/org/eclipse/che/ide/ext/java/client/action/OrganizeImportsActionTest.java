@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,9 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.organizeimports.OrganizeImportsPresenter;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +42,7 @@ public class OrganizeImportsActionTest {
     private ActionEvent              actionEvent;
 
     @Mock
-    private TextEditorPresenter editor;
+    private TextEditor editor;
 
     @Mock(answer = Answers.RETURNS_MOCKS)
     private JavaLocalizationConstant locale;
@@ -73,5 +73,4 @@ public class OrganizeImportsActionTest {
 
         verify(organizeImportsPresenter).organizeImports(editor);
     }
-
 }

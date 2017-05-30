@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,12 +113,8 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
 
         tabsPanel.add(menu);
 
-        widgetsPanel.addDomHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onWidgetFocused(widgetsPanel.getVisibleWidget());
-            }
-        }, ClickEvent.getType());
+        widgetsPanel.ensureDebugId("process-output-panel-holder");
+        widgetsPanel.addDomHandler(event -> delegate.onWidgetFocused(widgetsPanel.getVisibleWidget()), ClickEvent.getType());
     }
 
     @Override
@@ -319,6 +315,15 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
         }
     }
 
+    @Override
+    public void onTabDoubleClicked(Tab tab) {
+        final WidgetToShow widget = tabs2Widgets.get(tab);
+        if (widget != null) {
+            activateWidget(widget);
+            delegate.onWidgetDoubleClicked(widget.getWidget());
+        }
+    }
+
     private void selectTab(Tab tab) {
         for (Tab tabItem : tabs2Widgets.keySet()) {
             tabItem.unSelect();
@@ -343,5 +348,4 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
 
     interface SubPanelViewImplUiBinder extends UiBinder<Widget, SubPanelViewImpl> {
     }
-
 }

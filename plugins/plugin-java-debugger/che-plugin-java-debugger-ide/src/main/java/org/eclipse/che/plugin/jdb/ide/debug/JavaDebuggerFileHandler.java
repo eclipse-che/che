@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,7 +74,7 @@ public class JavaDebuggerFileHandler implements ActiveFileHandler {
         final EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
         if (activeEditor != null) {
             activeFile = editorAgent.getActiveEditor().getEditorInput().getFile();
-            activePath = activeFile.getPath();
+            activePath = activeFile.getLocation().toString();
         }
         if (activePath != null && !activePath.equals(location.getTarget()) && !activePath.equals(location.getResourcePath())) {
             if (location.isExternalResource()) {
@@ -94,7 +94,7 @@ public class JavaDebuggerFileHandler implements ActiveFileHandler {
             public void apply(Optional<File> file) throws OperationException {
                 if (file.isPresent()) {
                     handleActivatedFile(file.get(), callback, location.getLineNumber());
-                    eventBus.fireEvent(FileEvent.createOpenFileEvent(file.get()));
+                    editorAgent.openEditor(file.get());
                 } else {
                     callback.onFailure(new IllegalStateException("File is undefined"));
                 }
@@ -134,7 +134,7 @@ public class JavaDebuggerFileHandler implements ActiveFileHandler {
                        };
 
                        handleActivatedFile(file, downloadSourceCallback, location.getLineNumber());
-                       eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
+                       editorAgent.openEditor(file);
                    }
                })
                .catchError(new Operation<PromiseError>() {

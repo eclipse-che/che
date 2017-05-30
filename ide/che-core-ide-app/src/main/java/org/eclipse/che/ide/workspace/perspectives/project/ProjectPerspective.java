@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,6 @@ import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 import static org.eclipse.che.ide.api.parts.PartStackType.INFORMATION;
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 import static org.eclipse.che.ide.api.parts.PartStackType.TOOLING;
-
 
 /**
  * General-purpose, displaying all the PartStacks in a default manner:
@@ -78,9 +77,22 @@ public class ProjectPerspective extends AbstractPerspective {
         infoPanel.go(view.getInformationPanel());
     }
 
+
+    @Override
+    public String getPerspectiveId() {
+        return PROJECT_PERSPECTIVE_ID;
+    }
+
+
+    @Override
+    public String getPerspectiveName() {
+        return PROJECT_PERSPECTIVE_ID;
+    }
+
     /** {@inheritDoc} */
     @Override
     public void go(@NotNull AcceptsOneWidget container) {
         container.setWidget(view);
     }
+
 }

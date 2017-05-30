@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.che.plugin.java.server;
 
 import com.google.gson.Gson;
@@ -844,10 +843,11 @@ public class JavaNavigation {
     }
 
     private List<PackageFragmentRoot> toPackageRoots(IJavaProject javaProject, boolean includePackages) throws JavaModelException {
-        IPackageFragmentRoot[] packageFragmentRoots = javaProject.getPackageFragmentRoots();
+        IPackageFragmentRoot[] packageFragmentRoots = javaProject.getAllPackageFragmentRoots();
         List<PackageFragmentRoot> result = new ArrayList<>();
         for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRoots) {
-            if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE) {
+            if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE &&
+                javaProject.getPath().isPrefixOf(packageFragmentRoot.getPath())) {
                 PackageFragmentRoot root = DtoFactory.newDto(PackageFragmentRoot.class);
                 root.setPath(packageFragmentRoot.getPath().toOSString());
                 root.setProjectPath(packageFragmentRoot.getJavaProject().getPath().toOSString());

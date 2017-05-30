@@ -24,7 +24,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_jdk8"
+      "origin": "eclipse/ubuntu_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -32,21 +32,21 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {}
             },
             "db": {
               "agents": [
-                "org.eclipse.che.terminal"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal"
               ],
               "servers": {},
               "attributes" : {}
             }
           },
           "recipe": {
-            "content": "services:\n db:\n  image: codenvy/mysql\n  environment:\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 1073741824\n dev-machine:\n  image: codenvy/ubuntu_jdk8\n  mem_limit: 2147483648\n  depends_on:\n    - db",
+            "content": "services:\n db:\n  image: eclipse/mysql\n  environment:\n   MYSQL_ROOT_PASSWORD: password\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 1073741824\n dev-machine:\n  image: eclipse/ubuntu_jdk8\n  mem_limit: 2147483648\n  depends_on:\n    - db",
             "contentType": "application/x-yaml",
             "type": "compose"
           }
@@ -99,7 +99,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_jdk8"
+      "origin": "eclipse/ubuntu_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -107,7 +107,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -116,7 +116,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_jdk8",
+            "location": "eclipse/ubuntu_jdk8",
             "type": "dockerimage"
           }
         }
@@ -128,7 +128,11 @@
         {
           "commandLine": "mvn clean install -f ${current.project.path}",
           "name": "build",
-          "type": "mvn"
+          "type": "mvn",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          }
         }
       ]
     },
@@ -152,7 +156,7 @@
     "components": [],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_jdk8"
+      "origin": "eclipse/ubuntu_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -160,7 +164,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -169,7 +173,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_jdk8",
+            "location": "eclipse/ubuntu_jdk8",
             "type": "dockerimage"
           }
         }
@@ -210,7 +214,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_android"
+      "origin": "eclipse/ubuntu_android"
     },
     "workspaceConfig": {
       "environments": {
@@ -218,7 +222,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -227,7 +231,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_android",
+            "location": "eclipse/ubuntu_android",
             "type": "dockerimage"
           }
         }
@@ -239,7 +243,11 @@
         {
           "commandLine": "mvn clean install -f ${current.project.path}",
           "name": "build",
-          "type": "mvn"
+          "type": "mvn",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          }
         }
       ]
     },
@@ -277,7 +285,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/cpp_gcc"
+      "origin": "eclipse/cpp_gcc"
     },
     "workspaceConfig": {
       "environments": {
@@ -285,7 +293,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -294,7 +302,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/cpp_gcc",
+            "location": "eclipse/cpp_gcc",
             "type": "dockerimage"
           }
         }
@@ -306,7 +314,11 @@
         {
           "name": "run",
           "type": "custom",
-          "commandLine": "cd ${current.project.path} && make && ./a.out"
+          "commandLine": "cd ${current.project.path} && make && ./a.out",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Run"
+          }
         }
       ]
     },
@@ -338,7 +350,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/dotnet_core"
+      "origin": "eclipse/dotnet_core"
     },
     "workspaceConfig": {
       "environments": {
@@ -346,7 +358,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.csharp"
               ],
               "servers": {},
               "attributes" : {
@@ -355,7 +367,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/dotnet_core",
+            "location": "eclipse/dotnet_core",
             "type": "dockerimage"
           }
         }
@@ -369,7 +381,8 @@
           "type": "custom",
           "commandLine": "cd ${current.project.path} && dotnet restore",
           "attributes": {
-            "previewUrl": ""
+            "previewUrl": "",
+            "goal": "Build"
           }
         },
         {
@@ -377,7 +390,8 @@
           "type": "custom",
           "commandLine": "cd ${current.project.path} && dotnet run",
           "attributes": {
-            "previewUrl": "http://${server.port.5000}"
+            "previewUrl": "http://${server.port.5000}",
+            "goal": "Run"
           }
         }
       ]
@@ -409,7 +423,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_go"
+      "origin": "eclipse/ubuntu_go"
     },
     "workspaceConfig": {
       "environments": {
@@ -417,7 +431,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -426,7 +440,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_go",
+            "location": "eclipse/ubuntu_go",
             "type": "dockerimage"
           }
         }
@@ -440,7 +454,8 @@
           "type": "custom",
           "commandLine": "cd ${current.project.path} && go get -d && go run main.go",
           "attributes": {
-            "previewUrl": "http://${server.port.8080}"
+            "previewUrl": "http://${server.port.8080}",
+            "goal": "Run"
           }
         }
       ]
@@ -478,7 +493,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/hadoop-dev"
+      "origin": "eclipse/hadoop-dev"
     },
     "workspaceConfig": {
       "environments": {
@@ -486,7 +501,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -495,7 +510,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/hadoop-dev",
+            "location": "eclipse/hadoop-dev",
             "type": "dockerimage"
           }
         }
@@ -555,7 +570,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/node"
+      "origin": "eclipse/node"
     },
     "workspaceConfig": {
       "environments": {
@@ -563,7 +578,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -572,7 +587,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/node",
+            "location": "eclipse/node",
             "type": "dockerimage"
           }
         }
@@ -590,7 +605,7 @@
     "id": "php-default",
     "creator": "ide",
     "name": "PHP",
-    "description": "Default PHP Stack with PHP 5.5, most popular extensions and dockerimager.",
+    "description": "Default PHP Stack with PHP 7.0, most popular extensions.",
     "scope": "general",
     "tags": [
       "Ubuntu",
@@ -604,7 +619,7 @@
     "components": [
       {
         "name": "PHP",
-        "version": "5.5.9"
+        "version": "7.0"
       },
       {
         "name": "Apache",
@@ -625,7 +640,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/php"
+      "origin": "eclipse/php"
     },
     "workspaceConfig": {
       "environments": {
@@ -633,7 +648,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -642,7 +657,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/php",
+            "location": "eclipse/php",
             "type": "dockerimage"
           }
         }
@@ -652,11 +667,30 @@
       "description": null,
       "commands": [
         {
+          "name": "run php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Run"
+          }
+        },
+        {
+          "name": "debug php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || QUERY_STRING=\"start_debug=1&debug_host=localhost&debug_port=10137\" php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Debug"
+          }
+        },
+        {
           "name": "start apache",
           "type": "custom",
           "commandLine": "sudo service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
           "attributes": {
-            "previewUrl": "http://${server.port.80}/${current.project.relpath}"
+            "previewUrl": "http://${server.port.80}/${current.project.relpath}",
+            "goal": "Run"
           }
         },
         {
@@ -664,7 +698,8 @@
           "type": "custom",
           "commandLine": "sudo service apache2 stop",
           "attributes": {
-            "previewUrl": ""
+            "previewUrl": "",
+            "goal": "Run"
           }
         },
         {
@@ -672,7 +707,125 @@
           "type": "custom",
           "commandLine": "sudo service apache2 restart",
           "attributes": {
-            "previewUrl": "http://${server.port.80}/${current.project.relpath}"
+            "previewUrl": "http://${server.port.80}/${current.project.relpath}",
+            "goal": "Run"
+          }
+        }
+      ]
+    },
+    "stackIcon": {
+      "name": "type-php.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "php5.6-default",
+    "creator": "ide",
+    "name": "PHP-5.6",
+    "description": "Default PHP Stack with PHP 5.6, most popular extensions.",
+    "scope": "advanced",
+    "tags": [
+      "Ubuntu",
+      "Git",
+      "PHP",
+      "mysql",
+      "sqlite",
+      "Apache",
+      "dockerimager"
+    ],
+    "components": [
+      {
+        "name": "PHP",
+        "version": "5.6"
+      },
+      {
+        "name": "Apache",
+        "version": "2"
+      },
+      {
+        "name": "MySQL",
+        "version": "---"
+      },
+      {
+        "name": "Sqlite",
+        "version": "---"
+      },
+      {
+        "name": "dockerimager",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "eclipse/php:5.6"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "eclipse/php:5.6",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "name": "run php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Run"
+          }
+        },
+        {
+          "name": "debug php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || QUERY_STRING=\"start_debug=1&debug_host=localhost&debug_port=10137\" php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Debug"
+          }
+        },
+        {
+          "name": "start apache",
+          "type": "custom",
+          "commandLine": "sudo service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
+          "attributes": {
+            "previewUrl": "http://${server.port.80}/${current.project.relpath}",
+            "goal": "Run"
+          }
+        },
+        {
+          "name": "stop apache",
+          "type": "custom",
+          "commandLine": "sudo service apache2 stop",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Run"
+          }
+        },
+        {
+          "name": "restart apache",
+          "type": "custom",
+          "commandLine": "sudo service apache2 restart",
+          "attributes": {
+            "previewUrl": "http://${server.port.80}/${current.project.relpath}",
+            "goal": "Run"
           }
         }
       ]
@@ -706,7 +859,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_python:latest"
+      "origin": "eclipse/ubuntu_python:latest"
     },
     "workspaceConfig": {
       "environments": {
@@ -714,7 +867,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
               ],
               "servers": {},
               "attributes" : {
@@ -723,7 +876,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_python:latest",
+            "location": "eclipse/ubuntu_python:latest",
             "type": "dockerimage"
           }
         }
@@ -737,7 +890,8 @@
           "type": "custom",
           "commandLine": "cd ${current.project.path} && python main.py",
           "attributes": {
-            "previewUrl": ""
+            "previewUrl": "",
+            "goal": "Run"
           }
         }
       ]
@@ -776,7 +930,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_rails"
+      "origin": "eclipse/ubuntu_rails"
     },
     "workspaceConfig": {
       "environments": {
@@ -784,7 +938,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -793,7 +947,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_rails",
+            "location": "eclipse/ubuntu_rails",
             "type": "dockerimage"
           }
         }
@@ -807,7 +961,8 @@
           "type": "custom",
           "commandLine": "cd ${current.project.path} && bundle install",
           "attributes": {
-            "previewUrl": ""
+            "previewUrl": "",
+            "goal": "Build"
           }
         },
         {
@@ -815,7 +970,8 @@
           "type": "custom",
           "commandLine": "cd ${current.project.path} && rails server -b 0.0.0.0",
           "attributes": {
-            "previewUrl": "http://${server.port.3000}"
+            "previewUrl": "http://${server.port.3000}",
+            "goal": "Run"
           }
         }
       ]
@@ -842,7 +998,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/debian_jre"
+      "origin": "eclipse/debian_jre"
     },
     "workspaceConfig": {
       "environments": {
@@ -850,7 +1006,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -859,7 +1015,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/debian_jre",
+            "location": "eclipse/debian_jre",
             "type": "dockerimage"
           }
         }
@@ -887,7 +1043,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/debian_jre"
+      "origin": "eclipse/debian_jre"
     },
     "workspaceConfig": {
       "environments": {
@@ -895,6 +1051,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
+                "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
                 "org.eclipse.che.ssh",
@@ -909,7 +1066,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/debian_jre",
+            "location": "eclipse/debian_jre",
             "type": "dockerimage"
           }
         }
@@ -953,7 +1110,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/centos_jdk8"
+      "origin": "eclipse/centos_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -961,7 +1118,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -970,7 +1127,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/centos_jdk8",
+            "location": "eclipse/centos_jdk8",
             "type": "dockerimage"
           }
         }
@@ -982,7 +1139,11 @@
         {
           "commandLine": "mvn clean install -f ${current.project.path}",
           "name": "build",
-          "type": "mvn"
+          "type": "mvn",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          }
         }
       ]
     },
@@ -1025,7 +1186,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/debian_jdk8"
+      "origin": "eclipse/debian_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -1033,7 +1194,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -1042,7 +1203,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/debian_jdk8",
+            "location": "eclipse/debian_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1054,7 +1215,11 @@
         {
           "commandLine": "mvn clean install -f ${current.project.path}",
           "name": "build",
-          "type": "mvn"
+          "type": "mvn",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          }
         }
       ]
     },
@@ -1100,7 +1265,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/php:gae"
+      "origin": "eclipse/php:gae"
     },
     "workspaceConfig": {
       "environments": {
@@ -1108,7 +1273,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -1117,7 +1282,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/php:gae",
+            "location": "eclipse/php:gae",
             "type": "dockerimage"
           }
         }
@@ -1131,7 +1296,8 @@
           "type": "custom",
           "commandLine": "cd ${GAE} && ./dev_appserver.py 2>&1 --php_executable_path=/usr/bin/php5-cgi --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
           "attributes": {
-            "previewUrl": "http://${server.port.8080}"
+            "previewUrl": "http://${server.port.8080}",
+            "goal": "Run"
           }
         }
       ]
@@ -1165,7 +1331,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_python:2.7"
+      "origin": "eclipse/ubuntu_python:2.7"
     },
     "workspaceConfig": {
       "environments": {
@@ -1173,7 +1339,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
               ],
               "servers": {},
               "attributes" : {
@@ -1182,7 +1348,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_python:2.7",
+            "location": "eclipse/ubuntu_python:2.7",
             "type": "dockerimage"
           }
         }
@@ -1196,7 +1362,8 @@
           "type": "custom",
           "commandLine": "cd ${current.project.path} && sudo virtualenv /env && sudo pip install -r requirements.txt && python main.py",
           "attributes": {
-            "previewUrl": "http://${server.port.8080}"
+            "previewUrl": "http://${server.port.8080}",
+            "goal": "Run"
           }
         }
       ]
@@ -1227,7 +1394,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_python:gae_python2.7"
+      "origin": "eclipse/ubuntu_python:gae_python2.7"
     },
     "workspaceConfig": {
       "environments": {
@@ -1235,7 +1402,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
               ],
               "servers": {},
               "attributes" : {
@@ -1244,7 +1411,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_python:gae_python2.7",
+            "location": "eclipse/ubuntu_python:gae_python2.7",
             "type": "dockerimage"
           }
         }
@@ -1258,7 +1425,8 @@
           "type": "custom",
           "commandLine": "cd ${GAE} && ./dev_appserver.py 2>&1 --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
           "attributes": {
-            "previewUrl": "http://${server.port.8080}"
+            "previewUrl": "http://${server.port.8080}",
+            "goal": "Run"
           }
         }
       ]
@@ -1308,7 +1476,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/selenium"
+      "origin": "eclipse/selenium"
     },
     "workspaceConfig": {
       "environments": {
@@ -1316,7 +1484,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -1325,7 +1493,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/selenium",
+            "location": "eclipse/selenium",
             "type": "dockerimage"
           }
         }
@@ -1368,7 +1536,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -1419,7 +1587,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -1428,7 +1596,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_jre",
+            "location": "eclipse/ubuntu_jre",
             "type": "dockerimage"
           }
         }
@@ -1439,7 +1607,7 @@
     },
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_jre"
+      "origin": "eclipse/ubuntu_jre"
     }
   },
   {
@@ -1475,7 +1643,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-express:che-4.14.0-r11"
+      "origin": "bitnami/che-express:4.14.0-r18"
     },
     "workspaceConfig": {
       "environments": {
@@ -1483,7 +1651,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -1492,7 +1660,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-express:che-4.14.0-r11",
+            "location": "bitnami/che-express:4.14.0-r18",
             "type": "dockerimage"
           }
         }
@@ -1524,7 +1692,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-swift:che-3.0.1-RELEASE-r0"
+      "origin": "bitnami/che-swift:3.0.2-RELEASE-r3"
     },
     "workspaceConfig": {
       "environments": {
@@ -1532,7 +1700,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -1541,7 +1709,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-swift:che-3.0.1-RELEASE-r0",
+            "location": "bitnami/che-swift:3.0.2-RELEASE-r3",
             "type": "dockerimage"
           }
         }
@@ -1581,7 +1749,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-laravel:che-5.2.31-r9"
+      "origin": "bitnami/che-laravel:5.2.31-r14"
     },
     "workspaceConfig": {
       "environments": {
@@ -1589,7 +1757,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -1598,7 +1766,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-laravel:che-5.2.31-r8",
+            "location": "bitnami/che-laravel:5.2.31-r14",
             "type": "dockerimage"
           }
         }
@@ -1638,7 +1806,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-rails:che-5.0.0.1-r3"
+      "origin": "bitnami/che-rails:5.0.0.1-r9"
     },
     "workspaceConfig": {
       "environments": {
@@ -1646,7 +1814,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -1655,7 +1823,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-rails:che-5.0.0.1-r3",
+            "location": "bitnami/che-rails:5.0.0.1-r9",
             "type": "dockerimage"
           }
         }
@@ -1695,7 +1863,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-codeigniter:che-3.1.0-r9"
+      "origin": "bitnami/che-codeigniter:3.1.3-r2"
     },
     "workspaceConfig": {
       "environments": {
@@ -1703,7 +1871,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -1712,7 +1880,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-codeigniter:che-3.1.0-r9",
+            "location": "bitnami/che-codeigniter:3.1.3-r2",
             "type": "dockerimage"
           }
         }
@@ -1752,7 +1920,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-symfony:che-3.1.3-r6"
+      "origin": "bitnami/che-symfony:3.1.3-r12"
     },
     "workspaceConfig": {
       "environments": {
@@ -1760,7 +1928,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -1769,7 +1937,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-symfony:che-3.1.3-r6",
+            "location": "bitnami/che-symfony:3.1.3-r12",
             "type": "dockerimage"
           }
         }
@@ -1809,7 +1977,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-java-play:che-1.3.10-r4"
+      "origin": "bitnami/che-java-play:1.3.10-r10"
     },
     "workspaceConfig": {
       "environments": {
@@ -1817,7 +1985,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -1826,7 +1994,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-java-play:che-1.3.10-r4",
+            "location": "bitnami/che-java-play:1.3.10-r10",
             "type": "dockerimage"
           }
         }
@@ -1858,11 +2026,11 @@
     "components": [
       {
         "name": "PHP",
-        "version": "7.0.6"
+        "version": "7.0.11"
       },
       {
         "name": "Zend Server",
-        "version": "9.0.0"
+        "version": "9.0.1"
       },
       {
         "name": "Composer",
@@ -1879,7 +2047,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -1898,11 +2066,30 @@
       "description": null,
       "commands": [
         {
+          "name": "run php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Run"
+          }
+        },
+        {
+          "name": "debug php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || QUERY_STRING=\"start_debug=1&debug_host=localhost&debug_port=10137\" php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Debug"
+          }
+        },
+        {
           "name": "restart zend server",
           "type": "custom",
           "commandLine": "sudo sqlite3 /usr/local/zend/var/db/zsd.db \"UPDATE ZSD_DIRECTIVES SET DISK_VALUE='http://${server.port.10081}/ZendServer' WHERE NAME='zray.zendserver_ui_url'\" && sudo sed -i 's#zray.zendserver_ui_url=.*#zray.zendserver_ui_url=http://${server.port.10081}/ZendServer#g' /usr/local/zend/etc/conf.d/zray.ini && sudo /usr/local/zend/bin/zendctl.sh restart",
           "attributes": {
-            "previewUrl": "http://${server.port.80}"
+            "previewUrl": "http://${server.port.80}",
+            "goal": "Run"
           }
         },
         {
@@ -1910,7 +2097,8 @@
           "type": "custom",
           "commandLine": "sudo /usr/local/zend/bin/zendctl.sh stop",
           "attributes": {
-            "previewUrl": ""
+            "previewUrl": "",
+            "goal": "Run"
           }
         },
         {
@@ -1918,7 +2106,8 @@
           "type": "custom",
           "commandLine": "echo \"Zend Server admin password is `sudo cat /root/zend-password`\"",
           "attributes": {
-            "previewUrl": "http://${server.port.10081}"
+            "previewUrl": "http://${server.port.10081}",
+            "goal": ""
           }
         }
       ]
@@ -1965,7 +2154,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {
@@ -1991,7 +2180,8 @@
           "type": "custom",
           "commandLine": "pio run -d ${current.project.path}",
           "attributes": {
-            "previewUrl": ""
+            "previewUrl": "",
+            "goal": "Run"
           }
         },
         {
@@ -1999,7 +2189,8 @@
           "type": "custom",
           "commandLine": "pio run -d ${current.project.path} -t upload",
           "attributes": {
-            "previewUrl": ""
+            "previewUrl": "",
+            "goal": "Run"
           }
         },
         {
@@ -2007,7 +2198,8 @@
           "type": "custom",
           "commandLine": "pio run -d ${current.project.path} -t clean",
           "attributes": {
-            "previewUrl": ""
+            "previewUrl": "",
+            "goal": "Build"
           }
         },
         {
@@ -2015,7 +2207,8 @@
           "type": "custom",
           "commandLine": "pio remote device list",
           "attributes": {
-            "previewUrl": ""
+            "previewUrl": "",
+            "goal": ""
           }
         },
         {
@@ -2023,7 +2216,8 @@
           "type": "custom",
           "commandLine": "pio remote run -d ${current.project.path} -t upload",
           "attributes": {
-            "previewUrl": ""
+            "previewUrl": "",
+            "goal": "Run"
           }
         }
       ]
@@ -2032,5 +2226,239 @@
       "name": "type-python.svg",
       "mediaType": "image/svg+xml"
     }
-  }
+  },
+  {
+    "id": "vert.x",
+    "creator": "Clement Escoffier",
+    "name": "Eclipse Vert.x",
+    "description": "Eclipse Vert.x Stack on CentOS.",
+    "scope": "advanced",
+    "tags": [
+        "Java",
+        "JDK",
+        "Maven",
+        "Vert.x",
+        "CentOS",
+        "Git"
+    ],
+    "components": [{
+        "name": "CentOS",
+        "version": "---"
+    }, {
+        "name": "JDK",
+        "version": "1.8.0_45"
+    }, {
+        "name": "Maven",
+        "version": "3.2.2"
+    }],
+    "source": {
+        "type": "image",
+        "origin": "registry.centos.org/che-stacks/vertx"
+    },
+    "workspaceConfig": {
+        "environments": {
+            "default": {
+                "machines": {
+                    "dev-machine": {
+                        "agents": [
+                            "org.eclipse.che.exec",
+                            "org.eclipse.che.terminal",
+                            "org.eclipse.che.ws-agent",
+                            "org.eclipse.che.ssh"
+                        ],
+                        "servers": {},
+                        "attributes": {
+                            "memoryLimitBytes": "2147483648"
+                        }
+                    }
+                },
+                "recipe": {
+                    "location": "registry.centos.org/che-stacks/vertx",
+                    "type": "dockerimage"
+                }
+            }
+        },
+        "name": "default",
+        "defaultEnv": "default",
+        "description": null,
+        "commands": [{
+            "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
+            "name": "build",
+            "type": "mvn",
+            "attributes": {
+                "previewUrl": "",
+                "goal": "Build"
+            }
+        }, {
+            "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-fat.jar'",
+            "name": "run",
+            "type": "custom",
+            "attributes": {
+                "previewUrl": "http://${server.port.8080}",
+                "goal": "Run"
+            }
+        }]
+    },
+    "stackIcon": {
+        "name": "type-java.svg",
+        "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "spring-boot",
+    "creator": "Gytis Trikleris",
+    "name": "Spring Boot",
+    "description": "Spring Boot Stack on CentOS.",
+    "scope": "advanced",
+    "tags": [
+      "Java",
+      "JDK",
+      "Maven",
+      "Spring Boot",
+      "CentOS",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "CentOS",
+        "version": "---"
+      },
+      {
+        "name": "JDK",
+        "version": "1.8.0"
+      },
+      {
+        "name": "Maven",
+        "version": "3.3"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "registry.centos.org/che-stacks/spring-boot"
+    },
+    "workspaceConfig": {
+      "name": "default",
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "recipe": {
+            "location": "registry.centos.org/che-stacks/spring-boot",
+            "type": "dockerimage"
+          },
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal",
+                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.ssh"
+              ],
+              "attributes": {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          }
+        }
+      },
+      "commands": [
+        {
+          "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
+          "name": "build",
+          "type": "custom",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          }
+        },
+        {
+          "commandLine": "java -jar ${current.project.path}/target/*.jar",
+          "name": "run",
+          "type": "custom",
+          "attributes": {
+            "previewUrl": "http://${server.port.8080}",
+            "goal": "Run"
+          }
+        }
+      ]
+    },
+    "stackIcon": {
+      "name": "type-spring-boot.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+  "name": "CentOS WildFly Swarm",
+  "id": "WildFly Swarm",
+  "creator": "Dharmit Shah",
+  "description": "Eclipse WildFly Swarm Stack on CentOS.",
+  "scope": "advanced",
+  "source": {
+    "type": "image",
+    "origin": "registry.centos.org/che-stacks/wildfly-swarm"
+  },
+  "tags": [
+    "Java",
+    "JDK",
+    "Maven",
+    "WildFly Swarm",
+    "CentOS",
+    "Git"
+  ],
+  "workspaceConfig": {
+    "name": "default",
+    "environments": {
+      "default": {
+        "recipe": {
+          "location": "registry.centos.org/che-stacks/wildfly-swarm",
+          "type": "dockerimage"
+        },
+        "machines": {
+          "dev-machine": {
+            "attributes": {
+              "memoryLimitBytes": "2147483648"
+            },
+            "agents": [
+              "org.eclipse.che.terminal",
+              "org.eclipse.che.ws-agent",
+              "org.eclipse.che.ssh"
+            ],
+            "servers": {}
+          }
+        }
+      }
+    },
+    "commands": [
+      {
+        "name": "build",
+        "type": "mvn",
+        "attributes": {},
+        "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'"
+      },
+      {
+        "name": "run",
+        "type": "custom",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        },
+        "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-swarm.jar'"
+      }
+    ],
+    "projects": [],
+    "defaultEnv": "default",
+    "links": []
+  },
+  "components": [
+    {
+      "name": "CentOS",
+      "version": "---"
+    },
+    {
+      "name": "JDK",
+      "version": "1.8.0_45"
+    },
+    {
+      "name": "Maven",
+      "version": "3.3.9"
+    }
+  ]
+}
 ]

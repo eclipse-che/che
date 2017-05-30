@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.newresource;
 
 import com.google.common.base.Optional;
+import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
@@ -26,7 +27,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.dialogs.InputDialog;
 import org.eclipse.che.ide.api.dialogs.InputValidator;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -53,13 +54,16 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  * @author Vlad Zhukovskyi
  */
 public abstract class AbstractNewResourceAction extends AbstractPerspectiveAction {
-    private final   InputValidator           fileNameValidator;
+
     protected final String                   title;
     protected final DialogFactory            dialogFactory;
     protected final CoreLocalizationConstant coreLocalizationConstant;
     protected final EventBus                 eventBus;
     protected final AppContext               appContext;
-    private final   NotificationManager      notificationManager;
+    protected final Provider<EditorAgent>    editorAgentProvider;
+
+    private final InputValidator      fileNameValidator;
+    private final NotificationManager notificationManager;
 
     public AbstractNewResourceAction(String title,
                                      String description,
@@ -68,13 +72,15 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
                                      CoreLocalizationConstant coreLocalizationConstant,
                                      EventBus eventBus,
                                      AppContext appContext,
-                                     NotificationManager notificationManager) {
+                                     NotificationManager notificationManager,
+                                     Provider<EditorAgent> editorAgentProvider) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), title, description, null, svgIcon);
         this.dialogFactory = dialogFactory;
         this.coreLocalizationConstant = coreLocalizationConstant;
         this.eventBus = eventBus;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
+        this.editorAgentProvider = editorAgentProvider;
         this.fileNameValidator = new FileNameValidator();
         this.title = title;
     }
@@ -99,17 +105,17 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
         Resource resource = appContext.getResource();
 
         if (!(resource instanceof Container)) {
-            final Optional<Container> parent = resource.getParent();
+            final Container parent = resource.getParent();
 
-            checkState(parent.isPresent(), "Parent should be a container");
+            checkState(parent != null, "Parent should be a container");
 
-            resource = parent.get();
+            resource = parent;
         }
 
         ((Container)resource).newFile(name, getDefaultContent()).then(new Operation<File>() {
             @Override
             public void apply(File newFile) throws OperationException {
-                eventBus.fireEvent(FileEvent.createOpenFileEvent(newFile));
+                editorAgentProvider.get().openEditor(newFile);
                 eventBus.fireEvent(new RevealResourceEvent(newFile));
             }
         }).catchError(new Operation<PromiseError>() {
@@ -132,7 +138,7 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
             if (resource instanceof Container) {
                 e.getPresentation().setEnabled(true);
             } else {
-                e.getPresentation().setEnabled(resource.getParent().isPresent());
+                e.getPresentation().setEnabled(resource.getParent() != null);
             }
 
         } else {

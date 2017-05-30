@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,6 @@
 package org.eclipse.che.ide.ext.git.client.add;
 
 import org.eclipse.che.ide.api.mvp.View;
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
 
 
 /**
@@ -23,7 +20,7 @@ import javax.validation.constraints.NotNull;
  */
 public interface AddToIndexView extends View<AddToIndexView.ActionDelegate> {
     /** Needs for delegate some function into CloneRepository view. */
-    public interface ActionDelegate {
+    interface ActionDelegate {
         /** Performs any actions appropriate in response to the user having pressed the Add button. */
         void onAddClicked();
 
@@ -34,10 +31,10 @@ public interface AddToIndexView extends View<AddToIndexView.ActionDelegate> {
     /**
      * Set content into message field.
      *
-     * @param message
-     *         content of message
+     * @param htmlMessage
+     *         content of the message in html format
      */
-    void setMessage(@NotNull String message, @NotNull List<String> items);
+    void setMessage(String htmlMessage);
 
     /** @return <code>true</code> if new file must be added to index, and <code>false</code> otherwise */
     boolean isUpdated();

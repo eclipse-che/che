@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -222,8 +222,93 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String getCommandsToolbarBackgroundColor() {
+        return "#000000";
+    }
+
+    @Override
+    public String getCommandsToolbarProcessesLabelBackground() {
+        return "linear-gradient(to bottom, #292929, #131313)";
+    }
+
+    @Override
+    public String getCommandsToolbarProcessesLabelBorder() {
+        return "solid 0.6px #454545";
+    }
+
+    @Override
+    public String getCommandsToolbarMachineNameColor() {
+        return "#a3a3a3";
+    }
+
+    @Override
+    public String getCommandsToolbarCommandNameColor() {
+        return "#e3e3e3";
+    }
+
+    @Override
+    public String getCommandEditorProjectsTableHeaderColor() {
+        return "#2E353B";
+    }
+
+    @Override
+    public String getCommandEditorProjectsTableRowColor() {
+        return "#3D4650";
+    }
+
+    @Override
+    public String getCommandEditorProjectSwitcherBorder() {
+        return "none";
+    }
+
+    @Override
     public String getDialogContentBackground() {
         return "#656565";
+    }
+
+    @Override
+    public String getDropdownListBackground() {
+        return "linear-gradient(to bottom, #444444, #343434 98%)";
+    }
+
+    @Override
+    public String getHoveredDropdownListBackground() {
+        return "linear-gradient(to bottom, #3d3d3d, #1d1d1d 98%)";
+    }
+
+    @Override
+    public String getActiveDropdownListBackground() {
+        return "linear-gradient(to bottom, #3d3d3d, #1d1d1d)";
+    }
+
+    @Override
+    public String getDropdownListBorder() {
+        return "solid 0.6px #454545";
+    }
+
+    @Override
+    public String getDropdownListButtonColor() {
+        return "#e4e4e4";
+    }
+
+    @Override
+    public String getMenuButtonBackground() {
+        return "linear-gradient(to bottom, #444444, #343434 98%)";
+    }
+
+    @Override
+    public String getHoveredMenuButtonBackground() {
+        return "linear-gradient(to bottom, #3d3d3d, #1d1d1d 98%)";
+    }
+
+    @Override
+    public String getActiveMenuButtonBackground() {
+        return "linear-gradient(to bottom, #3d3d3d, #1d1d1d)";
+    }
+
+    @Override
+    public String getMenuButtonBorder() {
+        return "solid 0.6px #454545";
     }
 
     @Override
@@ -1472,23 +1557,23 @@ public class DarkTheme implements Theme {
     }
 
     @Override
-    public String toolButtonBorder() {
-        return "1px solid transparent";
-    }
-
-    @Override
     public String toolButtonActiveBorder() {
-        return "1px solid #24272c";
+        return "1px solid #262626";
     }
 
     @Override
     public String toolButtonHoverBackgroundColor() {
-        return "#44484D";
+        return "#262626";
     }
 
     @Override
     public String toolButtonActiveBackgroundColor() {
-        return "#33373B";
+        return "#262626";
+    }
+
+    @Override
+    public String toolButtonActiveColor() {
+        return "#4eabff";
     }
 
     @Override

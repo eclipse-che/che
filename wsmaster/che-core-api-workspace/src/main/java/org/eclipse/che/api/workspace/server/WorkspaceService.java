@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,6 +70,9 @@ import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_RESTORE;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_SNAPSHOT;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_CREATE_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_BY_NAMESPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACES;
@@ -84,8 +87,6 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 @Api(value = "/workspace", description = "Workspace REST API")
 @Path("/workspace")
 public class WorkspaceService extends Service {
-    private static final String CHE_WORKSPACE_AUTO_SNAPSHOT= "che.workspace.auto_snapshot";
-    private static final String CHE_WORKSPACE_AUTO_RESTORE= "che.workspace.auto_restore";
 
     private final WorkspaceManager              workspaceManager;
     private final WorkspaceValidator            validator;
@@ -94,6 +95,7 @@ public class WorkspaceService extends Service {
     private final String                        apiEndpoint;
     private final boolean                       cheWorkspaceAutoSnapshot;
     private final boolean                       cheWorkspaceAutoRestore;
+    private final boolean                       cheWorkspaceAutoStart;
     @Context
     private SecurityContext securityContext;
 
@@ -104,7 +106,8 @@ public class WorkspaceService extends Service {
                             WsAgentHealthChecker agentHealthChecker,
                             WorkspaceServiceLinksInjector workspaceServiceLinksInjector,
                             @Named(CHE_WORKSPACE_AUTO_SNAPSHOT) boolean cheWorkspaceAutoSnapshot,
-                            @Named(CHE_WORKSPACE_AUTO_RESTORE) boolean cheWorkspaceAutoRestore) {
+                            @Named(CHE_WORKSPACE_AUTO_RESTORE) boolean cheWorkspaceAutoRestore,
+                            @Named(CHE_WORKSPACE_AUTO_START) boolean cheWorkspaceAutoStart) {
         this.apiEndpoint = apiEndpoint;
         this.workspaceManager = workspaceManager;
         this.validator = validator;
@@ -112,6 +115,7 @@ public class WorkspaceService extends Service {
         this.linksInjector = workspaceServiceLinksInjector;
         this.cheWorkspaceAutoSnapshot = cheWorkspaceAutoSnapshot;
         this.cheWorkspaceAutoRestore = cheWorkspaceAutoRestore;
+        this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
     }
 
     @POST
@@ -168,19 +172,20 @@ public class WorkspaceService extends Service {
     }
 
     @GET
-    @Path("/{key}")
+    @Path("/{key:.*}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get the workspace by the composite key",
                   notes = "Composite key can be just workspace ID or in the " +
-                          "namespace:workspace_name form, where namespace is optional (e.g :workspace_name is valid key too.")
+                          "namespace:workspace_name form, where namespace is optional (e.g :workspace_name is valid key too." +
+                          "namespace/workspace_name form, where namespace can contain '/' character.")
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested workspace entity"),
                    @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
                    @ApiResponse(code = 403, message = "The user is not workspace owner"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public WorkspaceDto getByKey(@ApiParam(value = "Composite key",
                                            examples = @Example({@ExampleProperty("workspace12345678"),
-                                                                @ExampleProperty("namespace:workspace_name"),
-                                                                @ExampleProperty(":workspace_name")}))
+                                                                @ExampleProperty("namespace/workspace_name"),
+                                                                @ExampleProperty("namespace_part_1/namespace_part_2/workspace_name")}))
                                  @PathParam("key") String key) throws NotFoundException,
                                                                       ServerException,
                                                                       ForbiddenException,
@@ -211,7 +216,7 @@ public class WorkspaceService extends Service {
                                             @QueryParam("status")
                                             String status) throws ServerException, BadRequestException {
         //TODO add maxItems & skipCount to manager
-        return workspaceManager.getWorkspaces(EnvironmentContext.getCurrent().getSubject().getUserId())
+        return workspaceManager.getWorkspaces(EnvironmentContext.getCurrent().getSubject().getUserId(), false)
                                .stream()
                                .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
                                .map(workspace -> linksInjector.injectLinks(asDto(workspace), getServiceContext()))
@@ -219,7 +224,7 @@ public class WorkspaceService extends Service {
     }
 
     @GET
-    @Path("/namespace/{namespace}")
+    @Path("/namespace/{namespace:.*}")
     @Produces(APPLICATION_JSON)
     @GenerateLink(rel = LINK_REL_GET_BY_NAMESPACE)
     @ApiOperation(value = "Get workspaces by given namespace",
@@ -234,7 +239,7 @@ public class WorkspaceService extends Service {
                                              @ApiParam("The namespace")
                                              @PathParam("namespace")
                                              String namespace) throws ServerException, BadRequestException {
-        return workspaceManager.getByNamespace(namespace)
+        return workspaceManager.getByNamespace(namespace, false)
                                .stream()
                                .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
                                .map(workspace -> linksInjector.injectLinks(asDto(workspace), getServiceContext()))
@@ -381,6 +386,7 @@ public class WorkspaceService extends Service {
                                                       "The operation is not allowed for the user"),
                    @ApiResponse(code = 409, message = "Any conflict occurs during the snapshot creation"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
+    @Deprecated
     public void createSnapshot(@ApiParam("The workspace id") @PathParam("id") String workspaceId) throws BadRequestException,
                                                                                                          ForbiddenException,
                                                                                                          NotFoundException,
@@ -401,6 +407,7 @@ public class WorkspaceService extends Service {
                                                       "The snapshot doesn't exist for the workspace"),
                    @ApiResponse(code = 403, message = "The user is not workspace owner"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
+    @Deprecated
     public List<SnapshotDto> getSnapshot(@ApiParam("The id of the workspace") @PathParam("id") String workspaceId)
             throws ServerException,
                    BadRequestException,
@@ -693,8 +700,8 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public WsAgentHealthStateDto checkAgentHealth(@ApiParam(value = "Workspace id")
-                                                  @PathParam("id") String key) throws NotFoundException, ServerException {
-        final WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
+                                                  @PathParam("id") String id) throws NotFoundException, ServerException {
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         if (WorkspaceStatus.RUNNING != workspace.getStatus()) {
             return newDto(WsAgentHealthStateDto.class).withWorkspaceStatus(workspace.getStatus());
         }
@@ -718,8 +725,9 @@ public class WorkspaceService extends Service {
     @ApiOperation(value = "Get workspace server configuration values")
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains server settings")})
     public Map<String, String> getSettings() {
-        return ImmutableMap.of(CHE_WORKSPACE_AUTO_SNAPSHOT, Boolean.toString(cheWorkspaceAutoSnapshot),
-                               CHE_WORKSPACE_AUTO_RESTORE, Boolean.toString(cheWorkspaceAutoRestore));
+        return ImmutableMap.of(CHE_WORKSPACE_AUTO_SNAPSHOT, Boolean.toString(cheWorkspaceAutoSnapshot), //
+                               CHE_WORKSPACE_AUTO_RESTORE, Boolean.toString(cheWorkspaceAutoRestore), //
+                               CHE_WORKSPACE_AUTO_START, Boolean.toString(cheWorkspaceAutoStart));
     }
 
     private static Map<String, String> parseAttrs(List<String> attributes) throws BadRequestException {

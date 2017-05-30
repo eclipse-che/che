@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,12 +62,14 @@ public class DefaultActionGroupTest {
         defaultActionGroup = new DefaultActionGroup(actionManager);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void shouldNotAddSameActionTwice() {
         Action action = mock(Action.class);
 
         defaultActionGroup.add(action, new Constraints(AFTER, "someAction"));
         defaultActionGroup.add(action, new Constraints(BEFORE, "someAction"));
+
+        assertThat(defaultActionGroup.getChildrenCount()).isEqualTo(1);
     }
 
     @Test

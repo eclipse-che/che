@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.che.ide.ext.java.client.refactoring.move.wizard;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -23,7 +22,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.ng.FileTrackingEvent;
+import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification.Status;
 import org.eclipse.che.ide.api.resources.Container;
@@ -43,7 +42,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeInfo;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateMoveRefactoring;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ElementToMove;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.MoveSettings;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringSession;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ReorgDestination;
@@ -51,12 +49,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ReorgDestination;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.MOVE;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingMoveEvent;
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingResumeEvent;
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingSuspendEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.ERROR;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.FATAL;
@@ -81,7 +73,7 @@ public class MovePresenter implements MoveView.ActionDelegate {
     private final JavaNavigationService    navigationService;
     private final JavaLocalizationConstant locale;
     private final NotificationManager      notificationManager;
-    private final EventBus                 eventBus;
+    private final ClientServerEventService clientServerEventService;
 
     protected RefactorInfo refactorInfo;
     private   String       refactoringSessionId;
@@ -95,11 +87,12 @@ public class MovePresenter implements MoveView.ActionDelegate {
                          JavaNavigationService navigationService,
                          DtoFactory dtoFactory,
                          JavaLocalizationConstant locale,
-                         NotificationManager notificationManager, EventBus eventBus) {
+                         NotificationManager notificationManager,
+                         ClientServerEventService clientServerEventService) {
         this.view = view;
         this.refactoringUpdater = refactoringUpdater;
         this.editorAgent = editorAgent;
-        this.eventBus = eventBus;
+        this.clientServerEventService = clientServerEventService;
         this.view.setDelegate(this);
 
         this.previewPresenter = previewPresenter;
@@ -185,7 +178,7 @@ public class MovePresenter implements MoveView.ActionDelegate {
                 for (JavaProject project : projects) {
                     currentProject.add(project);
                 }
-                view.setTreeOfDestinations(currentProject);
+                view.setTreeOfDestinations(refactorInfo, currentProject);
                 view.show(refactorInfo);
             }
         }).catchError(new Operation<PromiseError>() {
@@ -229,33 +222,8 @@ public class MovePresenter implements MoveView.ActionDelegate {
             @Override
             public void apply(ChangeCreationResult arg) throws OperationException {
                 if (arg.isCanShowPreviewPage()) {
-                    eventBus.fireEvent(newFileTrackingSuspendEvent());
-
-                    refactorService.applyRefactoring(session).then(new Operation<RefactoringResult>() {
-                        @Override
-                        public void apply(RefactoringResult arg) throws OperationException {
-                            if (arg.getSeverity() == OK) {
-                                view.hide();
-                                refactoringUpdater.updateAfterRefactoring(arg.getChanges());
-
-                                final Resource[] resources = refactorInfo.getResources();
-
-                                if (resources != null && resources.length == 1) {
-                                    refactorService.reindexProject(resources[0].getRelatedProject().get().getLocation().toString());
-                                }
-
-                            } else {
-                                view.showErrorMessage(arg);
-                            }
-
-                            for (ChangeInfo change : arg.getChanges()) {
-                                final String path = change.getPath();
-                                final String oldPath = change.getOldPath();
-
-                                eventBus.fireEvent(newFileTrackingMoveEvent(path, oldPath));
-                            }
-                            eventBus.fireEvent(newFileTrackingResumeEvent());
-                        }
+                    clientServerEventService.sendFileTrackingSuspendEvent().then(success -> {
+                        applyRefactoring(session);
                     });
                 } else {
                     view.showErrorMessage(arg.getStatus());
@@ -265,6 +233,31 @@ public class MovePresenter implements MoveView.ActionDelegate {
             @Override
             public void apply(PromiseError error) throws OperationException {
                 notificationManager.notify(locale.applyMoveError(), error.getMessage(), Status.FAIL, FLOAT_MODE);
+            }
+        });
+    }
+
+    private void applyRefactoring(RefactoringSession session) {
+        refactorService.applyRefactoring(session).then(refactoringResult -> {
+            List<ChangeInfo> changes = refactoringResult.getChanges();
+            if (refactoringResult.getSeverity() == OK) {
+                view.hide();
+                refactoringUpdater.updateAfterRefactoring(changes).then(arg -> {
+                    Project project = null;
+                    Resource[] resources = refactorInfo.getResources();
+                    if (resources != null && resources.length == 1) {
+                        project = resources[0].getProject();
+                    }
+
+                    if (project != null) {
+                        refactorService.reindexProject(project.getPath());
+                    }
+
+                    refactoringUpdater.handleMovingFiles(changes).then(clientServerEventService.sendFileTrackingResumeEvent());
+                });
+            } else {
+                view.showErrorMessage(refactoringResult);
+                refactoringUpdater.handleMovingFiles(changes).then(clientServerEventService.sendFileTrackingResumeEvent());
             }
         });
     }
@@ -337,5 +330,4 @@ public class MovePresenter implements MoveView.ActionDelegate {
         view.setEnableAcceptButton(false);
         view.setEnablePreviewButton(false);
     }
-
 }

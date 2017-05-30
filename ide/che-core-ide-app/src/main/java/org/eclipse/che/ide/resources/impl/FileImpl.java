@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,12 +55,6 @@ class FileImpl extends ResourceImpl implements File {
 
     /** {@inheritDoc} */
     @Override
-    public String getMediaType() {
-        throw new UnsupportedOperationException();
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public boolean isReadOnly() {
         return false;
     }
@@ -83,12 +77,6 @@ class FileImpl extends ResourceImpl implements File {
         } else {
             return getName();
         }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String getPath() {
-        return getLocation().toString();
     }
 
     /** {@inheritDoc} */

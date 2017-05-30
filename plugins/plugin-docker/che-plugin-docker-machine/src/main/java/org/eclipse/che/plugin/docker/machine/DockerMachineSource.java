@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,8 +53,6 @@ public class DockerMachineSource extends MachineSourceImpl {
      * @param machineSource the machine source used to parse data.
      */
     public DockerMachineSource(MachineSource machineSource) throws MachineException {
-        super();
-
         // check type
         if (!DOCKER_IMAGE_TYPE.equals(machineSource.getType())) {
             throw new MachineException("Docker machine source can only be built with '" + DOCKER_IMAGE_TYPE + "' type");
@@ -208,6 +206,16 @@ public class DockerMachineSource extends MachineSourceImpl {
             fullRepoId.append('@').append(getDigest());
         }
         return fullRepoId.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "DockerMachineSource{" +
+               "registry='" + registry + '\'' +
+               ", repository='" + repository + '\'' +
+               ", tag='" + tag + '\'' +
+               ", digest='" + digest + '\'' +
+               '}';
     }
 
 }

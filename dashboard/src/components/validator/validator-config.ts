@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,8 @@ import {UniqueProjectNameValidator} from './unique-project-name-validator.direct
 import {UniqueWorkspaceNameValidator} from './unique-workspace-name-validator.directive';
 import {CustomValidator} from './custom-validator.directive';
 import {UniqueStackNameValidator} from './unique-stack-name-validator.directive';
+import {CityNameValidator} from './city-name-validator.directive';
+import {CustomAsyncValidator} from './custom-async-validator.directive';
 
 
 export class ValidatorConfig {
@@ -22,9 +24,11 @@ export class ValidatorConfig {
   constructor(register) {
 
     register.directive('gitUrl', GitUrlValidator)
+      .directive('cityNameValidator', CityNameValidator)
       .directive('uniqueProjectName', UniqueProjectNameValidator)
       .directive('uniqueWorkspaceName', UniqueWorkspaceNameValidator)
       .directive('customValidator', CustomValidator)
+      .directive('customAsyncValidator', CustomAsyncValidator)
       .directive('uniqueStackName', UniqueStackNameValidator);
   }
 }

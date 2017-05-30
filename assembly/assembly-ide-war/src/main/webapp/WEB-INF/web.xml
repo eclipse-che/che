@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2016 Codenvy, S.A.
+    Copyright (c) 2012-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -26,8 +26,37 @@
         <filter-name>dashboardFilter</filter-name>
         <filter-class>org.eclipse.che.DashboardRedirectionFilter</filter-class>
     </filter>
+    <filter>
+        <filter-name>cacheDisablingFilter</filter-name>
+        <filter-class>org.eclipse.che.filter.CheCacheDisablingFilter</filter-class>
+        <init-param>
+            <param-name>pattern_filename</param-name>
+            <param-value>^.*\.nocache\..*$</param-value>
+        </init-param>
+        <init-param>
+            <param-name>pattern_appname</param-name>
+            <param-value>^.*/_app/.*$</param-value>
+        </init-param>
+    </filter>
+    <filter>
+        <filter-name>cacheForcingFilter</filter-name>
+        <filter-class>org.eclipse.che.filter.CheCacheForcingFilter</filter-class>
+        <init-param>
+            <param-name>pattern_filename</param-name>
+            <param-value>^.*\.cache\..*$</param-value>
+        </init-param>
+    </filter>
+
     <filter-mapping>
         <filter-name>dashboardFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>cacheDisablingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>cacheForcingFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 

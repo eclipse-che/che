@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,16 +15,11 @@ import com.google.inject.persist.Transactional;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.core.db.jpa.DuplicateKeyException;
-import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
-import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
+import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -92,7 +87,9 @@ public class JpaProfileDao implements ProfileDao {
 
     @Transactional
     protected void doCreate(ProfileImpl profile) {
-        managerProvider.get().persist(profile);
+        EntityManager manager = managerProvider.get();
+        manager.persist(profile);
+        manager.flush();
     }
 
     @Transactional
@@ -103,6 +100,7 @@ public class JpaProfileDao implements ProfileDao {
                                                profile.getUserId()));
         }
         manager.merge(profile);
+        manager.flush();
     }
 
     @Transactional
@@ -111,30 +109,7 @@ public class JpaProfileDao implements ProfileDao {
         final ProfileImpl profile = manager.find(ProfileImpl.class, userId);
         if (profile != null) {
             manager.remove(profile);
-        }
-    }
-
-    @Singleton
-    public static class RemoveProfileBeforeUserRemovedEventSubscriber
-            extends CascadeRemovalEventSubscriber<BeforeUserRemovedEvent> {
-        @Inject
-        private EventService  eventService;
-        @Inject
-        private JpaProfileDao profileDao;
-
-        @PostConstruct
-        public void subscribe() {
-            eventService.subscribe(this, BeforeUserRemovedEvent.class);
-        }
-
-        @PreDestroy
-        public void unsubscribe() {
-            eventService.unsubscribe(this, BeforeUserRemovedEvent.class);
-        }
-
-        @Override
-        public void onRemovalEvent(BeforeUserRemovedEvent event) throws Exception {
-            profileDao.remove(event.getUser().getId());
+            manager.flush();
         }
     }
 }

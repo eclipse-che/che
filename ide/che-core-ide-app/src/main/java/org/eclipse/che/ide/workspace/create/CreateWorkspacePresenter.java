@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
+import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.workspace.create.CreateWorkspaceView.HidePopupCallBack;
@@ -68,7 +68,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
     private final CoreLocalizationConstant            locale;
     private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
     private final RecipeServiceClient                 recipeService;
-    private final BrowserQueryFieldRenderer           browserQueryFieldRenderer;
+    private final BrowserAddress                      browserAddress;
 
     private Callback<Component, Exception> callback;
     private List<RecipeDescriptor>         recipes;
@@ -81,7 +81,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
                                     CoreLocalizationConstant locale,
                                     Provider<DefaultWorkspaceComponent> wsComponentProvider,
                                     RecipeServiceClient recipeService,
-                                    BrowserQueryFieldRenderer browserQueryFieldRenderer) {
+                                    BrowserAddress browserAddress) {
         this.view = view;
         this.view.setDelegate(this);
 
@@ -90,7 +90,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
         this.locale = locale;
         this.wsComponentProvider = wsComponentProvider;
         this.recipeService = recipeService;
-        this.browserQueryFieldRenderer = browserQueryFieldRenderer;
+        this.browserAddress = browserAddress;
 
         this.workspacesNames = new ArrayList<>();
     }
@@ -119,7 +119,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
             }
         });
 
-        String workspaceName = browserQueryFieldRenderer.getWorkspaceName();
+        String workspaceName = browserAddress.getWorkspaceName();
 
         view.setWorkspaceName(workspaceName);
 

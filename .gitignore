@@ -9,8 +9,6 @@ target/
 bin/
 test-output/
 maven-eclipse.xml
-instance/
-config/
 
 # Idea #
 ##################
@@ -21,7 +19,7 @@ config/
 
 # Compiled source #
 ###################
-*.com
+!*.com/
 *.class
 *.dll
 *.exe
@@ -60,5 +58,19 @@ Thumbs.db
 */overlays
 *~
 
-# Che files
+# Che files #
+#############
 .che
+dockerfiles/che/eclipse-che.tar.gz
+.unison*
+docs/_site
+docs/.sass-cache
+docs/.jekyll-metadata
+docs/assets/imgs
+!assembly/assembly-main/src/assembly/bin/
+
+
+# NodeJs modules #
+##################
+plugins/plugin-terminal-ui/node_modules/
+plugins/plugin-terminal-ui/build/

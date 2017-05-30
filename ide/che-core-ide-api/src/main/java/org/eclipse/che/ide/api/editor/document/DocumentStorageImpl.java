@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,7 +76,7 @@ public class DocumentStorageImpl implements DocumentStorage {
             @Override
             public void apply(Void arg) throws OperationException {
                 Log.debug(DocumentStorageImpl.class, "Document saved (" + file.getLocation() + ").");
-                DocumentStorageImpl.this.eventBus.fireEvent(FileEvent.createSaveFileEvent(file));
+                DocumentStorageImpl.this.eventBus.fireEvent(FileEvent.createFileSavedEvent(file));
                 try {
                     callback.onSuccess(editorInput);
                 } catch (final Exception e) {

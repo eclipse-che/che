@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.client;
 
-import com.google.gwt.dom.client.Document;
-
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Window;
@@ -112,7 +111,6 @@ public class BootstrapController {
                         DevMachine devMachine = new DevMachine(devMachineDto);
 
                         if (appContext instanceof AppContextImpl) {
-                            ((AppContextImpl)appContext).setDevMachine(devMachine);
                             ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf(devMachineDto.getRuntime().projectsRoot()));
                         }
 
@@ -183,12 +181,14 @@ public class BootstrapController {
 
         appStateManagerProvider.get();
 
+        displayIDE();
+
         extensionInitializer.startExtensions();
 
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
-                displayIDE();
+                notifyShowIDE();
             }
         });
     }
@@ -196,7 +196,6 @@ public class BootstrapController {
     private void displayIDE() {
         // Start UI
         SimpleLayoutPanel mainPanel = new SimpleLayoutPanel();
-
         RootLayoutPanel.get().add(mainPanel);
 
         // Make sure the root panel creates its own stacking context
@@ -219,13 +218,6 @@ public class BootstrapController {
             @Override
             public void onClose(CloseEvent<Window> event) {
                 eventBus.fireEvent(WindowActionEvent.createWindowClosedEvent());
-            }
-        });
-
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                notifyShowIDE();
             }
         });
     }
@@ -267,4 +259,5 @@ public class BootstrapController {
 
         var interval = setInterval(setInterval, customInterval);
     }-*/;
+
 }

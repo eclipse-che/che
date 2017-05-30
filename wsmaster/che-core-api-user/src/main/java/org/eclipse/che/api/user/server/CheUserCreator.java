@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server;
 
+import org.eclipse.che.account.api.AccountManager;
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -34,6 +36,8 @@ public class CheUserCreator {
     private UserManager userManager;
 
     @Inject
+    private AccountManager accountManager;
+
     @SuppressWarnings("unused")
     private DBInitializer initializer;
 
@@ -49,6 +53,15 @@ public class CheUserCreator {
                                                       "secret",
                                                       emptyList());
                 userManager.create(cheUser, false);
+            } catch (ConflictException ignore) {
+            }
+        }
+
+        try {
+            accountManager.getById("che");
+        } catch (NotFoundException e) {
+            try {
+                accountManager.create(new AccountImpl("che", "che", "personal"));
             } catch (ConflictException ignore) {
             }
         }

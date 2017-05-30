@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,9 +17,9 @@ import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
-import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectRelativePathMacro;
-import org.eclipse.che.ide.extension.machine.client.command.macros.ServerPortProvider;
+import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
+import org.eclipse.che.ide.macro.CurrentProjectRelativePathMacro;
+import org.eclipse.che.ide.macro.ServerAddressMacroRegistrar;
 import org.eclipse.che.plugin.maven.client.MavenResources;
 
 import java.util.LinkedList;
@@ -53,7 +53,7 @@ public class MavenCommandType implements CommandType {
         pages = new LinkedList<>();
         pages.add(page);
 
-        iconRegistry.registerIcon(new Icon(ID + ".commands.category.icon", resources.maven()));
+        iconRegistry.registerIcon(new Icon("command.type." + ID, resources.maven()));
     }
 
     @Override
@@ -84,7 +84,7 @@ public class MavenCommandType implements CommandType {
     @Override
     public String getPreviewUrlTemplate() {
         //TODO: hardcode http after switching WS Master to https
-        return "http://" + ServerPortProvider.KEY_TEMPLATE.replace("%", DEF_PORT) + "/" +
+        return "http://" + ServerAddressMacroRegistrar.MACRO_NAME_TEMPLATE.replace("%", DEF_PORT) + "/" +
                currentProjectRelativePathMacro.getName();
     }
 }

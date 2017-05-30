@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ public class GitExtension {
     public static final String REPOSITORY_GROUP_MAIN_MENU = "GitRepositoryGroup";
     public static final String COMMAND_GROUP_MAIN_MENU    = "GitCommandGroup";
     public static final String HISTORY_GROUP_MAIN_MENU    = "GitHistoryGroup";
+    public static final String GIT_COMPARE_WITH_LATEST    = "gitCompareWithLatest";
 
     @Inject
     public GitExtension(GitResources resources,
@@ -154,15 +155,25 @@ public class GitExtension {
         actionManager.registerAction("gitCompareWithRevision", compareWithRevisionAction);
         compareGroup.add(compareWithRevisionAction);
 
-        DefaultActionGroup gitCompareContextMenuGroup = new DefaultActionGroup("Git", true, actionManager);
-        actionManager.registerAction("gitCompareContextMenu", gitCompareContextMenuGroup);
-        gitCompareContextMenuGroup.add(compareWithLatestAction);
-        gitCompareContextMenuGroup.add(compareWithBranchAction);
-        gitCompareContextMenuGroup.add(compareWithRevisionAction);
+        DefaultActionGroup gitContextMenuGroup = new DefaultActionGroup("Git", true, actionManager);
+        actionManager.registerAction("gitCompareContextMenu", gitContextMenuGroup);
+        gitContextMenuGroup.add(addToIndexAction);
+        gitContextMenuGroup.add(removeFromIndexAction);
+        gitContextMenuGroup.add(resetFilesAction);
+        gitContextMenuGroup.add(commitAction);
+        gitContextMenuGroup.add(historyAction);
+        gitContextMenuGroup.addSeparator();
+        gitContextMenuGroup.add(compareWithLatestAction);
+        gitContextMenuGroup.add(compareWithBranchAction);
+        gitContextMenuGroup.add(compareWithRevisionAction);
 
-        DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction("resourceOperation");
-        mainContextMenuGroup.add(gitCompareContextMenuGroup);
+        DefaultActionGroup projectExplorerContextMenuGroup = (DefaultActionGroup)actionManager.getAction("resourceOperation");
+        projectExplorerContextMenuGroup.add(gitContextMenuGroup);
 
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('d').build(), "gitCompareWithLatest");
+        DefaultActionGroup editorContextMenuGroup = (DefaultActionGroup)actionManager.getAction("editorContextMenu");
+        editorContextMenuGroup.addSeparator();
+        editorContextMenuGroup.add(gitContextMenuGroup);
+
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('d').build(), GIT_COMPARE_WITH_LATEST);
     }
 }

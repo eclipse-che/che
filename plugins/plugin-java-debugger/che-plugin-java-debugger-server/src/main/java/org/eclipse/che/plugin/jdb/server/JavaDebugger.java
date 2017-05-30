@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,8 +47,10 @@ import org.eclipse.che.api.debug.shared.model.action.StartAction;
 import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
 import org.eclipse.che.api.debug.shared.model.impl.FieldImpl;
+import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
@@ -203,7 +205,6 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
     @Override
     public void disconnect() throws DebuggerException {
-        resume(newDto(ResumeActionDto.class));
         vm.dispose();
         LOG.debug("Close connection to {}:{}", host, port);
     }
@@ -259,7 +260,12 @@ public class JavaDebugger implements EventsHandler, Debugger {
             throw new DebuggerException(e.getMessage(), e);
         }
 
-        debuggerCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
+        debuggerCallback.onEvent(
+                new BreakpointActivatedEventImpl(
+                        new BreakpointImpl(breakpoint.getLocation(),
+                                           true,
+                                           breakpoint.getCondition())));
+
         LOG.debug("Add breakpoint: {}", location);
     }
 
@@ -290,7 +296,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
             classPrepareRequests.put(className, request);
         }
 
-        LOG.debug("Deferred breakpoint: {}", breakpoint.getLocation());
+        LOG.debug("Deferred breakpoint: {}", breakpoint.getLocation().toString());
     }
 
     @Override
@@ -342,13 +348,15 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
     @Override
     public void resume(ResumeAction action) throws DebuggerException {
+        lock.lock();
         try {
+            invalidateCurrentThread();
             vm.resume();
             LOG.debug("Resume VM");
         } catch (VMCannotBeModifiedException e) {
             throw new DebuggerException(e.getMessage(), e);
         } finally {
-            resetCurrentThread();
+            lock.unlock();
         }
     }
 
@@ -386,7 +394,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
                                                                  .withVariablePath(
                                                                          newDto(VariablePathDto.class)
                                                                                  .withPath(singletonList(var.getName()))
-                                                                                  )
+                                                                 )
                                                                  .withPrimitive(var.isPrimitive()));
             }
             return dump;
@@ -569,7 +577,13 @@ public class JavaDebugger implements EventsHandler, Debugger {
         if (hitBreakpoint) {
             com.sun.jdi.Location jdiLocation = event.location();
 
-            Location location = debuggerUtil.getLocation(jdiLocation);
+            Location location;
+            try {
+                location = debuggerUtil.getLocation(jdiLocation);
+            } catch (DebuggerException e) {
+                location = new LocationImpl(jdiLocation.declaringType().name(), jdiLocation.lineNumber());
+            }
+
             debuggerCallback.onEvent(new SuspendEventImpl(location));
         }
 
@@ -666,12 +680,12 @@ public class JavaDebugger implements EventsHandler, Debugger {
         try {
             return parser.evaluate(new Evaluator(vm, getCurrentThread()));
         } catch (ExpressionException e) {
-            throw new DebuggerException(e.getMessage());
+            throw new DebuggerException(e.getMessage(), e);
         } finally {
             final long endTime = System.currentTimeMillis();
             LOG.debug("==>> Evaluate time: {} ms", (endTime - startTime));
             // Evaluation of expression may update state of frame.
-            resetCurrentFrame();
+            invalidateCurrentFrame();
         }
     }
 
@@ -699,13 +713,13 @@ public class JavaDebugger implements EventsHandler, Debugger {
         thread = t;
     }
 
-    private void resetCurrentFrame() {
+    private void invalidateCurrentFrame() {
         stackFrame = null;
     }
 
-    private void resetCurrentThread() {
-        this.stackFrame = null;
+    private void invalidateCurrentThread() {
         this.thread = null;
+        invalidateCurrentFrame();
     }
 
     private EventRequestManager getEventManager() throws DebuggerException {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.che.plugin.java.server.refactoring.session;
 
 import org.eclipse.che.dto.server.DtoFactory;
@@ -143,28 +142,35 @@ public abstract class RefactoringSession {
         }
 
         CompositeChange operationChange = (CompositeChange)operation.getUndoChange();
-        Change[] changes = operationChange.getChildren();
-
-        RefactoringStatus validationStatus = operation.getValidationStatus();
-        if (validationStatus != null) {
-            List<ChangeInfo> changesInfo = new ArrayList<>();
-
-            prepareChangesInfo(changes, changesInfo);
-
-            RefactoringResult status = DtoConverter.toRefactoringResultDto(validationStatus);
-            status.setChanges(changesInfo);
-
-            return status;
+        if (operationChange == null) {
+            return DtoConverter.toRefactoringResultDto(new RefactoringStatus());
         }
 
-        return DtoConverter.toRefactoringResultDto(new RefactoringStatus());
+        Change[] changes = operationChange.getChildren();
+        RefactoringStatus validationStatus = operation.getValidationStatus();
+
+        if (validationStatus == null) {
+            return DtoConverter.toRefactoringResultDto(new RefactoringStatus());
+        }
+
+        List<ChangeInfo> changesInfo = new ArrayList<>();
+
+        prepareChangesInfo(changes, changesInfo);
+
+        RefactoringResult status = DtoConverter.toRefactoringResultDto(validationStatus);
+        status.setChanges(changesInfo);
+
+        return status;
+
     }
 
     /**
      * Prepare the information about changes which were applied.
      *
-     * @param changes array of the applied changes
-     * @param changesInfo prepared list of {@link ChangeInfo}
+     * @param changes
+     *         array of the applied changes
+     * @param changesInfo
+     *         prepared list of {@link ChangeInfo}
      */
     public void prepareChangesInfo(Change[] changes, List<ChangeInfo> changesInfo) {
         for (Change ch : changes) {

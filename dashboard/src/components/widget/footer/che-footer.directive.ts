@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,56 +40,51 @@ export class CheFooter {
    *   <che-footer che-logo="src/logo.svg"></che-footer>
    *
    * @example
-   <example module="userDashboard">
-   <file name="index.html">
-   <che-footer
-   che-logo="src/logo.svg"
-   che-product-name="Eclipse Che"
-   che-support-email="support@codenvy.com"
-   che-support-help="http://www.eclipse.org/che">
-   </che-footer>
-   </file>
-   </example>
+   * <example module="userDashboard">
+   * <file name="index.html">
+   * <che-footer
+   * che-logo="src/logo.svg"
+   * che-product-name="Eclipse Che"
+   * che-support-email="support@codenvy.com"
+   * che-support-help="http://www.eclipse.org/che">
+   * </che-footer>
+   * </file>
+   * </example>
    * @author Ann Shumilova
    */
-  constructor () {
-    this.restrict='E';
+  private restrict: string;
+  private replace: boolean;
+  private transclude: boolean;
+
+  private bindToController: boolean;
+  private controller: string;
+  private controllerAs: string;
+  private templateUrl: string;
+
+  private scope: {
+    [propName: string]: string
+  };
+
+  constructor() {
+    this.templateUrl = 'components/widget/footer/che-footer.html';
+
+    this.restrict = 'E';
     this.replace = true;
-    this.transclude= true;
+    this.transclude = true;
+    this.bindToController = true;
+    this.controller = 'CheFooterController';
+    this.controllerAs = 'cheFooterController';
+
+    this.scope = {
+      supportHelpPath: '@cheSupportHelpPath',
+      supportHelpTitle: '@cheSupportHelpTitle',
+      supportEmail: '@cheSupportEmail',
+      logo: '@cheLogo',
+      version: '@cheVersion',
+      productName: '@cheProductName',
+      links: '=cheLinks',
+      email: '=?cheEmail'
+    };
   }
-
-  /**
-   * Template for the current footer
-   * @param element
-   * @param attrs
-   * @returns {string} the template
-   */
-  template(element, attrs) {
-    var logo = attrs.cheLogo;
-    var productName  = attrs.cheProductName;
-    var supportEmail = attrs.cheSupportEmail;
-    var supportHelpPath = attrs.cheSupportHelpPath;
-    var supportHelpTitle = attrs.cheSupportHelpTitle;
-
-    var template = '<div class=\"che-footer\" layout=\"row\" layout-align=\"start center\">';
-    if (logo) {
-      template += '<img class=\"che-footer-logo\" ng-src=\"' + logo + '\" alt=\"logo\">';
-    }
-    template += '<div flex />';
-    template += '<ng-transclude></ng-transclude>';
-
-    if (supportEmail) {
-      let subject = '?subject=' + encodeURIComponent('Wishes for ' + productName);
-      template += '<input class=\"che-footer-input\" ng-model=\"productWish\" placeholder=\"I wish this product...\" />';
-      template += '<a class=\"che-footer-button-mail che-footer-button\" ng-href=\"mailto:' + supportEmail + subject + '&body={{productWish}}\">Make a wish<a/>';
-    }
-
-    if (supportHelpPath && supportHelpTitle) {
-      template += '<a class=\"che-footer-button-community che-footer-button\" ng-href=\"' + supportHelpPath + '\" target=\"_blank\">' + supportHelpTitle + '<a/>';
-    }
-    template += '</div>';
-    return template;
-  }
-
 }
 

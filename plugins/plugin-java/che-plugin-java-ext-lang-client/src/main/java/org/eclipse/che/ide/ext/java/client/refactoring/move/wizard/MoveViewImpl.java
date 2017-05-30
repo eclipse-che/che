@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -176,7 +176,7 @@ final class MoveViewImpl extends Window implements MoveView {
 
     /** {@inheritDoc} */
     @Override
-    public void setTreeOfDestinations(List<JavaProject> projects) {
+    public void setTreeOfDestinations(RefactorInfo refactorInfo, List<JavaProject> projects) {
         final SingleSelectionModel<Object> selectionModel = new SingleSelectionModel<>();
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -198,7 +198,9 @@ final class MoveViewImpl extends Window implements MoveView {
                 }
             }
         });
-        CellTree tree = new CellTree(new ProjectsAndPackagesModel(projects, selectionModel, resources), null, cellTreeResources);
+        CellTree tree = new CellTree(new ProjectsAndPackagesModel(projects, refactorInfo, selectionModel, resources),
+                                     null,
+                                     cellTreeResources);
         tree.setAnimationEnabled(true);
         treePanel.clear();
         treePanel.add(tree);

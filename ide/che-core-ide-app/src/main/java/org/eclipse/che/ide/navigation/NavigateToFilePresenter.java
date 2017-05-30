@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.che.ide.navigation;
 
 import com.google.common.base.Optional;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -21,12 +20,13 @@ import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.Message;
 import org.eclipse.che.ide.websocket.MessageBuilder;
 import org.eclipse.che.ide.websocket.MessageBus;
@@ -35,9 +35,9 @@ import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.gwt.http.client.RequestBuilder.GET;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
@@ -53,7 +53,7 @@ import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegate, WsAgentStateHandler {
 
     private final MessageBusProvider     messageBusProvider;
-    private final EventBus               eventBus;
+    private final EditorAgent            editorAgent;
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
     private final NavigateToFileView     view;
     private final AppContext             appContext;
@@ -66,12 +66,13 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
                                    EventBus eventBus,
                                    DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                    MessageBusProvider messageBusProvider,
-                                   AppContext appContext) {
+                                   AppContext appContext,
+                                   EditorAgent editorAgent) {
         this.view = view;
         this.appContext = appContext;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.messageBusProvider = messageBusProvider;
-        this.eventBus = eventBus;
+        this.editorAgent = editorAgent;
 
         this.view.setDelegate(this);
 
@@ -90,50 +91,49 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
 
     /** Show dialog with view for navigation. */
     public void showDialog() {
-        view.showDialog();
-        view.clearInput();
+        view.showPopup();
     }
 
     @Override
-    public void onRequestSuggestions(String query, final AsyncCallback<List<Path>> callback) {
+    public void onFileSelected(Path path) {
+        view.hidePopup();
+
+        appContext.getWorkspaceRoot().getFile(path).then(new Operation<Optional<File>>() {
+            @Override
+            public void apply(Optional<File> optFile) throws OperationException {
+                if (optFile.isPresent()) {
+                    editorAgent.openEditor(optFile.get());
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onFileNameChanged(String fileName) {
+        if (fileName.isEmpty()) {
+            view.showItems(new ArrayList<ItemReference>());
+            return;
+        }
+
         // add '*' to allow search files by first letters
-        final String url = SEARCH_URL + "/?name=" + URL.encodePathSegment(query + "*");
+        final String url = SEARCH_URL + "/?name=" + URL.encodePathSegment(fileName + "*");
         final Message message = new MessageBuilder(GET, url).header(ACCEPT, APPLICATION_JSON).build();
         final Unmarshallable<List<ItemReference>> unmarshaller = dtoUnmarshallerFactory.newWSListUnmarshaller(ItemReference.class);
         try {
             wsMessageBus.send(message, new RequestCallback<List<ItemReference>>(unmarshaller) {
                 @Override
                 protected void onSuccess(List<ItemReference> result) {
-                    List<Path> paths = newArrayList();
-
-                    for (ItemReference reference : result) {
-                        paths.add(Path.valueOf(reference.getPath()));
-                    }
-
-                    callback.onSuccess(paths);
+                    view.showItems(result);
                 }
 
                 @Override
                 protected void onFailure(Throwable exception) {
-                    callback.onFailure(exception);
+                    Log.error(getClass(), exception);
                 }
             });
         } catch (WebSocketException e) {
-            callback.onFailure(e);
+            Log.error(getClass(), e);
         }
     }
 
-    @Override
-    public void onFileSelected(Path path) {
-        view.close();
-
-        appContext.getWorkspaceRoot().getFile(path).then(new Operation<Optional<File>>() {
-            @Override
-            public void apply(Optional<File> optFile) throws OperationException {
-                if (optFile.isPresent()) {
-                    eventBus.fireEvent(FileEvent.createOpenFileEvent(optFile.get()));
-                }
-            }
-        });
-    }
 }

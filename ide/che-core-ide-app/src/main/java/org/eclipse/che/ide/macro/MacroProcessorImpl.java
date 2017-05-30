@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,13 +12,10 @@ package org.eclipse.che.ide.macro;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
@@ -30,7 +27,6 @@ import java.util.Iterator;
  *
  * @author Artem Zatsarynnyi
  * @see Macro
- * @see CommandManager#executeCommand(CommandImpl, Machine)
  */
 public class MacroProcessorImpl implements MacroProcessor {
 

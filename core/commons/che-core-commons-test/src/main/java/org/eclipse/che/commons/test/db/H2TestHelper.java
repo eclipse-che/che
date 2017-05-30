@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,9 @@ public final class H2TestHelper {
      * or {@link #shutdownDefault()} is called directly.
      *
      * @return datasource to the in memory database
+     * @deprecated use {@link H2DBTestServer}.
      */
+    @Deprecated
     public static DataSource inMemoryDefault() {
         final JdbcDataSource dataSource = new JdbcDataSource();
         dataSource.setUrl(DEFAULT_IN_MEMORY_DB_URL);
@@ -47,7 +49,9 @@ public final class H2TestHelper {
      *
      * @throws SQLException
      *         when any sql error occurs
+     * @deprecated use {@link H2DBTestServer}.
      */
+    @Deprecated
     public static void shutdownDefault() throws SQLException {
         try (Connection conn = inMemoryDefault().getConnection()) {
             RunScript.execute(conn, new StringReader("SHUTDOWN"));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,21 +10,24 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.server.core.project;
 
-import org.eclipse.che.plugin.maven.server.MavenServerManager;
-import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
+import org.eclipse.che.commons.lang.PathUtil;
 import org.eclipse.che.maven.data.MavenArtifact;
 import org.eclipse.che.maven.data.MavenConstants;
 import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.che.maven.data.MavenModel;
 import org.eclipse.che.maven.data.MavenPlugin;
 import org.eclipse.che.maven.data.MavenProblemType;
+import org.eclipse.che.maven.data.MavenProfile;
 import org.eclipse.che.maven.data.MavenProjectProblem;
 import org.eclipse.che.maven.data.MavenRemoteRepository;
 import org.eclipse.che.maven.data.MavenResource;
+import org.eclipse.che.plugin.maven.server.MavenServerManager;
+import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.jdom.Element;
 
 import java.io.File;
@@ -38,6 +41,8 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyList;
 
 /**
  * @author Evgen Vidolob
@@ -74,6 +79,10 @@ public class MavenProject {
         return info.sources;
     }
 
+    public Collection<String> getProfilesIds() {
+        return info.profilesIds;
+    }
+
     public List<MavenResource> getResources() {
         return info.resources;
     }
@@ -84,6 +93,10 @@ public class MavenProject {
 
     public List<MavenResource> getTestResources() {
         return info.testResources;
+    }
+
+    public String getOutputDirectory() {
+        return info.outputDirectory;
     }
 
     public String getName() {
@@ -153,8 +166,11 @@ public class MavenProject {
 
     /**
      * Invoke maven to build project model.
-     * @param project to resolve
-     * @param mavenServer the maven server
+     *
+     * @param project
+     *         to resolve
+     * @param mavenServer
+     *         the maven server
      * @return the modification types that applied to this project
      */
     public MavenProjectModifications resolve(IProject project, MavenServerWrapper mavenServer, MavenServerManager serverManager) {
@@ -195,6 +211,7 @@ public class MavenProject {
         newInfo.properties = model.getProperties();
         newInfo.filters = model.getBuild().getFilters();
 
+        newInfo.outputDirectory = model.getBuild().getOutputDirectory();
 
         Set<MavenRemoteRepository> remoteRepositories = new HashSet<>();
         Set<MavenArtifact> extensions = new HashSet<>();
@@ -232,21 +249,42 @@ public class MavenProject {
         newInfo.plugins = new ArrayList<>(plugins);
         newInfo.unresolvedArtifacts = unresolvedArtifacts;
 
-        newInfo.modulesNameToPath = collectModulesNameAndPath(model);
-        //TODO add profiles
+        newInfo.modulesNameToPath = collectModulesNameAndPath(model.getModules());
+
+        Collection<String> newProfiles = collectProfilesIds(model.getProfiles());
+        if (clearProfiles || newInfo.profilesIds == null) {
+            newInfo.profilesIds = new ArrayList<>(newProfiles);
+        }
+        else {
+            Set<String> mergedProfiles = new HashSet<>(newInfo.profilesIds);
+            mergedProfiles.addAll(newProfiles);
+            newInfo.profilesIds = new ArrayList<>(mergedProfiles);
+        }
 
         return setInfo(newInfo);
     }
 
-    private Map<String, String> collectModulesNameAndPath(MavenModel model) {
+    private static Collection<String> collectProfilesIds(Collection<MavenProfile> profiles) {
+        if (profiles == null) {
+            return emptyList();
+        }
+
+        Set<String> result = new HashSet<>(profiles.size());
+        for (MavenProfile each : profiles) {
+            result.add(each.getId());
+        }
+        return result;
+    }
+
+    private Map<String, String> collectModulesNameAndPath(List<String> modules) {
         Map<String, String> result = new HashMap<>();
         String projectPath = project.getFullPath().toOSString();
         if (!projectPath.endsWith("/")) {
             projectPath += "/";
         }
-        //TODO resolve relative path in module
-        for (String name : model.getModules()) {
-            result.put(name, projectPath + name);
+
+        for (String name : modules) {
+            result.put(name, PathUtil.toCanonicalPath(projectPath + name, false));
         }
         return result;
     }
@@ -269,7 +307,6 @@ public class MavenProject {
     }
 
     /**
-     *
      * @return workspace relative pom.xml path or null if pom.xml does not exist
      */
     public String getPomPath() {
@@ -300,7 +337,12 @@ public class MavenProject {
 
     public List<IProject> getModulesProjects() {
         Collection<String> modulesPath = info.modulesNameToPath.values();
-        return modulesPath.stream().map(path -> workspace.getRoot().getProject(path)).collect(Collectors.toList());
+        return modulesPath.stream().map(path -> {
+            if (path.endsWith(MavenConstants.POM_FILE_NAME)) {
+                return workspace.getRoot().getProject(new Path(path).removeLastSegments(1).toOSString());
+            }
+            return workspace.getRoot().getProject(path);
+        }).collect(Collectors.toList());
     }
 
     public Collection<String> getModulesPath() {
@@ -359,6 +401,9 @@ public class MavenProject {
         public List<MavenResource> resources;
         public List<MavenResource> testResources;
 
+        public String outputDirectory;
+
+        public List<String> profilesIds;
         public List<String> activeProfiles;
         public List<String> inactiveProfiles;
         public List<String> filters;

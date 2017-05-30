@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.che.ide.ext.git.client.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 
@@ -59,7 +58,6 @@ import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitView;
 import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitViewImpl;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesView;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesViewImpl;
-import org.eclipse.che.ide.jsonrpc.RequestHandler;
 
 /** @author Andrey Plotnikov */
 @ExtensionGinModule
@@ -92,12 +90,6 @@ public class GitGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().implement(GitOutputConsole.class, GitOutputConsolePresenter.class)
                                              .build(GitOutputConsoleFactory.class));
 
-        configureGitCheckoutNotifications();
-    }
-
-    private void configureGitCheckoutNotifications() {
-        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
-                    .addBinding("event:git-checkout")
-                    .to(GitCheckoutStatusNotificationHandler.class);
+        bind(GitCheckoutStatusNotificationHandler.class).asEagerSingleton();
     }
 }

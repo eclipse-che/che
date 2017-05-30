@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.util.ArrayOf;
 
-import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -30,7 +29,6 @@ import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.LinkWithEditorAction;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.constraints.Direction;
@@ -49,15 +47,12 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.event.WindowActionHandler;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStackState;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
@@ -66,10 +61,10 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
@@ -95,12 +90,11 @@ import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 @Singleton
 public class EditorAgentImpl implements EditorAgent,
                                         EditorPartCloseHandler,
-                                        FileEventHandler,
                                         ActivePartChangedHandler,
                                         SelectionChangedHandler,
                                         WindowActionHandler,
-                                        WsAgentStateHandler,
-                                        StateComponent {
+                                        StateComponent,
+                                        WorkspaceStoppedEvent.Handler {
 
     private final EventBus                 eventBus;
     private final WorkspaceAgent           workspaceAgent;
@@ -113,8 +107,8 @@ public class EditorAgentImpl implements EditorAgent,
     private final List<EditorPartPresenter>           openedEditors;
     private final Map<EditorPartPresenter, String>    openedEditorsToProviders;
     private final Provider<EditorContentSynchronizer> editorContentSynchronizerProvider;
-    private final AppContext                          appContext;
     private final PromiseProvider                     promiseProvider;
+    private final ResourceProvider                    resourceProvider;
     private       List<EditorPartPresenter>           dirtyEditors;
     private       EditorPartPresenter                 activeEditor;
     private       PartPresenter                       activePart;
@@ -128,8 +122,8 @@ public class EditorAgentImpl implements EditorAgent,
                            CoreLocalizationConstant coreLocalizationConstant,
                            EditorMultiPartStackPresenter editorMultiPartStack,
                            Provider<EditorContentSynchronizer> editorContentSynchronizerProvider,
-                           AppContext appContext,
-                           PromiseProvider promiseProvider) {
+                           PromiseProvider promiseProvider,
+                           ResourceProvider resourceProvider) {
         this.eventBus = eventBus;
         this.fileTypeRegistry = fileTypeRegistry;
         this.preferencesManager = preferencesManager;
@@ -138,32 +132,20 @@ public class EditorAgentImpl implements EditorAgent,
         this.coreLocalizationConstant = coreLocalizationConstant;
         this.editorMultiPartStack = editorMultiPartStack;
         this.editorContentSynchronizerProvider = editorContentSynchronizerProvider;
-        this.appContext = appContext;
         this.promiseProvider = promiseProvider;
+        this.resourceProvider = resourceProvider;
         this.openedEditors = newArrayList();
         this.openedEditorsToProviders = new HashMap<>();
 
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
         eventBus.addHandler(SelectionChangedEvent.TYPE, this);
-        eventBus.addHandler(FileEvent.TYPE, this);
         eventBus.addHandler(WindowActionEvent.TYPE, this);
-        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
     @Override
     public void onClose(EditorPartPresenter editor) {
         closeEditor(editor);
-    }
-
-    @Override
-    public void onFileOperation(FileEvent event) {
-        switch (event.getOperationType()) {
-            case OPEN:
-                openEditor(event.getFile());
-                break;
-            case CLOSE:
-                closeEditor(event.getEditorTab());
-        }
     }
 
     @Override
@@ -197,18 +179,6 @@ public class EditorAgentImpl implements EditorAgent,
     }
 
     @Override
-    public void onWsAgentStarted(WsAgentStateEvent event) {
-        //do nothing
-    }
-
-    @Override
-    public void onWsAgentStopped(WsAgentStateEvent event) {
-        for (EditorPartPresenter editor : getOpenedEditors()) {
-            closeEditor(editor);
-        }
-    }
-
-    @Override
     public void openEditor(@NotNull final VirtualFile file) {
         doOpen(file, new OpenEditorCallbackImpl(), null);
     }
@@ -218,7 +188,31 @@ public class EditorAgentImpl implements EditorAgent,
         doOpen(file, new OpenEditorCallbackImpl(), constraints);
     }
 
-    private void closeEditor(EditorTab tab) {
+    @Override
+    public void closeEditor(final EditorPartPresenter editor) {
+        if (editor == null) {
+            return;
+        }
+
+        final EditorPartStack editorPartStack = editorMultiPartStack.getPartStackByPart(editor);
+        if (editorPartStack == null) {
+            return;
+        }
+
+        editor.onClosing(new AsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                EditorTab editorTab = editorPartStack.getTabByPart(editor);
+                doCloseEditor(editorTab);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+        });
+    }
+
+    private void doCloseEditor(EditorTab tab) {
         checkArgument(tab != null, "Null editor tab occurred");
 
         EditorPartPresenter editor = tab.getRelativeEditorPart();
@@ -238,23 +232,8 @@ public class EditorAgentImpl implements EditorAgent,
         if (activeEditor != null && activeEditor == editor) {
             activeEditor = null;
         }
-    }
 
-    @Override
-    public void closeEditor(EditorPartPresenter editor) {
-        if (editor == null) {
-            return;
-        }
-
-        EditorPartStack editorPartStack = editorMultiPartStack.getPartStackByPart(editor);
-        if (editorPartStack == null) {
-            return;
-        }
-
-        EditorTab editorTab = editorPartStack.getTabByPart(editor);
-        //we have the handlers for the closing file event in different places of the project
-        //so we need to notify them about it (we can't just pass doClose() method)
-        eventBus.fireEvent(FileEvent.createCloseFileEvent(editorTab));
+        eventBus.fireEvent(FileEvent.createFileClosedEvent(tab));
     }
 
     @Override
@@ -320,6 +299,7 @@ public class EditorAgentImpl implements EditorAgent,
                         editorContentSynchronizerProvider.get().trackEditor(editor);
                     }
                     callback.onEditorOpened(editor);
+                    eventBus.fireEvent(FileEvent.createFileOpenedEvent(file));
                     eventBus.fireEvent(new EditorOpenedEvent(file, editor));
                 }
             }
@@ -535,9 +515,9 @@ public class EditorAgentImpl implements EditorAgent,
             @Override
             public void makeCall(final AsyncCallback<Void> callback) {
                 String path = file.getString("PATH");
-                appContext.getWorkspaceRoot().getFile(path).then(new Operation<Optional<File>>() {
+                resourceProvider.getResource(path).then(new Operation<java.util.Optional<VirtualFile>>() {
                     @Override
-                    public void apply(final Optional<File> optionalFile) throws OperationException {
+                    public void apply(java.util.Optional<VirtualFile> optionalFile) throws OperationException {
                         if (optionalFile.isPresent()) {
                             restoreCreateEditor(optionalFile.get(), file, editorPartStack, callback, activeEditors);
                         } else {
@@ -551,7 +531,7 @@ public class EditorAgentImpl implements EditorAgent,
 
     }
 
-    private void restoreCreateEditor(final File resourceFile, JsonObject file, final EditorPartStack editorPartStack,
+    private void restoreCreateEditor(final VirtualFile resourceFile, JsonObject file, final EditorPartStack editorPartStack,
                                      final AsyncCallback<Void> openCallback,
                                      final Map<EditorPartPresenter, EditorPartStack> activeEditors) {
         String providerId = file.getString("EDITOR_PROVIDER");
@@ -642,6 +622,13 @@ public class EditorAgentImpl implements EditorAgent,
         PartPresenter partPresenter = activePartStack.getPartByPath(selectedResourceLocation);
         if (partPresenter != null) {
             workspaceAgent.setActivePart(partPresenter, EDITING);
+        }
+    }
+
+    @Override
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+        for (EditorPartPresenter editor : getOpenedEditors()) {
+            closeEditor(editor);
         }
     }
 

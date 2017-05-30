@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.languageserver.ide.quickopen;
 
 
-import org.eclipse.che.plugin.languageserver.ide.filters.Match;
+import org.eclipse.che.ide.filters.Match;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.Collections;
@@ -28,7 +28,7 @@ public class QuickOpenEntry {
     private final String id;
 
     private List<Match> labelHighlights;
-    private boolean         hidden;
+    private boolean     hidden;
 
     public QuickOpenEntry() {
         this(Collections.<Match>emptyList());
@@ -41,6 +41,7 @@ public class QuickOpenEntry {
 
     /**
      * A identifier for the entry
+     *
      * @return the id
      */
     public String getId() {
@@ -56,6 +57,7 @@ public class QuickOpenEntry {
 
     /**
      * Detail information. Optional.
+     *
      * @return
      */
     public String getDetail() {
@@ -64,6 +66,7 @@ public class QuickOpenEntry {
 
     /**
      * The icon of the entry.
+     *
      * @return
      */
     public SVGResource getIcon() {
@@ -72,6 +75,7 @@ public class QuickOpenEntry {
 
     /**
      * A another description, can be shown right to the label
+     *
      * @return
      */
     public String getDescription() {
@@ -84,6 +88,7 @@ public class QuickOpenEntry {
 
     /**
      * Additional CSS class name.
+     *
      * @return
      */
     public String getAdditionalClass() {
@@ -98,18 +103,20 @@ public class QuickOpenEntry {
         this.hidden = hidden;
     }
 
-    public void setHighlights(List<Match> highlights) {
-        labelHighlights = highlights;
-    }
-
     public List<Match> getHighlights() {
         return labelHighlights;
+    }
+
+    public void setHighlights(List<Match> highlights) {
+        labelHighlights = highlights;
     }
 
     /**
      * Called when the entry selected for opening.
      * Returns a boolean value indicating if an action was performed.
-     * @param mode gives an indicating if the element is previewed or opened.
+     *
+     * @param mode
+     *         gives an indicating if the element is previewed or opened.
      * @return
      */
     public boolean run(Mode mode) {

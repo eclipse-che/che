@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.account.shared.model.Account;
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
@@ -46,6 +47,12 @@ import static java.util.Collections.singletonMap;
  * @author Yevhenii Voevodin
  */
 public final class TestObjectsFactory {
+
+    public static AccountImpl createAccount(String id) {
+        return new AccountImpl(id,
+                               id + "_name",
+                               "personal");
+    }
 
     public static UserImpl createUser(String id) {
         return new UserImpl(id,

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.che.ide.api.action;
 
 import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -137,11 +138,13 @@ public class DefaultActionGroup extends ActionGroup {
         if (action == this) {
             throw new IllegalArgumentException("Cannot add a group to itself");
         }
+
         // Check that action isn't already registered
         if (!(action instanceof Separator)) {
             for (Action actionInList : actionList) {
                 if (action.equals(actionInList)) {
-                    throw new IllegalArgumentException("cannot add an action twice: " + action);
+                    Log.error(getClass(), "Can not add an action twice: " + action);
+                    return;
                 }
             }
         }

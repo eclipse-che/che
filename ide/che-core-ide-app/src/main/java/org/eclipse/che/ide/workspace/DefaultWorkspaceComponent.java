@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,27 +12,21 @@ package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
+import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
@@ -41,10 +35,9 @@ import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
  * Used when no {@code factory} specified.
  *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
- *
  */
 @Singleton
-public class DefaultWorkspaceComponent extends WorkspaceComponent  {
+public class DefaultWorkspaceComponent extends WorkspaceComponent {
 
     @Inject
     public DefaultWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
@@ -54,15 +47,14 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
                                      DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                      EventBus eventBus,
                                      AppContext appContext,
-                                     Provider<MachineManager> machineManagerProvider,
                                      NotificationManager notificationManager,
-                                     MessageBusProvider messageBusProvider,
-                                     BrowserQueryFieldRenderer browserQueryFieldRenderer,
+                                     BrowserAddress browserAddress,
                                      DialogFactory dialogFactory,
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
-                                     WorkspaceEventsHandler workspaceEventsHandler,
-                                     LoaderPresenter loader) {
+                                     LoaderPresenter loader,
+                                     RequestTransmitter transmitter,
+                                     WorkspaceEventsHandler handler) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
               startWorkspacePresenter,
@@ -70,40 +62,32 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
               dtoUnmarshallerFactory,
               eventBus,
               appContext,
-              machineManagerProvider,
               notificationManager,
-              messageBusProvider,
-              browserQueryFieldRenderer,
+              browserAddress,
               dialogFactory,
               preferencesManager,
               dtoFactory,
-              workspaceEventsHandler,
-              loader);
+              loader,
+              transmitter);
     }
 
     /** {@inheritDoc} */
     @Override
     public void start(final Callback<Component, Exception> callback) {
         this.callback = callback;
-        workspaceServiceClient.getWorkspace(browserQueryFieldRenderer.getNamespace(), browserQueryFieldRenderer.getWorkspaceName()).then(
-                new Operation<WorkspaceDto>() {
-                    @Override
-                    public void apply(WorkspaceDto workspaceDto) throws OperationException {
-                        handleWorkspaceEvents(workspaceDto, callback, true, false);
-                    }
-                }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                needToReloadComponents = true;
-                dialogFactory.createMessageDialog(locale.getWsErrorDialogTitle(),
-                                                  locale.getWsErrorDialogContent(error.getMessage()),
-                                                  null).show();
-            }
-        });
+        workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
+                              .then(workspaceDto -> {
+                                  handleWorkspaceEvents(workspaceDto, callback, null);
+                              })
+                              .catchError(error -> {
+                                  needToReloadComponents = true;
+                                  String dialogTitle = locale.getWsErrorDialogTitle();
+                                  String dialogContent = locale.getWsErrorDialogContent(error.getMessage());
+                                  dialogFactory.createMessageDialog(dialogTitle, dialogContent, null).show();
+                              });
     }
 
     @Override
     public void tryStartWorkspace() {
     }
-
 }

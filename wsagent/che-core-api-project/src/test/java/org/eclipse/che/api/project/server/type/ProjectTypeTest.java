@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -106,8 +106,10 @@ public class ProjectTypeTest {
         assertEquals(3, reg.getProjectTypes().size());
         assertEquals(1, child.getParents().size());
         assertEquals(2, child.getAncestors().size());
-        assertEquals(2, reg.getProjectType("child").getAttributes().size());
-        assertEquals(1, reg.getProjectType("parent").getAttributes().size());
+        assertEquals(2 + reg.getProjectType(BaseProjectType.ID).getAttributes().size(),
+                     reg.getProjectType("child").getAttributes().size());
+        assertEquals(1 + reg.getProjectType(BaseProjectType.ID).getAttributes().size(),
+                     reg.getProjectType("parent").getAttributes().size());
         Assert.assertTrue(reg.getProjectType("child").isTypeOf("parent"));
     }
 
@@ -174,7 +176,8 @@ public class ProjectTypeTest {
         ProjectTypeRegistry reg = new ProjectTypeRegistry(pts);
 
         assertEquals(2, child.getParents().size());
-        assertEquals(3, reg.getProjectType("child").getAttributes().size());
+        assertEquals(3 + reg.getProjectType(BaseProjectType.ID).getAttributes().size(),
+                     reg.getProjectType("child").getAttributes().size());
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,7 @@ import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -85,6 +86,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.lang.Thread.currentThread;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
@@ -95,9 +97,12 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static org.eclipse.che.api.factory.server.DtoConverter.asDto;
 import static org.eclipse.che.api.factory.server.FactoryService.VALIDATE_QUERY_PARAMETER;
+import static org.eclipse.che.dto.server.DtoFactory.cloneDto;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyMapOf;
@@ -130,9 +135,7 @@ public class FactoryServiceTest {
     private static final String USER_EMAIL              = "email";
     private static final String WORKSPACE_NAME          = "workspace";
     private static final String PROJECT_SOURCE_TYPE     = "git";
-    private static final String PROJECT_SOURCE_LOCATION = "http://github.com/codenvy/platform-api.git";
-    private static final String FACTORY_IMAGE_MIME_TYPE = "image/jpeg";
-    private static final String IMAGE_NAME              = "image12";
+    private static final String PROJECT_SOURCE_LOCATION = "https://github.com/codenvy/platform-api.git";
 
 
     private static final DtoFactory DTO = DtoFactory.getInstance();
@@ -198,128 +201,7 @@ public class FactoryServiceTest {
     }
 
     @Test
-    public void shouldSaveFactoryWithImagesFromFormData() throws Exception {
-        final Factory factory = createFactory();
-        final FactoryDto factoryDto = asDto(factory, user);
-        when(factoryManager.saveFactory(any(FactoryDto.class), anySetOf(FactoryImage.class))).thenReturn(factory);
-        when(factoryManager.getById(FACTORY_ID)).thenReturn(factory);
-        doReturn(factoryDto).when(factoryBuilderSpy).build(any(InputStream.class));
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .multiPart("factory", JsonHelper.toJson(factoryDto), APPLICATION_JSON)
-                                         .multiPart("image", getImagePath().toFile(), FACTORY_IMAGE_MIME_TYPE)
-                                         .expect()
-                                         .statusCode(200)
-                                         .when()
-                                         .post(SERVICE_PATH);
-
-
-        final FactoryDto result = getFromResponse(response, FactoryDto.class);
-        final boolean found = result.getLinks()
-                                    .stream()
-                                    .anyMatch(link -> link.getRel().equals("image")
-                                                      && link.getProduces().equals(FACTORY_IMAGE_MIME_TYPE)
-                                                      && !link.getHref().isEmpty());
-        factoryDto.withLinks(result.getLinks())
-                  .getCreator()
-                  .withCreated(result.getCreator().getCreated());
-        assertEquals(result, factoryDto);
-        assertTrue(found);
-    }
-
-    @Test
-    public void shouldSaveFactoryFromFormDataWithoutImages() throws Exception {
-        final Factory factory = createFactory();
-        final FactoryDto factoryDto = asDto(factory, user);
-        when(factoryManager.saveFactory(any(FactoryDto.class), anySetOf(FactoryImage.class))).thenReturn(factory);
-        doReturn(factoryDto).when(factoryBuilderSpy).build(any(InputStream.class));
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .multiPart("factory", JsonHelper.toJson(factoryDto), APPLICATION_JSON)
-                                         .expect()
-                                         .statusCode(200)
-                                         .when()
-                                         .post(SERVICE_PATH);
-        final FactoryDto result = getFromResponse(response, FactoryDto.class);
-        factoryDto.withLinks(result.getLinks())
-                  .getCreator()
-                  .withCreated(result.getCreator().getCreated());
-        assertEquals(result, factoryDto);
-    }
-
-    @Test
-    public void shouldSaveFactoryWithImagesWhenImagesWithoutContent() throws Exception {
-        final Factory factory = createFactory();
-        when(factoryManager.saveFactory(any(FactoryDto.class), anySetOf(FactoryImage.class))).thenReturn(factory);
-        when(factoryManager.getById(FACTORY_ID)).thenReturn(factory);
-        final FactoryDto factoryDto = asDto(factory, user);
-        doReturn(factoryDto).when(factoryBuilderSpy).build(any(InputStream.class));
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .multiPart("factory", DTO.toJson(factoryDto), APPLICATION_JSON)
-                                         .multiPart("image", File.createTempFile("img", ".jpeg"), "image/jpeg")
-                                         .expect()
-                                         .statusCode(200)
-                                         .when()
-                                         .post(SERVICE_PATH);
-        final FactoryDto result = getFromResponse(response, FactoryDto.class);
-        verify(factoryManager).saveFactory(any(FactoryDto.class), anySetOf(FactoryImage.class));
-        factoryDto.withLinks(result.getLinks())
-                  .getCreator()
-                  .withCreated(result.getCreator().getCreated());
-        assertEquals(result, factoryDto);
-    }
-
-    @Test
-    public void shouldThrowBadRequestExceptionWhenInvalidFactorySectionProvided() throws Exception {
-        doThrow(new JsonSyntaxException("Invalid json")).when(factoryBuilderSpy).build(any(InputStream.class));
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .multiPart("factory", "invalid content", FACTORY_IMAGE_MIME_TYPE)
-                                         .expect()
-                                         .statusCode(400)
-                                         .when()
-                                         .post(SERVICE_PATH);
-
-        final ServiceError err = getFromResponse(response, ServiceError.class);
-        assertEquals(err.getMessage(), "Invalid JSON value of the field 'factory' provided");
-    }
-
-    @Test
-    public void shouldThrowBadRequestExceptionWhenNoFactorySectionProvided() throws Exception {
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .multiPart("some data", "some content", FACTORY_IMAGE_MIME_TYPE)
-                                         .expect()
-                                         .statusCode(400)
-                                         .when()
-                                         .post(SERVICE_PATH);
-
-        final ServiceError err = getFromResponse(response, ServiceError.class);
-        assertEquals(err.getMessage(), "factory configuration required");
-    }
-
-    @Test
-    public void shouldThrowServerExceptionWhenProvidedFactoryDataInvalid() throws Exception {
-        final String errMessage = "eof";
-        doThrow(new IOException(errMessage)).when(factoryBuilderSpy).build(any(InputStream.class));
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .multiPart("factory", "any content", FACTORY_IMAGE_MIME_TYPE)
-                                         .expect()
-                                         .statusCode(500)
-                                         .when()
-                                         .post(SERVICE_PATH);
-
-        final ServiceError err = getFromResponse(response, ServiceError.class);
-        assertEquals(err.getMessage(), errMessage);
-    }
-
-    @Test
-    public void shouldSaveFactoryWithoutImages() throws Exception {
+    public void shouldSaveFactory() throws Exception {
         final Factory factory = createFactory();
         final FactoryDto factoryDto = asDto(factory, user);
         when(factoryManager.saveFactory(any(FactoryDto.class))).thenReturn(factory);
@@ -329,9 +211,8 @@ public class FactoryServiceTest {
                                          .contentType(ContentType.JSON)
                                          .body(factoryDto)
                                          .expect()
-                                         .statusCode(200)
+//                                         .statusCode(200)
                                          .post(SERVICE_PATH);
-
         assertEquals(getFromResponse(response, FactoryDto.class).withLinks(emptyList()), factoryDto);
     }
 
@@ -352,11 +233,10 @@ public class FactoryServiceTest {
         final Factory factory = createFactory();
         final FactoryDto factoryDto = asDto(factory, user);
         when(factoryManager.getById(FACTORY_ID)).thenReturn(factory);
-        when(factoryManager.getFactoryImages(FACTORY_ID)).thenReturn(emptySet());
 
         final Response response = given().when()
-                                         .expect()
-                                         .statusCode(200)
+//                                         .expect()
+//                                         .statusCode(200)
                                          .get(SERVICE_PATH + "/" + FACTORY_ID);
 
         assertEquals(getFromResponse(response, FactoryDto.class).withLinks(emptyList()), factoryDto);
@@ -367,7 +247,6 @@ public class FactoryServiceTest {
         final Factory factory = createFactory();
         final FactoryDto factoryDto = asDto(factory, user);
         when(factoryManager.getById(FACTORY_ID)).thenReturn(factory);
-        when(factoryManager.getFactoryImages(FACTORY_ID)).thenReturn(emptySet());
         doNothing().when(acceptValidator).validateOnAccept(any(FactoryDto.class));
 
         final Response response = given().when()
@@ -448,31 +327,10 @@ public class FactoryServiceTest {
     }
 
     @Test
-    public void shouldBeAbleToUpdateFactory() throws Exception {
-        final Factory existed = createFactory();
-        final Factory update = createFactoryWithStorage(null, "git", "http://github.com/codenvy/platform-api1.git");
-        when(factoryManager.getById(FACTORY_ID)).thenReturn(existed);
-        when(factoryManager.updateFactory(any())).thenReturn(update);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType(APPLICATION_JSON)
-                                         .body(JsonHelper.toJson(asDto(existed, user)))
-                                         .when()
-                                         .expect()
-                                         .statusCode(200)
-                                         .put(SERVICE_PATH + "/" + FACTORY_ID);
-
-        final FactoryDto result = getFromResponse(response, FactoryDto.class);
-        verify(factoryManager, times(1)).updateFactory(any());
-        assertEquals(result.withLinks(emptyList()), asDto(update, user));
-    }
-
-    @Test
     public void shouldThrowNotFoundExceptionWhenUpdatingNonExistingFactory() throws Exception {
         final Factory factory = createFactoryWithStorage(FACTORY_NAME,
                                                          "git",
-                                                         "http://github.com/codenvy/platform-api.git");
+                                                         "https://github.com/codenvy/platform-api.git");
         doThrow(new NotFoundException(format("Factory with id %s is not found.", FACTORY_ID))).when(factoryManager)
                                                                                               .getById(anyString());
 
@@ -571,64 +429,6 @@ public class FactoryServiceTest {
     }
 
     @Test
-    public void shouldReturnFactoryImageWithGivenName() throws Exception {
-        final byte[] imageContent = Files.readAllBytes(getImagePath());
-        final FactoryImage image = new FactoryImage(imageContent, FACTORY_IMAGE_MIME_TYPE, IMAGE_NAME);
-        when(factoryManager.getFactoryImages(FACTORY_ID, IMAGE_NAME)).thenReturn(ImmutableSet.of(image));
-
-        final Response response = given().when()
-                                         .expect()
-                                         .statusCode(200)
-                                         .get(SERVICE_PATH + "/" + FACTORY_ID + "/image?imgId=" + IMAGE_NAME);
-
-        assertEquals(response.getContentType(), FACTORY_IMAGE_MIME_TYPE);
-        assertEquals(response.getHeader("content-length"), String.valueOf(imageContent.length));
-        assertEquals(response.asByteArray(), imageContent);
-    }
-
-    @Test
-    public void shouldReturnFirstFoundFactoryImageWhenImageNameNotSpecified() throws Exception {
-        final byte[] imageContent = Files.readAllBytes(getImagePath());
-        final FactoryImage image = new FactoryImage(imageContent, FACTORY_IMAGE_MIME_TYPE, IMAGE_NAME);
-        when(factoryManager.getFactoryImages(FACTORY_ID)).thenReturn(ImmutableSet.of(image));
-
-        final Response response = given().when()
-                                         .expect()
-                                         .statusCode(200)
-                                         .get(SERVICE_PATH + "/" + FACTORY_ID + "/image");
-
-        assertEquals(response.getContentType(), "image/jpeg");
-        assertEquals(response.getHeader("content-length"), String.valueOf(imageContent.length));
-        assertEquals(response.asByteArray(), imageContent);
-    }
-
-    @Test
-    public void shouldThrowNotFoundExceptionWhenFactoryImageWithGivenIdentifierIsNotExist() throws Exception {
-        final String errMessage = "Image with name " + IMAGE_NAME + " is not found";
-        when(factoryManager.getFactoryImages(FACTORY_ID, IMAGE_NAME)).thenThrow(new NotFoundException(errMessage));
-
-        final Response response = given().expect()
-                                         .statusCode(404)
-                                         .when()
-                                         .get(SERVICE_PATH + "/" + FACTORY_ID + "/image?imgId=" + IMAGE_NAME);
-
-        assertEquals(getFromResponse(response, ServiceError.class).getMessage(), errMessage);
-    }
-
-    @Test
-    public void shouldBeAbleToReturnUrlSnippet() throws Exception {
-        final String result = "snippet";
-        when(factoryManager.getFactorySnippet(anyString(), anyString(), any(URI.class))).thenReturn(result);
-
-        given().expect()
-               .statusCode(200)
-               .contentType(TEXT_PLAIN)
-               .body(equalTo(result))
-               .when()
-               .get(SERVICE_PATH + "/" + FACTORY_ID + "/snippet?type=url");
-    }
-
-    @Test
     public void shouldNotGenerateFactoryIfNoProjectsWithSourceStorage() throws Exception {
         // given
         final String wsId = "workspace123234";
@@ -658,22 +458,6 @@ public class FactoryServiceTest {
 
         // then
         assertEquals(response.getStatusCode(), BAD_REQUEST.getStatusCode());
-    }
-
-    @Test
-    public void shouldResponse404OnGetSnippetIfFactoryDoesNotExist() throws Exception {
-        // given
-        doThrow(new NotFoundException("Factory URL with id " + FACTORY_ID + " is not found."))
-                .when(factoryManager).getFactorySnippet(anyString(), anyString(), any());
-
-        // when, then
-        final Response response = given().expect()
-                                         .statusCode(404)
-                                         .when()
-                                         .get(SERVICE_PATH + "/" + FACTORY_ID + "/snippet?type=url");
-
-        assertEquals(getFromResponse(response, ServiceError.class).getMessage(),
-                     "Factory URL with id " + FACTORY_ID + " is not found.");
     }
 
     /**
@@ -745,6 +529,67 @@ public class FactoryServiceTest {
         verify(acceptValidator).validateOnAccept(any());
     }
 
+    @Test
+    public void shouldAddExecAgentOnSaveFactory() throws Exception {
+        final Factory factory = createFactory();
+        final FactoryDto factoryDto = asDto(factory, user);
+
+        EnvironmentDto environment = newDto(EnvironmentDto.class);
+        ExtendedMachineDto machine = newDto(ExtendedMachineDto.class);
+        factoryDto.getWorkspace().setEnvironments(ImmutableMap.of("e1", cloneDto(environment).withMachines(
+                ImmutableMap.of("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                          "org.eclipse.che.ls.php",
+                                                                          "org.eclipse.che.ls.json")),
+                                "m2", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                          "org.eclipse.che.terminal",
+                                                                          "org.eclipse.che.ls.json")),
+                                "m3", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                          "org.eclipse.che.ls.json")))
+                                                                  ),
+                                                                  "e2", cloneDto(environment).withMachines(
+                        ImmutableMap.of("m4", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                  "org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.ls.json")),
+                                        "m5", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.ls.json")))
+                )));
+        Map<String, EnvironmentDto> expectedEnvs = ImmutableMap.of("e1", cloneDto(environment).withMachines(
+                ImmutableMap.of("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                          "org.eclipse.che.ls.php",
+                                                                          "org.eclipse.che.ls.json",
+                                                                          "org.eclipse.che.exec")),
+                                "m2", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                          "org.eclipse.che.terminal",
+                                                                          "org.eclipse.che.ls.json",
+                                                                          "org.eclipse.che.exec")),
+                                "m3", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                          "org.eclipse.che.ls.json")))
+                                                                   ),
+                                                                   "e2", cloneDto(environment).withMachines(
+                        ImmutableMap.of("m4", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
+                                                                                  "org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.ls.json",
+                                                                                  "org.eclipse.che.exec")),
+                                        "m5", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
+                                                                                  "org.eclipse.che.ls.json")))
+                ));
+
+        when(factoryManager.saveFactory(any(FactoryDto.class)))
+                .thenAnswer(invocation -> new FactoryImpl((Factory)invocation.getArguments()[0]));
+        doReturn(factoryDto).when(factoryBuilderSpy).build(any(InputStream.class));
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .body(factoryDto.toString())
+                                         .contentType(APPLICATION_JSON)
+                                         .expect()
+                                         .statusCode(200)
+                                         .when()
+                                         .post(SERVICE_PATH);
+        final FactoryDto result = getFromResponse(response, FactoryDto.class);
+        Map<String, EnvironmentDto> actualEnvs = result.getWorkspace().getEnvironments();
+        assertEquals(actualEnvs, expectedEnvs);
+    }
+
     private Factory createFactory() {
         return createNamedFactory(FACTORY_NAME);
     }
@@ -801,11 +646,5 @@ public class FactoryServiceTest {
 
     private static <T> List<T> unwrapDtoList(Response response, Class<T> dtoClass) {
         return FluentIterable.from(DtoFactory.getInstance().createListDtoFromJson(response.body().print(), dtoClass)).toList();
-    }
-
-    private static Path getImagePath() throws Exception {
-        final URL res = currentThread().getContextClassLoader().getResource("100x100_image.jpeg");
-        assertNotNull(res);
-        return Paths.get(res.toURI());
     }
 }

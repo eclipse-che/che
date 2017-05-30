@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
+import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.plugin.maven.server.core.MavenCommunication;
 import org.eclipse.che.plugin.maven.server.core.MavenExecutorService;
@@ -24,9 +25,9 @@ import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
 import org.eclipse.che.plugin.maven.server.core.MavenWorkspace;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
+import org.eclipse.che.plugin.maven.server.projecttype.MavenValueProvider;
 import org.eclipse.che.plugin.maven.server.rest.MavenServerService;
 import org.eclipse.che.plugin.maven.server.rmi.MavenServerManagerTest;
-import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.shared.MessageType;
 import org.eclipse.che.plugin.maven.shared.dto.NotificationMessage;
 import org.eclipse.core.resources.IProject;
@@ -52,6 +53,7 @@ public class PomReconcilerTest extends BaseTest {
 
     private MavenProjectManager projectManager;
     private MavenWorkspace      mavenWorkspace;
+    private MavenValueProvider  mavenValueProvider;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -75,6 +77,7 @@ public class PomReconcilerTest extends BaseTest {
         MavenWrapperManager wrapperManager = new MavenWrapperManager(mavenServerManager);
         projectManager =
                 new MavenProjectManager(wrapperManager, mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
+
 
 
         ClasspathManager classpathManager =

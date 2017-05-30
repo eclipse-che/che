@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,12 +27,12 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
-import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.menu.PartMenu;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
 import org.eclipse.che.ide.part.PartsComparator;
 import org.eclipse.che.ide.part.editor.actions.CloseAllTabsPaneAction;
@@ -63,6 +63,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -83,6 +84,8 @@ public class EditorPartStackPresenterTest {
     //constructor mocks
     @Mock
     private EditorPartStackView       view;
+    @Mock
+    private PartMenu                  partMenu;
     @Mock
     private PartsComparator           partsComparator;
     @Mock
@@ -105,6 +108,8 @@ public class EditorPartStackPresenterTest {
     private CloseAllTabsPaneAction    closeAllTabsPaneAction;
     @Mock
     private EditorPaneMenuItemFactory editorPaneMenuItemFactory;
+    @Mock
+    private EditorAgent               editorAgent;
 
     //additional mocks
     @Mock
@@ -193,6 +198,7 @@ public class EditorPartStackPresenterTest {
         when(editorPaneMenuItemFactory.createMenuItem((TabItem)anyObject())).thenReturn(editorPaneTabMenuItem);
 
         presenter = new EditorPartStackPresenter(view,
+                                                 partMenu,
                                                  partsComparator,
                                                  editorPaneMenuItemFactory,
                                                  presentationFactory,
@@ -202,7 +208,8 @@ public class EditorPartStackPresenterTest {
                                                  editorPaneMenu,
                                                  actionManager,
                                                  closePaneAction,
-                                                 closeAllTabsPaneAction);
+                                                 closeAllTabsPaneAction,
+                                                 editorAgent);
 
         when(tabItemFactory.createEditorPartButton(partPresenter1, presenter)).thenReturn(editorTab1);
         when(tabItemFactory.createEditorPartButton(partPresenter2, presenter)).thenReturn(editorTab2);
@@ -451,7 +458,7 @@ public class EditorPartStackPresenterTest {
 
         presenter.paneMenuTabItemHandler.onCloseButtonClicked(editorPaneTabMenuItem);
 
-        verify(eventBus).fireEvent(Matchers.<FileEvent>anyObject());
+        verify(editorAgent).closeEditor(any(EditorPartPresenter.class));
     }
 
 }

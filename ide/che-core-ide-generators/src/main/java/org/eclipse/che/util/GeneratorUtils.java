@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,10 @@ package org.eclipse.che.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,10 +67,31 @@ public class GeneratorUtils {
                 rootDirPath = args[0].substring(ROOT_DIR_PARAMETER.length());
             } else {
                 System.err.print("Wrong usage. There is only one allowed argument : "
-                        + ROOT_DIR_PARAMETER);//NOSONAR
+                                 + ROOT_DIR_PARAMETER);//NOSONAR
                 System.exit(1);//NOSONAR
             }
         }
         return new File(rootDirPath);
+    }
+
+    /**
+     * Parse command line arguments in format --key=value --key2=value2.
+     * Multiple keys is allowed
+     *
+     * @param args
+     *         command line argument.
+     * @return Mapping of keys to values.
+     */
+    public static Map<String, Set<String>> parseArgs(String[] args) {
+        Map<String, Set<String>> parsedArgs = new HashMap<>();
+        for (String arg : args) {
+            int index = arg.indexOf("=");
+            if (arg.startsWith("--") && index > 0) {
+                String argName = arg.substring(2, index);
+                parsedArgs.computeIfAbsent(argName, k -> new HashSet<>())
+                          .add(arg.substring(index + 1));
+            }
+        }
+        return parsedArgs;
     }
 }

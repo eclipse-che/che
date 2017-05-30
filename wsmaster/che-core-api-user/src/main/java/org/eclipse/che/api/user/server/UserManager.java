@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,30 +12,33 @@ package org.eclipse.che.api.user.server;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.google.inject.persist.Transactional;
 
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
+import org.eclipse.che.api.user.server.event.PostUserPersistedEvent;
+import org.eclipse.che.api.user.server.event.UserCreatedEvent;
+import org.eclipse.che.api.user.server.event.UserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-
 import java.util.Set;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.user.server.Constants.ID_LENGTH;
@@ -47,25 +50,27 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
  *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  * @author Yevhenii Voevodin
+ * @author Anton Korneta
  */
 @Singleton
 public class UserManager {
-
-    private static final Logger LOG = LoggerFactory.getLogger(UserManager.class);
 
     private final UserDao       userDao;
     private final ProfileDao    profileDao;
     private final PreferenceDao preferencesDao;
     private final Set<String>   reservedNames;
+    private final EventService  eventService;
 
     @Inject
     public UserManager(UserDao userDao,
                        ProfileDao profileDao,
                        PreferenceDao preferencesDao,
+                       EventService eventService,
                        @Named("che.auth.reserved_user_names") String[] reservedNames) {
         this.userDao = userDao;
         this.profileDao = profileDao;
         this.preferencesDao = preferencesDao;
+        this.eventService = eventService;
         this.reservedNames = Sets.newHashSet(reservedNames);
     }
 
@@ -92,30 +97,18 @@ public class UserManager {
                                            newUser.getName(),
                                            firstNonNull(newUser.getPassword(), generate("", PASSWORD_LENGTH)),
                                            newUser.getAliases());
-        try {
-            userDao.create(user);
-            profileDao.create(new ProfileImpl(user.getId()));
-            preferencesDao.setPreferences(user.getId(), ImmutableMap.of("temporary", Boolean.toString(isTemporary),
-                                                                        "codenvy:created", Long.toString(currentTimeMillis())));
-        } catch (ConflictException | ServerException x) {
-            // optimistic rollback(won't remove profile if userDao.remove failed)
-            // remove operation is not-found-safe so if any exception
-            // during the either user or profile creation occurs remove all entities
-            // NOTE: this logic must be replaced with transaction management
-            try {
-                userDao.remove(user.getId());
-                profileDao.remove(user.getId());
-                preferencesDao.remove(user.getId());
-            } catch (ConflictException | ServerException rollbackEx) {
-                LOG.error(format("An attempt to clean up resources due to user creation failure was unsuccessful." +
-                                 "Now the system may be in inconsistent state. " +
-                                 "User with id '%s' must not exist",
-                                 user.getId()),
-                          rollbackEx);
-            }
-            throw x;
-        }
+        doCreate(user, isTemporary);
+        eventService.publish(new UserCreatedEvent(user));
         return user;
+    }
+
+    @Transactional(rollbackOn = {RuntimeException.class, ApiException.class})
+    protected void doCreate(UserImpl user, boolean isTemporary) throws ConflictException, ServerException {
+        userDao.create(user);
+        eventService.publish(new PostUserPersistedEvent(new UserImpl(user))).propagateException();
+        profileDao.create(new ProfileImpl(user.getId()));
+        preferencesDao.setPreferences(user.getId(), ImmutableMap.of("temporary", Boolean.toString(isTemporary),
+                                                                    "codenvy:created", Long.toString(currentTimeMillis())));
     }
 
     /**
@@ -229,6 +222,58 @@ public class UserManager {
     }
 
     /**
+     * Returns all users whose email address contains specified {@code emailPart}.
+     *
+     * @param emailPart
+     *         fragment of user's email
+     * @param maxItems
+     *         the maximum number of users to return
+     * @param skipCount
+     *         the number of users to skip
+     * @return list of matched users
+     * @throws NullPointerException
+     *         when {@code emailPart} is null
+     * @throws IllegalArgumentException
+     *         when {@code maxItems} or {@code skipCount} is negative or
+     *         when {@code skipCount} more than {@value Integer#MAX_VALUE}
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    public Page<? extends User> getByEmailPart(String emailPart, int maxItems, long skipCount) throws ServerException {
+        requireNonNull(emailPart, "Required non-null email part");
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative");
+        checkArgument(skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
+                      "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
+        return userDao.getByEmailPart(emailPart, maxItems, skipCount);
+    }
+
+    /**
+     * Returns all users whose name contains specified {@code namePart}.
+     *
+     * @param namePart
+     *         fragment of user's name
+     * @param maxItems
+     *         the maximum number of users to return
+     * @param skipCount
+     *         the number of users to skip
+     * @return list of matched users
+     * @throws NullPointerException
+     *         when {@code namePart} is null
+     * @throws IllegalArgumentException
+     *         when {@code maxItems} or {@code skipCount} is negative or
+     *         when {@code skipCount} more than {@value Integer#MAX_VALUE}
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    public Page<? extends User> getByNamePart(String namePart, int maxItems, long skipCount) throws ServerException {
+        requireNonNull(namePart, "Required non-null name part");
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative");
+        checkArgument(skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
+                      "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
+        return userDao.getByNamePart(namePart, maxItems, skipCount);
+    }
+
+    /**
      * Gets total count of all users
      *
      * @return user count
@@ -253,6 +298,22 @@ public class UserManager {
      */
     public void remove(String id) throws ServerException, ConflictException {
         requireNonNull(id, "Required non-null id");
+        doRemove(id);
+        eventService.publish(new UserRemovedEvent(id));
+    }
+
+    @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
+    protected void doRemove(String id) throws ServerException {
+        UserImpl user;
+        try {
+            user = userDao.getById(id);
+        } catch (NotFoundException ignored) {
+            return;
+        }
+
+        preferencesDao.remove(id);
+        profileDao.remove(id);
+        eventService.publish(new BeforeUserRemovedEvent(user)).propagateException();
         userDao.remove(id);
     }
 }

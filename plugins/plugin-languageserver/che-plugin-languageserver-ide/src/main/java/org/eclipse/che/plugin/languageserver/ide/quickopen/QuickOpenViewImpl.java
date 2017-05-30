@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,10 +33,10 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.autocomplete.AutoCompleteResources;
+import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
-import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenEntry.Mode;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
@@ -50,20 +50,8 @@ import java.util.List;
 public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
 
     private final AutoCompleteResources.Css css;
-    @UiField
-    TextBox         nameField;
-    @UiField
-    DockLayoutPanel layoutPanel;
-    @UiField
-    FlowPanel       actionsPanel;
-    @UiField
-    HTML            actionsContainer;
-    private ActionDelegate             delegate;
-    private Resources                  resources;
-    private final LanguageServerResources languageServerResources;
-    private SimpleList<QuickOpenEntry> list;
-
-        private final SimpleList.ListItemRenderer<QuickOpenEntry> listItemRenderer =
+    private final LanguageServerResources   languageServerResources;
+    private final SimpleList.ListItemRenderer<QuickOpenEntry> listItemRenderer =
             new SimpleList.ListItemRenderer<QuickOpenEntry>() {
                 @Override
                 public void render(Element itemElement, QuickOpenEntry itemData) {
@@ -87,7 +75,7 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
                             builder.appendHtmlConstant("</span>");
                         }
 
-                        builder.appendHtmlConstant("<span class=\""+languageServerResources.quickOpenListCss().searchMatch()+"\">");
+                        builder.appendHtmlConstant("<span class=\"" + languageServerResources.quickOpenListCss().searchMatch() + "\">");
                         builder.appendEscaped(text.substring(highlight.getStart(), highlight.getEnd()));
                         builder.appendHtmlConstant("</span>");
                         pos = highlight.getEnd();
@@ -106,9 +94,9 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
                         icon.appendChild((elemental.dom.Node)svgImage.getElement());
                         itemElement.appendChild(icon);
                     }
-                    if(itemData instanceof QuickOpenEntryGroup) {
+                    if (itemData instanceof QuickOpenEntryGroup) {
                         QuickOpenEntryGroup entryGroup = (QuickOpenEntryGroup)itemData;
-                        if(entryGroup.isWithBorder()) {
+                        if (entryGroup.isWithBorder()) {
                             Elements.addClassName(languageServerResources.quickOpenListCss().groupSeparator(), itemElement);
                         }
                         if (entryGroup.getGroupLabel() != null) {
@@ -130,12 +118,23 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
                     return Elements.createDivElement();
                 }
             };
-    private QuickOpenModel model;
+    @UiField
+    TextBox         nameField;
+    @UiField
+    DockLayoutPanel layoutPanel;
+    @UiField
+    FlowPanel       actionsPanel;
+    @UiField
+    HTML            actionsContainer;
+    private ActionDelegate             delegate;
+    private Resources                  resources;
+    private SimpleList<QuickOpenEntry> list;
+    private QuickOpenModel             model;
+
     private final SimpleList.ListEventDelegate<QuickOpenEntry> eventDelegate = new SimpleList.ListEventDelegate<QuickOpenEntry>() {
         @Override
         public void onListItemClicked(Element listItemBase, QuickOpenEntry itemData) {
             run(itemData, true);
-
         }
 
         @Override
@@ -167,7 +166,6 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
                 delegate.onClose(event.isAutoClosed());
             }
         });
-
     }
 
     @Override
@@ -186,13 +184,13 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
 
         nameField.setValue(value);
 
-
         setPopupPositionAndShow(new PositionCallback() {
             @Override
             public void setPosition(int offsetWidth, int offsetHeight) {
-                setPopupPosition((Window.getClientWidth() / 2) - (offsetWidth/2), 60);
+                setPopupPosition((Window.getClientWidth() / 2) - (offsetWidth / 2), 60);
             }
         });
+
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
@@ -208,22 +206,20 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
         actionsContainer.getElement().setInnerHTML("");
         Element itemHolder = Elements.createDivElement();
         itemHolder.setClassName(css.items());
-        actionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element) itemHolder));
+        actionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element)itemHolder));
 
         list = SimpleList.create((SimpleList.View)actionsContainer.getElement().cast(), (Element)actionsContainer.getElement(), itemHolder,
                                  languageServerResources.quickOpenListCss(), listItemRenderer, eventDelegate);
 
         list.render(new ArrayList<>(model.getEntries()));
 
-
         layoutPanel.setWidgetHidden(actionsPanel, false);
         layoutPanel.setHeight("200px");
 
-        if(!nameField.getValue().isEmpty()){
+        if (!nameField.getValue().isEmpty()) {
             list.getSelectionModel().setSelectedItem(0);
             run(list.getSelectionModel().getSelectedItem(), false);
         }
-
     }
 
     protected void run(QuickOpenEntry entry, boolean isOpen) {
@@ -289,6 +285,5 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
 
     interface QuickOpenViewImplUiBinder extends UiBinder<DockLayoutPanel, QuickOpenViewImpl> {
     }
-
 
 }

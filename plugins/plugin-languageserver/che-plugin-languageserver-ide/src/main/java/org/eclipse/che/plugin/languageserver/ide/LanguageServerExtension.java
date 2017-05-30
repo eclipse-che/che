@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,11 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentItemDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -34,11 +29,17 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
+import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.ApplyTextEditAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.declaration.FindDefinitionAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.references.FindReferencesAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.GoToSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.workspace.FindSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.lsp4j.DidCloseTextDocumentParams;
+import org.eclipse.lsp4j.DidOpenTextDocumentParams;
+import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.TextDocumentItem;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 
@@ -60,11 +61,13 @@ public class LanguageServerExtension {
                                   GoToSymbolAction goToSymbolAction,
                                   FindSymbolAction findSymbolAction,
                                   FindDefinitionAction findDefinitionAction,
-                                  FindReferencesAction findReferencesAction) {
+                                  FindReferencesAction findReferencesAction,
+                                  ApplyTextEditAction applyTextEditAction) {
         actionManager.registerAction("LSGoToSymbolAction", goToSymbolAction);
         actionManager.registerAction("LSFindSymbolAction", findSymbolAction);
         actionManager.registerAction("LSFindDefinitionAction", findDefinitionAction);
         actionManager.registerAction("LSFindReferencesAction", findReferencesAction);
+        actionManager.registerAction("lsp.applyTextEdit", applyTextEditAction);
 
         DefaultActionGroup assistantGroup = (DefaultActionGroup)actionManager.getAction(GROUP_ASSISTANT);
         assistantGroup.add(goToSymbolAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
@@ -78,9 +81,9 @@ public class LanguageServerExtension {
         } else {
             keyBindingManager.getGlobal().addKey(new KeyBuilder().action().charCode(KeyCodeMap.F12).build(), "LSGoToSymbolAction");
         }
-        keyBindingManager.getGlobal().addKey(new KeyBuilder().alt().charCode('n').build(),"LSFindSymbolAction");
-        keyBindingManager.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F7).build(),"LSFindReferencesAction");
-        keyBindingManager.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.F4).build(),"LSFindDefinitionAction");
+        keyBindingManager.getGlobal().addKey(new KeyBuilder().alt().charCode('n').build(), "LSFindSymbolAction");
+        keyBindingManager.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F7).build(), "LSFindReferencesAction");
+        keyBindingManager.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.F4).build(), "LSFindDefinitionAction");
 
     }
 
@@ -97,11 +100,11 @@ public class LanguageServerExtension {
                 if (location.getFileExtension() == null || !fileTypeRegister.hasLSForExtension(location.getFileExtension())) {
                     return;
                 }
-                final TextDocumentIdentifierDTO documentId = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
+                final TextDocumentIdentifier documentId = dtoFactory.createDto(TextDocumentIdentifier.class);
                 documentId.setUri(location.toString());
                 switch (event.getOperationType()) {
                     case OPEN:
-                        onOpen(event, dtoFactory, serviceClient);
+                        onOpen(event, dtoFactory, serviceClient, fileTypeRegister);
                         break;
                     case CLOSE:
                         onClose(documentId, dtoFactory, serviceClient);
@@ -114,36 +117,38 @@ public class LanguageServerExtension {
         });
     }
 
-    private void onSave(TextDocumentIdentifierDTO documentId,
+    private void onSave(TextDocumentIdentifier documentId,
                         DtoFactory dtoFactory,
                         TextDocumentServiceClient serviceClient) {
-        DidSaveTextDocumentParamsDTO saveEvent = dtoFactory.createDto(DidSaveTextDocumentParamsDTO.class);
+        DidSaveTextDocumentParams saveEvent = dtoFactory.createDto(DidSaveTextDocumentParams.class);
         saveEvent.setTextDocument(documentId);
         serviceClient.didSave(saveEvent);
     }
 
-    private void onClose(TextDocumentIdentifierDTO documentId,
+    private void onClose(TextDocumentIdentifier documentId,
                          DtoFactory dtoFactory,
                          TextDocumentServiceClient serviceClient) {
-        DidCloseTextDocumentParamsDTO closeEvent = dtoFactory.createDto(DidCloseTextDocumentParamsDTO.class);
+        DidCloseTextDocumentParams closeEvent = dtoFactory.createDto(DidCloseTextDocumentParams.class);
         closeEvent.setTextDocument(documentId);
         serviceClient.didClose(closeEvent);
     }
 
     private void onOpen(final FileEvent event,
                         final DtoFactory dtoFactory,
-                        final TextDocumentServiceClient serviceClient) {
+                        final TextDocumentServiceClient serviceClient,
+                        final LanguageServerFileTypeRegister fileTypeRegister) {
         event.getFile().getContent().then(new Operation<String>() {
             @Override
             public void apply(String text) throws OperationException {
-                TextDocumentItemDTO documentItem = dtoFactory.createDto(TextDocumentItemDTO.class);
-                documentItem.setUri(event.getFile().getPath());
+                TextDocumentItem documentItem = dtoFactory.createDto(TextDocumentItem.class);
+                documentItem.setUri(event.getFile().getLocation().toString());
                 documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
                 documentItem.setText(text);
+                documentItem.setLanguageId(fileTypeRegister.findLangId(event.getFile().getLocation().getFileExtension()));
 
-                DidOpenTextDocumentParamsDTO openEvent = dtoFactory.createDto(DidOpenTextDocumentParamsDTO.class);
+                DidOpenTextDocumentParams openEvent = dtoFactory.createDto(DidOpenTextDocumentParams.class);
                 openEvent.setTextDocument(documentItem);
-                openEvent.setUri(event.getFile().getPath());
+                openEvent.getTextDocument().setUri(event.getFile().getLocation().toString());
                 openEvent.setText(text);
 
                 serviceClient.didOpen(openEvent);

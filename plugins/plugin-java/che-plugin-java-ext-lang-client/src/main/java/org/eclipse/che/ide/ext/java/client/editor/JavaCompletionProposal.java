@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,7 +84,6 @@ public class JavaCompletionProposal implements CompletionProposal, CompletionPro
         frame.setSize("100%", "100%");
         frame.getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
         frame.getElement().setAttribute("sandbox", ""); // empty value, not null
-        frame.getElement().getStyle().setProperty("resize", "both");
         frame.setUrl(client.getProposalDocUrl(id, sessionId));
         callback.onSuccess(frame);
     }

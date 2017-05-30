@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 
+import java.io.Writer;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -99,6 +100,11 @@ public class JsonStringMapImpl<T> implements JsonStringMap<T> {
     @Override
     public String toJson() {
         return gson.toJson(this);
+    }
+
+    @Override
+    public void toJson(Writer w) {
+        gson.toJson(this, w);
     }
 
     @Override

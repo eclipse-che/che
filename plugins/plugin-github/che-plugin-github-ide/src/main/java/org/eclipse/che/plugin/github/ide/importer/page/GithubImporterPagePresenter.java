@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,11 +31,10 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.util.NameUtils;
 import org.eclipse.che.plugin.github.ide.GitHubClientService;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
 import org.eclipse.che.plugin.github.ide.load.ProjectData;
-import org.eclipse.che.ide.rest.RestContext;
-import org.eclipse.che.ide.util.NameUtils;
 import org.eclipse.che.plugin.github.shared.GitHubRepository;
 import org.eclipse.che.plugin.github.shared.GitHubUser;
 import org.eclipse.che.security.oauth.OAuthStatus;
@@ -71,7 +70,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
     private       Map<String, List<GitHubRepository>> repositories;
     private       GitHubLocalizationConstant          locale;
     private       GithubImporterPageView              view;
-    private final String                              restContext;
+    private final String                              baseUrl;
     private final AppContext                          appContext;
     private       OAuth2Authenticator                 gitHubAuthenticator;
 
@@ -82,11 +81,10 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
                                        OAuth2AuthenticatorRegistry gitHubAuthenticatorRegistry,
                                        GitHubClientService gitHubClientService,
                                        DtoFactory dtoFactory,
-                                       @RestContext String restContext,
                                        AppContext appContext,
                                        GitHubLocalizationConstant locale) {
         this.view = view;
-        this.restContext = restContext;
+        this.baseUrl = appContext.getMasterEndpoint();
         this.appContext = appContext;
         this.gitHubAuthenticator = gitHubAuthenticatorRegistry.getAuthenticator("github");
         this.gitHubClientService = gitHubClientService;
@@ -314,7 +312,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
     private void authorize() {
         showProcessing(true);
         gitHubAuthenticator.authenticate(
-                OAuth2AuthenticatorUrlProvider.get(restContext, "github", appContext.getCurrentUser().getProfile().getUserId(),
+                OAuth2AuthenticatorUrlProvider.get(baseUrl, "github", appContext.getCurrentUser().getProfile().getUserId(),
                                                    Lists.asList("user", new String[]{"repo", "write:public_key"})),
                 new AsyncCallback<OAuthStatus>() {
                     @Override

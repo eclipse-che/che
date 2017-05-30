@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,39 +12,39 @@ package org.eclipse.che.plugin.nativeaccessexample.machine.client.command;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.util.UUID;
 
 import javax.validation.constraints.NotNull;
+import java.util.function.Consumer;
 
 /**
  * Simple command manager which allows to run native commands within the workspace Docker container.
- * Please note that the actual call is delegated to the MachineServiceClient service.
+ *
  *
  * @author Mathias Schaefer <mathias.schaefer@eclipsesource.com>
  */
 @Singleton
 public class CommandManager {
 
-    private final DtoFactory dtoFactory;
-    private final MachineServiceClient machineServiceClient;
-    private final NotificationManager notificationManager;
-    private final AppContext appContext;
+    private final DtoFactory              dtoFactory;
+    private final ExecAgentCommandManager commandManager;
+    private final AppContext              appContext;
 
     @Inject
-    public CommandManager(DtoFactory dtoFactory, MachineServiceClient machineServiceClient, NotificationManager notificationManager, AppContext appContext) {
+    public CommandManager(DtoFactory dtoFactory,
+                          ExecAgentCommandManager commandManager,
+                          AppContext appContext) {
         this.dtoFactory = dtoFactory;
-        this.machineServiceClient = machineServiceClient;
-        this.notificationManager = notificationManager;
+        this.commandManager = commandManager;
         this.appContext = appContext;
     }
 
@@ -56,25 +56,22 @@ public class CommandManager {
         if (machine == null) {
             return;
         }
-        String workspaceID = appContext.getWorkspaceId();
         String machineID = machine.getId();
         final CommandDto command = dtoFactory.createDto(CommandDto.class)
                 .withName("some-command")
                 .withCommandLine(commandLine)
                 .withType("arbitrary-type");
-        final String outputChannel = "process:output:" + UUID.uuid();
-        executeCommand(command, workspaceID, machineID, outputChannel);
+        executeCommand(command, machineID);
     }
 
-    public void executeCommand(final CommandDto command, @NotNull final String workspaceID, @NotNull final String machineID, String outputChannel) {
-        final Promise<MachineProcessDto> processPromise = machineServiceClient.executeCommand(workspaceID, machineID, command, outputChannel);
-        processPromise.then(new Operation<MachineProcessDto>() {
+    public void executeCommand(final CommandDto command, @NotNull final String machineID) {
+        final ExecAgentConsumer<ProcessStartResponseDto> consumer = commandManager.startProcess(machineID, command);
+
+        consumer.then(new Consumer<ProcessStartResponseDto>() {
             @Override
-            public void apply(MachineProcessDto process) throws OperationException
-            {
+            public void accept(ProcessStartResponseDto arg) {
                 //Do nothing in this example
             }
-
         });
 
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,17 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.keybinding;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.commons.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Scheme is set of the key bindings.
  *
  * @author Evgen Vidolob
  * @author Artem Zatsarynnyi
+ * @author <a href="mailto:ak@nuxeo.com">Arnaud Kervern</a>
  */
 public interface Scheme {
 
@@ -49,6 +51,14 @@ public interface Scheme {
     void addKey(@NotNull CharCodeWithModifiers key, @NotNull String actionId);
 
     /**
+     * Add multiple key bindings at once
+     *
+     * @param keys
+     *         Map of action's id with corresponding hot key
+     */
+    void addKeys(@NotNull Map<String, CharCodeWithModifiers> keys);
+
+    /**
      * Remove key binding for action.
      *
      * @param key
@@ -71,4 +81,9 @@ public interface Scheme {
      */
     @Nullable
     CharCodeWithModifiers getKeyBinding(@NotNull String actionId);
+
+    /**
+     * @return a boolean to check if the action is handled by this scheme
+     */
+    boolean contains(@NotNull String actionId);
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,12 +17,12 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.OrganizeImportResult;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.ext.java.shared.dto.ProposalApplyResult;
 import org.eclipse.che.ide.ext.java.shared.dto.Proposals;
@@ -35,9 +35,8 @@ import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newCallback;
-import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newPromise;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
 /**
@@ -118,28 +117,21 @@ public class JavaCodeAssistClient {
      *         the content to format
      */
     public Promise<List<Change>> format(final int offset, final int length, final String content) {
-
-        return newPromise(new AsyncPromiseHelper.RequestCall<List<Change>>() {
-            @Override
-            public void makeCall(AsyncCallback<List<Change>> callback) {
-                String url =
-                        appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/format?offset=" + offset + "&length=" +
-                        length;
-                asyncRequestFactory.createPostRequest(url, null)
-                                   .header(CONTENT_TYPE, MimeType.TEXT_PLAIN)
-                                   .data(content)
-                                   .send(newCallback(callback, unmarshallerFactory.newListUnmarshaller(Change.class)));
-            }
-        }).then(new Function<List<Change>, List<Change>>() {
+        return getFormatChanges(offset, length, content).then(new Function<List<Change>, List<Change>>() {
             @Override
             public List<Change> apply(List<Change> arg) throws FunctionException {
-                final List<Change> changes = new ArrayList<>();
-                for (Change change : arg) {
-                    changes.add(change);
-                }
-                return changes;
+                return arg.stream().collect(Collectors.toList());
             }
         });
+    }
+
+    private Promise<List<Change>> getFormatChanges(final int offset, final int length, final String content) {
+        final String baseUrl = appContext.getDevMachine().getWsAgentBaseUrl();
+        final String url = baseUrl + CODE_ASSIST_URL_PREFIX + "/format?offset=" + offset + "&length=" + length;
+        return asyncRequestFactory.createPostRequest(url, null)
+                                  .header(CONTENT_TYPE, MimeType.TEXT_PLAIN)
+                                  .data(content)
+                                  .send(unmarshallerFactory.newListUnmarshaller(Change.class));
     }
 
     /**
@@ -151,13 +143,13 @@ public class JavaCodeAssistClient {
      *         fully qualified name of the java file
      * @return list of imports which have conflicts
      */
-    public Promise<List<ConflictImportDTO>> organizeImports(String projectPath, String fqn) {
+    public Promise<OrganizeImportResult> organizeImports(String projectPath, String fqn) {
         String url =
                 appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/organize-imports?projectpath=" + projectPath +
                 "&fqn=" + fqn;
         return asyncRequestFactory.createPostRequest(url, null)
                                   .loader(loader)
-                                  .send(unmarshallerFactory.newListUnmarshaller(ConflictImportDTO.class));
+                                  .send(unmarshallerFactory.newUnmarshaller(OrganizeImportResult.class));
     }
 
     /**
@@ -168,12 +160,12 @@ public class JavaCodeAssistClient {
      * @param fqn
      *         fully qualified name of the java file
      */
-    public Promise<Void> applyChosenImports(String projectPath, String fqn, ConflictImportDTO chosen) {
+    public Promise<List<Change>> applyChosenImports(String projectPath, String fqn, ConflictImportDTO chosen) {
         String url = appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/apply-imports?projectpath=" + projectPath +
                      "&fqn=" + fqn;
         return asyncRequestFactory.createPostRequest(url, chosen)
                                   .loader(loader)
                                   .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
-                                  .send();
+                                  .send(unmarshallerFactory.newListUnmarshaller(Change.class));
     }
 }

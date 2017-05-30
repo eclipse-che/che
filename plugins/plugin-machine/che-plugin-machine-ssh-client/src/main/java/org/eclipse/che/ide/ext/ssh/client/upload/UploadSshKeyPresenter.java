@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,9 +15,9 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.ssh.client.SshLocalizationConstant;
-import org.eclipse.che.ide.rest.RestContext;
 
 import javax.validation.constraints.NotNull;
 
@@ -36,17 +36,19 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
     private String                  restContext;
     private NotificationManager     notificationManager;
     private AsyncCallback<Void>     callback;
+    private AppContext              appContext;
 
     @Inject
     public UploadSshKeyPresenter(UploadSshKeyView view,
                                  SshLocalizationConstant constant,
-                                 @RestContext String restContext,
+                                 AppContext appContext,
                                  NotificationManager notificationManager) {
         this.view = view;
         this.view.setDelegate(this);
         this.constant = constant;
-        this.restContext = restContext;
+        this.restContext = appContext.getMasterEndpoint();
         this.notificationManager = notificationManager;
+        this.appContext = appContext;
     }
 
     /** Show dialog. */
@@ -71,7 +73,15 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
             return;
         }
         view.setEncoding(FormPanel.ENCODING_MULTIPART);
-        view.setAction(restContext + "/ssh");
+
+        String action = restContext + "/ssh";
+
+        String csrfToken = appContext.getProperties().get("X-CSRF-Token");
+        if (csrfToken != null) {
+            action += "?X-CSRF-Token=" + csrfToken;
+        }
+
+        view.setAction(action);
         view.submit();
     }
 

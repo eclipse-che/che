@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,9 @@ public class Constants {
     public static final String LINK_REL_PROJECT_TYPES = "project types";
 
     public static final String CHE_DIR = ".che";
+
+    public static final String COMMANDS_ATTRIBUTE_NAME        = "commands";
+    public static final String COMMANDS_ATTRIBUTE_DESCRIPTION = "Project-related commands";
 
     private Constants() {
     }

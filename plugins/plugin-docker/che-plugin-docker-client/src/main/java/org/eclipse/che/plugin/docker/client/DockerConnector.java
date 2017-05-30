@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,9 +19,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
 import org.eclipse.che.api.core.util.FileCleaner;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.TarUtils;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
 import org.eclipse.che.plugin.docker.client.connection.CloseConnectionInputStream;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnection;
@@ -29,6 +29,7 @@ import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.connection.DockerResponse;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.DockerException;
+import org.eclipse.che.plugin.docker.client.exception.ExecNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
@@ -65,12 +66,13 @@ import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
 import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
 import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
+import org.eclipse.che.plugin.docker.client.params.ListImagesParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.PushParams;
 import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
@@ -109,6 +111,7 @@ import java.util.concurrent.Future;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
 import static javax.ws.rs.core.Response.Status.CREATED;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -127,7 +130,7 @@ import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 public class DockerConnector {
     private static final Logger LOG  = LoggerFactory.getLogger(DockerConnector.class);
     // Docker uses uppercase in first letter in names of json objects, e.g. {"Id":"123"} instead of {"id":"123"}
-    private static final Gson   GSON = new GsonBuilder().disableHtmlEscaping()
+    protected static final Gson GSON = new GsonBuilder().disableHtmlEscaping()
                                                         .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
                                                         .create();
 
@@ -194,16 +197,34 @@ public class DockerConnector {
     }
 
     /**
-     * Lists docker images.
+     * Lists all final layer docker images.
      *
      * @return list of docker images
      * @throws IOException
      *          when a problem occurs with docker api calls
      */
     public List<Image> listImages() throws IOException {
+        return listImages(ListImagesParams.create());
+    }
+
+    /**
+     * Lists docker images.
+     *
+     * @return list of docker images
+     * @throws IOException
+     *          when a problem occurs with docker api calls
+     */
+    public List<Image> listImages(ListImagesParams params) throws IOException {
+        final Filters filters = params.getFilters();
+
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path(apiVersionPathPrefix + "/images/json")) {
+            addQueryParamIfNotNull(connection, "all", params.getAll());
+            addQueryParamIfNotNull(connection, "digests", params.getAll());
+            if (filters != null) {
+                connection.query("filters", urlPathSegmentEscaper().escape(toJson(filters.getFilters())));
+            }
             final DockerResponse response = connection.request();
             if (OK.getStatusCode() != response.getStatus()) {
                 throw getDockerException(response);
@@ -267,6 +288,8 @@ public class DockerConnector {
      * Gets detailed information about docker image.
      *
      * @return detailed information about {@code image}
+     * @throws ImageNotFoundException
+     *          when docker api return 404 status
      * @throws IOException
      *          when a problem occurs with docker api calls
      */
@@ -275,7 +298,11 @@ public class DockerConnector {
                                                             .method("GET")
                                                             .path(apiVersionPathPrefix + "/images/" + params.getImage() + "/json")) {
             final DockerResponse response = connection.request();
-            if (OK.getStatusCode() != response.getStatus()) {
+            final int status = response.getStatus();
+            if (status == NOT_FOUND.getStatusCode()) {
+                throw new ImageNotFoundException(readAndCloseQuietly(response.getInputStream()));
+            }
+            if (OK.getStatusCode() != status) {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ImageInfo.class);
@@ -402,6 +429,8 @@ public class DockerConnector {
      * Gets detailed information about docker container.
      *
      * @return detailed information about {@code container}
+     * @throws ContainerNotFoundException
+     *          when container not found by docker (docker api returns 404)
      * @throws IOException
      *          when a problem occurs with docker api calls
      */
@@ -412,7 +441,11 @@ public class DockerConnector {
                                                                   "/json")) {
             addQueryParamIfNotNull(connection, "size", params.isReturnContainerSize());
             final DockerResponse response = connection.request();
-            if (OK.getStatusCode() != response.getStatus()) {
+            final int status = response.getStatus();
+            if (status == NOT_FOUND.getStatusCode()) {
+                throw new ContainerNotFoundException(readAndCloseQuietly(response.getInputStream()));
+            }
+            if (OK.getStatusCode() != status) {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerInfo.class);
@@ -476,7 +509,7 @@ public class DockerConnector {
 
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
-            if (status == 404) {
+            if (status == NOT_FOUND.getStatusCode()) {
                 throw new ContainerNotFoundException(readAndCloseQuietly(response.getInputStream()));
             }
             if (status != OK.getStatusCode()) {
@@ -498,6 +531,7 @@ public class DockerConnector {
      */
     public Exec createExec(final CreateExecParams params) throws IOException {
         final ExecConfig execConfig = new ExecConfig().withCmd(params.getCmd())
+                                                      .withUser(params.getUser())
                                                       .withAttachStderr(params.isDetach() == Boolean.FALSE)
                                                       .withAttachStdout(params.isDetach() == Boolean.FALSE);
         byte[] entityBytesArray = toJson(execConfig).getBytes(StandardCharsets.UTF_8);
@@ -521,6 +555,8 @@ public class DockerConnector {
      *
      * @param execOutputProcessor
      *         processor for exec output
+     * @throws ExecNotFoundException
+     *         when exec not found by docker (docker api returns 404)
      * @throws IOException
      *          when a problem occurs with docker api calls
      */
@@ -537,6 +573,9 @@ public class DockerConnector {
                                                             .entity(entityBytesArray)) {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
+            if (status == NOT_FOUND.getStatusCode()) {
+                throw new ExecNotFoundException(readAndCloseQuietly(response.getInputStream()));
+            }
             // According to last doc (https://docs.docker.com/reference/api/docker_remote_api_v1.15/#exec-start) status must be 201 but
             // in fact docker API returns 200 or 204 status.
             if (status / 100 != 2) {
@@ -775,6 +814,9 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "dockerfile", params.getDockerfile());
             addQueryParamIfNotNull(connection, "nocache", params.isNoCache());
             addQueryParamIfNotNull(connection, "q", params.isQuiet());
+            addQueryParamIfNotNull(connection, "cpusetcpus", params.getCpusetCpus());
+            addQueryParamIfNotNull(connection, "cpuperiod", params.getCpuPeriod());
+            addQueryParamIfNotNull(connection, "cpuquota", params.getCpuQuota());
             if (params.getTag() == null) {
                 addQueryParamIfNotNull(connection, "t", repository);
             } else {
@@ -826,6 +868,7 @@ public class DockerConnector {
                     throw new DockerException(e.getCause().getLocalizedMessage(), 500);
                 }
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new DockerException("Docker image build was interrupted", 500);
             }
         }
@@ -880,7 +923,7 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "tag", params.getTag());
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
-            if (status == 404) {
+            if (status == NOT_FOUND.getStatusCode()) {
                 throw new ImageNotFoundException(readAndCloseQuietly(response.getInputStream()));
             }
             if (status / 100 != 2) {
@@ -952,6 +995,7 @@ public class DockerConnector {
                 // unwrap exception thrown by task with .getCause()
                 throw new DockerException("Docker image pushing failed. Cause: " + e.getCause().getLocalizedMessage(), 500);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new DockerException("Docker image pushing was interrupted", 500);
             }
         }
@@ -1048,6 +1092,7 @@ public class DockerConnector {
                 // unwrap exception thrown by task with .getCause()
                 throw new DockerException(e.getCause().getLocalizedMessage(), 500);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new DockerException("Docker image pulling was interrupted", 500);
             }
         }
@@ -1278,7 +1323,7 @@ public class DockerConnector {
                                                             .path(apiVersionPathPrefix + "/networks/" + params.getNetworkId())) {
             final DockerResponse response = connection.request();
             int status = response.getStatus();
-            if (status == 404) {
+            if (status == NOT_FOUND.getStatusCode()) {
                 throw new NetworkNotFoundException(readAndCloseQuietly(response.getInputStream()));
             }
             if (status / 100 != 2) {

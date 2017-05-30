@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,8 +46,14 @@ public final class Constants {
 
     public static final String LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL = "get workspace events channel";
 
-    public static final String WS_AGENT_PROCESS_NAME          = "CheWsAgent";
+    public static final String WS_AGENT_PROCESS_NAME = "CheWsAgent";
 
+    public static final String CHE_WORKSPACE_AUTO_SNAPSHOT           = "che.workspace.auto_snapshot";
+    public static final String CHE_WORKSPACE_AUTO_RESTORE            = "che.workspace.auto_restore";
+    public static final String CHE_WORKSPACE_AUTO_START              = "che.workspace.auto_start";
+
+    public static final String COMMAND_PREVIEW_URL_ATTRIBUTE_NAME = "previewUrl";
+    public static final String COMMAND_GOAL_ATTRIBUTE_NAME        = "goal";
 
     private Constants() {}
 }

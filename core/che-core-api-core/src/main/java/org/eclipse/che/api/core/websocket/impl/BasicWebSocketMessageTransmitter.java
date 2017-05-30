@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.websocket.impl;
 
-import org.eclipse.che.api.core.websocket.WebSocketMessageTransmitter;
+import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -59,22 +59,4 @@ public class BasicWebSocketMessageTransmitter implements WebSocketMessageTransmi
             }
         }
     }
-
-    @Override
-    public synchronized void transmit(String message) {
-        LOG.debug("Broadcasting a web socket transmission: ", message);
-
-        registry.getSessions()
-                .stream()
-                .filter(Session::isOpen)
-                .map(Session::getBasicRemote)
-                .forEach(it -> {
-                    try {
-                        it.sendText(message);
-                    } catch (IOException e) {
-                        LOG.error("Error while trying to send a message to a basic websocket remote endpoint", e);
-                    }
-                });
-    }
-
 }

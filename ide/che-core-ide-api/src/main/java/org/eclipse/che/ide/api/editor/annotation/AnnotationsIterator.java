@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.annotation;
 
+import org.eclipse.che.ide.api.editor.text.Position;
+import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import org.eclipse.che.ide.api.editor.text.Position;
-import org.eclipse.che.ide.api.editor.text.TypedPosition;
-import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
 
 /**
  * An iterator iteration over a Positions and mapping positions to
@@ -27,7 +26,7 @@ final class AnnotationsIterator implements Iterator<Annotation> {
 
     private Annotation next;
 
-    private final List<TypedPosition> positions;
+    private final List<Position> positions;
 
     private int index;
 
@@ -37,9 +36,8 @@ final class AnnotationsIterator implements Iterator<Annotation> {
      * @param positions
      *         positions to iterate over
      * @param map
-     *         a map to map positions to annotations
      */
-    public AnnotationsIterator(final List<TypedPosition> positions,
+    public AnnotationsIterator(final List<Position> positions,
                                final Map<Position, Annotation> map) {
         this.positions = positions;
         this.index = 0;
@@ -47,16 +45,19 @@ final class AnnotationsIterator implements Iterator<Annotation> {
         next = findNext();
     }
 
+    @Override
     public boolean hasNext() {
         return next != null;
     }
 
+    @Override
     public Annotation next() {
         final Annotation result = next;
         next = findNext();
         return result;
     }
 
+    @Override
     public void remove() {
         throw new UnsupportedOperationException();
     }

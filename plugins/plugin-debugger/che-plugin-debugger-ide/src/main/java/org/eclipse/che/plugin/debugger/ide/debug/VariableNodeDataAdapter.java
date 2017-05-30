@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,13 +91,13 @@ public class VariableNodeDataAdapter implements NodeDataAdapter<MutableVariable>
 
     /** {@inheritDoc} */
     @Override
-    public void setNodeName(@NotNull MutableVariable data,@NotNull String name) {
+    public void setNodeName(@NotNull MutableVariable data, @NotNull String name) {
         // do nothing
     }
 
     /** {@inheritDoc} */
     @Override
-    public void setRenderedTreeNode(@NotNull MutableVariable data,@NotNull TreeNodeElement<MutableVariable> renderedNode) {
+    public void setRenderedTreeNode(@NotNull MutableVariable data, @NotNull TreeNodeElement<MutableVariable> renderedNode) {
         treeNodeElements.put(data, renderedNode);
     }
 
@@ -118,7 +118,7 @@ public class VariableNodeDataAdapter implements NodeDataAdapter<MutableVariable>
     /** {@inheritDoc} */
     @Override
     @Nullable
-    public MutableVariable getNodeByPath(@NotNull MutableVariable root,@NotNull List<String> relativeNodePath) {
+    public MutableVariable getNodeByPath(@NotNull MutableVariable root, @NotNull List<String> relativeNodePath) {
         MutableVariable localRoot = root;
         for (int i = 0; i < relativeNodePath.size(); i++) {
             String path = relativeNodePath.get(i);
@@ -126,7 +126,7 @@ public class VariableNodeDataAdapter implements NodeDataAdapter<MutableVariable>
                 List<MutableVariable> variables = new ArrayList<>(localRoot.getVariables());
                 localRoot = null;
                 for (int j = 0; j < variables.size(); j++) {
-                    MutableVariable variable = variables.get(i);
+                    MutableVariable variable = variables.get(j);
                     if (variable.getName().equals(path)) {
                         localRoot = variable;
                         break;

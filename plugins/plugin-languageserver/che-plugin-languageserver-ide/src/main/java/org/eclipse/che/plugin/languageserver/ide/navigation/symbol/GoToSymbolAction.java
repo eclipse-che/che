@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,20 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.symbol;
 
-import io.typefox.lsapi.ServerCapabilities;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.SymbolInformationDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -36,19 +27,24 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.filters.FuzzyMatches;
+import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
-import org.eclipse.che.plugin.languageserver.ide.filters.FuzzyMatches;
-import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.lsp4j.DocumentSymbolParams;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
@@ -62,16 +58,16 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class GoToSymbolAction extends AbstractPerspectiveAction implements QuickOpenPresenter.QuickOpenPresenterOpts {
 
     public static final String SCOPE_PREFIX = ":";
-    private final LanguageServerLocalization
-                                             localization;
+    private final LanguageServerLocalization localization;
     private final TextDocumentServiceClient  client;
     private final EditorAgent                editorAgent;
     private final DtoFactory                 dtoFactory;
     private final NotificationManager        notificationManager;
     private final FuzzyMatches               fuzzyMatches;
     private final SymbolKindHelper           symbolKindHelper;
+    private final PromiseProvider            promiseProvider;
     private       QuickOpenPresenter         presenter;
-    private       List<SymbolInformationDTO> cachedItems;
+    private       List<SymbolInformation>    cachedItems;
     private       LinearRange                selectedLinearRange;
     private       TextEditor                 activeEditor;
     private       TextPosition               cursorPosition;
@@ -84,7 +80,8 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
                             DtoFactory dtoFactory,
                             NotificationManager notificationManager,
                             FuzzyMatches fuzzyMatches,
-                            SymbolKindHelper symbolKindHelper) {
+                            SymbolKindHelper symbolKindHelper,
+                            PromiseProvider promiseProvider) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), localization.goToSymbolActionDescription(), localization.goToSymbolActionTitle(), null,
               null);
         this.presenter = presenter;
@@ -95,42 +92,36 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
         this.notificationManager = notificationManager;
         this.fuzzyMatches = fuzzyMatches;
         this.symbolKindHelper = symbolKindHelper;
+        this.promiseProvider = promiseProvider;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        DocumentSymbolParamsDTO paramsDTO = dtoFactory.createDto(DocumentSymbolParamsDTO.class);
-        TextDocumentIdentifierDTO identifierDTO = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
-        identifierDTO.setUri(editorAgent.getActiveEditor().getEditorInput().getFile().getPath());
+        DocumentSymbolParams paramsDTO = dtoFactory.createDto(DocumentSymbolParams.class);
+        TextDocumentIdentifier identifierDTO = dtoFactory.createDto(TextDocumentIdentifier.class);
+        identifierDTO.setUri(editorAgent.getActiveEditor().getEditorInput().getFile().getLocation().toString());
         paramsDTO.setTextDocument(identifierDTO);
         activeEditor = (TextEditor)editorAgent.getActiveEditor();
         cursorPosition = activeEditor.getDocument().getCursorPosition();
-        client.documentSymbol(paramsDTO).then(new Operation<List<SymbolInformationDTO>>() {
+        client.documentSymbol(paramsDTO).then(arg -> {
 
-            @Override
-            public void apply(List<SymbolInformationDTO> arg) throws OperationException {
-
-                cachedItems = arg;
-                presenter.run(GoToSymbolAction.this);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify("Can't fetch document symbols.", arg.getMessage(), StatusNotification.Status.FAIL,
-                                           StatusNotification.DisplayMode.FLOAT_MODE);
-            }
+            cachedItems = arg;
+            presenter.run(GoToSymbolAction.this);
+        }).catchError(arg -> {
+            notificationManager.notify("Can't fetch document symbols.", arg.getMessage(), StatusNotification.Status.FAIL,
+                                       StatusNotification.DisplayMode.FLOAT_MODE);
         });
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        if (activeEditor instanceof TextEditor) {
+        if (Objects.nonNull(activeEditor) && activeEditor instanceof TextEditor) {
             TextEditorConfiguration configuration = ((TextEditor)activeEditor).getConfiguration();
             if (configuration instanceof LanguageServerEditorConfiguration) {
                 ServerCapabilities capabilities = ((LanguageServerEditorConfiguration)configuration).getServerCapabilities();
                 event.getPresentation()
-                     .setEnabledAndVisible(capabilities.isDocumentSymbolProvider() != null && capabilities.isDocumentSymbolProvider());
+                     .setEnabledAndVisible(capabilities.getDocumentSymbolProvider() != null && capabilities.getDocumentSymbolProvider());
                 return;
             }
 
@@ -140,17 +131,17 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
 
     @Override
     public Promise<QuickOpenModel> getModel(String value) {
-        return Promises.resolve(new QuickOpenModel(toQuickOpenEntries(cachedItems, value)));
+        return promiseProvider.resolve(new QuickOpenModel(toQuickOpenEntries(cachedItems, value)));
     }
 
-    private List<SymbolEntry> toQuickOpenEntries(List<SymbolInformationDTO> items, final String value) {
+    private List<SymbolEntry> toQuickOpenEntries(List<SymbolInformation> items, final String value) {
         List<SymbolEntry> result = new ArrayList<>();
         String normalValue = value;
         if (value.startsWith(SCOPE_PREFIX)) {
             normalValue = normalValue.substring(SCOPE_PREFIX.length());
         }
 
-        for (SymbolInformationDTO item : items) {
+        for (SymbolInformation item : items) {
             String label = item.getName().trim();
 
             List<Match> highlights = fuzzyMatches.fuzzyMatch(normalValue, label);
@@ -160,7 +151,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
                     description = item.getContainerName();
                 }
 
-                RangeDTO range = item.getLocation().getRange();
+                Range range = item.getLocation().getRange();
                 TextRange textRange = new TextRange(new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()),
                                                     new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
                 //TODO add icons
@@ -176,19 +167,9 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
 
         if (!value.isEmpty()) {
             if (value.startsWith(SCOPE_PREFIX)) {
-                Collections.sort(result, new Comparator<SymbolEntry>() {
-                    @Override
-                    public int compare(SymbolEntry o1, SymbolEntry o2) {
-                        return sortScoped(value.toLowerCase(), o1, o2);
-                    }
-                });
+                Collections.sort(result, (o1, o2) -> sortScoped(value.toLowerCase(), o1, o2));
             } else {
-                Collections.sort(result, new Comparator<SymbolEntry>() {
-                    @Override
-                    public int compare(SymbolEntry o1, SymbolEntry o2) {
-                        return sortNormal(value.toLowerCase(), o1, o2);
-                    }
-                });
+                Collections.sort(result, (o1, o2) -> sortNormal(value.toLowerCase(), o1, o2));
             }
         }
 

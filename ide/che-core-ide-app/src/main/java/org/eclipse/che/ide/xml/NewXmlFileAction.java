@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,10 +14,12 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -38,10 +40,11 @@ public class NewXmlFileAction extends AbstractNewResourceAction {
                             CoreLocalizationConstant coreLocalizationConstant,
                             EventBus eventBus,
                             AppContext appContext,
-                            NotificationManager notificationManager) {
+                            NotificationManager notificationManager,
+                            Provider<EditorAgent> editorAgentProvider) {
         super(localizationConstant.actionNewXmlFileTitle(),
               localizationConstant.actionNewXmlFileDescription(),
-              resources.defaultFile(), dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager);
+              resources.defaultFile(), dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager, editorAgentProvider);
     }
 
     @Override

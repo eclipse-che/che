@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.SuspendActionDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.json.JsonHelper;
@@ -78,6 +79,11 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
         return asyncRequestFactory.createDeleteRequest(requestUrl)
                                   .loader(loaderFactory.newLoader())
                                   .send();
+    }
+
+    @Override
+    public Promise<Void> suspend(String id, SuspendActionDto action) {
+        return performAction(id, action);
     }
 
     @Override

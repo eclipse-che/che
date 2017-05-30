@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,14 +32,13 @@ import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.plugin.gdb.server.exception.GdbException;
+import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
 import org.eclipse.che.plugin.gdb.server.exception.GdbTerminatedException;
 import org.eclipse.che.plugin.gdb.server.parser.GdbContinue;
 import org.eclipse.che.plugin.gdb.server.parser.GdbDirectory;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoBreak;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoLine;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoProgram;
-import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
 import org.eclipse.che.plugin.gdb.server.parser.GdbPrint;
 import org.eclipse.che.plugin.gdb.server.parser.GdbRun;
 import org.eclipse.che.plugin.gdb.server.parser.GdbVersion;
@@ -158,11 +157,7 @@ public class GdbDebugger implements Debugger {
                 gdb.targetRemote(host, port);
             }
         } catch (DebuggerException | IOException | InterruptedException e) {
-            try {
-                gdb.quit();
-            } catch (IOException | InterruptedException | GdbException e1) {
-                LOG.error("Can't stop GDB: " + e1.getMessage(), e1);
-            }
+            gdb.stop();
             throw new DebuggerException("Can't initialize GDB: " + e.getMessage(), e);
         }
 
@@ -186,11 +181,7 @@ public class GdbDebugger implements Debugger {
         currentLocation = null;
         debuggerCallback.onEvent(new DisconnectEventImpl());
 
-        try {
-            gdb.quit();
-        } catch (IOException | InterruptedException | GdbException e) {
-            LOG.error(e.getMessage(), e);
-        }
+        gdb.stop();
     }
 
     @Override
@@ -287,6 +278,16 @@ public class GdbDebugger implements Debugger {
             throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
             throw new DebuggerException("Error during running. " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void suspend() throws DebuggerException {
+        try {
+            currentLocation = gdb.suspend(file, isRemoteConnection());
+            debuggerCallback.onEvent(new SuspendEventImpl(currentLocation));
+        } catch (IOException | InterruptedException e) {
+            throw new DebuggerException("Can not suspend debugger session. " + e.getMessage(), e);
         }
     }
 

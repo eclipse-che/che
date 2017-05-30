@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,8 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Redirect to support window
@@ -39,5 +41,10 @@ public class RedirectToSupportAction extends Action {
     @Override
     public void actionPerformed(ActionEvent e) {
         Window.open(productInfoDataProvider.getSupportLink(), "_blank", null);
+    }
+
+    @Override
+    public void update(ActionEvent event) {
+        event.getPresentation().setVisible(!isNullOrEmpty(productInfoDataProvider.getSupportLink()));
     }
 }

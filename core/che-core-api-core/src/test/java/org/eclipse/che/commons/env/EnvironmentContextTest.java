@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,23 @@ public class EnvironmentContextTest {
         assertEquals(actualSubject.getUserId(), "id");
         assertEquals(actualSubject.getToken(), "token");
         assertFalse(actualSubject.isTemporary());
+    }
+
+    @Test
+    public void shouldReturnAnonymousSubjectWhenThereIsNoSubject() {
+        //given
+        EnvironmentContext expected = EnvironmentContext.getCurrent();
+        expected.setSubject(null);
+
+        //when
+        Subject actualSubject = EnvironmentContext.getCurrent().getSubject();
+
+        //then
+        assertEquals(actualSubject.getUserName(), Subject.ANONYMOUS.getUserName());
+        assertEquals(actualSubject.getUserId(), Subject.ANONYMOUS.getUserId());
+        assertEquals(actualSubject.getToken(), Subject.ANONYMOUS.getToken());
+        assertEquals(actualSubject.isTemporary(), Subject.ANONYMOUS.isTemporary());
+        assertEquals(actualSubject.isAnonymous(), Subject.ANONYMOUS.isAnonymous());
     }
 
     @Test(enabled = false)

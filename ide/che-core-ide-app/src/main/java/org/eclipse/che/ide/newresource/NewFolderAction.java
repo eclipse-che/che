@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.newresource;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -27,6 +27,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.dialogs.InputDialog;
 import org.eclipse.che.ide.api.dialogs.InputValidator;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Folder;
@@ -53,10 +54,11 @@ public class NewFolderAction extends AbstractNewResourceAction {
                            DialogFactory dialogFactory,
                            EventBus eventBus,
                            AppContext appContext,
-                           NotificationManager notificationManager) {
+                           NotificationManager notificationManager,
+                           Provider<EditorAgent> editorAgentProvider) {
         super(localizationConstant.actionNewFolderTitle(),
               localizationConstant.actionNewFolderDescription(),
-              resources.defaultFolder(), dialogFactory, localizationConstant, eventBus, appContext, notificationManager);
+              resources.defaultFolder(), dialogFactory, localizationConstant, eventBus, appContext, notificationManager, editorAgentProvider);
         this.folderNameValidator = new FolderNameValidator();
     }
 
@@ -80,11 +82,11 @@ public class NewFolderAction extends AbstractNewResourceAction {
         Resource resource = appContext.getResource();
 
         if (!(resource instanceof Container)) {
-            final Optional<Container> parent = resource.getParent();
+            final Container parent = resource.getParent();
 
-            checkState(parent.isPresent(), "Parent should be a container");
+            checkState(parent != null, "Parent should be a container");
 
-            resource = parent.get();
+            resource = parent;
         }
 
         ((Container)resource).newFolder(name).then(new Operation<Folder>() {

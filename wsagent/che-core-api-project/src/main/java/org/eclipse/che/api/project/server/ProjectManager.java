@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,6 @@ import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
-import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.project.server.RegisteredProject.Problem;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
@@ -42,15 +41,13 @@ import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationListener;
-import org.eclipse.che.api.vfs.impl.file.event.LoEvent;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -66,6 +63,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.ErrorCodes.NOT_UPDATED_PROJECT;
 
 /**
  * Facade for all project related operations.
@@ -73,11 +71,10 @@ import static java.lang.String.format;
  * @author gazarenkov
  */
 @Singleton
-public final class ProjectManager {
+public class ProjectManager {
     private static final Logger LOG = LoggerFactory.getLogger(ProjectManager.class);
 
     private final VirtualFileSystem              vfs;
-    private final EventService                   eventService;
     private final ProjectTypeRegistry            projectTypeRegistry;
     private final ProjectRegistry                projectRegistry;
     private final ProjectHandlerRegistry         handlers;
@@ -86,11 +83,10 @@ public final class ProjectManager {
     private final FileWatcherNotificationHandler fileWatchNotifier;
     private final ExecutorService                executor;
     private final WorkspaceProjectsSyncer        workspaceProjectsHolder;
-    private final ProjectTreeChangesDetector     projectTreeChangesDetector;
+    private final FileWatcherManager             fileWatcherManager;
 
     @Inject
     public ProjectManager(VirtualFileSystemProvider vfsProvider,
-                          EventService eventService,
                           ProjectTypeRegistry projectTypeRegistry,
                           ProjectRegistry projectRegistry,
                           ProjectHandlerRegistry handlers,
@@ -98,9 +94,8 @@ public final class ProjectManager {
                           FileWatcherNotificationHandler fileWatcherNotificationHandler,
                           FileTreeWatcher fileTreeWatcher,
                           WorkspaceProjectsSyncer workspaceProjectsHolder,
-                          ProjectTreeChangesDetector projectTreeChangesDetector) throws ServerException {
+                          FileWatcherManager fileWatcherManager) throws ServerException {
         this.vfs = vfsProvider.getVirtualFileSystem();
-        this.eventService = eventService;
         this.projectTypeRegistry = projectTypeRegistry;
         this.projectRegistry = projectRegistry;
         this.handlers = handlers;
@@ -108,7 +103,7 @@ public final class ProjectManager {
         this.fileWatchNotifier = fileWatcherNotificationHandler;
         this.fileWatcher = fileTreeWatcher;
         this.workspaceProjectsHolder = workspaceProjectsHolder;
-        this.projectTreeChangesDetector = projectTreeChangesDetector;
+        this.fileWatcherManager = fileWatcherManager;
 
         executor = Executors.newFixedThreadPool(1 + Runtime.getRuntime().availableProcessors(),
                                                 new ThreadFactoryBuilder().setNameFormat("ProjectService-IndexingThread-")
@@ -117,7 +112,6 @@ public final class ProjectManager {
                                                                           .setDaemon(true).build());
     }
 
-    @PostConstruct
     void initWatcher() throws IOException {
         FileWatcherNotificationListener defaultListener =
                 new FileWatcherNotificationListener(file -> !(file.getPath().toString().contains(".che")
@@ -125,14 +119,6 @@ public final class ProjectManager {
                     @Override
                     public void onFileWatcherEvent(VirtualFile virtualFile, FileWatcherEventType eventType) {
                         LOG.debug("FS event detected: " + eventType + " " + virtualFile.getPath().toString() + " " + virtualFile.isFile());
-                        eventService.publish(LoEvent.newInstance()
-                                                    .withPath(virtualFile.getPath().toString())
-                                                    .withName(virtualFile.getName())
-                                                    .withItemType(virtualFile.isFile()
-                                                                  ? LoEvent.ItemType.FILE
-                                                                  : LoEvent.ItemType.DIR)
-                                                    .withTime(System.currentTimeMillis())
-                                                    .withEventType(eventType));
                     }
                 };
         fileWatchNotifier.addNotificationListener(defaultListener);
@@ -227,7 +213,7 @@ public final class ProjectManager {
                                                                                                             ForbiddenException,
                                                                                                             ServerException,
                                                                                                             NotFoundException {
-        projectTreeChangesDetector.suspend();
+        fileWatcherManager.suspend();
         try {
             // path and primary type is mandatory
             if (projectConfig.getPath() == null) {
@@ -245,11 +231,11 @@ public final class ProjectManager {
 
             return doCreateProject(projectConfig, options);
         } finally {
-            projectTreeChangesDetector.resume();
+            fileWatcherManager.resume();
         }
     }
 
-    /** Note: Use {@link ProjectTreeChangesDetector#suspend()} and {@link ProjectTreeChangesDetector#resume()} while creating a project */
+    /** Note: Use {@link FileWatcherManager#suspend()} and {@link FileWatcherManager#resume()} while creating a project */
     private RegisteredProject doCreateProject(ProjectConfig projectConfig, Map<String, String> options) throws ConflictException,
                                                                                                                ForbiddenException,
                                                                                                                ServerException,
@@ -316,7 +302,7 @@ public final class ProjectManager {
     public List<RegisteredProject> createBatchProjects(List<? extends NewProjectConfig> projectConfigList, boolean rewrite, ProjectOutputLineConsumerFactory lineConsumerFactory)
             throws BadRequestException, ConflictException, ForbiddenException, NotFoundException, ServerException, UnauthorizedException,
                    IOException {
-        projectTreeChangesDetector.suspend();
+        fileWatcherManager.suspend();
         try {
             final List<RegisteredProject> projects = new ArrayList<>(projectConfigList.size());
             validateProjectConfigurations(projectConfigList, rewrite);
@@ -353,7 +339,9 @@ public final class ProjectManager {
                         registeredProject = updateProject(projectConfig);
                     } catch (Exception e) {
                         registeredProject = projectRegistry.putProject(projectConfig, asFolder(pathToProject), true, false);
-                        registeredProject.getProblems().add(new Problem(14, "The project is not updated, caused by " + e.getLocalizedMessage()));
+                        final Problem problem = new Problem(NOT_UPDATED_PROJECT,
+                                                            "The project is not updated, caused by " + e.getLocalizedMessage());
+                        registeredProject.getProblems().add(problem);
                     }
                 } else {
                     registeredProject = projectRegistry.putProject(projectConfig, null, true, false);
@@ -365,7 +353,7 @@ public final class ProjectManager {
             return projects;
 
         } finally {
-            projectTreeChangesDetector.resume();
+            fileWatcherManager.resume();
         }
     }
 
@@ -443,9 +431,6 @@ public final class ProjectManager {
 
         projectRegistry.fireInitHandlers(project);
 
-        // TODO move to register?
-        reindexProject(project);
-
         return project;
     }
 
@@ -472,15 +457,15 @@ public final class ProjectManager {
                                                                                                              UnauthorizedException,
                                                                                                              ConflictException,
                                                                                                              NotFoundException {
-        projectTreeChangesDetector.suspend();
+        fileWatcherManager.suspend();
         try {
             return doImportProject(path, sourceStorage, rewrite, lineConsumerFactory);
         } finally {
-            projectTreeChangesDetector.resume();
+            fileWatcherManager.resume();
         }
     }
 
-    /** Note: Use {@link ProjectTreeChangesDetector#suspend()} and {@link ProjectTreeChangesDetector#resume()} while importing source code */
+    /** Note: Use {@link FileWatcherManager#suspend()} and {@link FileWatcherManager#resume()} while importing source code */
     private RegisteredProject doImportProject(String path, SourceStorage sourceStorage, boolean rewrite, LineConsumerFactory lineConsumerFactory) throws ServerException,
                                                                                                                 IOException,
                                                                                                                 ForbiddenException,
@@ -761,31 +746,5 @@ public final class ProjectManager {
         }
 
         return (FileEntry)entry;
-    }
-
-    /**
-     * Some importers don't use virtual file system API and changes are not indexed.
-     * Force searcher to reindex project to fix such issues.
-     *
-     * @param project
-     *
-     * @throws ServerException
-     */
-    private void reindexProject(final RegisteredProject project) throws ServerException {
-        final VirtualFile file = project.getBaseFolder().getVirtualFile();
-        executor.execute(() -> {
-            try {
-                final Searcher searcher;
-                try {
-                    searcher = getSearcher();
-                } catch (NotFoundException e) {
-                    LOG.warn(e.getLocalizedMessage());
-                    return;
-                }
-                searcher.add(file);
-            } catch (Exception e) {
-                LOG.warn(format("Project: %s", project.getPath()), e.getMessage());
-            }
-        });
     }
 }

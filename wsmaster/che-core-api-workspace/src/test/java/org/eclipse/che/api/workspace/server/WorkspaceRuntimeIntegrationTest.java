@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
-import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.notification.EventService;
@@ -33,6 +32,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -40,6 +40,8 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.commons.test.mockito.answer.WaitingAnswer;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
@@ -48,6 +50,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -75,30 +78,34 @@ public class WorkspaceRuntimeIntegrationTest {
     private static final String ENV_NAME     = "default-env";
 
     @Mock
-    private EventService              eventService;
+    private EventService                                   eventService;
     @Mock
-    private SnapshotDao               snapshotDao;
+    private MachineInstanceProviders                       machineInstanceProviders;
     @Mock
-    private MachineInstanceProviders  machineInstanceProviders;
+    private EnvironmentParser                              environmentParser;
     @Mock
-    private EnvironmentParser         environmentParser;
+    private MachineInstanceProvider                        instanceProvider;
     @Mock
-    private MachineInstanceProvider   instanceProvider;
+    private InfrastructureProvisioner                      infrastructureProvisioner;
     @Mock
-    private InfrastructureProvisioner infrastructureProvisioner;
+    private RecipeDownloader                               recipeDownloader;
     @Mock
-    private RecipeDownloader          recipeDownloader;
+    private ContainerNameGenerator                         containerNameGenerator;
     @Mock
-    private ContainerNameGenerator    containerNameGenerator;
+    private AgentRegistry                                  agentRegistry;
     @Mock
-    private AgentRegistry             agentRegistry;
+    private AgentSorter                                    agentSorter;
     @Mock
-    private AgentSorter               agentSorter;
+    private AgentLauncherFactory                           launcherFactory;
     @Mock
-    private AgentLauncherFactory      launcherFactory;
+    private WorkspaceSharedPool                            sharedPool;
+    @Mock
+    private SnapshotDao                                    snapshotDao;
+    @Captor
+    private ArgumentCaptor<Callable<WorkspaceRuntimeImpl>> taskCaptor;
 
-    private ExecutorService      executor;
-    private WorkspaceRuntimes    runtimes;
+    private ExecutorService   executor;
+    private WorkspaceRuntimes runtimes;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -114,13 +121,16 @@ public class WorkspaceRuntimeIntegrationTest {
                                                                           "http://localhost:8080/api",
                                                                           recipeDownloader,
                                                                           containerNameGenerator,
-                                                                          agentRegistry);
+                                                                          agentRegistry,
+                                                                          sharedPool);
 
         runtimes = new WorkspaceRuntimes(eventService,
                                          environmentEngine,
                                          agentSorter,
                                          launcherFactory,
-                                         agentRegistry);
+                                         agentRegistry,
+                                         snapshotDao,
+                                         sharedPool);
 
         executor = Executors.newFixedThreadPool(
                 1, new ThreadFactoryBuilder().setNameFormat(this.getClass().toString() + "-%d").build());
@@ -137,7 +147,7 @@ public class WorkspaceRuntimeIntegrationTest {
 
     // Check for https://github.com/codenvy/codenvy/issues/593
     @Test(expectedExceptions = NotFoundException.class,
-          expectedExceptionsMessageRegExp = "Workspace with id '" + WORKSPACE_ID + "' is not running.")
+          expectedExceptionsMessageRegExp = "Workspace with id '" + WORKSPACE_ID + "' is not running")
     public void environmentEngineShouldDestroyAllMachinesBeforeRemovalOfEnvironmentRecord() throws Exception {
         // given
         EnvironmentDto environment = newDto(EnvironmentDto.class);
@@ -172,7 +182,9 @@ public class WorkspaceRuntimeIntegrationTest {
                                            any(LineConsumer.class)))
                 .thenReturn(instance);
 
-        runtimes.start(workspace, ENV_NAME, false);
+        runtimes.startAsync(workspace, ENV_NAME, false);
+        verify(sharedPool).submit(taskCaptor.capture());
+        taskCaptor.getValue().call();
 
         WaitingAnswer<Void> waitingAnswer = new WaitingAnswer<>();
         doAnswer(waitingAnswer).when(instance).destroy();
@@ -181,7 +193,7 @@ public class WorkspaceRuntimeIntegrationTest {
         executor.execute(() -> {
             try {
                 runtimes.stop(WORKSPACE_ID);
-            } catch (ApiException e) {
+            } catch (Exception e) {
                 LOG.error(e.getLocalizedMessage(), e);
             }
         });
@@ -190,7 +202,7 @@ public class WorkspaceRuntimeIntegrationTest {
 
         // then
         // no exception - environment and workspace are still running
-        runtimes.get(WORKSPACE_ID);
+        runtimes.getRuntime(WORKSPACE_ID);
         // let instance removal proceed
         waitingAnswer.completeAnswer();
         // verify destroying was called
@@ -199,6 +211,6 @@ public class WorkspaceRuntimeIntegrationTest {
         // wait to ensure that removal of runtime is finished
         Thread.sleep(500);
         // runtime is removed - now getting of it should throw an exception
-        runtimes.get(WORKSPACE_ID);
+        runtimes.getRuntime(WORKSPACE_ID);
     }
 }

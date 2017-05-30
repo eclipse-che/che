@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.SuspendActionDto;
 import org.eclipse.che.api.promises.client.Promise;
 
 import java.util.List;
@@ -51,6 +52,16 @@ public interface DebuggerServiceClient {
      *      debug session id
      */
     Promise<Void> disconnect(String id);
+
+    /**
+     * Suspends the application is being debugged.
+     *
+     * @param id
+     *         debug session id
+     * @param action
+     *         the suspend action parameters
+     */
+    Promise<Void> suspend(String id, SuspendActionDto action);
 
     /**
      * Gets debug session info.

@@ -1,6 +1,6 @@
 <%--
 
-    Copyright (c) 2012-2016 Codenvy, S.A.
+    Copyright (c) 2012-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>Eclipse Che</title>
     <link rel="shortcut icon" href="/_app/favicon.ico"/>
-    <link href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css?family=Droid+Sans+Mono" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript" language="javascript">
 
@@ -36,7 +36,7 @@
 
         window.IDE.config = {
             "restContext": "/wsmaster/api",
-            "cheExtensionPath": "/wsagent/ext"
+            "websocketContext": "/wsmaster/websocket"
         };
 
         /**

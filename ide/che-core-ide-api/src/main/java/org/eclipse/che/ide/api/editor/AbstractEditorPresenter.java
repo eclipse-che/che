@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 
 import org.eclipse.che.ide.api.parts.AbstractPartPresenter;
@@ -54,12 +55,6 @@ public abstract class AbstractEditorPresenter extends AbstractPartPresenter impl
 
     /** {@inheritDoc} */
     @Override
-    public void setVisible(boolean visible) {
-        throw new UnsupportedOperationException("This method isn't supported in this class " + getClass());
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public IsWidget getView() {
         throw new UnsupportedOperationException("This method isn't supported in this class " + getClass());
     }
@@ -94,5 +89,10 @@ public abstract class AbstractEditorPresenter extends AbstractPartPresenter impl
     @Override
     public void onFileChanged() {
         firePropertyChange(TITLE_PROPERTY);
+    }
+
+    @Override
+    public void onClosing(AsyncCallback<Void> callback) {
+        callback.onSuccess(null);
     }
 }

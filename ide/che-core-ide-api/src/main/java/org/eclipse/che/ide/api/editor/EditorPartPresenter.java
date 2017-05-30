@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,4 +112,13 @@ public interface EditorPartPresenter extends PartPresenter {
      *         <code>true</code> if unsaved changed should be saved, and <code>false</code> if unsaved changed should be discarded
      */
     void close(boolean save);
+
+    /**
+     * Called when part is going to closing.
+     * Part can deny closing, by calling {@code callback#onFailure}.
+     *
+     * @param callback
+     *         callback to allow or deny closing the part
+     */
+    void onClosing(AsyncCallback<Void> callback);
 }

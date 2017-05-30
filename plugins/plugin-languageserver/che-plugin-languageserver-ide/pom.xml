@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2016 Codenvy, S.A.
+    Copyright (c) 2012-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-languageserver-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.0.0-M8-SNAPSHOT</version>
+        <version>5.12.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>che-plugin-languageserver-ide</artifactId>
@@ -43,10 +43,6 @@
             <artifactId>guice-assistedinject</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.typefox.lsapi</groupId>
-            <artifactId>io.typefox.lsapi</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>
@@ -56,15 +52,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-dto</artifactId>
+            <artifactId>che-core-api-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-languageserver-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -83,8 +75,26 @@
             <artifactId>che-core-ide-ui</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-orion-editor</artifactId>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-orion-editor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+                    <groupId>org.eclipse.xtext</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org.eclipse.xtend.lib</artifactId>
+                    <groupId>org.eclipse.xtend</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.xtext</groupId>
+            <artifactId>org.eclipse.xtext.xbase.lib.gwt</artifactId>
         </dependency>
         <dependency>
             <groupId>org.vectomatic</groupId>
@@ -102,7 +112,6 @@
         </dependency>
     </dependencies>
     <build>
-        <outputDirectory>target/classes</outputDirectory>
         <resources>
             <resource>
                 <directory>src/main/java</directory>
@@ -126,7 +135,46 @@
                 <configuration>
                     <excludes>
                         <exclude>**/org/eclipse/che/plugin/languageserver/ide/editor/codeassist/LatestCompletionResult.java</exclude>
+                        <exclude>**/Lsp4j.gwt.xml</exclude>
+                        <exclude>**/Either.java</exclude>
+                        <exclude>**/EitherUtil.java</exclude>
+                        <exclude>**/JsonUtil.java</exclude>
+                        <exclude>**/JsonSerializable.java</exclude>
+                        <exclude>**/ApplyTextEditAction.java</exclude>
+                        <exclude>**/QuickassistActionEvent.java</exclude>
+                        <exclude>**/LanguageServerQuickAssistProcessorFactory.java</exclude>
+                        <exclude>**/LanguageServerQuickAssistProcessor.java</exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-languageserver-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.eclipse.che.core</groupId>
+                        <artifactId>che-core-api-languageserver-shared</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <dtoPackages>
+                        <package>org.eclipse.lsp4j</package>
+                        <package>org.eclipse.che.api.languageserver.shared.event</package>
+                        <package>org.eclipse.che.api.languageserver.shared.model</package>
+                    </dtoPackages>
+                    <outputDirectory>${dto-generator-out-directory}</outputDirectory>
+                    <genClassName>org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls</genClassName>
+                    <impl>client</impl>
                 </configuration>
             </plugin>
             <plugin>
@@ -163,45 +211,18 @@
                 </executions>
             </plugin>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>pre-compile</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-api-dto-maven-plugin</artifactId>
-                <version>${project.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-client-dto</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
+                        <id>analyze</id>
                         <configuration>
-                            <dtoPackages>
-                                <package>org.eclipse.che.api.languageserver.shared</package>
-                            </dtoPackages>
-                            <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                            <genClassName>org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls</genClassName>
-                            <impl>client</impl>
+                            <ignoredDependencies>
+                                <ignoredDependency>org.eclipse.xtext:org.eclipse.xtext.xbase.lib.gwt</ignoredDependency>
+                            </ignoredDependencies>
                         </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>${project.groupId}</groupId>
-                        <artifactId>${project.artifactId}</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>

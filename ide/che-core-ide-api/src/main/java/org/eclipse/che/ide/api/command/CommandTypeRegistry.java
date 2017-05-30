@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.command;
 
-import org.eclipse.che.commons.annotation.Nullable;
-
-import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Registry for command types.
@@ -22,15 +21,14 @@ import java.util.List;
 public interface CommandTypeRegistry {
 
     /**
-     * Returns {@link CommandType} with the specified ID or {@code null} if none.
+     * Returns {@code Optional} {@link CommandType} with the specified ID or {@code Optional.absent()} if none.
      *
      * @param id
      *         the ID of the command type
-     * @return command type or {@code null}
+     * @return {@link CommandType} or {@code Optional.absent()}
      */
-    @Nullable
-    CommandType getCommandTypeById(String id);
+    Optional<CommandType> getCommandTypeById(String id);
 
-    /** Returns all registered {@link CommandType}s. */
-    List<CommandType> getCommandTypes();
+    /** Returns set of all registered {@link CommandType}s. */
+    Set<CommandType> getCommandTypes();
 }

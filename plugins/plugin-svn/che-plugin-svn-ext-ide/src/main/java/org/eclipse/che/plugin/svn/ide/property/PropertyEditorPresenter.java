@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,8 +21,8 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
-import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.api.user.AskCredentialsDialog;
+import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
@@ -61,7 +61,7 @@ public class PropertyEditorPresenter extends SubversionActionPresenter implement
                                       ProcessesPanelPresenter processesPanelPresenter,
                                       PropertyEditorView view,
                                       SubversionClientService service,
-                                      SubversionCredentialsDialog credentialsDialog,
+                                      AskCredentialsDialog credentialsDialog,
                                       NotificationManager notificationManager,
                                       SubversionExtensionLocalizationConstants constants,
                                       StatusColors statusColors) {
@@ -127,22 +127,6 @@ public class PropertyEditorPresenter extends SubversionActionPresenter implement
                         notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
                     }
                 });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void minimize() {
-        // stub
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void activatePart() {
-        // stub
     }
 
     private void editProperty(Project project) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineSource;
@@ -27,10 +28,10 @@ import org.eclipse.che.api.machine.server.spi.impl.AbstractInstance;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
-import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
@@ -101,11 +102,10 @@ public class DockerInstance extends AbstractInstance {
     private final DockerInstanceProcessesCleaner              processesCleaner;
     private final ConcurrentHashMap<Integer, InstanceProcess> machineProcesses;
     private final boolean                                     snapshotUseRegistry;
-
-    private MachineRuntimeInfoImpl machineRuntime;
+    private final MachineRuntimeInfoImpl                      machineRuntime;
 
     @Inject
-    public DockerInstance(DockerConnector docker,
+    public DockerInstance(DockerConnectorProvider dockerProvider,
                           @Named("che.docker.registry") String registry,
                           @Named("che.docker.namespace") @Nullable String registryNamespace,
                           DockerMachineFactory dockerMachineFactory,
@@ -116,11 +116,11 @@ public class DockerInstance extends AbstractInstance {
                           @Assisted LineConsumer outputConsumer,
                           DockerInstanceStopDetector dockerInstanceStopDetector,
                           DockerInstanceProcessesCleaner processesCleaner,
-                          @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) {
+                          @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) throws MachineException {
         super(machine);
         this.dockerMachineFactory = dockerMachineFactory;
         this.container = container;
-        this.docker = docker;
+        this.docker = dockerProvider.get();
         this.image = image;
         this.outputConsumer = outputConsumer;
         this.registry = registry;
@@ -131,6 +131,7 @@ public class DockerInstance extends AbstractInstance {
         this.machineProcesses = new ConcurrentHashMap<>();
         processesCleaner.trackProcesses(this);
         this.snapshotUseRegistry = snapshotUseRegistry;
+        this.machineRuntime = doGetRuntime();
     }
 
     @Override
@@ -140,19 +141,6 @@ public class DockerInstance extends AbstractInstance {
 
     @Override
     public MachineRuntimeInfoImpl getRuntime() {
-        // if runtime info is not evaluated yet
-        if (machineRuntime == null) {
-            try {
-                final ContainerInfo containerInfo = docker.inspectContainer(container);
-                machineRuntime = new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(containerInfo,
-                                                                                                null,
-                                                                                                node.getHost(),
-                                                                                                getConfig()));
-            } catch (IOException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-                return null;
-            }
-        }
         return machineRuntime;
     }
 
@@ -270,8 +258,7 @@ public class DockerInstance extends AbstractInstance {
     public void destroy() throws MachineException {
         try {
             outputConsumer.close();
-        } catch (IOException ignored) {
-        }
+        } catch (IOException ignored) {}
 
         machineProcesses.clear();
         processesCleaner.untrackProcesses(getId());
@@ -285,13 +272,15 @@ public class DockerInstance extends AbstractInstance {
             docker.removeContainer(RemoveContainerParams.create(container)
                                                         .withRemoveVolumes(true)
                                                         .withForce(true));
-        } catch (IOException e) {
+        } catch (IOException | ServerException e) {
+            LOG.error(e.getLocalizedMessage(), e);
             throw new MachineException(e.getLocalizedMessage());
         }
 
         try {
             docker.removeImage(RemoveImageParams.create(image).withForce(false));
         } catch (IOException ignore) {
+            LOG.error("IOException during destroy(). Ignoring.");
         }
     }
 
@@ -389,5 +378,15 @@ public class DockerInstance extends AbstractInstance {
      */
     public String getContainer() {
         return container;
+    }
+
+    private MachineRuntimeInfoImpl doGetRuntime() throws MachineException {
+        try {
+            return new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(docker.inspectContainer(container),
+                                                                                  getConfig(),
+                                                                                  node.getHost()));
+        } catch (IOException x) {
+            throw new MachineException(x.getMessage(), x);
+        }
     }
 }

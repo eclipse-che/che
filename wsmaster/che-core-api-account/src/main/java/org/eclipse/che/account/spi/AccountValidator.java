@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,8 +31,11 @@ import java.util.regex.Pattern;
 public class AccountValidator {
     private static final Logger LOG = LoggerFactory.getLogger(AccountValidator.class);
 
-    private static final Pattern ILLEGAL_ACCOUNT_NAME_CHARACTERS = Pattern.compile("[^a-zA-Z0-9]");
-    private static final Pattern VALID_ACCOUNT_NAME              = Pattern.compile("^[a-zA-Z0-9]*");
+    private static final Pattern ILLEGAL_ACCOUNT_NAME_CHARACTERS = Pattern.compile("[^a-zA-Z0-9-]" + // all character except allowed
+                                                                                   "|(?<=-)-+" +     // non single hyphens
+                                                                                   "|^-+" +          // hyphens at the beginning
+                                                                                   "|-+$");          // hyphens at the end
+    private static final Pattern VALID_ACCOUNT_NAME              = Pattern.compile("^(?:[a-zA-Z0-9]-?)*[a-zA-Z0-9]+");
 
     private final AccountManager accountManager;
 

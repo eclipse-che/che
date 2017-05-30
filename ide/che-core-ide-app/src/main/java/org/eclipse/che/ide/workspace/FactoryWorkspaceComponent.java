@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,14 +12,13 @@ package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -30,19 +29,16 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.factory.FactoryServiceClient;
-import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.collections.Jso;
-import org.eclipse.che.ide.collections.js.JsoArray;
 import org.eclipse.che.ide.context.AppContextImpl;
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
+import org.eclipse.che.ide.context.BrowserAddress;
+import org.eclipse.che.ide.context.QueryParameters;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
@@ -62,8 +58,9 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 @Singleton
 public class FactoryWorkspaceComponent extends WorkspaceComponent {
 
-    private final FactoryServiceClient           factoryServiceClient;
-    private       String                         workspaceId;
+    private final QueryParameters      queryParameters;
+    private final FactoryServiceClient factoryServiceClient;
+    private       String               workspaceId;
 
     @Inject
     public FactoryWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
@@ -74,15 +71,14 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
                                      DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                      EventBus eventBus,
                                      AppContext appContext,
-                                     Provider<MachineManager> machineManagerProvider,
                                      NotificationManager notificationManager,
-                                     MessageBusProvider messageBusProvider,
-                                     BrowserQueryFieldRenderer browserQueryFieldRenderer,
+                                     BrowserAddress browserAddress,
                                      DialogFactory dialogFactory,
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
-                                     WorkspaceEventsHandler workspaceEventsHandler,
-                                     LoaderPresenter loader) {
+                                     LoaderPresenter loader,
+                                     QueryParameters queryParameters,
+                                     RequestTransmitter requestTransmitter) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
               startWorkspacePresenter,
@@ -90,34 +86,30 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
               dtoUnmarshallerFactory,
               eventBus,
               appContext,
-              machineManagerProvider,
               notificationManager,
-              messageBusProvider,
-              browserQueryFieldRenderer,
+              browserAddress,
               dialogFactory,
               preferencesManager,
               dtoFactory,
-              workspaceEventsHandler,
-              loader);
+              loader,
+              requestTransmitter);
         this.factoryServiceClient = factoryServiceClient;
+        this.queryParameters = queryParameters;
     }
 
     @Override
     public void start(final Callback<Component, Exception> callback) {
         this.callback = callback;
-        Jso factoryParams = browserQueryFieldRenderer.getParameters();
-        JsoArray<String> keys = factoryParams.getKeys();
         Map<String, String> factoryParameters = new HashMap<>();
-        // check all factory parameters
-        for (String key : keys.toList()) {
+        for (Map.Entry<String, String> queryParam : queryParameters.getAll().entrySet()) {
+            String key = queryParam.getKey();
             if (key.startsWith("factory-")) {
-                String value = factoryParams.getStringField(key);
-                factoryParameters.put(key.substring("factory-".length()), value);
+                factoryParameters.put(key.substring("factory-".length()), queryParam.getValue());
             }
         }
 
         // get workspace ID to use dedicated workspace for this factory
-        this.workspaceId = browserQueryFieldRenderer.getParameterFromURLByName("workspaceId");
+        this.workspaceId = queryParameters.getByName("workspaceId");
 
         Promise<FactoryDto> factoryPromise;
         // now search if it's a factory based on id or from parameters
@@ -127,24 +119,16 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
             factoryPromise = factoryServiceClient.resolveFactory(factoryParameters, true);
         }
 
-        Promise<Void> promise = factoryPromise.then(new Function<FactoryDto, Void>() {
-            @Override
-            public Void apply(final FactoryDto factory) throws FunctionException {
-                
-                if (appContext instanceof AppContextImpl) {
-                    ((AppContextImpl)appContext).setFactory(factory);
-                }
-
-                // get workspace
-                tryStartWorkspace();
-                return null;
+        factoryPromise.then((Function<FactoryDto, Void>)factory -> {
+            if (appContext instanceof AppContextImpl) {
+                (appContext).setFactory(factory);
             }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                Log.error(FactoryWorkspaceComponent.class, "Unable to load Factory", error);
-                callback.onFailure(new Exception(error.getCause()));
-            }
+            // get workspace
+            tryStartWorkspace();
+            return null;
+        }).catchError(error -> {
+            Log.error(FactoryWorkspaceComponent.class, "Unable to load Factory", error);
+            callback.onFailure(new Exception(error.getCause()));
         });
 
     }
@@ -169,15 +153,12 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
      * Checks if specified workspace has {@link WorkspaceStatus} which is {@code RUNNING}
      */
     protected Operation<WorkspaceDto> checkWorkspaceIsStarted() {
-        return new Operation<WorkspaceDto>() {
-            @Override
-            public void apply(WorkspaceDto workspace) throws OperationException {
-                if (!RUNNING.equals(workspace.getStatus())) {
-                    notificationManager.notify(locale.failedToLoadFactory(), locale.workspaceNotRunning(), FAIL, FLOAT_MODE);
-                    throw new OperationException(locale.workspaceNotRunning());
-                } else {
-                    startWorkspace().apply(workspace);
-                }
+        return workspace -> {
+            if (!RUNNING.equals(workspace.getStatus())) {
+                notificationManager.notify(locale.failedToLoadFactory(), locale.workspaceNotRunning(), FAIL, FLOAT_MODE);
+                throw new OperationException(locale.workspaceNotRunning());
+            } else {
+                startWorkspace().apply(workspace);
             }
         };
     }

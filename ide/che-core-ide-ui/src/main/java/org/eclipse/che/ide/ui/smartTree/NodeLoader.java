@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,10 +38,10 @@ import org.eclipse.che.ide.ui.smartTree.handler.GroupingHandlerRegistration;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +71,14 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
      *
      * @see NodeInterceptor
      */
-    private List<NodeInterceptor> nodeInterceptors;
+    private Set<NodeInterceptor> nodeInterceptors;
+
+    private final Comparator<NodeInterceptor> priorityComparator = new Comparator<NodeInterceptor>() {
+        @Override
+        public int compare(NodeInterceptor o1, NodeInterceptor o2) {
+            return o1.getPriority() - o2.getPriority();
+        }
+    };
 
     /**
      * When caching is on nodes will be loaded from cache if they exist otherwise nodes will be loaded every time forcibly.
@@ -231,15 +238,9 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
      *         set of {@link NodeInterceptor}
      */
     public NodeLoader(@Nullable Set<NodeInterceptor> nodeInterceptors) {
-        this.nodeInterceptors = new ArrayList<>();
+        this.nodeInterceptors = new HashSet<>();
         if (nodeInterceptors != null) {
             this.nodeInterceptors.addAll(nodeInterceptors);
-            Collections.sort(this.nodeInterceptors, new Comparator<NodeInterceptor>() {
-                @Override
-                public int compare(NodeInterceptor o1, NodeInterceptor o2) {
-                    return o1.getPriority() - o2.getPriority();
-                }
-            });
         }
     }
 
@@ -392,7 +393,10 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
                     onLoadSuccess(parent, children);
                 }
 
-                iterate(new LinkedList<>(nodeInterceptors), parent, children);
+                LinkedList<NodeInterceptor> sortedByPriorityQueue = new LinkedList<>(nodeInterceptors);
+                Collections.sort(sortedByPriorityQueue, priorityComparator);
+
+                iterate(sortedByPriorityQueue, parent, children);
             }
         };
     }
@@ -483,11 +487,11 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
     }
 
     /**
-     * Return list of node interceptors.
+     * Return set of node interceptors.
      *
      * @return node interceptors list
      */
-    public List<NodeInterceptor> getNodeInterceptors() {
+    public Set<NodeInterceptor> getNodeInterceptors() {
         return nodeInterceptors;
     }
 

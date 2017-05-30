@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,17 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.declaration;
 
-import io.typefox.lsapi.ServerCapabilities;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -32,6 +25,9 @@ import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenter;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
+import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -69,7 +65,7 @@ public class FindDefinitionAction extends AbstractPerspectiveAction {
             if (configuration instanceof LanguageServerEditorConfiguration) {
                 ServerCapabilities capabilities = ((LanguageServerEditorConfiguration)configuration).getServerCapabilities();
                 event.getPresentation()
-                     .setEnabledAndVisible(capabilities.isDefinitionProvider() != null && capabilities.isDefinitionProvider());
+                     .setEnabledAndVisible(capabilities.getDefinitionProvider() != null && capabilities.getDefinitionProvider());
                 return;
             }
         }
@@ -82,23 +78,17 @@ public class FindDefinitionAction extends AbstractPerspectiveAction {
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
 
         TextEditor textEditor = ((TextEditor)activeEditor);
-        TextDocumentPositionParamsDTO paramsDTO = dtoBuildHelper.createTDPP(textEditor.getDocument(), textEditor.getCursorPosition());
+        TextDocumentPositionParams paramsDTO = dtoBuildHelper.createTDPP(textEditor.getDocument(), textEditor.getCursorPosition());
 
-        final Promise<List<LocationDTO>> promise = client.definition(paramsDTO);
-        promise.then(new Operation<List<LocationDTO>>() {
-            @Override
-            public void apply(List<LocationDTO> arg) throws OperationException {
-                if (arg.size() == 1) {
-                    presenter.onLocationSelected(arg.get(0));
-                } else {
-                    presenter.openLocation(promise);
-                }
+        final Promise<List<Location>> promise = client.definition(paramsDTO);
+        promise.then(arg -> {
+            if (arg.size() == 1) {
+                presenter.onLocationSelected(arg.get(0));
+            } else {
+                presenter.openLocation(promise);
             }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                presenter.showError(arg);
-            }
+        }).catchError(arg -> {
+            presenter.showError(arg);
         });
     }
 }

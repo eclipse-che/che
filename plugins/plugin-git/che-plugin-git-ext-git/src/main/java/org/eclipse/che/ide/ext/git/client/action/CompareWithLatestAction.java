@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListPresenter;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -105,7 +106,9 @@ public class CompareWithLatestAction extends GitAction {
                                    @Override
                                    public void apply(Optional<File> file) throws OperationException {
                                        if (file.isPresent()) {
-                                           comparePresenter.show(file.get(), defineStatus(changedFiles[0].substring(0, 1)), REVISION);
+                                           comparePresenter.showCompareWithLatest(file.get(),
+                                                                                  defineStatus(changedFiles[0].substring(0, 1)),
+                                                                                  REVISION);
                                        }
                                    }
                                });
@@ -114,7 +117,7 @@ public class CompareWithLatestAction extends GitAction {
                                for (String item : changedFiles) {
                                    items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
                                }
-                               changedListPresenter.show(items, REVISION, project);
+                               changedListPresenter.show(items, REVISION, null, project);
                            }
                        }
                    }

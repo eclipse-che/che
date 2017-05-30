@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,9 +15,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
-import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
+import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,8 +54,6 @@ public class NodeJsDebuggerConfigurationPagePresenterTest {
     private AppContext                          appContext;
     @Mock
     private RecipeServiceClient                 recipeServiceClient;
-    @Mock
-    private MachineServiceClient                machineServiceClient;
 
     @InjectMocks
     private NodeJsDebuggerConfigurationPagePresenter pagePresenter;

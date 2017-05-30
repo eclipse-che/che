@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,11 +43,11 @@ import java.util.Arrays;
 
 import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 import static org.eclipse.che.ide.api.parts.PartStackType.INFORMATION;
+import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.LEFT;
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
 import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.anyDouble;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -84,6 +84,8 @@ public class AbstractPerspectiveTest {
     @Mock
     private PartStackView           partStackView;
     @Mock
+    private PartStackPresenter      extraPartStackPresenter;
+    @Mock
     private PartStackPresenter      partStackPresenter;
     @Mock
     private WorkBenchPartController workBenchController;
@@ -91,6 +93,8 @@ public class AbstractPerspectiveTest {
     private PartPresenter           partPresenter;
     @Mock
     private Constraints             constraints;
+    @Mock
+    private PartPresenter           navigationPart;
     @Mock
     private PartPresenter           activePart;
     @Mock
@@ -122,8 +126,8 @@ public class AbstractPerspectiveTest {
                                           Matchers.<WorkBenchPartController>anyObject())).thenReturn(partStackPresenter);
 
         perspective =
-                new DummyPerspective(view, stackPresenterFactory, partStackViewFactory, controllerFactory, eventBus, partStackPresenter,
-                                     dynaProvider);
+                new DummyPerspective(view, stackPresenterFactory, partStackViewFactory, controllerFactory, eventBus,
+                        extraPartStackPresenter, partStackPresenter, dynaProvider);
     }
 
     @Test
@@ -186,22 +190,22 @@ public class AbstractPerspectiveTest {
 
         perspective.hidePart(partPresenter);
 
-        verify(partStackPresenter).hidePart(partPresenter);
+        verify(partStackPresenter).minimize();
     }
 
     @Test
-    public void partsShouldBeCollapsed() {
-        perspective.maximizeCentralPart();
+    public void partShouldBeMaximized() {
+        perspective.onMaximize(partStackPresenter);
 
-        verify(workBenchController, times(3)).getSize();
-        verify(workBenchController, times(3)).setHidden(true);
+        verify(partStackPresenter).maximize();
     }
 
     @Test
-    public void partsShouldBeRestored() {
-        perspective.maximizeBottomPart();
-        perspective.restoreParts();
-        verify(workBenchController, times(3)).setSize(anyDouble());
+    public void partShouldBeCollapsed() {
+        perspective.onMaximize(extraPartStackPresenter);
+
+        verify(partStackPresenter, times(3)).collapse();
+        verify(extraPartStackPresenter).maximize();
     }
 
     @Test
@@ -276,11 +280,30 @@ public class AbstractPerspectiveTest {
                                 @NotNull PartStackViewFactory partViewFactory,
                                 @NotNull WorkBenchControllerFactory controllerFactory,
                                 @NotNull EventBus eventBus,
-                                PartStackPresenter partStackPresenter,
+
+                                PartStackPresenter extraPartStackPresenter,
+                                PartStackPresenter editingPartStackPresenter,
+
                                 DynaProvider dynaProvider) {
             super(SOME_TEXT, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus, dynaProvider);
 
-            partStacks.put(EDITING, partStackPresenter);
+            if (extraPartStackPresenter != null) {
+                partStacks.put(NAVIGATION, extraPartStackPresenter);
+            }
+
+            if (editingPartStackPresenter != null) {
+                partStacks.put(EDITING, editingPartStackPresenter);
+            }
+        }
+
+        @Override
+        public String getPerspectiveId() {
+            return SOME_TEXT;
+        }
+
+        @Override
+        public String getPerspectiveName() {
+            return "Dummy";
         }
 
         @Override
@@ -288,4 +311,5 @@ public class AbstractPerspectiveTest {
             throw new NotSupportedException("This method will be tested in the class which extends AbstractPerspective");
         }
     }
+
 }

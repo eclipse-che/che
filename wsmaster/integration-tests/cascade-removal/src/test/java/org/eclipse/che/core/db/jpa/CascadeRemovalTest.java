@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,25 +15,28 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.google.inject.name.Names;
-import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.api.AccountModule;
 import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
+import org.eclipse.che.account.spi.AccountDao;
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
+import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
+import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.ssh.server.jpa.JpaSshDao.RemoveSshKeysBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao.RemovePreferencesBeforeUserRemovedEventSubscriber;
-import org.eclipse.che.api.user.server.jpa.JpaProfileDao.RemoveProfileBeforeUserRemovedEventSubscriber;
+import org.eclipse.che.api.user.server.jpa.PreferenceEntity;
 import org.eclipse.che.api.user.server.jpa.UserJpaModule;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -42,18 +45,31 @@ import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
+import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
+import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.commons.test.db.H2DBTestServer;
+import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
 import org.eclipse.che.core.db.DBInitializer;
-import org.eclipse.che.core.db.event.CascadeRemovalEvent;
-import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.event.CascadeEvent;
+import org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.inject.lifecycle.InitModule;
+import org.h2.Driver;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -65,7 +81,7 @@ import javax.persistence.EntityManagerFactory;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
+import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createAccount;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createPreferences;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createProfile;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createSnapshot;
@@ -90,6 +106,7 @@ public class CascadeRemovalTest {
 
     private Injector      injector;
     private EventService  eventService;
+    private AccountDao    accountDao;
     private PreferenceDao preferenceDao;
     private UserDao       userDao;
     private ProfileDao    profileDao;
@@ -97,8 +114,12 @@ public class CascadeRemovalTest {
     private SnapshotDao   snapshotDao;
     private SshDao        sshDao;
 
-    /** User is a root of dependency tree. */
-    private UserImpl user;
+    /** Account and User are a root of dependency tree. */
+    private AccountImpl account;
+    private UserImpl    user;
+
+    private UserManager    userManager;
+    private AccountManager accountManager;
 
     /** Profile depends on user. */
     private ProfileImpl profile;
@@ -120,16 +141,45 @@ public class CascadeRemovalTest {
     private SnapshotImpl snapshot3;
     private SnapshotImpl snapshot4;
 
+    private H2DBTestServer server;
+
     @BeforeMethod
     public void setUp() throws Exception {
+        server = H2DBTestServer.startDefault();
         injector = Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
+                install(new PersistTestModuleBuilder().setDriver(Driver.class)
+                                                      .runningOn(server)
+                                                      .addEntityClasses(AccountImpl.class,
+                                                                        UserImpl.class,
+                                                                        ProfileImpl.class,
+                                                                        PreferenceEntity.class,
+                                                                        WorkspaceImpl.class,
+                                                                        WorkspaceConfigImpl.class,
+                                                                        ProjectConfigImpl.class,
+                                                                        EnvironmentImpl.class,
+                                                                        EnvironmentRecipeImpl.class,
+                                                                        ExtendedMachineImpl.class,
+                                                                        SourceStorageImpl.class,
+                                                                        ServerConf2Impl.class,
+                                                                        StackImpl.class,
+                                                                        CommandImpl.class,
+                                                                        SnapshotImpl.class,
+                                                                        RecipeImpl.class,
+                                                                        SshPairImpl.class)
+                                                      .addEntityClass("org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
+                                                      .setExceptionHandler(H2ExceptionHandler.class)
+                                                      .build());
                 bind(EventService.class).in(Singleton.class);
                 install(new InitModule(PostConstruct.class));
-                install(new JpaPersistModule("test"));
-                bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
+                bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
                 bind(DBInitializer.class).asEagerSingleton();
+
+                bind(String[].class).annotatedWith(Names.named("che.auth.reserved_user_names")).toInstance(new String[0]);
+                bind(UserManager.class);
+                bind(AccountManager.class);
+
                 install(new UserJpaModule());
                 install(new AccountModule());
                 install(new SshJpaModule());
@@ -142,11 +192,15 @@ public class CascadeRemovalTest {
                 bind(AccountManager.class);
                 bind(Boolean.class).annotatedWith(Names.named("che.workspace.auto_snapshot")).toInstance(false);
                 bind(Boolean.class).annotatedWith(Names.named("che.workspace.auto_restore")).toInstance(false);
+                bind(WorkspaceSharedPool.class).toInstance(new WorkspaceSharedPool("cached", null, null));
             }
         });
 
         eventService = injector.getInstance(EventService.class);
+        accountDao = injector.getInstance(AccountDao.class);
         userDao = injector.getInstance(UserDao.class);
+        userManager = injector.getInstance(UserManager.class);
+        accountManager = injector.getInstance(AccountManager.class);
         preferenceDao = injector.getInstance(PreferenceDao.class);
         profileDao = injector.getInstance(ProfileDao.class);
         sshDao = injector.getInstance(SshDao.class);
@@ -157,36 +211,38 @@ public class CascadeRemovalTest {
     @AfterMethod
     public void cleanup() {
         injector.getInstance(EntityManagerFactory.class).close();
+        server.shutdown();
     }
 
     @Test
-    public void shouldDeleteAllTheEntitiesWhenUserIsDeleted() throws Exception {
+    public void shouldDeleteAllTheEntitiesWhenUserAndAccountIsDeleted() throws Exception {
         createTestData();
 
         // Remove the user, all entries must be removed along with the user
-        userDao.remove(user.getId());
+        accountManager.remove(account.getId());
+        userManager.remove(user.getId());
 
         // Check all the entities are removed
         assertNull(notFoundToNull(() -> userDao.getById(user.getId())));
         assertNull(notFoundToNull(() -> profileDao.getById(user.getId())));
         assertTrue(preferenceDao.getPreferences(user.getId()).isEmpty());
         assertTrue(sshDao.get(user.getId()).isEmpty());
-        assertTrue(workspaceDao.getByNamespace(user.getId()).isEmpty());
+        assertTrue(workspaceDao.getByNamespace(user.getName()).isEmpty());
         assertTrue(snapshotDao.findSnapshots(workspace1.getId()).isEmpty());
         assertTrue(snapshotDao.findSnapshots(workspace2.getId()).isEmpty());
     }
 
-    @Test(dataProvider = "beforeRemoveRollbackActions")
-    public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntries(
-            Class<CascadeRemovalEventSubscriber<CascadeRemovalEvent>> subscriberClass,
-            Class<CascadeRemovalEvent> eventClass) throws Exception {
+    @Test(dataProvider = "beforeUserRemoveRollbackActions")
+    public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntriesDuringUserRemoving(
+            Class<CascadeEventSubscriber<CascadeEvent>> subscriberClass,
+            Class<CascadeEvent> eventClass) throws Exception {
         createTestData();
         eventService.unsubscribe(injector.getInstance(subscriberClass), eventClass);
 
         // Remove the user, all entries must be rolled back after fail
         try {
-            userDao.remove(user.getId());
-            fail("UserDao#remove had to throw exception");
+            userManager.remove(user.getId());
+            fail("UserManager#remove has to throw exception");
         } catch (Exception ignored) {
         }
 
@@ -195,32 +251,56 @@ public class CascadeRemovalTest {
         assertNotNull(profileDao.getById(user.getId()));
         assertFalse(preferenceDao.getPreferences(user.getId()).isEmpty());
         assertFalse(sshDao.get(user.getId()).isEmpty());
+        wipeTestData();
+    }
+
+    @DataProvider(name = "beforeUserRemoveRollbackActions")
+    public Object[][] beforeUserRemoveActions() {
+        return new Class[][] {
+                {RemoveSshKeysBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class}
+        };
+    }
+
+    @Test(dataProvider = "beforeAccountRemoveRollbackActions")
+    public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntriesDuringAccountRemoving(
+            Class<CascadeEventSubscriber<CascadeEvent>> subscriberClass,
+            Class<CascadeEvent> eventClass) throws Exception {
+        createTestData();
+        eventService.unsubscribe(injector.getInstance(subscriberClass), eventClass);
+
+        // Remove the user, all entries must be rolled back after fail
+        try {
+            accountDao.remove(account.getId());
+            fail("AccountDao#remove had to throw exception");
+        } catch (Exception ignored) {
+        }
+
+        // Check all the data rolled back
         assertFalse(workspaceDao.getByNamespace(user.getName()).isEmpty());
         assertFalse(snapshotDao.findSnapshots(workspace1.getId()).isEmpty());
         assertFalse(snapshotDao.findSnapshots(workspace2.getId()).isEmpty());
         wipeTestData();
     }
 
-    @DataProvider(name = "beforeRemoveRollbackActions")
-    public Object[][] beforeRemoveActions() {
+    @DataProvider(name = "beforeAccountRemoveRollbackActions")
+    public Object[][] beforeAccountRemoveActions() {
         return new Class[][] {
-                {RemovePreferencesBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
-                {RemoveProfileBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
                 {RemoveWorkspaceBeforeAccountRemovedEventSubscriber.class, BeforeAccountRemovedEvent.class},
                 {RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber.class, BeforeWorkspaceRemovedEvent.class},
-                {RemoveSshKeysBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
                 };
     }
 
     private void createTestData() throws ConflictException, ServerException {
+        accountDao.create(account = createAccount("bobby"));
+
         userDao.create(user = createUser("bobby"));
 
         profileDao.create(profile = createProfile(user.getId()));
 
         preferenceDao.setPreferences(user.getId(), preferences = createPreferences());
 
-        workspaceDao.create(workspace1 = createWorkspace("workspace1", user.getAccount()));
-        workspaceDao.create(workspace2 = createWorkspace("workspace2", user.getAccount()));
+        workspaceDao.create(workspace1 = createWorkspace("workspace1", account));
+        workspaceDao.create(workspace2 = createWorkspace("workspace2", account));
 
         sshDao.create(sshPair1 = createSshPair(user.getId(), "service", "name1"));
         sshDao.create(sshPair2 = createSshPair(user.getId(), "service", "name2"));
@@ -248,6 +328,8 @@ public class CascadeRemovalTest {
         profileDao.remove(user.getId());
 
         userDao.remove(user.getId());
+
+        accountDao.remove(account.getId());
     }
 
     private static <T> T notFoundToNull(Callable<T> action) throws Exception {

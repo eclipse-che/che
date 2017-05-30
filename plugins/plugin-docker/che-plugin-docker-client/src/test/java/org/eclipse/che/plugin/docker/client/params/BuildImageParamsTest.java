@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
 package org.eclipse.che.plugin.docker.client.params;
 
 import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -28,24 +27,28 @@ import static org.testng.Assert.assertNull;
 
 /**
  * @author Mykola Morhun
+ * @author Alexander Garagatyi
  */
 public class BuildImageParamsTest {
 
-    private static final String             REPOSITORY                           = "repository";
-    private static final String             TAG                                  = "tag";
-    private static final AuthConfigs        AUTH_CONFIGS                         = mock(AuthConfigs.class);
-    private static final Boolean            DO_FORCE_PULL                        = true;
-    private static final Long               MEMORY_LIMIT                         = 12345L;
-    private static final Long               MEMORY_SWAP_LIMIT                    = 67890L;
-    private static final File               FILE                                 = new File(".");
-    private static final List<File>         FILES;
-    private static final String             DOCKERFILE                           = "/tmp/Dockerfile";
-    private static final String             REMOTE                               = "https://github.com/someuser/remote.git";
-    private static final Boolean            QUIET                                = false;
-    private static final Boolean            NO_CACHE                             = false;
-    private static final Boolean            REMOVE_INTERMEDIATE_CONTAINER        = true;
-    private static final Boolean            FORCE_REMOVE_INTERMEDIATE_CONTAINERS = true;
-    private static final Map<String,String> BUILD_ARGS                           = new HashMap<>();
+    private static final String              REPOSITORY                           = "repository";
+    private static final String              TAG                                  = "tag";
+    private static final AuthConfigs         AUTH_CONFIGS                         = mock(AuthConfigs.class);
+    private static final Boolean             DO_FORCE_PULL                        = true;
+    private static final Long                MEMORY_LIMIT                         = 12345L;
+    private static final Long                MEMORY_SWAP_LIMIT                    = 67890L;
+    private static final File                FILE                                 = new File(".");
+    private static final String              DOCKERFILE                           = "/tmp/Dockerfile";
+    private static final String              REMOTE                               = "https://github.com/someuser/remote.git";
+    private static final Boolean             QUIET                                = false;
+    private static final Boolean             NO_CACHE                             = false;
+    private static final Boolean             REMOVE_INTERMEDIATE_CONTAINER        = true;
+    private static final Boolean             FORCE_REMOVE_INTERMEDIATE_CONTAINERS = true;
+    private static final Map<String, String> BUILD_ARGS                           = new HashMap<>();
+    private static final String              CPUSET_CPUS                          = "0-3";
+    private static final Long                CPU_PERIOD                           = 50000L;
+    private static final Long                CPU_QUOTA                            = 150000L;
+    private static final List<File> FILES;
 
     static {
         FILES = new ArrayList<>();
@@ -78,6 +81,9 @@ public class BuildImageParamsTest {
         assertNull(buildImageParams.isRemoveIntermediateContainer());
         assertNull(buildImageParams.isForceRemoveIntermediateContainers());
         assertNull(buildImageParams.getBuildArgs());
+        assertNull(buildImageParams.getCpusetCpus());
+        assertNull(buildImageParams.getCpuPeriod());
+        assertNull(buildImageParams.getCpuQuota());
     }
 
     @Test
@@ -99,8 +105,10 @@ public class BuildImageParamsTest {
         assertNull(buildImageParams.isRemoveIntermediateContainer());
         assertNull(buildImageParams.isForceRemoveIntermediateContainers());
         assertNull(buildImageParams.getBuildArgs());
+        assertNull(buildImageParams.getCpusetCpus());
+        assertNull(buildImageParams.getCpuPeriod());
+        assertNull(buildImageParams.getCpuQuota());
     }
-
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParametersFromFiles() {
@@ -116,6 +124,9 @@ public class BuildImageParamsTest {
                                            .withNoCache(NO_CACHE)
                                            .withRemoveIntermediateContainers(REMOVE_INTERMEDIATE_CONTAINER)
                                            .withForceRemoveIntermediateContainers(FORCE_REMOVE_INTERMEDIATE_CONTAINERS)
+                                           .withCpusetCpus(CPUSET_CPUS)
+                                           .withCpuPeriod(CPU_PERIOD)
+                                           .withCpuQuota(CPU_QUOTA)
                                            .withBuildArgs(BUILD_ARGS);
 
         assertNull(buildImageParams.getRemote());
@@ -133,6 +144,9 @@ public class BuildImageParamsTest {
         assertEquals(buildImageParams.isRemoveIntermediateContainer(), REMOVE_INTERMEDIATE_CONTAINER);
         assertEquals(buildImageParams.isForceRemoveIntermediateContainers(), FORCE_REMOVE_INTERMEDIATE_CONTAINERS);
         assertEquals(buildImageParams.getBuildArgs(), BUILD_ARGS);
+        assertEquals(buildImageParams.getCpusetCpus(), CPUSET_CPUS);
+        assertEquals(buildImageParams.getCpuPeriod(), CPU_PERIOD);
+        assertEquals(buildImageParams.getCpuQuota(), CPU_QUOTA);
     }
 
     @Test
@@ -149,6 +163,9 @@ public class BuildImageParamsTest {
                                            .withNoCache(NO_CACHE)
                                            .withRemoveIntermediateContainers(REMOVE_INTERMEDIATE_CONTAINER)
                                            .withForceRemoveIntermediateContainers(FORCE_REMOVE_INTERMEDIATE_CONTAINERS)
+                                           .withCpusetCpus(CPUSET_CPUS)
+                                           .withCpuPeriod(CPU_PERIOD)
+                                           .withCpuQuota(CPU_QUOTA)
                                            .withBuildArgs(BUILD_ARGS);
 
         assertNull(buildImageParams.getFiles());
@@ -166,6 +183,9 @@ public class BuildImageParamsTest {
         assertEquals(buildImageParams.isRemoveIntermediateContainer(), REMOVE_INTERMEDIATE_CONTAINER);
         assertEquals(buildImageParams.isForceRemoveIntermediateContainers(), FORCE_REMOVE_INTERMEDIATE_CONTAINERS);
         assertEquals(buildImageParams.getBuildArgs(), BUILD_ARGS);
+        assertEquals(buildImageParams.getCpusetCpus(), CPUSET_CPUS);
+        assertEquals(buildImageParams.getCpuPeriod(), CPU_PERIOD);
+        assertEquals(buildImageParams.getCpuQuota(), CPU_QUOTA);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -211,205 +231,63 @@ public class BuildImageParamsTest {
 
     @Test
     public void repositoryParameterShouldEqualsNullIfItNotSet() {
-        buildImageParams.withTag(TAG)
-                        .withAuthConfigs(AUTH_CONFIGS)
-                        .withDoForcePull(DO_FORCE_PULL)
-                        .withMemoryLimit(MEMORY_LIMIT)
-                        .withMemorySwapLimit(MEMORY_SWAP_LIMIT)
-                        .withDockerfile(DOCKERFILE)
-                        .withQuiet(QUIET)
-                        .withNoCache(NO_CACHE)
-                        .withRemoveIntermediateContainers(REMOVE_INTERMEDIATE_CONTAINER)
-                        .withForceRemoveIntermediateContainers(FORCE_REMOVE_INTERMEDIATE_CONTAINERS)
-                        .withBuildArgs(BUILD_ARGS);
-
         assertNull(buildImageParams.getRepository());
     }
 
     @Test
     public void tagParameterShouldEqualsNullIfItNotSet() {
-        buildImageParams.withRepository(REPOSITORY)
-                        .withAuthConfigs(AUTH_CONFIGS)
-                        .withDoForcePull(DO_FORCE_PULL)
-                        .withMemoryLimit(MEMORY_LIMIT)
-                        .withMemorySwapLimit(MEMORY_SWAP_LIMIT)
-                        .withDockerfile(DOCKERFILE)
-                        .withQuiet(QUIET)
-                        .withNoCache(NO_CACHE)
-                        .withRemoveIntermediateContainers(REMOVE_INTERMEDIATE_CONTAINER)
-                        .withForceRemoveIntermediateContainers(FORCE_REMOVE_INTERMEDIATE_CONTAINERS)
-                        .withBuildArgs(BUILD_ARGS);
-
         assertNull(buildImageParams.getTag());
     }
 
     @Test
     public void authConfigParameterShouldEqualsNullIfItNotSet() {
-        buildImageParams.withRepository(REPOSITORY)
-                        .withTag(TAG)
-                        .withDoForcePull(DO_FORCE_PULL)
-                        .withMemoryLimit(MEMORY_LIMIT)
-                        .withMemorySwapLimit(MEMORY_SWAP_LIMIT)
-                        .withDockerfile(DOCKERFILE)
-                        .withQuiet(QUIET)
-                        .withNoCache(NO_CACHE)
-                        .withRemoveIntermediateContainers(REMOVE_INTERMEDIATE_CONTAINER)
-                        .withForceRemoveIntermediateContainers(FORCE_REMOVE_INTERMEDIATE_CONTAINERS)
-                        .withBuildArgs(BUILD_ARGS);
-
         assertNull(buildImageParams.getAuthConfigs());
     }
 
     @Test
     public void doForcePullParameterShouldEqualsNullIfItNotSet() {
-        buildImageParams.withRepository(REPOSITORY)
-                        .withTag(TAG)
-                        .withAuthConfigs(AUTH_CONFIGS)
-                        .withMemoryLimit(MEMORY_LIMIT)
-                        .withMemorySwapLimit(MEMORY_SWAP_LIMIT)
-                        .withDockerfile(DOCKERFILE)
-                        .withQuiet(QUIET)
-                        .withNoCache(NO_CACHE)
-                        .withRemoveIntermediateContainers(REMOVE_INTERMEDIATE_CONTAINER)
-                        .withForceRemoveIntermediateContainers(FORCE_REMOVE_INTERMEDIATE_CONTAINERS)
-                        .withBuildArgs(BUILD_ARGS);
-
         assertNull(buildImageParams.isDoForcePull());
     }
 
     @Test
     public void memoryLimitParameterShouldEqualsNullIfItNotSet() {
-        buildImageParams.withRepository(REPOSITORY)
-                        .withTag(TAG)
-                        .withAuthConfigs(AUTH_CONFIGS)
-                        .withDoForcePull(DO_FORCE_PULL)
-                        .withMemorySwapLimit(MEMORY_SWAP_LIMIT)
-                        .withDockerfile(DOCKERFILE)
-                        .withQuiet(QUIET)
-                        .withNoCache(NO_CACHE)
-                        .withRemoveIntermediateContainers(REMOVE_INTERMEDIATE_CONTAINER)
-                        .withForceRemoveIntermediateContainers(FORCE_REMOVE_INTERMEDIATE_CONTAINERS)
-                        .withBuildArgs(BUILD_ARGS);
-
         assertNull(buildImageParams.getMemoryLimit());
     }
 
     @Test
     public void memorySwapLimitParameterShouldEqualsNullIfItNotSet() {
-        buildImageParams.withRepository(REPOSITORY)
-                        .withTag(TAG)
-                        .withAuthConfigs(AUTH_CONFIGS)
-                        .withDoForcePull(DO_FORCE_PULL)
-                        .withMemoryLimit(MEMORY_LIMIT)
-                        .withDockerfile(DOCKERFILE)
-                        .withQuiet(QUIET)
-                        .withNoCache(NO_CACHE)
-                        .withRemoveIntermediateContainers(REMOVE_INTERMEDIATE_CONTAINER)
-                        .withForceRemoveIntermediateContainers(FORCE_REMOVE_INTERMEDIATE_CONTAINERS)
-                        .withBuildArgs(BUILD_ARGS);
-
         assertNull(buildImageParams.getMemorySwapLimit());
     }
 
     @Test
     public void dockerfileParameterShouldEqualsNullIfItNotSet() {
-        buildImageParams.withRepository(REPOSITORY)
-                        .withTag(TAG)
-                        .withAuthConfigs(AUTH_CONFIGS)
-                        .withDoForcePull(DO_FORCE_PULL)
-                        .withMemoryLimit(MEMORY_LIMIT)
-                        .withMemorySwapLimit(MEMORY_SWAP_LIMIT)
-                        .withQuiet(QUIET)
-                        .withNoCache(NO_CACHE)
-                        .withRemoveIntermediateContainers(REMOVE_INTERMEDIATE_CONTAINER)
-                        .withForceRemoveIntermediateContainers(FORCE_REMOVE_INTERMEDIATE_CONTAINERS)
-                        .withBuildArgs(BUILD_ARGS);
+        buildImageParams.withRepository(REPOSITORY);
 
         assertNull(buildImageParams.getDockerfile());
     }
 
     @Test
     public void quietParameterShouldEqualsNullIfItNotSet() {
-        buildImageParams.withRepository(REPOSITORY)
-                        .withTag(TAG)
-                        .withAuthConfigs(AUTH_CONFIGS)
-                        .withDoForcePull(DO_FORCE_PULL)
-                        .withMemoryLimit(MEMORY_LIMIT)
-                        .withMemorySwapLimit(MEMORY_SWAP_LIMIT)
-                        .withDockerfile(DOCKERFILE)
-                        .withNoCache(NO_CACHE)
-                        .withRemoveIntermediateContainers(REMOVE_INTERMEDIATE_CONTAINER)
-                        .withForceRemoveIntermediateContainers(FORCE_REMOVE_INTERMEDIATE_CONTAINERS)
-                        .withBuildArgs(BUILD_ARGS);
-
         assertNull(buildImageParams.isQuiet());
     }
 
     @Test
     public void noCacheParameterShouldEqualsNullIfItNotSet() {
-        buildImageParams.withRepository(REPOSITORY)
-                        .withTag(TAG)
-                        .withAuthConfigs(AUTH_CONFIGS)
-                        .withDoForcePull(DO_FORCE_PULL)
-                        .withMemoryLimit(MEMORY_LIMIT)
-                        .withMemorySwapLimit(MEMORY_SWAP_LIMIT)
-                        .withDockerfile(DOCKERFILE)
-                        .withQuiet(QUIET)
-                        .withRemoveIntermediateContainers(REMOVE_INTERMEDIATE_CONTAINER)
-                        .withForceRemoveIntermediateContainers(FORCE_REMOVE_INTERMEDIATE_CONTAINERS)
-                        .withBuildArgs(BUILD_ARGS);
-
         assertNull(buildImageParams.isNoCache());
     }
 
     @Test
     public void removeIntermediateContainerParameterShouldEqualsNullIfItNotSet() {
-        buildImageParams.withRepository(REPOSITORY)
-                        .withTag(TAG)
-                        .withAuthConfigs(AUTH_CONFIGS)
-                        .withDoForcePull(DO_FORCE_PULL)
-                        .withMemoryLimit(MEMORY_LIMIT)
-                        .withMemorySwapLimit(MEMORY_SWAP_LIMIT)
-                        .withDockerfile(DOCKERFILE)
-                        .withQuiet(QUIET)
-                        .withNoCache(NO_CACHE)
-                        .withForceRemoveIntermediateContainers(FORCE_REMOVE_INTERMEDIATE_CONTAINERS)
-                        .withBuildArgs(BUILD_ARGS);
-
         assertNull(buildImageParams.isRemoveIntermediateContainer());
     }
 
     @Test
     public void forceRemoveIntermediateContainersParameterShouldEqualsNullIfItNotSet() {
-        buildImageParams.withRepository(REPOSITORY)
-                        .withTag(TAG)
-                        .withAuthConfigs(AUTH_CONFIGS)
-                        .withDoForcePull(DO_FORCE_PULL)
-                        .withMemoryLimit(MEMORY_LIMIT)
-                        .withMemorySwapLimit(MEMORY_SWAP_LIMIT)
-                        .withDockerfile(DOCKERFILE)
-                        .withQuiet(QUIET)
-                        .withNoCache(NO_CACHE)
-                        .withRemoveIntermediateContainers(REMOVE_INTERMEDIATE_CONTAINER)
-                        .withBuildArgs(BUILD_ARGS);
-
         assertNull(buildImageParams.isForceRemoveIntermediateContainers());
     }
 
     @Test
     public void buildArgsParameterShouldEqualsNullIfItNotSet() {
-        buildImageParams.withRepository(REPOSITORY)
-                        .withTag(TAG)
-                        .withAuthConfigs(AUTH_CONFIGS)
-                        .withDoForcePull(DO_FORCE_PULL)
-                        .withMemoryLimit(MEMORY_LIMIT)
-                        .withMemorySwapLimit(MEMORY_SWAP_LIMIT)
-                        .withDockerfile(DOCKERFILE)
-                        .withQuiet(QUIET)
-                        .withNoCache(NO_CACHE)
-                        .withRemoveIntermediateContainers(REMOVE_INTERMEDIATE_CONTAINER)
-                        .withForceRemoveIntermediateContainers(FORCE_REMOVE_INTERMEDIATE_CONTAINERS);
-
         assertNull(buildImageParams.getBuildArgs());
     }
 
@@ -447,4 +325,18 @@ public class BuildImageParamsTest {
         assertEquals(buildImageParams.getBuildArgs().get(key), value);
     }
 
+    @Test
+    public void cpuQuotaParameterShouldBeNullIfItNotSet() {
+        assertNull(buildImageParams.getCpuQuota());
+    }
+
+    @Test
+    public void cpuPeriodParameterShouldBeNullIfItNotSet() {
+        assertNull(buildImageParams.getCpuPeriod());
+    }
+
+    @Test
+    public void cpusetCpusParameterShouldBeNullIfItNotSet() {
+        assertNull(buildImageParams.getCpusetCpus());
+    }
 }

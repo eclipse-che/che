@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.ext.web.css.NewCssFileAction;
 import org.eclipse.che.ide.ext.web.css.NewLessFileAction;
 import org.eclipse.che.ide.ext.web.html.NewHtmlFileAction;
-import org.eclipse.che.ide.ext.web.html.PreviewAction;
+import org.eclipse.che.ide.ext.web.html.PreviewHTMLAction;
 import org.eclipse.che.ide.ext.web.html.editor.HtmlEditorProvider;
 import org.eclipse.che.ide.ext.web.js.NewJavaScriptFileAction;
 import org.eclipse.che.ide.ext.web.js.editor.JsEditorProvider;
@@ -56,15 +56,13 @@ public class WebExtension {
                         @Named("JSFileType") FileType jsFile,
                         @Named("HTMLFileType") FileType htmlFile,
                         @Named("ES6FileType") FileType es6File,
-                        @Named("JSXFileType") FileType jsxFile,
-                        @Named("TypeScript") FileType typeScriptFile) {
+                        @Named("JSXFileType") FileType jsxFile) {
         // register new Icon for javascript project type
         iconRegistry.registerIcon(new Icon("JavaScript.samples.category.icon", resources.samplesCategoryJs()));
 
         editorRegistry.registerDefaultEditor(jsFile, jsEditorProvider);
         editorRegistry.registerDefaultEditor(es6File, jsEditorProvider);
         editorRegistry.registerDefaultEditor(jsxFile, jsEditorProvider);
-        editorRegistry.registerDefaultEditor(typeScriptFile, jsEditorProvider);
         editorRegistry.registerDefaultEditor(htmlFile, htmlEditorProvider);
     }
 
@@ -95,13 +93,13 @@ public class WebExtension {
                                 NewLessFileAction newLessFileAction,
                                 NewHtmlFileAction newHtmlFileAction,
                                 NewJavaScriptFileAction newJavaScriptFileAction,
-                                PreviewAction previewAction) {
+                                PreviewHTMLAction previewHTMLAction) {
         // register actions
         actionManager.registerAction("newCssFile", newCssFileAction);
         actionManager.registerAction("newLessFile", newLessFileAction);
         actionManager.registerAction("newHtmlFile", newHtmlFileAction);
         actionManager.registerAction("newJavaScriptFile", newJavaScriptFileAction);
-        actionManager.registerAction("previewHTML", previewAction);
+        actionManager.registerAction("previewHTML", previewHTMLAction);
 
         // set icons
         newCssFileAction.getTemplatePresentation().setSVGResource(resources.cssFile());
@@ -118,10 +116,10 @@ public class WebExtension {
 
         // add actions in context menu
         DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
-        mainContextMenuGroup.add(previewAction);
+        mainContextMenuGroup.add(previewHTMLAction);
 
         // add actions in Assistant main menu
         DefaultActionGroup assistantMainMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_ASSISTANT);
-        assistantMainMenuGroup.add(previewAction);
+        assistantMainMenuGroup.add(previewHTMLAction);
     }
 }

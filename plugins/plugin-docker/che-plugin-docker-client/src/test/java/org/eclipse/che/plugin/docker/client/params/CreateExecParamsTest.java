@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ public class CreateExecParamsTest {
     private static final String   CONTAINER = "container";
     private static final boolean  DETACH    = false;
     private static final String[] CMD       = {"command", "arg1", "arg2"};
+    private static final String   USER      = "user:user";
 
     private CreateExecParams createExecParams;
 
@@ -40,11 +41,13 @@ public class CreateExecParamsTest {
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
         createExecParams = CreateExecParams.create(CONTAINER, CMD)
-                                           .withDetach(DETACH);
+                                           .withDetach(DETACH)
+                                           .withUser(USER);
 
         assertEquals(createExecParams.getContainer(), CONTAINER);
         assertEquals(createExecParams.getCmd(), CMD);
         assertTrue(createExecParams.isDetach() == DETACH);
+        assertEquals(createExecParams.getUser(), USER);
     }
 
     @Test(expectedExceptions = NullPointerException.class)

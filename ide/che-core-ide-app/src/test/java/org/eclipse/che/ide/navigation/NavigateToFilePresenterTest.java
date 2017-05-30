@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import com.google.common.base.Optional;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.api.promises.client.Promise;
@@ -63,6 +64,8 @@ public class NavigateToFilePresenterTest {
     private Promise<Optional<File>> optFilePromise;
     @Mock
     private AppContext              appContext;
+    @Mock
+    private EditorAgent             editorAgent;
 
     private NavigateToFilePresenter presenter;
 
@@ -79,7 +82,8 @@ public class NavigateToFilePresenterTest {
                                                 eventBus,
                                                 dtoUnmarshallerFactory,
                                                 messageBusProvider,
-                                                appContext);
+                                                appContext,
+                                                editorAgent);
 
         presenter.onWsAgentStarted(wsAgentStateEvent);
     }
@@ -88,15 +92,15 @@ public class NavigateToFilePresenterTest {
     public void testShowDialog() throws Exception {
         presenter.showDialog();
 
-        verify(view).showDialog();
-        verify(view).clearInput();
+        verify(view).showPopup();
     }
 
     @Test
     public void testOnFileSelected() throws Exception {
         presenter.onFileSelected(Path.ROOT);
 
-        verify(view).close();
+        verify(view).hidePopup();
         verify(container).getFile(eq(Path.ROOT));
     }
+
 }

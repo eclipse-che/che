@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-
-import org.eclipse.che.api.languageserver.shared.lsapi.DiagnosticDTO;
+import org.eclipse.lsp4j.Diagnostic;
 
 /**
  * @author Evgen Vidolob
@@ -23,7 +22,7 @@ public interface DiagnosticCollector {
      * @param diagnostic
      *         Diagnostic - The discovered diagnostic.
      */
-    void acceptDiagnostic(DiagnosticDTO diagnostic);
+    void acceptDiagnostic(Diagnostic diagnostic);
 
     /**
      * Notification sent before starting the diagnostic process.

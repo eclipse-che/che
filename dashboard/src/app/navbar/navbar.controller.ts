@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,42 +9,41 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheAPI} from '../../components/api/che-api.factory';
 
-export class CheNavBarCtrl {
+export class CheNavBarController {
+  menuItemUrl = {
+    dashboard: '#/',
+    workspaces: '#/workspaces',
+    administration: '#/administration',
+    // subsections
+    plugins: '#/admin/plugins',
+    factories: '#/factories',
+    account: '#/account',
+    stacks: '#/stacks'
+  };
+
+  private $mdSidenav: ng.material.ISidenavService;
+  private $scope: ng.IScope;
+  private $window: ng.IWindowService;
+  private $location: ng.ILocationService;
+  private $route: ng.route.IRouteService;
+  private cheAPI: CheAPI;
+  private profile: che.IProfile;
 
   /**
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor($mdSidenav, $scope, $location, $route, cheAPI, $window) {
-    this.mdSidenav = $mdSidenav;
+  constructor($mdSidenav: ng.material.ISidenavService, $scope: ng.IScope, $location: ng.ILocationService, $route: ng.route.IRouteService, cheAPI: CheAPI, $window: ng.IWindowService) {
+    this.$mdSidenav = $mdSidenav;
     this.$scope = $scope;
     this.$location = $location;
     this.$route = $route;
     this.cheAPI = cheAPI;
     this.$window = $window;
-    this.links = [{href: '#/create-workspace', name: 'New Workspace'}];
 
     this.profile = cheAPI.getProfile().getProfile();
-    if (this.profile.email) {
-      this.email = this.profile.email;
-    } else {
-      this.profile.$promise.then(() => {
-        this.email = this.profile.email ? this.profile.email : 'N/A ';
-      }, () => {
-        this.email = 'N/A ';
-      });
-    }
-
-    this.menuItemUrl = {
-      dashboard: '#/',
-      workspaces: '#/workspaces',
-      administration: '#/administration',
-      // subsections
-      plugins: '#/admin/plugins',
-      account: '#/account',
-      stacks: '#/stacks'
-    };
 
     // highlight navbar menu item
     $scope.$on('$locationChangeStart', () => {
@@ -52,29 +51,30 @@ export class CheNavBarCtrl {
       $scope.$broadcast('navbar-selected:set', path);
     });
 
-    cheAPI.cheWorkspace.fetchWorkspaces();
+    cheAPI.getWorkspace().fetchWorkspaces();
+    cheAPI.getFactory().fetchFactories();
   }
 
-  isImsAvailable() {
-    return this.imsArtifactApi.isImsAvailable();
-  }
-
-  reload() {
+  reload(): void {
     this.$route.reload();
   }
 
   /**
    * Toggle the left menu
    */
-  toggleLeftMenu() {
-    this.mdSidenav('left').toggle();
+  toggleLeftMenu(): void {
+    this.$mdSidenav('left').toggle();
   }
 
-  getWorkspacesNumber() {
-    return this.cheAPI.cheWorkspace.getWorkspaces().length;
+  getWorkspacesNumber(): number {
+    return this.cheAPI.getWorkspace().getWorkspaces().length;
   }
 
-  openLinkInNewTab(url) {
+  getFactoriesNumber(): number {
+    return this.cheAPI.getFactory().getPageFactories().length;
+  }
+
+  openLinkInNewTab(url: string): void {
     this.$window.open(url, '_blank');
   }
 }

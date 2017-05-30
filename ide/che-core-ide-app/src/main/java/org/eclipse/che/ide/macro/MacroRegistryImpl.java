@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.macro;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
@@ -27,6 +28,7 @@ import java.util.Set;
  *
  * @author Artem Zatsarynnyi
  */
+@Singleton
 public class MacroRegistryImpl implements MacroRegistry {
 
     private final Map<String, Macro> macros;

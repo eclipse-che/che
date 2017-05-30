@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,15 +76,6 @@ public class FactoryServiceClientImpl implements FactoryServiceClient {
         }
         return asyncRequestFactory.createGetRequest(url.toString()).header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
                                   .send(unmarshallerFactory.newUnmarshaller(FactoryDto.class));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void getFactorySnippet(String factoryId, String type, AsyncRequestCallback<String> callback) {
-        final String requestUrl = API_FACTORY_BASE_URL + factoryId + "/snippet?type=" + type;
-        asyncRequestFactory.createGetRequest(requestUrl).header(HTTPHeader.ACCEPT, MimeType.TEXT_PLAIN).send(callback);
     }
 
     /**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,10 +19,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -67,9 +63,9 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
 
     private final AutoCompleteResources.Css css;
 
-    private final PresentationFactory presentationFactory;
+    private final PresentationFactory       presentationFactory;
 
-    private final SimpleList.ListEventDelegate<Action> eventDelegate = new SimpleList.ListEventDelegate<Action>() {
+    private final SimpleList.ListEventDelegate<Action> eventDelegate    = new SimpleList.ListEventDelegate<Action>() {
         @Override
         public void onListItemClicked(Element listItemBase, Action itemData) {
             list.getSelectionModel().setSelectedItem(itemData);
@@ -81,7 +77,7 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
         }
     };
 
-    private final SimpleList.ListItemRenderer<Action> listItemRenderer =
+    private final SimpleList.ListItemRenderer<Action>  listItemRenderer =
             new SimpleList.ListItemRenderer<Action>() {
                 @Override
                 public void render(Element itemElement, Action itemData) {
@@ -133,21 +129,24 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
             };
 
     @UiField
-    TextBox nameField;
+    TextBox                              nameField;
 
     @UiField
-    CheckBox includeNonMenu;
+    CheckBox                             includeNonMenu;
 
-    private ActionDelegate  delegate;
-    private Resources       resources;
-    private KeyBindingAgent keyBindingAgent;
-    private ActionManager   actionManager;
-
-    @UiField
-    DockLayoutPanel layoutPanel;
+    private ActionDelegate               delegate;
+    private Resources                    resources;
+    private KeyBindingAgent              keyBindingAgent;
+    private ActionManager                actionManager;
 
     @UiField
-    FlowPanel actionsPanel;
+    DockLayoutPanel                      layoutPanel;
+
+    @UiField
+    FlowPanel                            actionsPanel;
+
+    @UiField
+    HTML                                 actionsContainer;
 
     private SimpleList<Action>           list;
     private Map<Action, String>          actions;
@@ -180,18 +179,11 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
         layoutPanel.setWidgetHidden(actionsPanel, true);
         layoutPanel.setHeight("60px");
 
-        addCloseHandler(new CloseHandler<PopupPanel>() {
-            @Override
-            public void onClose(CloseEvent<PopupPanel> event) {
-                delegate.onClose();
-            }
-        });
+        addCloseHandler(event -> delegate.onClose());
 
-        includeNonMenu.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                delegate.nameChanged(nameField.getText(), event.getValue());
-            }
+        includeNonMenu.addValueChangeHandler(event -> {
+            includeNonMenu.getElement().setAttribute("checked", Boolean.toString(event.getValue()));
+            delegate.nameChanged(nameField.getText(), event.getValue());
         });
     }
 
@@ -213,12 +205,7 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
             hideActions();
         }
 
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                center();
-            }
-        });
+        Scheduler.get().scheduleDeferred(() -> center());
     }
 
     @Override
@@ -230,56 +217,39 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
     public void showActions(Map<Action, String> actions) {
         this.actions = actions;
 
-        actionsPanel.clear();
+        actionsContainer.getElement().setInnerHTML("");
 
-        final TableElement itemHolder = Elements.createTableElement();
+        TableElement itemHolder = Elements.createTableElement();
         itemHolder.setClassName(css.items());
+        actionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element) itemHolder));
 
-        final HTML html = new HTML();
-        html.setStyleName(css.noborder());
-        html.getElement().appendChild(((com.google.gwt.dom.client.Element)itemHolder));
-
-        final HTML container = new HTML();
-        container.setStyleName(css.noborder());
-        container.getElement().appendChild(html.getElement());
-
-        list = SimpleList.create((SimpleList.View)container.getElement().cast(),
-                                 (Element)html.getElement(),
-                                 itemHolder,
-                                 resources.defaultSimpleListCss(),
-                                 listItemRenderer,
-                                 eventDelegate);
+        list = SimpleList.create((SimpleList.View)actionsContainer.getElement().cast(), (Element)actionsContainer.getElement(), itemHolder,
+                resources.defaultSimpleListCss(), listItemRenderer, eventDelegate);
 
         list.render(new ArrayList<>(actions.keySet()));
 
-        actionsPanel.add(container);
+        if (!actions.isEmpty()) {
+            list.getSelectionModel().setSelectedItem(0);
+        }
+
         layoutPanel.setWidgetHidden(actionsPanel, false);
         layoutPanel.setHeight("250px");
 
         if (isVisible()) {
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                @Override
-                public void execute() {
-                    center();
-                }
-            });
+            Scheduler.get().scheduleDeferred(() -> center());
         }
     }
 
     @Override
     public void hideActions() {
         actions = new HashMap<>();
+        actionsContainer.getElement().setInnerHTML("");
 
         layoutPanel.setWidgetHidden(actionsPanel, true);
         layoutPanel.setHeight("60px");
 
         if (isVisible()) {
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                @Override
-                public void execute() {
-                    center();
-                }
-            });
+            Scheduler.get().scheduleDeferred(() -> center());
         }
     }
 
@@ -328,12 +298,7 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
                 return;
         }
 
-        Scheduler.get().scheduleDeferred(new Command() {
-            @Override
-            public void execute() {
-                delegate.nameChanged(nameField.getText(), includeNonMenu.getValue());
-            }
-        });
+        Scheduler.get().scheduleDeferred((Command)() -> delegate.nameChanged(nameField.getText(), includeNonMenu.getValue()));
     }
 
 }

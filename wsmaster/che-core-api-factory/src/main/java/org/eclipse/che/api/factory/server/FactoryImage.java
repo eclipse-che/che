@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,10 +19,10 @@ import java.util.Objects;
 @Embeddable
 public class FactoryImage {
 
-    @Column(name = "imagedata")
+    @Column(name = "image_data")
     private byte[] imageData;
 
-    @Column(name = "mediatype")
+    @Column(name = "media_type")
     private String mediaType;
 
     @Column(name = "name")

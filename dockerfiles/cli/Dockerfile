@@ -9,10 +9,10 @@
 #
 # use:
 #    docker run -v $(pwd):/che eclipse/che-cli [command]
-FROM eclipse/che-base:nightly
+FROM ${BUILD_ORGANIZATION}/${BUILD_PREFIX}-base:${BUILD_TAG}
 
 COPY scripts /scripts/
 COPY version /version/
 
-RUN mkdir /che && chmod u+x /scripts/entrypoint.sh
+RUN mkdir /che
 ENTRYPOINT ["/scripts/entrypoint.sh"]

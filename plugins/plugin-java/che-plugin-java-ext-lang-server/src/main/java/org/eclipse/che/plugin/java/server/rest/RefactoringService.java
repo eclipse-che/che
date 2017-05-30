@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.che.plugin.java.server.rest;
 
 import com.google.inject.Inject;
@@ -37,6 +36,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
@@ -90,7 +90,14 @@ public class RefactoringService {
                     if (javaElement.isPack()) {
                         return javaProject.findPackageFragment(new org.eclipse.core.runtime.Path(javaElement.getPath()));
                     } else {
-                        return javaProject.findType(javaElement.getPath()).getCompilationUnit();
+
+                        IType type = javaProject.findType(javaElement.getPath());
+
+                        //in some cases client may send FQN that doesn't exist
+                        if (type == null) {
+                            throw new IllegalArgumentException("Can't find type: " + javaElement.getPath());
+                        }
+                        return type.getCompilationUnit();
 
                     }
                 } catch (JavaModelException e) {

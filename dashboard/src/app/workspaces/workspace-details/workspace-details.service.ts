@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,44 +10,87 @@
  */
 'use strict';
 
+interface IPage {
+  title: string;
+  content: string;
+  icon: string;
+  index: number;
+}
+
+interface ISection {
+ title: string;
+ description: string;
+ content: string;
+}
+
 /**
  * This class is handling the data for workspace details sections (tabs)
  *
  * @author Ann Shumilova
  */
 export class WorkspaceDetailsService {
-
-    /**
-     * Default constructor that is using resource
-     * @ngInject for Dependency injection
-     */
-    constructor () {
-      this.sections = [];
-    }
+  pages: IPage[];
+  sections: ISection[];
 
   /**
-   * Add new section to the workspace details.
-   *
-   * @param title section title
-   * @param content section html content
-   * @param icon section icon
-   * @param index optional section index (order)
+   * Default constructor that is using resource
+   * @ngInject for Dependency injection
    */
-    addSection(title, content, icon, index) {
-      let section = {};
-      section.title = title;
-      section.content = content;
-      section.icon = icon;
-      section.index = index || this.sections.length;
-      this.sections.push(section);
-    }
+  constructor () {
+    this.pages = [];
+    this.sections = [];
+  }
 
   /**
-   * Returns workspace details sections.
+   * Add new page(tab) to the workspace details.
    *
-   * @returns {Array} array of sections
+   * @param title page title
+   * @param content page html content
+   * @param icon page icon
+   * @param index optional page index (order)
    */
-    getSections() {
-      return this.sections;
+  addPage(title: string, content: string, icon: string, index: number): void {
+    let page: IPage = {
+      title: title,
+      content: content,
+      icon: icon,
+      index: index || this.pages.length
+    };
+    this.pages.push(page);
+  }
+
+  /**
+   * Adds new section in workspace details.
+   *
+   * @param title title of the section
+   * @param description description of teh section (optional)
+   * @param content html content of the section
+   */
+  addSection(title: string, description: string, content: string): void {
+    let section: ISection = {
+      title: title,
+      description: description,
+      content: content
     }
+
+    this.sections.push(section);
+  }
+
+  /**
+   * Returns workspace details pages(tabs).
+   *
+   * @returns {Array} array of pages(tabs)
+   */
+  getPages(): IPage[] {
+    return this.pages;
+  }
+
+  /**
+   * Returns the array of workspace details sections.
+   *
+   * @returns {ISection[]} list of sections
+   */
+  getSections(): ISection[] {
+    return this.sections;
+  }
 }

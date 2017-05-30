@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2016 Codenvy, S.A.
+# Copyright (c) 2012-2017 Codenvy, S.A.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -13,12 +13,16 @@
 [ -z "${CHE_LOCAL_CONF_DIR}" ]  && CHE_LOCAL_CONF_DIR="${CATALINA_HOME}/conf/"
 
 #Global JAVA options
-[ -z "${JAVA_OPTS}" ]  && JAVA_OPTS="-Xms256m -Xmx1024m  -Djava.security.egd=file:/dev/./urandom"
+[ -z "${JAVA_OPTS}" ]  && JAVA_OPTS="-Xms256m -Xmx1024m -XX:+UseG1GC -XX:+UseStringDeduplication -Djava.security.egd=file:/dev/./urandom"
 
 #Global LOGS DIR
 [ -z "${CHE_LOGS_DIR}" ]  && CHE_LOGS_DIR="$CATALINA_HOME/logs"
 
+[ -z "${CHE_LOGS_LEVEL}" ]  && CHE_LOGS_LEVEL="INFO"
+
 [ -z "${JPDA_ADDRESS}" ]  && JPDA_ADDRESS="4403"
+
+[ -z "${UMASK}" ] && UMASK="022"
 
 #Tomcat options
 [ -z "${CATALINA_OPTS}" ]  && CATALINA_OPTS="-Dcom.sun.management.jmxremote  \
@@ -30,9 +34,7 @@
 [ -z "${CLASSPATH}" ]  && CLASSPATH="${CATALINA_HOME}/conf/:${JAVA_HOME}/lib/tools.jar"
 
 
-export JAVA_OPTS="$JAVA_OPTS  -Dche.logs.dir=${CHE_LOGS_DIR}"
+export JAVA_OPTS="$JAVA_OPTS  -Dche.logs.dir=${CHE_LOGS_DIR} -Dche.logs.level=${CHE_LOGS_LEVEL} -Djuli-logback.configurationFile=file:$CATALINA_HOME/conf/tomcat-logger.xml"
 
-
-#Class path
 [ -z "${SERVER_PORT}" ]  && SERVER_PORT=8080
 export SERVER_PORT

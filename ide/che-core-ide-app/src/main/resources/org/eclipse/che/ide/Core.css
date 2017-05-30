@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -518,6 +518,24 @@ a {
     background-color: keyboardSelectionBackgroundColor;
 }
 
+.gwt-DisclosurePanel .header td {
+    color: mainFontColor;
+    font-size: 11px;
+    font-weight: bold;
+    font-family: textFieldFontFamily;
+}
+
+.gwt-DisclosurePanel .header td img {
+    width: 12px;
+    height: 12px;
+    margin-top: 5px;
+}
+
+.gwt-DisclosurePanel .content {
+    margin-left: 24px;
+    border: none;
+}
+
 .editorFullScreen {
     fill: #e7e7e7;
     width: 15px;
@@ -721,7 +739,6 @@ a {
     animation-fill-mode: both;
 }
 
-
 .createWsTagsPopup {
     /*the same index as in Window*/
     z-index: 20000;
@@ -780,3 +797,8 @@ a {
 ::-webkit-scrollbar-thumb:hover {
     background-color: scrollbarHoverBackgroundColor;
 }
+
+.codeassistant-highlight {
+    color: completionPopupItemHighlightTextColor;
+}
+

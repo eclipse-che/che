@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import org.eclipse.che.maven.data.MavenExplicitProfiles;
 import org.eclipse.che.maven.data.MavenModel;
 import org.eclipse.che.maven.server.MavenRemoteServer;
 import org.eclipse.che.maven.server.MavenServer;
@@ -21,6 +22,7 @@ import org.eclipse.che.maven.server.MavenServerDownloadListener;
 import org.eclipse.che.maven.server.MavenServerLogger;
 import org.eclipse.che.maven.server.MavenSettings;
 import org.eclipse.che.maven.server.MavenTerminal;
+import org.eclipse.che.maven.server.ProfileApplicationResult;
 import org.eclipse.che.plugin.maven.server.execution.CommandLine;
 import org.eclipse.che.plugin.maven.server.execution.JavaParameters;
 import org.eclipse.che.plugin.maven.server.execution.ProcessExecutor;
@@ -38,6 +40,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -97,7 +100,10 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
                 MavenSettings mavenSettings = new MavenSettings();
                 //TODO add more user settings
                 mavenSettings.setMavenHome(new File(System.getenv("M2_HOME")));
-                mavenSettings.setGlobalSettings(new File(System.getProperty("user.home"), ".m2/settings.xml"));
+                mavenSettings.setUserSettings(new File(System.getProperty("user.home"), ".m2/settings.xml"));
+                // Setting Global maven setting
+                // for more maven info settings visit https://maven.apache.org/settings.html
+                mavenSettings.setGlobalSettings(new File(System.getenv("M2_HOME"), "conf/settings.xml"));
                 mavenSettings.setLoggingLevel(MavenTerminal.LEVEL_INFO);
                 if (localRepository != null) {
                     mavenSettings.setLocalRepository(localRepository);
@@ -118,6 +124,13 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
 
     public MavenModel interpolateModel(MavenModel model, File projectDir) {
         return perform(() -> getOrCreateWrappedObject().interpolateModel(model, projectDir));
+    }
+
+    public ProfileApplicationResult applyProfiles(MavenModel model,
+                                                  File projectDir,
+                                                  MavenExplicitProfiles explicitProfiles,
+                                                  Collection<String> alwaysOnProfiles) {
+        return perform(() -> getOrCreateWrappedObject().applyProfiles(model, projectDir, explicitProfiles, alwaysOnProfiles));
     }
 
     @PreDestroy

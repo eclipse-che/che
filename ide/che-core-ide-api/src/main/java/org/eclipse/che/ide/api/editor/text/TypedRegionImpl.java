@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,11 +32,13 @@ public class TypedRegionImpl extends RegionImpl implements TypedRegion {
     }
 
     /* @see org.eclipse.jface.text.ITypedRegion#getProjectType() */
+    @Override
     public String getType() {
         return fType;
     }
 
     /* @see java.lang.Object#isEquals(java.lang.Object) */
+    @Override
     public boolean equals(Object o) {
         if (o instanceof TypedRegionImpl) {
             TypedRegionImpl r = (TypedRegionImpl)o;
@@ -46,6 +48,7 @@ public class TypedRegionImpl extends RegionImpl implements TypedRegion {
     }
 
     /* @see java.lang.Object#hashCode() */
+    @Override
     public int hashCode() {
         int type = fType == null ? 0 : fType.hashCode();
         return super.hashCode() | type;
@@ -55,6 +58,7 @@ public class TypedRegionImpl extends RegionImpl implements TypedRegion {
      * @see org.eclipse.jface.text.Region#toString()
      * @since 3.5
      */
+    @Override
     public String toString() {
         return fType + " - " + super.toString(); //$NON-NLS-1$
     }

@@ -9,6 +9,26 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_destroy() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} destroy [PARAMETERS]\n"
+  text "\n"
+  text "Deletes a ${CHE_MINI_PRODUCT_NAME} installation\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --quiet                           Do not ask user for confirmation\n"
+  text "  --cli                             Removes the 'cli.log'\n"
+  text "\n"
+}
+
+
+pre_cmd_destroy() {
+  :
+}
+
+post_cmd_destroy() {
+  :
+}
 
 cmd_destroy_post_action() {
  true
@@ -28,57 +48,50 @@ cmd_destroy() {
       --cli)
         DESTROY_CLI="true"
         shift ;;
-      *) error "Unknown parameter: $1" ; return 2 ;;
+      *) error "Unknown parameter: $1; did you mean --quiet or --cli?" ; return 2 ;;
     esac
   done
 
-  WARNING="destroy !!! Stopping services and !!! deleting data !!! this is unrecoverable !!!"
+  WARNING="${YELLOW}!!!${RED} Stopping services and ${YELLOW}!!!${RED} deleting data ${YELLOW}!!!${RED} this is unrecoverable ${YELLOW}!!!${NC}"
   if ! confirm_operation "${WARNING}" "${QUIET}"; then
     return;
   fi
 
-  cmd_stop
+  cmd_lifecycle stop --skip:graceful
 
   info "destroy" "Deleting instance and config..."
 
   log "docker_run -v \"${CHE_HOST_CONFIG}\":${CHE_CONTAINER_ROOT} \
-                    alpine:3.4 sh -c \"rm -rf /root${CHE_CONTAINER_ROOT}/docs \
+                    ${BOOTSTRAP_IMAGE_ALPINE} sh -c \"rm -rf /root${CHE_CONTAINER_ROOT}/docs \
                                    && rm -rf /root${CHE_CONTAINER_ROOT}/instance \
                                    && rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env\""
-
-  docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
-                alpine:3.4 sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
-                               && rm -rf /root${CHE_CONTAINER_ROOT}/instance \
-                               && rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env" > /dev/null 2>&1  || true
-
   # Super weird bug.  For some reason on windows, this command has to be run 3x for everything
   # to be destroyed properly if you are in dev mode.
-  if has_docker_for_windows_client; then
-    if [[ "${CHE_DEVELOPMENT_MODE}" = "on" ]]; then
-      docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
-                    alpine:3.4 sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
-                                   && rm -rf /root${CHE_CONTAINER_ROOT}/instance \
-                                   && rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env" > /dev/null 2>&1  || true
-      docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
-                    alpine:3.4 sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
-                                   && rm -rf /root${CHE_CONTAINER_ROOT}/instance \
-                                   && rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env" > /dev/null 2>&1  || true
-    fi
-  fi
-
+  until directory_is_empty; do
+    docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
+                  ${BOOTSTRAP_IMAGE_ALPINE} sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
+                                 ; rm -rf /root${CHE_CONTAINER_ROOT}/instance \
+                                 ; rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env" > /dev/null 2>&1  || true
+  done
   rm -rf "${CHE_CONTAINER_INSTANCE}"
 
   cmd_destroy_post_action
 
-  # Sometimes users want the CLI after they have destroyed their instance
-  # If they pass destroy --cli then we will also destroy the CLI
+  # Sometimes users want the CLI log after they have destroyed their instance
+  # If they pass destroy --cli then we will also destroy the CLI log
   if [[ "${DESTROY_CLI}" = "true" ]]; then
-    if [[ "${CLI_MOUNT}" = "not set" ]]; then
-      info "destroy" "Did not delete cli.log - ':/cli' not mounted"
-    else
-      info "destroy" "Deleting cli.log..."
-      docker_run -v "${CLI_MOUNT}":/root/cli alpine:3.4 sh -c "rm -rf /root/cli/cli.log"
-    fi
+    info "destroy" "Deleting cli.log..."
+     docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
+               ${BOOTSTRAP_IMAGE_ALPINE} sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/cli.log" > /dev/null 2>&1 || true
   fi
 }
 
+directory_is_empty() {
+  if [[ -d "${CHE_CONTAINER_CONFIG}/docs" ]] ||
+     [[ -d "${CHE_CONTAINER_CONFIG}/instance" ]] ||
+     [[ -f "${CHE_CONTAINER_CONFIG}/${CHE_MINI_PRODUCT_NAME}.env" ]]; then
+    return 1
+  else
+    return 0
+  fi
+}

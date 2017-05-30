@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -49,6 +49,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -147,9 +149,9 @@ public abstract class BaseTest {
         fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
 
-        pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
-                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, new TestWorkspaceHolder(new ArrayList<>()),
-                                mock(ProjectTreeChangesDetector.class));
+        pm = new ProjectManager(vfsProvider, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher,
+                                new TestWorkspaceHolder(new ArrayList<>()), mock(FileWatcherManager.class));
 
         plugin = new ResourcesPlugin("target/index", wsPath, () -> projectRegistry, () -> pm);
 
@@ -220,6 +222,18 @@ public abstract class BaseTest {
                 new ResourceChangedEvent(root, new ProjectCreatedEvent("", folder.getPath().toString())));
 
         return folder;
+    }
+
+    protected File createTestPom(String folderName, String pomContent) throws IOException {
+        File file = new File(wsPath, folderName);
+        file.mkdirs();
+        File pomFile = new File(file, "pom.xml");
+
+        FileOutputStream outputStream = new FileOutputStream(pomFile);
+        outputStream.write(getPomContent(pomContent).getBytes());
+        outputStream.flush();
+        outputStream.close();
+        return pomFile;
     }
 
     protected String getPomContent(String content) {
