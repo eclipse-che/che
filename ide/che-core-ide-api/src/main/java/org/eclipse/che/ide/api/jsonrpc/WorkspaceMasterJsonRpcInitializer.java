@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
+import org.eclipse.che.ide.rest.UrlBuilder;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
@@ -62,10 +63,19 @@ public class WorkspaceMasterJsonRpcInitializer {
     }
 
     private void internalInitialize() {
-        String protocol = "https:".equals(getProtocol()) ? "wss://" : "ws://";
-        String host = getHost();
-        String context = getWebsocketContext() + "/";
-        String workspaceMasterUrl = protocol + host + context + appContext.getAppId();
+
+        String workspaceMasterUrl;
+        UrlBuilder builder = new UrlBuilder(getWebsocketContext());
+
+        if(builder.getProtocol() != null && !builder.getProtocol().isEmpty()) {
+            workspaceMasterUrl = builder.getUrl() + "/" + appContext.getAppId();
+
+        } else {
+            String protocol = "https:".equals(getProtocol()) ? "wss://" : "ws://";
+            String host = getHost();
+            String context = getWebsocketContext() + "/";
+            workspaceMasterUrl = protocol + host + context + appContext.getAppId();
+        }
 
         initializer.initialize("ws-master", singletonMap("url", workspaceMasterUrl));
     }

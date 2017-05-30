@@ -53,7 +53,8 @@ public class InternalMachineConfig {
         this.servers.putAll(originalConfig.getServers());
         this.attributes = new HashMap<>(originalConfig.getAttributes());
 
-        initAgents(originalConfig.getAgents());
+        if(agentRegistry != null && agentSorter != null)
+           initAgents(originalConfig.getAgents());
     }
 
     /**
@@ -78,6 +79,7 @@ public class InternalMachineConfig {
     }
 
     private void initAgents(List<String> agentIds) throws InfrastructureException {
+
         try {
             // TODO ensure already contains dependencies
             List<AgentKey> sortedAgents = agentSorter.sort(agentIds);

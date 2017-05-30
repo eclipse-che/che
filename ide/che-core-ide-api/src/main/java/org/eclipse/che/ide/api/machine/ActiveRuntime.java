@@ -12,11 +12,8 @@ package org.eclipse.che.ide.api.machine;
 
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
-import org.eclipse.che.api.workspace.shared.Utils;
-import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,45 +24,50 @@ import java.util.Optional;
 
 /**
  * @author Vitalii Parfonov
- * @deprecated use {@link org.eclipse.che.ide.api.workspace.model.RuntimeImpl}
  */
-@Deprecated
 public class ActiveRuntime {
 
     private DevMachine                 devMachine;
-    private Map<String, MachineEntity> machines;
+    private Map<String, MachineEntity> machines = new HashMap<>();
 
     public ActiveRuntime(Workspace workspace) {
         Runtime workspaceRuntime = workspace.getRuntime();
 
-        WorkspaceConfig workspaceConfig = workspace.getConfig();
-        String defaultEnv = workspaceConfig.getDefaultEnv();
-        Environment defEnvironment = workspaceConfig.getEnvironments().get(defaultEnv);
+        Log.info(ActiveRuntime.class, workspaceRuntime);
+        Log.info(ActiveRuntime.class, workspaceRuntime.getMachines().entrySet());
+//        WorkspaceConfig workspaceConfig = workspace.getConfig();
+//        String envName = workspaceRuntime.getActiveEnv();
+////        String defaultEnv = workspaceConfig.getDefaultEnv();
+//        Environment env = workspaceConfig.getEnvironments().get(envName);
+//
+//        String devMachineName = Utils.getDevMachineName(env);
+//
+//        Machine devMachine = workspaceRuntime.getMachines().get(devMachineName);
+//
+//        this.devMachine = new DevMachine(devMachineName, devMachine);
 
-        String devMachineName = Utils.getDevMachineName(defEnvironment);
-        Machine devMachine = workspaceRuntime.getMachines().get(devMachineName);
-
-        this.devMachine = new DevMachine(devMachineName, devMachine);
-        machines = new HashMap<>();
-
+        if(workspaceRuntime.getMachines() != null)
         for (Entry<String, ? extends Machine> entry : workspaceRuntime.getMachines().entrySet()) {
             machines.put(entry.getKey(), new MachineEntityImpl(entry.getKey(), entry.getValue()));
+            if(entry.getValue().getServers().containsKey("ws-agent")) {
+                this.devMachine = new DevMachine(entry.getKey(), entry.getValue());
+            }
         }
+
+        Log.info(ActiveRuntime.class, devMachine);
+//        if(this.devMachine == null)
+//            throw new RuntimeException("No WS-AGENT Server configured for workspace: " + workspace.getId());
+
     }
 
-    @Deprecated
     public DevMachine getDevMachine() {
         return devMachine;
     }
 
-    @Deprecated
-    /** @deprecated use {@link RuntimeImpl#getMachines()} */
     public List<MachineEntity> getMachines() {
         return new ArrayList<>(machines.values());
     }
 
-    @Deprecated
-    /** @deprecated use {@link org.eclipse.che.ide.api.workspace.model.RuntimeImpl#getMachineByName(String)} */
     public Optional<MachineEntity> getMachineByName(String name) {
         return Optional.ofNullable(machines.get(name));
     }

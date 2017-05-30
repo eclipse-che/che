@@ -39,9 +39,12 @@ import org.eclipse.che.ide.core.StandardComponentInitializer;
 import org.eclipse.che.ide.preferences.StyleInjector;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.theme.ThemeAgentImpl;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Performs essential initialization routines of the IDE application, such as:
@@ -53,6 +56,8 @@ import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
  */
 @Singleton
 class GeneralIdeInitializer implements IdeInitializer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GeneralIdeInitializer.class);
 
     protected final WorkspaceServiceClient                 workspaceServiceClient;
     protected final AppContext                             appContext;
@@ -97,8 +102,9 @@ class GeneralIdeInitializer implements IdeInitializer {
     @Override
     public Promise<WorkspaceDto> getWorkspaceToStart() {
         final String workspaceKey = browserAddress.getWorkspaceKey();
-
-        return workspaceServiceClient.getWorkspace(workspaceKey);
+        Promise<WorkspaceDto> ws = workspaceServiceClient.getWorkspace(workspaceKey);
+        LOG.debug("Got workspace: " + workspaceKey);
+        return ws;
     }
 
     @Override
@@ -125,8 +131,12 @@ class GeneralIdeInitializer implements IdeInitializer {
     }
 
     protected Promise<Void> initAppContext() {
+
         return getWorkspaceToStart()
                 .then((Function<WorkspaceDto, Void>)workspace -> {
+
+                    Log.info(GeneralIdeInitializer.class, "Workspace -> " + workspace);
+
                     ((AppContextImpl)appContext).setWorkspace(workspace);
                     ((AppContextImpl)appContext).setStartAppActions(StartUpActionsParser.getStartUpActions());
                     browserAddress.setAddress(workspace.getNamespace(), workspace.getConfig().getName());
