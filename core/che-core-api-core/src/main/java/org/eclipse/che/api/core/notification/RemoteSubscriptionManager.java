@@ -65,7 +65,7 @@ public class RemoteSubscriptionManager {
     }
 
     private void consumeSubscriptionRequest(String endpointId, EventSubscription eventSubscription) {
-        subscriptionContexts.computeIfPresent(eventSubscription.getMethod(), (k, v) -> new HashSet<>())
+        subscriptionContexts.computeIfAbsent(eventSubscription.getMethod(), k -> new HashSet<>())
                             .add(new SubscriptionContext(endpointId, eventSubscription.getScope()));
     }
 
