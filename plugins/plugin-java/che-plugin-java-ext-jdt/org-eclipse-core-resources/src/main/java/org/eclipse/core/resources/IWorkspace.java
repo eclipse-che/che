@@ -1465,7 +1465,7 @@ public interface IWorkspace extends IAdaptable {
 	 * be filtered out by its parent resource filters once it exists in the workspace.
 	 * </p>
 	 * <p>
-	 * This method will return a status with severity <code>IStatus.FAILED</code>
+	 * This method will return a status with severity <code>IStatus.ERROR</code>
 	 * if the resource will be filtered out - removed - out of the workspace by 
 	 * its parent resource filters. 
 	 * </p>
@@ -1476,7 +1476,7 @@ public interface IWorkspace extends IAdaptable {
 	 * @param resource the resource to validate the location for
 	 * @return a status object with code <code>IStatus.OK</code> if the given
 	 * resource is not filtered by its parent resource filters, otherwise a status
-	 * object with severity <code>IStatus.FAILED</code> indicating that it will
+	 * object with severity <code>IStatus.ERROR</code> indicating that it will
 	 * @see IStatus#OK
 	 * @since 3.6
 	 */
@@ -1507,7 +1507,7 @@ public interface IWorkspace extends IAdaptable {
 	 * </ul>
 	 * </p>
 	 * <p>
-	 * This method will return a status with severity <code>IStatus.FAILED</code>
+	 * This method will return a status with severity <code>IStatus.ERROR</code>
 	 * if the location does not obey the above rules. Also, this method will
 	 * return a status with severity <code>IStatus.WARNING</code> if the
 	 * location overlaps the location of any existing resource in the workspace.
@@ -1521,7 +1521,7 @@ public interface IWorkspace extends IAdaptable {
 	 * @return a status object with code <code>IStatus.OK</code> if the given
 	 * location is valid as the linked resource location, otherwise a status
 	 * object with severity <code>IStatus.WARNING</code> or
-	 * <code>IStatus.FAILED</code> indicating what is wrong with the location
+	 * <code>IStatus.ERROR</code> indicating what is wrong with the location
 	 * @see IStatus#OK
 	 * @see ResourcesPlugin#PREF_DISABLE_LINKING
 	 * @since 2.1
@@ -1551,7 +1551,7 @@ public interface IWorkspace extends IAdaptable {
 	 * </ul>
 	 * </p>
 	 * <p>
-	 * This method will return a status with severity <code>IStatus.FAILED</code>
+	 * This method will return a status with severity <code>IStatus.ERROR</code>
 	 * if the location does not obey the above rules. Also, this method will
 	 * return a status with severity <code>IStatus.WARNING</code> if the
 	 * location overlaps the location of any existing resource in the workspace.
@@ -1565,7 +1565,7 @@ public interface IWorkspace extends IAdaptable {
 	 * @return a status object with code <code>IStatus.OK</code> if the given
 	 * location is valid as the linked resource location, otherwise a status
 	 * object with severity <code>IStatus.WARNING</code> or
-	 * <code>IStatus.FAILED</code> indicating what is wrong with the location
+	 * <code>IStatus.ERROR</code> indicating what is wrong with the location
 	 * @see IStatus#OK
 	 * @see ResourcesPlugin#PREF_DISABLE_LINKING
 	 * @since 3.2

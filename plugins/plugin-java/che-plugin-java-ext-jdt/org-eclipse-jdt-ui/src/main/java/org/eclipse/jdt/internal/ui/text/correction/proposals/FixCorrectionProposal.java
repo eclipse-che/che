@@ -63,8 +63,8 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 //			ImageImageDescriptor image = new ImageImageDescriptor(super.getImage());
 //
 //			int flag = JavaElementImageDescriptor.WARNING;
-//			if (status.getSeverity() == IStatus.FAILED) {
-//				flag = JavaElementImageDescriptor.FAILED;
+//			if (status.getSeverity() == IStatus.ERROR) {
+//				flag = JavaElementImageDescriptor.ERROR;
 //			}
 //
 //			ImageDescriptor composite =
@@ -200,7 +200,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 //			if (cause instanceof CoreException) {
 //				throw (CoreException)cause;
 //			} else {
-//				throw new CoreException(new Status(IStatus.FAILED, JavaUI.ID_PLUGIN, cause.getLocalizedMessage(), cause));
+//				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, cause.getLocalizedMessage(), cause));
 //			}
 //		}
 //	}

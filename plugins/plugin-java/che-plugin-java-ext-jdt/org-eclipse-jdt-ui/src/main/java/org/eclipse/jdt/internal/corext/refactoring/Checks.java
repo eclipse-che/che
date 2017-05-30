@@ -1,4 +1,5 @@
 /*******************************************************************************
+/*******************************************************************************
  * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -739,7 +740,7 @@ public class Checks {
 	 * Checks whether it is possible to modify the given <code>IJavaElement</code>.
 	 * The <code>IJavaElement</code> must exist and be non read-only to be modifiable.
 	 * Moreover, if it is a <code>IMember</code> it must not be binary.
-	 * The returned <code>RefactoringStatus</code> has <code>FAILED</code> severity if
+	 * The returned <code>RefactoringStatus</code> has <code>ERROR</code> severity if
 	 * it is not possible to modify the element.
 	 * @param javaElement
 	 * @return the status

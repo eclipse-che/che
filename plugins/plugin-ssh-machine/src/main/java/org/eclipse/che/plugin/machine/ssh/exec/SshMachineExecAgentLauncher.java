@@ -192,7 +192,7 @@ public class SshMachineExecAgentLauncher  {
                 process.start(lineConsumer);
             } catch (ConflictException e) {
                 try {
-                    machine.getLogger().writeLine(format("[FAILED] %s", e.getMessage()));
+                    machine.getLogger().writeLine(format("[ERROR] %s", e.getMessage()));
                 } catch (IOException ignored) {
                 }
             } finally {

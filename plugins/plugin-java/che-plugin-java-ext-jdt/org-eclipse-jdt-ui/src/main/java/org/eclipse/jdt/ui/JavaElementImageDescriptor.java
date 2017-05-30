@@ -329,7 +329,7 @@ public class JavaElementImageDescriptor extends ImageDescriptor {
 //
 //	private void drawBottomLeft() {
 //		Point pos= new Point(0, getSize().y);
-//		if ((fFlags & FAILED) != 0) {
+//		if ((fFlags & ERROR) != 0) {
 //			addBottomLeftImage(JavaPluginImages.DESC_OVR_ERROR, pos);
 //		}
 //		if ((fFlags & BUILDPATH_ERROR) != 0) {
