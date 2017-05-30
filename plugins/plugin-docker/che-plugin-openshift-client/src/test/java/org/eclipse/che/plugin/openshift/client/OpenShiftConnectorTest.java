@@ -34,7 +34,11 @@ public class OpenShiftConnectorTest {
     private static final String   CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT = "cheserviceaccount";
     private static final int      OPENSHIFT_LIVENESS_PROBE_DELAY = 300;
     private static final int      OPENSHIFT_LIVENESS_PROBE_TIMEOUT = 1;
-
+    private static final String   OPENSHIFT_DEFAULT_TOKEN = "91XMfu-FuNDkGjcIh6b0y1EtCvztGeSsSqRrWhBfyL8";
+    private static final String   OPENSHIFT_DEFAULT_WORKSPACE_PERSISTENT_VOLUME_CLAIM = "che_claim_data";
+    private static final String   OPENSHIFT_DEFAULT_WORKSPACE_QUANTITY = "10Gi";
+    private static final String   OPENSHIFT_DEFAULT_WORKSPACE_STORAGE = "/data/workspaces";
+    private static final String   OPENSHIFT_DEFAULT_WORKSPACE_PROJECTS_STORAGE = "/projects";
     @Mock
     private DockerConnectorConfiguration       dockerConnectorConfiguration;
     @Mock
@@ -65,7 +69,11 @@ public class OpenShiftConnectorTest {
                                                     CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
                                                     CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT,
                                                     OPENSHIFT_LIVENESS_PROBE_DELAY,
-                                                    OPENSHIFT_LIVENESS_PROBE_TIMEOUT);
+                                                    OPENSHIFT_LIVENESS_PROBE_TIMEOUT,
+                                                    OPENSHIFT_DEFAULT_WORKSPACE_PERSISTENT_VOLUME_CLAIM,
+                                                    OPENSHIFT_DEFAULT_WORKSPACE_QUANTITY,
+                                                    OPENSHIFT_DEFAULT_WORKSPACE_STORAGE,
+                                                    OPENSHIFT_DEFAULT_WORKSPACE_PROJECTS_STORAGE);
         String workspaceID = openShiftConnector.getCheWorkspaceId(createContainerParams);
 
         //Then
