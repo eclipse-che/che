@@ -335,6 +335,8 @@
                         <exclude>**/*.png</exclude>
                         <exclude>**/*.gif</exclude>
                         <exclude>**/*.jpg</exclude>
+                        <exclude>**/OutputCustomizer.java</exclude>
+                        <exclude>**/DefaultOutputCustomizer.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
