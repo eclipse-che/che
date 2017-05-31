@@ -13,7 +13,6 @@ package org.eclipse.che.ide.workspace;
 import com.google.gwt.http.client.URL;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -165,17 +164,6 @@ public class WorkspaceServiceClient {
         return asyncRequestFactory.createDeleteRequest(url)
                                   .loader(loaderFactory.newLoader("Stopping workspace..."))
                                   .send();
-    }
-
-    /**
-     * Get all commands from the specified workspace.
-     *
-     * @param wsId
-     *         workspace ID
-     * @return a promise that will provide a list of {@link CommandDto}s, or rejects with an error
-     */
-    public Promise<List<CommandDto>> getCommands(String wsId) {
-        return getWorkspace(wsId).then((Function<WorkspaceDto, List<CommandDto>>)workspaceDto -> workspaceDto.getConfig().getCommands());
     }
 
     /**

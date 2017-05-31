@@ -21,12 +21,13 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandType;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceConfigImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
+import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 /** Responsible for managing the commands which are stored with workspace. */
 @Singleton
@@ -45,13 +46,12 @@ class WorkspaceCommandManagerDelegate {
         this.appContext = appContext;
     }
 
-    /** Returns commands which are stored in the workspace with the specified {@code workspaceId}. */
-    Promise<List<CommandImpl>> getCommands(String workspaceId) {
-        return workspaceServiceClient.getCommands(workspaceId)
-                                     .then((Function<List<CommandDto>,
-                                             List<CommandImpl>>)commands -> commands.stream()
-                                                                                    .map(CommandImpl::new)
-                                                                                    .collect(toList()));
+    /** Returns commands which are stored in the current workspace. */
+    List<CommandImpl> getCommands() {
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final WorkspaceConfigImpl workspaceConfig = workspace.getConfig();
+
+        return workspaceConfig.getCommands();
     }
 
     /**
@@ -67,7 +67,10 @@ class WorkspaceCommandManagerDelegate {
                                                 .withAttributes(command.getAttributes());
 
         return workspaceServiceClient.addCommand(appContext.getWorkspaceId(), commandDto)
-                                     .then((Function<WorkspaceDto, CommandImpl>)arg -> command);
+                                     .then((Function<WorkspaceDto, CommandImpl>)workspace -> {
+                                         ((AppContextImpl)appContext).setWorkspace(workspace);
+                                         return command;
+                                     });
     }
 
     /**
@@ -83,12 +86,18 @@ class WorkspaceCommandManagerDelegate {
                                                 .withAttributes(command.getAttributes());
 
         return workspaceServiceClient.updateCommand(appContext.getWorkspaceId(), command.getName(), commandDto)
-                                     .then((Function<WorkspaceDto, CommandImpl>)arg -> command);
+                                     .then((Function<WorkspaceDto, CommandImpl>)workspace -> {
+                                         ((AppContextImpl)appContext).setWorkspace(workspace);
+                                         return command;
+                                     });
     }
 
     /** Removes the command with the specified {@code commandName}. */
     Promise<Void> removeCommand(String commandName) {
         return workspaceServiceClient.deleteCommand(appContext.getWorkspaceId(), commandName)
-                                     .then((Function<WorkspaceDto, Void>)arg -> null);
+                                     .then((Function<WorkspaceDto, Void>)workspace -> {
+                                         ((AppContextImpl)appContext).setWorkspace(workspace);
+                                         return null;
+                                     });
     }
 }

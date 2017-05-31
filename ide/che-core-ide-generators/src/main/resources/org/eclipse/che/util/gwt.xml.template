@@ -6,6 +6,7 @@ $config.inherits: { module |     <inherits name="$module$"/>
     <entry-point class="$config.entryPoint$"/>
 $if(config.loggingEnabled)$
     <inherits name="com.google.gwt.logging.Logging"/>
+    <set-property name="gwt.logging.logLevel" value="FINE"/>
     <!-- Disable logging to the server -->
     <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
     <!-- Enable logging to the browser's console in SuperDev mode -->

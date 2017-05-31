@@ -35,7 +35,7 @@ public class IdeBootstrap {
                       .then(aVoid -> {
                           extensionInitializer.startExtensions();
                           Scheduler.get().scheduleDeferred(this::notifyShowIDE);
-                          wsStarter.startWorkspace();
+                          wsStarter.startWorkspace(false);
                       })
                       .catchError(handleError())
                       .catchError(handleErrorFallback());
