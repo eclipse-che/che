@@ -30,8 +30,8 @@ import java.util.Set;
  */
 public abstract class RuntimeInfrastructure {
 
-    protected final     Set<String>  recipeTypes;
-    protected final     String       name;
+    protected final Set<String>  recipeTypes;
+    protected final String       name;
     protected final EventService eventService;
 
     public RuntimeInfrastructure(String name, Collection<String> types, EventService eventService) {
@@ -57,7 +57,6 @@ public abstract class RuntimeInfrastructure {
     }
 
     /**
-     *
      * @return EventService
      */
     public final EventService getEventService() {
@@ -86,7 +85,7 @@ public abstract class RuntimeInfrastructure {
 
     /**
      * An Infrastructure MAY track Runtimes. In this case the method should be overridden.
-     *
+     * <p>
      * One of the reason for infrastructure to support this is ability to recover infrastructure
      * after shutting down Master server. For this purpose an Infrastructure should also implement
      * getRuntime(id) method
@@ -103,7 +102,7 @@ public abstract class RuntimeInfrastructure {
 
     /**
      * An Infrastructure MAY track Runtimes. In this case the method should be overridden.
-     *
+     * <p>
      * One of the reason for infrastructure to support this is ability to recover infrastructure
      * after shutting down Master server.
      *
