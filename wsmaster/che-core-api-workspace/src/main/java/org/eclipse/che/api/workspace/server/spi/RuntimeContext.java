@@ -37,7 +37,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public abstract class RuntimeContext {
 
-    private static final Logger LOG = getLogger(RuntimeInfrastructure.class);
+    private static final Logger LOG = getLogger(RuntimeContext.class);
 
     protected final Environment           environment;
     protected final RuntimeIdentity   identity;
