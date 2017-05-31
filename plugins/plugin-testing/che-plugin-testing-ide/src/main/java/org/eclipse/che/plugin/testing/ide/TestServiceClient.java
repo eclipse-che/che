@@ -37,7 +37,6 @@ import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
-import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.command.goal.TestGoal;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
@@ -153,13 +152,8 @@ public class TestServiceClient {
                                                  Promise<CommandImpl> compileCommand) {
         return compileCommand.thenPromise(command -> {
             final WorkspaceImpl workspace = appContext.getWorkspace();
-            final RuntimeImpl runtime = workspace.getRuntime();
-            final MachineImpl machine;
-            if (runtime == null) {
-                machine = null;
-            } else {
-                machine = runtime.getDevMachine().orElse(null);
-            }
+            final MachineImpl machine = workspace.getDevMachine().orElse(null);
+
             if (machine == null) {
                 if (statusNotification != null) {
                     statusNotification.setContent("Executing the tests without preliminary compilation.");

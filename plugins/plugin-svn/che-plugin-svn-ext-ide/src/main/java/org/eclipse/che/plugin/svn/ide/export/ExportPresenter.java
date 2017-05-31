@@ -24,7 +24,6 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
-import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
@@ -160,11 +159,8 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
 
     private void openExportPopup(Path project, Path exportPath, String revision, StatusNotification notification) {
         final WorkspaceImpl workspace = appContext.getWorkspace();
-        final RuntimeImpl runtime = workspace.getRuntime();
-        if (runtime == null) {
-            return;
-        }
-        final Optional<? extends MachineImpl> devMachine = runtime.getDevMachine();
+        final Optional<MachineImpl> devMachine = workspace.getDevMachine();
+
         if (!devMachine.isPresent()) {
             return;
         }

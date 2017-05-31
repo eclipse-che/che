@@ -13,7 +13,6 @@ package org.eclipse.che.ide.command.toolbar.previews;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
-import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 
 import java.util.Map.Entry;
@@ -49,12 +48,7 @@ class PreviewUrl {
 
     private String getDisplayNameForPreviewUrl(String previewUrl) {
         final WorkspaceImpl workspace = appContext.getWorkspace();
-        final RuntimeImpl runtime = workspace.getRuntime();
-        if(runtime == null) {
-            return previewUrl;
-        }
-
-        final Optional<? extends MachineImpl> devMachine = runtime.getDevMachine();
+        final Optional<MachineImpl> devMachine = workspace.getDevMachine();
 
         if (!devMachine.isPresent()) {
             return previewUrl;

@@ -157,13 +157,8 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
     @Override
     public void onWsAgentStopped(WsAgentStateEvent event) {
         final WorkspaceImpl workspace = appContext.getWorkspace();
-        final RuntimeImpl runtime = workspace.getRuntime();
+        final Optional<MachineImpl> devMachine = workspace.getDevMachine();
 
-        if (runtime == null) {
-            return;
-        }
-
-        final Optional<MachineImpl> devMachine = runtime.getDevMachine();
         if (!devMachine.isPresent()) {
             return;
         }

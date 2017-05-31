@@ -19,7 +19,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
-import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 
@@ -54,12 +53,8 @@ public class CommandManager {
      */
     public void execute(String commandLine) {
         final WorkspaceImpl workspace = appContext.getWorkspace();
-        final RuntimeImpl runtime = workspace.getRuntime();
-        if (runtime == null) {
-            return;
-        }
+        final Optional<MachineImpl> machine = workspace.getDevMachine();
 
-        final Optional<? extends MachineImpl> machine = runtime.getDevMachine();
         if (!machine.isPresent()) {
             return;
         }

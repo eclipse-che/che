@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -61,10 +60,7 @@ public class RunCommandAction extends Action {
         }
 
         final WorkspaceImpl workspace = appContext.getWorkspace();
-        final RuntimeImpl runtime = workspace.getRuntime();
-        if (runtime != null) {
-            runtime.getDevMachine().ifPresent(m -> commandManager.getCommand(name)
-                                                                 .ifPresent(command -> commandExecutor.executeCommand(command, m)));
-        }
+        workspace.getDevMachine().ifPresent(m -> commandManager.getCommand(name)
+                                                               .ifPresent(command -> commandExecutor.executeCommand(command, m)));
     }
 }
