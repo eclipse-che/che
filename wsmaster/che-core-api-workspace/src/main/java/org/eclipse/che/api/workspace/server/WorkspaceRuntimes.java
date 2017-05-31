@@ -226,8 +226,6 @@ public class WorkspaceRuntimes {
             return CompletableFuture.runAsync(ThreadLocalPropagateContext.wrap(() -> {
                 try {
                     runtimeContext.start(options);
-
-
                     eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                                    .withWorkspaceId(workspaceId)
                                                    .withStatus(WorkspaceStatus.RUNNING)
