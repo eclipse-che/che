@@ -63,12 +63,8 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
     @Override
     public Map<String, ? extends Machine> getMachines() {
         Map<String, ? extends Machine> result = getInternalMachines();
-        if (result == null) {
-            return new HashMap<>();
-        } else {
-            for (Machine machine  : result.values()) {
-                rewriteExternalServers(machine.getServers());
-            }
+        for (Machine machine : result.values()) {
+            rewriteExternalServers(machine.getServers());
         }
         return result;
     }
