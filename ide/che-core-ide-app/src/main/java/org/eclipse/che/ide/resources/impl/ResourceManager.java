@@ -34,6 +34,7 @@ import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
@@ -71,8 +72,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingResumeEvent;
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingSuspendEvent;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.COPIED_FROM;
@@ -130,24 +129,25 @@ public final class ResourceManager {
 
     private static final Resource[] NO_RESOURCES = new Resource[0];
 
-    private final ProjectServiceClient   ps;
-    private final EventBus               eventBus;
-    private final EditorAgent            editorAgent;
-    private final DeletedFilesController deletedFilesController;
-    private final ResourceFactory        resourceFactory;
-    private final PromiseProvider        promises;
-    private final DtoFactory             dtoFactory;
-    private final ProjectTypeRegistry    typeRegistry;
+    private final ProjectServiceClient     ps;
+    private final EventBus                 eventBus;
+    private final EditorAgent              editorAgent;
+    private final DeletedFilesController   deletedFilesController;
+    private final ResourceFactory          resourceFactory;
+    private final PromiseProvider          promises;
+    private final DtoFactory               dtoFactory;
+    private final ProjectTypeRegistry      typeRegistry;
     /**
      * Link to the workspace content root. Immutable among the workspace life.
      */
-    private final Container              workspaceRoot;
-    private final WsAgentURLModifier     urlModifier;
-    private       DevMachine             devMachine;
+    private final Container                workspaceRoot;
+    private final WsAgentURLModifier       urlModifier;
+    private final ClientServerEventService clientServerEventService;
+    private       DevMachine               devMachine;
     /**
      * Internal store, which caches requested resources from the server.
      */
-    private       ResourceStore          store;
+    private       ResourceStore            store;
 
     /**
      * Cached dto project configuration.
@@ -165,7 +165,8 @@ public final class ResourceManager {
                            DtoFactory dtoFactory,
                            ProjectTypeRegistry typeRegistry,
                            ResourceStore store,
-                           WsAgentURLModifier urlModifier) {
+                           WsAgentURLModifier urlModifier,
+                           ClientServerEventService clientServerEventService) {
         this.devMachine = devMachine;
         this.ps = ps;
         this.eventBus = eventBus;
@@ -177,6 +178,7 @@ public final class ResourceManager {
         this.typeRegistry = typeRegistry;
         this.store = store;
         this.urlModifier = urlModifier;
+        this.clientServerEventService = clientServerEventService;
 
         this.workspaceRoot = resourceFactory.newFolderImpl(Path.ROOT, this);
     }
@@ -492,51 +494,54 @@ public final class ResourceManager {
                 deletedFilesController.add(source.getLocation().toString());
             }
 
-            eventBus.fireEvent(newFileTrackingSuspendEvent());
+            return clientServerEventService.sendFileTrackingSuspendEvent().thenPromise(success -> {
+                store.dispose(source.getLocation(), !source.isFile()); //TODO: need to be tested
 
-            store.dispose(source.getLocation(), !source.isFile()); //TODO: need to be tested
+                return ps.move(source.getLocation(), destination.parent(), destination.lastSegment(), force)
+                         .thenPromise(ignored -> {
+                             if (source.isProject() && source.getLocation().segmentCount() == 1) {
+                                 return ps.getProjects().then((Function<List<ProjectConfigDto>, Resource>)updatedConfigs -> {
+                                     clientServerEventService.sendFileTrackingResumeEvent();
 
-            return ps.move(source.getLocation(), destination.parent(), destination.lastSegment(), force)
-                     .thenPromise(ignored -> {
-                         if (source.isProject() && source.getLocation().segmentCount() == 1) {
-                             return ps.getProjects().then((Function<List<ProjectConfigDto>, Resource>)updatedConfigs -> {
-                                 eventBus.fireEvent(newFileTrackingResumeEvent());
+                                     //cache new configs
+                                     cachedConfigs = updatedConfigs.toArray(new ProjectConfigDto[updatedConfigs.size()]);
+                                     store.dispose(source.getLocation(), true);
 
-                                 //cache new configs
-                                 cachedConfigs = updatedConfigs.toArray(new ProjectConfigDto[updatedConfigs.size()]);
-                                 store.dispose(source.getLocation(), true);
+                                     for (ProjectConfigDto projectConfigDto : cachedConfigs) {
+                                         if (projectConfigDto.getPath().equals(destination.toString())) {
+                                             final Project newResource =
+                                                     resourceFactory.newProjectImpl(projectConfigDto, ResourceManager.this);
+                                             store.register(newResource);
+                                             eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(newResource, source,
+                                                                                                               ADDED | MOVED_FROM |
+                                                                                                               MOVED_TO |
+                                                                                                               DERIVED)));
 
-                                 for (ProjectConfigDto projectConfigDto : cachedConfigs) {
-                                     if (projectConfigDto.getPath().equals(destination.toString())) {
-                                         final Project newResource =
-                                                 resourceFactory.newProjectImpl(projectConfigDto, ResourceManager.this);
-                                         store.register(newResource);
-                                         eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(newResource, source,
-                                                                                                           ADDED | MOVED_FROM |
-                                                                                                           MOVED_TO |
-                                                                                                           DERIVED)));
-
-                                         return newResource;
+                                             return newResource;
+                                         }
                                      }
+
+                                     throw new IllegalStateException("Resource not found");
+                                 });
+                             }
+
+                             return findResource(destination, false).then((Function<Optional<Resource>, Resource>)movedResource -> {
+                                 if (movedResource.isPresent()) {
+                                     eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(movedResource.get(), source,
+                                                                                                       ADDED | MOVED_FROM |
+                                                                                                       MOVED_TO | DERIVED)));
+
+                                     clientServerEventService.sendFileTrackingResumeEvent();
+
+                                     return movedResource.get();
                                  }
+
+                                 clientServerEventService.sendFileTrackingResumeEvent();
 
                                  throw new IllegalStateException("Resource not found");
                              });
-                         }
-
-                         return findResource(destination, false).then((Function<Optional<Resource>, Resource>)movedResource -> {
-                             if (movedResource.isPresent()) {
-                                 eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(movedResource.get(), source,
-                                                                                                   ADDED | MOVED_FROM |
-                                                                                                   MOVED_TO | DERIVED)));
-                                 eventBus.fireEvent(newFileTrackingResumeEvent());
-                                 return movedResource.get();
-                             }
-                             eventBus.fireEvent(newFileTrackingResumeEvent());
-
-                             throw new IllegalStateException("Resource not found");
                          });
-                     });
+            });
         });
     }
 
@@ -587,7 +592,7 @@ public final class ResourceManager {
 
             if (descToRemove != null) {
                 for (Resource toRemove : descToRemove) {
-                    if (isResourceOpened(resource)) {
+                    if (isResourceOpened(toRemove)) {
                         deletedFilesController.add(toRemove.getLocation().toString());
                     }
 

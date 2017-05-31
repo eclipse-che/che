@@ -12,7 +12,6 @@ package org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard;
 
 import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -21,15 +20,21 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
@@ -49,11 +54,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatusEntry;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameRefactoringSession;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameSettings;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.junit.Before;
@@ -73,6 +73,7 @@ import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRe
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.PACKAGE;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -82,8 +83,8 @@ import static org.mockito.Mockito.when;
 
 @RunWith(GwtMockitoTestRunner.class)
 public class RenamePresenterTest {
-    private final static String SESSION_ID   = "sessionId";
-    private final static String TEXT         = "text.text";
+    private final static String SESSION_ID = "sessionId";
+    private final static String TEXT       = "text.text";
 
     //variables for constructor
     @Mock
@@ -92,8 +93,6 @@ public class RenamePresenterTest {
     private SimilarNamesConfigurationPresenter similarNamesConfigurationPresenter;
     @Mock
     private JavaLocalizationConstant           locale;
-    @Mock
-    private EventBus                           eventBus;
     @Mock
     private EditorAgent                        editorAgent;
     @Mock
@@ -110,19 +109,21 @@ public class RenamePresenterTest {
     private RefactoringServiceClient           refactorService;
     @Mock
     private LoaderFactory                      loaderFactory;
+    @Mock
+    private ClientServerEventService           clientServerEventService;
 
     @Mock
     private TextEditor               activeEditor;
     @Mock
-    private EditorInput editorInput;
+    private EditorInput              editorInput;
     @Mock
-    private File file;
+    private File                     file;
     @Mock
-    private Container container;
+    private Container                container;
     @Mock
-    private Container srcFolder;
+    private Container                srcFolder;
     @Mock
-    private Project project;
+    private Project                  project;
     @Mock
     private RefactoringSession       refactoringSession;
     @Mock
@@ -148,6 +149,12 @@ public class RenamePresenterTest {
     private Promise<ChangeCreationResult>     changeCreationResultPromise;
     @Mock
     private Promise<RefactoringResult>        refactoringStatusPromise;
+    @Mock
+    private Promise<Void>                     updateAfterRefactoringPromise;
+    @Mock
+    private Promise<Void>                     fileTrackingSuspendEventPromise;
+    @Mock
+    private Promise<Void>                     handleMovingFilesPromise;
 
     @Captor
     private ArgumentCaptor<Operation<RenameRefactoringSession>>           renameRefactoringSessionCaptor;
@@ -159,6 +166,10 @@ public class RenamePresenterTest {
     private ArgumentCaptor<Operation<ChangeCreationResult>>               changeCreationResultCaptor;
     @Captor
     private ArgumentCaptor<Operation<RefactoringResult>>                  refactoringStatusCaptor;
+    @Captor
+    private ArgumentCaptor<Operation<Void>>                               clientServerSuspendOperation;
+    @Captor
+    private ArgumentCaptor<Operation<Void>>                               updateAfterRefactoringOperation;
 
     private RenamePresenter renamePresenter;
 
@@ -203,6 +214,11 @@ public class RenamePresenterTest {
 
         when(changeCreationResult.getStatus()).thenReturn(refactoringStatus);
 
+        when(clientServerEventService.sendFileTrackingSuspendEvent()).thenReturn(fileTrackingSuspendEventPromise);
+        when(refactoringUpdater.handleMovingFiles(anyList())).thenReturn(handleMovingFilesPromise);
+        when(refactoringUpdater.updateAfterRefactoring(anyList())).thenReturn(updateAfterRefactoringPromise);
+        when(updateAfterRefactoringPromise.then(Matchers.<Operation<Void>>anyObject())).thenReturn(updateAfterRefactoringPromise);
+
         renamePresenter = new RenamePresenter(view,
                                               similarNamesConfigurationPresenter,
                                               locale,
@@ -212,9 +228,9 @@ public class RenamePresenterTest {
                                               notificationManager,
                                               previewPresenter,
                                               refactorService,
+                                              clientServerEventService,
                                               dtoFactory,
-                                              dialogFactory,
-                                              eventBus);
+                                              dialogFactory);
     }
 
     @Test
@@ -556,13 +572,21 @@ public class RenamePresenterTest {
         verify(changeCreationResultPromise).then(changeCreationResultCaptor.capture());
         changeCreationResultCaptor.getValue().apply(changeCreationResult);
 
+        verify(fileTrackingSuspendEventPromise).then(clientServerSuspendOperation.capture());
+        clientServerSuspendOperation.getValue().apply(null);
+
         verify(refactorService).applyRefactoring(refactoringSession);
         verify(refactoringStatusPromise).then(refactoringStatusCaptor.capture());
         refactoringStatusCaptor.getValue().apply(refactoringStatus);
 
         verify(refactoringStatus, times(2)).getSeverity();
         verify(view).hide();
-        verify(refactoringUpdater).updateAfterRefactoring(changes);
+
+        verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
+        updateAfterRefactoringOperation.getValue().apply(null);
+        verify(refactoringUpdater).updateAfterRefactoring(Matchers.<List<ChangeInfo>>anyObject());
+        verify(refactoringUpdater).handleMovingFiles(anyList());
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
     }
 
     @Test
@@ -588,12 +612,19 @@ public class RenamePresenterTest {
         verify(changeCreationResultPromise).then(changeCreationResultCaptor.capture());
         changeCreationResultCaptor.getValue().apply(changeCreationResult);
 
+        verify(fileTrackingSuspendEventPromise).then(clientServerSuspendOperation.capture());
+        clientServerSuspendOperation.getValue().apply(null);
+
         verify(refactorService).applyRefactoring(refactoringSession);
         verify(refactoringStatusPromise).then(refactoringStatusCaptor.capture());
         refactoringStatusCaptor.getValue().apply(refactoringStatus);
 
         verify(view).hide();
+        verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
+        updateAfterRefactoringOperation.getValue().apply(null);
         verify(refactoringUpdater).updateAfterRefactoring(Matchers.<List<ChangeInfo>>anyObject());
+        verify(refactoringUpdater).handleMovingFiles(anyList());
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
     }
 
     @Test

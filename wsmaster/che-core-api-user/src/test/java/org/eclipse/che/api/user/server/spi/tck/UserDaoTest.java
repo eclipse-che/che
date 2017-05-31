@@ -34,8 +34,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toSet;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
@@ -56,6 +59,8 @@ public class UserDaoTest {
 
     private static final int COUNT_OF_USERS = 5;
 
+    private static final String NAME_PREFIX = "user_name-";
+
     private UserImpl[] users;
 
     @Inject
@@ -73,7 +78,7 @@ public class UserDaoTest {
 
         for (int i = 0; i < users.length; i++) {
             final String id = NameGenerator.generate("user", Constants.ID_LENGTH);
-            final String name = "user_name-" + i;
+            final String name = NAME_PREFIX + i;
             final String email = name + "@eclipse.org";
             final String password = NameGenerator.generate("", Constants.PASSWORD_LENGTH);
             final List<String> aliases = new ArrayList<>(asList("google:" + name, "github:" + name));
@@ -416,6 +421,72 @@ public class UserDaoTest {
                             .stream()
                             .filter(u -> u.getPassword() == null)
                             .count(), users.length);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void throwsNpeWhenGettingByNamePartWithNullEmailPart() throws Exception {
+        userDao.getByNamePart(null, 0, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void throwsIllegalArgExceptionWhenGettingByNamePartWithNegativeMaxItems() throws Exception {
+        userDao.getByNamePart(NAME_PREFIX, -1, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void throwsIllegalArgExceptionWhenGettingByNamePartWithNegativeSkipCount() throws Exception {
+        userDao.getByNamePart(NAME_PREFIX, 10, -1);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void throwsIllegalArgExceptionWhenGettingByNamePartWithSkipCountThatGreaterThanLimit() throws Exception {
+        userDao.getByNamePart(NAME_PREFIX, 10, 0xffffffffL);
+    }
+
+    @Test
+    public void getsUsersByNamePart() throws Exception {
+        Set<UserImpl> actual = stream(users).map(u -> new UserImpl(u.getId(),
+                                                                   u.getEmail(),
+                                                                   u.getName(),
+                                                                   null,
+                                                                   u.getAliases())).collect(toSet());
+
+        Set<UserImpl> expect = new HashSet<>(userDao.getByNamePart(NAME_PREFIX, users.length, 0).getItems());
+
+        assertEquals(actual, expect);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void throwsNpeWhenGettingByEmailPartWithNullEmailPart() throws Exception {
+        userDao.getByEmailPart(null, 0, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void throwsIllegalArgExceptionWhenGettingByEmailPartWithNegativeMaxItems() throws Exception {
+        userDao.getByEmailPart(NAME_PREFIX, -1, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void throwsIllegalArgExceptionWhenGettingByEmailPartWithNegativeSkipCount() throws Exception {
+        userDao.getByEmailPart(NAME_PREFIX, 10, -1);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void throwsIllegalArgExceptionWhenGettingByEmailPartWithSkipCountThatGreaterThanLimit() throws Exception {
+        userDao.getByEmailPart(NAME_PREFIX, 10, 0xffffffffL);
+    }
+
+    @Test
+    public void getsUsersByEmailPart() throws Exception {
+        Set<UserImpl> actual = stream(users).map(u -> new UserImpl(u.getId(),
+                                                                   u.getEmail(),
+                                                                   u.getName(),
+                                                                   null,
+                                                                   u.getAliases())).collect(toSet());
+
+        Set<UserImpl> expect = new HashSet<>(userDao.getByEmailPart(NAME_PREFIX, users.length, 0).getItems());
+
+        assertEquals(actual, expect);
     }
 
     private static void assertEqualsNoPassword(User actual, User expected) {

@@ -54,6 +54,7 @@ import static org.eclipse.che.commons.xml.XMLTreeLocation.inTheEnd;
  * <li>packaging</li>
  * <li>parent</li>
  * <li>build</li>
+ * <li>profiles</li>
  * <li>dependencyManagement</li>
  * <li>properties</li>
  * <li>modules</li>
@@ -163,6 +164,7 @@ public final class Model {
     }
 
     private static final ToModuleMapper     TO_MODULE_MAPPER     = new ToModuleMapper();
+    private static final ToProfileMapper    TO_PROFILE_MAPPER    = new ToProfileMapper();
     private static final ToDependencyMapper TO_DEPENDENCY_MAPPER = new ToDependencyMapper();
     private static final ToRepositoryMapper TO_REPOSITORY_MAPPER = new ToRepositoryMapper();
 
@@ -180,6 +182,7 @@ public final class Model {
     private List<String>         modules;
     private List<Repository>     repositories;
     private List<Repository>     pluginRepositories;
+    private List<Profile>        profiles;
     private Dependencies         dependencies;
     private File                 pom;
 
@@ -343,6 +346,41 @@ public final class Model {
     }
 
     /**
+     * Returns list of profiles.
+     */
+    public List<Profile> getProfiles() {
+        if (profiles == null) {
+            return emptyList();
+        }
+        return new ArrayList<>(profiles);
+    }
+
+    /**
+     * Sets list of profiles.
+     * <p/>
+     * <b>Note: all existing profiles will be removed from model and xml as well</b>
+     *
+     * @param profiles
+     *         new profiles
+     */
+    public Model setProfiles(Collection<? extends Profile> profiles) {
+        //remove existing profiles
+        for (Profile profile : profiles()) {
+            profile.remove();
+        }
+        //add profiles if necessary
+        if (profiles != null && !profiles.isEmpty()) {
+            for (Profile profile : profiles) {
+                addProfile(profile);
+            }
+        } else {
+            root.removeChild("profiles");
+            this.profiles = null;
+        }
+        return this;
+    }
+
+    /**
      * Returns list of repositories which are collections of plugin artifacts.
      * <p/>
      * Serves as a place to collect and store plugin artifacts.
@@ -422,6 +460,29 @@ public final class Model {
                                          "reporting",
                                          "profiles").or(inTheEnd()));
             repository.element = root.getSingleChild("repositories").getFirstChild();
+        }
+        return this;
+    }
+
+    /**
+     * Adds a profile to the mocel
+     *
+     * @param profile
+     *         profile
+     */
+    public Model addProfile(Profile profile) {
+        requireNonNull(profile, "Required not null profile");
+        profiles().add(profile);
+        //add profile to xml
+        if (root.hasSingleChild("profiles")) {
+            root.getSingleChild("profiles").appendChild(profile.asXMLElement());
+            profile.element = root.getLastChild();
+        } else {
+            root.insertChild(createElement("profiles", profile.asXMLElement()),
+                             beforeAnyOf("name",
+                                         "build",
+                                         "modules").or(inTheEnd()));
+            profile.element = root.getSingleChild("profiles").getFirstChild();
         }
         return this;
     }
@@ -977,6 +1038,10 @@ public final class Model {
         return repositories == null ? repositories = new ArrayList<>() : repositories;
     }
 
+    private List<Profile> profiles() {
+        return profiles == null ? profiles = new ArrayList<>() : profiles;
+    }
+
     private List<Repository> pluginRepositories() {
         return pluginRepositories == null ? pluginRepositories = new ArrayList<>() : pluginRepositories;
     }
@@ -1106,6 +1171,9 @@ public final class Model {
         if (root.hasSingleChild("modules")) {
             model.modules = tree.getElements("/project/modules/module", TO_MODULE_MAPPER);
         }
+        if (root.hasSingleChild("profiles")) {
+            model.profiles = tree.getElements("/project/profiles/profile", TO_PROFILE_MAPPER);
+        }
         if (root.hasSingleChild("repositories")) {
             model.repositories = tree.getElements("/project/repositories/repository", TO_REPOSITORY_MAPPER);
         }
@@ -1139,6 +1207,13 @@ public final class Model {
         @Override
         public String map(Element element) {
             return element.getText();
+        }
+    }
+
+    private static class ToProfileMapper implements ElementMapper<Profile> {
+        @Override
+        public Profile map(Element element) {
+            return new Profile(element);
         }
     }
 

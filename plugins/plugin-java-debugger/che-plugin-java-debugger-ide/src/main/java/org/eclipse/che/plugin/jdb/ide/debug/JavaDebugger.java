@@ -13,6 +13,9 @@ package org.eclipse.che.plugin.jdb.ide.debug;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
@@ -23,8 +26,6 @@ import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerStateManager;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolver;
 import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
@@ -60,7 +61,8 @@ public class JavaDebugger extends AbstractDebugger {
                         DebuggerStateManager debuggerStateManager,
                         NotificationManager notificationManager,
                         FileTypeRegistry fileTypeRegistry,
-                        BreakpointManager breakpointManager) {
+                        BreakpointManager breakpointManager,
+                        RequestHandlerManager requestHandlerManager) {
         super(service,
               transmitter,
               configurator,
@@ -71,7 +73,8 @@ public class JavaDebugger extends AbstractDebugger {
               debuggerStateManager,
               notificationManager,
               breakpointManager,
-              ID);
+              ID,
+              requestHandlerManager);
         this.fqnResolverFactory = fqnResolverFactory;
         this.fileTypeRegistry = fileTypeRegistry;
     }

@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
-import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsMessenger;
-import org.eclipse.che.api.languageserver.messager.ShowMessageMessenger;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
@@ -45,10 +44,6 @@ public class ServerInitializerImplTest {
     @Mock
     private ServerInitializerObserver           observer;
     @Mock
-    private PublishDiagnosticsParamsMessenger   publishDiagnosticsParamsMessenger;
-    @Mock
-    private ShowMessageMessenger                showMessageParamsMessenger;
-    @Mock
     private LanguageDescription                 languageDescription;
     @Mock
     private LanguageServerLauncher              launcher;
@@ -56,12 +51,14 @@ public class ServerInitializerImplTest {
     private LanguageServer                      server;
     @Mock
     private CompletableFuture<InitializeResult> completableFuture;
+    @Mock
+    private EventService                        eventService;
 
-    private ServerInitializerImpl initializer;
+    private ServerInitializerImpl               initializer;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        initializer = spy(new ServerInitializerImpl(publishDiagnosticsParamsMessenger, showMessageParamsMessenger));
+        initializer = spy(new ServerInitializerImpl(eventService));
     }
 
     @Test

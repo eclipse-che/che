@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.util;
 
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -24,7 +24,8 @@ public class JsonRpcMessageConsumer<T> implements MessageConsumer<T> {
     private final RequestTransmitter        transmitter;
     private final JsonRpcEndpointIdProvider jsonRpcEndpointIdProvider;
 
-    public JsonRpcMessageConsumer(String method, RequestTransmitter transmitter, JsonRpcEndpointIdProvider jsonRpcEndpointIdProvider) {
+    public JsonRpcMessageConsumer(String method, RequestTransmitter transmitter,
+                                  JsonRpcEndpointIdProvider jsonRpcEndpointIdProvider) {
         this.method = method;
         this.transmitter = transmitter;
         this.jsonRpcEndpointIdProvider = jsonRpcEndpointIdProvider;
@@ -33,7 +34,11 @@ public class JsonRpcMessageConsumer<T> implements MessageConsumer<T> {
     @Override
     public void consume(T message) throws IOException {
         try {
-            jsonRpcEndpointIdProvider.get().forEach(it -> transmitter.transmitOneToNone(it, method, message));
+            jsonRpcEndpointIdProvider.get().forEach(it -> transmitter.newRequest()
+                                                                     .endpointId(it)
+                                                                     .methodName(method)
+                                                                     .paramsAsDto(message)
+                                                                     .sendAndSkipResult());
         } catch (IllegalStateException e) {
             LOG.error("Error trying send line {}", message);
         }

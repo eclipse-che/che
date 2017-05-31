@@ -124,7 +124,11 @@ public class WsAgentLauncher implements AgentLauncher {
             Thread.currentThread().interrupt();
             throw new ServerException("Ws agent pinging is interrupted");
         }
-        LOG.error("Fail pinging ws agent. Workspace ID:{}. Url:{}. Timestamp:{}", machine.getWorkspaceId(), wsAgentPingUrl);
+        LOG.error("Fail pinging ws agent with {} url in {} workspace in {} machine on {} node.",
+                  wsAgentPingUrl,
+                  machine.getWorkspaceId(),
+                  machine.getId(),
+                  machine.getNode().getHost());
         throw new ServerException(pingTimedOutErrorMessage);
     }
 

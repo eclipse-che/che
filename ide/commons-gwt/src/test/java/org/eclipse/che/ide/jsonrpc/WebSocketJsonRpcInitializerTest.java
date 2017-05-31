@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.jsonrpc;
 
 import org.eclipse.che.ide.jsonrpc.WebSocketJsonRpcInitializer;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocketInitializer;
+import org.eclipse.che.ide.websocket.impl.WebSocketInitializer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

@@ -24,7 +24,7 @@
 <md-content id="create-project-content-page"
             md-scroll-y flex
             class="projects-create-project">
-  <div ng-show="createProjectCtrl.isCreateProjectInProgress()">
+  <div ng-if="createProjectCtrl.isCreateProjectInProgress()">
     <div id="create-project-panel" class="create-project-progress-panel">
       <che-loader class="che-loader-panel" layout="column">
         <!--crane and terminals-->
@@ -83,7 +83,7 @@
     </div>
   </div>
 
-  <div ng-hide="createProjectCtrl.isCreateProjectInProgress()">
+  <div ng-if="!createProjectCtrl.isCreateProjectInProgress()">
 
     <!-- Select source -->
     <che-label-container id="create-project-source-id"

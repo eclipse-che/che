@@ -30,7 +30,7 @@ export class CreateFactoryCtrl {
   private stackRecipeMode: string;
   private factoryContent: any;
   private factoryObject: any;
-  private form: any;
+  private form: ng.IFormController;
   private name: string;
   private factoryId: string;
   private factoryLink: string;
@@ -42,8 +42,7 @@ export class CreateFactoryCtrl {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, cheAPI: CheAPI, $log: ng.ILogService, cheNotification: CheNotification, $scope: ng.IScope,
-              $filter: ng.IFilterService, lodash: _.LoDashStatic, $document: ng.IDocumentService) {
+  constructor($location: ng.ILocationService, cheAPI: CheAPI, $log: ng.ILogService, cheNotification: CheNotification, $scope: ng.IScope, $filter: ng.IFilterService, lodash: _.LoDashStatic, $document: ng.IDocumentService) {
     this.$location = $location;
     this.cheAPI = cheAPI;
     this.$log = $log;
@@ -60,6 +59,7 @@ export class CreateFactoryCtrl {
     this.factoryContent = null;
 
     $scope.$watch('createFactoryCtrl.factoryObject', () => {
+      this.name = this.factoryObject && this.factoryObject.name ? this.factoryObject.name : '';
       this.factoryContent = this.$filter('json')(angular.fromJson(this.factoryObject));
     }, true);
 
@@ -94,7 +94,7 @@ export class CreateFactoryCtrl {
   }
 
   isFormInvalid(): boolean {
-    return this.form ? this.form.$invalid: false;
+    return this.form ? this.form.$invalid : false;
   }
 
   /**
@@ -115,14 +115,15 @@ export class CreateFactoryCtrl {
     if (!factoryContent) {
       return;
     }
-
-    // try to set factory name
-    try {
-      let factoryObject = angular.fromJson(factoryContent);
-      factoryObject.name = this.name;
-      factoryContent = angular.toJson(factoryObject);
-    } catch (e) {
-      this.$log.error(e);
+    if (this.name) {
+      // try to set factory name
+      try {
+        let factoryObject = angular.fromJson(factoryContent);
+        factoryObject.name = this.name;
+        factoryContent = angular.toJson(factoryObject);
+      } catch (e) {
+        this.$log.error(e);
+      }
     }
 
     this.isImporting = true;
@@ -138,27 +139,25 @@ export class CreateFactoryCtrl {
         }
       });
 
-      var parser = this.$document[0].createElement('a');
+      let parser = (<any>this.$document[0]).createElement('a');
       parser.href = this.factoryLink;
       this.factoryId = factory.id;
       this.factoryBadgeUrl = parser.protocol + '//' + parser.hostname + '/factory/resources/codenvy-contribute.svg';
 
       this.markdown = '[![Contribute](' + this.factoryBadgeUrl + ')](' + this.factoryLink + ')';
+      this.finishFlow();
     }, (error: any) => {
       this.isImporting = false;
       this.cheNotification.showError(error.data.message ? error.data.message : 'Create factory failed.');
       this.$log.error(error);
-    }).then(() => {
-      this.finishFlow();
     });
   }
 
-  /*
-   * Flow of creating a factory is finished, we can redirect to details of factory
+  /**
+   * Flow of creating a factory is finished, we can redirect to details of factory.
    */
   finishFlow(): void {
     this.clearFactoryContent();
     this.$location.path('/factory/' + this.factoryId);
   }
-
 }

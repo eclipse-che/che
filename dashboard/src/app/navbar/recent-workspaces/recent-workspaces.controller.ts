@@ -11,6 +11,7 @@
 'use strict';
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import IdeSvc from '../../../app/ide/ide.service';
+import {CheBranding} from '../../../components/branding/che-branding.factory';
 
 const MAX_RECENT_WORKSPACES_ITEMS: number = 5;
 
@@ -33,17 +34,19 @@ export class NavbarRecentWorkspacesController {
   $window: ng.IWindowService;
   $rootScope: ng.IRootScopeService;
   dropdownItems: Object;
+  workspaceCreationLink: string;
 
   /**
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor(ideSvc: IdeSvc, cheWorkspace: CheWorkspace, $window: ng.IWindowService, $log: ng.ILogService, $scope: ng.IScope, $rootScope: ng.IRootScopeService) {
+  constructor(ideSvc: IdeSvc, cheWorkspace: CheWorkspace, cheBranding: CheBranding, $window: ng.IWindowService, $log: ng.ILogService, $scope: ng.IScope, $rootScope: ng.IRootScopeService) {
     this.ideSvc = ideSvc;
     this.cheWorkspace = cheWorkspace;
     this.$log = $log;
     this.$window = $window;
     this.$rootScope = $rootScope;
+    this.workspaceCreationLink = cheBranding.getWorkspace().creationLink;
 
     // workspace updated time map by id
     this.workspaceUpdated = new Map();

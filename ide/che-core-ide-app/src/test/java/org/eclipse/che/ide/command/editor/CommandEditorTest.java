@@ -178,6 +178,10 @@ public class CommandEditorTest {
         editor.doSave();
 
         verify(commandManager).updateCommand(anyString(), eq(editor.editedCommand));
+        verify(commandPromise).then(operationCaptor.capture());
+        operationCaptor.getValue().apply(editedCommand);
+
+        verify(view).setSaveEnabled(false);
     }
 
     @Test(expected = OperationException.class)

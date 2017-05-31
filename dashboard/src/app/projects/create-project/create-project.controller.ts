@@ -933,7 +933,7 @@ export class CreateProjectController {
    * @param attributes {any}
    */
   createWorkspace(workspaceConfig: che.IWorkspaceConfig, attributes?: any): void {
-    // tODO: no account in che ? it's null when testing on localhost
+    // todo: no account in che ? it's null when testing on localhost
     let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig, attributes);
     creationPromise.then((workspace: any) => {
       this.createProjectSvc.setWorkspaceNamespace(workspace.namespace);
@@ -1081,10 +1081,11 @@ export class CreateProjectController {
    * Update creation flow state when source option changes
    */
   onSourceOptionChanged(): void {
-    if ('select-source-existing' === this.selectSourceOption) {
-      // need to call selection of current tab
-      this.setCurrentTab(this.currentTab);
+    if ('select-source-existing' !== this.selectSourceOption) {
+      this.isReady = true;
+      return;
     }
+    this.setCurrentTab(this.currentTab);
   }
 
   /**

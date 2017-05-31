@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.10.0-SNAPSHOT</version>
+        <version>5.12.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.core</groupId>
@@ -24,6 +24,7 @@
     <packaging>pom</packaging>
     <name>Che Core :: IDE</name>
     <modules>
+        <module>gwt-logger</module>
         <module>commons-gwt</module>
         <module>che-core-ide-api</module>
         <module>che-core-ide-generators</module>

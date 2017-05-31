@@ -56,7 +56,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Util methods for converting maven model objects into maven-server objects
@@ -69,7 +70,7 @@ public class MavenModelUtil {
         return new MavenKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
     }
 
-    public static MavenModel convertModel(Model model) {
+    public static MavenModel convertModel(Model model, File projectDir) {
         Build build = model.getBuild();
         List<String> sources = new ArrayList<>();
         List<String> testSources = new ArrayList<>();
@@ -84,10 +85,10 @@ public class MavenModelUtil {
             }
         }
 
-        return convertModel(model, sources, testSources, Collections.emptyList(), Collections.emptyList(), null);
+        return convertModel(model, projectDir, sources, testSources, Collections.emptyList(), Collections.emptyList(), null);
     }
 
-    public static MavenModel convertModel(Model model, List<String> sources, List<String> testSources, Collection<Artifact> dependencies,
+    public static MavenModel convertModel(Model model, File projectDir, List<String> sources, List<String> testSources, Collection<Artifact> dependencies,
                                           Collection<Artifact> extensions, File localRepo) {
 
         MavenModel result = new MavenModel();
@@ -111,28 +112,32 @@ public class MavenModelUtil {
         result.setDependencies(convertArtifacts(dependencies, convertedArtifacts, localRepo));
 
         result.setRemoteRepositories(convertRepositories(model.getRepositories()));
-        result.setProfiles(convertProfiles(model.getProfiles()));
-        convertBuild(result.getBuild(), model.getBuild(), sources, testSources);
+        result.setProfiles(convertProfiles(model.getProfiles(), projectDir));
+        convertBuild(result.getBuild(), model.getBuild(), projectDir, sources, testSources);
 
         return result;
     }
 
     public static MavenModel convertProjectToModel(MavenProject project, List<DependencyNode> dependencyNodes, File localRepository) {
         Model model = project.getModel();
-        return convertModel(model, project.getCompileSourceRoots(), project.getTestCompileSourceRoots(), project.getArtifacts(),
+        return convertModel(model, project.getBasedir(), project.getCompileSourceRoots(), project.getTestCompileSourceRoots(), project.getArtifacts(),
                             project.getExtensionArtifacts(), localRepository);
     }
 
-    private static void convertBuild(MavenBuild mavenBuild, Build build, List<String> compileSourceRoots,
+    private static void convertBuild(MavenBuild mavenBuild, Build build, File projectDir, List<String> compileSourceRoots,
                                      List<String> testCompileSourceRoots) {
-        convertBaseBuild(build, mavenBuild);
-        mavenBuild.setOutputDirectory(build.getOutputDirectory());
-        mavenBuild.setTestOutputDirectory(build.getTestOutputDirectory());
-        mavenBuild.setSources(compileSourceRoots);
-        mavenBuild.setTestSources(testCompileSourceRoots);
+        convertBaseBuild(build, mavenBuild, projectDir);
+        mavenBuild.setOutputDirectory(relativize(projectDir, build.getOutputDirectory()));
+        mavenBuild.setTestOutputDirectory(relativize(projectDir, build.getTestOutputDirectory()));
+        mavenBuild.setSources(compileSourceRoots.stream()
+                                                .map(path -> relativize(projectDir, path))
+                                                .collect(toList()));
+        mavenBuild.setTestSources(testCompileSourceRoots.stream()
+                                                        .map(path -> relativize(projectDir, path))
+                                                        .collect(toList()));
     }
 
-    private static List<MavenProfile> convertProfiles(List<Profile> profiles) {
+    private static List<MavenProfile> convertProfiles(List<Profile> profiles, File projectDir) {
         List<MavenProfile> result = new ArrayList<>();
 
         if (profiles != null) {
@@ -151,7 +156,7 @@ public class MavenModelUtil {
 
                 mavenProfile.setActivation(convertActivation(profile.getActivation()));
                 if (profile.getBuild() != null) {
-                    convertBaseBuild(profile.getBuild(), mavenProfile.getBuild());
+                    convertBaseBuild(profile.getBuild(), mavenProfile.getBuild(), projectDir);
                 }
                 result.add(mavenProfile);
             }
@@ -160,12 +165,12 @@ public class MavenModelUtil {
         return result;
     }
 
-    private static void convertBaseBuild(BuildBase build, MavenBuildBase mavenBuild) {
+    private static void convertBaseBuild(BuildBase build, MavenBuildBase mavenBuild, File projectDir) {
         mavenBuild.setDefaultGoal(build.getDefaultGoal());
-        mavenBuild.setDirectory(build.getDirectory());
+        mavenBuild.setDirectory(relativize(projectDir, build.getDirectory()));
         mavenBuild.setFinalName(build.getFinalName());
-        mavenBuild.setResources(convenrtResources(build.getResources()));
-        mavenBuild.setTestResources(convenrtResources(build.getTestResources()));
+        mavenBuild.setResources(convenrtResources(build.getResources(), projectDir));
+        mavenBuild.setTestResources(convenrtResources(build.getTestResources(), projectDir));
         List<String> filters = build.getFilters();
         if (filters == null) {
             mavenBuild.setFilters(Collections.emptyList());
@@ -174,11 +179,11 @@ public class MavenModelUtil {
         }
     }
 
-    private static List<MavenResource> convenrtResources(List<Resource> resources) {
+    private static List<MavenResource> convenrtResources(List<Resource> resources, File projectDir) {
         List<MavenResource> result = new ArrayList<>();
         if (resources != null) {
             for (Resource res : resources) {
-                result.add(new MavenResource(res.getDirectory(),
+                result.add(new MavenResource(relativize(projectDir, res.getDirectory()),
                                              res.isFiltering(),
                                              res.getTargetPath(),
                                              patternsOrEmptyList(res.getIncludes()),
@@ -262,7 +267,7 @@ public class MavenModelUtil {
         ArrayList<MavenArtifact> result = new ArrayList<>();
         if (artifacts != null) {
             result.addAll(artifacts.stream().map(artifact -> convertArtifact(artifact, convertedArtifacts, localRepository))
-                                   .collect(Collectors.toList()));
+                                   .collect(toList()));
         }
 
         return result;
@@ -304,7 +309,7 @@ public class MavenModelUtil {
         if (build != null) {
             List<Plugin> plugins = build.getPlugins();
             if (plugins != null) {
-                result.addAll(plugins.stream().map(MavenModelUtil::convertPlugin).collect(Collectors.toList()));
+                result.addAll(plugins.stream().map(MavenModelUtil::convertPlugin).collect(toList()));
             }
         }
 
@@ -314,13 +319,13 @@ public class MavenModelUtil {
     private static MavenPlugin convertPlugin(Plugin plugin) {
         List<MavenPluginExecution> executions =
                 plugin.getExecutions().stream().map(MavenModelUtil::convertExecution)
-                      .collect(Collectors.toList());
+                      .collect(toList());
 
         List<MavenKey> dependecies =
                 plugin.getDependencies()
                       .stream()
                       .map(dependency -> new MavenKey(dependency.getGroupId(), dependency.getArtifactId(),
-                                                      dependency.getVersion())).collect(Collectors.toList());
+                                                      dependency.getVersion())).collect(toList());
 
         return new MavenPlugin(plugin.getGroupId(), plugin.getArtifactId(), plugin.getVersion(), false,
                                convertConfiguration(plugin.getConfiguration()), executions, dependecies);
@@ -358,7 +363,7 @@ public class MavenModelUtil {
         return new MavenPluginExecution(execution.getId(), convertConfiguration(execution.getConfiguration()), execution.getGoals());
     }
 
-    public static Model convertToMavenModel(MavenModel model) {
+    public static Model convertToMavenModel(MavenModel model, File projectDir) {
         Model result = new Model();
         result.setArtifactId(model.getMavenKey().getArtifactId());
         result.setGroupId(model.getMavenKey().getGroupId());
@@ -380,19 +385,19 @@ public class MavenModelUtil {
         result.setModules(model.getModules());
         result.setBuild(new Build());
         MavenBuild modelBuild = model.getBuild();
-        convertToMavenBuildBase(modelBuild, result.getBuild());
-        result.getBuild().setSourceDirectory(modelBuild.getSources().get(0));
-        result.getBuild().setTestSourceDirectory(modelBuild.getTestSources().get(0));
+        convertToMavenBuildBase(modelBuild, result.getBuild(), projectDir);
+        result.getBuild().setSourceDirectory(relativize(projectDir, modelBuild.getSources().get(0)));
+        result.getBuild().setTestSourceDirectory(relativize(projectDir, modelBuild.getTestSources().get(0)));
 
-        result.setProfiles(convertToMavenProfiles(model.getProfiles()));
+        result.setProfiles(convertToMavenProfiles(model.getProfiles(), projectDir));
         return result;
     }
 
-    private static List<Profile> convertToMavenProfiles(List<MavenProfile> profiles) {
-        return profiles.stream().map(MavenModelUtil::convertToMavenProfile).collect(Collectors.toList());
+    private static List<Profile> convertToMavenProfiles(List<MavenProfile> profiles, File projectDir) {
+        return profiles.stream().map(profile -> convertToMavenProfile(profile, projectDir)).collect(toList());
     }
 
-    private static Profile convertToMavenProfile(MavenProfile mavenProfile) {
+    private static Profile convertToMavenProfile(MavenProfile mavenProfile, File projectDir) {
         Profile result = new Profile();
         result.setId(mavenProfile.getId());
         result.setSource(mavenProfile.getSource());
@@ -400,7 +405,7 @@ public class MavenModelUtil {
         result.setProperties(mavenProfile.getProperties());
         result.setBuild(new Build());
         result.setActivation(convertToMavenActivation(mavenProfile.getActivation()));
-        convertToMavenBuildBase(mavenProfile.getBuild(), result.getBuild());
+        convertToMavenBuildBase(mavenProfile.getBuild(), result.getBuild(), projectDir);
         return result;
     }
 
@@ -449,22 +454,22 @@ public class MavenModelUtil {
         return null;
     }
 
-    private static void convertToMavenBuildBase(MavenBuildBase modelBuild, BuildBase build) {
+    private static void convertToMavenBuildBase(MavenBuildBase modelBuild, BuildBase build, File projectDir) {
         build.setFinalName(modelBuild.getFinalName());
         build.setDefaultGoal(modelBuild.getDefaultGoal());
-        build.setDirectory(modelBuild.getDirectory());
+        build.setDirectory(relativize(projectDir, modelBuild.getDirectory()));
         build.setFilters(modelBuild.getFilters());
-        build.setResources(convertToMavenResources(modelBuild.getResources()));
-        build.setTestResources(convertToMavenResources(modelBuild.getTestResources()));
+        build.setResources(convertToMavenResources(modelBuild.getResources(), projectDir));
+        build.setTestResources(convertToMavenResources(modelBuild.getTestResources(), projectDir));
     }
 
-    private static List<Resource> convertToMavenResources(List<MavenResource> resources) {
-        return resources.stream().map(MavenModelUtil::convertToMavenResource).collect(Collectors.toList());
+    private static List<Resource> convertToMavenResources(List<MavenResource> resources, File projectDir) {
+        return resources.stream().map(resource -> convertToMavenResource(resource, projectDir)).collect(toList());
     }
 
-    private static Resource convertToMavenResource(MavenResource mavenResource) {
+    private static Resource convertToMavenResource(MavenResource mavenResource, File projectDir) {
         Resource resource = new Resource();
-        resource.setDirectory(mavenResource.getDirectory());
+        resource.setDirectory(relativize(projectDir, mavenResource.getDirectory()));
         resource.setFiltering(mavenResource.isFiltered());
         resource.setTargetPath(mavenResource.getTargetPath());
         resource.setIncludes(mavenResource.getIncludes());
@@ -498,5 +503,17 @@ public class MavenModelUtil {
         result.setEnabled(policy.isEnabled());
         result.setUpdatePolicy(policy.getUpdatePolicy());
         return result;
+    }
+
+    private static String relativize(File basePath, String rawPath) {
+        if (rawPath == null) {
+            return null;
+        }
+
+        if (rawPath.isEmpty()) {
+            return rawPath;
+        }
+
+        return rawPath.startsWith(File.separator) ? basePath.toURI().relativize(new File(rawPath).toURI()).getPath() : rawPath;
     }
 }
