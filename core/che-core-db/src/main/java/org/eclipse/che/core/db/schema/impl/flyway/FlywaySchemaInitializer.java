@@ -18,11 +18,17 @@ import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
 import org.flywaydb.core.internal.dbsupport.DbSupportFactory;
+import org.flywaydb.core.internal.metadatatable.MetaDataTable;
+import org.flywaydb.core.internal.metadatatable.MetaDataTableImpl;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.eclipse.che.core.db.DBInitializer.BARE_DB_INIT_PROPERTY_NAME;
 
 /**
  * <a href="https://flywaydb.org/">Flyway</a> based schema initializer.
@@ -96,13 +102,16 @@ public class FlywaySchemaInitializer implements SchemaInitializer {
     }
 
     @Override
-    public void init() throws SchemaInitializationException {
+    public Map<String, String> init() throws SchemaInitializationException {
+        final Map<String, String> initResult = new HashMap<>();
         try (final Connection conn = dataSource.getConnection()) {
             final Flyway flyway = new Flyway();
             flyway.setDataSource(dataSource);
             flyway.setLocations(locations);
             flyway.setClassLoader(Thread.currentThread().getContextClassLoader());
             final DbSupport dbSupport = DbSupportFactory.createDbSupport(conn, true);
+            final MetaDataTable mt = new MetaDataTableImpl(dbSupport, dbSupport.getOriginalSchema().getTable(flyway.getTable()));
+            initResult.put(BARE_DB_INIT_PROPERTY_NAME, String.valueOf(!mt.hasAppliedMigrations()));
             final String productName = conn.getMetaData().getDatabaseProductName().toLowerCase();
             flyway.setResolvers(new CustomSqlMigrationResolver(productName, dbSupport, placeholderReplacer));
             flyway.setSkipDefaultResolvers(true);
@@ -117,5 +126,6 @@ public class FlywaySchemaInitializer implements SchemaInitializer {
         } catch (SQLException | RuntimeException x) {
             throw new SchemaInitializationException(x.getLocalizedMessage(), x);
         }
+        return initResult;
     }
 }

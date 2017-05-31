@@ -13,29 +13,33 @@ package org.eclipse.che.api.workspace.server.stack;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
+import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.core.db.DBInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 /**
@@ -43,27 +47,33 @@ import static java.lang.String.format;
  * and set {@link StackIcon} to the predefined stack.
  *
  * @author Alexander Andrienko
+ * @author Sergii Leshchenko
+ * @author Anton Korneta
  */
 @Singleton
 public class StackLoader {
+
+    public static final String CHE_PREDEFINED_STACKS = "che.predefined.stacks";
+
     private static final Logger LOG = LoggerFactory.getLogger(StackLoader.class);
 
-    private final Gson GSON;
+    protected final StackDao stackDao;
 
-    private final Path     stackJsonPath;
-    private final Path     stackIconFolderPath;
-    private final StackDao stackDao;
+    private final Gson                GSON;
+    private final Map<String, String> stacks2images;
+    private final DBInitializer       dbInitializer;
+    private final Boolean             reloadStacksOnStart;
 
     @Inject
     @SuppressWarnings("unused")
-    public StackLoader(@Named("che.stacks.storage") String stacksPath,
-                       @Named("che.stacks.images") String stackIconFolder,
+    public StackLoader(@Named("che.predefined.stacks.reload_on_start") boolean reloadStacksOnStart,
+                       @Named(CHE_PREDEFINED_STACKS) Map<String, String> stacks2images,
                        StackDao stackDao,
                        DBInitializer dbInitializer) {
-        this.stackJsonPath = Paths.get(stacksPath);
-        this.stackIconFolderPath = Paths.get(stackIconFolder);
+        this.reloadStacksOnStart = reloadStacksOnStart;
+        this.stacks2images = stacks2images;
         this.stackDao = stackDao;
-
+        this.dbInitializer = dbInitializer;
         GSON = new GsonBuilder().create();
     }
 
@@ -72,18 +82,31 @@ public class StackLoader {
      */
     @PostConstruct
     public void start() {
-        if (Files.exists(stackJsonPath) && Files.isRegularFile(stackJsonPath)) {
-            try (BufferedReader reader = Files.newBufferedReader(stackJsonPath)) {
-                List<StackImpl> stacks = GSON.fromJson(reader, new TypeToken<List<StackImpl>>() {}.getType());
-                stacks.forEach(this::loadStack);
-            } catch (Exception e) {
-                LOG.error("Failed to store stacks ", e);
+        final boolean override;
+        if (reloadStacksOnStart) {
+            LOG.warn("Reload stacks on start is deprecated policy, and it will be removed soon");
+            override = true;
+        } else {
+            override = dbInitializer.isBareInit();
+        }
+        if (override) {
+            for (Map.Entry<String, String> stack2image : stacks2images.entrySet()) {
+                final String stackFile = stack2image.getKey();
+                final String imagesDir = stack2image.getValue();
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(IoUtil.getResource(stackFile)))) {
+                    List<StackImpl> stacks = GSON.fromJson(reader, new TypeToken<List<StackImpl>>() {}.getType());
+                    final Path imagesDirPath = !isNullOrEmpty(imagesDir) ? Paths.get(imagesDir) : null;
+                    stacks.forEach(stack -> loadStack(stack, imagesDirPath));
+                } catch (Exception ex) {
+                    LOG.error("Failed to store stacks from '{}'", stackFile);
+                }
             }
+            LOG.info("Stacks initialization finished");
         }
     }
 
-    private void loadStack(StackImpl stack) {
-        setIconData(stack, stackIconFolderPath);
+    protected void loadStack(StackImpl stack, Path imagePath) {
+        setIconData(stack, imagePath);
 
         try {
             stackDao.update(stack);
@@ -91,27 +114,37 @@ public class StackLoader {
             try {
                 stackDao.create(stack);
             } catch (Exception ex) {
-                LOG.error(format("Failed to load stack with id '%s' ", stack.getId()), ex.getMessage());
+                LOG.error(format("Failed to load stack with id '%s' ", stack.getId()), ex);
             }
         }
     }
 
-    private void setIconData(StackImpl stack, Path stackIconFolderPath) {
+    /**
+     * Searches for stack icon and set image data into given stack.
+     *
+     * @param stack
+     *         stack for icon setup
+     * @param stackIconFolderPath
+     *         path to icon folder
+     */
+    protected void setIconData(StackImpl stack, Path stackIconFolderPath) {
         StackIcon stackIcon = stack.getStackIcon();
         if (stackIcon == null) {
             return;
         }
-        try {
-            Path stackIconPath = stackIconFolderPath.resolve(stackIcon.getName());
-            if (Files.exists(stackIconPath) && Files.isRegularFile(stackIconPath)) {
-                stackIcon = new StackIcon(stackIcon.getName(), stackIcon.getMediaType(), Files.readAllBytes(stackIconPath));
-                stack.setStackIcon(stackIcon);
-            } else {
-                throw new IOException("Stack icon is not a file or doesn't exist by path: " + stackIconPath);
-            }
-        } catch (IOException e) {
+        if (stackIconFolderPath == null) {
             stack.setStackIcon(null);
-            LOG.error(format("Failed to load stack icon data for the stack with id '%s'", stack.getId()), e);
+            LOG.warn("No configured image found for stack {}", stack.getId());
+            return;
+        }
+        try {
+            final Path stackIconPath = stackIconFolderPath.resolve(stackIcon.getName());
+            final byte[] imageData = IOUtils.toByteArray(IoUtil.getResource(stackIconPath.toString()));
+            stackIcon = new StackIcon(stackIcon.getName(), stackIcon.getMediaType(), imageData);
+            stack.setStackIcon(stackIcon);
+        } catch (IOException ex) {
+            stack.setStackIcon(null);
+            LOG.error(format("Failed to load stack icon data for the stack with id '%s'", stack.getId()), ex);
         }
     }
 }

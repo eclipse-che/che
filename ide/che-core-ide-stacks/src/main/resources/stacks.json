@@ -2220,7 +2220,7 @@
     ],
     "source": {
       "type": "image",
-        "origin": "code/pio:latest"
+      "origin": "code/pio:latest"
     },
     "workspaceConfig": {
       "environments": {
@@ -2308,74 +2308,74 @@
     "description": "Eclipse Vert.x Stack on CentOS.",
     "scope": "advanced",
     "tags": [
-        "Java",
-        "JDK",
-        "Maven",
-        "Vert.x",
-        "CentOS",
-        "Git"
+      "Java",
+      "JDK",
+      "Maven",
+      "Vert.x",
+      "CentOS",
+      "Git"
     ],
     "components": [{
-        "name": "CentOS",
-        "version": "---"
+      "name": "CentOS",
+      "version": "---"
     }, {
-        "name": "JDK",
-        "version": "1.8.0_45"
+      "name": "JDK",
+      "version": "1.8.0_45"
     }, {
-        "name": "Maven",
-        "version": "3.2.2"
+      "name": "Maven",
+      "version": "3.2.2"
     }],
     "source": {
-        "type": "image",
-        "origin": "registry.centos.org/che-stacks/vertx"
+      "type": "image",
+      "origin": "registry.centos.org/che-stacks/vertx"
     },
     "workspaceConfig": {
-        "environments": {
-            "default": {
-                "machines": {
-                    "dev-machine": {
-                        "agents": [
-                            "org.eclipse.che.exec",
-                            "org.eclipse.che.terminal",
-                            "org.eclipse.che.ws-agent",
-                            "org.eclipse.che.ssh"
-                        ],
-                        "servers": {},
-                        "attributes": {
-                            "memoryLimitBytes": "2147483648"
-                        }
-                    }
-                },
-                "recipe": {
-                    "location": "registry.centos.org/che-stacks/vertx",
-                    "type": "dockerimage"
-                }
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.exec",
+                "org.eclipse.che.terminal",
+                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes": {
+                "memoryLimitBytes": "2147483648"
+              }
             }
-        },
-        "name": "default",
-        "defaultEnv": "default",
-        "description": null,
-        "commands": [{
-            "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
-            "name": "build",
-            "type": "mvn",
-            "attributes": {
-                "previewUrl": "",
-                "goal": "Build"
-            }
-        }, {
-            "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-fat.jar'",
-            "name": "run",
-            "type": "custom",
-            "attributes": {
-                "previewUrl": "http://${server.port.8080}",
-                "goal": "Run"
-            }
-        }]
+          },
+          "recipe": {
+            "location": "registry.centos.org/che-stacks/vertx",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [{
+        "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
+        "name": "build",
+        "type": "mvn",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Build"
+        }
+      }, {
+        "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-fat.jar'",
+        "name": "run",
+        "type": "custom",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}",
+          "goal": "Run"
+        }
+      }]
     },
     "stackIcon": {
-        "name": "type-java.svg",
-        "mediaType": "image/svg+xml"
+      "name": "type-java.svg",
+      "mediaType": "image/svg+xml"
     }
   },
   {
@@ -2456,167 +2456,167 @@
     }
   },
   {
-  "name": "CentOS WildFly Swarm",
-  "id": "wildfly-swarm",
-  "creator": "Dharmit Shah",
-  "description": "Eclipse WildFly Swarm Stack on CentOS.",
-  "scope": "advanced",
-  "source": {
-    "type": "image",
-    "origin": "registry.centos.org/che-stacks/wildfly-swarm"
-  },
-  "tags": [
-    "Java",
-    "JDK",
-    "Maven",
-    "WildFly Swarm",
-    "CentOS",
-    "Git"
-  ],
-  "workspaceConfig": {
-    "name": "default",
-    "environments": {
-      "default": {
-        "recipe": {
-          "location": "registry.centos.org/che-stacks/wildfly-swarm",
-          "type": "dockerimage"
-        },
-        "machines": {
-          "dev-machine": {
-            "attributes": {
-              "memoryLimitBytes": "2147483648"
-            },
+    "name": "CentOS WildFly Swarm",
+    "id": "wildfly-swarm",
+    "creator": "Dharmit Shah",
+    "description": "Eclipse WildFly Swarm Stack on CentOS.",
+    "scope": "advanced",
+    "source": {
+      "type": "image",
+      "origin": "registry.centos.org/che-stacks/wildfly-swarm"
+    },
+    "tags": [
+      "Java",
+      "JDK",
+      "Maven",
+      "WildFly Swarm",
+      "CentOS",
+      "Git"
+    ],
+    "workspaceConfig": {
+      "name": "default",
+      "environments": {
+        "default": {
+          "recipe": {
+            "location": "registry.centos.org/che-stacks/wildfly-swarm",
+            "type": "dockerimage"
+          },
+          "machines": {
+            "dev-machine": {
+              "attributes": {
+                "memoryLimitBytes": "2147483648"
+              },
 
-            "agents": [
-              "org.eclipse.che.terminal",
-              "org.eclipse.che.ws-agent",
-              "org.eclipse.che.ssh"
-            ],
-            "servers": {}
+              "agents": [
+                "org.eclipse.che.terminal",
+                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.ssh"
+              ],
+              "servers": {}
+            }
           }
         }
-      }
+      },
+      "commands": [
+        {
+          "name": "build",
+          "type": "mvn",
+          "attributes": {},
+          "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'"
+        },
+        {
+          "name": "run",
+          "type": "custom",
+          "attributes": {
+            "previewUrl": "http://${server.port.8080}"
+          },
+          "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-swarm.jar'"
+        }
+      ],
+      "projects": [],
+      "defaultEnv": "default",
+      "links": []
     },
-    "commands": [
+    "components": [
       {
-        "name": "build",
-        "type": "mvn",
-        "attributes": {},
-        "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'"
+        "name": "CentOS",
+        "version": "---"
       },
       {
-        "name": "run",
-        "type": "custom",
-        "attributes": {
-          "previewUrl": "http://${server.port.8080}"
-        },
-        "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-swarm.jar'"
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.3.9"
       }
+    ]
+  },
+  {
+    "name": "CentOS nodejs",
+    "id": "nodejs4",
+    "scope": "advanced",
+    "source": {
+      "type": "image",
+      "origin": "registry.centos.org/che-stacks/centos-nodejs"
+    },
+    "description": "CentOS Node Stack",
+    "tags": [
+      "CentOS",
+      "Git",
+      "Node.JS",
+      "NPM",
+      "Gulp",
+      "Bower",
+      "Grunt",
+      "Yeoman",
+      "Angular",
+      "Karma"
     ],
-    "projects": [],
-    "defaultEnv": "default",
-    "links": []
-  },
-  "components": [
-    {
-      "name": "CentOS",
-      "version": "---"
-    },
-    {
-      "name": "JDK",
-      "version": "1.8.0_45"
-    },
-    {
-      "name": "Maven",
-      "version": "3.3.9"
-    }
-  ]
-},
-{
-  "name": "CentOS nodejs",
-  "id": "nodejs4",
-  "scope": "advanced",
-  "source": {
-    "type": "image",
-    "origin": "registry.centos.org/che-stacks/centos-nodejs"
-  },
-  "description": "CentOS Node Stack",
-  "tags": [
-    "CentOS",
-    "Git",
-    "Node.JS",
-    "NPM",
-    "Gulp",
-    "Bower",
-    "Grunt",
-    "Yeoman",
-    "Angular",
-    "Karma"
-  ],
-  "workspaceConfig": {
-    "name": "default",
-    "environments": {
-      "default": {
-        "recipe": {
-          "location": "registry.centos.org/che-stacks/centos-nodejs",
-          "type": "dockerimage"
-        },
-        "machines": {
-          "dev-machine": {
-            "attributes": {
-              "memoryLimitBytes": "2147483648"
-            },
-            "agents": [
-              "org.eclipse.che.terminal",
-              "org.eclipse.che.ws-agent",
-              "org.eclipse.che.ssh"
-            ],
-            "servers": {}
+    "workspaceConfig": {
+      "name": "default",
+      "environments": {
+        "default": {
+          "recipe": {
+            "location": "registry.centos.org/che-stacks/centos-nodejs",
+            "type": "dockerimage"
+          },
+          "machines": {
+            "dev-machine": {
+              "attributes": {
+                "memoryLimitBytes": "2147483648"
+              },
+              "agents": [
+                "org.eclipse.che.terminal",
+                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.ssh"
+              ],
+              "servers": {}
+            }
           }
         }
-      }
+      },
+      "commands": [
+        {
+          "name": "run",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": "http://${server.port.8080}"
+          },
+          "commandLine": "cd ${current.project.path} && scl enable rh-nodejs4 'node app.js'"
+        }
+      ],
+      "projects": [],
+      "defaultEnv": "default",
+      "links": []
     },
-    "commands": [
+    "components": [
       {
-        "name": "run",
-        "type": "custom",
-        "attributes": {
-          "goal": "Run",
-          "previewUrl": "http://${server.port.8080}"
-        },
-        "commandLine": "cd ${current.project.path} && scl enable rh-nodejs4 'node app.js'"
+        "name": "Node.JS",
+        "version": "---"
+      },
+      {
+        "name": "NPM",
+        "version": "---"
+      },
+      {
+        "name": "Gulp",
+        "version": "---"
+      },
+      {
+        "name": "Bower",
+        "version": "---"
+      },
+      {
+        "name": "Grunt",
+        "version": "---"
+      },
+      {
+        "name": "Yeoman",
+        "version": "---"
       }
     ],
-    "projects": [],
-    "defaultEnv": "default",
-    "links": []
-  },
-  "components": [
-    {
-      "name": "Node.JS",
-      "version": "---"
-    },
-    {
-      "name": "NPM",
-      "version": "---"
-    },
-    {
-      "name": "Gulp",
-      "version": "---"
-    },
-    {
-      "name": "Bower",
-      "version": "---"
-    },
-    {
-      "name": "Grunt",
-      "version": "---"
-    },
-    {
-      "name": "Yeoman",
-      "version": "---"
-    }
-  ],
-  "creator": "Dharmit Shah"
-}
+    "creator": "Dharmit Shah"
+  }
 ]
