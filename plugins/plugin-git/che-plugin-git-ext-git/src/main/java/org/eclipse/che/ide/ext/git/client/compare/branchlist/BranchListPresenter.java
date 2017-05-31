@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.branchList;
+package org.eclipse.che.ide.ext.git.client.compare.branchlist;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
@@ -28,7 +28,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
-import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
@@ -56,7 +56,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
     public static final String BRANCH_LIST_COMMAND_NAME = "Git list of branches";
 
     private final ComparePresenter        comparePresenter;
-    private final ChangedListPresenter    changedListPresenter;
+    private final ChangesListPresenter    changesListPresenter;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
     private final ProcessesPanelPresenter consolesPanelPresenter;
     private final BranchListView          view;
@@ -73,7 +73,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
     @Inject
     public BranchListPresenter(BranchListView view,
                                ComparePresenter comparePresenter,
-                               ChangedListPresenter changedListPresenter,
+                               ChangesListPresenter changesListPresenter,
                                GitServiceClient service,
                                GitLocalizationConstant locale,
                                AppContext appContext,
@@ -83,7 +83,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                                ProcessesPanelPresenter processesPanelPresenter) {
         this.view = view;
         this.comparePresenter = comparePresenter;
-        this.changedListPresenter = changedListPresenter;
+        this.changesListPresenter = changesListPresenter;
         this.dialogFactory = dialogFactory;
         this.service = service;
         this.locale = locale;
@@ -152,7 +152,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                                for (String item : changedFiles) {
                                    items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
                                }
-                               changedListPresenter.show(items, selectedBranch.getName(), null, project);
+                               changesListPresenter.show(items, selectedBranch.getName(), null, project);
                            }
                        }
                    }

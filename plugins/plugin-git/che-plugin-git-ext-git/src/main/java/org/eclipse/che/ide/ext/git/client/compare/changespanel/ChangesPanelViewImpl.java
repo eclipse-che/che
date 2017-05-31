@@ -8,64 +8,61 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.changedList;
+package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.SelectionModel;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.compare.NameComparator;
-import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
-import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
+import org.eclipse.che.ide.ui.smartTree.presentation.PresentationRenderer;
 
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.TREE;
 
 /**
- * Implementation of {@link ChangedListView}.
+ * Implementation of {@link ChangesPanelView}.
  *
  * @author Igor Vinokur
  */
-@Singleton
-public class ChangedListViewImpl extends Window implements ChangedListView {
-    interface ChangedListViewImplUiBinder extends UiBinder<DockLayoutPanel, ChangedListViewImpl> {
+public class ChangesPanelViewImpl extends Composite implements ChangesPanelView {
+    interface TreeViewImplUiBinder extends UiBinder<DockLayoutPanel, ChangesPanelViewImpl> {
     }
 
-    private static ChangedListViewImplUiBinder uiBinder = GWT.create(ChangedListViewImplUiBinder.class);
+    private static TreeViewImplUiBinder uiBinder = GWT.create(TreeViewImplUiBinder.class);
 
     @UiField
-    LayoutPanel changedFilesPanel;
+    LayoutPanel changesPanel;
     @UiField
     Button      changeViewModeButton;
     @UiField
     Button      expandButton;
     @UiField
     Button      collapseButton;
-
     @UiField(provided = true)
     final GitLocalizationConstant locale;
     @UiField(provided = true)
@@ -73,83 +70,56 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
 
     private ActionDelegate delegate;
     private Tree           tree;
-    private Button         btnCompare;
+    private Set<Path>      nodePaths;
 
     private final NodesResources nodesResources;
 
     @Inject
-    protected ChangedListViewImpl(GitResources resources,
-                                  GitLocalizationConstant locale,
-                                  NodesResources nodesResources) {
+    public ChangesPanelViewImpl(GitResources resources,
+                                GitLocalizationConstant locale,
+                                NodesResources nodesResources) {
         this.res = resources;
         this.locale = locale;
         this.nodesResources = nodesResources;
+        this.nodePaths = new HashSet<>();
 
-        DockLayoutPanel widget = uiBinder.createAndBindUi(this);
-
-        this.setTitle(locale.changeListTitle());
-        this.setWidget(widget);
+        initWidget(uiBinder.createAndBindUi(this));
 
         NodeStorage nodeStorage = new NodeStorage();
         NodeLoader nodeLoader = new NodeLoader();
         tree = new Tree(nodeStorage, nodeLoader);
-        tree.getSelectionModel().setSelectionMode(SelectionModel.Mode.SINGLE);
-        tree.getSelectionModel().addSelectionChangedHandler(new SelectionChangedEvent.SelectionChangedHandler() {
-            @Override
-            public void onSelectionChanged(SelectionChangedEvent event) {
-                List<Node> selection = event.getSelection();
-                if (!selection.isEmpty()) {
-                    delegate.onNodeSelected(selection.get(0));
-                }
-            }
-        });
-        changedFilesPanel.add(tree);
+        SelectionModel selectionModel = tree.getSelectionModel();
+        selectionModel.setSelectionMode(SelectionModel.Mode.SINGLE);
+        changesPanel.add(tree);
 
         createButtons();
-
-        SafeHtmlBuilder shb = new SafeHtmlBuilder();
-
-        shb.appendHtmlConstant("<table height =\"20\">");
-        shb.appendHtmlConstant("<tr height =\"3\"></tr><tr>");
-        shb.appendHtmlConstant("<td width =\"20\" bgcolor =\"dodgerBlue\"></td>");
-        shb.appendHtmlConstant("<td>modified</td>");
-        shb.appendHtmlConstant("<td width =\"20\" bgcolor =\"red\"></td>");
-        shb.appendHtmlConstant("<td>deleted</td>");
-        shb.appendHtmlConstant("<td width =\"20\" bgcolor =\"green\"></td>");
-        shb.appendHtmlConstant("<td>added</td>");
-        shb.appendHtmlConstant("<td width =\"20\" bgcolor =\"purple\"></td>");
-        shb.appendHtmlConstant("<td>copied</td>");
-        shb.appendHtmlConstant("</tr></table>");
-
-        getFooter().add(new HTML(shb.toSafeHtml()));
     }
 
-    /** {@inheritDoc} */
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public void viewChangedFilesAsList(@NotNull Map<String, Status> items) {
-        tree.getNodeStorage().clear();
-        for (String file : items.keySet()) {
-            tree.getNodeStorage().add(new ChangedFileNode(file, items.get(file), nodesResources, delegate, false));
+    public void addSelectionHandler(SelectionChangedHandler handler) {
+        tree.getSelectionModel().addSelectionChangedHandler(handler);
+    }
+
+    @Override
+    public void viewChangedFiles(Map<String, Status> files, ViewMode viewMode) {
+        NodeStorage nodeStorage = tree.getNodeStorage();
+        nodeStorage.clear();
+        if (viewMode == TREE) {
+            getGroupedNodes(files).forEach(nodeStorage::add);
+            tree.expandAll();
+        } else {
+            files.keySet().forEach(file -> nodeStorage.add(new ChangedFileNode(file, files.get(file), nodesResources, delegate, false)));
         }
     }
 
     @Override
-    public void viewChangedFilesAsTree(@NotNull Map<String, Status> items) {
+    public void resetPanelState() {
         tree.getNodeStorage().clear();
-        List<Node> nodes = getGroupedNodes(items);
-        if (nodes.size() == 1) {
-            tree.getNodeStorage().add(nodes);
-            tree.setExpanded(nodes.get(0), true);
-        } else {
-            for (Node node : nodes) {
-                tree.getNodeStorage().add(node);
-            }
-        }
     }
 
     @Override
@@ -162,24 +132,6 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
         tree.expandAll();
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void close() {
-        this.hide();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void showDialog() {
-        this.show();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEnableCompareButton(boolean enabled) {
-        btnCompare.setEnabled(enabled);
-    }
-
     @Override
     public void setEnableExpandCollapseButtons(boolean enabled) {
         expandButton.setEnabled(enabled);
@@ -187,66 +139,61 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
     }
 
     @Override
+    public void setEnabledChangeViewModeButton(boolean enabled) {
+        changeViewModeButton.setEnabled(enabled);
+    }
+
+    @Override
     public void setTextToChangeViewModeButton(String text) {
         changeViewModeButton.setText(text);
     }
 
+    @Override
+    public void setTreeRender(PresentationRenderer render) {
+        tree.setPresentationRenderer(render);
+    }
+
+    @Override
+    public TreeStyles getTreeStyles() {
+        return tree.getTreeStyles();
+    }
+
+    @Override
+    public void refreshNodes() {
+        tree.getAllChildNodes(tree.getRootNodes(), false).forEach(node -> tree.refresh(node));
+    }
+
+    @Override
+    public Set<Path> getNodePaths() {
+        return nodePaths;
+    }
+
     private void createButtons() {
-        changeViewModeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                delegate.onChangeViewModeButtonClicked();
-            }
-        });
+        changeViewModeButton.addClickHandler(clickEvent -> delegate.onChangeViewModeButtonClicked());
 
         expandButton.setTitle(locale.changeListExpandCollapseAllButtonTitle());
         expandButton.getElement().setInnerHTML(FontAwesome.EXPAND);
-        expandButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                delegate.onExpandButtonClicked();
-            }
-        });
+        expandButton.addClickHandler(clickEvent -> delegate.onExpandButtonClicked());
 
         collapseButton.setTitle(locale.changeListCollapseAllButtonTitle());
         collapseButton.getElement().setInnerHTML(FontAwesome.COMPRESS);
-        collapseButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                delegate.onCollapseButtonClicked();
-            }
-        });
-
-        Button btnClose = createButton(locale.buttonClose(), "git-compare-btn-close", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onCloseClicked();
-            }
-        });
-        addButtonToFooter(btnClose);
-
-        btnCompare = createButton(locale.buttonCompare(), "git-compare-btn-compare", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onCompareClicked();
-            }
-        });
-        addButtonToFooter(btnCompare);
+        collapseButton.addClickHandler(clickEvent -> delegate.onCollapseButtonClicked());
     }
 
     private List<Node> getGroupedNodes(Map<String, Status> items) {
         List<String> allFiles = new ArrayList<>(items.keySet());
-        List<String> allPaths = new ArrayList<>();
+        List<String> allFolders = new ArrayList<>();
         for (String file : allFiles) {
+            nodePaths.add(Path.valueOf(file));
             String path = file.substring(0, file.lastIndexOf("/"));
-            if (!allPaths.contains(path)) {
-                allPaths.add(path);
+            if (!allFolders.contains(path)) {
+                allFolders.add(path);
             }
         }
-        List<String> commonPaths = getCommonPaths(allPaths);
+        List<String> commonPaths = getCommonPaths(allFolders);
         for (String commonPath : commonPaths) {
-            if (!allPaths.contains(commonPath)) {
-                allPaths.add(commonPath);
+            if (!allFolders.contains(commonPath)) {
+                allFolders.add(commonPath);
             }
         }
 
@@ -272,11 +219,12 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
             }
 
             //Map child files to related folders of current nesting level or just create a common folder
-            for (String path : allPaths) {
+            for (String path : allFolders) {
+                nodePaths.add(Path.valueOf(path));
                 if (!(Path.valueOf(path).segmentCount() == i - 1)) {
                     continue;
                 }
-                Node folder = new ChangedFolderNode(getTransitFolderName(allPaths, path), nodesResources);
+                Node folder = new ChangedFolderNode(getTransitFolderName(allFolders, path), Path.valueOf(path), nodesResources);
                 if (currentChildNodes.keySet().contains(path)) {
                     folder.setChildren(currentChildNodes.get(path));
                 }
@@ -292,10 +240,10 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
                         nodesToNest.add(preparedNodes.remove(nestedItem));
                     }
                 }
-                if (nodesToNest.isEmpty()) {
+                if (nodesToNest.isEmpty() && !parentPath.isEmpty()) {
                     continue;
                 }
-                Collections.sort(nodesToNest, new NameComparator());
+                nodesToNest.sort(new NameComparator());
                 if (currentChildNodes.keySet().contains(parentPath)) {
                     nodesToNest.addAll(currentChildNodes.get(parentPath));
                 }
@@ -307,7 +255,7 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
             }
         }
         ArrayList<Node> nodes = new ArrayList<>(preparedNodes.values());
-        Collections.sort(nodes, new NameComparator());
+        nodes.sort(new NameComparator());
         return new ArrayList<>(nodes);
     }
 

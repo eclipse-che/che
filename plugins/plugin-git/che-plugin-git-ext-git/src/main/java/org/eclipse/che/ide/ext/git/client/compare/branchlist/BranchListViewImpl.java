@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.branchList;
+package org.eclipse.che.ide.ext.git.client.compare.branchlist;
 
 import elemental.dom.Element;
 import elemental.html.TableCellElement;
