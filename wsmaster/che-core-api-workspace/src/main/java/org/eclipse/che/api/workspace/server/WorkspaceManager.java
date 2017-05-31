@@ -20,7 +20,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
@@ -29,17 +28,18 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Future;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Throwables.getCausalChain;
@@ -133,7 +133,7 @@ public class WorkspaceManager {
 
     /**
      * Gets workspace by composite key.
-     *
+     * <p>
      * <p> Key rules:
      * <ul>
      * <li>@Deprecated : If it contains <b>:</b> character then that key is combination of namespace and workspace name
@@ -141,7 +141,7 @@ public class WorkspaceManager {
      * <li>If it doesn't contain <b>/</b> character then that key is id(e.g. workspace123456)
      * <li>If it contains <b>/</b> character then that key is combination of namespace and workspace name
      * </ul>
-     *
+     * <p>
      * Note that namespace can contain <b>/</b> character.
      *
      * @param key
@@ -161,7 +161,7 @@ public class WorkspaceManager {
 
     /**
      * Gets workspace by name and owner.
-     *
+     * <p>
      * <p>Returned instance status is either {@link WorkspaceStatus#STOPPED}
      * or  defined by its runtime(if exists).
      *
@@ -184,7 +184,7 @@ public class WorkspaceManager {
 
     /**
      * Gets list of workspaces which user can read
-     *
+     * <p>
      * <p>Returned workspaces have either {@link WorkspaceStatus#STOPPED} status
      * or status defined by their runtime instances(if those exist).
      *
@@ -210,7 +210,7 @@ public class WorkspaceManager {
 
     /**
      * Gets list of workspaces which has given namespace
-     *
+     * <p>
      * <p>Returned workspaces have either {@link WorkspaceStatus#STOPPED} status
      * or status defined by their runtime instances(if those exist).
      *
@@ -236,7 +236,7 @@ public class WorkspaceManager {
 
     /**
      * Updates an existing workspace with a new configuration.
-     *
+     * <p>
      * <p>Replace strategy is used for workspace update, it means
      * that existing workspace data will be replaced with given {@code update}.
      *
@@ -272,7 +272,7 @@ public class WorkspaceManager {
 
     /**
      * Removes workspace with specified identifier.
-     *
+     * <p>
      * <p>Does not remove the workspace if it has the runtime,
      * throws {@link ConflictException} in this case.
      * Won't throw any exception if workspace doesn't exist.
@@ -335,7 +335,7 @@ public class WorkspaceManager {
         //final boolean autoRestore = restoreAttr == null ? defaultAutoRestore : parseBoolean(restoreAttr);
         //startAsync(workspace, envName, firstNonNull(restore, autoRestore));
         //&& !getSnapshot(workspaceId).isEmpty());
-        startAsync(workspace, envName, options);
+        startAsync(workspace, envName, options).complete(null);
         return normalizeState(workspace, true);
     }
 
@@ -468,11 +468,11 @@ public class WorkspaceManager {
 //    }
 
     /** Asynchronously starts given workspace. */
-    private void startAsync(WorkspaceImpl workspace,
-                            String envName,
-                            Map<String, String> options) throws ConflictException,
-                                                                NotFoundException,
-                                                                ServerException {
+    private CompletableFuture<Void> startAsync(WorkspaceImpl workspace,
+                                               String envName,
+                                               Map<String, String> options) throws ConflictException,
+                                                                                   NotFoundException,
+                                                                                   ServerException {
         if (envName != null && !workspace.getConfig().getEnvironments().containsKey(envName)) {
             throw new NotFoundException(format("Workspace '%s:%s' doesn't contain environment '%s'",
                                                workspace.getNamespace(),
@@ -484,33 +484,31 @@ public class WorkspaceManager {
         final String env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
 
         states.put(workspace.getId(), WorkspaceStatus.STARTING);
-        // barrier, safely doesn't allow to start the workspace twice
-        final Future<Runtime> descriptor = runtimes.startAsync(workspace, env, options);
+        return runtimes.startAsync(workspace, env, firstNonNull(options, Collections.emptyMap()))
+                       .thenRunAsync(ThreadLocalPropagateContext.wrap(() -> {
+                           states.put(workspace.getId(), WorkspaceStatus.RUNNING);
 
-        sharedPool.execute(() -> {
-            try {
-                descriptor.get();
-
-                states.put(workspace.getId(), WorkspaceStatus.RUNNING);
-
-                LOG.info("Workspace '{}:{}' with id '{}' started by user '{}'",
-                         workspace.getNamespace(),
-                         workspace.getConfig().getName(),
-                         workspace.getId(),
-                         sessionUserNameOr("undefined"));
-            } catch (Exception ex) {
-                if (workspace.isTemporary()) {
-                    removeWorkspaceQuietly(workspace);
-                }
-                for (Throwable cause : getCausalChain(ex)) {
-                    // TODO spi
+                           LOG.info("Workspace '{}:{}' with id '{}' started by user '{}'",
+                                    workspace.getNamespace(),
+                                    workspace.getConfig().getName(),
+                                    workspace.getId(),
+                                    sessionUserNameOr("undefined"));
+                       }))
+                       .exceptionally(ex -> {
+                           if (workspace.isTemporary()) {
+                               removeWorkspaceQuietly(workspace);
+                           }
+                           for (Throwable cause : getCausalChain(ex)) {
+                               // TODO spi
 //                    if (cause instanceof SourceNotFoundException) {
 //                        return;
 //                    }
-                }
-                LOG.error(ex.getLocalizedMessage(), ex);
-            }
-        });
+                           }
+                           LOG.error(ex.getLocalizedMessage(), ex);
+                           return null;
+                       });
+
+
     }
 
 
@@ -522,7 +520,7 @@ public class WorkspaceManager {
             workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
             workspaceDao.update(workspace);
         }
-
+        states.put(workspace.getId(), WorkspaceStatus.STOPPING);
         String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
         LOG.info("Workspace '{}/{}' with id '{}' is being stopped by user '{}'",
                  workspace.getNamespace(),
@@ -589,7 +587,7 @@ public class WorkspaceManager {
     private WorkspaceImpl normalizeState(WorkspaceImpl workspace, boolean includeRuntimes) throws ServerException {
         WorkspaceStatus status = states.get(workspace.getId());
         if (status != null) {
-            if (status.equals(WorkspaceStatus.RUNNING) && includeRuntimes) {
+            if (!status.equals(WorkspaceStatus.STOPPED) && includeRuntimes) {
                 try {
                     workspace.setRuntime(runtimes.get(workspace.getId()));
                 } catch (NotFoundException e) {

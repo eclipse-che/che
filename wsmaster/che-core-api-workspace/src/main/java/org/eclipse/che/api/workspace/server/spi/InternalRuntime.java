@@ -15,7 +15,6 @@ import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.URLRewriter;
-import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 
 import java.net.MalformedURLException;
@@ -34,7 +33,6 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
 
     private final T                    context;
     private final URLRewriter          urlRewriter;
-    private       Map<String, Machine> cachedExternalMachines;
     private final List<Warning> warnings = new ArrayList<>();
 
     public InternalRuntime(T context, URLRewriter urlRewriter) {
@@ -64,21 +62,11 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
 
     @Override
     public Map<String, ? extends Machine> getMachines() {
-
-        if (cachedExternalMachines == null) {
-            cachedExternalMachines = new HashMap<>();
-            // should not be null, replace with empty map in this case
-            Map<String, ? extends Machine> internalMachines = getInternalMachines() == null ? new HashMap<>() : getInternalMachines();
-            for (Map.Entry<String, ? extends Machine> entry : internalMachines.entrySet()) {
-                String key = entry.getKey();
-                Machine machine = entry.getValue();
-                Map<String, Server> newServers = rewriteExternalServers(machine.getServers());
-                MachineImpl newMachine = new MachineImpl(machine.getProperties(), newServers);
-                cachedExternalMachines.put(key, newMachine);
-            }
-
+        Map<String, ? extends Machine> result = getInternalMachines();
+        for (Machine machine : result.values()) {
+            rewriteExternalServers(machine.getServers());
         }
-        return cachedExternalMachines;
+        return result;
     }
 
     /**

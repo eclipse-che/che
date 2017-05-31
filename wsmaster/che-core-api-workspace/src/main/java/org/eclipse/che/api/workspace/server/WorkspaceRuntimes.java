@@ -25,13 +25,14 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
+import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
@@ -44,9 +45,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Future;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -71,11 +72,11 @@ public class WorkspaceRuntimes {
     private final WorkspaceSharedPool                    sharedPool;
 
     @Inject
-    public WorkspaceRuntimes(EventService eventsService,
+    public WorkspaceRuntimes(EventService eventService,
                              Set<RuntimeInfrastructure> infrastructures,
                              WorkspaceSharedPool sharedPool) {
         this.runtimes = new ConcurrentHashMap<>();
-        this.eventService = eventsService;
+        this.eventService = eventService;
         this.sharedPool = sharedPool;
 
         // TODO: consider extracting to a strategy interface(1. pick the last, 2. fail with conflict)
@@ -94,7 +95,6 @@ public class WorkspaceRuntimes {
             }
         }
         infraByRecipe = ImmutableMap.copyOf(tmp);
-
     }
 
     @PostConstruct
@@ -132,7 +132,7 @@ public class WorkspaceRuntimes {
     /**
      * Returns the runtime descriptor describing currently starting/running/stopping
      * workspace runtime.
-     *
+     * <p>
      * returns a copy of a real {@code Runtime} object,
      * which means that any runtime copy modifications won't affect the
      * real object and also it means that copy won't be affected with modifications applied
@@ -159,7 +159,7 @@ public class WorkspaceRuntimes {
     /**
      * Starts all machines from specified workspace environment,
      * creates workspace runtime instance based on that environment.
-     *
+     * <p>
      * <p>During the start of the workspace its
      * runtime is visible with {@link WorkspaceStatus#STARTING} status.
      *
@@ -181,41 +181,75 @@ public class WorkspaceRuntimes {
      * @see WorkspaceStatus#STARTING
      * @see WorkspaceStatus#RUNNING
      */
-    public Runtime start(Workspace workspace,
-                         String envName,
-                         Map<String, String> options) throws InfrastructureException,
-                                                             ValidationException,
-                                                             IOException,
-                                                             NotFoundException,
-                                                             ConflictException,
-                                                             ServerException {
+    public CompletableFuture<Void> startAsync(Workspace workspace,
+                                              String envName,
+                                              Map<String, String> options)
+            throws ConflictException, NotFoundException, ServerException {
 
         final EnvironmentImpl environment = copyEnv(workspace, envName);
         final String workspaceId = workspace.getId();
-        doStart(environment, workspaceId, envName, options);
-        return get(workspaceId);
-    }
 
-    /**
-     * Starts the workspace like
-     * method does, but asynchronously. Nonetheless synchronously checks that workspace
-     * doesn't have runtime and makes it {@link WorkspaceStatus#STARTING}.
-     */
-    public Future<Runtime> startAsync(Workspace workspace,
-                                      String envName,
-                                      Map<String, String> options) throws ConflictException, ServerException {
 
-        final EnvironmentImpl environment = copyEnv(workspace, envName);
-        final String workspaceId = workspace.getId();
-        return sharedPool.submit(() -> {
-            doStart(environment, workspaceId, envName, options);
-            return get(workspaceId);
-        });
+        requireNonNull(environment, "Environment should not be null " + workspaceId);
+        requireNonNull(environment.getRecipe(), "OldRecipe should not be null " + workspaceId);
+        requireNonNull(environment.getRecipe().getType(), "OldRecipe type should not be null " + workspaceId);
+
+        RuntimeInfrastructure infra = infraByRecipe.get(environment.getRecipe().getType());
+        if (infra == null) {
+            throw new NotFoundException("No infrastructure found of type: " + environment.getRecipe().getType() +
+                                        " for workspace: " + workspaceId);
+        }
+
+        if (runtimes.containsKey(workspaceId)) {
+            throw new ConflictException("Could not start workspace '" + workspaceId +
+                                        "' because its status is 'RUNNING'");
+        }
+
+        eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                       .withWorkspaceId(workspaceId)
+                                       .withStatus(WorkspaceStatus.STARTING)
+                                       .withEventType(EventType.STARTING)
+                                       .withPrevStatus(WorkspaceStatus.STOPPED));
+
+        Subject subject = EnvironmentContext.getCurrent().getSubject();
+        RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, subject.getUserName());
+        try {
+            RuntimeContext runtimeContext = infra.prepare(runtimeId, environment);
+
+            InternalRuntime runtime = runtimeContext.getRuntime();
+            if (runtime == null) {
+                throw new IllegalStateException(
+                        "SPI contract violated. RuntimeInfrastructure.start(...) must not return null: "
+                        + RuntimeInfrastructure.class);
+            }
+            runtimes.put(workspaceId, runtime);
+            return CompletableFuture.runAsync(ThreadLocalPropagateContext.wrap(() -> {
+                try {
+                    runtimeContext.start(options);
+                    eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                                   .withWorkspaceId(workspaceId)
+                                                   .withStatus(WorkspaceStatus.RUNNING)
+                                                   .withEventType(EventType.RUNNING)
+                                                   .withPrevStatus(WorkspaceStatus.STARTING));
+                } catch (InfrastructureException e) {
+                    LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
+                    new RuntimeException(e);
+                }
+            }), sharedPool.getExecutor());
+            //TODO made complete rework of exceptions.
+        } catch (ValidationException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            throw new ConflictException(e.getLocalizedMessage());
+        } catch (InfrastructureException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            throw new ServerException(e.getLocalizedMessage(), e);
+        }
+
     }
 
     /**
      * Stops running workspace runtime.
-     *
+     * <p>
      * <p>Stops environment in an implementation specific way.
      * During the stop of the workspace its runtime is accessible with {@link WorkspaceStatus#STOPPING stopping} status.
      * Workspace may be stopped only if its status is {@link WorkspaceStatus#RUNNING}.
@@ -249,19 +283,18 @@ public class WorkspaceRuntimes {
 
         runtimes.remove(workspaceId);
 
-        final WorkspaceStatusEvent event = DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                                     .withWorkspaceId(workspaceId)
-                                                     .withPrevStatus(WorkspaceStatus.STOPPING);
-        event.setStatus(WorkspaceStatus.STOPPED);
-        event.setEventType(EventType.STOPPED);
-        eventService.publish(event);
+        eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                       .withWorkspaceId(workspaceId)
+                                       .withPrevStatus(WorkspaceStatus.STOPPING)
+                                       .withStatus(WorkspaceStatus.STOPPED)
+                                       .withEventType(EventType.STOPPED));
     }
 
     /**
      * Returns true if workspace was started and its status is
      * {@link WorkspaceStatus#RUNNING running}, {@link WorkspaceStatus#STARTING starting}
      * or {@link WorkspaceStatus#STOPPING stopping} - otherwise returns false.
-     *
+     * <p>
      * <p> This method is less expensive alternative to {@link #get(String)} + {@code try catch}, see example:
      * <pre>{@code
      *
@@ -295,55 +328,6 @@ public class WorkspaceRuntimes {
                                                              ValidationException,
                                                              IOException {
 
-        requireNonNull(environment, "Environment should not be null " + workspaceId);
-        requireNonNull(environment.getRecipe(), "OldRecipe should not be null " + workspaceId);
-        requireNonNull(environment.getRecipe().getType(), "OldRecipe type should not be null " + workspaceId);
-
-        RuntimeInfrastructure infra = infraByRecipe.get(environment.getRecipe().getType());
-        if (infra == null) {
-            throw new NotFoundException("No infrastructure found of type: " + environment.getRecipe().getType() +
-                                        " for workspace: " + workspaceId);
-        }
-
-        if (runtimes.containsKey(workspaceId)) {
-            throw new ConflictException("Could not start workspace '" + workspaceId +
-                                        "' because its status is 'RUNNING'");
-        }
-
-        eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                       .withWorkspaceId(workspaceId)
-                                       .withStatus(WorkspaceStatus.STARTING)
-                                       .withEventType(EventType.STARTING)
-                                       .withPrevStatus(WorkspaceStatus.STOPPED));
-
-
-        // Start environment
-        if (options == null) {
-            options = new HashMap<>();
-        }
-
-        Subject subject = EnvironmentContext.getCurrent().getSubject();
-        RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, subject.getUserName());
-
-        try {
-            InternalRuntime runtime = infra.prepare(runtimeId, environment).start(options);
-
-            if (runtime == null) {
-                throw new IllegalStateException(
-                        "SPI contract violated. RuntimeInfrastructure.start(...) must not return null: "
-                        + RuntimeInfrastructure.class);
-            }
-
-            runtimes.put(workspaceId, runtime);
-            eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                           .withWorkspaceId(workspaceId)
-                                           .withStatus(WorkspaceStatus.RUNNING)
-                                           .withEventType(EventType.RUNNING)
-                                           .withPrevStatus(WorkspaceStatus.STARTING));
-        } catch (InternalInfrastructureException e) {
-            LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
-            throw new InfrastructureException(e.getMessage(), e);
-        }
     }
 
     private static EnvironmentImpl copyEnv(Workspace workspace, String envName) {

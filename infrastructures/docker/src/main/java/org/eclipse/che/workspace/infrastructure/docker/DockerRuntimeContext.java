@@ -108,7 +108,7 @@ public class DockerRuntimeContext extends RuntimeContext {
     }
 
     @Override
-    protected InternalRuntime internalStart(Map<String, String> startOptions) throws InfrastructureException {
+    protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
         startSynchronizer.setStartThread();
         try {
             contextsStorage.add(this);
@@ -127,7 +127,6 @@ public class DockerRuntimeContext extends RuntimeContext {
                 machineName = startQueue.peek();
             }
 
-            return getInternalRuntime();
         } catch (InfrastructureException | RuntimeException e) {
             boolean interrupted = Thread.interrupted();
             contextsStorage.remove(this);
@@ -163,6 +162,14 @@ public class DockerRuntimeContext extends RuntimeContext {
     @Override
     public URL getOutputChannel() throws InfrastructureException, UnsupportedOperationException {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public InternalRuntime getRuntime() {
+        return new DockerInternalRuntime(this,
+                                         urlRewriter,
+                                         startSynchronizer);
+
     }
 
     private DockerMachine startMachine(String name,
@@ -213,7 +220,7 @@ public class DockerRuntimeContext extends RuntimeContext {
     private InternalRuntime getInternalRuntime() {
         return new DockerInternalRuntime(this,
                                          urlRewriter,
-                                         startSynchronizer.getMachines());
+                                         startSynchronizer);
     }
 
     private void destroyRuntime(Map<String, String> stopOptions) throws InfrastructureException {
