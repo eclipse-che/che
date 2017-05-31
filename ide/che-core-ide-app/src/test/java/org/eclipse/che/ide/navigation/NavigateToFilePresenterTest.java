@@ -13,11 +13,10 @@ package org.eclipse.che.ide.navigation;
 import com.google.common.base.Optional;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.resource.Path;
@@ -32,7 +31,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,9 +69,6 @@ public class NavigateToFilePresenterTest {
 
     @Before
     public void setUp() {
-        DevMachine devMachine = mock(DevMachine.class);
-        when(devMachine.getId()).thenReturn("id");
-        when(appContext.getDevMachine()).thenReturn(devMachine);
         when(appContext.getWorkspaceRoot()).thenReturn(container);
         when(container.getFile(any(Path.class))).thenReturn(optFilePromise);
         when(messageBusProvider.getMachineMessageBus()).thenReturn(messageBus);

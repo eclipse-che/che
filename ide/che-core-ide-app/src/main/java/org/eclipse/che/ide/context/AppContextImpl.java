@@ -92,13 +92,13 @@ public class AppContextImpl implements AppContext,
      * Can be processed after IDE initialization as usual after starting ws-agent.
      */
     private final List<StartUpAction> startAppActions;
-    private CurrentUser currentUser;
-    private WorkspaceImpl       workspace;
-    private FactoryImpl         factory;
-    private Path                projectsRoot;
-    private ActiveRuntime       runtime;
-    private ResourceManager     resourceManager;
-    private Map<String, String> properties;
+    private       CurrentUser         currentUser;
+    private       WorkspaceImpl       workspace;
+    private       FactoryImpl         factory;
+    private       Path                projectsRoot;
+    private       ActiveRuntime       runtime;
+    private       ResourceManager     resourceManager;
+    private       Map<String, String> properties;
 
     @Inject
     public AppContextImpl(EventBus eventBus,
@@ -200,6 +200,7 @@ public class AppContextImpl implements AppContext,
         this.factory = new FactoryImpl(factory);
     }
 
+    @Deprecated
     @Override
     public DevMachine getDevMachine() {
         return runtime.getDevMachine();
@@ -412,20 +413,24 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public String getMasterEndpoint() {
-        String fromUrl = queryParameters.getByName("master");
-        if (fromUrl == null || fromUrl.isEmpty())
+        final String fromUrl = queryParameters.getByName("master");
+
+        if (fromUrl == null || fromUrl.isEmpty()) {
             return masterFromIDEConfig();
-        else
+        } else {
             return fromUrl;
+        }
     }
 
     @Override
     public String getDevAgentEndpoint() {
-        String fromUrl = queryParameters.getByName("agent");
-        if (fromUrl == null || fromUrl.isEmpty())
+        final String fromUrl = queryParameters.getByName("agent");
+
+        if (fromUrl == null || fromUrl.isEmpty()) {
             return getDevMachine().getWsAgentBaseUrl();
-        else
+        } else {
             return fromUrl;
+        }
     }
 
     @Override

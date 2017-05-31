@@ -12,6 +12,8 @@ package org.eclipse.che.ide.api.machine;
 
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+
 /**
  * Dummy implementation.
  *
@@ -21,7 +23,7 @@ import com.google.inject.Singleton;
 public class CheWsAgentLinksModifier implements WsAgentURLModifier {
 
     @Override
-    public void initialize(DevMachine devMachine) {
+    public void initialize(MachineImpl devMachine) {
     }
 
     @Override

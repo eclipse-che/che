@@ -123,7 +123,9 @@ public interface AppContext {
      * @return the object which describes developer machine
      * @see DevMachine
      * @since 4.2.0
+     * @deprecated use {@link org.eclipse.che.ide.api.workspace.model.RuntimeImpl#getDevMachine()}
      */
+    @Deprecated
     DevMachine getDevMachine();
 
     /**

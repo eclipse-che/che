@@ -17,6 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.List;
@@ -30,7 +31,9 @@ class WorkspaceAgentOutputHandler {
         BiConsumer<String, List<String>> operation = (String endpointId, List<String> messages) -> {
             Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
-            if (appContext.getWorkspace().getRuntime() == null || appContext.getDevMachine() == null) {
+            final WorkspaceImpl workspace = appContext.getWorkspace();
+
+            if (!workspace.getDevMachine().isPresent()) {
                 Log.error(getClass(), "Runtime or dev machine is not properly initialized for this action");
                 return;
             }
@@ -40,7 +43,7 @@ class WorkspaceAgentOutputHandler {
                 return;
             }
 
-            eventBus.fireEvent(new EnvironmentOutputEvent(messages.get(0), appContext.getDevMachine().getName()));
+            eventBus.fireEvent(new EnvironmentOutputEvent(messages.get(0), workspace.getDevMachine().get().getName()));
         };
 
         configurator.newConfiguration()

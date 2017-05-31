@@ -21,8 +21,11 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.Macro;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
 /**
  * Provides dev-machine's host name.
@@ -66,9 +69,15 @@ public class DevMachineHostNameMacro implements Macro, WsAgentStateHandler {
 
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
-        String hostName = appContext.getDevMachine().getProperties().get("config.hostname");
-        if (hostName != null) {
-            value = hostName;
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final Optional<MachineImpl> devMachine = workspace.getDevMachine();
+
+        if (devMachine.isPresent()) {
+            final String hostName = devMachine.get().getProperties().get("config.hostname");
+
+            if (hostName != null) {
+                value = hostName;
+            }
         }
     }
 

@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.testing.ide;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
@@ -30,15 +29,15 @@ import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.command.goal.TestGoal;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.CommandOutputConsole;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -107,9 +106,9 @@ public class TestServiceClientTest implements MockitoPrinter {
     @Mock
     private StatusNotification         statusNotification;
     @Mock
-    private DevMachine                 devMachine;
+    private MachineImpl                 devMachine;
     @Mock
-    private Machine                    machine;
+    private MachineImpl                    machine;
     @Mock
     private CommandOutputConsole       commandOutputConsole;
 
@@ -158,15 +157,15 @@ public class TestServiceClientTest implements MockitoPrinter {
             return promiseError;
         })).when(testServiceClient).promiseFromThrowable(any(Throwable.class));
 
-        when(appContext.getDevMachine()).thenReturn(devMachine);
-        when(machine.getId()).thenReturn("DevMachineId");
+//        when(appContext.getDevMachine()).thenReturn(devMachine);
+        when(machine.getName()).thenReturn("DevMachineId");
 
         doAnswer(new FunctionAnswer<String, Promise<String>>(commandLine -> {
             String processedCommandLine = commandLine.replace("${current.project.path}", rootOfProjects + "/" + projectPath);
             return new PromiseMocker<String>().applyOnThenOperation(processedCommandLine).getPromise();
         })).when(macroProcessor).expandMacros(anyString());
 
-        when(commandConsoleFactory.create(any(CommandImpl.class), any(Machine.class))).then(createCall -> {
+        when(commandConsoleFactory.create(any(CommandImpl.class), any(MachineImpl.class))).then(createCall -> {
             CommandOutputConsole commandOutputConsole = mock(CommandOutputConsole.class);
             when(commandOutputConsole.getProcessStartedConsumer()).thenReturn(processStartedEvent -> {
                 consoleEvents.add(processStartedEvent);

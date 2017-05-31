@@ -22,7 +22,9 @@ import javax.validation.constraints.NotNull;
  * Must contains all information that need to communicate with dev machine such as links, type, environment variable and etc.
  *
  * @author Vitalii Parfonov
+ * @deprecated use {@link org.eclipse.che.ide.api.workspace.model.RuntimeImpl#getDevMachine()}
  */
+@Deprecated
 public class DevMachine extends MachineEntityImpl {
 
     public DevMachine(String name, @NotNull Machine devMachineDescriptor) {

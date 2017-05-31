@@ -18,7 +18,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.util.Pair;
 
 import javax.validation.constraints.NotNull;
@@ -74,12 +75,12 @@ public class JavaDebugConfigurationPagePresenter implements JavaDebugConfigurati
     }
 
     private void setPortsList() {
-        List<Pair<String, String>> ports = extractPortsList(appContext.getDevMachine());
-        view.setPortsList(ports);
+        WorkspaceImpl workspace = appContext.getWorkspace();
+        workspace.getDevMachine().ifPresent(machine -> view.setPortsList(extractPortsList(machine)));
     }
 
     /** Extracts list of ports available for connecting to the remote debugger. */
-    private List<Pair<String, String>> extractPortsList(final MachineEntity machine) {
+    private List<Pair<String, String>> extractPortsList(final MachineImpl machine) {
         List<Pair<String, String>> ports = new ArrayList<>();
         if (machine == null) {
             return ports;

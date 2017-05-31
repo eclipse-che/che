@@ -12,10 +12,13 @@ package org.eclipse.che.ide.command.toolbar.previews;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 
 /** Represents an item for displaying in the 'Previews' list. */
 class PreviewUrl {
@@ -45,13 +48,19 @@ class PreviewUrl {
     }
 
     private String getDisplayNameForPreviewUrl(String previewUrl) {
-        final DevMachine devMachine = appContext.getDevMachine();
-
-        if (devMachine == null) {
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final RuntimeImpl runtime = workspace.getRuntime();
+        if(runtime == null) {
             return previewUrl;
         }
 
-        for (Entry<String, ? extends Server> entry : devMachine.getServers().entrySet()) {
+        final Optional<? extends MachineImpl> devMachine = runtime.getDevMachine();
+
+        if (!devMachine.isPresent()) {
+            return previewUrl;
+        }
+
+        for (Entry<String, ? extends Server> entry : devMachine.get().getServers().entrySet()) {
             Server server = entry.getValue();
             String serverUrl = server.getUrl();
 
@@ -68,7 +77,7 @@ class PreviewUrl {
                     port = port.substring(0, slashIndex);
                 }
 
-                return previewUrl.replace(serverUrl, devMachine.getDisplayName() + ':' + port);
+                return previewUrl.replace(serverUrl, devMachine.get().getName() + ':' + port);
             }
         }
 

@@ -25,10 +25,13 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspaceNotification;
+
+import java.util.Optional;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
@@ -94,8 +97,12 @@ public class WorkspaceStatusHandler {
 
             if (workspace.getStatus() == RUNNING) {
                 wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
-                wsAgentStateController.initialize(appContext.getDevMachine());
-                wsAgentURLModifier.initialize(appContext.getDevMachine());
+
+                final Optional<MachineImpl> devMachine = appContext.getWorkspace().getDevMachine();
+                devMachine.ifPresent(machine -> {
+                    wsAgentStateController.initialize(machine);
+                    wsAgentURLModifier.initialize(machine);
+                });
 
                 eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
             } else if (workspace.getStatus() == STARTING) {
