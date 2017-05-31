@@ -28,10 +28,10 @@ import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 /** Data object for {@link Runtime}. */
 public class RuntimeImpl implements Runtime {
 
-    private final String                             activeEnv;
-    private final String                             owner;
-    private       Map<String, ? extends MachineImpl> machines;
-    private       List<Warning>                      warnings;
+    private final String                   activeEnv;
+    private final String                   owner;
+    private       Map<String, MachineImpl> machines;
+    private       List<Warning>            warnings;
 
     public RuntimeImpl(String activeEnv,
                        Map<String, ? extends Machine> machines,
@@ -60,11 +60,19 @@ public class RuntimeImpl implements Runtime {
     }
 
     @Override
-    public Map<String, ? extends MachineImpl> getMachines() {
+    public Map<String, MachineImpl> getMachines() {
         if (machines == null) {
             machines = new HashMap<>();
         }
         return machines;
+    }
+
+    /** Returns development machine or an empty {@code Optional} if none. */
+    public Optional<MachineImpl> getDevMachine() {
+        return getMachines().values()
+                            .stream()
+                            .filter(m -> m.getServerByName(WSAGENT_REFERENCE).isPresent())
+                            .findAny();
     }
 
     /** Returns ws-agent server. */

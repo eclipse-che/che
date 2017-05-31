@@ -17,7 +17,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,10 +76,10 @@ public class RunCommandActionTest {
     @Test
     public void actionShouldBePerformed() {
         when(event.getParameters()).thenReturn(Collections.singletonMap(NAME_PROPERTY, "MCI"));
-        final DevMachine devMachine = mock(DevMachine.class);
+//        final DevMachine devMachine = mock(DevMachine.class);
         final Machine machine = mock(Machine.class);
-        when(devMachine.getDescriptor()).thenReturn(machine);
-        when(appContext.getDevMachine()).thenReturn(devMachine);
+//        when(devMachine.getDescriptor()).thenReturn(machine);
+//        when(appContext.getDevMachine()).thenReturn(devMachine);
 
         action.actionPerformed(event);
 

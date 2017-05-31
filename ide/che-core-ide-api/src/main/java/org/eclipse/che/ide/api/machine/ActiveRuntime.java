@@ -13,6 +13,7 @@ package org.eclipse.che.ide.api.machine;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
@@ -20,13 +21,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 
 /**
  * @author Vitalii Parfonov
+ * @deprecated use {@link org.eclipse.che.ide.api.workspace.model.RuntimeImpl}
  */
+@Deprecated
 public class ActiveRuntime {
 
     private DevMachine                 devMachine;
@@ -62,15 +64,14 @@ public class ActiveRuntime {
 
     }
 
+    @Deprecated
     public DevMachine getDevMachine() {
         return devMachine;
     }
 
+    @Deprecated
+    /** @deprecated use {@link RuntimeImpl#getMachines()} */
     public List<MachineEntity> getMachines() {
         return new ArrayList<>(machines.values());
-    }
-
-    public Optional<MachineEntity> getMachineByName(String name) {
-        return Optional.ofNullable(machines.get(name));
     }
 }

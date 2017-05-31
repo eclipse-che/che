@@ -16,12 +16,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.macro.BaseMacro;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 
 import java.util.Map;
 import java.util.Set;
@@ -51,10 +52,10 @@ public class ServerPortMacro extends AbstractServerMacro {
 
     /** {@inheritDoc} */
     @Override
-    public Set<Macro> getMacros(DevMachine devMachine) {
+    public Set<Macro> getMacros(MachineImpl devMachine) {
         final Set<Macro> macros = Sets.newHashSet();
 
-        for (Map.Entry<String, ? extends Server> entry : devMachine.getDescriptor().getServers().entrySet()) {
+        for (Map.Entry<String, ServerImpl> entry : devMachine.getServers().entrySet()) {
 
             if (!entry.getValue().getUrl().contains(":")) {
                 continue;

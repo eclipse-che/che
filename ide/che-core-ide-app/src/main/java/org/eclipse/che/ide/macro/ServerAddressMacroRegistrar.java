@@ -23,8 +23,11 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.BaseMacro;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -56,9 +59,11 @@ public class ServerAddressMacroRegistrar implements WsAgentStateHandler {
     }
 
     private void registerMacros() {
-        Machine devMachine = appContext.getDevMachine();
-        if (devMachine != null) {
-            macros = getMacros(devMachine);
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final Optional<MachineImpl> devMachine = workspace.getDevMachine();
+
+        if (devMachine.isPresent()) {
+            macros = getMacros(devMachine.get());
             macroRegistry.register(macros);
         }
     }

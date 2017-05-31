@@ -11,6 +11,8 @@
 package org.eclipse.che.ide.api.machine;
 
 
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+
 /**
  * Modify the URL to the workspace agent.
  * <p>Note that for che assembly it's return the source url.
@@ -25,7 +27,7 @@ public interface WsAgentURLModifier {
      * @param devMachine
      *         runtime information of dev machine instance, such as link
      */
-    void initialize(DevMachine devMachine);
+    void initialize(MachineImpl devMachine);
 
     /**
      * Change source url in accordance with the requirements of the assembly

@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.project;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
@@ -64,10 +63,7 @@ public class ProjectServiceClientTest {
                                                         dtoFactory,
                                                         dtoUnmarshallerFactory,
                                                         appContext);
-        DevMachine devMachine = mock(DevMachine.class);
-        when(devMachine.getWsAgentBaseUrl()).thenReturn("");
-
-        when(appContext.getDevMachine()).thenReturn(devMachine);
+        when(appContext.getDevAgentEndpoint()).thenReturn("");
     }
 
     @Test

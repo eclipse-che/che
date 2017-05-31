@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -31,24 +33,23 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.command.goal.TestGoal;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.CommandOutputConsole;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.HTTPHeader;
 
-import com.google.gwt.http.client.URL;
-import com.google.gwt.regexp.shared.MatchResult;
-import com.google.gwt.regexp.shared.RegExp;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
@@ -150,12 +151,9 @@ public class TestServiceClient {
                                                  StatusNotification statusNotification,
                                                  Promise<CommandImpl> compileCommand) {
         return compileCommand.thenPromise(command -> {
-            final MachineEntity machine;
-            if (command == null) {
-                machine = null;
-            } else {
-                machine = appContext.getDevMachine();
-            }
+            final WorkspaceImpl workspace = appContext.getWorkspace();
+            final MachineImpl machine = workspace.getDevMachine().orElse(null);
+
             if (machine == null) {
                 if (statusNotification != null) {
                     statusNotification.setContent("Executing the tests without preliminary compilation.");
@@ -182,7 +180,7 @@ public class TestServiceClient {
                                                                           command.getType(), attributes);
 
                             final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
-                            final String machineId = machine.getId();
+                            final String machineId = machine.getName();
 
                             processesPanelPresenter.addCommandOutput(console);
                             ExecAgentConsumer<ProcessStartResponseDto> processPromise = execAgentCommandManager.startProcess(machineId,

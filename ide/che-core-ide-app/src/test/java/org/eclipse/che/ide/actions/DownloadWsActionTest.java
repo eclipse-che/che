@@ -17,7 +17,6 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.download.DownloadContainer;
@@ -66,9 +65,7 @@ public class DownloadWsActionTest {
     public void actionShouldBePerformed() throws Exception {
         String baseUrl = "baseUrl";
 
-        DevMachine devMachine = mock(DevMachine.class);
-        when(appContext.getDevMachine()).thenReturn(devMachine);
-        when(devMachine.getWsAgentBaseUrl()).thenReturn(baseUrl);
+        when(appContext.getDevAgentEndpoint()).thenReturn(baseUrl);
         when(wsAgentURLModifier.modify(anyString())).thenReturn(baseUrl);
 
         action.actionPerformed(actionEvent);

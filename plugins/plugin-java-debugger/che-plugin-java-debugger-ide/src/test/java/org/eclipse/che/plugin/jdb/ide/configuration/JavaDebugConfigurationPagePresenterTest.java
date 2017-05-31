@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -43,7 +43,7 @@ public class JavaDebugConfigurationPagePresenterTest {
     @Mock
     private AppContext                     appContext;
     @Mock
-    private DevMachine                     devMachine;
+    private MachineImpl                    devMachine;
 
     @Mock
     private DebugConfiguration configuration;
@@ -55,8 +55,8 @@ public class JavaDebugConfigurationPagePresenterTest {
     public void setUp() {
         when(configuration.getHost()).thenReturn(HOST);
         when(configuration.getPort()).thenReturn(PORT);
-        when(appContext.getDevMachine()).thenReturn(devMachine);
-        when(devMachine.getId()).thenReturn("devMachine");
+//        when(appContext.getDevMachine()).thenReturn(devMachine);
+        when(devMachine.getName()).thenReturn("devMachine");
 
 
         pagePresenter.resetFrom(configuration);

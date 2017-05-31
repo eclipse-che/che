@@ -19,6 +19,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /** Data object for {@link Workspace}. */
 public class WorkspaceImpl implements Workspace {
@@ -103,6 +104,14 @@ public class WorkspaceImpl implements Workspace {
     @Override
     public RuntimeImpl getRuntime() {
         return runtime;
+    }
+
+    /**
+     * Shorthand for {@link RuntimeImpl#getDevMachine()}.
+     * Returns an empty {@code Optional} if workspace doesn't have a runtime.
+     */
+    public Optional<MachineImpl> getDevMachine() {
+        return getRuntime() != null ? getRuntime().getDevMachine() : Optional.empty();
     }
 
     @Override

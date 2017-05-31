@@ -14,12 +14,14 @@ import com.google.common.annotations.Beta;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -53,17 +55,18 @@ public abstract class AbstractServerMacro implements WsAgentStateHandler {
     /**
      * Register macro providers which returns the implementation.
      *
-     * @see AbstractServerMacro#getMacros(DevMachine)
+     * @see AbstractServerMacro#getMacros(MachineImpl)
      * @since 4.7.0
      */
     private void registerMacros() {
-        final DevMachine devMachine = appContext.getDevMachine();
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final Optional<MachineImpl> devMachine = workspace.getDevMachine();
 
-        if (devMachine == null) {
+        if (!devMachine.isPresent()) {
             return;
         }
 
-        final Set<Macro> macros = getMacros(devMachine);
+        final Set<Macro> macros = getMacros(devMachine.get());
         checkNotNull(macros);
 
         if (macros.isEmpty()) {
@@ -76,17 +79,18 @@ public abstract class AbstractServerMacro implements WsAgentStateHandler {
     /**
      * Unregister macro providers which the implementation returns.
      *
-     * @see AbstractServerMacro#getMacros(DevMachine)
+     * @see AbstractServerMacro#getMacros(MachineImpl)
      * @since 4.7.0
      */
     private void unregisterMacros() {
-        final DevMachine devMachine = appContext.getDevMachine();
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final Optional<MachineImpl> devMachine = workspace.getDevMachine();
 
-        if (devMachine == null) {
+        if (!devMachine.isPresent()) {
             return;
         }
 
-        for (Macro provider : getMacros(devMachine)) {
+        for (Macro provider : getMacros(devMachine.get())) {
             macroRegistry.unregister(provider);
         }
     }
@@ -97,11 +101,10 @@ public abstract class AbstractServerMacro implements WsAgentStateHandler {
      * @param devMachine
      *         current developer machine
      * @return set of unique macro providers
-     * @see DevMachine
      * @see Macro
      * @since 4.7.0
      */
-    public abstract Set<Macro> getMacros(DevMachine devMachine);
+    public abstract Set<Macro> getMacros(MachineImpl devMachine);
 
     /** {@inheritDoc} */
     @Override

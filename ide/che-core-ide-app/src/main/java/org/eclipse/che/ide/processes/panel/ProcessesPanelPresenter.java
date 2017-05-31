@@ -40,11 +40,10 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.ActivateProcessOutputEvent;
-import org.eclipse.che.ide.api.machine.events.MachineStartingEvent;
 import org.eclipse.che.ide.api.machine.events.MachineRunningEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStartingEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
@@ -87,6 +86,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -310,9 +310,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     /** Opens new terminal for the selected machine. */
     public void newTerminal(Object source) {
         final ProcessTreeNode selectedTreeNode = view.getSelectedTreeNode();
-        final DevMachine devMachine = appContext.getDevMachine();
-        if (selectedTreeNode == null && devMachine != null) {
-            onAddTerminal(devMachine.getName(), source);
+
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final Optional<MachineImpl> devMachine = workspace.getDevMachine();
+
+        if (selectedTreeNode == null && devMachine.isPresent()) {
+            onAddTerminal(devMachine.get().getName(), source);
             return;
         }
 
@@ -516,7 +519,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     public void addCommandOutput(OutputConsole outputConsole) {
-        addCommandOutput(appContext.getDevMachine().getName(), outputConsole);
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final Optional<MachineImpl> devMachine = workspace.getDevMachine();
+
+        devMachine.ifPresent(machine -> addCommandOutput(machine.getName(), outputConsole));
     }
 
     /**

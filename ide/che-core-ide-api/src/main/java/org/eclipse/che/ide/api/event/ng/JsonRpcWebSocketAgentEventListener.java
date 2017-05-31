@@ -18,7 +18,6 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
@@ -157,12 +156,18 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
 
     @Override
     public void onWsAgentStopped(WsAgentStateEvent event) {
-        DevMachine devMachine = appContext.getDevMachine();
-        String devMachineId = devMachine.getId();
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final Optional<MachineImpl> devMachine = workspace.getDevMachine();
+
+        if (!devMachine.isPresent()) {
+            return;
+        }
+
+        final String devMachineName = devMachine.get().getName();
 
         Log.debug(JsonRpcWebSocketAgentEventListener.class, "Web socket agent stopped event caught.");
 
         initializer.terminate("ws-agent");
-        initializer.terminate(devMachineId);
+        initializer.terminate(devMachineName);
     }
 }

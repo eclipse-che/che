@@ -133,6 +133,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.Boolean.parseBoolean;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -597,7 +598,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     @Override
     public void doSave(final AsyncCallback<EditorInput> callback) {
         //If the workspace is stopped we shouldn't try to save a file
-        if (isReadOnly() || appContext.getDevMachine() == null) {
+        if (isReadOnly() || appContext.getWorkspace().getStatus() != RUNNING) {
             return;
         }
 

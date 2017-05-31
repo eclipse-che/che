@@ -16,12 +16,14 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -50,11 +52,14 @@ public class CommandManager {
      * Execute the the given command command within the workspace Docker container.
      */
     public void execute(String commandLine) {
-        final DevMachine machine = appContext.getDevMachine();
-        if (machine == null) {
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final Optional<MachineImpl> machine = workspace.getDevMachine();
+
+        if (!machine.isPresent()) {
             return;
         }
-        String machineID = machine.getName();
+
+        String machineID = machine.get().getName();
         final CommandDto command = dtoFactory.createDto(CommandDto.class)
                 .withName("some-command")
                 .withCommandLine(commandLine)

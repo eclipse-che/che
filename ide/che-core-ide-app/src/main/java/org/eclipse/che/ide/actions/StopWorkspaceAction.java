@@ -46,7 +46,7 @@ public class StopWorkspaceAction extends AbstractPerspectiveAction {
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
         event.getPresentation().setVisible(true);
-        event.getPresentation().setEnabled(appContext.getDevMachine() != null);
+        event.getPresentation().setEnabled(appContext.getWorkspace().getRuntime() != null);
     }
 
     /** {@inheritDoc} */

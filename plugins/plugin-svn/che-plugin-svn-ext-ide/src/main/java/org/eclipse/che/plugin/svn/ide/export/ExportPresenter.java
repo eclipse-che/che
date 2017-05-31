@@ -23,6 +23,8 @@ import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.user.AskCredentialsDialog;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
@@ -34,6 +36,7 @@ import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -155,8 +158,15 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
     }
 
     private void openExportPopup(Path project, Path exportPath, String revision, StatusNotification notification) {
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final Optional<MachineImpl> devMachine = workspace.getDevMachine();
+
+        if (!devMachine.isPresent()) {
+            return;
+        }
+
         final StringBuilder url = new StringBuilder(appContext.getDevAgentEndpoint() + "/svn/"
-                                                    + appContext.getDevMachine().getId() + "/export" + project.toString());
+                                                    + devMachine.get().getName() + "/export" + project.toString());
         char separator = '?';
         if (!".".equals(exportPath.toString())) {
             url.append(separator).append("path").append('=').append(exportPath);
