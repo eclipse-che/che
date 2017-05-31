@@ -203,6 +203,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
             messageBus.cancelReconnection();
         }
         messageBus = messageBusProvider.createMachineMessageBus(devMachine.getWsAgentWebSocketUrl());
+        // TODO: need to remove all handlers when ws-agent stopped
         messageBus.addOnCloseHandler(this);
         messageBus.addOnErrorHandler(this);
         messageBus.addOnOpenHandler(this);

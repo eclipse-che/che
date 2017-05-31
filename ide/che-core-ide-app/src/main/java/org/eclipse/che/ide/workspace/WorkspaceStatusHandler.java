@@ -14,8 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.WorkspaceSnapshotNotifier;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -28,6 +28,7 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.start.StartWorkspaceNotification;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
@@ -80,34 +81,35 @@ public class WorkspaceStatusHandler {
         this.messages = messages;
     }
 
-    public void handleWorkspaceStatusChanged() {
-        handleWorkspaceStatusChanged(null);
-    }
+    public void handleWorkspaceStatusChanged(WorkspaceStatusEvent serverEvent) {
 
-    public void handleWorkspaceStatusChanged(@Nullable WorkspaceStatusEvent serverEvent) {
+        Log.info(WorkspaceStatusHandler.class, "Workspace from context:  " + appContext.getWorkspaceId());
+
         workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
             ((AppContextImpl)appContext).setWorkspace(workspace);
 
-            // FIXME: spi
-            // should be set on server `ws-agent` has been started
-            ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf("/projects"));
-
             if (workspace.getStatus() == RUNNING) {
-                wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
-                wsAgentStateController.initialize(appContext.getDevMachine());
-                wsAgentURLModifier.initialize(appContext.getDevMachine());
-
-                eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
+                handleWorkspaceRunning(workspace);
             } else if (workspace.getStatus() == STARTING) {
                 eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
             } else if (workspace.getStatus() == STOPPED) {
                 eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
             }
 
-            if (serverEvent != null) {
-                notify(serverEvent);
-            }
+            notify(serverEvent);
         });
+    }
+
+    public void handleWorkspaceRunning(Workspace workspace) {
+        // FIXME: spi
+        // should be set on server `ws-agent` has been started
+        ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf("/projects"));
+
+        wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
+        wsAgentStateController.initialize(appContext.getDevMachine());
+        wsAgentURLModifier.initialize(appContext.getDevMachine());
+
+        eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
     }
 
     // TODO: move to the separate component that should listen appropriate events

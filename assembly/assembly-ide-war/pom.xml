@@ -23,7 +23,7 @@
     <name>Che IDE :: Compiling GWT Application</name>
     <properties>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
-        <gwt.log.enable>false</gwt.log.enable>
+        <gwt.log.enable>true</gwt.log.enable>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>

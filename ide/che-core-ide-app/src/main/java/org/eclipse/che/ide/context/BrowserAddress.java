@@ -80,6 +80,13 @@ public class BrowserAddress {
      */
     public String getWorkspaceKey() {
         String browserUrl = Window.Location.getPath();
+
+        // TODO temporary to make it work with not "path obliged" URL
+        String wsParam = Window.Location.getParameter("ws");
+        if(wsParam != null)
+            return wsParam;
+        //
+
         String[] urlParts = browserUrl.split("/", NAMESPACE_START_SEGMENT + 1);
         if (urlParts.length < NAMESPACE_START_SEGMENT) {
             return "";
