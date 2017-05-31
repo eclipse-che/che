@@ -14,14 +14,12 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.SubscriptionManagerClient;
-import org.eclipse.che.ide.context.BrowserAddress;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.workspace.WorkspaceStatusHandler;
@@ -42,16 +40,9 @@ import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.WORKSPACE_STO
 @Singleton
 public class CurrentWorkspaceManager {
 
-    private static final String WS_STATUS_ERROR_MSG = "Tried to subscribe to workspace status events, but got error";
-//    private static final String WS_AGENT_OUTPUT_ERROR_MSG = "Tried to subscribe to workspace agent output, but got error";
-//    private static final String ENV_STATUS_ERROR_MSG      = "Tried to subscribe to environment status events, but got error";
-
     private final WorkspaceServiceClient        workspaceServiceClient;
-    private final BrowserAddress                browserAddress;
-    private final RequestTransmitter            transmitter;
     private final LoaderPresenter               wsStatusNotification;
     private final Provider<NotificationManager> notificationManagerProvider;
-    private final IdeInitializer                ideInitializer;
     private final CoreLocalizationConstant      messages;
     private final WorkspaceStatusHandler        wsStatusHandler;
     private final AppContext                    appContext;
@@ -59,21 +50,15 @@ public class CurrentWorkspaceManager {
 
     @Inject
     CurrentWorkspaceManager(WorkspaceServiceClient workspaceServiceClient,
-                            BrowserAddress browserAddress,
-                            RequestTransmitter transmitter,
                             LoaderPresenter loader,
                             Provider<NotificationManager> notificationManagerProvider,
-                            IdeInitializer ideInitializer,
                             CoreLocalizationConstant messages,
                             WorkspaceStatusHandler wsStatusHandler,
                             AppContext appContext,
                             SubscriptionManagerClient subscriptionManagerClient) {
         this.workspaceServiceClient = workspaceServiceClient;
-        this.browserAddress = browserAddress;
-        this.transmitter = transmitter;
         this.wsStatusNotification = loader;
         this.notificationManagerProvider = notificationManagerProvider;
-        this.ideInitializer = ideInitializer;
         this.messages = messages;
         this.wsStatusHandler = wsStatusHandler;
         this.appContext = appContext;
@@ -83,45 +68,17 @@ public class CurrentWorkspaceManager {
     // TODO: handle errors while workspace starting (show message dialog)
     // to allow user to see the reason of failed start
 
-    /** Start the current workspace. */
-    void startWorkspace() {
-        startWorkspace(false);
-    }
-
+    /** Start the current workspace with the default environment. */
     public void startWorkspace(boolean restoreFromSnapshot) {
-        ideInitializer.getWorkspaceToStart().then(workspace -> {
-            subscribeToEvents(workspace.getId());
-            startWorkspace(workspace, restoreFromSnapshot);
-        });
-    }
+        subscribeToEvents();
 
-    private void subscribeToEvents(String workspaceId) {
-        workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
-                              .then(skip -> {
-                                  String endpointId = "ws-master";
-                                  String method = "workspace/statusChanged";
-                                  Map<String, String> scope = singletonMap("workspaceId", workspaceId);
-                                  subscriptionManagerClient.subscribe(endpointId, method, scope);
-                              });
-
-
-//        subscribe(WS_STATUS_ERROR_MSG, "event:workspace-status:subscribe", workspaceId);
-//        subscribe(WS_AGENT_OUTPUT_ERROR_MSG, "event:ws-agent-output:subscribe", workspaceId);
-//        subscribe(ENV_STATUS_ERROR_MSG, "event:environment-status:subscribe", workspaceId);
-    }
-
-    private void subscribe(String it, String methodName, String id) {
-
-    }
-
-    /** Starts the workspace with the default environment. */
-    private void startWorkspace(Workspace workspace, boolean restoreFromSnapshot) {
         wsStatusNotification.show(STARTING_WORKSPACE_RUNTIME);
 
+        final WorkspaceImpl workspace = appContext.getWorkspace();
         final WorkspaceStatus workspaceStatus = workspace.getStatus();
 
         if (workspaceStatus == RUNNING) {
-            wsStatusHandler.handleWorkspaceStatusChanged();
+            wsStatusHandler.handleWorkspaceRunning(workspace);
         } else if (workspaceStatus == STOPPED || workspaceStatus == STOPPING) {
             wsStatusNotification.show(STARTING_WORKSPACE_RUNTIME);
 
@@ -142,8 +99,19 @@ public class CurrentWorkspaceManager {
         }
     }
 
+    private void subscribeToEvents() {
+        subscribe("ws-master", "workspace/statusChanged");
+    }
+
+    private void subscribe(String endpointId, String methodName) {
+        Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
+        subscriptionManagerClient.subscribe(endpointId, methodName, scope);
+    }
+
     /** Stop the current workspace. */
     public void stopWorkspace() {
         workspaceServiceClient.stop(appContext.getWorkspaceId());
+
+        // TODO: unsubscribe from events
     }
 }
