@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 
@@ -74,10 +73,5 @@ public class ActiveRuntime {
     /** @deprecated use {@link RuntimeImpl#getMachines()} */
     public List<MachineEntity> getMachines() {
         return new ArrayList<>(machines.values());
-    }
-
-    @Deprecated
-    public Optional<MachineEntity> getMachineByName(String name) {
-        return Optional.ofNullable(machines.get(name));
     }
 }
