@@ -63,21 +63,29 @@ public class WorkspaceMasterJsonRpcInitializer {
     }
 
     private void internalInitialize() {
-
         String workspaceMasterUrl;
-        UrlBuilder builder = new UrlBuilder(getWebsocketContext());
 
-        if(builder.getProtocol() != null && !builder.getProtocol().isEmpty()) {
-            workspaceMasterUrl = builder.getUrl() + "/" + appContext.getAppId();
+        try {
+            UrlBuilder builder = new UrlBuilder(getWebsocketContext());
 
-        } else {
-            String protocol = "https:".equals(getProtocol()) ? "wss://" : "ws://";
-            String host = getHost();
-            String context = getWebsocketContext() + "/";
-            workspaceMasterUrl = protocol + host + context + appContext.getAppId();
+            if (builder.getProtocol() != null && !builder.getProtocol().isEmpty()) {
+                workspaceMasterUrl = builder.getUrl() + "/" + appContext.getAppId();
+            } else {
+                workspaceMasterUrl = getWsMasterURL();
+            }
+        } catch (IllegalArgumentException e) {
+            workspaceMasterUrl = getWsMasterURL();
         }
 
         initializer.initialize("ws-master", singletonMap("url", workspaceMasterUrl));
+    }
+
+    private String getWsMasterURL() {
+        String protocol = "https:".equals(getProtocol()) ? "wss://" : "ws://";
+        String host = getHost();
+        String context = getWebsocketContext() + "/";
+
+        return protocol + host + context + appContext.getAppId();
     }
 
     public void terminate() {

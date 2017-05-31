@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
+
 /**
  * @author Vitalii Parfonov
  */
@@ -49,7 +51,7 @@ public class ActiveRuntime {
         if(workspaceRuntime.getMachines() != null)
         for (Entry<String, ? extends Machine> entry : workspaceRuntime.getMachines().entrySet()) {
             machines.put(entry.getKey(), new MachineEntityImpl(entry.getKey(), entry.getValue()));
-            if(entry.getValue().getServers().containsKey("ws-agent")) {
+            if(entry.getValue().getServers().containsKey(WSAGENT_REFERENCE)) {
                 this.devMachine = new DevMachine(entry.getKey(), entry.getValue());
             }
         }
