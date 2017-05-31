@@ -111,11 +111,7 @@ public class WorkspaceImpl implements Workspace {
      * Returns an empty {@code Optional} if workspace doesn't have a runtime.
      */
     public Optional<MachineImpl> getDevMachine() {
-        if (getRuntime() != null) {
-            return getRuntime().getDevMachine();
-        }
-
-        return Optional.empty();
+        return getRuntime() != null ? getRuntime().getDevMachine() : Optional.empty();
     }
 
     @Override
