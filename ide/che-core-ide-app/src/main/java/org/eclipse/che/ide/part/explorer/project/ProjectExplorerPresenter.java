@@ -18,6 +18,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -45,7 +46,6 @@ import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent.MarkerChanged
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView.ActionDelegate;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.node.SyntheticNodeUpdateEvent;
@@ -60,14 +60,11 @@ import org.eclipse.che.ide.ui.smartTree.event.ExpandNodeEvent;
 import org.eclipse.che.ide.ui.smartTree.event.PostLoadEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -91,6 +88,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                                                        ResourceChangedHandler,
                                                                        MarkerChangedHandler,
                                                                        SyntheticNodeUpdateEvent.SyntheticNodeUpdateHandler {
+    private static final int PART_SIZE = 500;
     private final ProjectExplorerView      view;
     private final EventBus                 eventBus;
     private final ResourceNode.NodeFactory nodeFactory;
@@ -100,12 +98,8 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     private final TreeExpander             treeExpander;
     private final RequestTransmitter       requestTransmitter;
     private final DtoFactory               dtoFactory;
-
-    private UpdateTask updateTask = new UpdateTask();
-    private Set<Path> expandQueue = new HashSet<>();
-
-    private static final int PART_SIZE = 500;
-
+    private UpdateTask updateTask  = new UpdateTask();
+    private Set<Path>  expandQueue = new HashSet<>();
     private boolean hiddenFilesAreShown;
 
     @Inject
@@ -186,7 +180,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             @Override
             public void execute() {
                 final PartStack partStack = checkNotNull(workspaceAgentProvider.get().getPartStack(PartStackType.NAVIGATION),
-                        "Navigation part stack should not be a null");
+                                                         "Navigation part stack should not be a null");
                 partStack.addPart(ProjectExplorerPresenter.this);
                 partStack.setActivePart(ProjectExplorerPresenter.this);
             }
@@ -205,9 +199,14 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
                 if (node instanceof ResourceNode) {
                     Resource data = ((ResourceNode)node).getData();
-                    requestTransmitter.transmitOneToNone(endpointId, method, dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
-                                                                                       .withPath(data.getLocation().toString())
-                                                                                       .withType(START));
+                    requestTransmitter.newRequest()
+                                      .endpointId(endpointId)
+                                      .methodName(method)
+                                      .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
+                                                             .withPath(data.getLocation().toString())
+                                                             .withType(START))
+                                      .sendAndSkipResult();
+
                 }
             }
         });
@@ -219,9 +218,14 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
                 if (node instanceof ResourceNode) {
                     Resource data = ((ResourceNode)node).getData();
-                    requestTransmitter.transmitOneToNone(endpointId, method, dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
-                                                                                       .withPath(data.getLocation().toString())
-                                                                                       .withType(STOP));
+                    requestTransmitter.newRequest()
+                                      .endpointId(endpointId)
+                                      .methodName(method)
+                                      .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
+                                                             .withPath(data.getLocation().toString())
+                                                             .withType(STOP))
+                                      .sendAndSkipResult();
+
                 }
             }
         });

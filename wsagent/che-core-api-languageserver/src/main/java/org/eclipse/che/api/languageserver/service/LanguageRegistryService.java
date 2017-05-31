@@ -79,6 +79,6 @@ public class LanguageRegistryService {
     @Path("initialize")
     public void initialize(@QueryParam("path") String path) throws LanguageServerException {
         //in most cases starts new LS if not already started
-        registry.findServer(TextDocumentService.prefixURI(path));
+        registry.findServer(TextDocumentServiceUtils.prefixURI(path));
     }
 }

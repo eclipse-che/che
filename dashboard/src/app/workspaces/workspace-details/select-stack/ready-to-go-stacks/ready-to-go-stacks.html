@@ -20,8 +20,7 @@
   </div>
   <div layout="row" layout-wrap>
     <md-card layout="column" class="che-simple-selector"
-             ng-repeat="stack in readyToGoStacksCtrl.generalStacks"
-             ng-init="$first && readyToGoStacksCtrl.setStackSelectionById(stack.id)"
+             ng-repeat="stack in readyToGoStacksCtrl.generalStacks | orderBy:readyToGoStacksCtrl.getPrioritySortPosition"
              ng-click="readyToGoStacksCtrl.setStackSelectionById(stack.id)"
              ng-hide="readyToGoStacksCtrl.filteredStackIds.indexOf(stack.id) === -1"
              ng-class="{'che-simple-selector-active' : '{{stack.id}}' === readyToGoStacksCtrl.selectedStackId}">

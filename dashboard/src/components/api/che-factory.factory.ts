@@ -22,6 +22,7 @@ interface IFactoriesResource<T> extends ng.resource.IResourceClass<T> {
   getFactoryByName: any;
 }
 
+const DEFAULT_MAX_ITEMS = 15;
 
 /**
  * This class is handling the factory retrieval
@@ -32,7 +33,6 @@ export class CheFactory {
   private $resource: ng.resource.IResourceService;
   private $q: ng.IQService;
   private lodash: _.LoDashStatic;
-  private cheUser: CheUser;
 
   private remoteFactoryAPI: IFactoriesResource<any>;
 
@@ -44,6 +44,7 @@ export class CheFactory {
   private factoryPagesMap: Map<number, any>;
   private pageInfo: any;
   private itemsPerPage: number;
+  private cheUser: CheUser;
 
   /**
    * Default constructor that is using resource
@@ -52,8 +53,8 @@ export class CheFactory {
   constructor($resource: ng.resource.IResourceService, $q: ng.IQService, lodash: _.LoDashStatic, cheUser: CheUser) {
     // keep resource
     this.$resource = $resource;
-    this.$q = $q;
     this.cheUser = cheUser;
+    this.$q = $q;
 
     this.lodash = lodash;
 
@@ -63,11 +64,10 @@ export class CheFactory {
     this.factoriesByName = new Map();
     this.parametersFactories = new Map();
     this.factoryContentsByWorkspaceId = new Map();
-
-    //paging
-    this.pageFactories = [];// all current page factories
-    this.factoryPagesMap = new Map();// page factories by relative link
-    this.pageInfo = {};//pages info
+    // paging
+    this.pageFactories = [];
+    this.factoryPagesMap = new Map();
+    this.pageInfo = {};
 
     this.remoteFactoryAPI = <IFactoriesResource<any>>this.$resource('/api/factory/:factoryId', {factoryId: '@id'}, {
       updateFactory: {method: 'PUT', url: '/api/factory/:factoryId'},
@@ -85,7 +85,7 @@ export class CheFactory {
         url: '/api/factory/find?creator.userId=:userId&maxItems=:maxItems&skipCount=:skipCount',
         isArray: false,
         responseType: 'json',
-        transformResponse: (data, headersGetter) => {
+        transformResponse: (data: any, headersGetter: Function) => {
           return this._getPageFromResponse(data, headersGetter('link'));
         }
       },
@@ -100,13 +100,13 @@ export class CheFactory {
   _getPageFromResponse(data: any, headersLink: any): any {
     let links = new Map();
     if (!headersLink) {
-      //TODO remove it after adding headers paging links on server side
-      let user = this.cheUser.getUser().id;
+      // todo remove it after adding headers paging links on server side
+      let user = this.cheUser.getUser();
       if (!this.itemsPerPage || !user) {
         return {factories: data};
       }
       this.pageInfo.currentPageNumber = this.pageInfo.currentPageNumber ? this.pageInfo.currentPageNumber : 1;
-      let link = '/api/factory/find?creator.userId=' + user + '&maxItems=' + this.itemsPerPage;
+      let link = '/api/factory/find?creator.userId=' + user.id + '&maxItems=' + this.itemsPerPage;
       links.set('first', link + '&skipCount=0');
       if (data && data.length > 0) {
         links.set('next', link + '&skipCount=' + this.pageInfo.currentPageNumber * this.itemsPerPage);
@@ -121,8 +121,8 @@ export class CheFactory {
     }
     let pattern = new RegExp('<([^>]+?)>.+?rel="([^"]+?)"', 'g');
     let result;
-    while (result = pattern.exec(headersLink)) { //look for pattern
-      links.set(result[2], result[1]);//add link
+    while (result = pattern.exec(headersLink)) {
+      links.set(result[2], result[1]);
     }
     return {
       factories: data,
@@ -197,7 +197,6 @@ export class CheFactory {
     if (lastPageLink) {
       let pageParam = this._getPageParamByLink(lastPageLink);
       this.pageInfo.countOfPages = pageParam.skipCount / pageParam.maxItems + 1;
-      this.pageInfo.count = pageParam.skipCount;
       let lastPageData = {link: lastPageLink, factories: null};
       if (this.pageInfo.currentPageNumber === this.pageInfo.countOfPages) {
         lastPageData.factories = data.factories;
@@ -236,17 +235,23 @@ export class CheFactory {
    * Ask for loading the factories in asynchronous way
    * If there are no changes, it's not updated
    * @param maxItems - the max number of items to return
-   * @param skipCount - the number of items to skip
-   * @returns {*} the promise
+   * @returns {ng.IPromise<any>} the promise
    */
-  fetchFactories(maxItems, skipCount): ng.IPromise<any> {
-    this.itemsPerPage = maxItems;
-    let promise = this._getFactories({maxItems: maxItems, skipCount: skipCount});
+  fetchFactories(maxItems?: number): ng.IPromise<any> {
+    this.itemsPerPage = maxItems ? maxItems : DEFAULT_MAX_ITEMS;
+
+    let promise = this._getFactories({maxItems: this.itemsPerPage, skipCount: 0});
 
     return promise.then((data: any) => {
-      this.pageInfo.currentPageNumber = skipCount / maxItems + 1;
+      this.pageInfo.currentPageNumber = 1;
       this._updateCurrentPageFactories(data.factories);
       this._updatePagesData(data);
+      return this.pageFactories;
+    }, (error: any) => {
+      if (error && error.status === 304) {
+        return this.pageFactories;
+      }
+      return this.$q.reject(error);
     });
   }
 
@@ -301,39 +306,36 @@ export class CheFactory {
     return deferred.promise;
   }
 
-  _getFactories(queryData): ng.IPromise<any> {
+  _getFactories(queryData: any): ng.IPromise<any> {
     let deferred = this.$q.defer();
     let user = this.cheUser.getUser();
-
-    if (user) {
-      queryData.userId = user.id;
-      this.remoteFactoryAPI.getFactories(queryData).$promise.then((data) => {
-        this._updateFactoriesDetails(data.factories).then((factoriesDetails) => {
-          data.factories = factoriesDetails;//update factories
-          deferred.resolve(data);
-        }, (error) => {
-          deferred.reject(error);
-        });
-      }, (error) => {
-        deferred.reject(error);
-      });
+    if (user && user.id) {
+      deferred.resolve(user.id);
     } else {
-      this.cheUser.fetchUser().then((user) => {
-        queryData.userId = user.id;
-        this.remoteFactoryAPI.getFactories(queryData).$promise.then((data) => {
-          this._updateFactoriesDetails(data.factories).then((factoriesDetails) => {
-            data.factories = factoriesDetails;//update factories
-            deferred.resolve(data);
-          }, (error) => {
-            deferred.reject(error);
-          });
-        }, (error) => {
-          deferred.reject(error);
-        });
+      this.cheUser.fetchUser().then((user: che.IUser) => {
+        deferred.resolve(user.id);
+      }, (error: any) => {
+        deferred.reject(error);
       });
     }
 
-    return deferred.promise;
+    let resultPromise = deferred.promise.then((userId: string) => {
+      queryData.userId = userId;
+      return this.remoteFactoryAPI.getFactories(queryData).$promise.then((data: any) => {
+        return this._updateFactoriesDetails(data.factories).then((factoriesDetails: any) => {
+          data.factories = factoriesDetails;
+          return this.$q.when(data);
+        }, (error: any) => {
+          return this.$q.reject(error);
+        });
+      }, (error: any) => {
+        return this.$q.reject(error);
+      });
+    }, (error: any) => {
+      return this.$q.reject(error);
+    });
+
+    return resultPromise;
   }
 
   _updateFactoriesDetails(factories: Array<any>): ng.IPromise<any> {
@@ -346,7 +348,8 @@ export class CheFactory {
 
     let promises = [];
     factories.forEach((factory: any) => {
-      let factoryPromise = this.fetchFactoryById(factory.id);//ask the factory details
+      // ask the factory details
+      let factoryPromise = this.fetchFactoryById(factory.id);
       factoryPromise.then((factoryDetails: any) => {
         factoriesDetails.push(factoryDetails);
       });
@@ -354,7 +357,7 @@ export class CheFactory {
     });
     this.$q.all(promises).then(() => {
       deferred.resolve(factoriesDetails);
-    }, (error) => {
+    }, (error: any) => {
       deferred.reject(error);
     });
 
@@ -388,7 +391,7 @@ export class CheFactory {
     }).$promise;
 
     promise.then((factoryContent: any) => {
-      //update factoryContents map
+      // update factoryContents map
       this.factoryContentsByWorkspaceId.set(workspace.id, factoryContent);
       deferred.resolve(factoryContent);
     }, (error: any) => {
@@ -415,7 +418,7 @@ export class CheFactory {
   /**
    * Create factory by content
    * @param factoryContent  the factory content
-   * @returns {*} the promise
+   * @returns {ng.IPromise<any>} the promise
    */
   createFactoryByContent(factoryContent: any): ng.IPromise<any> {
     let formDataObject = new FormData();
@@ -426,7 +429,7 @@ export class CheFactory {
 
   /**
    * Gets the current page factories
-   * @returns {Array}
+   * @returns {Array<che.IFactory>}
    */
   getPageFactories(): Array<che.IFactory> {
     return this.pageFactories;
@@ -435,8 +438,8 @@ export class CheFactory {
   /**
    * Ask for loading the factory in asynchronous way
    * If there are no changes, it's not updated
-   * @param factoryId the factory ID
-   * @returns {*} the promise
+   * @param factoryId {string} the factory ID
+   * @returns {ng.IPromise<any>} the promise
    */
   fetchFactoryById(factoryId: string): ng.IPromise<any> {
     let deferred = this.$q.defer();
@@ -461,8 +464,8 @@ export class CheFactory {
    * Fetches factory by the user's id and factory's name.
    *
    * @param factoryName name of the factory to be fetched.
-   * @param userId user id
-   * @returns {IPromise<T>}
+   * @param userId {string} user id
+   * @returns {ng.IPromise<any>}
    */
   fetchFactoryByName(factoryName: string, userId: string): ng.IPromise<any> {
     let deferred = this.$q.defer();
@@ -487,7 +490,7 @@ export class CheFactory {
    * Ask for getting parameter the factory in asynchronous way
    * If there are no changes, it's not updated
    * @param parameters the factory parameters
-   * @returns {*} the promise
+   * @returns {ng.IPromise<any>} the promise
    */
   fetchParameterFactory(parameters: any): ng.IPromise<any> {
     let deferred = this.$q.defer();
@@ -510,10 +513,10 @@ export class CheFactory {
 
   /**
    * Detects links for factory acceptance (with id and named one)
-   * @param factory factory to detect links
-   * @returns [*] links acceptance links
+   * @param factory {che.IFactory} factory to detect links
+   * @returns {Array<string>} links acceptance links
    */
-  detectLinks(factory: che.IFactory): Array<any> {
+  detectLinks(factory: che.IFactory): Array<string> {
     let links = [];
 
     if (!factory || !factory.links) {
@@ -531,17 +534,17 @@ export class CheFactory {
 
   /**
    * Get the factory from factoryMap by factoryId
-   * @param factoryId the factory ID
-   * @returns factory
+   * @param factoryId {string} the factory ID
+   * @returns factory {che.IFactory}
    */
-  getFactoryById(factoryId: string): any {
+  getFactoryById(factoryId: string): che.IFactory {
     return this.factoriesById.get(factoryId);
   }
 
   /**
    * Set the factory
-   * @param factory
-   * @returns {*} the promise
+   * @param factory {che.IFactory}
+   * @returns {ng.IPromise<any>} the promise
    */
   setFactory(factory: che.IFactory): ng.IPromise<any> {
     let deferred = this.$q.defer();
@@ -566,25 +569,24 @@ export class CheFactory {
 
   /**
    * Set the factory content by factoryId
-   * @param factoryId  the factory ID
+   * @param factoryId {string} the factory ID
    * @param factoryContent  the factory content
-   * @returns {*} the promise
+   * @returns {ng.IPromise<any>} the promise
    */
   setFactoryContent(factoryId: string, factoryContent: any): ng.IPromise<any> {
     let deferred = this.$q.defer();
-
     let promise = this.remoteFactoryAPI.updateFactory({factoryId: factoryId}, factoryContent).$promise;
-    // check if was OK or not
+
     promise.then(() => {
       let fetchFactoryPromise = this.fetchFactoryById(factoryId);
-      //check if was OK or not
+      // check if was OK or not
       fetchFactoryPromise.then((factory: any) => {
         this.fetchFactoryPage(this.pageInfo.currentPageNumber);
         deferred.resolve(factory);
       }, (error: any) => {
         deferred.reject(error);
       });
-    }, (error) => {
+    }, (error: any) => {
       deferred.reject(error);
     });
 
@@ -594,13 +596,13 @@ export class CheFactory {
   /**
    * Performs factory deleting by the given factoryId.
    * @param factoryId the factory ID
-   * @returns {*} the promise
+   * @returns {ng.IPromise<any>} the promise
    */
   deleteFactoryById(factoryId: string): ng.IPromise<any> {
     let promise = this.remoteFactoryAPI.delete({factoryId: factoryId}).$promise;
-    //check if was OK or not
+    // check if was OK or not
     return promise.then(() => {
-      this.factoriesById.delete(factoryId);//update factories map
+      this.factoriesById.delete(factoryId);
       if (this.pageInfo && this.pageInfo.currentPageNumber) {
         this.fetchFactoryPage(this.pageInfo.currentPageNumber);
       }
@@ -623,7 +625,7 @@ export class CheFactory {
    * Returns the factory url based on id.
    * @returns {link.href|*} link value
    */
-  getFactoryIdUrl(factory: any): string {
+  getFactoryIdUrl(factory: che.IFactory): string {
     let link = this.lodash.find(factory.links, (link: any) => {
       return 'accept' === link.rel;
     });
@@ -635,7 +637,7 @@ export class CheFactory {
    *
    * @returns {link.href|*} link value
    */
-  getFactoryNamedUrl(factory: any): string {
+  getFactoryNamedUrl(factory: che.IFactory): string {
     let link = this.lodash.find(factory.links, (link: any) => {
       return 'accept-named' === link.rel;
     });

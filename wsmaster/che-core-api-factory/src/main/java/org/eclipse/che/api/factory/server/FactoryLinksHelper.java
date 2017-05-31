@@ -46,38 +46,6 @@ public class FactoryLinksHelper {
     private FactoryLinksHelper() {}
 
     /**
-     * Creates factory links and links for retrieving factory images.
-     *
-     * @param images
-     *         a set of factory images
-     * @param serviceContext
-     *         the context to retrieve factory service base URI
-     * @return list of factory and factory images links
-     */
-    public static List<Link> createLinks(FactoryDto factory,
-                                         Set<FactoryImage> images,
-                                         ServiceContext serviceContext,
-                                         String userName) {
-        final List<Link> links = new LinkedList<>(createLinks(factory, serviceContext, userName));
-        final UriBuilder uriBuilder = serviceContext.getServiceUriBuilder();
-        final String factoryId = factory.getId();
-
-        // creation of links to retrieve images
-        links.addAll(images.stream()
-                           .map(image -> createLink(HttpMethod.GET,
-                                                    uriBuilder.clone()
-                                                              .path(FactoryService.class, "getImage")
-                                                              .queryParam("imgId", image.getName())
-                                                              .build(factoryId)
-                                                              .toString(),
-                                                    null,
-                                                    image.getMediaType(),
-                                                    IMAGE_REL_ATT))
-                           .collect(toList()));
-        return links;
-    }
-
-    /**
      * Creates factory links.
      *
      * @param serviceContext
@@ -100,21 +68,6 @@ public class FactoryLinksHelper {
                                  null,
                                  APPLICATION_JSON,
                                  RETRIEVE_FACTORY_REL_ATT));
-
-            // creation of snippet links
-            links.addAll(SNIPPET_TYPES.stream()
-                                     .map(snippet -> createLink(HttpMethod.GET,
-                                                                uriBuilder.clone()
-                                                                          .path(FactoryService.class,
-                                                                                "getFactorySnippet")
-                                                                          .queryParam("type", snippet)
-                                                                          .build(factoryId)
-                                                                          .toString(),
-                                                                null,
-                                                                TEXT_PLAIN,
-                                                                SNIPPET_REL_ATT + '/' + snippet))
-                                     .collect(toList()));
-
             // creation of accept factory link
             final Link createWorkspace = createLink(HttpMethod.GET,
                                                     uriBuilder.clone()

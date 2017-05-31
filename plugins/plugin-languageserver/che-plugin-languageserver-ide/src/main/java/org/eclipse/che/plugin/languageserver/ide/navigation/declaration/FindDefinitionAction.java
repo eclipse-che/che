@@ -13,10 +13,7 @@ package org.eclipse.che.plugin.languageserver.ide.navigation.declaration;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -84,20 +81,14 @@ public class FindDefinitionAction extends AbstractPerspectiveAction {
         TextDocumentPositionParams paramsDTO = dtoBuildHelper.createTDPP(textEditor.getDocument(), textEditor.getCursorPosition());
 
         final Promise<List<Location>> promise = client.definition(paramsDTO);
-        promise.then(new Operation<List<Location>>() {
-            @Override
-            public void apply(List<Location> arg) throws OperationException {
-                if (arg.size() == 1) {
-                    presenter.onLocationSelected(arg.get(0));
-                } else {
-                    presenter.openLocation(promise);
-                }
+        promise.then(arg -> {
+            if (arg.size() == 1) {
+                presenter.onLocationSelected(arg.get(0));
+            } else {
+                presenter.openLocation(promise);
             }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                presenter.showError(arg);
-            }
+        }).catchError(arg -> {
+            presenter.showError(arg);
         });
     }
 }

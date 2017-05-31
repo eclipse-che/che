@@ -41,20 +41,29 @@ public class CheProductInfoDataProvider extends ProductInfoDataProviderImpl {
         return locale.getProductName();
     }
 
+    @Override
     public String getSupportLink() {
         return locale.getSupportLink();
     }
 
+    @Override
     public String getDocumentTitle() {
         return locale.cheTabTitle();
     }
 
+    @Override
     public String getDocumentTitle(String workspaceName) {
         return locale.cheTabTitle(workspaceName);
     }
 
+    @Override
     public SVGResource getLogo() {
         return resources.logo();
+    }
+
+    @Override
+    public SVGResource getWaterMarkLogo() {
+        return resources.waterMarkLogo();
     }
 
     @Override

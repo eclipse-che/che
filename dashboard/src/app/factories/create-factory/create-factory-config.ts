@@ -17,7 +17,7 @@ import {FactoryFromWorkspaceCtrl} from '../create-factory/workspaces-tab/factory
 import {FactoryFromWorkspace} from '../create-factory/workspaces-tab/factory-from-workspace.directive';
 import {FactoryFromFileCtrl} from '../create-factory/config-file-tab/factory-from-file.controller';
 import {FactoryFromFile} from '../create-factory/config-file-tab/factory-from-file.directive';
-import {FactoryFromTemplateCtrl} from '../create-factory/template-tab/factory-from-template.controller';
+import {FactoryFromTemplateController} from '../create-factory/template-tab/factory-from-template.controller';
 import {FactoryFromTemplate} from '../create-factory/template-tab/factory-from-template.directive';
 import {FactoryActionBoxController} from './action/factory-action-box.controller';
 import {FactoryActionBox} from './action/factory-action-box.directive';
@@ -40,8 +40,8 @@ export class CreateFactoryConfig {
     register.controller('FactoryFromFileCtrl', FactoryFromFileCtrl);
     register.directive('cdvyFactoryFromFile', FactoryFromFile);
 
-    register.controller('FactoryFromTemplateCtrl', FactoryFromTemplateCtrl);
-    register.directive('cdvyFactoryFromTemplate', FactoryFromTemplate);
+    register.controller('FactoryFromTemplateController', FactoryFromTemplateController);
+    register.directive('cheFactoryFromTemplate', FactoryFromTemplate);
 
     register.controller('FactoryActionBoxController', FactoryActionBoxController);
     register.directive('cdvyFactoryActionBox', FactoryActionBox);

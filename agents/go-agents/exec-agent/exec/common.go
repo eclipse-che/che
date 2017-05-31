@@ -13,6 +13,8 @@ package exec
 
 import (
 	"errors"
+	"github.com/eclipse/che/agents/go-agents/core/process"
+	"github.com/eclipse/che/agents/go-agents/core/rpc"
 	"strconv"
 	"strings"
 )
@@ -27,18 +29,18 @@ func maskFromTypes(types string) uint64 {
 	for _, t := range strings.Split(types, ",") {
 		switch strings.ToLower(strings.TrimSpace(t)) {
 		case "stderr":
-			mask |= StderrBit
+			mask |= process.StderrBit
 		case "stdout":
-			mask |= StdoutBit
+			mask |= process.StdoutBit
 		case "process_status":
-			mask |= ProcessStatusBit
+			mask |= process.StatusBit
 		}
 	}
 	return mask
 }
 
 func parseTypes(types string) uint64 {
-	var mask uint64 = DefaultMask
+	var mask uint64 = process.DefaultMask
 	if types != "" {
 		mask = maskFromTypes(types)
 	}
@@ -58,7 +60,7 @@ func parsePid(strPid string) (uint64, error) {
 }
 
 // Checks whether command is valid
-func checkCommand(command *Command) error {
+func checkCommand(command *process.Command) error {
 	if command.Name == "" {
 		return errors.New("Command name required")
 	}
@@ -66,4 +68,12 @@ func checkCommand(command *Command) error {
 		return errors.New("Command line required")
 	}
 	return nil
+}
+
+type rpcProcessEventConsumer struct {
+	rpcChannel chan *rpc.Event
+}
+
+func (rpcConsumer *rpcProcessEventConsumer) Accept(e process.Event) {
+	rpcConsumer.rpcChannel <- rpc.NewEvent(e.Type(), e)
 }

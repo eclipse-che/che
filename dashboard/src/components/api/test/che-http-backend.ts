@@ -81,6 +81,8 @@ export class CheHttpBackend {
    * Setup all data that should be retrieved on calls
    */
   setup(): void {
+    this.httpBackend.when('OPTIONS', '/api/').respond({});
+
     // add the remote call
     let workspaceReturn = [];
     let workspaceKeys = this.workspaces.keys();
@@ -88,7 +90,13 @@ export class CheHttpBackend {
       let tmpWorkspace = this.workspaces.get(key);
       workspaceReturn.push(tmpWorkspace);
       this.addWorkspaceAgent(key, tmpWorkspace.runtime);
+
+      // get by ID
       this.httpBackend.when('GET', '/api/workspace/' + key).respond(tmpWorkspace);
+      // get by namespace/workspaceName
+      this.httpBackend.when('GET', `/api/workspace/${tmpWorkspace.namespace}/${tmpWorkspace.config.name}`).respond(tmpWorkspace);
+
+      this.httpBackend.when('DELETE', '/api/workspace/' + key).respond(200);
     }
 
     let workspacSettings = {
@@ -97,7 +105,6 @@ export class CheHttpBackend {
     };
     this.httpBackend.when('GET', '/api/workspace/settings').respond(200, workspacSettings);
 
-    this.httpBackend.when('OPTIONS', '/api/').respond({});
     this.httpBackend.when('GET', '/api/workspace/settings').respond({});
 
     this.httpBackend.when('GET', '/api/workspace').respond(workspaceReturn);
@@ -154,6 +161,7 @@ export class CheHttpBackend {
     for (let key of userEmailKeys) {
       this.httpBackend.when('GET', '/api/user/find?email=' + key).respond(this.userEmailMap.get(key));
     }
+    this.httpBackend.when('GET', /\/_app\/compilation-mappings(\?.*$)?/).respond(200, '');
   }
 
   /**
@@ -304,12 +312,17 @@ export class CheHttpBackend {
 
 
   /**
-   * Set attributes of the current user
-   * @param attributes
+   * Set profile attributes
+   * @param attributes {che.IProfileAttributes}
+   * @param userId {string}
    */
-  setAttributes(attributes: any): void {
-    this.httpBackend.when('PUT', '/api/profile/attributes').respond(attributes);
-    this.defaultProfile.attributes = attributes;
+  setAttributes(attributes: che.IProfileAttributes, userId?: string): void {
+    if (angular.isUndefined(userId)) {
+      this.httpBackend.when('PUT', '/api/profile/attributes').respond({attributes: attributes});
+      this.defaultProfile.attributes = attributes;
+      return;
+    }
+    this.httpBackend.when('PUT', `/api/profile/${userId}/attributes`).respond({userId: userId, attributes: attributes});
   }
 
   /**
@@ -525,4 +538,6 @@ export class CheHttpBackend {
   addUserEmail(user: che.IUser): void {
     this.userEmailMap.set(user.email, user);
   }
+
+
 }

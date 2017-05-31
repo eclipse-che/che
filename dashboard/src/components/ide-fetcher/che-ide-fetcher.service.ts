@@ -9,34 +9,48 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheBranding} from '../branding/che-branding.factory';
+
+const IDE_FETCHER_CALLBACK_ID = 'cheIdeFetcherCallback';
 
 /**
  * Provides a way to download IDE .js and then cache it before trying to load the IDE
  * @author Florent Benoit
+ * @author Oleksii Orel
  */
 export class CheIdeFetcher {
+  private $log: ng.ILogService;
+  private $http: ng.IHttpService;
+  private $window: ng.IWindowService;
+  private cheBranding: CheBranding;
+  private userAgent: string;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($http, $window, cheBranding) {
+  constructor($log: ng.ILogService, $http: ng.IHttpService, $window: ng.IWindowService, cheBranding: CheBranding) {
+    this.$log = $log;
     this.$http = $http;
     this.$window = $window;
     this.cheBranding = cheBranding;
 
     this.userAgent = this.getUserAgent();
-    this.cheBranding.promise.then(() => {
+
+    const callback = () => {
       this.findMappingFile();
-    }, (error) => {
-      console.log('error with promise,', error);
-    });
+      this.cheBranding.unregisterCallback(IDE_FETCHER_CALLBACK_ID);
+    };
+    this.cheBranding.registerCallback(IDE_FETCHER_CALLBACK_ID, callback.bind(this));
   }
 
-
-  getUserAgent() {
-    var userAgent = this.$window.navigator.userAgent.toLowerCase();
-    var docMode = this.$window.document.documentMode;
+  /**
+   * Gets user agent.
+   * @returns {string}
+   */
+  getUserAgent(): string {
+    const userAgent = this.$window.navigator.userAgent.toLowerCase();
+    const docMode = (<any>this.$window.document).documentMode;
 
     if (userAgent.indexOf('webkit') !== -1) {
       return 'safari';
@@ -55,74 +69,61 @@ export class CheIdeFetcher {
     return 'unknown';
   }
 
-
-  findMappingFile() {
+  /**
+   * Finds mapping file.
+   */
+  findMappingFile(): void {
     // get the content of the compilation mapping file
-    let randVal = Math.floor((Math.random()*1000000)+1);
-    let rand = '?uid=' + randVal;
-    let resourcesPath = this.cheBranding.getIdeResourcesPath();
+    const randVal = Math.floor((Math.random() * 1000000) + 1);
+    const resourcesPath = this.cheBranding.getIdeResourcesPath();
     if (!resourcesPath) {
-      console.log('Unable to get IDE resources path');
+      this.$log.log('Unable to get IDE resources path');
       return;
     }
 
-    let fileMappinUrl = resourcesPath + 'compilation-mappings.txt' + rand;
+    const fileMappingUrl = `${resourcesPath}compilation-mappings.txt?uid=${randVal}`;
 
-    let promise = this.$http.get(fileMappinUrl);
-
-    this.dataPromise = promise.then((response) => {
-
+    this.$http.get(fileMappingUrl).then((response: {data: any}) => {
+      if (!response || !response.data) {
+        return;
+      }
       let urlToLoad = this.getIdeUrlMappingFile(response.data);
-
       // load the url
-      if (urlToLoad != null) {
-        console.log('Preloading IDE javascript', urlToLoad);
+      if (angular.isDefined(urlToLoad)) {
+        this.$log.log('Preloading IDE javascript', urlToLoad);
         this.$http.get(urlToLoad, { cache: true});
       } else {
-        console.error('Unable to find the IDE javascript file to cache');
+        this.$log.error('Unable to find the IDE javascript file to cache');
       }
-    }, (error) => {
-      console.log('unable to find compilation mapping file', error);
+    }, (error: any) => {
+      this.$log.log('unable to find compilation mapping file', error);
     });
-
   }
 
-  getIdeUrlMappingFile(data) {
-
-    var mappings = data.split('\n');
-    var lineIndex = 0;
-
-    var javascriptFilename = null;
-    var userAgent = null;
-
-    while (lineIndex < mappings.length) {
-
-      var currentLine = mappings[lineIndex];
-
-      if (currentLine === '') {
-        if (javascriptFilename && userAgent && this.userAgent === userAgent.split(' ')[1]) {
-          /// ide-resources/_app/_app.nocache.js
-          return this.cheBranding.getIdeResourcesPath() + javascriptFilename;
-        }
-
-        // reset current variables
-        javascriptFilename = null;
-        userAgent = null;
-      }
-
-      if (currentLine.endsWith('.cache.js')) {
-        javascriptFilename = mappings[lineIndex];
-      }
-
-      if (currentLine.startsWith('user.agent ')) {
-        userAgent = mappings[lineIndex];
-      }
-
-      lineIndex++;
+  /**
+   * Gets URL of mapping file.
+   * @param data {string}
+   * @returns {string}
+   */
+  getIdeUrlMappingFile(data: string): string {
+    let mappingFileUrl: string;
+    let javascriptFileName: string;
+    const mappings = data.split(new RegExp('^\\n', 'gm'));
+    const isPasses = mappings.some((mapping: string) => {
+      const subMappings = mapping.split('\n');
+      const userAgent = subMappings.find((subMapping: string) => {
+        return subMapping.startsWith('user.agent ');
+      }).split(' ')[1];
+      javascriptFileName = subMappings.find((subMapping: string) => {
+        return subMapping.endsWith('.cache.js');
+      });
+      return javascriptFileName && userAgent && this.userAgent === userAgent;
+    });
+    if (isPasses && javascriptFileName) {
+      mappingFileUrl = this.cheBranding.getIdeResourcesPath() + javascriptFileName;
     }
 
-    return null;
-
+    return  mappingFileUrl;
   }
 
 }

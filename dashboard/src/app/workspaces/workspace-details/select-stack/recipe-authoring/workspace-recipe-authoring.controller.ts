@@ -9,7 +9,12 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {ComposeParser} from '../../../../../components/api/environment/compose-parser';
 import {DockerfileParser} from '../../../../../components/api/environment/docker-file-parser';
+import {CheBranding} from '../../../../../components/branding/che-branding.factory';
+
+const DOCKERFILE = 'dockerfile';
+const COMPOSE = 'compose';
 
 /**
  * @ngdoc controller
@@ -21,6 +26,7 @@ import {DockerfileParser} from '../../../../../components/api/environment/docker
 export class WorkspaceRecipeAuthoringController {
   $timeout: ng.ITimeoutService;
 
+  composeParser: ComposeParser;
   dockerfileParser: DockerfileParser;
   recipeValidationError: string;
 
@@ -30,6 +36,7 @@ export class WorkspaceRecipeAuthoringController {
   recipeScript: string;
   recipeFormatCopy: string;
   recipeScriptCopy: string;
+  stackDocsUrl: string;
   recipeChange: Function;
 
   editorOptions: {
@@ -44,10 +51,11 @@ export class WorkspaceRecipeAuthoringController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($scope: ng.IScope, $timeout: ng.ITimeoutService) {
+  constructor($scope: ng.IScope, $timeout: ng.ITimeoutService, cheBranding: CheBranding) {
     this.$timeout = $timeout;
-
+    this.composeParser = new ComposeParser();
     this.dockerfileParser = new DockerfileParser();
+    this.stackDocsUrl = cheBranding.getDocs().stack;
 
     this.editorOptions = {
       lineWrapping: true,
@@ -63,7 +71,7 @@ export class WorkspaceRecipeAuthoringController {
       this.recipeScriptCopy = this.recipeScript;
     });
     $scope.$watch(() => { return this.recipeFormat; }, () => {
-      this.recipeFormatCopy = this.recipeFormat || 'compose';
+      this.recipeFormatCopy = this.recipeFormat || COMPOSE;
     });
 
     this.onRecipeChange();
@@ -94,21 +102,30 @@ export class WorkspaceRecipeAuthoringController {
   detectFormat(content: string): void {
     // compose format detection:
     if (content.match(/^services:\n/m)) {
-      this.recipeFormatCopy = 'compose';
+      this.recipeFormatCopy = COMPOSE;
       this.editorOptions.mode = 'text/x-yaml';
     }
 
     // docker file format detection
     if (content.match(/^FROM\s+\w+/m)) {
-      this.recipeFormatCopy = 'dockerfile';
+      this.recipeFormatCopy = DOCKERFILE;
       this.editorOptions.mode = 'text/x-dockerfile';
     }
   }
 
   validateRecipe(content: string): void {
     this.recipeValidationError = '';
+
+    if (!content) {
+      return;
+    }
+
     try {
-      this.dockerfileParser.parse(content);
+      if (this.recipeFormatCopy === DOCKERFILE) {
+        this.dockerfileParser.parse(content);
+      } else if (this.recipeFormatCopy === COMPOSE) {
+        this.composeParser.parse(content);
+      }
     } catch (e) {
       this.recipeValidationError = e.message;
     }

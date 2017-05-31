@@ -31,6 +31,7 @@ import {CheFilterSelector} from './filter-selector/che-filter-selector.directive
 import {CheFilterSelectorController} from './filter-selector/che-filter-selector.controller';
 import {CheFrame} from './frame/che-frame.directive';
 import {CheFooter} from './footer/che-footer.directive';
+import {CheFooterController} from './footer/che-footer.controller';
 import {CheHtmlSource} from './html-source/che-html-source.directive';
 import {CheInput} from './input/che-input.directive';
 import {CheInputBox} from './input/che-input-box.directive';
@@ -48,6 +49,7 @@ import {CheListHeader} from './list/che-list-header.directive';
 import {CheListHeaderColumn} from './list/che-list-header-column.directive';
 import {CheListTitle} from './list/che-list-title.directive';
 import {CheListItemChecked} from './list/che-list-item-checked.directive';
+import {CheListHelperFactory} from './list/che-list-helper.factory';
 import {CheLoader} from './loader/che-loader.directive';
 import {CheLoaderCrane} from './loader/che-loader-crane.directive';
 import {ChePanelCtrl} from './panel/che-panel.controller';
@@ -69,11 +71,13 @@ import {ChePopup} from './popup/che-popup.directive';
 import {CheModalPopup} from './popup/che-modal-popup.directive';
 import {CheShowArea} from './show-area/che-show-area.directive';
 import {DemoSourceRender} from './html-source/demo-source-render.directive';
-
+import {CheEditor} from './editor/che-editor.directive';
+import {CheEditorController} from './editor/che-editor.controller';
+import {PagingButtons} from './paging-button/paging-button.directive';
 
 export class WidgetConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
 
     // accordion
     register.directive('cheAccordion', CheAccordion)
@@ -87,6 +91,8 @@ export class WidgetConfig {
       .directive('cheButtonWarning', CheButtonWarning)
       .directive('cheButtonSaveFlat', CheButtonSaveFlat)
       .directive('cheButtonCancelFlat', CheButtonCancelFlat)
+      // paging buttons
+      .directive('chePagingButtons', PagingButtons)
       // dropdown
       .controller('CheButtonDropdownCtrl', CheButtonDropdownCtrl)
       .directive('cheButtonDropdown', CheButtonDropdown)
@@ -102,6 +108,7 @@ export class WidgetConfig {
       .controller('CheFilterSelectorController', CheFilterSelectorController)
       .directive('cheFrame', CheFrame)
       .directive('cheFooter', CheFooter)
+      .controller('CheFooterController', CheFooterController)
       .directive('cheHtmlSource', CheHtmlSource)
       .directive('demoSourceRender', DemoSourceRender)
       .directive('cheInput', CheInput)
@@ -123,6 +130,7 @@ export class WidgetConfig {
       .directive('cheListItem', CheListItem)
       .directive('cheListHeader', CheListHeader)
       .directive('cheListHeaderColumn', CheListHeaderColumn)
+      .factory('cheListHelperFactory', CheListHelperFactory)
 
       .directive('cheLoader', CheLoader)
       .directive('cheLoaderCrane', CheLoaderCrane)
@@ -156,5 +164,8 @@ export class WidgetConfig {
       .directive('cheModalPopup', CheModalPopup)
       // show area
       .directive('cheShowArea', CheShowArea)
+      // editor
+      .controller('CheEditorController', CheEditorController)
+      .directive('cheEditor', CheEditor);
   }
 }

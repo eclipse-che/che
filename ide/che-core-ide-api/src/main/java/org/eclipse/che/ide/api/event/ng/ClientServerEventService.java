@@ -10,51 +10,53 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event.ng;
 
-import com.google.web.bindery.event.shared.EventBus;
-
-import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
-import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
-import org.eclipse.che.ide.util.loging.Log;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import org.eclipse.che.api.promises.client.Promise;
 
 /**
- * @author Dmitry Kuleshov
+ * Send file tracking operation calls on server side. There are several types of such calls:
+ * <ul>
+ *     <li>
+ *         START/STOP - tells to start/stop tracking specific file
+ *     </li>
+ *     <li>
+ *         SUSPEND/RESUME - tells to start/stop tracking all files registered for specific endpoint
+ *     </li>
+ *     <li>
+ *         MOVE - tells that file that is being tracked should be moved (renamed)
+ *     </li>
+ * </ul>
  */
-@Singleton
-public class ClientServerEventService {
-    private final DtoFactory         dtoFactory;
-    private final RequestTransmitter requestTransmitter;
+public interface ClientServerEventService {
 
-    @Inject
-    public ClientServerEventService(EventBus eventBus, DtoFactory dtoFactory, RequestTransmitter requestTransmitter) {
-        this.dtoFactory = dtoFactory;
-        this.requestTransmitter = requestTransmitter;
+    /**
+     * Sends event on server side which tells to start tracking specific file
+     *
+     * @param path
+     *         the path to the specific file
+     */
+    Promise<Void> sendFileTrackingStartEvent(String path);
 
-        Log.debug(getClass(), "Adding file event listener");
-        eventBus.addHandler(FileTrackingEvent.TYPE, new FileTrackingEvent.FileTrackingEventHandler() {
-            @Override
-            public void onEvent(FileTrackingEvent event) {
-                final FileTrackingOperationDto.Type type = event.getType();
-                final String path = event.getPath();
-                final String oldPath = event.getOldPath();
+    /**
+     * Sends event on server side which tells to stop tracking specific file
+     *
+     * @param path
+     *         the path to the specific file
+     */
+    Promise<Void> sendFileTrackingStopEvent(String path);
 
-                transmit(path, oldPath, type);
-            }
-        });
-    }
+    /** Sends event on server side which tells to suspend tracking all files registered for specific endpoint */
+    Promise<Void> sendFileTrackingSuspendEvent();
 
-    private void transmit(String path, String oldPath, FileTrackingOperationDto.Type type) {
-        final String endpointId = "ws-agent";
-        final String method = "track:editor-file";
-        final FileTrackingOperationDto dto = dtoFactory.createDto(FileTrackingOperationDto.class)
-                                                       .withPath(path)
-                                                       .withType(type)
-                                                       .withOldPath(oldPath);
+    /** Sends event on server side which tells to resume tracking all files registered for specific endpoint */
+    Promise<Void> sendFileTrackingResumeEvent();
 
-
-        requestTransmitter.transmitOneToNone(endpointId, method, dto);
-    }
+    /**
+     * Sends event on server side which tells file that is being tracked should be moved (renamed)
+     *
+     * @param oldPath
+     *         the old path to the specific file
+     * @param newPath
+     *         the new path to the specific file
+     */
+    Promise<Void> sendFileTrackingMoveEvent(String oldPath, String newPath);
 }

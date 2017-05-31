@@ -89,6 +89,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -326,8 +327,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             if (TERMINAL_NODE.equals(child.getType()) && terminals.containsKey(child.getId())) {
                 onCloseTerminal(child);
             } else if (COMMAND_NODE.equals(child.getType()) && consoles.containsKey(child.getId())) {
-                onStopCommandProcess(child);
-                view.hideProcessOutput(child.getId());
+                OutputConsole console = consoles.get(child.getId());
+                removeConsole(console, child, () -> {});
             }
         }
 
@@ -337,7 +338,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     @Override
     public void onCloseTerminal(ProcessTreeNode node) {
         closeTerminal(node);
-        view.hideProcessOutput(node.getId());
+        view.removeWidget(node.getId());
     }
 
     @Override
@@ -455,17 +456,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         newTerminal.setVisible(true);
         newTerminal.connect();
-        newTerminal.setListener(new TerminalPresenter.TerminalStateListener() {
-            @Override
-            public void onExit() {
-                String terminalId = terminalNode.getId();
-                if (terminals.containsKey(terminalId)) {
-                    onStopProcess(terminalNode);
-                    terminals.remove(terminalId);
-                }
-                view.hideProcessOutput(terminalId);
-            }
-        });
+        newTerminal.setListener(() -> onCloseTerminal(terminalNode));
     }
 
     @Override
@@ -674,12 +665,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onCloseCommandOutputClick(final ProcessTreeNode node) {
-        closeCommandOutput(node, new SubPanel.RemoveCallback() {
-            @Override
-            public void remove() {
-                view.hideProcessOutput(node.getId());
-            }
-        });
+        closeCommandOutput(node, () -> {});
     }
 
     @Override
@@ -697,46 +683,39 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         if (console.isFinished()) {
-            console.close();
-            onStopProcess(node);
-            consoles.remove(commandId);
-            consoleCommands.remove(console);
-
-            removeCallback.remove();
-
-            if (console instanceof CommandOutputConsole) {
-                eventBus.fireEvent(new ProcessOutputClosedEvent(((CommandOutputConsole)console).getPid()));
-            }
-
-            return;
+            removeConsole(console, node, removeCallback);
+        } else {
+            dialogFactory.createConfirmDialog("",
+                                              localizationConstant.outputsConsoleViewStopProcessConfirmation(console.getTitle()),
+                                              getConfirmCloseConsoleCallback(console, node, removeCallback),
+                                              null).show();
         }
-
-        dialogFactory.createConfirmDialog("",
-                                          localizationConstant.outputsConsoleViewStopProcessConfirmation(console.getTitle()),
-                                          getConfirmCloseConsoleCallback(console, node, removeCallback),
-                                          null).show();
     }
 
     private ConfirmCallback getConfirmCloseConsoleCallback(final OutputConsole console,
                                                            final ProcessTreeNode node,
                                                            final SubPanel.RemoveCallback removeCallback) {
-        return new ConfirmCallback() {
-            @Override
-            public void accepted() {
-                console.stop();
-                onStopProcess(node);
-
-                console.close();
-                consoles.remove(node.getId());
-                consoleCommands.remove(console);
-
-                removeCallback.remove();
-
-                if (console instanceof CommandOutputConsole) {
-                    eventBus.fireEvent(new ProcessOutputClosedEvent(((CommandOutputConsole)console).getPid()));
-                }
-            }
+        return () -> {
+            console.stop();
+            removeConsole(console, node, removeCallback);
         };
+    }
+
+    private void removeConsole(final OutputConsole console,
+                               final ProcessTreeNode node,
+                               final SubPanel.RemoveCallback removeCallback) {
+        console.close();
+        onStopProcess(node);
+
+        consoles.remove(node.getId());
+        consoleCommands.remove(console);
+        view.removeWidget(node.getId());
+
+        removeCallback.remove();
+
+        if (console instanceof CommandOutputConsole) {
+            eventBus.fireEvent(new ProcessOutputClosedEvent(((CommandOutputConsole)console).getPid()));
+        }
     }
 
     private void onStopProcess(ProcessTreeNode node) {
@@ -1018,13 +997,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
                     for (ProcessTreeNode child : children) {
                         if (COMMAND_NODE == child.getType()) {
-                            closeCommandOutput(child, new SubPanel.RemoveCallback() {
-                                @Override
-                                public void remove() {
-                                }
-                            });
+                            OutputConsole console = consoles.get(child.getId());
+                            removeConsole(console, child, () -> {});
                         } else if (TERMINAL_NODE == child.getType()) {
-                            closeTerminal(child);
+                            onCloseTerminal(child);
                         }
 
                         view.hideProcessOutput(child.getId());
@@ -1066,9 +1042,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     private void restoreState(final MachineEntity machine) {
-        execAgentCommandManager.getProcesses(machine.getId(), false).then(new Operation<List<GetProcessesResponseDto>>() {
+        execAgentCommandManager.getProcesses(machine.getId(), false)
+                               .onSuccess(new BiConsumer<String, List<GetProcessesResponseDto>>() {
             @Override
-            public void apply(List<GetProcessesResponseDto> processes) throws OperationException {
+            public void accept(String endpointId, List<GetProcessesResponseDto> processes) {
                 for (GetProcessesResponseDto process : processes) {
                     final int pid = process.getPid();
                     final String type = process.getType();
@@ -1084,7 +1061,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                     /*
                      * Hide the processes which are launched by command of unknown type
                      */
-                    if (isProcessLaunchedByCommandOfKnownType(type)) {
+                    if (commandTypeRegistry.getCommandTypeById(type).isPresent()) {
                         final String processName = process.getName();
                         final CommandImpl commandByName = getWorkspaceCommandByName(processName);
 
@@ -1125,22 +1102,15 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 int limit = 50;
                 int skip = 0;
                 execAgentCommandManager.getProcessLogs(machine.getId(), pid, from, till, limit, skip)
-                                       .then(new Operation<List<GetProcessLogsResponseDto>>() {
-                                           @Override
-                                           public void apply(List<GetProcessLogsResponseDto> logs) throws OperationException {
-                                               for (GetProcessLogsResponseDto log : logs) {
-                                                   String text = log.getText();
-                                                   console.printOutput(text);
-                                               }
+                                       .onSuccess(logs -> {
+                                           for (GetProcessLogsResponseDto log : logs) {
+                                               String text = log.getText();
+                                               console.printOutput(text);
                                            }
                                        })
-                                       .catchError(new Operation<PromiseError>() {
-                                           @Override
-                                           public void apply(PromiseError arg) throws OperationException {
-                                               String error = "Error trying to get process log with pid: " + pid + ". " + arg.getMessage();
-                                               Log.error(getClass(), error);
-                                           }
-                                       });
+                                       .onFailure((s, error) -> Log.error(getClass(),
+                                                                                "Error trying to get process log with pid: " + pid + ". " +
+                                                                                error.getMessage()));
             }
 
             private void subscribeToProcess(CommandOutputConsole console, int pid) {
@@ -1149,18 +1119,14 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 String processStatus = "process_status";
                 String after = null;
                 execAgentCommandManager.subscribe(machine.getId(), pid, asList(stderr, stdout, processStatus), after)
-                                       .thenIfProcessStartedEvent(console.getProcessStartedOperation())
-                                       .thenIfProcessDiedEvent(console.getProcessDiedOperation())
-                                       .thenIfProcessStdOutEvent(console.getStdOutOperation())
-                                       .thenIfProcessStdErrEvent(console.getStdErrOperation())
-                                       .then(console.getProcessSubscribeOperation());
+                                       .thenIfProcessStartedEvent(console.getProcessStartedConsumer())
+                                       .thenIfProcessDiedEvent(console.getProcessDiedConsumer())
+                                       .thenIfProcessStdOutEvent(console.getStdOutConsumer())
+                                       .thenIfProcessStdErrEvent(console.getStdErrConsumer())
+                                       .then(console.getProcessSubscribeConsumer());
             }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(localizationConstant.failedToGetProcesses(machine.getId()));
-            }
-        });
+                               }).onFailure(
+                (endpointId, error) -> notificationManager.notify(localizationConstant.failedToGetProcesses(machine.getId())));
     }
 
     private CommandImpl getWorkspaceCommandByName(String name) {
@@ -1171,10 +1137,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         return null;
-    }
-
-    private boolean isProcessLaunchedByCommandOfKnownType(String type) {
-        return commandTypeRegistry.getCommandTypeById(type).isPresent();
     }
 
     @Override

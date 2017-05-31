@@ -18,7 +18,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
-import org.eclipse.che.ide.ext.git.client.GitCheckoutStatusNotificationOperation;
+import org.eclipse.che.ide.ext.git.client.GitCheckoutStatusNotificationHandler;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexView;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexViewImpl;
 import org.eclipse.che.ide.ext.git.client.branch.BranchView;
@@ -90,6 +90,6 @@ public class GitGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().implement(GitOutputConsole.class, GitOutputConsolePresenter.class)
                                              .build(GitOutputConsoleFactory.class));
 
-        bind(GitCheckoutStatusNotificationOperation.class).asEagerSingleton();
+        bind(GitCheckoutStatusNotificationHandler.class).asEagerSingleton();
     }
 }

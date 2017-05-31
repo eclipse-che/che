@@ -42,9 +42,9 @@
                            aria-label="Name of the workspace"
                            ng-model="workspaceDetailsController.newName"
                            ng-change="workspaceDetailsController.updateName(workspaceNameForm)"
-                           ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 }, allowInvalid: true }"
+                           ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 }, allowInvalid: true }"
                            required
-                           unique-workspace-name="workspaceDetailsController.workspaceName"
+                           custom-validator="workspaceDetailsController.isNameUnique($value)"
                            ng-minlength="3"
                            ng-maxlength="20"
                            ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
@@ -55,7 +55,7 @@
                     </div>
                     <div ng-message="minlength">The name has to be more than 3 characters long.</div>
                     <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
-                    <div ng-message="uniqueWorkspaceName">This workspace name is already used.</div>
+                    <div ng-message="customValidator">This workspace name is already used.</div>
                   </che-error-messages>
                 </che-input>
               </ng-form>
