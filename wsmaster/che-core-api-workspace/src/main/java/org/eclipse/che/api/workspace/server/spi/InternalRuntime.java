@@ -33,7 +33,6 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
 
     private final T                    context;
     private final URLRewriter          urlRewriter;
-    private       Map<String, Machine> cachedExternalMachines;
     private final List<Warning> warnings = new ArrayList<>();
 
     public InternalRuntime(T context, URLRewriter urlRewriter) {
@@ -63,22 +62,15 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
 
     @Override
     public Map<String, ? extends Machine> getMachines() {
-
-        return getInternalMachines() == null ? new HashMap<>() : getInternalMachines();
-//        if (cachedExternalMachines == null) {
-//            cachedExternalMachines = new HashMap<>();
-//            // should not be null, replace with empty map in this case
-//            Map<String, ? extends Machine> internalMachines = getInternalMachines() == null ? new HashMap<>() : getInternalMachines();
-//            for (Map.Entry<String, ? extends Machine> entry : internalMachines.entrySet()) {
-//                String key = entry.getKey();
-//                Machine machine = entry.getValue();
-//                Map<String, Server> newServers = rewriteExternalServers(machine.getServers());
-//                MachineImpl newMachine = new MachineImpl(machine.getProperties(), newServers);
-//                cachedExternalMachines.put(key, newMachine);
-//            }
-//
-//        }
-//        return cachedExternalMachines;
+        Map<String, ? extends Machine> result = getInternalMachines();
+        if (result == null) {
+            return new HashMap<>();
+        } else {
+            for (Machine machine  : result.values()) {
+                rewriteExternalServers(machine.getServers());
+            }
+        }
+        return result;
     }
 
     /**
