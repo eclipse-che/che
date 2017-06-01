@@ -15,7 +15,7 @@ import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
-import org.eclipse.che.ide.api.editor.editorconfig.AutoSaveTextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
@@ -28,7 +28,7 @@ import static org.eclipse.che.ide.api.editor.partition.DocumentPartitioner.DEFAU
 /**
  * @author Evgen Vidolob
  */
-public class PomEditorConfiguration extends AutoSaveTextEditorConfiguration {
+public class PomEditorConfiguration extends DefaultTextEditorConfiguration {
 
     private AnnotationModel annotationModel;
 

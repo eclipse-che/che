@@ -18,16 +18,20 @@ import org.eclipse.che.ide.api.editor.partition.ConstantPartitioner;
 import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
+import org.eclipse.che.ide.api.editor.reconciler.DefaultReconciler;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 
 import java.util.Map;
+
+import static org.eclipse.che.ide.api.editor.partition.DocumentPartitioner.DEFAULT_CONTENT_TYPE;
 
 /**
  * Default implementation of the {@link TextEditorConfiguration}.
  */
 public class DefaultTextEditorConfiguration implements TextEditorConfiguration {
 
+    private DefaultReconciler reconciler;
     private ConstantPartitioner partitioner;
 
     @Override
@@ -47,15 +51,13 @@ public class DefaultTextEditorConfiguration implements TextEditorConfiguration {
 
     @Override
     public Reconciler getReconciler() {
-        return null;
+        return reconciler == null ? reconciler = new DefaultReconciler(DEFAULT_CONTENT_TYPE, getPartitioner()) : reconciler;
+
     }
 
     @Override
     public DocumentPartitioner getPartitioner() {
-        if(partitioner == null) {
-            partitioner = new ConstantPartitioner();
-        }
-        return partitioner;
+        return partitioner == null ? partitioner = new ConstantPartitioner() : partitioner;
     }
 
     @Override

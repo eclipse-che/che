@@ -315,8 +315,6 @@ export class CreateProjectController {
           return workspace.id === preselectWorkspaceId;
         });
       }
-      // generate project name
-      this.generateProjectName(true);
     }
   }
 
@@ -963,30 +961,6 @@ export class CreateProjectController {
   }
 
   /**
-   * Generates a default project name only if user has not entered any data
-   * @param firstInit on first init, user do not have yet initialized something
-   */
-  generateProjectName(firstInit: boolean): void {
-    // name has not been modified by the user
-    if (firstInit || (this.projectInformationForm.deskname.$pristine && this.projectInformationForm.name.$pristine)) {
-      // generate a name
-
-      // starts with project
-      let name = 'project';
-
-      // type selected
-      if (this.importProjectData.project.type) {
-        name = this.importProjectData.project.type.replace(/\s/g, '_');
-      }
-
-      name = name + '-' + this.generateRandomStr();
-
-      this.setProjectName(name);
-    }
-
-  }
-
-  /**
    * Generates a default workspace name
    */
   generateWorkspaceName(): void {
@@ -1020,12 +994,6 @@ export class CreateProjectController {
       this.$location.path('/workspaces');
     }
     this.createProjectSvc.resetCreateProgress();
-  }
-
-  resetCreateNewProject(): void {
-    this.resetCreateProgress();
-    this.generateWorkspaceName();
-    this.generateProjectName(true);
   }
 
   showIDE(): void {
@@ -1209,7 +1177,7 @@ export class CreateProjectController {
     }
 
     this.templatesChoice = 'templates-samples';
-    this.generateProjectName(true);
+
     // enable wizard only if
     // - ready-to-go-stack with PT
     // - custom stack

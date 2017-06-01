@@ -15,6 +15,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.MergeResult;
+import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
@@ -132,6 +133,11 @@ public abstract class BaseTest {
     protected Promise<List<Branch>>                   branchListPromise;
     @Captor
     protected ArgumentCaptor<Operation<List<Branch>>> branchListCaptor;
+
+    @Mock
+    protected Promise<PushResponse>                   pushPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<PushResponse>> pushPromiseCaptor;
 
     @Mock
     protected Promise<Branch>                   branchPromise;

@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.project.ResolvingProjectStateHolder;
 import org.eclipse.che.plugin.maven.client.command.MavenCommandType;
 import org.eclipse.che.plugin.maven.client.editor.PomEditorConfigurationFactory;
+import org.eclipse.che.plugin.maven.client.editor.PomReconcileUpdateOperation;
 import org.eclipse.che.plugin.maven.client.editor.PomReconcilingStrategyFactory;
 import org.eclipse.che.plugin.maven.client.project.ResolvingMavenProjectStateHolder;
 import org.eclipse.che.plugin.maven.client.resource.MavenProjectInterceptor;
@@ -51,5 +52,7 @@ public class MavenGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(PomEditorConfigurationFactory.class));
 
         GinMultibinder.newSetBinder(binder(), ResolvingProjectStateHolder.class).addBinding().to(ResolvingMavenProjectStateHolder.class);
+
+        bind(PomReconcileUpdateOperation.class).asEagerSingleton();
     }
 }

@@ -12,15 +12,18 @@ package org.eclipse.che.maven.server;
 
 import org.eclipse.che.maven.data.MavenActivation;
 import org.eclipse.che.maven.data.MavenActivationFile;
+import org.eclipse.che.maven.data.MavenBuild;
 import org.eclipse.che.maven.data.MavenExplicitProfiles;
 import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.che.maven.data.MavenModel;
 import org.eclipse.che.maven.data.MavenProfile;
+import org.eclipse.che.maven.data.MavenResource;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.File;
 import java.rmi.RemoteException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
 
@@ -132,5 +135,59 @@ public class MavenServerTest {
         Assert.assertNotNull(profileApplicationResult);
         Assert.assertEquals(1, profileApplicationResult.getActivatedProfiles().getEnabledProfiles().size());
         Assert.assertEquals(1, profileApplicationResult.getModel().getProperties().size());
+    }
+
+    @Test
+    public void testShouldProvideRelativePathsInsteadAbsoluteForSimplePom() throws Exception {
+        final MavenSettings mavenSettings = new MavenSettings();
+        mavenSettings.setLoggingLevel(MavenTerminal.LEVEL_INFO);
+
+        final MavenServer server = new MavenServerImpl(mavenSettings);
+        final MavenServerResult mavenServerResult =
+                server.resolveProject(new File(MavenServerTest.class.getResource("/SimplePom/pom.xml").getFile()),
+                                      emptyList(), emptyList());
+
+        final MavenBuild mavenBuild = mavenServerResult.getProjectInfo().getMavenModel().getBuild();
+
+        final MavenResource expectedMavenResource = new MavenResource("src/main/resources", false, null, emptyList(), emptyList());
+        final MavenResource expectedMavenTestResource = new MavenResource("src/test/resources", false, null, emptyList(), emptyList());
+
+        Assert.assertEquals(mavenBuild.getOutputDirectory(), "target/classes");
+        Assert.assertEquals(mavenBuild.getTestOutputDirectory(), "target/test-classes");
+        Assert.assertEquals(mavenBuild.getSources(), singletonList("src/main/java"));
+        Assert.assertEquals(mavenBuild.getTestSources(), singletonList("src/test/java"));
+        Assert.assertEquals(mavenBuild.getResources(), singletonList(expectedMavenResource));
+        Assert.assertEquals(mavenBuild.getTestResources(), singletonList(expectedMavenTestResource));
+    }
+
+    @Test
+    public void testShouldProvideRelativePathsInsteadAbsoluteForComplexPom() throws Exception {
+        final MavenSettings mavenSettings = new MavenSettings();
+        mavenSettings.setLoggingLevel(MavenTerminal.LEVEL_INFO);
+
+        final MavenServer server = new MavenServerImpl(mavenSettings);
+        final MavenServerResult mavenServerResult =
+                server.resolveProject(new File(MavenServerTest.class.getResource("/ComplexPom/pom.xml").getFile()),
+                                      emptyList(), emptyList());
+
+        final MavenBuild mavenBuild = mavenServerResult.getProjectInfo().getMavenModel().getBuild();
+
+        final MavenResource expectedMavenResource = new MavenResource("resDir1",
+                                                                      true,
+                                                                      "targetPath",
+                                                                      Arrays.asList("include1", "include2"),
+                                                                      Arrays.asList("exclude1", "exclude2"));
+        final MavenResource expectedMavenTestResource = new MavenResource("testResDir1",
+                                                                          true,
+                                                                          "targetPath",
+                                                                          Arrays.asList("include1", "include2"),
+                                                                          Arrays.asList("exclude1", "exclude2"));
+
+        Assert.assertEquals(mavenBuild.getOutputDirectory(), "outputDir");
+        Assert.assertEquals(mavenBuild.getTestOutputDirectory(), "testOutputDir");
+        Assert.assertEquals(mavenBuild.getSources(), singletonList("srcDir"));
+        Assert.assertEquals(mavenBuild.getTestSources(), singletonList("testSrcDir"));
+        Assert.assertEquals(mavenBuild.getResources(), singletonList(expectedMavenResource));
+        Assert.assertEquals(mavenBuild.getTestResources(), singletonList(expectedMavenTestResource));
     }
 }

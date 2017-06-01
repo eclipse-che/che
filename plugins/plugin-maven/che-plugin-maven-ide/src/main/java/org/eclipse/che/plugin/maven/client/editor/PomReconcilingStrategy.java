@@ -12,6 +12,8 @@ package org.eclipse.che.plugin.maven.client.editor;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -23,7 +25,10 @@ import org.eclipse.che.ide.api.editor.reconciler.DirtyRegion;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilingStrategy;
 import org.eclipse.che.ide.api.editor.text.Region;
 import org.eclipse.che.ide.ext.java.client.editor.ProblemRequester;
+import org.eclipse.che.ide.ext.java.client.editor.ReconcileOperationEvent;
+import org.eclipse.che.ide.ext.java.client.editor.ReconcileOperationEvent.ReconcileOperationHandler;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
+import org.eclipse.che.ide.ext.java.shared.dto.ReconcileResult;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.maven.client.service.MavenServerServiceClient;
 
@@ -35,20 +40,24 @@ import java.util.List;
  *
  * @author Evgen Vidolob
  */
-public class PomReconcilingStrategy implements ReconcilingStrategy {
+public class PomReconcilingStrategy implements ReconcilingStrategy, ReconcileOperationHandler {
 
     private final AnnotationModel          annotationModel;
-    private final EditorWithErrors   editor;
+    private final EditorWithErrors         editor;
     private final MavenServerServiceClient client;
-    private       String                   pomPath;
+
+    private String              pomPath;
+    private HandlerRegistration reconcilerOperationHandlerRegistration;
 
     @Inject
     public PomReconcilingStrategy(@Assisted AnnotationModel annotationModel,
                                   @Assisted @NotNull final EditorWithErrors editor,
-                                  MavenServerServiceClient client) {
+                                  MavenServerServiceClient client,
+                                  EventBus eventBus) {
         this.annotationModel = annotationModel;
         this.editor = editor;
         this.client = client;
+        reconcilerOperationHandlerRegistration = eventBus.addHandler(ReconcileOperationEvent.TYPE, this);
     }
 
     @Override
@@ -118,6 +127,14 @@ public class PomReconcilingStrategy implements ReconcilingStrategy {
 
     @Override
     public void closeReconciler() {
+        reconcilerOperationHandlerRegistration.removeHandler();
+    }
 
+    @Override
+    public void onReconcileOperation(ReconcileResult reconcileResult) {
+        if (!pomPath.equals(reconcileResult.getFileLocation())) {
+            return;
+        }
+        doReconcile(reconcileResult.getProblems());
     }
 }

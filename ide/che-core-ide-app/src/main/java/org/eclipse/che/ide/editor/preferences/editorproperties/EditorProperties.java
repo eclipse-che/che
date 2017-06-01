@@ -35,7 +35,8 @@ public enum EditorProperties {
     //White spaces section
     SHOW_WHITESPACES("showWhitespaces"),
 
-    //Soft wrap
+    //Edit section
+    ENABLE_AUTO_SAVE("enableAutoSave"),
     SOFT_WRAP("wordWrap"),
 
     //Rulers section

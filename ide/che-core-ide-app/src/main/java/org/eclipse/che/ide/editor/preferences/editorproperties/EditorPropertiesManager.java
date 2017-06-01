@@ -48,9 +48,12 @@ import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProp
 /**
  * The class contains methods to simplify the work with editor properties.
  *
+ * @deprecated in favor of {@link org.eclipse.che.ide.editor.preferences.EditorPreferencesManager}
+ *
  * @author Roman Nikitenko
  */
 @Singleton
+@Deprecated
 public class EditorPropertiesManager {
 
     /** The editor settings property name. */

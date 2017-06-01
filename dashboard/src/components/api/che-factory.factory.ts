@@ -73,13 +73,7 @@ export class CheFactory {
       updateFactory: {method: 'PUT', url: '/api/factory/:factoryId'},
       getFactoryContentFromWorkspace: {method: 'GET', url: '/api/factory/workspace/:workspaceId'},
       getFactoryParameters: {method: 'POST', url: '/api/factory/resolver/'},
-      createFactoryByContent: {
-        method: 'POST',
-        url: '/api/factory',
-        isArray: false,
-        headers: {'Content-Type': undefined},
-        transformRequest: angular.identity
-      },
+      createFactoryByContent: {method: 'POST', url: '/api/factory'},
       getFactories: {
         method: 'GET',
         url: '/api/factory/find?creator.userId=:userId&maxItems=:maxItems&skipCount=:skipCount',
@@ -421,10 +415,7 @@ export class CheFactory {
    * @returns {ng.IPromise<any>} the promise
    */
   createFactoryByContent(factoryContent: any): ng.IPromise<any> {
-    let formDataObject = new FormData();
-    formDataObject.append('factory', factoryContent);
-
-    return this.remoteFactoryAPI.createFactoryByContent({}, formDataObject).$promise;
+    return this.remoteFactoryAPI.createFactoryByContent({}, factoryContent).$promise;
   }
 
   /**

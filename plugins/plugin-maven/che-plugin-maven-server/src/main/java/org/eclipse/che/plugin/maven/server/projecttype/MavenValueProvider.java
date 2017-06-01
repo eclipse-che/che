@@ -68,14 +68,12 @@ public class MavenValueProvider extends ReadonlyValueProvider {
                 return readFromPom(attributeName);
             }
 
-            //Temporary commented due to incorrect resolving maven project attributes from project model, instead of resolving project
-            //attributes from the maven server, we'll read and parse pom.xml directly by our own.
-//            final MavenProject mavenProject = mavenProjectManager.getMavenProject(projectFolder.getPath().toString());
-//            if (mavenProject != null) {
-//                return getFromMavenProject(mavenProject, attributeName);
-//            } else {
+            final MavenProject mavenProject = mavenProjectManager.getMavenProject(projectFolder.getPath().toString());
+            if (mavenProject != null) {
+                return getFromMavenProject(mavenProject, attributeName);
+            } else {
                 return readFromPom(attributeName);
-//            }
+            }
         } catch (ServerException | ForbiddenException | IOException e) {
             throwReadException(e);
         } catch (XMLTreeException e) {
