@@ -28,6 +28,7 @@ import org.eclipse.che.workspace.infrastructure.docker.config.env.ProjectsRootEn
 import org.eclipse.che.workspace.infrastructure.docker.config.proxy.DockerProxyModule;
 import org.eclipse.che.workspace.infrastructure.docker.config.volume.ExtraVolumeModule;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentTypeModule;
+import org.eclipse.che.workspace.infrastructure.docker.service.InstallerService;
 import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyModule;
 
 import java.util.Set;
@@ -90,6 +91,8 @@ public class DockerInfraModule extends AbstractModule {
         devMachineEnvVars.addBinding().toProvider(ProjectsRootEnvVariableProvider.class);
         devMachineEnvVars.addBinding().toProvider(JavaOptsEnvVariableProvider.class);
         allMachinesEnvVars.addBinding().toProvider(ApiEndpointEnvVariableProvider.class);
+
+        bind(InstallerService.class);
 
         install(new DnsResolversModule());
         install(new DockerProxyModule());
