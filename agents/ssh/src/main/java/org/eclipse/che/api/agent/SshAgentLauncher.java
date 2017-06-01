@@ -14,9 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.agent.server.launcher.AbstractAgentLauncher;
-import org.eclipse.che.api.agent.server.launcher.CompositeAgentLaunchingChecker;
-import org.eclipse.che.api.agent.server.launcher.MappedPortIsListeningAgentChecker;
-import org.eclipse.che.api.agent.server.launcher.ProcessIsLaunchedChecker;
+import org.eclipse.che.api.agent.server.launcher.SshAgentLaunchingChecker;
 
 import javax.inject.Named;
 
@@ -33,7 +31,7 @@ public class SshAgentLauncher extends AbstractAgentLauncher {
                             @Named("che.agent.dev.ping_delay_ms") long agentPingDelayMs) {
         super(agentMaxStartTimeMs,
               agentPingDelayMs,
-              new MappedPortIsListeningAgentChecker("22/tcp"));
+              new SshAgentLaunchingChecker());
     }
 
     @Override
