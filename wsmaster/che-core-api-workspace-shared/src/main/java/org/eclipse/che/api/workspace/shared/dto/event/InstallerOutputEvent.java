@@ -13,11 +13,9 @@ package org.eclipse.che.api.workspace.shared.dto.event;
 import org.eclipse.che.dto.shared.DTO;
 /**
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
- * @version $Id: $
  */
 @DTO
 public interface InstallerOutputEvent {
-
 
     String getInstallerName();
 
@@ -38,7 +36,4 @@ public interface InstallerOutputEvent {
     void setTimestamp(String timestamp);
 
     InstallerOutputEvent withTimestamp(String timestamp);
-
-
-
 }

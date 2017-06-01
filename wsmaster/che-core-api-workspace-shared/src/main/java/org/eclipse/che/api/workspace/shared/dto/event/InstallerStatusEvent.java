@@ -50,7 +50,4 @@ public interface InstallerStatusEvent {
     void setTimestamp(String timestamp);
 
     InstallerStatusEvent withTimestamp(String timestamp);
-
-
-
 }
