@@ -544,8 +544,10 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     @Override
     public void activate() {
         if (editorWidget != null) {
-            editorWidget.refresh();
-            editorWidget.setFocus();
+            Scheduler.get().scheduleDeferred(() -> {
+                editorWidget.refresh();
+                editorWidget.setFocus();
+            });
             final String isLinkedWithEditor = preferencesManager.getValue(LinkWithEditorAction.LINK_WITH_EDITOR);
             if (!parseBoolean(isLinkedWithEditor)) {
                 setSelection(new Selection<>(input.getFile()));
