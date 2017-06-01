@@ -238,8 +238,16 @@ public class JavaRefactoringRename implements FileEventHandler {
                 } finally {
                     mode.removeListener(this);
                     isActiveLinkedEditor = false;
-                    if (!isSuccessful && linkedEditor instanceof EditorWithAutoSave) {
-                        ((EditorWithAutoSave)linkedEditor).enableAutoSave();
+
+                    boolean isNameChanged = start >= 0 && end >= 0;
+                    if (!isSuccessful && isNameChanged) {
+                        undoChanges();
+                    }
+
+                    if (!isSuccessful) {
+                        clientServerEventService.sendFileTrackingResumeEvent().then(arg -> {
+                            enableAutoSave();
+                        });
                     }
                 }
             }
@@ -292,9 +300,11 @@ public class JavaRefactoringRename implements FileEventHandler {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                enableAutoSave();
-
                 undoChanges();
+
+                clientServerEventService.sendFileTrackingResumeEvent().then(success -> {
+                    enableAutoSave();
+                });
 
                 notificationManager.notify(locale.failedToRename(), arg.getMessage(), FAIL, FLOAT_MODE);
             }

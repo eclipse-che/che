@@ -19,6 +19,8 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
+import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
+import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -80,6 +82,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -117,7 +120,7 @@ public class JavaRefactoringRenameTest {
     private CreateRenameRefactoring           createRenameRefactoringDto;
     @Mock
     private LinkedRenameRefactoringApply      linkedRenameRefactoringApplyDto;
-    @Mock(extraInterfaces = {HasLinkedMode.class, EditorWithAutoSave.class})
+    @Mock(extraInterfaces = {HasLinkedMode.class, EditorWithAutoSave.class, UndoableEditor.class})
     private TextEditor                        textEditor;
     @Mock
     private EditorInput                       editorInput;
@@ -150,9 +153,13 @@ public class JavaRefactoringRenameTest {
     @Mock
     private Document                          document;
     @Mock
+    private HandlesUndoRedo                   undoRedo;
+    @Mock
     private Promise<Void>                     updateAfterRefactoringPromise;
     @Mock
     private Promise<Void>                     fileTrackingSuspendEventPromise;
+    @Mock
+    private Promise<Void>                     fileTrackingResumeEventPromise;
     @Mock
     private Promise<Void>                     handleMovingFilesPromise;
 
@@ -166,6 +173,8 @@ public class JavaRefactoringRenameTest {
     private ArgumentCaptor<Operation<PromiseError>>             refactoringErrorCaptor;
     @Captor
     private ArgumentCaptor<Operation<Void>>                     clientServerSuspendOperation;
+    @Captor
+    private ArgumentCaptor<Operation<Void>>                     clientServerResumeOperation;
     @Captor
     private ArgumentCaptor<Operation<Void>>                     updateAfterRefactoringOperation;
 
@@ -201,8 +210,10 @@ public class JavaRefactoringRenameTest {
         when(result.getEntries()).thenReturn(Collections.singletonList(entry));
 
         when(clientServerEventService.sendFileTrackingSuspendEvent()).thenReturn(fileTrackingSuspendEventPromise);
+        when(clientServerEventService.sendFileTrackingResumeEvent()).thenReturn(fileTrackingResumeEventPromise);
         when(refactoringUpdater.handleMovingFiles(anyList())).thenReturn(handleMovingFilesPromise);
         when(refactoringUpdater.updateAfterRefactoring(anyList())).thenReturn(updateAfterRefactoringPromise);
+        when(((UndoableEditor)textEditor).getUndoRedo()).thenReturn(undoRedo);
     }
 
     @Test
@@ -392,6 +403,56 @@ public class JavaRefactoringRenameTest {
         updateAfterRefactoringOperation.getValue().apply(null);
         verify(refactoringUpdater).handleMovingFiles(anyList());
         verify(clientServerEventService).sendFileTrackingResumeEvent();
+    }
+
+    @Test
+    public void shouldUndoRenameRefactoringWhenUserEnterNewNameButEscapeRename() throws OperationException {
+        //use case: user hit Refactoring -> Rename action, type a new name and press escape button
+
+        refactoringRename.refactor(textEditor);
+
+        verify(refactoringServiceClient).createRenameRefactoring(createRenameRefactoringDto);
+        verify(createRenamePromise).then(renameRefCaptor.capture());
+        renameRefCaptor.getValue().apply(session);
+
+        verify(fileTrackingSuspendEventPromise).then(clientServerSuspendOperation.capture());
+        clientServerSuspendOperation.getValue().apply(null);
+
+        verify(linkedMode).addListener(inputArgumentCaptor.capture());
+        inputArgumentCaptor.getValue().onLinkedModeExited(false, 0, 5);
+
+        verify(fileTrackingResumeEventPromise).then(clientServerResumeOperation.capture());
+        clientServerResumeOperation.getValue().apply(null);
+
+        verify(refactoringServiceClient, never()).applyLinkedModeRename(anyObject());
+        verify((UndoableEditor)textEditor).getUndoRedo();
+        verify(undoRedo).undo();
+        verify((EditorWithAutoSave)textEditor).enableAutoSave();
+    }
+
+    @Test
+    public void shouldDoNotApplyUndoOperationWhenUserNotEnterNewNameAndEscapeRename() throws OperationException {
+        //use case: user hit Refactoring -> Rename action, DO NOT type a new name and press escape button
+
+        refactoringRename.refactor(textEditor);
+
+        verify(refactoringServiceClient).createRenameRefactoring(createRenameRefactoringDto);
+        verify(createRenamePromise).then(renameRefCaptor.capture());
+        renameRefCaptor.getValue().apply(session);
+
+        verify(fileTrackingSuspendEventPromise).then(clientServerSuspendOperation.capture());
+        clientServerSuspendOperation.getValue().apply(null);
+
+        verify(linkedMode).addListener(inputArgumentCaptor.capture());
+        inputArgumentCaptor.getValue().onLinkedModeExited(false, -1, -1);
+
+        verify(fileTrackingResumeEventPromise).then(clientServerResumeOperation.capture());
+        clientServerResumeOperation.getValue().apply(null);
+
+        verify(refactoringServiceClient, never()).applyLinkedModeRename(anyObject());
+        verify((UndoableEditor)textEditor, never()).getUndoRedo();
+        verify(undoRedo, never()).undo();
+        verify((EditorWithAutoSave)textEditor).enableAutoSave();
     }
 
     private void mainCheckRenameRefactoring() throws OperationException {
