@@ -17,18 +17,18 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface InstallerStatusEvent {
 
-    enum EventType {
+    enum Status {
         STARTING,
         RUNNING,
         FAILED
     }
 
 
-    InstallerStatusEvent.EventType getEventType();
+    InstallerStatusEvent.Status getStatus();
 
-    void setEventType(InstallerStatusEvent.EventType eventType);
+    void setStatus(InstallerStatusEvent.Status status);
 
-    InstallerStatusEvent withEventType(InstallerStatusEvent.EventType eventType);
+    InstallerStatusEvent withStatus(InstallerStatusEvent.Status status);
 
 
     String getInstallerName();

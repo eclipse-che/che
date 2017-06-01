@@ -68,18 +68,22 @@ public class InstallerService {
 
 
     private void handleInstallerStatus(InstallerStatusEvent installerStatusEvent ) {
+      LOG.info("Status:" + installerStatusEvent.getStatus() + ", timestamp:" + installerStatusEvent.getTimestamp());
       eventService.publish(installerStatusEvent);
     }
 
     private void handleAgentStatus(InstallerStatusEvent installerStatusEvent ) {
+        LOG.info("Status:" + installerStatusEvent.getStatus() + ", timestamp:" + installerStatusEvent.getTimestamp());
        eventService.publish(installerStatusEvent);
     }
 
     private void handleInstallerOutput(InstallerOutputEvent installerOutputEvent) {
+        LOG.info("Text:" + installerOutputEvent.getText() + ", timestamp:" + installerOutputEvent.getTimestamp());
         eventService.publish(installerOutputEvent);
     }
 
     private void handleInstallerError(InstallerOutputEvent installerOutputEvent) {
+        LOG.info("Text:" + installerOutputEvent.getText() + ", timestamp:" + installerOutputEvent.getTimestamp());
         eventService.publish(installerOutputEvent);
     }
 }
