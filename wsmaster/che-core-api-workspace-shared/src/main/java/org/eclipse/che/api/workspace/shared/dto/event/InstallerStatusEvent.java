@@ -19,7 +19,7 @@ public interface InstallerStatusEvent {
 
     enum Status {
         STARTING,
-        RUNNING,
+        FINISHED,
         FAILED
     }
 

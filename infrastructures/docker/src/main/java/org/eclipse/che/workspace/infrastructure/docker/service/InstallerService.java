@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.shared.dto.event.InstallerOutputEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.InstallerStatusEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,16 +43,16 @@ public class InstallerService {
     public void configureMethods() {
 
         requestHandler.newConfiguration()
-                      .methodName("installAgent/status")
+                      .methodName("status")
                       .paramsAsDto(InstallerStatusEvent.class)
                       .noResult()
                       .withConsumer(this::handleInstallerStatus);
 
         requestHandler.newConfiguration()
-                      .methodName("status")
-                      .paramsAsDto(InstallerStatusEvent.class)
+                      .methodName("server/status")
+                      .paramsAsDto(ServerStatusEvent.class)
                       .noResult()
-                      .withConsumer(this::handleAgentStatus);
+                      .withConsumer(this::handleServerStatus);
 
         requestHandler.newConfiguration()
                       .methodName("logs/stdout")
@@ -67,23 +68,24 @@ public class InstallerService {
     }
 
 
-    private void handleInstallerStatus(InstallerStatusEvent installerStatusEvent ) {
-      LOG.info("Status:" + installerStatusEvent.getStatus() + ", timestamp:" + installerStatusEvent.getTimestamp());
-      eventService.publish(installerStatusEvent);
-    }
 
-    private void handleAgentStatus(InstallerStatusEvent installerStatusEvent ) {
-        LOG.info("Status:" + installerStatusEvent.getStatus() + ", timestamp:" + installerStatusEvent.getTimestamp());
+    private void handleInstallerStatus(InstallerStatusEvent installerStatusEvent) {
+        //TODO: spi actions here
        eventService.publish(installerStatusEvent);
     }
 
+    private void handleServerStatus(ServerStatusEvent serverStatusEvent) {
+        //TODO: spi actions here
+        eventService.publish(serverStatusEvent);
+    }
+
     private void handleInstallerOutput(InstallerOutputEvent installerOutputEvent) {
-        LOG.info("Text:" + installerOutputEvent.getText() + ", timestamp:" + installerOutputEvent.getTimestamp());
+        //TODO: spi actions here
         eventService.publish(installerOutputEvent);
     }
 
     private void handleInstallerError(InstallerOutputEvent installerOutputEvent) {
-        LOG.info("Text:" + installerOutputEvent.getText() + ", timestamp:" + installerOutputEvent.getTimestamp());
+        //TODO: spi actions here
         eventService.publish(installerOutputEvent);
     }
 }
