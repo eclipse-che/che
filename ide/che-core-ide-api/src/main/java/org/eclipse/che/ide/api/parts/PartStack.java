@@ -120,10 +120,15 @@ public interface PartStack extends Presenter {
     void collapse();
 
     /**
-     * Minimizes / hides the part stack.
-     * The part state will not be retored when restoring the perspective state.
+     * Minimizes (hides) the part stack.
+     * The part state will not be restored when restoring the perspective state.
      */
     void minimize();
+
+    /**
+     * Restores the part stack from minimized state.
+     */
+    void unMinimize();
 
     /**
      * Restores the part stack and the perspective to the default state.

@@ -34,6 +34,8 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
     @UiField
     SimplePanel processesListPanel;
     @UiField
+    SimplePanel panelSelectorPanel;
+    @UiField
     SimplePanel buttonsPanel;
     @UiField
     SimplePanel previewUrlListPanel;
@@ -68,6 +70,11 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
     @Override
     public AcceptsOneWidget getPreviewUrlsListContainer() {
         return previewUrlListPanel;
+    }
+
+    @Override
+    public AcceptsOneWidget getPanelSelectorContainer() {
+        return panelSelectorPanel;
     }
 
     @Override

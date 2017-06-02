@@ -19,17 +19,13 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.actions.RefreshPathAction;
-import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
-import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.HasAttributes;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
-import org.eclipse.che.ide.api.data.tree.settings.HasSettings;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.parts.base.ToolButton;
@@ -85,8 +81,7 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
     private static final String PROJECT_TREE_WIDGET_ID = "projectTree";
 
     @Inject
-    public ProjectExplorerViewImpl(final Resources resources,
-                                   final ContextMenu contextMenu,
+    public ProjectExplorerViewImpl(final ContextMenu contextMenu,
                                    final CoreLocalizationConstant coreLocalizationConstant,
                                    final Set<NodeInterceptor> nodeInterceptorSet,
                                    final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor,
@@ -96,7 +91,6 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
                                    final Provider<PerspectiveManager> managerProvider,
                                    final ActionManager actionManager,
                                    final EmptyTreePanel emptyTreePanel) {
-        super(resources);
         this.skipHiddenNodesInterceptor = skipHiddenNodesInterceptor;
 
         setTitle(coreLocalizationConstant.projectExplorerTitleBarText());
@@ -137,55 +131,55 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
 
         setContentWidget(tree);
 
-        ToolButton collapseAllButton = new ToolButton(FontAwesome.COMPRESS);
-        collapseAllButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (tree.getGoInto().isActive()) {
-                    Node lastNode = tree.getGoInto().getLastUsed();
-                    tree.setExpanded(lastNode, false, true);
-                    return;
-                }
+//        ToolButton collapseAllButton = new ToolButton(FontAwesome.COMPRESS);
+//        collapseAllButton.addClickHandler(new ClickHandler() {
+//            @Override
+//            public void onClick(ClickEvent event) {
+//                if (tree.getGoInto().isActive()) {
+//                    Node lastNode = tree.getGoInto().getLastUsed();
+//                    tree.setExpanded(lastNode, false, true);
+//                    return;
+//                }
+//
+//                tree.collapseAll();
+//            }
+//        });
+//        Tooltip.create((elemental.dom.Element)collapseAllButton.getElement(), BOTTOM, MIDDLE, "Collapse All");
+//        collapseAllButton.ensureDebugId(COLLAPSE_ALL_BUTTON_ID);
+//        collapseAllButton.setVisible(true);
+//        addToolButton(collapseAllButton);
 
-                tree.collapseAll();
-            }
-        });
-        Tooltip.create((elemental.dom.Element)collapseAllButton.getElement(), BOTTOM, MIDDLE, "Collapse All");
-        collapseAllButton.ensureDebugId(COLLAPSE_ALL_BUTTON_ID);
-        collapseAllButton.setVisible(true);
-        addToolButton(collapseAllButton);
+//        ToolButton linkedEditorButton = new ToolButton(FontAwesome.EXCHANGE);
+//        linkedEditorButton.addClickHandler(new ClickHandler() {
+//            @Override
+//            public void onClick(ClickEvent event) {
+//                linkWithEditorAction.actionPerformed(null);
+//            }
+//        });
+//        Tooltip.create((elemental.dom.Element)linkedEditorButton.getElement(), BOTTOM, MIDDLE, "Link with editor");
+//        linkedEditorButton.ensureDebugId(LINK_WITH_EDITOR_ID);
+//        linkedEditorButton.setVisible(true);
+//        addToolButton(linkedEditorButton);
 
-        ToolButton linkedEditorButton = new ToolButton(FontAwesome.EXCHANGE);
-        linkedEditorButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                linkWithEditorAction.actionPerformed(null);
-            }
-        });
-        Tooltip.create((elemental.dom.Element)linkedEditorButton.getElement(), BOTTOM, MIDDLE, "Link with editor");
-        linkedEditorButton.ensureDebugId(LINK_WITH_EDITOR_ID);
-        linkedEditorButton.setVisible(true);
-        addToolButton(linkedEditorButton);
-
-        ToolButton refreshPathButton = new ToolButton(FontAwesome.REFRESH);
-        refreshPathButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final Presentation presentation = presentationFactory.getPresentation(refreshPathAction);
-                final ActionEvent actionEvent = new ActionEvent(presentation, actionManager, managerProvider.get(), null);
-
-                refreshPathAction.update(actionEvent);
-
-                if (presentation.isEnabled() && presentation.isVisible()) {
-                    refreshPathAction.actionPerformed(actionEvent);
-                }
-            }
-        });
-
-        Tooltip.create((elemental.dom.Element)refreshPathButton.getElement(), BOTTOM, MIDDLE, "Refresh selected path");
-        refreshPathButton.ensureDebugId(REFRESH_BUTTON_ID);
-        refreshPathButton.setVisible(true);
-        addToolButton(refreshPathButton);
+//        ToolButton refreshPathButton = new ToolButton(FontAwesome.REFRESH);
+//        refreshPathButton.addClickHandler(new ClickHandler() {
+//            @Override
+//            public void onClick(ClickEvent event) {
+//                final Presentation presentation = presentationFactory.getPresentation(refreshPathAction);
+//                final ActionEvent actionEvent = new ActionEvent(presentation, actionManager, managerProvider.get(), null);
+//
+//                refreshPathAction.update(actionEvent);
+//
+//                if (presentation.isEnabled() && presentation.isVisible()) {
+//                    refreshPathAction.actionPerformed(actionEvent);
+//                }
+//            }
+//        });
+//
+//        Tooltip.create((elemental.dom.Element)refreshPathButton.getElement(), BOTTOM, MIDDLE, "Refresh selected path");
+//        refreshPathButton.ensureDebugId(REFRESH_BUTTON_ID);
+//        refreshPathButton.setVisible(true);
+//        addToolButton(refreshPathButton);
     }
 
     @Override

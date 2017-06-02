@@ -24,9 +24,7 @@ class ToolbarButton extends FocusWidget {
 
     ToolbarButton(SafeHtml content) {
         super(Document.get().createDivElement());
-
         getElement().setInnerSafeHtml(content);
-
         addStyleName(RESOURCES.css().button());
     }
 
@@ -43,4 +41,5 @@ class ToolbarButton extends FocusWidget {
         RESOURCES = GWT.create(Resources.class);
         RESOURCES.css().ensureInjected();
     }
+
 }

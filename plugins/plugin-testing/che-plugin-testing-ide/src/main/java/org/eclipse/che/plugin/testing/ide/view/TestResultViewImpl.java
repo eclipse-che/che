@@ -49,7 +49,6 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
@@ -62,7 +61,6 @@ import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.eclipse.che.plugin.testing.ide.view.navigation.TestClassNavigation;
 import org.eclipse.che.plugin.testing.ide.view.navigation.factory.TestResultNodeFactory;
 import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultClassNode;
@@ -102,13 +100,10 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     FlowPanel                                       navigationPanel;
 
     @Inject
-    public TestResultViewImpl(TestResources testResources,
-                              PartStackUIResources resources,
-                              JavaNavigationService javaNavigationService,
+    public TestResultViewImpl(JavaNavigationService javaNavigationService,
                               EditorAgent editorAgent,
                               AppContext appContext,
                               TestResultNodeFactory nodeFactory) {
-        super(resources);
         this.javaNavigationService = javaNavigationService;
         this.editorAgent = editorAgent;
         this.appContext = appContext;

@@ -12,14 +12,12 @@ package org.eclipse.che.plugin.languageserver.ide.location;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
@@ -40,9 +38,7 @@ public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelega
 
     private final Tree tree;
 
-    @Inject
-    public OpenLocationViewImpl(PartStackUIResources resources) {
-        super(resources);
+    public OpenLocationViewImpl() {
         DockLayoutPanel panel = new DockLayoutPanel(Style.Unit.PX);
 
         NodeStorage storage = new NodeStorage(new NodeUniqueKeyProvider() {

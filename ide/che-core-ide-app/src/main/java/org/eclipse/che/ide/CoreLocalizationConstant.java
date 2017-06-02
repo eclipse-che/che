@@ -390,6 +390,18 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.minimizePart.description")
     String actionMinimizePartDescription();
 
+    @Key("maximizePartStack.title")
+    String maximizePartStackTitle();
+
+    @Key("restorePartStack.title")
+    String restorePartStackTitle();
+
+    @Key("minimizePartStack.title")
+    String minimizePartStackTitle();
+
+    @Key("partStackOptions.title")
+    String partStackOptionsTitle();
+
     /* NewResource */
     @Key("newResource.title")
     String newResourceTitle(String title);

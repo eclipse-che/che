@@ -23,6 +23,8 @@ public interface CommandToolbarView extends View<CommandToolbarView.ActionDelega
 
     AcceptsOneWidget getPreviewUrlsListContainer();
 
+    AcceptsOneWidget getPanelSelectorContainer();
+
     void addButton(ToolbarButton button);
 
     interface ActionDelegate {

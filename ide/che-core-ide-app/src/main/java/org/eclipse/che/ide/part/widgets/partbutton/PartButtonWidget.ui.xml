@@ -14,18 +14,27 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <ui:style>
-        .icon {
-            display: inline-block;
-            vertical-align: middle;
+
+        .button {
+            cursor: pointer;
+            position: relative;
         }
 
-        .label {
-            display: inline-block;
+        .icon {
         }
+
+        .icon svg {
+            width: 14px;
+            height: 14px;
+            position: absolute;
+            left: 4px;
+            top: 6px;
+        }
+
     </ui:style>
 
-    <g:FlowPanel>
-        <g:FlowPanel ui:field="iconPanel" addStyleNames="{style.icon}"/>
-        <g:Label ui:field="tabName" styleName="{style.label}"/>
+    <g:FlowPanel styleName="{style.button}">
+        <g:FlowPanel ui:field="iconPanel" styleName="{style.icon}"/>
     </g:FlowPanel>
+
 </ui:UiBinder>

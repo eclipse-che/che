@@ -158,6 +158,11 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
     }
 
     @Override
+    public void unMinimize() {
+        state = State.NORMAL;
+    }
+
+    @Override
     public void restore() {
         state = State.NORMAL;
     }

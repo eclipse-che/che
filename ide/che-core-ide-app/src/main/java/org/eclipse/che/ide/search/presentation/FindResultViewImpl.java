@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
@@ -38,10 +37,8 @@ class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> impleme
     private final FindResultNodeFactory findResultNodeFactory;
 
     @Inject
-    public FindResultViewImpl(PartStackUIResources resources,
-                              FindResultNodeFactory findResultNodeFactory,
+    public FindResultViewImpl(FindResultNodeFactory findResultNodeFactory,
                               CoreLocalizationConstant localizationConstant) {
-        super(resources);
         setTitle(localizationConstant.actionFullTextSearch());
         this.findResultNodeFactory = findResultNodeFactory;
 

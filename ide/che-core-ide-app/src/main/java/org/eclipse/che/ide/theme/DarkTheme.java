@@ -85,7 +85,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String tabBorderColor() {
-        return "#33373b";
+        return "#1b1e2b";
     }
 
     @Override
@@ -183,12 +183,12 @@ public class DarkTheme implements Theme {
 
     @Override
     public String partBackground() {
-        return "#292C2F";
+        return "#1e2331";
     }
 
     @Override
     public String partToolbar() {
-        return "#33373B";
+        return "#242a3a";
     }
 
     @Override
@@ -213,7 +213,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getMainFontColor() {
-        return "#FFFFFF";
+        return "#a0a9b7";
     }
 
     @Override
@@ -223,7 +223,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getCommandsToolbarBackgroundColor() {
-        return "#000000";
+        return "#1e2331";
     }
 
     @Override
@@ -968,7 +968,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getSplitterSmallBorderColor() {
-        return "#21252b";
+        return "#1b1e2b";
     }
 
     @Override
@@ -1058,7 +1058,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getMenuBackgroundColor() {
-        return "#292c2f";
+        return "#242a3a";
     }
 
     @Override
@@ -1368,7 +1368,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String projectExplorerSelectedRowBorder() {
-        return "#4eabff";
+        return "#3193d4";
     }
 
     @Override

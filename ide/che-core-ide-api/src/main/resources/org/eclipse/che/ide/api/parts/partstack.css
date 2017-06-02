@@ -114,8 +114,8 @@
     width: 200px;
 }
 
-.ide-PartStack-Content {
-    background-color: partBackground;
+.ide-PartStack {
+    position: relative;
     width: 100%;
     height: 100%;
 }

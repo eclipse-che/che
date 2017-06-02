@@ -12,7 +12,6 @@ package org.eclipse.che.ide.api.parts;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -26,6 +25,18 @@ public interface PartStackUIResources extends ClientBundle {
 
         @ClassName("ide-Base-Part-Toolbar")
         String ideBasePartToolbar();
+
+        @ClassName("ide-PartStack")
+        String idePartStack();
+
+        @ClassName("ide-PartStack-Header")
+        String idePartStackHeader();
+
+        @ClassName("ide-PartStack-PartSwitcher")
+        String idePartStackPartSwitcher();
+
+        @ClassName("ide-PartStack-PartActions")
+        String idePartStackPartActions();
 
         @ClassName("ide-PartStack-Content")
         String idePartStackContent();

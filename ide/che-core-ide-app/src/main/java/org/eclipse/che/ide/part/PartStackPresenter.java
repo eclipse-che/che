@@ -303,6 +303,20 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
     }
 
     @Override
+    public void onToggleMaximize() {
+        if (getPartStackState() == PartStack.State.MAXIMIZED) {
+            restore();
+        } else {
+            maximize();
+        }
+    }
+
+    @Override
+    public void onMinimize() {
+        minimize();
+    }
+
+    @Override
     public void maximize() {
         // Update the view state.
         view.setMaximized(true);
@@ -370,6 +384,23 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
     @Override
     public State getPartStackState() {
         return state;
+    }
+
+    @Override
+    public void unMinimize() {
+        // Change the state to COLLAPSED for the following restoring.
+        if (state == State.MINIMIZED) {
+            state = State.COLLAPSED;
+
+            if (delegate != null) {
+                delegate.onRestore(this);
+            }
+        }
+
+//        activeTab = selectedTab;
+//        activePart = parts.get(selectedTab);
+//        activePart.onOpen();
+//        selectActiveTab(activeTab);
     }
 
     @Override
@@ -456,36 +487,8 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
     /** {@inheritDoc} */
     @Override
     public void onTabClicked(@NotNull TabItem selectedTab) {
-        // Change the state to COLLAPSED for the following restoring.
-        if (state == State.MINIMIZED) {
-            state = State.COLLAPSED;
-        }
-
-        // Restore COLLAPSED part stack.
-        if (state == State.COLLAPSED) {
-            activeTab = selectedTab;
-
-            if (delegate != null) {
-                delegate.onRestore(this);
-            }
-
-            activePart = parts.get(selectedTab);
-            activePart.onOpen();
-            selectActiveTab(activeTab);
-
-            return;
-        }
-
         // Minimize the part stack if user clicked on the active tab.
         if (selectedTab.equals(activeTab)) {
-            if (state == State.NORMAL) {
-                minimize();
-
-                activeTab.unSelect();
-                activeTab = null;
-                activePart = null;
-            }
-
             return;
         }
 
@@ -505,6 +508,11 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
     @Override
     public void showPartMenu(int mouseX, int mouseY) {
+        partMenu.show(mouseX, mouseY);
+    }
+
+    @Override
+    public void onPartStackMenu(int mouseX, int mouseY) {
         partMenu.show(mouseX, mouseY);
     }
 

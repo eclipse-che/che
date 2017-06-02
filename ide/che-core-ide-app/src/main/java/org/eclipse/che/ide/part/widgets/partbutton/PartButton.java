@@ -32,4 +32,5 @@ public interface PartButton extends View<PartButton.ActionDelegate>, TabItem {
     interface ActionDelegate {
         void onTabClicked(@NotNull TabItem selectedTab);
     }
+
 }

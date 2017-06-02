@@ -117,8 +117,7 @@ public class AbstractPerspectivePersistenceTest {
         when(controllerFactory.createController(Matchers.<SplitLayoutPanel>anyObject(),
                                                 Matchers.<SimplePanel>anyObject())).thenReturn(workBenchController);
 
-        when(partStackViewFactory.create(Matchers.<PartStackView.TabPosition>anyObject(),
-                                         Matchers.<FlowPanel>anyObject())).thenReturn(partStackView);
+        when(partStackViewFactory.create(Matchers.<FlowPanel>anyObject())).thenReturn(partStackView);
 
         when(stackPresenterFactory.create(Matchers.<PartStackView>anyObject(),
                                           Matchers.<WorkBenchPartController>anyObject())).thenReturn(partStackPresenter);

@@ -37,7 +37,6 @@ import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
-import org.eclipse.che.ide.api.parts.PartStackView.TabPosition;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
@@ -182,12 +181,6 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     @Override
     public void unSelect() {
         getElement().removeAttribute("focused");
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setTabPosition(@NotNull TabPosition tabPosition) {
-        throw new UnsupportedOperationException("This method doesn't allow in this class " + getClass());
     }
 
     /** {@inheritDoc} */

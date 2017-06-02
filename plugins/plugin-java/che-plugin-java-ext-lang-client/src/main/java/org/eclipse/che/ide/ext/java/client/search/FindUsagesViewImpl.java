@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
@@ -43,8 +42,8 @@ class FindUsagesViewImpl extends BaseView<FindUsagesView.ActionDelegate> impleme
     private final NodeFactory nodeFactory;
 
     @Inject
-    public FindUsagesViewImpl(PartStackUIResources resources, NodeFactory nodeFactory, JavaLocalizationConstant localizationConstant) {
-        super(resources);
+    public FindUsagesViewImpl(NodeFactory nodeFactory,
+                              JavaLocalizationConstant localizationConstant) {
         this.nodeFactory = nodeFactory;
         setTitle(localizationConstant.findUsagesPartTitle());
         DockLayoutPanel panel = new DockLayoutPanel(Style.Unit.PX);
@@ -78,4 +77,5 @@ class FindUsagesViewImpl extends BaseView<FindUsagesView.ActionDelegate> impleme
             tree.getSelectionModel().select(tree.getRootNodes().get(0), false);
         }
     }
+
 }

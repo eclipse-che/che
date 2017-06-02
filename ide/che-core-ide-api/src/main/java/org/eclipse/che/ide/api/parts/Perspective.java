@@ -26,7 +26,6 @@ import javax.validation.constraints.NotNull;
  */
 public interface Perspective extends StateComponent {
 
-
     /**
      * Some unique id will used to set/switch current perspective in workbench layout logic
      */

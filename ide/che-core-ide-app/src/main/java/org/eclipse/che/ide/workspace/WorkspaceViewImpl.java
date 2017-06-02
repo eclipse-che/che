@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class WorkspaceViewImpl extends LayoutPanel implements WorkspaceView {
+
     interface WorkspaceViewUiBinder extends UiBinder<Widget, WorkspaceViewImpl> {
     }
 
@@ -60,9 +61,10 @@ public class WorkspaceViewImpl extends LayoutPanel implements WorkspaceView {
     protected WorkspaceViewImpl() {
         add(uiBinder.createAndBindUi(this));
         getElement().setId("codenvyIdeWorkspaceViewImpl");
-        ideMainDockPanel.setWidgetHidden(noToolbarPanel, true);
+        ideMainDockPanel.setWidgetHidden(toolbarPanel, true);
+        ideMainDockPanel.setWidgetHidden(noToolbarPanel, false);
         ideMainDockPanel.setWidgetHidden(actionsPanel, true);
-        ideMainDockPanel.setWidgetHidden(statusPanel, false);
+        ideMainDockPanel.setWidgetHidden(statusPanel, true);
     }
 
     /** {@inheritDoc} */
@@ -93,4 +95,5 @@ public class WorkspaceViewImpl extends LayoutPanel implements WorkspaceView {
     public AcceptsOneWidget getStatusPanel() {
         return statusPanel;
     }
+
 }

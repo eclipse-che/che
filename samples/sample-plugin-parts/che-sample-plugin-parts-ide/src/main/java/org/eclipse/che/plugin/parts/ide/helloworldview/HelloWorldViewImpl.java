@@ -11,9 +11,6 @@
 package org.eclipse.che.plugin.parts.ide.helloworldview;
 
 import com.google.gwt.user.client.ui.Label;
-import com.google.inject.Inject;
-
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 
 /**
@@ -25,13 +22,10 @@ public class HelloWorldViewImpl extends BaseView<HelloWorldView.ActionDelegate> 
 
     /**
      * Constructor.
-     *
-     * @param resources the {@link PartStackUIResources}
      */
-    @Inject
-    public HelloWorldViewImpl(PartStackUIResources resources){
-        super(resources);
+    public HelloWorldViewImpl() {
         Label label = new Label("Hello World");
         setContentWidget(label);
     }
+
 }

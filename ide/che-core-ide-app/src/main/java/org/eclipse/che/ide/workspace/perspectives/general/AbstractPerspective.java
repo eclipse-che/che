@@ -44,9 +44,6 @@ import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 import static org.eclipse.che.ide.api.parts.PartStackType.INFORMATION;
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 import static org.eclipse.che.ide.api.parts.PartStackType.TOOLING;
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.LEFT;
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
 
 /**
  * The class which contains general business logic for all perspectives.
@@ -93,19 +90,19 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
 
         view.setDelegate(this);
 
-        PartStackView navigationView = partViewFactory.create(LEFT, view.getLeftPanel());
+        PartStackView navigationView = partViewFactory.create(view.getLeftPanel());
         leftPartController = controllerFactory.createController(view.getSplitPanel(), view.getNavigationPanel());
         PartStack navigationPartStack = stackPresenterFactory.create(navigationView, leftPartController);
         navigationPartStack.setDelegate(this);
         partStacks.put(NAVIGATION, navigationPartStack);
 
-        PartStackView informationView = partViewFactory.create(BELOW, view.getBottomPanel());
+        PartStackView informationView = partViewFactory.create(view.getBottomPanel());
         belowPartController = controllerFactory.createController(view.getSplitPanel(), view.getInformationPanel());
         PartStack informationStack = stackPresenterFactory.create(informationView, belowPartController);
         informationStack.setDelegate(this);
         partStacks.put(INFORMATION, informationStack);
 
-        PartStackView toolingView = partViewFactory.create(RIGHT, view.getRightPanel());
+        PartStackView toolingView = partViewFactory.create(view.getRightPanel());
         rightPartController = controllerFactory.createController(view.getSplitPanel(), view.getToolPanel());
         PartStack toolingPartStack = stackPresenterFactory.create(toolingView, rightPartController);
         toolingPartStack.setDelegate(this);
