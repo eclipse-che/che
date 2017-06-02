@@ -33,9 +33,11 @@ public class PHPUnitTestActionGroup implements TestAction {
     private final Action runContainerTestAction;
 
     @Inject
-    public PHPUnitTestActionGroup(ActionManager actionManager, PHPRunScriptTestAction runScriptTestAction,
-            PHPRunScriptTestEditorAction runScriptTestEditorAction, PHPRunContainerTestAction runContainerTestAction,
-            KeyBindingAgent keyBinding) {
+    public PHPUnitTestActionGroup(ActionManager actionManager,
+                                  PHPRunScriptTestAction runScriptTestAction,
+                                  PHPRunScriptTestEditorAction runScriptTestEditorAction,
+                                  PHPRunContainerTestAction runContainerTestAction,
+                                  KeyBindingAgent keyBinding) {
         actionManager.registerAction("PHPRunScriptTestAction", runScriptTestAction);
         actionManager.registerAction("PHPRunScriptTestEditorAction", runScriptTestEditorAction);
         actionManager.registerAction("PHPRunContainerTestAction", runContainerTestAction);

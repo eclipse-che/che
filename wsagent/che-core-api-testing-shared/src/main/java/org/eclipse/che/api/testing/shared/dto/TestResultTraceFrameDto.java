@@ -35,8 +35,7 @@ public interface TestResultTraceFrameDto {
     void setTraceFrame(String traceFrame);
 
     /**
-     * Returns trace frame simple location DTO (i.e. file with related
-     * method/function definition).
+     * Returns trace frame simple location DTO (i.e. file with related method/function definition).
      * 
      * @return trace frame simple location DTO
      */

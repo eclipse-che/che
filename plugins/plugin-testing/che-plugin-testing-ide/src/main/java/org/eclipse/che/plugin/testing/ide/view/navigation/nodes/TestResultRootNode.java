@@ -37,12 +37,14 @@ public class TestResultRootNode extends AbstractTestResultTreeNode {
     private final TestResultRootDto testResultRootDto;
 
     @Inject
-    public TestResultRootNode(TestServiceClient testServiceClient, TestResultNodeFactory nodeFactory,
-            TestResources testResources, @Assisted TestResultRootDto testResultRootDto,
-            @Assisted String frameworkName) {
+    public TestResultRootNode(TestServiceClient testServiceClient,
+                              TestResultNodeFactory nodeFactory,
+                              TestResources testResources,
+                              @Assisted TestResultRootDto testResultRootDto,
+                              @Assisted String frameworkName) {
         super(testServiceClient, nodeFactory, testResources, frameworkName);
         this.testResultRootDto = testResultRootDto;
-        
+
     }
 
     @Override
@@ -66,7 +68,7 @@ public class TestResultRootNode extends AbstractTestResultTreeNode {
     public TestResultStatus getTestStatus() {
         return testResultRootDto.getStatus();
     }
-    
+
     @Override
     public TestResultTraceDto getTestTrace() {
         return testResultRootDto.getTrace();
@@ -76,7 +78,7 @@ public class TestResultRootNode extends AbstractTestResultTreeNode {
     protected Promise<List<Node>> getChildrenImpl() {
         final List<Node> children = new ArrayList<Node>();
         Promise<List<TestResultDto>> promise = testServiceClient.getTestResults(frameworkName,
-                testResultRootDto.getResultPath());
+                                                                                testResultRootDto.getResultPath());
         return promise.then(new Function<List<TestResultDto>, List<Node>>() {
             @Override
             public List<Node> apply(List<TestResultDto> arg) {

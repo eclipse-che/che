@@ -21,9 +21,9 @@ import org.eclipse.che.plugin.testing.phpunit.server.PHPUnitMessageParser;
  */
 abstract public class AbstractPHPUnitElement {
 
-    protected String file = "";
-    protected boolean isFiltered = false;
-    protected int line = 0;
+    protected String                 file       = "";
+    protected boolean                isFiltered = false;
+    protected int                    line       = 0;
     protected AbstractPHPUnitElement parent;
 
     public AbstractPHPUnitElement(final Map<?, ?> properties, final AbstractPHPUnitElement parent) {
@@ -72,8 +72,7 @@ abstract public class AbstractPHPUnitElement {
     /**
      * Checks if this element is filtered.
      * 
-     * @return <code>true</code> if this element is filtered, <code>false</code>
-     *         otherwise
+     * @return <code>true</code> if this element is filtered, <code>false</code> otherwise
      */
     public boolean isFiltered() {
         return isFiltered;

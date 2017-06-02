@@ -38,8 +38,8 @@ import org.slf4j.LoggerFactory;
  */
 public class PHPUnitTestRunner implements TestRunner {
 
-    public static final Logger LOG = LoggerFactory.getLogger(PHPUnitTestRunner.class);
-    public static final String RUNNER_ID = "PHPUnit";
+    public static final Logger      LOG       = LoggerFactory.getLogger(PHPUnitTestRunner.class);
+    public static final String      RUNNER_ID = "PHPUnit";
 
     private final PHPUnitTestEngine testEngine;
 

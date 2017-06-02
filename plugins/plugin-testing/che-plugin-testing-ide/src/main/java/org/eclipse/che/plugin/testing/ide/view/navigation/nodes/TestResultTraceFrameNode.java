@@ -35,14 +35,15 @@ import com.google.inject.assistedinject.Assisted;
  */
 public class TestResultTraceFrameNode extends AbstractTreeNode implements HasPresentation, HasAction {
 
-    private final TestResources testResources;
-    private final SimpleLocationHandler simpleLocationHandler;
+    private final TestResources           testResources;
+    private final SimpleLocationHandler   simpleLocationHandler;
     private final TestResultTraceFrameDto testResultTraceFrameDto;
-    private NodePresentation nodePresentation;
+    private NodePresentation              nodePresentation;
 
     @Inject
-    public TestResultTraceFrameNode(TestResources testResources, SimpleLocationHandler simpleLocationHandler,
-            @Assisted TestResultTraceFrameDto testResultTraceFrameDto) {
+    public TestResultTraceFrameNode(TestResources testResources,
+                                    SimpleLocationHandler simpleLocationHandler,
+                                    @Assisted TestResultTraceFrameDto testResultTraceFrameDto) {
         this.testResources = testResources;
         this.simpleLocationHandler = simpleLocationHandler;
         this.testResultTraceFrameDto = testResultTraceFrameDto;

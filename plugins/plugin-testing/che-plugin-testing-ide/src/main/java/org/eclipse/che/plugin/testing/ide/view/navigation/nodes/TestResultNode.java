@@ -37,13 +37,16 @@ import com.google.inject.assistedinject.Assisted;
  */
 public class TestResultNode extends AbstractTestResultTreeNode implements HasAction {
 
-    private final TestResultDto testResultDto;
+    private final TestResultDto         testResultDto;
     private final SimpleLocationHandler simpleLocationHandler;
 
     @Inject
-    public TestResultNode(TestServiceClient testServiceClient, TestResultNodeFactory nodeFactory,
-            TestResources testResources, SimpleLocationHandler simpleLocationHandler,
-            @Assisted TestResultDto testResultDto, @Assisted String frameworkName) {
+    public TestResultNode(TestServiceClient testServiceClient,
+                          TestResultNodeFactory nodeFactory,
+                          TestResources testResources,
+                          SimpleLocationHandler simpleLocationHandler,
+                          @Assisted TestResultDto testResultDto,
+                          @Assisted String frameworkName) {
         super(testServiceClient, nodeFactory, testResources, frameworkName);
         this.testResultDto = testResultDto;
         this.simpleLocationHandler = simpleLocationHandler;
@@ -88,7 +91,7 @@ public class TestResultNode extends AbstractTestResultTreeNode implements HasAct
     protected Promise<List<Node>> getChildrenImpl() {
         final List<Node> children = new ArrayList<Node>();
         Promise<List<TestResultDto>> promise = testServiceClient.getTestResults(frameworkName,
-                testResultDto.getResultPath());
+                                                                                testResultDto.getResultPath());
         return promise.then(new Function<List<TestResultDto>, List<Node>>() {
             @Override
             public List<Node> apply(List<TestResultDto> arg) {

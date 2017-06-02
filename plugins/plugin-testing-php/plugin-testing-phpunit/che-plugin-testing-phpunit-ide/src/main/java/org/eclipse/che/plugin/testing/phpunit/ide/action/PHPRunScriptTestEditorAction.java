@@ -37,14 +37,18 @@ import com.google.inject.Inject;
 public class PHPRunScriptTestEditorAction extends ProjectAction {
 
     private final TestActionRunner runner;
-    private final AppContext appContext;
-    private final EditorAgent editorAgent;
+    private final AppContext       appContext;
+    private final EditorAgent      editorAgent;
     private final FileTypeRegistry fileTypeRegistry;
 
     @Inject
-    public PHPRunScriptTestEditorAction(TestActionRunner runner, EditorAgent editorAgent,
-            FileTypeRegistry fileTypeRegistry, PHPUnitTestResources resources, AppContext appContext,
-            SelectionAgent selectionAgent, PHPUnitTestLocalizationConstant localization) {
+    public PHPRunScriptTestEditorAction(TestActionRunner runner,
+                                        EditorAgent editorAgent,
+                                        FileTypeRegistry fileTypeRegistry,
+                                        PHPUnitTestResources resources,
+                                        AppContext appContext,
+                                        SelectionAgent selectionAgent,
+                                        PHPUnitTestLocalizationConstant localization) {
         super(localization.actionRunScriptTitle(), localization.actionRunScriptDescription(), resources.testIcon());
         this.runner = runner;
         this.appContext = appContext;

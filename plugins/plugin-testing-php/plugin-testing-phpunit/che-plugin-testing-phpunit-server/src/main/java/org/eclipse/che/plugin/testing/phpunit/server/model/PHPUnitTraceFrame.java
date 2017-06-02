@@ -22,9 +22,9 @@ import org.eclipse.che.plugin.testing.phpunit.server.PHPUnitMessageParser;
  */
 public class PHPUnitTraceFrame extends AbstractPHPUnitElement {
 
-    private String traceFunction = ""; //$NON-NLS-1$
-    private String traceClass = ""; //$NON-NLS-1$
-    private String traceType = PHPUnitMessageParser.CALL_DYNAMIC;
+    private String traceFunction = "";                               //$NON-NLS-1$
+    private String traceClass    = "";                               //$NON-NLS-1$
+    private String traceType     = PHPUnitMessageParser.CALL_DYNAMIC;
 
     public PHPUnitTraceFrame(final Map<?, ?> frame, final AbstractPHPUnitTestEvent parent) {
         super(frame, parent);

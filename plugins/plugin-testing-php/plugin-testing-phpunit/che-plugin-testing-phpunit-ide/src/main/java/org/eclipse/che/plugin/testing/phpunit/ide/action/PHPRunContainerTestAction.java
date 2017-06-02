@@ -40,14 +40,20 @@ import com.google.inject.Inject;
 public class PHPRunContainerTestAction extends AbstractPerspectiveAction {
 
     private final TestActionRunner runner;
-    private final AppContext appContext;
-    private final SelectionAgent selectionAgent;
+    private final AppContext       appContext;
+    private final SelectionAgent   selectionAgent;
 
     @Inject
-    public PHPRunContainerTestAction(TestActionRunner runner, PHPUnitTestResources resources, AppContext appContext,
-            SelectionAgent selectionAgent, PHPUnitTestLocalizationConstant localization) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.actionRunContainerTitle(),
-                localization.actionRunScriptDescription(), null, resources.testIcon());
+    public PHPRunContainerTestAction(TestActionRunner runner,
+                                     PHPUnitTestResources resources,
+                                     AppContext appContext,
+                                     SelectionAgent selectionAgent,
+                                     PHPUnitTestLocalizationConstant localization) {
+        super(Arrays.asList(PROJECT_PERSPECTIVE_ID),
+              localization.actionRunContainerTitle(),
+              localization.actionRunScriptDescription(),
+              null,
+              resources.testIcon());
         this.runner = runner;
         this.appContext = appContext;
         this.selectionAgent = selectionAgent;

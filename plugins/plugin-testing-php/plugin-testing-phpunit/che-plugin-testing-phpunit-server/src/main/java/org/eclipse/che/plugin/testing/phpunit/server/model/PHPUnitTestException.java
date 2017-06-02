@@ -22,8 +22,8 @@ import org.eclipse.che.plugin.testing.phpunit.server.PHPUnitMessageParser;
  */
 public class PHPUnitTestException extends AbstractPHPUnitTestEvent {
 
-    private static final String TOP_CLASS = "Exception"; //$NON-NLS-1$
-    private String exceptionClass = TOP_CLASS;
+    private static final String TOP_CLASS      = "Exception"; //$NON-NLS-1$
+    private String              exceptionClass = TOP_CLASS;
 
     public PHPUnitTestException(Map<?, ?> exception, PHPUnitTestCase parent) {
         super(exception, parent);

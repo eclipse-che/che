@@ -67,8 +67,7 @@ public interface TestResultDto {
     void setName(String name);
 
     /**
-     * Returns additional text (i.e. test execution time) that will be added as
-     * info text in related tree element label.
+     * Returns additional text (i.e. test execution time) that will be added as info text in related tree element label.
      * 
      * @return info text
      */
@@ -96,8 +95,7 @@ public interface TestResultDto {
     void setTrace(TestResultTraceDto traceDto);
 
     /**
-     * Returns test result simple location DTO (i.e. file with related test
-     * case).
+     * Returns test result simple location DTO (i.e. file with related test case).
      * 
      * @return test result simple location DTO
      */

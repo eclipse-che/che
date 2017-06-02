@@ -88,8 +88,8 @@ class PHPUnitTestResultsProvider {
         testResultDto.setName(phpTestResult.getName());
         testResultDto.setTrace(getTestTrace(phpTestResult));
         testResultDto.setInfoText(getTimeString(phpTestResult.getTime()));
-        testResultDto.setType(
-                phpTestResult instanceof PHPUnitTestSuite ? TestResultType.TEST_SUITE : TestResultType.TEST_CASE);
+        testResultDto.setType(phpTestResult instanceof PHPUnitTestSuite ? TestResultType.TEST_SUITE
+                                                                        : TestResultType.TEST_CASE);
         SimpleLocationDto simpleLocationDto = DtoFactory.getInstance().createDto(SimpleLocationDto.class);
         simpleLocationDto.setResourcePath(phpTestResult.getFile());
         simpleLocationDto.setLineNumber(phpTestResult.getLine() - 1);
@@ -108,8 +108,9 @@ class PHPUnitTestResultsProvider {
                 testResultTraceDto.setMessage(phpTestEvent.getExceptionClass() + ": " + phpTestEvent.getMessage());
                 List<TestResultTraceFrameDto> traceFrames = new ArrayList<>();
                 for (PHPUnitTraceFrame phpTraceFrame : phpTestEvent.getTrace()) {
-                    TestResultTraceFrameDto testResultTraceFrameDto = DtoFactory.getInstance()
-                            .createDto(TestResultTraceFrameDto.class);
+                    TestResultTraceFrameDto testResultTraceFrameDto =
+                                                                    DtoFactory.getInstance()
+                                                                              .createDto(TestResultTraceFrameDto.class);
                     testResultTraceFrameDto.setTraceFrame(phpTraceFrame.toString());
                     SimpleLocationDto simpleLocationDto = DtoFactory.getInstance().createDto(SimpleLocationDto.class);
                     simpleLocationDto.setResourcePath(phpTraceFrame.getFile());

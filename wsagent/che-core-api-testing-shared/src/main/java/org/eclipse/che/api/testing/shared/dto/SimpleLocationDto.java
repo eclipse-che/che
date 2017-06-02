@@ -13,8 +13,7 @@ package org.eclipse.che.api.testing.shared.dto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Provides info about file to be opened in the editor and line number on which
- * the selection should be made.
+ * Provides info about file to be opened in the editor and line number on which the selection should be made.
  * 
  * @author Bartlomiej Laczkowski
  */

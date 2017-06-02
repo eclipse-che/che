@@ -25,17 +25,17 @@ public class PHPUnitTestSuite extends AbstractPHPUnitTestResult {
 
     protected class StatusCount {
         public int[] counts = { 0, 0, 0, 0, 0, 0, 0 }; // STATUS_STARTED,
-                                                    // STATUS_PASS,
-                                                    // STATUS_SKIP,
-                                                    // STATUS_INCOMPLETE,
-                                                    // STATUS_FAIL,
-                                                    // STATUS_ERROR
+                                                       // STATUS_PASS,
+                                                       // STATUS_SKIP,
+                                                       // STATUS_INCOMPLETE,
+                                                       // STATUS_FAIL,
+                                                       // STATUS_ERROR
     }
 
-    protected final StatusCount statusCount = new StatusCount();
-    private Set<AbstractPHPUnitTestResult> children = null;
-    private int runCount = 0;
-    private int totalCount;
+    protected final StatusCount            statusCount = new StatusCount();
+    private Set<AbstractPHPUnitTestResult> children    = null;
+    private int                            runCount    = 0;
+    private int                            totalCount;
 
     public PHPUnitTestSuite(final Map<?, ?> test, final PHPUnitTestSuite parent) {
         super(test, parent);
@@ -119,5 +119,5 @@ public class PHPUnitTestSuite extends AbstractPHPUnitTestResult {
         if (parent != null)
             ((PHPUnitTestSuite) parent).addRunCount(count);
     }
-    
+
 }

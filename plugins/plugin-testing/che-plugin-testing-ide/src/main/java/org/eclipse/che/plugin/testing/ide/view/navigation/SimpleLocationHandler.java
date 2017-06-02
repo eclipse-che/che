@@ -29,8 +29,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 /**
- * Simple location DTO handler. It is responsible for opening the provided
- * location.
+ * Simple location DTO handler. It is responsible for opening the provided location.
  * 
  * @author Bartlomiej Laczkowski
  */
@@ -38,8 +37,8 @@ public class SimpleLocationHandler {
 
     private static final String PROJECTS_ROOT = "/projects";
 
-    private final EditorAgent editorAgent;
-    private final AppContext appContext;
+    private final EditorAgent   editorAgent;
+    private final AppContext    appContext;
 
     @Inject
     public SimpleLocationHandler(EditorAgent editorAgent, AppContext appContext) {
@@ -109,8 +108,9 @@ public class SimpleLocationHandler {
         }
     }
 
-    private void openFileAndScrollToLine(final VirtualFile virtualFile, final int scrollToLine,
-            final AsyncCallback<VirtualFile> callback) {
+    private void openFileAndScrollToLine(final VirtualFile virtualFile,
+                                         final int scrollToLine,
+                                         final AsyncCallback<VirtualFile> callback) {
         editorAgent.openEditor(virtualFile, new EditorAgent.OpenEditorCallback() {
             @Override
             public void onEditorOpened(EditorPartPresenter editor) {
@@ -136,8 +136,8 @@ public class SimpleLocationHandler {
 
             @Override
             public void onInitializationFailed() {
-                callback.onFailure(
-                        new IllegalStateException("Initialization " + virtualFile.getName() + " in the editor failed"));
+                callback.onFailure(new IllegalStateException("Initialization " + virtualFile.getName()
+                                                             + " in the editor failed"));
             }
         });
     }

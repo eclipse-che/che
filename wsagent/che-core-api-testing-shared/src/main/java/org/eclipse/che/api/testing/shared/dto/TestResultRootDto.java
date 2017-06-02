@@ -66,8 +66,7 @@ public interface TestResultRootDto {
     void setName(String label);
 
     /**
-     * Returns additional text (i.e. test execution time) that will be added as
-     * info text in related tree element label.
+     * Returns additional text (i.e. test execution time) that will be added as info text in related tree element label.
      * 
      * @return info text
      */
@@ -109,11 +108,9 @@ public interface TestResultRootDto {
     void setResultPath(List<String> resultPath);
 
     /**
-     * Returns <code>true</code> if this result root is empty (has no test
-     * results at all).
+     * Returns <code>true</code> if this result root is empty (has no test results at all).
      * 
-     * @return <code>true</code> if this result root is empty,
-     *         <code>false</code> otherwise
+     * @return <code>true</code> if this result root is empty, <code>false</code> otherwise
      */
     boolean isEmpty();
 

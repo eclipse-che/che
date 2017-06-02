@@ -13,8 +13,7 @@ package org.eclipse.che.plugin.testing.phpunit.ide;
 import com.google.gwt.i18n.client.Messages;
 
 /**
- * Localization constants. Interface to represent the constants defined in
- * resource bundle: 'PHPUnitTestLocalizationConstant.properties'.
+ * Localization constants. Interface to represent the constants defined in resource bundle: 'PHPUnitTestLocalizationConstant.properties'.
  *
  * @author Bartlomiej Laczkowski
  */

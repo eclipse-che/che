@@ -20,12 +20,12 @@ public class PHPUnitTestRoot extends PHPUnitTestSuite {
     public PHPUnitTestRoot() {
         super(null, null);
     }
-    
+
     @Override
     public String getName() {
         return "Test Results";
     }
-    
+
     @Override
     public void setStatus(final int status) {
         statusCount.counts[status]++;
@@ -33,5 +33,5 @@ public class PHPUnitTestRoot extends PHPUnitTestSuite {
         if (parent != null)
             ((PHPUnitTestSuite) parent).setStatus(status);
     }
-    
+
 }

@@ -24,8 +24,8 @@ import org.eclipse.che.plugin.testing.phpunit.server.PHPUnitMessageParser;
  */
 public class PHPUnitTestCase extends AbstractPHPUnitTestResult {
 
-    protected PHPUnitTestException exception = null;
-    protected List<PHPUnitTestWarning> warnings = null;
+    protected PHPUnitTestException     exception = null;
+    protected List<PHPUnitTestWarning> warnings  = null;
 
     public PHPUnitTestCase(final Map<?, ?> test, final PHPUnitTestSuite parent) {
         super(test, parent);

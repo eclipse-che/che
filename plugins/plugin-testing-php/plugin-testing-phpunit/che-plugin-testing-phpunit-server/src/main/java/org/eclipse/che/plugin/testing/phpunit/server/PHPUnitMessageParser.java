@@ -26,37 +26,37 @@ import org.eclipse.che.plugin.testing.phpunit.server.model.PHPUnitTestWarning;
  */
 public class PHPUnitMessageParser {
 
-    public static final String CALL_DYNAMIC = "->";
-    public static final String CALL_STATIC = "::";
-    private static final String ELEMENT_EVENT = "event";
-    private static final String ELEMENT_EXCEPTION = "exception";
+    public static final String  CALL_DYNAMIC             = "->";
+    public static final String  CALL_STATIC              = "::";
+    private static final String ELEMENT_EVENT            = "event";
+    private static final String ELEMENT_EXCEPTION        = "exception";
     private static final String ELEMENT_TARGET_TESTSUITE = "testsuite";
-    private static final String ELEMENT_TARGET_TESTCASE = "testcase";
-    private static final String ELEMENT_TEST = "test";
-    private static final String ELEMENT_WARNINGS = "warnings";
-    public static final String PROPERTY_CLASS = "class";
-    public static final String PROPERTY_CODE = "code";
-    public static final String PROPERTY_COUNT = "tests";
-    public static final String PROPERTY_FILE = "file";
-    public static final String PROPERTY_FILTERED = "filtered";
-    public static final String PROPERTY_LINE = "line";
-    public static final String PROPERTY_MESSAGE = "message";
-    public static final String PROPERTY_DIFF = "diff";
-    public static final String PROPERTY_NAME = "name";
-    public static final String PROPERTY_TIME = "time";
-    public static final String PROPERTY_TARGET = "target";
-    public static final String PROPERTY_TRACE = "trace";
-    public static final String STATUS_ERROR = "error";
-    public static final String STATUS_WARNING = "warning";
-    public static final String STATUS_FAIL = "fail";
-    public static final String STATUS_INCOMPLETE = "incomplete";
-    public static final String STATUS_PASS = "pass";
-    public static final String STATUS_SKIP = "skip";
-    public static final String TAG_END = "end";
-    public static final String TAG_START = "start";
+    private static final String ELEMENT_TARGET_TESTCASE  = "testcase";
+    private static final String ELEMENT_TEST             = "test";
+    private static final String ELEMENT_WARNINGS         = "warnings";
+    public static final String  PROPERTY_CLASS           = "class";
+    public static final String  PROPERTY_CODE            = "code";
+    public static final String  PROPERTY_COUNT           = "tests";
+    public static final String  PROPERTY_FILE            = "file";
+    public static final String  PROPERTY_FILTERED        = "filtered";
+    public static final String  PROPERTY_LINE            = "line";
+    public static final String  PROPERTY_MESSAGE         = "message";
+    public static final String  PROPERTY_DIFF            = "diff";
+    public static final String  PROPERTY_NAME            = "name";
+    public static final String  PROPERTY_TIME            = "time";
+    public static final String  PROPERTY_TARGET          = "target";
+    public static final String  PROPERTY_TRACE           = "trace";
+    public static final String  STATUS_ERROR             = "error";
+    public static final String  STATUS_WARNING           = "warning";
+    public static final String  STATUS_FAIL              = "fail";
+    public static final String  STATUS_INCOMPLETE        = "incomplete";
+    public static final String  STATUS_PASS              = "pass";
+    public static final String  STATUS_SKIP              = "skip";
+    public static final String  TAG_END                  = "end";
+    public static final String  TAG_START                = "start";
 
-    private PHPUnitTestSuite currentGroup;
-    private PHPUnitTestCase currentTestCase;
+    private PHPUnitTestSuite    currentGroup;
+    private PHPUnitTestCase     currentTestCase;
 
     public PHPUnitMessageParser(PHPUnitTestRoot testRoot) {
         this.currentGroup = testRoot;

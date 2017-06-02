@@ -53,9 +53,9 @@ public class PHPUnitTestEngine {
 
     private final class PrinterListener implements Runnable {
 
-        private ServerSocket serverSocket;
-        private Socket socket;
-        private Gson gson = new GsonBuilder().create();
+        private ServerSocket    serverSocket;
+        private Socket          socket;
+        private Gson            gson = new GsonBuilder().create();
         private ExecutorService threadExecutor;
 
         public PrinterListener() {
@@ -90,13 +90,11 @@ public class PHPUnitTestEngine {
             try {
                 if (socket != null && !socket.isClosed())
                     socket.close();
-            } catch (final Exception e) {
-            }
+            } catch (final Exception e) {}
             try {
                 if (serverSocket != null && !serverSocket.isClosed())
                     serverSocket.close();
-            } catch (final IOException e) {
-            }
+            } catch (final IOException e) {}
             threadExecutor.shutdown();
         }
 
@@ -128,17 +126,17 @@ public class PHPUnitTestEngine {
         }
     }
 
-    private static final String PRINTER_NAME = "ZendPHPUnitLogger";
-    private static final String PRINTER_DIRECTORY = "phpunit-printer";
-    private static final String PHPUNIT_GLOBAL = "phpunit";
-    private static final String PHPUNIT_COMPOSER = "/vendor/bin/phpunit";
-    private static final int PRINTER_PORT = 7478;
+    private static final String        PRINTER_NAME      = "ZendPHPUnitLogger";
+    private static final String        PRINTER_DIRECTORY = "phpunit-printer";
+    private static final String        PHPUNIT_GLOBAL    = "phpunit";
+    private static final String        PHPUNIT_COMPOSER  = "/vendor/bin/phpunit";
+    private static final int           PRINTER_PORT      = 7478;
 
-    private final ProjectManager projectManager;
-    private final CountDownLatch latchReady = new CountDownLatch(1);
-    private final CountDownLatch latchDone = new CountDownLatch(1);
+    private final ProjectManager       projectManager;
+    private final CountDownLatch       latchReady        = new CountDownLatch(1);
+    private final CountDownLatch       latchDone         = new CountDownLatch(1);
 
-    private PHPUnitTestRoot phpTestsRoot;
+    private PHPUnitTestRoot            phpTestsRoot;
     private PHPUnitTestResultsProvider testResultsProvider;
 
     public PHPUnitTestEngine(ProjectManager projectManager) {
@@ -157,7 +155,8 @@ public class PHPUnitTestEngine {
         String projectAbsolutePath = testParameters.get("absoluteProjectPath");
         String testTargetRelativePath = testParameters.get("testTarget");
         File testTargetFile = getTestTargetFile(testTargetRelativePath, projectAbsolutePath);
-        File testTargetWorkingDirectory = testTargetFile.isDirectory() ? testTargetFile : testTargetFile.getParentFile();
+        File testTargetWorkingDirectory =
+                                        testTargetFile.isDirectory() ? testTargetFile : testTargetFile.getParentFile();
         // Get appropriate path to executable
         String phpUnitExecutable = PHPUNIT_GLOBAL;
         if (hasComposerRunner(projectPath)) {
@@ -177,11 +176,15 @@ public class PHPUnitTestEngine {
         } catch (InterruptedException e) {
             LOG.error(e.getMessage(), e);
         }
-        final CommandLine cmdRunTests = new CommandLine(phpUnitExecutable, "--include-path", printerDirAbsolutePath,
-                "--printer", PRINTER_NAME, getTestTarget(testTargetFile));
+        final CommandLine cmdRunTests = new CommandLine(phpUnitExecutable,
+                                                        "--include-path",
+                                                        printerDirAbsolutePath,
+                                                        "--printer",
+                                                        PRINTER_NAME,
+                                                        getTestTarget(testTargetFile));
         ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true)
-                .directory(testTargetWorkingDirectory)
-                .command(cmdRunTests.toShellCommand());
+                                                .directory(testTargetWorkingDirectory)
+                                                .command(cmdRunTests.toShellCommand());
         pb.environment().put("ZEND_PHPUNIT_PORT", String.valueOf(PRINTER_PORT));
         Process processRunPHPUnitTests = pb.start();
         final StringBuilder stdErrOut = new StringBuilder();
@@ -235,16 +238,19 @@ public class PHPUnitTestEngine {
         }
         return tmpPrinterFile;
     }
-    
+
     private File getTestTargetFile(String testTargetRelativePath, String projectAbsolutePath) {
         if (Path.of(testTargetRelativePath).length() > 1)
-            return new File(Path.of(projectAbsolutePath).newPath(Path.of(testTargetRelativePath).subPath(1)).toString());
+            return new File(Path.of(projectAbsolutePath)
+                                .newPath(Path.of(testTargetRelativePath).subPath(1))
+                                .toString());
         return new File(Path.of(projectAbsolutePath).toString());
     }
 
     private String getTestTarget(File testTargetFile) {
         if (testTargetFile.isDirectory()) {
-            if ((new File(testTargetFile, "phpunit.xml").exists() || new File(testTargetFile, "phpunit.xml.dist").exists())) {
+            if ((new File(testTargetFile, "phpunit.xml").exists()
+                 || new File(testTargetFile, "phpunit.xml.dist").exists())) {
                 return "";
             }
             return testTargetFile.getAbsolutePath();
@@ -263,7 +269,7 @@ public class PHPUnitTestEngine {
             return false;
         }
         try (InputStream inputStream = composerJson.getVirtualFile().getContent();
-                InputStreamReader reader = new InputStreamReader(inputStream);) {
+             InputStreamReader reader = new InputStreamReader(inputStream);) {
             Gson gson = new GsonBuilder().create();
             Map<String, ?> composerJsonMap = gson.fromJson(reader, LinkedTreeMap.class);
             Map<String, String> requireDev = (Map<String, String>) composerJsonMap.get("require-dev");
@@ -277,5 +283,5 @@ public class PHPUnitTestEngine {
         }
         return false;
     }
-    
+
 }

@@ -23,8 +23,8 @@ import org.eclipse.che.plugin.testing.phpunit.server.PHPUnitMessageParser;
  */
 public abstract class AbstractPHPUnitTestEvent extends AbstractPHPUnitElement {
 
-    protected String message;
-    protected String diff;
+    protected String                  message;
+    protected String                  diff;
     protected List<PHPUnitTraceFrame> trace;
 
     public AbstractPHPUnitTestEvent(final Map<?, ?> event, final AbstractPHPUnitElement parent) {

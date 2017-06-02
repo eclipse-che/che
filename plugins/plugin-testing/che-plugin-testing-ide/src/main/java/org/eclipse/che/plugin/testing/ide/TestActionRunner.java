@@ -35,13 +35,14 @@ import com.google.inject.Inject;
  */
 public class TestActionRunner {
 
-    private final TestServiceClient service;
+    private final TestServiceClient   service;
     private final NotificationManager notificationManager;
     private final TestResultPresenter presenter;
 
     @Inject
-    public TestActionRunner(TestServiceClient service, NotificationManager notificationManager,
-            TestResultPresenter presenter) {
+    public TestActionRunner(TestServiceClient service,
+                            NotificationManager notificationManager,
+                            TestResultPresenter presenter) {
         this.service = service;
         this.notificationManager = notificationManager;
         this.presenter = presenter;

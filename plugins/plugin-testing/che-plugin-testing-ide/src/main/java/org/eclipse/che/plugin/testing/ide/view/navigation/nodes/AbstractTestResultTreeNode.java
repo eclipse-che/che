@@ -30,16 +30,18 @@ import org.eclipse.che.plugin.testing.ide.view.navigation.factory.TestResultNode
  */
 public abstract class AbstractTestResultTreeNode extends AbstractTreeNode implements HasPresentation {
 
-    protected final TestResources testResources;
+    protected final TestResources         testResources;
     protected final TestResultNodeFactory nodeFactory;
-    protected final TestServiceClient testServiceClient;
-    protected final String frameworkName;
-    private NodePresentation nodePresentation;
-    
-    private static final String TEXT_INFO_CSS = "color: " + getEditorInfoTextColor() + "; font-size: 11px";
+    protected final TestServiceClient     testServiceClient;
+    protected final String                frameworkName;
+    private NodePresentation              nodePresentation;
 
-    public AbstractTestResultTreeNode(TestServiceClient testServiceClient, TestResultNodeFactory nodeFactory,
-            TestResources testResources, String frameworkName) {
+    private static final String           TEXT_INFO_CSS = "color: " + getEditorInfoTextColor() + "; font-size: 11px";
+
+    public AbstractTestResultTreeNode(TestServiceClient testServiceClient,
+                                      TestResultNodeFactory nodeFactory,
+                                      TestResources testResources,
+                                      String frameworkName) {
         this.testServiceClient = testServiceClient;
         this.nodeFactory = nodeFactory;
         this.testResources = testResources;
