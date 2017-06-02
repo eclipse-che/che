@@ -13,8 +13,8 @@ package org.eclipse.che.ide.api.editor;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 
-import org.eclipse.che.ide.api.parts.AbstractPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
+import org.eclipse.che.ide.api.parts.AbstractPartPresenter;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;

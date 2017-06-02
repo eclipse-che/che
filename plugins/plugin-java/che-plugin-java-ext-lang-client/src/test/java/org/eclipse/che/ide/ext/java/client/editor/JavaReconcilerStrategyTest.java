@@ -14,6 +14,7 @@ import com.google.common.base.Optional;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.document.Document;
@@ -34,12 +35,14 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingProjectState.IN_PROGRESS;
 import static org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingProjectState.RESOLVED;
@@ -48,6 +51,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +61,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class JavaReconcilerStrategyTest {
     private static final String FILE_NAME = "TestClass.java";
+    private static final String FILE_PATH = "some/path/to/file/TestClass.java";
 
     @Mock
     private EventBus                            eventBus;
@@ -82,9 +87,11 @@ public class JavaReconcilerStrategyTest {
     private ResolvingProjectStateHolderRegistry resolvingProjectStateHolderRegistry;
     @Mock
     private JavaLocalizationConstant            localizationConstant;
+    @Mock
+    private JsonRpcPromise<ReconcileResult>     reconcileResultPromise;
 
     @Captor
-    private ArgumentCaptor<JavaReconcileClient.ReconcileCallback> reconcileCallbackCaptor;
+    private ArgumentCaptor<Consumer<ReconcileResult>> reconcileResultCaptor;
 
 
     @InjectMocks
@@ -102,7 +109,7 @@ public class JavaReconcilerStrategyTest {
         when(editorInput.getFile()).thenReturn(file);
         when(file.getName()).thenReturn(FILE_NAME);
         when(file.getRelatedProject()).thenReturn(project);
-        when(file.getLocation()).thenReturn(Path.valueOf("some/path/to/file"));
+        when(file.getLocation()).thenReturn(Path.valueOf(FILE_PATH));
 
         when(project.get()).thenReturn(projectConfig);
         when(projectConfig.getLocation()).thenReturn(Path.valueOf("some/path/to/project"));
@@ -115,6 +122,9 @@ public class JavaReconcilerStrategyTest {
         when(resolvingProjectStateHolderRegistry.getResolvingProjectStateHolder(anyString())).thenReturn(resolvingProjectStateHolder);
         when(localizationConstant.codeAssistErrorMessageResolvingProject()).thenReturn("error");
 
+        when(client.reconcile(anyString(), anyString())).thenReturn(reconcileResultPromise);
+        when(reconcileResultPromise.onSuccess(Matchers.<Consumer<ReconcileResult>>anyObject())).thenReturn(reconcileResultPromise);
+
         javaReconcilerStrategy.setDocument(mock(Document.class));
     }
 
@@ -124,9 +134,8 @@ public class JavaReconcilerStrategyTest {
 
         javaReconcilerStrategy.parse();
 
-        verify(client).reconcile(anyString(), anyString(), reconcileCallbackCaptor.capture());
-        JavaReconcileClient.ReconcileCallback reconcileCallback = reconcileCallbackCaptor.getValue();
-        reconcileCallback.onReconcile(reconcileResult);
+        verify(reconcileResultPromise).onSuccess(reconcileResultCaptor.capture());
+        reconcileResultCaptor.getValue().accept(reconcileResult);
 
         verify(reconcileResult, never()).getProblems();
         verify(reconcileResult, never()).getHighlightedPositions();
@@ -145,9 +154,40 @@ public class JavaReconcilerStrategyTest {
 
         javaReconcilerStrategy.parse();
 
-        verify(client).reconcile(anyString(), anyString(), reconcileCallbackCaptor.capture());
-        JavaReconcileClient.ReconcileCallback reconcileCallback = reconcileCallbackCaptor.getValue();
-        reconcileCallback.onReconcile(reconcileResult);
+        verify(reconcileResultPromise).onSuccess(reconcileResultCaptor.capture());
+        reconcileResultCaptor.getValue().accept(reconcileResult);
+
+        verify(reconcileResult).getProblems();
+        verify(reconcileResult).getHighlightedPositions();
+        verify(codeAssistProcessor).enableCodeAssistant();
+        verify(codeAssistProcessor, never()).disableCodeAssistant(anyString());
+        verify(highlighter).reconcile(eq(positions));
+    }
+
+    @Test
+    public void shouldSkipReconcileResultByFilePath() throws Exception {
+        reset(resolvingProjectStateHolder);
+        when(reconcileResult.getFileLocation()).thenReturn("some/path/to/stranger/file");
+
+        javaReconcilerStrategy.onReconcileOperation(reconcileResult);
+
+        verify(resolvingProjectStateHolder, never()).getState();
+        verify(reconcileResult, never()).getProblems();
+        verify(reconcileResult, never()).getHighlightedPositions();
+        verify(codeAssistProcessor, never()).enableCodeAssistant();
+        verify(codeAssistProcessor, never()).disableCodeAssistant(anyString());
+    }
+
+    @Test
+    public void shouldApplyReconcileResultAtReconcileOperation() throws Exception {
+        when(resolvingProjectStateHolder.getState()).thenReturn(RESOLVED);
+        HighlightedPosition highlightedPosition = mock(HighlightedPosition.class);
+        List<HighlightedPosition> positions = new ArrayList<>();
+        positions.add(highlightedPosition);
+        when(reconcileResult.getHighlightedPositions()).thenReturn(positions);
+        when(reconcileResult.getFileLocation()).thenReturn(FILE_PATH);
+
+        javaReconcilerStrategy.onReconcileOperation(reconcileResult);
 
         verify(reconcileResult).getProblems();
         verify(reconcileResult).getHighlightedPositions();

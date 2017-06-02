@@ -17,9 +17,7 @@ import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.plugin.testing.ide.TestAction;
-import org.eclipse.che.plugin.testing.junit.ide.action.RunAllContextTestAction;
 import org.eclipse.che.plugin.testing.junit.ide.action.RunAllTestAction;
-import org.eclipse.che.plugin.testing.junit.ide.action.RunClassContextTestAction;
 import org.eclipse.che.plugin.testing.junit.ide.action.RunClassTestAction;
 
 import com.google.inject.Inject;
@@ -30,27 +28,18 @@ import com.google.inject.Inject;
  * @author Mirage Abeysekara
  */
 public class JUnitTestAction implements TestAction {
-
-    public static final String TEST_ACTION_RUN_ALL           = "TestActionRunAll";
-    public static final String TEST_ACTION_RUN_CLASS         = "TestActionRunClass";
-    public static final String TEST_ACTION_RUN_CLASS_CONTEXT = "TestActionRunClassContext";
-    public static final String TEST_ACTION_RUN_ALL_CONTEXT   = "TestActionRunAllContext";
-    private final Action runClassTestAction;
-    private final Action runAllTestAction;
+    public static final String TEST_ACTION_RUN_CLASS = "TestJUnitActionRunClassContext";
+    public static final String TEST_ACTION_RUN_ALL   = "TestJUnitActionRunAllContext";
     private final Action runClassContextTestAction;
     private final Action runAllContextTestAction;
 
     @Inject
     public JUnitTestAction(ActionManager actionManager, 
-                           RunClassTestAction runClassTestAction,
-                           RunAllTestAction runAllTestAction, 
-                           RunClassContextTestAction runClassContextTestAction,
-                           RunAllContextTestAction runAllContextTestAction,
+                           RunClassTestAction runClassContextTestAction,
+                           RunAllTestAction runAllContextTestAction,
                            KeyBindingAgent keyBinding) {
-        actionManager.registerAction(TEST_ACTION_RUN_CLASS, runClassTestAction);
-        actionManager.registerAction(TEST_ACTION_RUN_ALL, runAllTestAction);
-        actionManager.registerAction(TEST_ACTION_RUN_CLASS_CONTEXT, runClassContextTestAction);
-        actionManager.registerAction(TEST_ACTION_RUN_ALL_CONTEXT, runAllContextTestAction);
+        actionManager.registerAction(TEST_ACTION_RUN_CLASS, runClassContextTestAction);
+        actionManager.registerAction(TEST_ACTION_RUN_ALL, runAllContextTestAction);
 
         if (UserAgent.isMac()) {
             keyBinding.getGlobal().addKey(new KeyBuilder().control().alt().charCode('z').build(), TEST_ACTION_RUN_ALL);
@@ -60,17 +49,15 @@ public class JUnitTestAction implements TestAction {
             keyBinding.getGlobal().addKey(new KeyBuilder().action().shift().charCode('z').build(), TEST_ACTION_RUN_CLASS);
         }
 
-        this.runAllTestAction = runAllTestAction;
         this.runClassContextTestAction = runClassContextTestAction;
-        this.runClassTestAction = runClassTestAction;
         this.runAllContextTestAction = runAllContextTestAction;
     }
 
 
     @Override
     public void addMainMenuItems(DefaultActionGroup testMainMenu) {
-        testMainMenu.add(runClassTestAction);
-        testMainMenu.add(runAllTestAction);
+        testMainMenu.add(runClassContextTestAction);
+        testMainMenu.add(runAllContextTestAction);
     }
 
     @Override

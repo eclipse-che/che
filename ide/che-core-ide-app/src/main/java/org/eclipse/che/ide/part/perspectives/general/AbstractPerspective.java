@@ -286,7 +286,6 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
         List<String> rules = part.getRules();
         if (rules.isEmpty() || rules.contains(perspectiveId)) {
             destPartStack.addPart(part, constraint);
-            return;
         }
     }
 

@@ -112,7 +112,7 @@ public interface EditorAgent {
      *
      * @param callback
      */
-    void saveAll(AsyncCallback callback);
+    void saveAll(AsyncCallback<Void> callback);
 
     /**
      * Current active editor

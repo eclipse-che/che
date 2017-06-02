@@ -15,12 +15,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -85,13 +81,10 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         toolBar = new DockLayoutPanel(Style.Unit.PX);
         toolBar.addStyleName(resources.partStackCss().ideBasePartToolbar());
         toolBar.getElement().setAttribute("role", "toolbar");
-        toolBar.addDomHandler(new MouseUpHandler() {
-            @Override
-            public void onMouseUp(MouseUpEvent event) {
-                //activate last focused element if user clicked on part header
-                if (lastFocused != null) {
-                    lastFocused.setFocus(true);
-                }
+        toolBar.addDomHandler(event -> {
+            //activate last focused element if user clicked on part header
+            if (lastFocused != null) {
+                lastFocused.setFocus(true);
             }
         }, MouseUpEvent.getType());
         container.addNorth(toolBar, 23);
@@ -103,7 +96,7 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         toolbarHeader.getElement().setAttribute("role", "toolbar-header");
         toolBar.addNorth(toolbarHeader, 22);
 
-        // padding 2 pixels from the right
+        //padding 2 pixels from the right
         toolbarHeader.addEast(new FlowPanel(), 2);
 
         titleLabel = new Label();
@@ -114,15 +107,8 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         addMinimizeButton();
         addMenuButton();
 
-        /**
-         * Handle double clicking on the toolbar header
-         */
-        toolbarHeader.addDomHandler(new DoubleClickHandler() {
-            @Override
-            public void onDoubleClick(DoubleClickEvent event) {
-                onToggleMaximize();
-            }
-        }, DoubleClickEvent.getType());
+        //handle double clicking on the toolbar header
+        toolbarHeader.addDomHandler(event -> onToggleMaximize(), DoubleClickEvent.getType());
     }
 
     /**
@@ -133,12 +119,7 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         minimize.getElement().setAttribute("name", "workBenchIconMinimize");
         minimizeButton = new ToolButton(minimize);
 
-        minimizeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                onMinimize();
-            }
-        });
+        minimizeButton.addClickHandler(event -> onMinimize());
 
         addToolButton(minimizeButton);
 
@@ -155,12 +136,7 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         SVGImage maximize = new SVGImage(resources.maximizePart());
         maximize.getElement().setAttribute("name", "workBenchIconMaximize");
         ToolButton maximizeButton = new ToolButton(maximize);
-        maximizeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                onToggleMaximize();
-            }
-        });
+        maximizeButton.addClickHandler(event -> onToggleMaximize());
 
         addToolButton(maximizeButton);
 
@@ -176,13 +152,10 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
     private void addMenuButton() {
         final ToolButton menuButton = new ToolButton(FontAwesome.COG + "&nbsp;" + FontAwesome.CARET_DOWN);
         menuButton.getElement().setAttribute("name", "workBenchIconMenu");
-        menuButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                int left = getAbsoluteLeft(menuButton.getElement());
-                int top = getAbsoluteTop(menuButton.getElement());
-                delegate.onPartMenu(left, top + 21);
-            }
+        menuButton.addClickHandler(event -> {
+            int left = getAbsoluteLeft(menuButton.getElement());
+            int top = getAbsoluteTop(menuButton.getElement());
+            delegate.onPartMenu(left, top + 21);
         });
 
         toolbarHeader.addEast(menuButton, 25);
@@ -327,12 +300,9 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
     public final void setFocus(boolean focused) {
         this.focused = focused;
         if (focused) {
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                @Override
-                public void execute() {
-                    focusView();
-                }
-            });
+            Scheduler.get().scheduleDeferred(this::focusView);
+        } else {
+            Scheduler.get().scheduleDeferred(this::blurView);
         }
     }
 
@@ -348,6 +318,10 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
      */
     protected void focusView() {
         getElement().focus();
+    }
+
+    protected void blurView() {
+        getElement().blur();
     }
 
 }

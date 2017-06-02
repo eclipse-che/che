@@ -425,19 +425,19 @@ public class SelectionModel implements HasSelectionHandlers<Node>, HasBeforeSele
                 Node sel = node.getNode();
                 if (e.getCtrlOrMetaKey() && isSelected(sel)) {
                     doDeselect(Collections.singletonList(sel), false);
-                    tree.focus();
+                    tree.setFocus(true);
 
                     // reset the starting location of the click when meta is used during a multiselect
                     lastSelectedNode = sel;
                 } else if (e.getCtrlOrMetaKey()) {
                     doSelect(Collections.singletonList(sel), true, false);
-                    tree.focus();
+                    tree.setFocus(true);
 
                     // reset the starting location of the click when meta is used during a multiselect
                     lastSelectedNode = sel;
                 } else if (isSelected(sel) && !e.getShiftKey() && !e.getCtrlOrMetaKey() && selectionStorage.size() > 0) {
                     doSelect(Collections.singletonList(sel), false, false);
-                    tree.focus();
+                    tree.setFocus(true);
                 }
             }
         }
@@ -466,7 +466,7 @@ public class SelectionModel implements HasSelectionHandlers<Node>, HasBeforeSele
         } else {
             switch (selectionMode) {
                 case SIMPLE:
-                    tree.focus();
+                    tree.setFocus(true);
                     if (isSelected(sel)) {
                         deselect(sel);
                     } else {
@@ -475,7 +475,7 @@ public class SelectionModel implements HasSelectionHandlers<Node>, HasBeforeSele
                     break;
 
                 case SINGLE:
-                    tree.focus();
+                    tree.setFocus(true);
                     if (isMeta && isSelected) {
                         deselect(sel);
                     } else if (!isSelected) {
@@ -497,7 +497,7 @@ public class SelectionModel implements HasSelectionHandlers<Node>, HasBeforeSele
 
                         // holding shift down, selecting the same item again, selecting itself
                         if (sel == lastSelectedNode) {
-                            tree.focus();
+                            tree.setFocus(true);
                             doSelect(Collections.singletonList(sel), false, false);
 
                         } else if (lastSelTreeEl != null && selTreeNodeEl != null) {
@@ -529,7 +529,7 @@ public class SelectionModel implements HasSelectionHandlers<Node>, HasBeforeSele
                                 }
                             }
 
-                            tree.focus();
+                            tree.setFocus(true);
                             doSelect(selectedItems, false, false);
 
                             // change back to last selected, the walking causes this need
@@ -537,14 +537,14 @@ public class SelectionModel implements HasSelectionHandlers<Node>, HasBeforeSele
                         }
 
                     } else if (!isSelected(sel)) {
-                        tree.focus();
+                        tree.setFocus(true);
                         doSelect(Collections.singletonList(sel), e.getCtrlOrMetaKey(), false);
 
                         // reset the starting location of multi select
                         lastSelectedNode = sel;
                     } else if (isSelected(sel) && !e.getShiftKey() && !e.getCtrlOrMetaKey() && !selectionStorage.isEmpty()) {
                         doSelect(Collections.singletonList(sel), false, false);
-                        tree.focus();
+                        tree.setFocus(true);
                     } else if (isSelected(sel) && !selectionStorage.isEmpty()) {
                         doDeselect(Collections.singletonList(sel), false);
                     }

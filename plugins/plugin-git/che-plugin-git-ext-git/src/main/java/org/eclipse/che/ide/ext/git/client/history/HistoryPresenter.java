@@ -27,7 +27,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus;
-import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
 import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
@@ -54,7 +54,7 @@ import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 public class HistoryPresenter implements HistoryView.ActionDelegate {
 
     private final ComparePresenter        comparePresenter;
-    private final ChangedListPresenter    changedListPresenter;
+    private final ChangesListPresenter    changesListPresenter;
     private final DialogFactory           dialogFactory;
     private final HistoryView             view;
     private final GitServiceClient        service;
@@ -71,7 +71,7 @@ public class HistoryPresenter implements HistoryView.ActionDelegate {
     @Inject
     public HistoryPresenter(HistoryView view,
                             ComparePresenter comparePresenter,
-                            ChangedListPresenter changedListPresenter,
+                            ChangesListPresenter changesListPresenter,
                             GitServiceClient service,
                             GitLocalizationConstant locale,
                             NotificationManager notificationManager,
@@ -79,7 +79,7 @@ public class HistoryPresenter implements HistoryView.ActionDelegate {
                             AppContext appContext) {
         this.view = view;
         this.comparePresenter = comparePresenter;
-        this.changedListPresenter = changedListPresenter;
+        this.changesListPresenter = changesListPresenter;
         this.dialogFactory = dialogFactory;
         this.service = service;
         this.locale = locale;
@@ -197,7 +197,7 @@ public class HistoryPresenter implements HistoryView.ActionDelegate {
                            for (String item : changedFiles) {
                                items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
                            }
-                           changedListPresenter.show(items, revisionA, revisionB, project);
+                           changesListPresenter.show(items, revisionA, revisionB, project);
                        }
                    }
                })

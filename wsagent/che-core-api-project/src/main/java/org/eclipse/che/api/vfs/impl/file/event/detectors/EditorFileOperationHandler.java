@@ -10,20 +10,27 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
+import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import static java.lang.String.format;
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.MOVE;
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
 
 /** Receive a file tracking operation call from client and notify server side about it by {@link FileTrackingOperationEvent}. */
 @Singleton
 public class EditorFileOperationHandler {
     private static final String INCOMING_METHOD = "track:editor-file";
 
-    private final EventService      eventService;
+    private final EventService eventService;
 
     @Inject
     public EditorFileOperationHandler(EventService eventService) {
@@ -41,10 +48,25 @@ public class EditorFileOperationHandler {
 
     private Void handleFileTrackingOperation(String endpointId, FileTrackingOperationDto operation) {
         try {
+            Type operationType = operation.getType();
+            if (operationType == SUSPEND || operationType == RESUME) {
+                eventService.publish(new FileTrackingOperationEvent(endpointId, operation));
+                return null;
+            }
+
+            String filePath = operation.getPath();
+            if (filePath.isEmpty()) {
+                throw new NotFoundException(format("Path for the file should be defined for %s operation", operationType));
+            }
+
+            if (operationType == MOVE && operation.getOldPath().isEmpty()) {
+                throw new NotFoundException("Old path should be defined for 'MOVE' operation");
+            }
+
             eventService.publish(new FileTrackingOperationEvent(endpointId, operation));
             return null;
         } catch (Exception e) {
-            throw new JsonRpcException(500, e.getLocalizedMessage());
+            throw new JsonRpcException(500, "Can not handle file operation: " + e.getLocalizedMessage());
         }
     }
 }
