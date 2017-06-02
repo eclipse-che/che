@@ -171,7 +171,13 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
     @Override
     public void getCompletion(final CompletionCallback callback) {
-        callback.onCompletion(new CompletionImpl(completionItem, currentWord, offset));
+        if (canResolve()) {
+            resolve().then(completionItem -> {
+                callback.onCompletion(new CompletionImpl(completionItem, currentWord, offset));
+            });
+        } else {
+            callback.onCompletion(new CompletionImpl(completionItem, currentWord, offset));
+        }
     }
 
     private boolean canResolve() {
@@ -210,8 +216,11 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
             } else {
                 int currentWordLength = currentWord.length();
                 int cursorOffset = document.getCursorOffset();
-                String insertText = completionItem.getInsertText() == null ? completionItem.getLabel() : completionItem.getInsertText();
-                document.replace(cursorOffset - currentWordLength, currentWordLength, insertText);
+                if (completionItem.getInsertText() == null) {
+                    document.replace(cursorOffset - currentWordLength, currentWordLength, completionItem.getLabel());
+                } else {
+                    document.replace(cursorOffset - offset, offset, completionItem.getInsertText());
+                }
             }
         }
 
