@@ -39,7 +39,7 @@ public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate 
     public String getLanguageId() {
         return ProjectAttributes.PYTHON_ID;
     }
-    
+
     @Override
     public boolean isAbleToLaunch() {
         return launchScript.toFile().exists();

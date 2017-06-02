@@ -60,7 +60,7 @@ public class TSLSLauncher extends LanguageServerLauncherTemplate {
     public String getLanguageId() {
         return Constants.TS_LANG;
     }
-    
+
     @Override
     public boolean isAbleToLaunch() {
         return Files.exists(launchScript);
