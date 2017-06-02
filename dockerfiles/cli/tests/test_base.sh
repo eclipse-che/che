@@ -14,8 +14,9 @@ export SCRIPTS_DIR="${BATS_BASE_DIR}"/base/scripts/base
 export TESTS_DIR="${BATS_BASE_DIR}"/cli/tests
 export TESTRUN_DIR="${TESTS_DIR}"/testrun
 export CONTAINER_TESTRUN_DIR=/dockerfiles/cli/tests/testrun
-if [ -d "${TESTRUN_DIR}" ]; then
- rm -rf "${TESTRUN_DIR}"
+
+if [ -d "${CONTAINER_TESTRUN_DIR}" ]; then
+ rm -rf "${CONTAINER_TESTRUN_DIR}"
 fi
 mkdir "${TESTRUN_DIR}" -p
 
