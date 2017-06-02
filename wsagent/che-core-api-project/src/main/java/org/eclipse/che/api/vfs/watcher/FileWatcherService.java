@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.ClosedWatchServiceException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.WatchEvent;
@@ -168,7 +169,7 @@ public class FileWatcherService {
         }
     }
 
-    boolean isStopped(){
+    boolean isStopped() {
         return executor.isShutdown();
     }
 
@@ -185,6 +186,10 @@ public class FileWatcherService {
      *         directory
      */
     public void register(Path dir) {
+        if (!Files.exists(dir)) {
+            LOG.debug("Trying to register directory '{}' but it does not exist", dir);
+            return;
+        }
         LOG.debug("Registering directory '{}'", dir);
         if (keys.values().contains(dir)) {
             int previous = registrations.get(dir);
@@ -207,9 +212,9 @@ public class FileWatcherService {
      * method decreases by one registration counter that corresponds to
      * directory specified by the argument. If registration counter comes to
      * zero directory watching is totally cancelled.
-     *
+     * <p>
      * If this method is called for not existing directory nothing happens.
-     *
+     * <p>
      * If this method is called for not registered directory nothing happens.
      *
      * @param dir
@@ -321,8 +326,9 @@ public class FileWatcherService {
 
     private void resetAndRemove(WatchKey watchKey, Path dir) {
         if (!watchKey.reset()) {
-            registrations.remove(dir);
-
+            if (dir != null) {
+                registrations.remove(dir);
+            }
             keys.remove(watchKey);
         }
     }

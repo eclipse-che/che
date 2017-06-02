@@ -26,12 +26,6 @@ public interface TestNGLocalizationConstant extends Messages {
     @Key("action.runClass.description")
     String actionRunClassDescription();
 
-    @Key("action.runClassContext.title")
-    String actionRunClassContextTitle();
-
-    @Key("action.runClassContext.description")
-    String actionRunClassContextDescription();
-
     @Key("action.runAll.title")
     String actionRunAllTitle();
 

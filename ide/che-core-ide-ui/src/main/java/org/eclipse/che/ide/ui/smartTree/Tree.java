@@ -273,7 +273,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
 
     private boolean focusConstrainScheduled = false;
 
-    private boolean focused = false;
+    protected boolean focused = false;
 
     public Tree(NodeStorage nodeStorage, NodeLoader nodeLoader) {
         this(nodeStorage, nodeLoader, GWT.<TreeStyles>create(TreeStyles.class));
@@ -673,13 +673,16 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
         container.scrollIntoView();
         focusEl.getStyle().setLeft((nodeStorage.getDepth(node) - 1) * 16, Style.Unit.PX);
         focusEl.getStyle().setTop(container.getOffsetTop(), Style.Unit.PX);
+        setFocus(true);
     }
 
-    /**
-     * Sets window focus to current tree.
-     */
-    public void focus() {
+    @Override
+    public void setFocus(boolean focused) {
+        super.setFocus(focused);
         focusImpl.focus(focusEl);
+        this.focused = focused;
+
+        view.onFocusUpdated();
     }
 
     /**
@@ -1577,8 +1580,6 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
                 toggle(node.getNode());
             }
         }
-
-        focus();
     }
 
     private void onAfterFirstAttach() {

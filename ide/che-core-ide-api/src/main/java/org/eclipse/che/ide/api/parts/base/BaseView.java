@@ -109,12 +109,9 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
     public final void setFocus(boolean focused) {
         this.focused = focused;
         if (focused) {
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                @Override
-                public void execute() {
-                    focusView();
-                }
-            });
+            Scheduler.get().scheduleDeferred(this::focusView);
+        } else {
+            Scheduler.get().scheduleDeferred(this::blurView);
         }
     }
 
@@ -130,6 +127,10 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
      */
     protected void focusView() {
         getElement().focus();
+    }
+
+    protected void blurView() {
+        getElement().blur();
     }
 
 }

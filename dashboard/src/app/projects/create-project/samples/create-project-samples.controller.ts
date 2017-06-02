@@ -73,7 +73,7 @@ export class CreateProjectSamplesController {
       });
     }
 
-    this.filteredAndSortedTemplates = this.$filter('orderBy')(filteredTemplates, 'projectType', 'displayName');
+    this.filteredAndSortedTemplates = this.$filter('orderBy')(filteredTemplates, ['projectType', 'displayName']);
 
     if (this.filteredAndSortedTemplates.length) {
       this.initItem(this.filteredAndSortedTemplates[0]);
@@ -91,7 +91,6 @@ export class CreateProjectSamplesController {
 
     // set selected item
     this.selectedTemplateName = template.name;
-
     this.projectSampleOnSelect({template: template});
   }
 

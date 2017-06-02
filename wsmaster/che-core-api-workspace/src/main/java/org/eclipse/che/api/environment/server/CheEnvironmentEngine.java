@@ -251,9 +251,9 @@ public class CheEnvironmentEngine {
         // add random chars to ensure that old environments that weren't removed by some reason won't prevent start
         String networkId = NameGenerator.generate(workspaceId + "_", 16);
 
-        String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
+        String ownerName = EnvironmentContext.getCurrent().getSubject().getUserName();
 
-        initializeEnvironment(namespace,
+        initializeEnvironment(ownerName,
                               workspaceId,
                               envName,
                               environment,
@@ -265,7 +265,7 @@ public class CheEnvironmentEngine {
             throw new ServerException("Agent 'org.eclipse.che.ws-agent' is not found in any of environment machines");
         }
 
-        startEnvironmentQueue(namespace,
+        startEnvironmentQueue(ownerName,
                               workspaceId,
                               devMachineName,
                               networkId,
@@ -377,7 +377,6 @@ public class CheEnvironmentEngine {
             }
         }
         final String creator = EnvironmentContext.getCurrent().getSubject().getUserId();
-        final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
 
         MachineImpl machine = MachineImpl.builder()
                                          .setConfig(machineConfig)
@@ -392,7 +391,8 @@ public class CheEnvironmentEngine {
             // needed to reuse startInstance method and
             // create machine instances by different implementation-specific providers
             CheServiceImpl service = machineConfigToService(machineConfig);
-            normalize(namespace,
+            final String ownerName = EnvironmentContext.getCurrent().getSubject().getUserName();
+            normalize(ownerName,
                       workspaceId,
                       machineConfig.getName(),
                       service);
@@ -401,7 +401,7 @@ public class CheEnvironmentEngine {
             machineStarter = (machineLogger, machineSource) -> {
                 CheServiceImpl serviceWithNormalizedSource = normalizeServiceSource(service, machineSource);
 
-                normalize(namespace,
+                normalize(ownerName,
                           workspaceId,
                           machineConfig.getName(),
                           serviceWithNormalizedSource);
@@ -409,7 +409,7 @@ public class CheEnvironmentEngine {
                 infrastructureProvisioner.provision(new ExtendedMachineImpl().withAgents(agents),
                                                     serviceWithNormalizedSource);
 
-                return machineProvider.startService(namespace,
+                return machineProvider.startService(ownerName,
                                                     workspaceId,
                                                     environmentHolder.name,
                                                     machineConfig.getName(),
@@ -559,7 +559,7 @@ public class CheEnvironmentEngine {
         instanceProvider.removeInstanceSnapshot(snapshot.getMachineSource());
     }
 
-    private void initializeEnvironment(String namespace,
+    private void initializeEnvironment(String ownerName,
                                        String workspaceId,
                                        String envName,
                                        EnvironmentImpl envConfig,
@@ -575,7 +575,7 @@ public class CheEnvironmentEngine {
 
         infrastructureProvisioner.provision(envConfig, internalEnv);
 
-        normalize(namespace,
+        normalize(ownerName,
                   workspaceId,
                   internalEnv);
 
@@ -618,13 +618,13 @@ public class CheEnvironmentEngine {
         }
     }
 
-    private void normalize(String namespace,
+    private void normalize(String ownerName,
                            String workspaceId,
                            CheServicesEnvironmentImpl environment) throws ServerException {
 
         Map<String, CheServiceImpl> services = environment.getServices();
         for (Map.Entry<String, CheServiceImpl> serviceEntry : services.entrySet()) {
-            normalize(namespace,
+            normalize(ownerName,
                       workspaceId,
                       serviceEntry.getKey(),
                       serviceEntry.getValue());
@@ -694,7 +694,7 @@ public class CheEnvironmentEngine {
                                        }).collect(toList()));
     }
 
-    private void normalize(String namespace,
+    private void normalize(String ownerName,
                            String workspaceId,
                            String machineName,
                            CheServiceImpl service) throws ServerException {
@@ -718,14 +718,14 @@ public class CheEnvironmentEngine {
 
         service.setContainerName(containerNameGenerator.generateContainerName(workspaceId,
                                                                               service.getId(),
-                                                                              namespace,
+                                                                              ownerName,
                                                                               machineName));
     }
 
     /**
      * Starts all machine from machine queue of environment.
      */
-    private void startEnvironmentQueue(String namespace,
+    private void startEnvironmentQueue(String ownerName,
                                        String workspaceId,
                                        String devMachineName,
                                        String networkId,
@@ -782,7 +782,7 @@ public class CheEnvironmentEngine {
                 // create machine instances by different implementation-specific providers
                 MachineStarter machineStarter = (machineLogger, machineSource) -> {
                     CheServiceImpl serviceWithNormalizedSource = normalizeServiceSource(service, machineSource);
-                    return machineProvider.startService(namespace,
+                    return machineProvider.startService(ownerName,
                                                         workspaceId,
                                                         envName,
                                                         finalMachineName,

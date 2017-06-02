@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.11.0-SNAPSHOT</version>
+        <version>5.12.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-factory</artifactId>
     <packaging>jar</packaging>
@@ -36,10 +36,6 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>

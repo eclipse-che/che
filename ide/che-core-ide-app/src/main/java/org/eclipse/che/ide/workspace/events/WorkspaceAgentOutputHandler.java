@@ -46,6 +46,6 @@ public class WorkspaceAgentOutputHandler {
                     .methodName("event:ws-agent-output:message")
                     .paramsAsListOfString()
                     .noResult()
-                    .withConsumer(operation);
+                    .withBiConsumer(operation);
     }
 }

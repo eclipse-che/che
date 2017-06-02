@@ -32,6 +32,12 @@ node default {
   # please leave this as it is if you don't need no_proxy configuration
   $no_proxy_for_che_workspaces = getValue("CHE_WORKSPACE_NO__PROXY","")
 
+  ###############################
+  # Single port configuration
+  #
+  $che_single_port = getValue("CHE_SINGLE_PORT","false")
+
+
   ################################
   # DNS resolver configuration
   $dns_resolvers = getValue("CHE_DNS_RESOLVERS","")
