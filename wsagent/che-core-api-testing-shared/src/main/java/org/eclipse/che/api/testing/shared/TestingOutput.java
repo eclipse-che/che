@@ -18,6 +18,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author David Festal
  */
 @DTO
+@Deprecated
 public interface TestingOutput {
 
     enum LineType {

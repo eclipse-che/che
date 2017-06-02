@@ -76,8 +76,7 @@ public class TestStateNode extends AbstractTreeNode implements HasPresentation {
         if (testState.getDescription() == TestStateDescription.PASSED) {
             presentation.setPresentableTextCss("color: green;");
         } else if (testState.getDescription() == TestStateDescription.IGNORED) {
-            presentation.setPresentableTextCss("text-decoration: line-through;\n" +
-                    "    color: yellow;");
+            presentation.setPresentableTextCss("text-decoration: line-through; color: yellow;");
         } else if (testState.getDescription() == TestStateDescription.FAILED || testState.getDescription() == TestStateDescription.ERROR) {
             presentation.setPresentableTextCss("color: red;");
         }

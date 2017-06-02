@@ -11,7 +11,6 @@
 package org.eclipse.che.plugin.testing.testng.server;
 
 import com.beust.jcommander.JCommander;
-import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -19,21 +18,19 @@ import org.eclipse.che.commons.lang.execution.CommandLine;
 import org.eclipse.che.commons.lang.execution.ExecutionException;
 import org.eclipse.che.commons.lang.execution.JavaParameters;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
+import org.eclipse.che.plugin.java.testing.AbstractJavaTestRunner;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -48,10 +45,10 @@ import java.util.Set;
  *
  * @author Mirage Abeysekara
  */
-public class TestNGRunner implements TestRunner {
+public class TestNGRunner extends AbstractJavaTestRunner {
 
+    private static final String TEST_ANNOTATION_FQN = Test.class.getName();
     private static final Logger LOG = LoggerFactory.getLogger(TestNGRunner.class);
-
     private final ProjectClasspathProvider classpathProvider;
     private final TestNGSuiteUtil suiteUtil;
 
@@ -73,9 +70,7 @@ public class TestNGRunner implements TestRunner {
     @Override
     @Nullable
     public ProcessHandler execute(TestExecutionContext context) {
-        String projectPath = context.getProjectPath();
-        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectPath);
-        IJavaProject javaProject = JavaModelManager.getJavaModelManager().getJavaModel().getJavaProject(project);
+        IJavaProject javaProject = getJavaProject(context.getProjectPath());
         if (javaProject.exists()) {
             return startTestProcess(javaProject, context);
         }
@@ -144,42 +139,11 @@ public class TestNGRunner implements TestRunner {
     }
 
     private File createClassSuite(IJavaProject javaProject, String filePath) {
-
-        try {
-            IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(false);
-            IPath packageRootPath = null;
-            for (IClasspathEntry classpathEntry : resolvedClasspath) {
-                if (filePath.startsWith(classpathEntry.getPath().toOSString())) {
-                    packageRootPath = classpathEntry.getPath();
-                    break;
-                }
-            }
-
-            if (packageRootPath == null) {
-                throw new RuntimeException("Can't find IClasspathEntry for path " + filePath);
-            }
-
-            String packagePath = packageRootPath.toOSString();
-            if (!packagePath.endsWith("/")) {
-                packagePath += "/";
-            }
-
-            String pathToClass = filePath.substring(packagePath.length());
-            IJavaElement element = javaProject.findElement(new Path(pathToClass));
-            if (element != null && element instanceof ICompilationUnit) {
-                ICompilationUnit compilationUnit = (ICompilationUnit) element;
-                IType primaryType = compilationUnit.findPrimaryType();
-                String qualifiedName = primaryType.getFullyQualifiedName();
-                Map<String, List<String>> classes = Collections.singletonMap(qualifiedName, null);
-                return suiteUtil.writeSuite(System.getProperty("java.io.tmpdir"), javaProject.getElementName(), classes);
-            } else {
-                throw new RuntimeException("Can't find class: " + pathToClass);
-            }
-
-        } catch (JavaModelException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return null;
+        ICompilationUnit compilationUnit = findCompilationUnitByPath(javaProject, filePath);
+        IType primaryType = compilationUnit.findPrimaryType();
+        String qualifiedName = primaryType.getFullyQualifiedName();
+        Map<String, List<String>> classes = Collections.singletonMap(qualifiedName, null);
+        return suiteUtil.writeSuite(System.getProperty("java.io.tmpdir"), javaProject.getElementName(), classes);
     }
 
     /**
@@ -190,4 +154,47 @@ public class TestNGRunner implements TestRunner {
         return "testng";
     }
 
+    @Override
+    protected boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit) {
+        try {
+            IAnnotation[] annotations = method.getAnnotations();
+            IAnnotation test = null;
+            for (IAnnotation annotation : annotations) {
+                if (annotation.getElementName().equals("Test")) {
+                    test = annotation;
+                    break;
+                }
+                if (annotation.getElementName().equals(TEST_ANNOTATION_FQN)) {
+                    return true;
+                }
+            }
+
+            if (test == null) {
+                return false;
+            }
+
+            IImportDeclaration[] imports = compilationUnit.getImports();
+            for (IImportDeclaration importDeclaration : imports) {
+                if (importDeclaration.getElementName().equals(TEST_ANNOTATION_FQN)) {
+                    return true;
+                }
+            }
+
+            for (IImportDeclaration importDeclaration : imports) {
+                if (importDeclaration.isOnDemand()) {
+                    String elementName = importDeclaration.getElementName();
+                    elementName = elementName.substring(0, elementName.length() - 3); //remove .*
+                    if (TEST_ANNOTATION_FQN.startsWith(elementName)) {
+                        return true;
+                    }
+
+                }
+            }
+
+            return false;
+        } catch (JavaModelException e) {
+            LOG.info("Can't read method annotations.", e);
+            return false;
+        }
+    }
 }

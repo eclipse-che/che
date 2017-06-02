@@ -16,11 +16,17 @@ import org.eclipse.che.api.testing.server.framework.TestFrameworkRegistry;
 import org.eclipse.che.api.testing.server.framework.TestMessagesOutputTransmitter;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.api.testing.shared.Constants;
+import org.eclipse.che.api.testing.shared.TestDetectionContext;
+import org.eclipse.che.api.testing.shared.TestDetectionResult;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
+import org.eclipse.che.api.testing.shared.TestPosition;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
+import org.eclipse.che.dto.server.DtoFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -39,6 +45,23 @@ public class TestingRPCService {
         this.frameworkRegistry = frameworkRegistry;
     }
 
+    @Inject
+    private void configureRunTestHandler(RequestHandlerConfigurator configurator) {
+        configurator.newConfiguration()
+                .methodName(Constants.RUN_TESTS_METHOD)
+                .paramsAsDto(TestExecutionContext.class)
+                .resultAsBoolean()
+                .withFunction(this::runTests);
+    }
+
+    @Inject
+    private void configureTestDetectionHandler(RequestHandlerConfigurator configurator) {
+        configurator.newConfiguration()
+                .methodName(Constants.TESTING_RPC_TEST_DETECTION_NAME)
+                .paramsAsDto(TestDetectionContext.class)
+                .resultAsDto(TestDetectionResult.class)
+                .withFunction(this::handleTestDetection);
+    }
 
     private boolean runTests(String endpoint, TestExecutionContext context) {
         this.endpoint = endpoint;
@@ -57,12 +80,17 @@ public class TestingRPCService {
         }
     }
 
-    @Inject
-    private void configureRunTestHandler(RequestHandlerConfigurator configurator) {
-        configurator.newConfiguration()
-                .methodName(Constants.RUN_TESTS_METHOD)
-                .paramsAsDto(TestExecutionContext.class)
-                .resultAsBoolean()
-                .withFunction(this::runTests);
+
+    private TestDetectionResult handleTestDetection(String endpointId, TestDetectionContext request) {
+        TestDetectionResult result = DtoFactory.newDto(TestDetectionResult.class);
+
+        List<TestPosition> testPositions = new ArrayList<>();
+        for (TestRunner testRunner : frameworkRegistry.getAllTestRunners()) {
+            testPositions.addAll(testRunner.detectTests(request));
+        }
+
+        result.setTestPosition(testPositions);
+        result.setTestFile(!testPositions.isEmpty());
+        return result;
     }
 }

@@ -10,14 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.testing.server.framework;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import com.google.inject.Inject;
 
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
-
-import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Registry for Test Frameworks on the server. All the Test Frameworks should be
@@ -49,6 +50,10 @@ public class TestFrameworkRegistry {
      */
     public TestRunner getTestRunner(String frameworkName) {
         return frameworks.get(frameworkName);
+    }
+
+    public List<TestRunner> getAllTestRunners() {
+        return new ArrayList<>(frameworks.values());
     }
 
 }

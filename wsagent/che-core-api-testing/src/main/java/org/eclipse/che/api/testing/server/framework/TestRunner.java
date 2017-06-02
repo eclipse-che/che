@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.testing.server.framework;
 
+import org.eclipse.che.api.testing.shared.TestDetectionContext;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
+import org.eclipse.che.api.testing.shared.TestPosition;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
 
+import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,4 +58,13 @@ public interface TestRunner {
      * @return the implementation framework name
      */
     String getName();
+
+    /**
+     * Detect is any test present at given context
+     *
+     * @param context the current context
+     * @return list of the test positions if any test present, empty list otherwise
+     */
+    @NotNull
+    List<TestPosition> detectTests(TestDetectionContext context);
 }
