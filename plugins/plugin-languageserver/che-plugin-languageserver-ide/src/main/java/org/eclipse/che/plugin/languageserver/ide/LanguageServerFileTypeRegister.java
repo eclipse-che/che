@@ -63,14 +63,15 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                                           OrionContentTypeRegistrant contentTypeRegistrant,
                                           OrionHoverRegistrant orionHoverRegistrant,
                                           OrionOccurrencesRegistrant orionOccurrencesRegistrant,
-                                          LanguageServerEditorProvider editorProvider, HoverProvider hoverProvider,
+                                          LanguageServerEditorProvider editorProvider, 
+                                          HoverProvider hoverProvider,
                                           OccurrencesProvider occurrencesProvider) { 
         this.serverLanguageRegistry = serverLanguageRegistry;
         this.lsRegistry = lsRegistry;
         this.resources = resources;
         this.editorRegistry = editorRegistry;
         this.contentTypeRegistrant = contentTypeRegistrant;
-        this.orionHoverRegistrant = orionHoverRegistrant; 
+        this.orionHoverRegistrant = orionHoverRegistrant;
         this.orionOccurrencesRegistrant = orionOccurrencesRegistrant;
         this.editorProvider = editorProvider;
         this.hoverProvider = hoverProvider;
