@@ -188,9 +188,9 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
     private static class CompletionImpl implements Completion {
 
-        private       CompletionItem completionItem;
-        private final String         currentWord;
-        private       int            offset;
+        private CompletionItem completionItem;
+        private String         currentWord;
+        private int            offset;
 
         public CompletionImpl(CompletionItem completionItem, String currentWord, int offset) {
             this.completionItem = completionItem;
@@ -208,9 +208,9 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
                         new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
                 document.replace(startOffset, endOffset - startOffset, completionItem.getTextEdit().getNewText());
             } else {
-                final int currentWordLength = currentWord.length();
+                int currentWordLength = currentWord.length();
+                int cursorOffset = document.getCursorOffset();
                 String insertText = completionItem.getInsertText() == null ? completionItem.getLabel() : completionItem.getInsertText();
-                final int cursorOffset = document.getCursorOffset();
                 document.replace(cursorOffset - currentWordLength, currentWordLength, insertText);
             }
         }
@@ -222,8 +222,8 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
                 return LinearRange.createWithStart(document.getCursorOffset()).andLength(0);
             }
             Range range = textEdit.getRange();
-            int startOffset = document.getIndexFromPosition(new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()))
-                              + textEdit.getNewText().length();
+            TextPosition textPosition = new TextPosition(range.getStart().getLine(), range.getStart().getCharacter());
+            int startOffset = document.getIndexFromPosition(textPosition) + textEdit.getNewText().length();
             return LinearRange.createWithStart(startOffset).andLength(0);
         }
 
