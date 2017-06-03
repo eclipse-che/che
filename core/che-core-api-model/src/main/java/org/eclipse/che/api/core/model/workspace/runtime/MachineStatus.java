@@ -27,8 +27,8 @@ public enum MachineStatus {
     STOPPED,
 
     /**
-     * unknown
+     * failed
      */
-    UNKNOWN;
+    FAILED;
 
 }
