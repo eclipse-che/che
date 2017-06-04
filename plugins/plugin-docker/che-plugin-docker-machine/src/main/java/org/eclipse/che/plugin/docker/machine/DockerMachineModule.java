@@ -33,6 +33,7 @@ public class DockerMachineModule extends AbstractModule {
     protected void configure() {
         bind(org.eclipse.che.plugin.docker.machine.cleaner.DockerAbandonedResourcesCleaner.class);
         bind(org.eclipse.che.plugin.docker.machine.cleaner.RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class);
+        bind(org.eclipse.che.plugin.docker.machine.idle.ServerIdleDetector.class);
 
         @SuppressWarnings("unused") Multibinder<String> devMachineEnvVars =
                 Multibinder.newSetBinder(binder(),
