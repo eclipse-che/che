@@ -65,15 +65,13 @@ export class CheToggleButtonPopover implements ng.IDirective {
     chePopoverPlacement: '@?'
   };
 
-  private $q: ng.IQService;
   private $timeout: ng.ITimeoutService;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $timeout: ng.ITimeoutService) {
-    this.$q = $q;
+  constructor($timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;
   }
 
