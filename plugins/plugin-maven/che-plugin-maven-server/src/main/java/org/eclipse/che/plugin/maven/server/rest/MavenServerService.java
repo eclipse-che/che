@@ -17,18 +17,14 @@ import io.swagger.annotations.ApiResponses;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
-import org.eclipse.che.commons.xml.XMLTreeException;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
-import org.eclipse.che.ide.maven.tools.Model;
-import org.eclipse.che.maven.data.MavenProjectProblem;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
 import org.eclipse.che.plugin.maven.server.MavenWrapperManager;
@@ -37,15 +33,9 @@ import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
 import org.eclipse.che.plugin.maven.server.core.MavenWorkspace;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
-import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
+import org.eclipse.che.plugin.maven.server.core.reconcile.PomReconciler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXParseException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -53,8 +43,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -68,14 +56,10 @@ import static javax.ws.rs.core.MediaType.TEXT_XML;
  */
 @Path("/maven/server")
 public class MavenServerService {
-    private static final Logger LOG = LoggerFactory.getLogger(MavenServerService.class);
-
     private final MavenWrapperManager      wrapperManager;
     private final ProjectRegistry          projectRegistry;
-    private final MavenProjectManager      mavenProjectManager;
     private final MavenWorkspace           mavenWorkspace;
     private final EclipseWorkspaceProvider eclipseWorkspaceProvider;
-    private final ProjectManager           cheProjectManager;
 
     @Inject
     private MavenProgressNotifier notifier;
@@ -90,17 +74,16 @@ public class MavenServerService {
     private ClasspathManager classpathManager;
 
     @Inject
+    private PomReconciler pomReconciler;
+
+    @Inject
     public MavenServerService(MavenWrapperManager wrapperManager,
                               ProjectRegistry projectRegistry,
-                              ProjectManager projectManager,
-                              MavenProjectManager mavenProjectManager,
                               MavenWorkspace mavenWorkspace,
                               EclipseWorkspaceProvider eclipseWorkspaceProvider) {
 
-        cheProjectManager = projectManager;
         this.wrapperManager = wrapperManager;
         this.projectRegistry = projectRegistry;
-        this.mavenProjectManager = mavenProjectManager;
         this.mavenWorkspace = mavenWorkspace;
         this.eclipseWorkspaceProvider = eclipseWorkspaceProvider;
     }
@@ -171,65 +154,8 @@ public class MavenServerService {
     @ApiResponses({@ApiResponse(code = 200, message = "OK")})
     @Produces("application/json")
     public List<Problem> reconcilePom(@ApiParam(value = "The paths to pom.xml file which need to be reconciled")
-                                      @QueryParam("pompath") String pomPath) {
-        VirtualFileEntry entry = null;
-        List<Problem> result = new ArrayList<>();
-        try {
-            entry = cheProjectManager.getProjectsRoot().getChild(pomPath);
-            if (entry == null) {
-                return result;
-            }
-
-            Model.readFrom(entry.getVirtualFile());
-            org.eclipse.che.api.vfs.Path path = entry.getPath();
-            String pomContent = entry.getVirtualFile().getContentAsString();
-            MavenProject mavenProject =
-                    mavenProjectManager.findMavenProject(ResourcesPlugin.getWorkspace().getRoot().getProject(path.getParent().toString()));
-            if (mavenProject == null) {
-                return result;
-            }
-
-            List<MavenProjectProblem> problems = mavenProject.getProblems();
-            int start = pomContent.indexOf("<project ") + 1;
-            int end = start + "<project ".length();
-
-            List<Problem> problemList = problems.stream().map(mavenProjectProblem -> DtoFactory.newDto(Problem.class)
-                                                                                               .withError(true)
-                                                                                               .withSourceStart(start)
-                                                                                               .withSourceEnd(end)
-                                                                                               .withMessage(mavenProjectProblem.getDescription()))
-                                                .collect(Collectors.toList());
-            result.addAll(problemList);
-        } catch (ServerException | ForbiddenException | IOException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (XMLTreeException exception) {
-            Throwable cause = exception.getCause();
-            if (cause != null && cause instanceof SAXParseException) {
-                result.add(createProblem(entry, (SAXParseException)cause));
-            }
-        }
-        return result;
+                                      @QueryParam("pompath") String pomPath)
+            throws ForbiddenException, ConflictException, NotFoundException, ServerException {
+        return pomReconciler.reconcile(pomPath);
     }
-
-    private Problem createProblem(VirtualFileEntry entry, SAXParseException spe) {
-        Problem problem = DtoFactory.newDto(Problem.class);
-        problem.setError(true);
-        problem.setMessage(spe.getMessage());
-        if (entry != null) {
-            int lineNumber = spe.getLineNumber();
-            int columnNumber = spe.getColumnNumber();
-            try {
-                String content = entry.getVirtualFile().getContentAsString();
-                Document document = new Document(content);
-                int lineOffset = document.getLineOffset(lineNumber - 1);
-                problem.setSourceStart(lineOffset + columnNumber - 1);
-                problem.setSourceEnd(lineOffset + columnNumber);
-            } catch (ForbiddenException | ServerException | BadLocationException e) {
-                LOG.error(e.getMessage(), e);
-            }
-
-        }
-        return problem;
-    }
-
 }

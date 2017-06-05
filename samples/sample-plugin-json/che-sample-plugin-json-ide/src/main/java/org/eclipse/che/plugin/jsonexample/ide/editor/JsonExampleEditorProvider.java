@@ -10,12 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.jsonexample.ide.editor;
 
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorProvider;
 import org.eclipse.che.ide.api.editor.defaulteditor.AbstractTextEditorProvider;
-import org.eclipse.che.ide.api.editor.defaulteditor.DefaultTextEditorProvider;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
 import javax.inject.Inject;
 

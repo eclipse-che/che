@@ -18,6 +18,7 @@ import com.google.inject.name.Names;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorProvider;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
+import org.eclipse.che.ide.api.editor.autosave.AutoSaveMode;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistant;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistantFactory;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistantImpl;
@@ -29,16 +30,19 @@ import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMapImpl;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistAssistant;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistantFactory;
+import org.eclipse.che.ide.api.editor.reconciler.DefaultReconciler;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilerFactory;
-import org.eclipse.che.ide.api.editor.reconciler.ReconcilerWithAutoSave;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
+import org.eclipse.che.ide.editor.autosave.AutoSaveModeImpl;
 import org.eclipse.che.ide.editor.quickfix.QuickAssistAssistantImpl;
 import org.eclipse.che.ide.editor.quickfix.QuickAssistWidgetFactory;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizerImpl;
 import org.eclipse.che.ide.editor.synchronization.EditorGroupSynchronization;
 import org.eclipse.che.ide.editor.synchronization.EditorGroupSynchronizationImpl;
+import org.eclipse.che.ide.editor.synchronization.workingCopy.EditorWorkingCopySynchronizer;
+import org.eclipse.che.ide.editor.synchronization.workingCopy.EditorWorkingCopySynchronizerImpl;
 import org.eclipse.che.ide.editor.texteditor.TextEditorPartViewImpl;
 import org.eclipse.che.ide.editor.texteditor.infopanel.InfoPanel;
 import org.eclipse.che.ide.part.editor.EditorPartStackView;
@@ -58,6 +62,8 @@ public class EditorApiModule extends AbstractGinModule {
     @Override
     protected void configure() {
         bind(EditorAgent.class).to(EditorAgentImpl.class).in(Singleton.class);
+
+        bind(AutoSaveMode.class).to(AutoSaveModeImpl.class);
 
         bind(UserActivityManager.class).in(Singleton.class);
 
@@ -88,7 +94,7 @@ public class EditorApiModule extends AbstractGinModule {
 
         // bind the reconciler
         install(new GinFactoryModuleBuilder()
-                        .implement(Reconciler.class, ReconcilerWithAutoSave.class)
+                        .implement(Reconciler.class, DefaultReconciler.class)
                         .build(ReconcilerFactory.class));
 
         // bind the code assistant and quick assistant
@@ -106,5 +112,7 @@ public class EditorApiModule extends AbstractGinModule {
 
         install(new GinFactoryModuleBuilder().build(RecentFileActionFactory.class));
         bind(RecentFileList.class).to(RecentFileStore.class).in(Singleton.class);
+
+        bind(EditorWorkingCopySynchronizer.class).to(EditorWorkingCopySynchronizerImpl.class).in(Singleton.class);
     }
 }

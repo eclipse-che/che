@@ -8,13 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.changedList;
+package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.project.shared.NodesResources;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
@@ -28,10 +29,11 @@ import java.util.List;
  */
 public class ChangedFolderNode extends AbstractTreeNode implements HasPresentation {
 
-    private String           name;
-    private NodePresentation nodePresentation;
-
+    private final Path           path;
+    private final String         name;
     private final NodesResources nodesResources;
+
+    private NodePresentation nodePresentation;
 
     /**
      * Create instance of ChangedFolderNode.
@@ -41,8 +43,9 @@ public class ChangedFolderNode extends AbstractTreeNode implements HasPresentati
      * @param nodesResources
      *         resources that contain icons
      */
-    public ChangedFolderNode(String name, NodesResources nodesResources) {
+    ChangedFolderNode(String name, Path path, NodesResources nodesResources) {
         this.name = name;
+        this.path = path;
         this.nodesResources = nodesResources;
     }
 
@@ -78,5 +81,12 @@ public class ChangedFolderNode extends AbstractTreeNode implements HasPresentati
             updatePresentation(nodePresentation);
         }
         return nodePresentation;
+    }
+
+    /**
+     * Returns path of the node.
+     */
+    public Path getPath() {
+        return path;
     }
 }

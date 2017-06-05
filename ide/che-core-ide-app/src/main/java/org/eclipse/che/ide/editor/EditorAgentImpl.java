@@ -145,7 +145,17 @@ public class EditorAgentImpl implements EditorAgent,
 
     @Override
     public void onClose(EditorPartPresenter editor) {
-        closeEditor(editor);
+        if (editor == null) {
+            return;
+        }
+
+        final EditorPartStack editorPartStack = editorMultiPartStack.getPartStackByPart(editor);
+        if (editorPartStack == null) {
+            return;
+        }
+
+        EditorTab editorTab = editorPartStack.getTabByPart(editor);
+        doCloseEditor(editorTab);
     }
 
     @Override
@@ -348,16 +358,16 @@ public class EditorAgentImpl implements EditorAgent,
 
     /** {@inheritDoc} */
     @Override
-    public void saveAll(final AsyncCallback callback) {
+    public void saveAll(final AsyncCallback<Void> callback) {
         dirtyEditors = getDirtyEditors();
         if (dirtyEditors.isEmpty()) {
-            callback.onSuccess("Success");
+            callback.onSuccess(null);
         } else {
             doSave(callback);
         }
     }
 
-    private void doSave(final AsyncCallback callback) {
+    private void doSave(final AsyncCallback<Void> callback) {
         final EditorPartPresenter partPresenter = dirtyEditors.get(0);
         partPresenter.doSave(new AsyncCallback<EditorInput>() {
             @Override
@@ -369,7 +379,7 @@ public class EditorAgentImpl implements EditorAgent,
             public void onSuccess(EditorInput result) {
                 dirtyEditors.remove(partPresenter);
                 if (dirtyEditors.isEmpty()) {
-                    callback.onSuccess("Success");
+                    callback.onSuccess(null);
                 } else {
                     doSave(callback);
                 }

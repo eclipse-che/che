@@ -10,9 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.commit;
 
+import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
+import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The view of {@link CommitPresenter}.
@@ -31,15 +36,32 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
         /** Performs any actions appropriate in response to the user having changed something. */
         void onValueChanged();
 
-        /**
-         * Set the commit message for an amend commit.
-         */
+        /** Performs any actions appropriate in response to the user having clicked on changed file check-box. */
+        void onFileNodeCheckBoxValueChanged(Path path, boolean newCheckBoxValue);
+
+        /** Set the commit message for an amend commit. */
         void setAmendCommitMessage();
+
+        /** Get list of changed files paths. */
+        Set<String> getChangedFiles();
     }
 
     /** @return entered message */
     @NotNull
     String getMessage();
+
+    /**
+     * Mark check-boxes of given paths as checked.
+     *
+     * @param paths
+     *         pats of nodes
+     */
+    void setMarkedCheckBoxes(Set<Path> paths);
+
+    /**
+     * Returns selected remote branch from branches drop-down list.
+     */
+    String getRemoteBranch();
 
     /**
      * Set content into message field.
@@ -50,51 +72,45 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
     void setMessage(@NotNull String message);
 
     /**
-     * Returns <code>true</code> if need to add all changes to index except from new files before commit, and <code>false</code> otherwise
+     * Set list of remote branches to drop-down.
      */
-    boolean isAddAllExceptNew();
+    void setRemoteBranchesList(List<Branch> branches);
 
-    /**
-     * Set status of flag that represents add all changes to index except from new files before commit.
-     *
-     * @param addAllExceptNew
-     *         <code>true</code> if need to add all changes to index except from new files before commit,
-     *         <code>false</code> otherwise
-     */
-    void setAddAllExceptNew(boolean addAllExceptNew);
-
-    /** Returns true if the selection must be added to index before commit, and <code>false</code> otherwise. */
-    boolean isAddSelectedFiles();
-
-    /**
-     * Sets the status of flag that represents add selected files.
-     *
-     * @param addSelectedFiles
-     *         <code>true</code> if need to add selected files before commit, <code>false</code> otherwise
-     */
-    void setAddSelectedFiles(boolean addSelectedFiles);
-
-    /** Returns <code>true</code> if need to commit all files in the project, and <code>false</code> otherwise. */
-    boolean isCommitAllFiles();
-
-    /**
-     * Sets the status of flag that represents add selected files.
-     *
-     * @param commitAllFiles
-     *         <code>true</code> if need to add selected files before commit, <code>false</code> otherwise
-     */
-    void setCommitAllFiles(boolean commitAllFiles);
-
-    /** Returns <code>true</code> if need to amend the last commit, and <code>false</code> otherwise. */
+    /** Returns <code>true</code> if need to amend the last commit, and <code>false</code> otherwise */
     boolean isAmend();
 
+    /** Set checked or unchecked the 'Amend' checkbox. */
+    void setValueToAmendCheckBox(boolean value);
+
+    /** Set checked or unchecked the 'Push after commit' checkbox. */
+    void setValueToPushAfterCommitCheckBox(boolean value);
+
     /**
-     * Set status of amend the last commit.
+     * Change the enable state of the 'Amend' check-box.
      *
-     * @param isAmend
-     *         <code>true</code> need to amend the last commit, <code>false</code> need to create new commit
+     * @param enable
+     *         <code>true</code> to enable the check-box, <code>false</code> to disable it
      */
-    void setAmend(boolean isAmend);
+    void setEnableAmendCheckBox(boolean enable);
+
+    /**
+     * Change the enable state of the 'Push after commit' check-box.
+     *
+     * @param enable
+     *         <code>true</code> to enable the check-box, <code>false</code> to disable it
+     */
+    void setEnablePushAfterCommitCheckBox(boolean enable);
+
+    /**
+     * Change the enable state of the 'Remote branches' drop-down list.
+     *
+     * @param enable
+     *         <code>true</code> to enable the drop-down list, <code>false</code> to disable it
+     */
+    void setEnableRemoteBranchesDropDownLis(boolean enable);
+
+    /** Returns <code>true</code> if need to push after commit, and <code>false</code> otherwise */
+    boolean isPushAfterCommit();
 
     /**
      * Change the enable state of the commit button.
@@ -112,4 +128,9 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
 
     /** Show dialog. */
     void showDialog();
+
+    /**
+     * Initialize changed panel.
+     */
+    void setChangesPanelView(ChangesPanelView changesPanelView);
 }

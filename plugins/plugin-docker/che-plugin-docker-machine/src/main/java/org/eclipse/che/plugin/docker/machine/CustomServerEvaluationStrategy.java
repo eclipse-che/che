@@ -205,6 +205,8 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
         protected String getExternalAddress() {
             return externalAddressProperty != null ?
                    externalAddressProperty :
+                   internalAddressProperty != null ?
+                   internalAddressProperty :
                    !isNullOrEmpty(gatewayAddressContainer) ?
                    gatewayAddressContainer :
                    this.internalHost;

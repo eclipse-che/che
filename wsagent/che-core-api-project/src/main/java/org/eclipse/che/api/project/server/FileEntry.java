@@ -45,7 +45,7 @@ public class FileEntry extends VirtualFileEntry {
     /**
      * Gets content of file as array of bytes.
      *
-     * @return content of file as stream
+     * @return content of file as array of bytes.
      * @throws ServerException
      *         if other error occurs
      */

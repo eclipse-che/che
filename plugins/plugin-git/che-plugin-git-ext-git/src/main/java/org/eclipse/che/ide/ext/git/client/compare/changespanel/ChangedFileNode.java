@@ -8,15 +8,15 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.client.compare.changedList;
+package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView.ActionDelegate;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
-import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListView.ActionDelegate;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
@@ -56,11 +56,11 @@ public class ChangedFileNode extends AbstractTreeNode implements HasPresentation
      *         <code>true</code> if it is needed to view file name with its full path,
      *         and <code>false</code> if it is needed to view only name of the file
      */
-    public ChangedFileNode(String pathName,
-                           Status status,
-                           NodesResources nodesResources,
-                           ActionDelegate actionDelegate,
-                           boolean viewPath) {
+    ChangedFileNode(String pathName,
+                    Status status,
+                    NodesResources nodesResources,
+                    ActionDelegate actionDelegate,
+                    boolean viewPath) {
         this.pathName = pathName;
         this.status = status;
         this.nodesResources = nodesResources;
@@ -127,6 +127,6 @@ public class ChangedFileNode extends AbstractTreeNode implements HasPresentation
 
     @Override
     public void actionPerformed() {
-       actionDelegate.onFileNodeDoubleClicked();
+        actionDelegate.onFileNodeDoubleClicked(pathName, status);
     }
 }
