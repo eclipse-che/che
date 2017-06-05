@@ -2618,5 +2618,69 @@
       }
     ],
     "creator": "Dharmit Shah"
+},
+{
+    "id": "centos-go",
+    "creator": "Dharmit Shah",
+    "name": "CentOS Go",
+    "description": "CentOS based Go Stack",
+    "scope": "advanced",
+    "tags": [
+      "CentOS",
+      "Go"
+    ],
+    "components": [
+      {
+        "name": "CentOS",
+        "version": "7.3"
+      },
+      {
+        "name": "Go",
+        "version": "1.6.2"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "registry.centos.org/che-stacks/centos-go"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "registry.centos.org/che-stacks/centos-go",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "name": "run",
+          "type": "custom",
+          "commandLine": "cd ${current.project.path} && go get -d && go run main.go",
+          "attributes": {
+            "previewUrl": "http://${server.port.8080}",
+            "goal": "Run"
+          }
+        }
+      ]
+    },
+    "stackIcon": {
+      "name": "type-go.svg",
+      "mediaType": "image/svg+xml"
+    }
   }
 ]
