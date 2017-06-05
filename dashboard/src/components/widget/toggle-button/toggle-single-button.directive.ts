@@ -21,6 +21,7 @@
  * `<toggle-single-button>` defines button with two states.
  *
  * @param {string} che-title button's title
+ * @param {expression=} che-multiline-title allows multi line title if attr exists
  * @param {string=} che-font-icon button's icon CSS class
  * @param {expression=} che-state expression which defines initial state of button.
  * @param {Function} che-on-change callback on model change
@@ -61,13 +62,17 @@ export class ToggleSingleButton {
       init: '=?cheState',
       state: '=?cheValue',
       title: '@cheTitle',
+      multilineTitle: '=?cheMultilineTitle',
       fontIcon: '@?cheFontIcon',
       onChange: '&cheOnChange'
     };
 
   }
 
-  link($scope: IToggleSingleButtonScope): void {
+  link($scope: IToggleSingleButtonScope, $element: ng.IAugmentedJQuery, $attrs: ng.IAttributes): void {
+    if (angular.isDefined($attrs.cheMultilineTitle)) {
+      $scope.multilineTitle = 'true';
+    }
 
     if ($scope.init) {
       $scope.state = $scope.init;
