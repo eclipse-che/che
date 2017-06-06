@@ -31,9 +31,6 @@ public class JsonModule extends AbstractModule {
                                                              "babelrc"};
     private static final String MIME_TYPE  = "application/json";
 
-
-    static {
-    }
     @Override
     protected void configure() {
         Multibinder.newSetBinder(binder(), LanguageServerLauncher.class).addBinding().to(JsonLanguageServerLauncher.class);

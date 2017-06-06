@@ -66,5 +66,4 @@ public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate 
         launcher.startListening();
         return launcher.getRemoteProxy();
     }
-
   }
