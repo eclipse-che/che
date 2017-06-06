@@ -40,13 +40,11 @@ public abstract class RuntimeContext {
     private static final Logger LOG = getLogger(RuntimeContext.class);
 
     protected final Environment           environment;
-    protected final RuntimeIdentity   identity;
+    protected final RuntimeIdentity       identity;
     protected final RuntimeInfrastructure infrastructure;
-    // TODO other than WorkspaceStatus impl
-    private         WorkspaceStatus       state;
+    private         WorkspaceStatus       status;
     protected final InternalRecipe        recipe;
     protected final Map<String, InternalMachineConfig> internalMachines = new HashMap<>();
-    //protected final URL statusChannel;
 
     public RuntimeContext(Environment environment,
                           RuntimeIdentity identity,
@@ -66,8 +64,18 @@ public abstract class RuntimeContext {
 
     }
 
+
     /**
-     * Creates and starts Runtime.
+     * Context must return the Runtime object whatever its status is (STOPPED status including)
+     *
+     * @return Runtime object
+     */
+    public abstract InternalRuntime getRuntime();
+
+    /**
+     *
+     * TODO move to InternalRuntime
+     * starts Runtime.
      * In practice this method launching supposed to take unpredictable long time
      * so normally it should be launched in separated thread
      *
@@ -82,16 +90,16 @@ public abstract class RuntimeContext {
      *         when any other error occurs
      */
     public void start(Map<String, String> startOptions) throws InfrastructureException {
-        if (this.state != null) {
+        if (this.status != null) {
             throw new StateException("Context already used");
         }
-        state = WorkspaceStatus.STARTING;
+        status = WorkspaceStatus.STARTING;
         internalStart(startOptions);
-        state = WorkspaceStatus.RUNNING;
-        //eturn runtime;
+        status = WorkspaceStatus.RUNNING;
     }
 
     /**
+     * TODO move to InternalRuntime
      * Starts underlying environment in implementation specific way.
      *
      * @param startOptions options of workspace that may used in environment start
@@ -104,21 +112,23 @@ public abstract class RuntimeContext {
     protected abstract void internalStart(Map<String, String> startOptions) throws InfrastructureException;
 
     /**
+     * TODO move to InternalRuntime
      * Stops Runtime
      * Presumably can take some time so considered to launch in separate thread
      *
      * @param stopOptions
      * @throws StateException
-     *         when the context can't be stopped because otherwise it would be in inconsistent state
+     *         when the context can't be stopped because otherwise it would be in inconsistent status
      *         (e.g. stop(interrupt) might not be allowed during start)
      * @throws InfrastructureException
      *         when any other error occurs
      */
     public final void stop(Map<String, String> stopOptions) throws InfrastructureException {
-        if (this.state != WorkspaceStatus.RUNNING) {
+        if (this.status != WorkspaceStatus.RUNNING) {
             throw new StateException("The environment must be running");
         }
-        state = WorkspaceStatus.STOPPING;
+        status = WorkspaceStatus.STOPPING;
+
         // TODO spi what to do in exception appears here?
         try {
             internalStop(stopOptions);
@@ -128,9 +138,10 @@ public abstract class RuntimeContext {
         } catch (InfrastructureException e) {
             LOG.debug(e.getLocalizedMessage(), e);
         }
-        state = WorkspaceStatus.STOPPED;
+        status = WorkspaceStatus.STOPPED;
     }
 
+    // TODO move to InternalRuntime
     protected abstract void internalStop(Map<String, String> stopOptions) throws InfrastructureException;
 
     /**
@@ -180,15 +191,7 @@ public abstract class RuntimeContext {
         return identity;
     }
 
-//    /**
-//     * @return incoming Workspace Environment
-//     */
-//    public Environment getEnvironment() {
-//        return environment;
-//    }
 
-
-    public abstract InternalRuntime getRuntime();
 
     /**
      * @return RuntimeInfrastructure the Context created from
@@ -197,11 +200,6 @@ public abstract class RuntimeContext {
         return infrastructure;
     }
 
-    // Returns environment with "suggested" RuntimeMachine list if no machines was declared
-    // TODO need that?
-//    public Environment getSuggestedEnv(Environment env) {
-//        return effectiveEnv;
-//    }
 
 
     private InternalRecipe resolveRecipe(Recipe recipe) throws InfrastructureException {
