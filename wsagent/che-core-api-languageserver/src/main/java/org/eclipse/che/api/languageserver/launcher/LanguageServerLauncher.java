@@ -21,7 +21,7 @@ import org.eclipse.lsp4j.services.LanguageServer;
 public interface LanguageServerLauncher {
 
     /**
-     * Starts {@link io.typefox.lsapi.services.LanguageServer}.
+     * Starts {@link LanguageServer}.
      */
     LanguageServer launch(String projectPath, LanguageClient client) throws LanguageServerException;
 
