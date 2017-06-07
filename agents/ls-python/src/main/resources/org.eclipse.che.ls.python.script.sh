@@ -188,8 +188,8 @@ fi
 
 curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
 
-cd ${LS_DIR} && ${SUDO} pip3 install -r ${LS_DIR}/requirements.txt
+cd ${LS_DIR} && ${SUDO} pip3 install --process-dependency-links .
 
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
-echo "python3.5 ${LS_DIR}/python-langserver.py --fs=local --mode=stdio" > ${LS_LAUNCHER}
+echo "pyls" > ${LS_LAUNCHER}
