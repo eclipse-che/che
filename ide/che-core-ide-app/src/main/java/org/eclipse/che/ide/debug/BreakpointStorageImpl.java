@@ -22,15 +22,12 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Executor;
 import org.eclipse.che.api.promises.client.js.JsPromiseProvider;
-import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.api.promises.client.js.ResolveFunction;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointStorage;
@@ -83,8 +80,11 @@ public class BreakpointStorageImpl implements BreakpointStorage {
             LOG.warning("Local storage is not supported. Breakpoints won't be preserved.");
             this.readAllBreakpointMarker = promiseProvider.resolve(null);
         } else {
-            this.readAllBreakpointMarker = getReadAllBreakpointMarker();
-            preserve();
+            this.readAllBreakpointMarker = getReadAllBreakpointsMarker();
+            this.readAllBreakpointMarker.then(onFulfilled -> {
+                preserve();
+            });
+
             clearOutdatedRecords();
         }
     }
@@ -94,9 +94,7 @@ public class BreakpointStorageImpl implements BreakpointStorage {
         readAllBreakpointMarker.then(onFulfilled -> {
             BreakpointStorageImpl.this.breakpoints.addAll(breakpoints);
 
-            if (storage != null) {
-                preserve();
-            }
+            preserve();
         });
     }
 
@@ -105,9 +103,7 @@ public class BreakpointStorageImpl implements BreakpointStorage {
         readAllBreakpointMarker.then(onFulfilled -> {
             BreakpointStorageImpl.this.breakpoints.add(breakpoint);
 
-            if (storage != null) {
-                preserve();
-            }
+            preserve();
         });
     }
 
@@ -118,9 +114,7 @@ public class BreakpointStorageImpl implements BreakpointStorage {
                     b -> b.getLineNumber() == breakpoint.getLineNumber() && b.getPath().equals(breakpoint.getPath())
             );
 
-            if (storage != null) {
-                preserve();
-            }
+            preserve();
         });
     }
 
@@ -133,9 +127,7 @@ public class BreakpointStorageImpl implements BreakpointStorage {
                 );
             }
 
-            if (storage != null) {
-                preserve();
-            }
+            preserve();
         });
     }
 
@@ -143,10 +135,7 @@ public class BreakpointStorageImpl implements BreakpointStorage {
     public void clear() {
         readAllBreakpointMarker.then(onFulfilled -> {
             BreakpointStorageImpl.this.breakpoints.clear();
-
-            if (storage != null) {
-                preserve();
-            }
+            preserve();
         });
     }
 
@@ -156,6 +145,10 @@ public class BreakpointStorageImpl implements BreakpointStorage {
     }
 
     private void preserve() {
+        if (storage == null) {
+            return;
+        }
+
         List<BreakpointDto> breakpoints2save = new LinkedList<>();
 
         for (Breakpoint breakpoint : breakpoints) {
@@ -169,30 +162,20 @@ public class BreakpointStorageImpl implements BreakpointStorage {
         storage.setItem(storageKey, dtoFactory.toJson(breakpoints2save));
     }
 
-    private Promise<Void> getReadAllBreakpointMarker() {
-        return Promises.create(new Executor.ExecutorBody<Void>() {
-            @Override
-            public void apply(final ResolveFunction<Void> resolve, final RejectFunction reject) {
-                addWorkspaceHandler(resolve);
-            }
-        });
+    private Promise<Void> getReadAllBreakpointsMarker() {
+        return promiseProvider.create(Executor.create((resolve, reject) -> addWorkspaceHandler(resolve)));
     }
 
     private void addWorkspaceHandler(final ResolveFunction<Void> readAllMarkerResolveFunc) {
-        eventBus.addHandler(WorkspaceReadyEvent.getType(), new WorkspaceReadyEvent.WorkspaceReadyHandler() {
-            @Override
-            public void onWorkspaceReady(WorkspaceReadyEvent event) {
-                BreakpointStorageImpl.this.onWorkspaceReady(readAllMarkerResolveFunc);
-            }
-        });
+        eventBus.addHandler(WorkspaceReadyEvent.getType(), event -> BreakpointStorageImpl.this.onWorkspaceReady(readAllMarkerResolveFunc));
     }
 
     private void onWorkspaceReady(ResolveFunction<Void> readAllMarkerResolveFunc) {
         ArrayOf<Promise<?>> breakpointPromises = prepareBreakpointPromises();
 
-        promiseProvider.all2(breakpointPromises).then(arg -> {
-            for (int i = 0; i < arg.length(); i++) {
-                Breakpoint breakpoint = (Breakpoint)arg.get(i);
+        promiseProvider.all2(breakpointPromises).then(breakpoints -> {
+            for (int i = 0; i < breakpoints.length(); i++) {
+                Breakpoint breakpoint = (Breakpoint)breakpoints.get(i);
                 if (breakpoint != null) {
                     BreakpointStorageImpl.this.breakpoints.add(breakpoint);
                 }
@@ -220,22 +203,16 @@ public class BreakpointStorageImpl implements BreakpointStorage {
     }
 
     private Promise<Breakpoint> toBreakpointPromise(Promise<Optional<File>> filePromise, BreakpointDto dto) {
-        return filePromise.then(new Function<Optional<File>, Breakpoint>() {
-            @Override
-            public Breakpoint apply(Optional<File> file) throws FunctionException {
-                return file.isPresent() ? new Breakpoint(BREAKPOINT,
-                                                         dto.getLocation().getLineNumber(),
-                                                         dto.getLocation().getTarget(),
-                                                         file.get(),
-                                                         false)
-                                        : null;
-            }
-        }).catchError(new Function<PromiseError, Breakpoint>() {
-            @Override
-            public Breakpoint apply(PromiseError arg) throws FunctionException {
-                return null;
-            }
-        });
+        return filePromise.then((Function<Optional<File>, Breakpoint>)file -> createBreakpoint(file.get(), dto)).catchError(error -> null);
+    }
+
+    @Nullable
+    private Breakpoint createBreakpoint(@Nullable File file, BreakpointDto dto) {
+        return file == null ? null : new Breakpoint(BREAKPOINT,
+                                                    dto.getLocation().getLineNumber(),
+                                                    dto.getLocation().getTarget(),
+                                                    file,
+                                                    false);
     }
 
     /**

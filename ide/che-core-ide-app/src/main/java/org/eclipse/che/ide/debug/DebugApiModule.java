@@ -36,7 +36,7 @@ public class DebugApiModule extends AbstractGinModule {
                         .implement(BreakpointRenderer.class, BreakpointRendererImpl.class)
                         .build(BreakpointRendererFactory.class));
 
-        bind(BreakpointStorage.class).to(BreakpointStorageImpl.class).in(Singleton.class);
+        bind(BreakpointStorage.class).to(BreakpointStorageImpl.class);
         bind(BreakpointManager.class).to(BreakpointManagerImpl.class).in(Singleton.class);
     }
 }
