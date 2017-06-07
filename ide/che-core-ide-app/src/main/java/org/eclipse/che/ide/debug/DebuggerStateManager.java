@@ -15,8 +15,7 @@ import java.util.List;
 
 import org.eclipse.che.api.debug.shared.dto.DebugSessionStateDto;
 import org.eclipse.che.api.debug.shared.model.DebugSessionState;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
@@ -38,8 +37,7 @@ import com.google.web.bindery.event.shared.EventBus;
 @Singleton
 public class DebuggerStateManager {
 
-    public static final String                      LOCAL_STORAGE_DEBUGGER_STATES_KEY_PREFIX =
-                                                                                             "che-debugger-session-states-";
+    public static final String                      LOCAL_STORAGE_DEBUGGER_STATES_KEY_PREFIX = "che-debugger-session-states-";
     private static final List<DebugSessionStateDto> EMPTY_LIST                               = new ArrayList<>();
 
     private final EventBus                          eventBus;
@@ -148,31 +146,16 @@ public class DebuggerStateManager {
         if (localStorage == null) {
             return;
         }
-        final List<String> workspaceIds = new ArrayList<>();
-        int storageKeysSize = localStorage.getLength();
-        for (int i = 0; i < storageKeysSize; i++) {
-            String storageKey = localStorage.key(i);
-            if (storageKey.startsWith(LOCAL_STORAGE_DEBUGGER_STATES_KEY_PREFIX)) {
-                workspaceIds.add(storageKey.substring(LOCAL_STORAGE_DEBUGGER_STATES_KEY_PREFIX.length()));
+        for (int i = 0; i < localStorage.getLength(); i++) {
+            String key = localStorage.key(i);
+            if (key != null && key.startsWith(LOCAL_STORAGE_DEBUGGER_STATES_KEY_PREFIX)) {
+                String workspaceId = key.substring(LOCAL_STORAGE_DEBUGGER_STATES_KEY_PREFIX.length());
+                Promise<WorkspaceDto> workspace = workspaceServiceClient.getWorkspace(workspaceId);
+                workspace.catchError(arg -> {
+                    localStorage.removeItem(key);
+                });
             }
         }
-        workspaceServiceClient.getWorkspaces(0, 100).then(new Operation<List<WorkspaceDto>>() {
-            @Override
-            public void apply(List<WorkspaceDto> workspaceDtos) throws OperationException {
-                for (String workspaceId : workspaceIds) {
-                    boolean workspaceExists = false;
-                    for (WorkspaceDto workspaceDto : workspaceDtos) {
-                        if (workspaceId.equals(workspaceDto.getId())) {
-                            workspaceExists = true;
-                            break;
-                        }
-                    }
-                    if (!workspaceExists) {
-                        localStorage.removeItem(LOCAL_STORAGE_DEBUGGER_STATES_KEY_PREFIX + workspaceId);
-                    }
-                }
-            }
-        });
     }
 
 }
