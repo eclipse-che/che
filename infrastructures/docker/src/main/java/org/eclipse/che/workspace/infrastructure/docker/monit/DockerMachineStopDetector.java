@@ -161,7 +161,7 @@ public class DockerMachineStopDetector {
                         try {
                             DockerRuntimeContext context = contextsStorage.get(instanceIds.second);
                             try {
-                                context.stop(Collections.emptyMap());
+                                context.getRuntime().stop(Collections.emptyMap());
                             } catch (InternalInfrastructureException e) {
                                 LOG.error(e.getLocalizedMessage(), e);
                             } catch (InfrastructureException ignored) {
