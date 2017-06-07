@@ -14,7 +14,6 @@ import elemental.js.util.JsArrayOf;
 import elemental.util.ArrayOf;
 
 import com.google.common.base.Optional;
-import com.google.gwt.storage.client.Storage;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -35,6 +34,8 @@ import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.util.storage.LocalStorage;
+import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -51,30 +52,34 @@ import static org.eclipse.che.ide.api.debug.Breakpoint.Type.BREAKPOINT;
 @Singleton
 public class BreakpointStorageImpl implements BreakpointStorage {
 
-    private static final Logger LOG                           = Logger.getLogger(BreakpointStorageImpl.class.getName());
-    private static final String LOCAL_STORAGE_BREAKPOINTS_KEY = "che-breakpoints-";
+    private static final Logger LOG                                  = Logger.getLogger(BreakpointStorageImpl.class.getName());
+    private static final String LOCAL_STORAGE_BREAKPOINTS_KEY_PREFIX = "che-breakpoints-";
 
     private final AppContext             appContext;
     private final DtoFactory             dtoFactory;
-    private final Storage                storage;
+    private final LocalStorage           storage;
     private final WorkspaceServiceClient workspaceServiceClient;
     private final JsPromiseProvider      promiseProvider;
     private final Promise<Void>          readAllBreakpointMarker;
     private final List<Breakpoint>       breakpoints;
     private final EventBus               eventBus;
+    private final String                 storageKey;
 
     @Inject
     public BreakpointStorageImpl(AppContext appContext,
                                  DtoFactory dtoFactory,
                                  WorkspaceServiceClient workspaceServiceClient,
-                                 JsPromiseProvider promiseProvider, EventBus eventBus) {
+                                 JsPromiseProvider promiseProvider,
+                                 LocalStorageProvider localStorageProvider,
+                                 EventBus eventBus) {
         this.appContext = appContext;
         this.dtoFactory = dtoFactory;
         this.workspaceServiceClient = workspaceServiceClient;
         this.promiseProvider = promiseProvider;
         this.eventBus = eventBus;
-        this.storage = Storage.getLocalStorageIfSupported();
+        this.storage = localStorageProvider.get();
         this.breakpoints = new LinkedList<>();
+        this.storageKey = LOCAL_STORAGE_BREAKPOINTS_KEY_PREFIX + appContext.getWorkspaceId();
 
         if (storage == null) {
             LOG.warning("Local storage is not supported. Breakpoints won't be preserved.");
@@ -158,7 +163,6 @@ public class BreakpointStorageImpl implements BreakpointStorage {
                                                                    .withLineNumber(breakpoint.getLineNumber())));
         }
 
-        String storageKey = LOCAL_STORAGE_BREAKPOINTS_KEY + appContext.getWorkspaceId();
         storage.setItem(storageKey, dtoFactory.toJson(breakpoints2save));
     }
 
@@ -189,7 +193,7 @@ public class BreakpointStorageImpl implements BreakpointStorage {
     private ArrayOf<Promise<?>> prepareBreakpointPromises() {
         ArrayOf<Promise<?>> breakpointPromises = JsArrayOf.create();
 
-        String json = storage.getItem(LOCAL_STORAGE_BREAKPOINTS_KEY + appContext.getWorkspaceId());
+        String json = storage.getItem(storageKey);
         if (json == null) {
             return breakpointPromises;
         }
@@ -224,8 +228,8 @@ public class BreakpointStorageImpl implements BreakpointStorage {
     private void clearOutdatedRecords() {
         for (int i = 0; i < storage.getLength(); i++) {
             String key = storage.key(i);
-            if (key != null && key.startsWith(LOCAL_STORAGE_BREAKPOINTS_KEY)) {
-                String wsId = key.substring(LOCAL_STORAGE_BREAKPOINTS_KEY.length());
+            if (key != null && key.startsWith(LOCAL_STORAGE_BREAKPOINTS_KEY_PREFIX)) {
+                String wsId = key.substring(LOCAL_STORAGE_BREAKPOINTS_KEY_PREFIX.length());
 
                 Promise<WorkspaceDto> workspace = workspaceServiceClient.getWorkspace(wsId);
                 workspace.catchError(arg -> {
