@@ -30,7 +30,9 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConf
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.Hover;
+import org.eclipse.lsp4j.MarkedString;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,10 +94,10 @@ public class HoverProvider implements OrionHoverHandler {
             }
 
             private String renderContent(Hover hover) {
-                List<String> contents = new ArrayList<String>();
-                for (String dto : hover.getContents()) {
+                List<String> contents = new ArrayList<>();
+                for (Either<String, MarkedString> dto : hover.getContents()) {
                     // plain markdown text
-                    contents.add(dto);
+                    contents.add(dto.getLeft());//todo check it
                 }
                 return Joiner.on("\n\n").join(contents);
             }

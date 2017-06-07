@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
-import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
+
+import java.util.List;
 
 /**
  * Contains the latest completion result retrieved from the completion service.
@@ -23,7 +25,7 @@ public class LatestCompletionResult {
     private TextDocumentIdentifier documentId;
     private int                    offset;
     private String                 word;
-    private ExtendedCompletionList completionList;
+    private List<ExtendedCompletionItem> completionList;
 
     /**
      * Returns the identifier of document used to compute the latest completion
@@ -60,7 +62,7 @@ public class LatestCompletionResult {
      *
      * @return the completion list
      */
-    public ExtendedCompletionList getCompletionList() {
+    public List<ExtendedCompletionItem> getCompletionList() {
         return this.completionList;
     }
 
@@ -97,7 +99,7 @@ public class LatestCompletionResult {
      */
     public boolean isGoodFor(TextDocumentIdentifier documentId, int offset, String word) {
         return completionList != null &&
-               !completionList.isInComplete() &&
+//               !completionList.isInComplete() && //todo rework it
                this.documentId.getUri().equals(documentId.getUri()) &&
                word.startsWith(this.word) &&
                offset - this.offset == word.length() - this.word.length();
@@ -116,7 +118,7 @@ public class LatestCompletionResult {
      *         a completion list
      */
     public void update(TextDocumentIdentifier documentId, int offset, String word,
-                       ExtendedCompletionList completionList) {
+                       List<ExtendedCompletionItem> completionList) {
         this.documentId = documentId;
         this.offset = offset;
         this.word = word;

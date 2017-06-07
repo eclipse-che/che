@@ -18,7 +18,6 @@ import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.CompletionItemDto;
-import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.CompletionListDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedCompletionItemDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.HoverDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.LocationDto;
@@ -49,8 +48,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.prefixURI;
 import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.removePrefixUri;
 
@@ -80,10 +79,11 @@ public class TextDocumentService {
         dtoToDtoList("rangeFormatting", DocumentRangeFormattingParams.class, TextEditDto.class, this::rangeFormatting);
         dtoToDtoList("references", ReferenceParams.class, LocationDto.class, this::references);
         dtoToDtoList("onTypeFormatting", DocumentOnTypeFormattingParams.class, TextEditDto.class, this::onTypeFormatting);
+        dtoToDtoList("completion", TextDocumentPositionParams.class, CompletionItemDto.class, this::completion);
 
         dtoToDto("completionItem/resolve", ExtendedCompletionItemDto.class, CompletionItemDto.class, this::completionItemResolve);
         dtoToDto("documentHighlight", TextDocumentPositionParams.class, DocumentHighlight.class, this::documentHighlight);
-        dtoToDto("completion", TextDocumentPositionParams.class, CompletionListDto.class, this::completion);
+
         dtoToDto("hover", TextDocumentPositionParams.class, HoverDto.class, this::hover);
         dtoToDto("signatureHelp", TextDocumentPositionParams.class, SignatureHelpDto.class, this::signatureHelp);
 
@@ -93,15 +93,20 @@ public class TextDocumentService {
         dtoToNothing("didSave", DidSaveTextDocumentParams.class, this::didSave);
     }
 
-    private CompletionListDto completion(TextDocumentPositionParams textDocumentPositionParams) {
+    private List<CompletionItemDto> completion(TextDocumentPositionParams textDocumentPositionParams) {
         try {
             TextDocumentIdentifier textDocument = textDocumentPositionParams.getTextDocument();
             textDocument.setUri(prefixURI(textDocument.getUri()));
             textDocumentPositionParams.setUri(prefixURI(textDocumentPositionParams.getUri()));
             LanguageServer server = getServer(textDocument.getUri());
-            return server != null ? new CompletionListDto(server.getTextDocumentService().completion(textDocumentPositionParams).get())
-                                  : null;
-
+            return server != null ? server.getTextDocumentService()
+                                                .completion(textDocumentPositionParams)
+                                                .get()
+                                                .getLeft()
+                                                .stream()
+                                                .map(CompletionItemDto::new)
+                                                .collect(toList())
+                                     : null;
         } catch (LanguageServerException | InterruptedException | ExecutionException e) {
             throw new JsonRpcException(-27000, e.getMessage());
         }
@@ -116,7 +121,7 @@ public class TextDocumentService {
                                                                     .get()
                                                                     .stream()
                                                                     .map(SymbolInformationDto::new)
-                                                                    .collect(Collectors.toList());
+                                                                    .collect(toList());
 
         } catch (ExecutionException | InterruptedException | LanguageServerException e) {
             throw new JsonRpcException(-27000, e.getMessage());
@@ -134,7 +139,7 @@ public class TextDocumentService {
 
             List<? extends Location> locations = server.getTextDocumentService().references(referenceParams).get();
             locations.forEach(o -> o.setUri(removePrefixUri(o.getUri())));
-            return locations.stream().map(LocationDto::new).collect(Collectors.toList());
+            return locations.stream().map(LocationDto::new).collect(toList());
         } catch (ExecutionException | InterruptedException | LanguageServerException e) {
             throw new JsonRpcException(-27000, e.getMessage());
 
@@ -151,7 +156,7 @@ public class TextDocumentService {
 
             List<? extends Location> locations = server.getTextDocumentService().definition(textDocumentPositionParams).get();
             locations.forEach(o -> o.setUri(removePrefixUri(o.getUri())));
-            return locations.stream().map(LocationDto::new).collect(Collectors.toList());
+            return locations.stream().map(LocationDto::new).collect(toList());
         } catch (InterruptedException | ExecutionException | LanguageServerException e) {
             throw new JsonRpcException(-27000, e.getMessage());
         }
@@ -199,7 +204,7 @@ public class TextDocumentService {
                                           .formatting(documentFormattingParams)
                                           .get().stream()
                                           .map(TextEditDto::new)
-                                          .collect(Collectors.toList());
+                                          .collect(toList());
 
         } catch (InterruptedException | ExecutionException | LanguageServerException e) {
             throw new JsonRpcException(-27000, e.getMessage());
@@ -215,7 +220,7 @@ public class TextDocumentService {
                                           .rangeFormatting(documentRangeFormattingParams)
                                           .get().stream()
                                           .map(TextEditDto::new)
-                                          .collect(Collectors.toList());
+                                          .collect(toList());
         } catch (InterruptedException | ExecutionException | LanguageServerException e) {
             throw new JsonRpcException(-27000, e.getMessage());
         }
@@ -229,7 +234,7 @@ public class TextDocumentService {
                                                                     .onTypeFormatting(documentOnTypeFormattingParams)
                                                                     .get().stream()
                                                                     .map(TextEditDto::new)
-                                                                    .collect(Collectors.toList());
+                                                                    .collect(toList());
         } catch (InterruptedException | ExecutionException | LanguageServerException e) {
             throw new JsonRpcException(-27000, e.getMessage());
         }

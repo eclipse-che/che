@@ -20,6 +20,7 @@ import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -69,7 +70,7 @@ public class ServerInitializerImpl implements ServerInitializer {
             }
 
             @Override
-            public CompletableFuture<Void> showMessageRequest(ShowMessageRequestParams requestParams) {
+            public CompletableFuture<MessageActionItem> showMessageRequest(ShowMessageRequestParams requestParams) {
                 return CompletableFuture.completedFuture(null);
             }
 

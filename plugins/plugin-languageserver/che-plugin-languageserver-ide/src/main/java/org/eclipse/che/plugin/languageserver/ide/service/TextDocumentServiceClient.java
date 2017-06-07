@@ -17,7 +17,6 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcError;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
-import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -61,8 +60,8 @@ public class TextDocumentServiceClient {
      * @param position
      * @return
      */
-    public Promise<ExtendedCompletionList> completion(TextDocumentPositionParams position) {
-        return transmitDtoAndReceiveDto(position, "textDocument/completion", ExtendedCompletionList.class);
+    public Promise<List<ExtendedCompletionItem>> completion(TextDocumentPositionParams position) {
+        return transmitDtoAndReceiveDtoList(position, "textDocument/completion", ExtendedCompletionItem.class);
     }
 
     /**

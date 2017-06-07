@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
-import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -81,9 +80,9 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
             // no need to send new completion request
             computeProposals(currentWord, offset - latestCompletionResult.getOffset(), callback);
         } else {
-            documentServiceClient.completion(documentPosition).then(new Operation<ExtendedCompletionList>() {
+            documentServiceClient.completion(documentPosition).then(new Operation<List<ExtendedCompletionItem>>() {
                 @Override
-                public void apply(ExtendedCompletionList list) throws OperationException {
+                public void apply(List<ExtendedCompletionItem> list) throws OperationException {
                     latestCompletionResult.update(documentId, offset, currentWord, list);
                     computeProposals(currentWord, 0, callback);
                 }
@@ -141,7 +140,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
 
     private void computeProposals(String currentWord, int offset, CodeAssistCallback callback) {
         List<CompletionProposal> proposals = newArrayList();
-        for (ExtendedCompletionItem item : latestCompletionResult.getCompletionList().getItems()) {
+        for (ExtendedCompletionItem item : latestCompletionResult.getCompletionList()) {
             List<Match> highlights = filter(currentWord, item);
             if (highlights != null) {
                 proposals.add(new CompletionItemBasedCompletionProposal(item,
