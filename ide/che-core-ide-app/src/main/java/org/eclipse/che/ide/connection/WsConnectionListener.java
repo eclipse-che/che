@@ -44,6 +44,10 @@ public class WsConnectionListener implements ConnectionClosedHandler, Connection
             @Override
             public void onWorkspaceStarted(WorkspaceStartedEvent workspace) {
                 messageBus = messageBusProvider.getMessageBus();
+                if (messageBus == null) {
+                    Log.error(WsConnectionListener.class, "Unable to add onClose handler. Message bus must not ber null.");
+                    return;
+                }
 
                 messageBus.addOnCloseHandler(WsConnectionListener.this);
             }

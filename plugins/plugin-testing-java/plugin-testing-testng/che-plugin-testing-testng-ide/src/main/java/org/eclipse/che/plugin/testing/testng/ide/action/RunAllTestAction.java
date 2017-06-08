@@ -78,11 +78,13 @@ public class RunAllTestAction extends AbstractPerspectiveAction
         Resource resource = appContext.getResource();
         if (resource == null) {
             e.getPresentation().setEnabledAndVisible(false);
+            return;
         }
         
         Project project = resource.getProject();
         if (project == null) {
             e.getPresentation().setEnabledAndVisible(false);
+            return;
         }
         
         e.getPresentation().setVisible(true);

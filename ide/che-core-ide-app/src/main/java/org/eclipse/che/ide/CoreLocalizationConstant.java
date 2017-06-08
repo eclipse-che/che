@@ -115,6 +115,12 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.rename.description")
     String renameItemActionDescription();
 
+    @Key("action.collapseAll.title")
+    String collapseAllActionTitle();
+
+    @Key("action.collapseAll.description")
+    String collapseAllActionDescription();
+
     @Key("renameNodeDialogTitle")
     String renameNodeDialogTitle();
 

@@ -240,9 +240,6 @@ public class StandardComponentInitializer {
     private RenameItemAction renameItemAction;
 
     @Inject
-    private CollapseAllAction collapseAllAction;
-
-    @Inject
     private SplitVerticallyAction splitVerticallyAction;
 
     @Inject
@@ -412,6 +409,9 @@ public class StandardComponentInitializer {
 
     @Inject
     private ShowConsoleTreeAction showConsoleTreeAction;
+
+    @Inject
+    private CollapseAllAction collapseAllAction;
 
     @Inject
     private PerspectiveManager perspectiveManager;
@@ -733,6 +733,7 @@ public class StandardComponentInitializer {
         partMenuGroup.add(minimizePartAction);
         partMenuGroup.add(restorePartAction);
         partMenuGroup.add(showConsoleTreeAction);
+        partMenuGroup.add(collapseAllAction);
 
         actionManager.registerAction("expandEditor", expandEditorAction);
         DefaultActionGroup rightMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_MAIN_MENU);

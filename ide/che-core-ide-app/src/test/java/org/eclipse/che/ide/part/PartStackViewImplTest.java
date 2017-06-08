@@ -14,7 +14,6 @@ import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.DeckLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
@@ -98,7 +97,7 @@ public class PartStackViewImplTest {
         when(tabItem.getView()).thenReturn(widget);
         when(partPresenter.getView()).thenReturn(widget);
 
-        when(resources.partStackCss().idePartStackContent()).thenReturn(SOME_TEXT);
+//        when(resources.partStackCss().idePartStackContent()).thenReturn(SOME_TEXT);
 
         view = new PartStackViewImpl(resources, localizationConstant);
         view.setDelegate(delegate);

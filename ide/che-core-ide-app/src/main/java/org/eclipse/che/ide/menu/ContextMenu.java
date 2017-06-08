@@ -111,13 +111,18 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                popupMenu.getElement().getStyle().setProperty("opacity", "1");
-                updateMenuPosition(popupMenu, x, y);
+                setPosition(x, y);
             }
         });
     }
 
-    private void updateMenuPosition(PopupMenu popupMenu, int x, int y) {
+    private void setPosition(int x, int y) {
+        if (popupMenu == null) {
+            return;
+        }
+
+        popupMenu.getElement().getStyle().setProperty("opacity", "1");
+
         if (x + popupMenu.getOffsetWidth() > Window.getClientWidth()) {
             popupMenu.getElement().getStyle().setLeft(x - popupMenu.getOffsetWidth() - 1, PX);
         } else {
