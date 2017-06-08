@@ -370,9 +370,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
                 breakpointStorage.readAll().then(new Operation<List<Breakpoint>>() {
                     @Override
                     public void apply(List<Breakpoint> breakpoints) throws OperationException {
-                        for (Breakpoint breakpoint : breakpoints) {
-                            addBreakpoint(breakpoint);
-                        }
+                        breakpoints.forEach(BreakpointManagerImpl.this::addBreakpoint);
                     }
                 });
             }
