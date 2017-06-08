@@ -105,8 +105,8 @@ public class BreakpointManagerImpl implements BreakpointManager,
             for (final Breakpoint breakpoint : pathBreakpoints) {
                 if (breakpoint.getLineNumber() == lineNumber) {
                     // breakpoint already exists at given line
-                    deleteBreakpoint(activeFile, breakpoint);
                     breakpointStorage.delete(breakpoint);
+                    deleteBreakpoint(activeFile, breakpoint);
                     return;
                 }
             }
@@ -167,11 +167,14 @@ public class BreakpointManagerImpl implements BreakpointManager,
      */
     private void deleteBreakpoints(final Set<String> paths) {
         for (String path : paths) {
-            List<Breakpoint> breakpointsToDelete = breakpoints.get(path);
-            if (breakpointsToDelete != null) {
-                for (Breakpoint breakpoint : new ArrayList<>(breakpointsToDelete)) {
-                    deleteBreakpoint(breakpoint.getFile(), breakpoint);
-                }
+            if (!breakpoints.containsKey(path)) {
+                return;
+            }
+
+            List<Breakpoint> breakpointsToDelete = new ArrayList<>(breakpoints.get(path));
+            breakpointStorage.deleteAll(breakpointsToDelete);
+            for (Breakpoint breakpoint : new ArrayList<>(breakpointsToDelete)) {
+                deleteBreakpoint(breakpoint.getFile(), breakpoint);
             }
         }
     }
@@ -263,8 +266,8 @@ public class BreakpointManagerImpl implements BreakpointManager,
             removeBreakpointsForPath(pathBreakpoints);
         }
 
-        breakpoints.clear();
         breakpointStorage.clear();
+        breakpoints.clear();
 
         for (BreakpointManagerObserver observer : observers) {
             observer.onAllBreakpointsDeleted();
@@ -346,15 +349,20 @@ public class BreakpointManagerImpl implements BreakpointManager,
 
 
             for (final Breakpoint breakpoint : toRemove) {
+                breakpointStorage.delete(breakpoint);
                 deleteBreakpoint(file, breakpoint);
             }
+
             for (final Breakpoint breakpoint : toAdd) {
                 if (isLineNotEmpty(file, breakpoint.getLineNumber())) {
-                    addBreakpoint(new Breakpoint(breakpoint.getType(),
-                                                 breakpoint.getLineNumber(),
-                                                 breakpoint.getPath(),
-                                                 file,
-                                                 false));
+                    Breakpoint newBreakpoint = new Breakpoint(breakpoint.getType(),
+                                                              breakpoint.getLineNumber(),
+                                                              breakpoint.getPath(),
+                                                              file,
+                                                              false);
+
+                    addBreakpoint(newBreakpoint);
+                    breakpointStorage.add(newBreakpoint);
                 }
             }
         }
