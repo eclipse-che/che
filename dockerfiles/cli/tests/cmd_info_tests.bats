@@ -31,5 +31,3 @@ source /dockerfiles/cli/tests/test_base.sh
   [[ $result == *${expected_output_4}* ]]
   [[ $result == *${expected_output_5}* ]]
 }
-
-
