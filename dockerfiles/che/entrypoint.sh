@@ -244,15 +244,15 @@ init() {
   fi
   ### Are we going to use the embedded che.properties or one provided by user?`
   ### CHE_LOCAL_CONF_DIR is internal Che variable that sets where to load
-  export CHE_LOCAL_CONF_DIR="/conf"
-  if [ -f "/conf/che.properties" ]; then
+  export CHE_LOCAL_CONF_DIR="${CHE_DATA_HOST}/conf"
+  if [ -f "${CHE_LOCAL_CONF_DIR}/che.properties" ]; then
     echo "Found custom che.properties..."
     if [ "$CHE_USER" != "root" ]; then
       sudo chown -R ${CHE_USER} ${CHE_LOCAL_CONF_DIR}
     fi
   else
-    if [ ! -d /conf ]; then
-        mkdir -p /conf
+    if [ ! -d ${CHE_LOCAL_CONF_DIR} ]; then
+        mkdir -p ${CHE_LOCAL_CONF_DIR}
     fi
     echo "Using embedded che.properties... Copying template to ${CHE_LOCAL_CONF_DIR}/che.properties"
     cp -rf "${CHE_HOME}/conf/che.properties" ${CHE_LOCAL_CONF_DIR}/che.properties
