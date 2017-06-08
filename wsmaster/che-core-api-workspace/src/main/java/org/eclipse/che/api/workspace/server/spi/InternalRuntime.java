@@ -12,10 +12,12 @@ package org.eclipse.che.api.workspace.server.spi;
 
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
+import org.slf4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -24,6 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
+
 /**
  * Implementation of concrete Runtime
  * Important to notice - no states in here, it is always RUNNING
@@ -31,9 +36,11 @@ import java.util.Map;
  */
 public abstract class InternalRuntime <T extends RuntimeContext> implements Runtime {
 
+    private static final Logger LOG = getLogger(InternalRuntime.class);
     private final T                    context;
     private final URLRewriter          urlRewriter;
-    private final List<Warning> warnings = new ArrayList<>();
+    private final List<Warning>        warnings = new ArrayList<>();
+    private       WorkspaceStatus      status;
 
     public InternalRuntime(T context, URLRewriter urlRewriter) {
         this.context = context;
@@ -68,6 +75,72 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
         }
         return result;
     }
+
+    /**
+     * Starts Runtime.
+     * In practice this method launching supposed to take unpredictable long time
+     * so normally it should be launched in separated thread
+     *
+     * @param startOptions
+     *         optional parameters
+     * @throws StateException
+     *         when the context is already used
+     * @throws InternalInfrastructureException
+     *         when error that indicates system internal problem occurs
+     * @throws InfrastructureException
+     *         when any other error occurs
+     */
+    public void start(Map<String, String> startOptions) throws InfrastructureException {
+        if (this.status != null) {
+            throw new StateException("Context already used");
+        }
+        status = WorkspaceStatus.STARTING;
+        internalStart(startOptions);
+        status = WorkspaceStatus.RUNNING;
+    }
+
+    /**
+     * Starts underlying environment in implementation specific way.
+     *
+     * @param startOptions options of workspace that may used in environment start
+     * @throws InternalInfrastructureException
+     *         when error that indicates system internal problem occurs
+     * @throws InfrastructureException
+     *         when any other error occurs
+     */
+    protected abstract void internalStart(Map<String, String> startOptions) throws InfrastructureException;
+
+    /**
+     * Stops Runtime
+     * Presumably can take some time so considered to launch in separate thread
+     *
+     * @param stopOptions  options of workspace that may used in environment stop
+     * @throws StateException
+     *         when the context can't be stopped because otherwise it would be in inconsistent status
+     *         (e.g. stop(interrupt) might not be allowed during start)
+     * @throws InfrastructureException
+     *         when any other error occurs
+     */
+    public final void stop(Map<String, String> stopOptions) throws InfrastructureException {
+        if (this.status != WorkspaceStatus.RUNNING) {
+            throw new StateException("The environment must be running");
+        }
+        status = WorkspaceStatus.STOPPING;
+
+        // TODO spi what to do in exception appears here?
+        try {
+            internalStop(stopOptions);
+        } catch (InternalInfrastructureException e) {
+            LOG.error(format("Error occurs on stop of workspace %s. Error: " + e.getLocalizedMessage(),
+                             context.getIdentity().getWorkspaceId()), e);
+        } catch (InfrastructureException e) {
+            LOG.debug(e.getLocalizedMessage(), e);
+        }
+        status = WorkspaceStatus.STOPPED;
+    }
+
+    protected abstract void internalStop(Map<String, String> stopOptions) throws InfrastructureException;
+
 
     /**
      * @return some implementation specific properties if any

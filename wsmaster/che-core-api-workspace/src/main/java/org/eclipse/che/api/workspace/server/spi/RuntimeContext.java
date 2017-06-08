@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.spi;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
@@ -27,7 +28,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -42,7 +42,6 @@ public abstract class RuntimeContext {
     protected final Environment           environment;
     protected final RuntimeIdentity       identity;
     protected final RuntimeInfrastructure infrastructure;
-    private         WorkspaceStatus       status;
     protected final InternalRecipe        recipe;
     protected final Map<String, InternalMachineConfig> internalMachines = new HashMap<>();
 
@@ -73,78 +72,6 @@ public abstract class RuntimeContext {
     public abstract InternalRuntime getRuntime();
 
     /**
-     *
-     * TODO move to InternalRuntime
-     * starts Runtime.
-     * In practice this method launching supposed to take unpredictable long time
-     * so normally it should be launched in separated thread
-     *
-     * @param startOptions
-     *         optional parameters
-     * @return running runtime
-     * @throws StateException
-     *         when the context is already used
-     * @throws InternalInfrastructureException
-     *         when error that indicates system internal problem occurs
-     * @throws InfrastructureException
-     *         when any other error occurs
-     */
-    public void start(Map<String, String> startOptions) throws InfrastructureException {
-        if (this.status != null) {
-            throw new StateException("Context already used");
-        }
-        status = WorkspaceStatus.STARTING;
-        internalStart(startOptions);
-        status = WorkspaceStatus.RUNNING;
-    }
-
-    /**
-     * TODO move to InternalRuntime
-     * Starts underlying environment in implementation specific way.
-     *
-     * @param startOptions options of workspace that may used in environment start
-     * @return server internal representation of workspace runtime
-     * @throws InternalInfrastructureException
-     *         when error that indicates system internal problem occurs
-     * @throws InfrastructureException
-     *         when any other error occurs
-     */
-    protected abstract void internalStart(Map<String, String> startOptions) throws InfrastructureException;
-
-    /**
-     * TODO move to InternalRuntime
-     * Stops Runtime
-     * Presumably can take some time so considered to launch in separate thread
-     *
-     * @param stopOptions
-     * @throws StateException
-     *         when the context can't be stopped because otherwise it would be in inconsistent status
-     *         (e.g. stop(interrupt) might not be allowed during start)
-     * @throws InfrastructureException
-     *         when any other error occurs
-     */
-    public final void stop(Map<String, String> stopOptions) throws InfrastructureException {
-        if (this.status != WorkspaceStatus.RUNNING) {
-            throw new StateException("The environment must be running");
-        }
-        status = WorkspaceStatus.STOPPING;
-
-        // TODO spi what to do in exception appears here?
-        try {
-            internalStop(stopOptions);
-        } catch (InternalInfrastructureException e) {
-            LOG.error(format("Error occurs on stop of workspace %s. Error: " + e.getLocalizedMessage(),
-                             identity.getWorkspaceId()), e);
-        } catch (InfrastructureException e) {
-            LOG.debug(e.getLocalizedMessage(), e);
-        }
-        status = WorkspaceStatus.STOPPED;
-    }
-
-    // TODO move to InternalRuntime
-    protected abstract void internalStop(Map<String, String> stopOptions) throws InfrastructureException;
-
-    /**
      * Infrastructure should assign channel (usual WebSocket) to push long lived processes messages
      * Examples of such messages include:
      * - Start/Stop logs output
@@ -161,6 +88,7 @@ public abstract class RuntimeContext {
      * @throws UnsupportedOperationException
      *         if implementation does not provide channel
      * @throws InfrastructureException
+     *         when any other error occurs
      */
     public abstract URL getOutputChannel() throws InfrastructureException,
                                                   UnsupportedOperationException;
@@ -192,6 +120,14 @@ public abstract class RuntimeContext {
     }
 
 
+    /**
+     * Return internal machines map.
+     *
+     * @return immutable copy of internal machines map.
+     */
+    public Map<String, InternalMachineConfig> getMachineConfigs() {
+        return ImmutableMap.copyOf(internalMachines);
+    }
 
     /**
      * @return RuntimeInfrastructure the Context created from

@@ -225,7 +225,7 @@ public class WorkspaceRuntimes {
             runtimes.put(workspaceId, runtime);
             return CompletableFuture.runAsync(ThreadLocalPropagateContext.wrap(() -> {
                 try {
-                    runtimeContext.start(options);
+                    runtime.start(options);
                     eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                                    .withWorkspaceId(workspaceId)
                                                    .withStatus(WorkspaceStatus.RUNNING)
@@ -279,7 +279,7 @@ public class WorkspaceRuntimes {
             throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
         }
 
-        runtime.getContext().stop(options);
+        runtime.stop(options);
 
         runtimes.remove(workspaceId);
 
