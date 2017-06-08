@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.debug.BreakpointRendererFactory;
+import org.eclipse.che.ide.api.debug.BreakpointStorage;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClientImpl;
 
@@ -35,6 +36,7 @@ public class DebugApiModule extends AbstractGinModule {
                         .implement(BreakpointRenderer.class, BreakpointRendererImpl.class)
                         .build(BreakpointRendererFactory.class));
 
+        bind(BreakpointStorage.class).to(BreakpointStorageImpl.class);
         bind(BreakpointManager.class).to(BreakpointManagerImpl.class).in(Singleton.class);
     }
 }

@@ -41,4 +41,14 @@ public class BrowserLocalStorageImpl implements LocalStorage {
     public void setItem(String key, String value) {
         storage.setItem(key, value);
     }
+
+    @Override
+    public String key(int index) {
+        return storage.key(index);
+    }
+
+    @Override
+    public int getLength() {
+        return storage.getLength();
+    }
 }
