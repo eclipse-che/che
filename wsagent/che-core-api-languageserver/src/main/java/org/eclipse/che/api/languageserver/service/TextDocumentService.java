@@ -24,6 +24,8 @@ import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.LocationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SignatureHelpDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SymbolInformationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.TextEditDto;
+import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -37,6 +39,7 @@ import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +86,6 @@ public class TextDocumentService {
 
         dtoToDto("completionItem/resolve", ExtendedCompletionItemDto.class, CompletionItemDto.class, this::completionItemResolve);
         dtoToDto("documentHighlight", TextDocumentPositionParams.class, DocumentHighlight.class, this::documentHighlight);
-
         dtoToDto("hover", TextDocumentPositionParams.class, HoverDto.class, this::hover);
         dtoToDto("signatureHelp", TextDocumentPositionParams.class, SignatureHelpDto.class, this::signatureHelp);
 
@@ -99,14 +101,25 @@ public class TextDocumentService {
             textDocument.setUri(prefixURI(textDocument.getUri()));
             textDocumentPositionParams.setUri(prefixURI(textDocumentPositionParams.getUri()));
             LanguageServer server = getServer(textDocument.getUri());
-            return server != null ? server.getTextDocumentService()
-                                                .completion(textDocumentPositionParams)
-                                                .get()
-                                                .getLeft()
-                                                .stream()
-                                                .map(CompletionItemDto::new)
-                                                .collect(toList())
-                                     : null;
+
+            if (server == null) {
+                return null;
+            }
+            Either<List<CompletionItem>, CompletionList> either = server.getTextDocumentService()
+                                                                        .completion(textDocumentPositionParams)
+                                                                        .get();
+            if (either.getLeft() != null) {
+                return either.getLeft()
+                             .stream()
+                             .map(CompletionItemDto::new)
+                             .collect(toList());
+            }
+
+            return either.getRight()
+                         .getItems()
+                         .stream()
+                         .map(CompletionItemDto::new)
+                         .collect(toList());
         } catch (LanguageServerException | InterruptedException | ExecutionException e) {
             throw new JsonRpcException(-27000, e.getMessage());
         }

@@ -38,7 +38,7 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
     public LanguageServerReconcileStrategy(TextDocumentSynchronizeFactory synchronizeFactory,
                                            @Assisted ServerCapabilities serverCapabilities) {
 
-        TextDocumentSyncKind documentSync = serverCapabilities.getTextDocumentSync().getLeft();
+        TextDocumentSyncKind documentSync = serverCapabilities.getTextDocumentSync().getLeft();//todo handle right too
         synchronize = synchronizeFactory.getSynchronize(documentSync);
     }
 
