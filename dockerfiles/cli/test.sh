@@ -40,8 +40,12 @@ run_test_in_docker_container() {
 
 echo "Running tests in container from image $IMAGE_NAME"
 echo "Running functional bats tests for CLI prompts and usage"
-#run_test_in_docker_container cli_prompts_usage_tests.bats
+run_test_in_docker_container cli_prompts_usage_tests.bats
 echo "Running functional bats tests for init and destroy commands"
-#run_test_in_docker_container cmd_init_destroy_tests.bats
+run_test_in_docker_container cmd_init_destroy_tests.bats
 echo "Running functionals bats tests for start command"
-run_test_in_docker_container cmd_start_tests.bats --net=host
+run_test_in_docker_container cmd_start_stop_restart_tests.bats --net=host
+echo "Running functionals bats tests for info command"
+run_test_in_docker_container cmd_info_tests.bats
+echo "Running functionals bats tests for config command"
+run_test_in_docker_container cmd_config_tests.bats
