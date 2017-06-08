@@ -173,7 +173,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
 
             List<Breakpoint> breakpointsToDelete = new ArrayList<>(breakpoints.get(path));
             breakpointStorage.deleteAll(breakpointsToDelete);
-            for (Breakpoint breakpoint : new ArrayList<>(breakpointsToDelete)) {
+            for (Breakpoint breakpoint : breakpointsToDelete) {
                 deleteBreakpoint(breakpoint.getFile(), breakpoint);
             }
         }
