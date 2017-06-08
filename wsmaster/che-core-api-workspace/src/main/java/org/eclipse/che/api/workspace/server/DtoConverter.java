@@ -20,17 +20,19 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.api.workspace.shared.dto.CommandDto;
-import org.eclipse.che.api.workspace.shared.dto.MachineDto;
-import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.MachineDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -41,6 +43,7 @@ import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.api.workspace.shared.stack.StackSource;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.dto.server.DtoFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -224,6 +227,14 @@ public final class DtoConverter {
 
         runtimeDto.setMachines(machineDtos);
         return runtimeDto;
+    }
+
+    /** Converts {@link RuntimeIdentity} to {@link RuntimeIdentityDto}. */
+    public static RuntimeIdentityDto asDto(RuntimeIdentity identity) {
+        return DtoFactory.newDto(RuntimeIdentityDto.class)
+                         .withWorkspaceId(identity.getWorkspaceId())
+                         .withEnvName(identity.getEnvName())
+                         .withOwner(identity.getOwner());
     }
 
 //    /** Converts {@link Snapshot} to {@link SnapshotDto}. */

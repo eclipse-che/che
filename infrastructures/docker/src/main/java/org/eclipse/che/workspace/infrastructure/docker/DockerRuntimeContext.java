@@ -17,6 +17,7 @@ import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -63,6 +64,7 @@ public class DockerRuntimeContext extends RuntimeContext {
     private final ContextsStorage      contextsStorage;
     private final SnapshotDao          snapshotDao;
     private final DockerRegistryClient dockerRegistryClient;
+    private final EventService         eventService;
 
     @Inject
     public DockerRuntimeContext(@Assisted DockerRuntimeInfrastructure infrastructure,
@@ -77,7 +79,8 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 AgentRegistry agentRegistry,
                                 ContextsStorage contextsStorage,
                                 SnapshotDao snapshotDao,
-                                DockerRegistryClient dockerRegistryClient)
+                                DockerRegistryClient dockerRegistryClient,
+                                EventService eventService)
             throws ValidationException, InfrastructureException {
         super(environment, identity, infrastructure, agentSorter, agentRegistry);
         this.devMachineName = Utils.getDevMachineName(environment);
@@ -89,10 +92,9 @@ public class DockerRuntimeContext extends RuntimeContext {
         this.contextsStorage = contextsStorage;
         this.snapshotDao = snapshotDao;
         this.dockerRegistryClient = dockerRegistryClient;
+        this.eventService = eventService;
         this.startSynchronizer = new StartSynchronizer();
     }
-
-
 
     @Override
     public URL getOutputChannel() throws InfrastructureException, UnsupportedOperationException {
@@ -116,7 +118,9 @@ public class DockerRuntimeContext extends RuntimeContext {
                                          serviceStarter,
                                          snapshotDao,
                                          dockerRegistryClient,
-                                         startSynchronizer);
+                                         startSynchronizer,
+                                         identity,
+                                         eventService);
     }
 
 
