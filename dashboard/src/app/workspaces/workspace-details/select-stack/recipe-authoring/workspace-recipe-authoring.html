@@ -10,16 +10,14 @@
                  che-name="recipe"
                  type="hidden"
                  ng-model="workspaceRecipeAuthoringController.recipeScriptCopy"
+                 custom-validator="workspaceRecipeAuthoringController.isRecipeValid()"
                  ng-required>
         <che-error-messages che-message-scope="workspace-details-environment"
                             che-message-name="Recipe content">
           <div ng-message="required">The recipe is required.</div>
+          <div ng-message="customValidator">{{workspaceRecipeAuthoringController.recipeValidationError}}</div>
         </che-error-messages>
       </che-input>
-      <div class="errors-container"
-           ng-if="workspaceRecipeAuthoringController.recipeValidationError">
-        {{workspaceRecipeAuthoringController.recipeValidationError}}
-      </div>
       <div class="recipe-docs-link">
         <a ng-href="{{workspaceRecipeAuthoringController.stackDocsUrl}}" target="_blank">Custom stack documentation</a>
       </div>

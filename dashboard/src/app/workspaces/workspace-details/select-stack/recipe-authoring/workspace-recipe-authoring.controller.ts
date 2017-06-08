@@ -131,6 +131,10 @@ export class WorkspaceRecipeAuthoringController {
     }
   }
 
+  isRecipeValid(): boolean {
+    return this.recipeValidationError.length === 0;
+  }
+
   onRecipeChange(): void {
     this.$timeout(() => {
       this.detectFormat(this.recipeScriptCopy);
