@@ -168,7 +168,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
     private void deleteBreakpoints(final Set<String> paths) {
         for (String path : paths) {
             if (!breakpoints.containsKey(path)) {
-                return;
+                continue;
             }
 
             List<Breakpoint> breakpointsToDelete = new ArrayList<>(breakpoints.get(path));
