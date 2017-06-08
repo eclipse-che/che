@@ -50,15 +50,15 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     private static final Logger LOG = getLogger(DockerInternalRuntime.class);
 
     private final DockerRuntimeContext.StartSynchronizer startSynchronizer;
-    private final Map<String, String> properties;
-    private final Queue<String>       startQueue;
-    private final ContextsStorage     contextsStorage;
-    private final NetworkLifecycle    dockerNetworkLifecycle;
-    private final String              devMachineName;
-    private final DockerEnvironment   dockerEnvironment;
-    private final MachineStarter      serviceStarter;
-    private final SnapshotDao         snapshotDao;
-    private final DockerRegistryClient dockerRegistryClient;
+    private final Map<String, String>                    properties;
+    private final Queue<String>                          startQueue;
+    private final ContextsStorage                        contextsStorage;
+    private final NetworkLifecycle                       dockerNetworkLifecycle;
+    private final String                                 devMachineName;
+    private final DockerEnvironment                      dockerEnvironment;
+    private final MachineStarter                         serviceStarter;
+    private final SnapshotDao                            snapshotDao;
+    private final DockerRegistryClient                   dockerRegistryClient;
 
 
     public DockerInternalRuntime(DockerRuntimeContext context,
@@ -67,7 +67,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                  List<String> orderedServices,
                                  ContextsStorage contextsStorage,
                                  DockerEnvironment dockerEnvironment,
-                                 NetworkLifecycle  dockerNetworkLifecycle,
+                                 NetworkLifecycle dockerNetworkLifecycle,
                                  MachineStarter serviceStarter,
                                  SnapshotDao snapshotDao,
                                  DockerRegistryClient dockerRegistryClient,
@@ -81,7 +81,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         this.dockerNetworkLifecycle = dockerNetworkLifecycle;
         this.serviceStarter = serviceStarter;
         this.snapshotDao = snapshotDao;
-        this.dockerRegistryClient =  dockerRegistryClient;
+        this.dockerRegistryClient = dockerRegistryClient;
         this.startQueue = new ArrayDeque<>(orderedServices);
     }
 
@@ -135,8 +135,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         // TODO property name
         final RuntimeIdentity identity = getContext().getIdentity();
         if ("true".equals(startOptions.get("restore"))) {
-            MachineSourceImpl machineSource = null;
-
+            MachineSourceImpl machineSource;
             try {
                 SnapshotImpl snapshot = snapshotDao.getSnapshot(identity.getWorkspaceId(),
                                                                 identity.getEnvName(),
@@ -176,7 +175,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
     // TODO rework to agent launchers
     private void startAgents(String machineName, DockerMachine dockerMachine) throws InfrastructureException {
-        InternalMachineConfig machineConfig = internalMachines.get(machineName);
+        InternalMachineConfig machineConfig = getContext().getMachineConfigs().get(machineName);
         if (machineConfig == null) {
             throw new InfrastructureException("Machine %s is not found in internal machines config of RuntimeContext");
         }
@@ -227,6 +226,17 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         }
     }
 
+    @Override
+    public Map<String, ? extends Machine> getInternalMachines() {
+        return Collections.unmodifiableMap(startSynchronizer.getMachines());
+    }
+
+
+    @Override
+    public Map<String, String> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
+
     private void checkStartInterruption() throws InfrastructureException {
         if (Thread.interrupted()) {
             throw new InfrastructureException("Docker infrastructure runtime start was interrupted");
@@ -255,6 +265,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
     /**
      * Prepare snapshots of all active machines.
+     *
      * @param machines
      *         the active machines map
      */
@@ -314,16 +325,5 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                 LOG.error(format("Couldn't remove snapshot '%s', workspace id '%s'", snapshot.getId(), snapshot.getWorkspaceId()), x);
             }
         }
-    }
-
-    @Override
-    public Map<String, ? extends Machine> getInternalMachines() {
-        return Collections.unmodifiableMap(startSynchronizer.getMachines());
-    }
-
-
-    @Override
-    public Map<String, String> getProperties() {
-        return Collections.unmodifiableMap(properties);
     }
 }

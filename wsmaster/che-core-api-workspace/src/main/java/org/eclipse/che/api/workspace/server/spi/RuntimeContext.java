@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.spi;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.core.ValidationException;
@@ -40,7 +42,6 @@ public abstract class RuntimeContext {
     protected final Environment           environment;
     protected final RuntimeIdentity       identity;
     protected final RuntimeInfrastructure infrastructure;
-
     protected final InternalRecipe        recipe;
     protected final Map<String, InternalMachineConfig> internalMachines = new HashMap<>();
 
@@ -94,7 +95,6 @@ public abstract class RuntimeContext {
 
 
 
-
 //    /**
 //     * Status Channel URL should be passed by Workspace API level. It is used for events about any kind of status changes, such as:
 //     * - Agent installing statuses
@@ -120,6 +120,14 @@ public abstract class RuntimeContext {
     }
 
 
+    /**
+     * Return internal machines map.
+     *
+     * @return immutable copy of internal machines map.
+     */
+    public Map<String, InternalMachineConfig> getMachineConfigs() {
+        return ImmutableMap.copyOf(internalMachines);
+    }
 
     /**
      * @return RuntimeInfrastructure the Context created from
