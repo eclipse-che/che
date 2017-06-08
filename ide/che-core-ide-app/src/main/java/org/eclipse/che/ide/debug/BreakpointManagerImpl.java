@@ -13,8 +13,6 @@ package org.eclipse.che.ide.debug;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -29,12 +27,10 @@ import org.eclipse.che.ide.api.debug.BreakpointStorage;
 import org.eclipse.che.ide.api.debug.HasBreakpointRenderer;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
-import org.eclipse.che.ide.api.editor.EditorOpenedEventHandler;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.project.DeleteProjectEvent;
-import org.eclipse.che.ide.api.event.project.DeleteProjectHandler;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
@@ -173,9 +169,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
 
             List<Breakpoint> breakpointsToDelete = new ArrayList<>(breakpoints.get(path));
             breakpointStorage.deleteAll(breakpointsToDelete);
-            for (Breakpoint breakpoint : breakpointsToDelete) {
-                deleteBreakpoint(breakpoint.getFile(), breakpoint);
-            }
+            breakpointsToDelete.forEach(breakpoint -> deleteBreakpoint(breakpoint.getFile(), breakpoint));
         }
     }
 
@@ -190,12 +184,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
 
         final BreakpointRenderer breakpointRenderer = getBreakpointRendererForFile(breakpoint.getPath());
         if (breakpointRenderer != null) {
-            breakpointRenderer.addBreakpointMark(breakpoint.getLineNumber(), new LineChangeAction() {
-                @Override
-                public void onLineChange(VirtualFile file, int firstLine, int linesAdded, int linesRemoved) {
-                    BreakpointManagerImpl.this.onLineChange(file, firstLine, linesAdded, linesRemoved);
-                }
-            });
+            breakpointRenderer.addBreakpointMark(breakpoint.getLineNumber(), BreakpointManagerImpl.this::onLineChange);
             breakpointRenderer.setBreakpointActive(breakpoint.getLineNumber(), breakpoint.isActive());
         }
 
@@ -279,7 +268,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
         }
     }
 
-    public void deleteCurrentBreakpoint() {
+    private void deleteCurrentBreakpoint() {
         if (currentBreakpoint != null) {
             int oldLineNumber = currentBreakpoint.getLineNumber();
             BreakpointRenderer breakpointRenderer = getBreakpointRendererForFile(currentBreakpoint.getPath());
@@ -375,54 +364,40 @@ public class BreakpointManagerImpl implements BreakpointManager,
         eventBus.addHandler(WorkspaceReadyEvent.getType(), new WorkspaceReadyEvent.WorkspaceReadyHandler() {
             @Override
             public void onWorkspaceReady(WorkspaceReadyEvent event) {
-                breakpointStorage.readAll().then(new Operation<List<Breakpoint>>() {
-                    @Override
-                    public void apply(List<Breakpoint> breakpoints) throws OperationException {
-                        breakpoints.forEach(BreakpointManagerImpl.this::addBreakpoint);
-                    }
+                breakpointStorage.readAll().then(breakpoints -> {
+                    breakpoints.forEach(BreakpointManagerImpl.this::addBreakpoint);
                 });
             }
         });
 
-        eventBus.addHandler(EditorOpenedEvent.TYPE, new EditorOpenedEventHandler() {
-            @Override
-            public void onEditorOpened(EditorOpenedEvent event) {
-                onOpenEditor(event.getFile().getLocation().toString(), event.getEditor());
+        eventBus.addHandler(EditorOpenedEvent.TYPE, event -> onOpenEditor(event.getFile().getLocation().toString(), event.getEditor()));
+
+        eventBus.addHandler(DeleteProjectEvent.TYPE, event -> {
+            if (breakpoints.isEmpty()) {
+                return;
             }
+
+            ProjectConfigDto config = event.getProjectConfig();
+            String path = config.getPath() + "/";
+            deleteBreakpoints(getBreakpointPaths(path));
         });
 
-        eventBus.addHandler(DeleteProjectEvent.TYPE, new DeleteProjectHandler() {
-            @Override
-            public void onProjectDeleted(DeleteProjectEvent event) {
+        eventBus.addHandler(ResourceChangedEvent.getType(), event -> {
+            if (event.getDelta().getKind() == ResourceDelta.REMOVED) {
                 if (breakpoints.isEmpty()) {
                     return;
                 }
 
-                ProjectConfigDto config = event.getProjectConfig();
-                String path = config.getPath() + "/";
-                deleteBreakpoints(getBreakpointPaths(path));
-            }
-        });
+                final Resource resource = event.getDelta().getResource();
 
-        eventBus.addHandler(ResourceChangedEvent.getType(), new ResourceChangedEvent.ResourceChangedHandler() {
-            @Override
-            public void onResourceChanged(ResourceChangedEvent event) {
-                if (event.getDelta().getKind() == ResourceDelta.REMOVED) {
-                    if (breakpoints.isEmpty()) {
-                        return;
-                    }
+                Path path = resource.getLocation();
 
-                    final Resource resource = event.getDelta().getResource();
+                if (resource.isFolder()) {
+                    path.addTrailingSeparator();
 
-                    Path path = resource.getLocation();
-
-                    if (resource.isFolder()) {
-                        path.addTrailingSeparator();
-
-                        deleteBreakpoints(getBreakpointPaths(path.toString()));
-                    } else if (resource.isFile()) {
-                        deleteBreakpoints(Collections.singleton(path.toString()));
-                    }
+                    deleteBreakpoints(getBreakpointPaths(path.toString()));
+                } else if (resource.isFile()) {
+                    deleteBreakpoints(Collections.singleton(path.toString()));
                 }
             }
         });
@@ -473,12 +448,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
     private void reAddBreakpointMark(BreakpointRenderer breakpointRenderer, Breakpoint breakpoint) {
         int lineNumber = breakpoint.getLineNumber();
 
-        breakpointRenderer.addBreakpointMark(lineNumber, new LineChangeAction() {
-            @Override
-            public void onLineChange(VirtualFile file, int firstLine, int linesAdded, int linesRemoved) {
-                BreakpointManagerImpl.this.onLineChange(file, firstLine, linesAdded, linesRemoved);
-            }
-        });
+        breakpointRenderer.addBreakpointMark(lineNumber, this::onLineChange);
         breakpointRenderer.setBreakpointActive(lineNumber, breakpoint.isActive());
     }
 
@@ -522,11 +492,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
     @Override
     public void onBreakpointAdded(Breakpoint breakpoint) {
         String path = breakpoint.getPath();
-        List<Breakpoint> breakpointsForPath = breakpoints.get(path);
-        if (breakpointsForPath == null) {
-            breakpointsForPath = new ArrayList<>();
-            breakpoints.put(path, breakpointsForPath);
-        }
+        List<Breakpoint> breakpointsForPath = breakpoints.computeIfAbsent(path, k -> new ArrayList<>());
 
         int i = breakpointsForPath.indexOf(breakpoint);
         if (i == -1) {
