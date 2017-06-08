@@ -60,7 +60,7 @@ teardown() {
   #THEN
   #check that state is not set because CLI stop command also removes container.
   [[ "$(docker inspect --format='{{.State.Running}}' chetest)" == "" ]]
-  #check that stopped container actully removed
+  #check that stopped container actually removed
   [[ "$(docker ps -a)" != *"chetest"* ]]
 }
 
