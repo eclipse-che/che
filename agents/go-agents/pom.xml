@@ -26,11 +26,15 @@
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
+                    <includes>**/**</includes>
                     <excludes>
-                        <exclude>/docs/**</exclude>
+                        <exclude>docs/**</exclude>
                         <exclude>terminal-agent/term/server.go</exclude>
                         <exclude>vendor/**</exclude>
                         <exclude>Godeps/**</exclude>
+                        <exclude>target/**</exclude>
+                        <exclude>README.md</exclude>
+                        <exclude>.gitignore</exclude>
                     </excludes>
                 </configuration>
             </plugin>
