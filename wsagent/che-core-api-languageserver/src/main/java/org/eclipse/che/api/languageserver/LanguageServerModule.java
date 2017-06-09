@@ -22,6 +22,7 @@ import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.api.languageserver.registry.ServerInitializer;
 import org.eclipse.che.api.languageserver.registry.ServerInitializerImpl;
 import org.eclipse.che.api.languageserver.service.LanguageRegistryService;
+import org.eclipse.che.api.languageserver.service.LanguageServerInitializationHandler;
 import org.eclipse.che.api.languageserver.service.TextDocumentService;
 import org.eclipse.che.api.languageserver.service.WorkspaceService;
 
@@ -39,5 +40,7 @@ public class LanguageServerModule extends AbstractModule {
         bind(TextDocumentService.class).asEagerSingleton();
         bind(PublishDiagnosticsParamsJsonRpcTransmitter.class).asEagerSingleton();
         bind(ShowMessageJsonRpcTransmitter.class).asEagerSingleton();
+
+        bind(LanguageServerInitializationHandler.class).asEagerSingleton();
     }
 }
