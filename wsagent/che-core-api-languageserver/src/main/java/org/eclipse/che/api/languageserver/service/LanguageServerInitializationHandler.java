@@ -32,7 +32,7 @@ public class LanguageServerInitializationHandler {
                                   .withFunction(path -> {
                                       try {
                                           return registry.findServer(TextDocumentServiceUtils.prefixURI(path)) != null;
-                                      } catch (LanguageServerException | InterruptedException e) {
+                                      } catch (LanguageServerException e) {
                                           throw new JsonRpcException(-27000, e.getMessage());
                                       }
                                   });
