@@ -29,6 +29,7 @@
             width: 18px;
             height: 18px;
             overflow: hidden;
+            cursor: pointer;
         }
 
         .button * {
@@ -56,23 +57,26 @@
             text-align: center;
             color: toolButtonColor;
             white-space: nowrap;
-            cursor: default;
+            pointer-events: none;
         }
 
-        .button[name="workBenchIconMenu"] > div {
-            font-size: 10px;
+        .button > svg,
+        .button > svg * {
+            fill: toolButtonColor;
         }
 
         .button:hover > svg,
+        .button:hover > svg *,
         .button:hover > div {
-            fill: toolButtonHoverColor;
-            color: toolButtonHoverColor;
+            fill: toolButtonHoverColor !important;
+            color: toolButtonHoverColor !important;
         }
 
         .button:active > svg,
+        .button:active > svg *,
         .button:active > div {
-            fill: toolButtonActiveColor;
-            color: toolButtonActiveColor;
+            fill: toolButtonActiveColor !important;
+            color: toolButtonActiveColor !important;
         }
 
         .button:active > svg > *,

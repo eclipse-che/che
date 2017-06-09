@@ -23,7 +23,8 @@ div[maximized="true"] div[name="maximizePart"] i {
     color: blueIconColor;
 }
 
-div[maximized="true"] svg[name="workBenchIconMaximize"] {
+div[maximized="true"] svg[name="workBenchIconMaximize"],
+div[maximized="true"] svg[name="workBenchIconMaximize"] * {
     fill: blueIconColor;
 }
 

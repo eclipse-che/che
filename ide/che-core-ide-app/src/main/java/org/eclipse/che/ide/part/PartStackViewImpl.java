@@ -12,6 +12,7 @@ package org.eclipse.che.ide.part;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -169,10 +170,12 @@ public class PartStackViewImpl extends Composite implements RequiresResize, Part
         menuButton.add(menuToolButton);
         menuToolButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent event) {
-                int left = getAbsoluteLeft(menuToolButton.getElement());
-                int top = getAbsoluteTop(menuToolButton.getElement());
-                delegate.onPartStackMenu(left + 10, top + 21 - 8);
+            public void onClick(final ClickEvent event) {
+                Scheduler.get().scheduleDeferred(() -> {
+                    int left = getAbsoluteLeft(menuToolButton.getElement());
+                    int top = getAbsoluteTop(menuToolButton.getElement());
+                    delegate.onPartStackMenu(left + 10, top + 21 - 8);
+                });
             }
         });
 

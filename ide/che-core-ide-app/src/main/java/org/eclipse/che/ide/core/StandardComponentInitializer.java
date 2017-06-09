@@ -734,6 +734,8 @@ public class StandardComponentInitializer {
         partMenuGroup.add(restorePartAction);
         partMenuGroup.add(showConsoleTreeAction);
         partMenuGroup.add(collapseAllAction);
+        partMenuGroup.add(refreshPathAction);
+        partMenuGroup.add(linkWithEditorAction);
 
         actionManager.registerAction("expandEditor", expandEditorAction);
         DefaultActionGroup rightMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_MAIN_MENU);
