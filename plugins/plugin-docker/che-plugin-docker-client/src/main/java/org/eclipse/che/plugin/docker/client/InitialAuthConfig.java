@@ -28,6 +28,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static java.lang.String.format;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY_SYNONYMS;
 
 /**
  * Collects auth configurations for private docker registries. Credential might be configured in .properties files, see details {@link
@@ -41,6 +42,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  *
  * @author Alexander Garagatyi
  * @author Alexander Andrienko
+ * @author Mykola Morhun
  */
 @Singleton
 public class InitialAuthConfig {
@@ -81,6 +83,7 @@ public class InitialAuthConfig {
 
             configMap.put(url, newDto(AuthConfig.class).withUsername(userName).withPassword(password));
         }
+        ensureDockerHubConfiguredNoMoreThanOnce(configMap);
 
         authConfigs = newDto(AuthConfigs.class).withConfigs(configMap);
     }
@@ -118,6 +121,18 @@ public class InitialAuthConfig {
             throw new IllegalArgumentException(format("Property '%s' is missing.", propertyName));
         }
         return propertyValue;
+    }
+
+    private void ensureDockerHubConfiguredNoMoreThanOnce(Map<String, AuthConfig> configMap) {
+        boolean isDockerHubConfigured = false;
+        for (String defaultRegistryAlias : DEFAULT_REGISTRY_SYNONYMS) {
+            if (configMap.containsKey(defaultRegistryAlias)) {
+                if (isDockerHubConfigured) {
+                    throw new IllegalArgumentException("Docker hub registry is configured more than one time");
+                }
+                isDockerHubConfigured = true;
+            }
+        }
     }
 
 }

@@ -40,8 +40,8 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     private final List<WidgetToShow>                    widgets;
     private final Map<IsWidget, WidgetRemovingListener> removingListeners;
 
-    private FocusListener                               focusListener;
-    private DoubleClickListener                         doubleClickListener;
+    private FocusListener       focusListener;
+    private DoubleClickListener doubleClickListener;
 
     @AssistedInject
     public SubPanelPresenter(SubPanelFactory subPanelFactory, SubPanelViewFactory subPanelViewFactory) {
@@ -124,6 +124,7 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     public void removeWidget(WidgetToShow widget) {
         view.removeWidget(widget);
         widgets.remove(widget);
+        removingListeners.remove(widget.getWidget());
     }
 
     @Override
@@ -153,10 +154,9 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
 
     @Override
     public void onWidgetRemoving(IsWidget widget, RemoveCallback removeCallback) {
-        final WidgetRemovingListener listener = removingListeners.remove(widget);
+        final WidgetRemovingListener listener = removingListeners.get(widget);
         if (listener != null) {
             listener.onWidgetRemoving(removeCallback);
         }
     }
-
 }

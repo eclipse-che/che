@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.macro;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
@@ -27,6 +28,7 @@ import java.util.Set;
  *
  * @author Artem Zatsarynnyi
  */
+@Singleton
 public class MacroRegistryImpl implements MacroRegistry {
 
     private final Map<String, Macro> macros;

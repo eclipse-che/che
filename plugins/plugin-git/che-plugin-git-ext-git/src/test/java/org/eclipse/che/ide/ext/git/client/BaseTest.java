@@ -13,9 +13,12 @@ package org.eclipse.che.ide.ext.git.client;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.git.shared.Branch;
+import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.MergeResult;
+import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.Revision;
+import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
@@ -32,7 +35,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.junit.Before;
@@ -136,6 +139,11 @@ public abstract class BaseTest {
     protected ArgumentCaptor<Operation<List<Branch>>> branchListCaptor;
 
     @Mock
+    protected Promise<PushResponse>                   pushPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<PushResponse>> pushPromiseCaptor;
+
+    @Mock
     protected Promise<Branch>                   branchPromise;
     @Captor
     protected ArgumentCaptor<Operation<Branch>> branchCaptor;
@@ -164,6 +172,16 @@ public abstract class BaseTest {
     protected Promise<String>                   stringPromise;
     @Captor
     protected ArgumentCaptor<Operation<String>> stringCaptor;
+
+    @Mock
+    protected Promise<LogResponse>                   logPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<LogResponse>> logCaptor;
+
+    @Mock
+    protected Promise<ShowFileContentResponse>                   showPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<ShowFileContentResponse>> showCaptor;
 
     @Before
     public void disarm() {

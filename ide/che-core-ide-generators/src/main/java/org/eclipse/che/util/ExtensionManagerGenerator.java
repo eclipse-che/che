@@ -52,21 +52,16 @@ public class ExtensionManagerGenerator {
      * Entry point. --rootDir is the optional parameter.
      *
      * @param args
+     * @throws IOException 
      */
-    public static void main(String[] args) {
-        try {
-            File rootFolder = GeneratorUtils.getRootFolder(args);
-            System.out.println(" ------------------------------------------------------------------------ ");
-            System.out.println(String.format("Searching for Extensions in %s", rootFolder.getAbsolutePath()));
-            System.out.println(" ------------------------------------------------------------------------ ");
-            // find all Extension FQNs
-            findExtensions();
-            generateExtensionManager(rootFolder);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-            // error
-            System.exit(1);//NOSONAR
-        }
+    public static void main(String[] args) throws IOException {
+        File rootFolder = GeneratorUtils.getRootFolder(args);
+        System.out.println(" ------------------------------------------------------------------------ ");
+        System.out.println(String.format("Searching for Extensions in %s", rootFolder.getAbsolutePath()));
+        System.out.println(" ------------------------------------------------------------------------ ");
+        // find all Extension FQNs
+        findExtensions();
+        generateExtensionManager(rootFolder);
     }
 
     /**

@@ -20,6 +20,9 @@ public interface Resources extends com.google.gwt.resources.client.ClientBundle 
     @Source("logo/che-logo.svg")
     SVGResource logo();
 
+    @Source("logo/water-mark-logo.svg")
+    SVGResource waterMarkLogo();
+
     @Source({"Styles.css", "org/eclipse/che/ide/api/ui/style.css"})
     Styles styles();
 }

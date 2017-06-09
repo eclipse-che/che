@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
-import io.typefox.lsapi.ServerCapabilities;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Overflow;
@@ -19,9 +18,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -32,9 +29,14 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.icon.Icon;
+import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
-import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.TextEdit;
 
 import java.util.List;
 
@@ -46,25 +48,28 @@ import static org.eclipse.che.ide.api.theme.Style.theme;
  */
 public class CompletionItemBasedCompletionProposal implements CompletionProposal {
 
-    private CompletionItemDTO               completionItem;
+    private final String                    currentWord;
     private final TextDocumentServiceClient documentServiceClient;
-    private final TextDocumentIdentifierDTO documentId;
+    private final TextDocumentIdentifier    documentId;
     private final LanguageServerResources   resources;
     private final Icon                      icon;
     private final ServerCapabilities        serverCapabilities;
     private final List<Match>               highlights;
     private final int                       offset;
-    private boolean resolved;
+    private       ExtendedCompletionItem    completionItem;
+    private       boolean                   resolved;
 
-    CompletionItemBasedCompletionProposal(CompletionItemDTO completionItem,
+    CompletionItemBasedCompletionProposal(ExtendedCompletionItem completionItem,
+                                          String currentWord,
                                           TextDocumentServiceClient documentServiceClient,
-                                          TextDocumentIdentifierDTO documentId,
+                                          TextDocumentIdentifier documentId,
                                           LanguageServerResources resources,
                                           Icon icon,
                                           ServerCapabilities serverCapabilities,
                                           List<Match> highlights,
                                           int offset) {
         this.completionItem = completionItem;
+        this.currentWord = currentWord;
         this.documentServiceClient = documentServiceClient;
         this.documentId = documentId;
         this.resources = resources;
@@ -78,9 +83,9 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     @Override
     public void getAdditionalProposalInfo(final AsyncCallback<Widget> callback) {
         if (completionItem.getDocumentation() == null && canResolve()) {
-            resolve().then(new Operation<CompletionItemDTO>() {
+            resolve().then(new Operation<ExtendedCompletionItem>() {
                 @Override
-                public void apply(CompletionItemDTO item) throws OperationException {
+                public void apply(ExtendedCompletionItem item) throws OperationException {
                     completionItem = item;
                     resolved = true;
                     callback.onSuccess(createAdditionalInfoWidget());
@@ -116,43 +121,43 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     @Override
     public String getDisplayString() {
         SafeHtmlBuilder builder = new SafeHtmlBuilder();
-        
+
         String label = completionItem.getLabel();
         int pos = 0;
         for (Match highlight : highlights) {
             if (highlight.getStart() == highlight.getEnd()) {
                 continue;
             }
-            
+
             if (pos < highlight.getStart()) {
                 appendPlain(builder, label.substring(pos, highlight.getStart()));
             }
-            
+
             appendHighlighted(builder, label.substring(highlight.getStart(), highlight.getEnd()));
             pos = highlight.getEnd();
         }
-        
+
         if (pos < label.length()) {
             appendPlain(builder, label.substring(pos));
         }
-        
+
         if (completionItem.getDetail() != null) {
             appendDetail(builder, completionItem.getDetail());
         }
-        
+
         return builder.toSafeHtml().asString();
     }
-    
+
     private void appendPlain(SafeHtmlBuilder builder, String text) {
         builder.appendEscaped(text);
     }
-    
+
     private void appendHighlighted(SafeHtmlBuilder builder, String text) {
         builder.appendHtmlConstant("<span class=\"" + resources.css().codeassistantHighlight() + "\">");
         builder.appendEscaped(text);
         builder.appendHtmlConstant("</span>");
     }
-    
+
     private void appendDetail(SafeHtmlBuilder builder, String text) {
         builder.appendHtmlConstant(" <span class=\"" + resources.css().codeassistantDetail() + "\">");
         builder.appendEscaped(text);
@@ -166,7 +171,13 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
     @Override
     public void getCompletion(final CompletionCallback callback) {
-        callback.onCompletion(new CompletionImpl(completionItem, offset));
+        if (canResolve()) {
+            resolve().then(completionItem -> {
+                callback.onCompletion(new CompletionImpl(completionItem, currentWord, offset));
+            });
+        } else {
+            callback.onCompletion(new CompletionImpl(completionItem, currentWord, offset));
+        }
     }
 
     private boolean canResolve() {
@@ -176,42 +187,52 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
                serverCapabilities.getCompletionProvider().getResolveProvider();
     }
 
-    private Promise<CompletionItemDTO> resolve() {
+    private Promise<ExtendedCompletionItem> resolve() {
         completionItem.setTextDocumentIdentifier(documentId);
         return documentServiceClient.resolveCompletionItem(completionItem);
     }
 
     private static class CompletionImpl implements Completion {
 
-        private CompletionItemDTO completionItem;
-        private int               offset;
+        private CompletionItem completionItem;
+        private String         currentWord;
+        private int            offset;
 
-        public CompletionImpl(CompletionItemDTO completionItem, int offset) {
+        public CompletionImpl(CompletionItem completionItem, String currentWord, int offset) {
             this.completionItem = completionItem;
+            this.currentWord = currentWord;
             this.offset = offset;
         }
 
         @Override
         public void apply(Document document) {
             if (completionItem.getTextEdit() != null) {
-                RangeDTO range = completionItem.getTextEdit().getRange();
+                Range range = completionItem.getTextEdit().getRange();
                 int startOffset = document.getIndexFromPosition(
                         new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()));
                 int endOffset = offset + document.getIndexFromPosition(
                         new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
                 document.replace(startOffset, endOffset - startOffset, completionItem.getTextEdit().getNewText());
             } else {
-                String insertText = completionItem.getInsertText() == null ? completionItem.getLabel() : completionItem.getInsertText();
-                document.replace(document.getCursorOffset() - offset, offset, insertText);
+                int currentWordLength = currentWord.length();
+                int cursorOffset = document.getCursorOffset();
+                if (completionItem.getInsertText() == null) {
+                    document.replace(cursorOffset - currentWordLength, currentWordLength, completionItem.getLabel());
+                } else {
+                    document.replace(cursorOffset - offset, offset, completionItem.getInsertText());
+                }
             }
         }
 
         @Override
         public LinearRange getSelection(Document document) {
-            RangeDTO range = completionItem.getTextEdit().getRange();
-            int startOffset = document
-                                      .getIndexFromPosition(new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()))
-                              + completionItem.getTextEdit().getNewText().length();
+            final TextEdit textEdit = completionItem.getTextEdit();
+            if (textEdit == null) {
+                return LinearRange.createWithStart(document.getCursorOffset()).andLength(0);
+            }
+            Range range = textEdit.getRange();
+            TextPosition textPosition = new TextPosition(range.getStart().getLine(), range.getStart().getCharacter());
+            int startOffset = document.getIndexFromPosition(textPosition) + textEdit.getNewText().length();
             return LinearRange.createWithStart(startOffset).andLength(0);
         }
 

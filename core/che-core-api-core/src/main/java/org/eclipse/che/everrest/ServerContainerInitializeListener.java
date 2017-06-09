@@ -187,10 +187,6 @@ public class ServerContainerInitializeListener implements ServletContextListener
         final String authType = "BASIC";
         final Subject subject = EnvironmentContext.getCurrent().getSubject();
 
-        if (subject == null) {
-            return new SimpleSecurityContext(isSecure);
-        }
-
         final Principal principal = new SimplePrincipal(subject.getUserName());
         return new SecurityContext() {
 

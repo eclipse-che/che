@@ -47,7 +47,7 @@ public class GwtCheCommandType implements CommandType {
         pages = new LinkedList<>();
         pages.add(page);
 
-        iconRegistry.registerIcon(new Icon(ID + ".commands.category.icon", resources.gwtCheCommandType()));
+        iconRegistry.registerIcon(new Icon("command.type." + ID, resources.gwtCheCommandType()));
     }
 
     @Override

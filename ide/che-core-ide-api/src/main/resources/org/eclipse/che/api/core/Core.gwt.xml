@@ -18,4 +18,10 @@
     <source path='rest/shared'/>
     <source path='jsonrpc/shared'/>
     <source path='websocket/shared'/>
+    <source path='websocket/commons'/>
+    <source path='jsonrpc/reception'/>
+    <source path='jsonrpc/transmission'/>
+    <source path='jsonrpc/json'/>
+    <source path='jsonrpc/commons'/>
+    <source path='logger/commons'/>
 </module>

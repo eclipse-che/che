@@ -28,6 +28,6 @@ public interface EditorPrefLocalizationConstant extends Messages {
     @DefaultMessage("Keys")
     String keysSectionLabel();
 
-    @DefaultMessage("Key Bindings:")
+    @DefaultMessage("Key Bindings")
     String keybindingsLabel();
 }

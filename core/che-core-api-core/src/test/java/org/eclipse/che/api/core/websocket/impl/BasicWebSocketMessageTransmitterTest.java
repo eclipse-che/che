@@ -72,17 +72,6 @@ public class BasicWebSocketMessageTransmitterTest {
     }
 
     @Test
-    public void shouldSendBroadcastingMessageIfSessionIsOpen() throws IOException {
-        transmitter.transmit(MESSAGE);
-
-        verify(session, never()).getBasicRemote();
-        verify(remote, never()).sendText(MESSAGE);
-        verify(reSender, never()).add(any(), anyString());
-
-        verify(registry).getSessions();
-    }
-
-    @Test
     public void shouldAddMessageToPendingIfSessionIsNotOpenedAndEndpointIsSet() throws IOException {
         when(session.isOpen()).thenReturn(false);
 

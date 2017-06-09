@@ -24,6 +24,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.resource.Path;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents current context of the IDE application.
@@ -31,6 +32,7 @@ import java.util.List;
  * @author Vitaly Parfonov
  * @author Artem Zatsarynnyi
  * @author Vlad Zhukovskyi
+ * @author Yevhenii Voevodin
  */
 public interface AppContext {
 
@@ -185,7 +187,7 @@ public interface AppContext {
     FactoryDto getFactory();
 
     void setFactory(FactoryDto factory);
-    
+
     String getWorkspaceId();
 
     /**
@@ -210,4 +212,21 @@ public interface AppContext {
 
 
     String getDevAgentEndpoint();
+
+    /**
+     * Returns web application identifier. Most obvious use - to distinguish web applications
+     * on server side (e.g. connected via websocket)
+     *
+     * @return identifier
+     */
+    String getAppId();
+
+    /**
+     * Returns context properties, key-value storage that allows to store
+     * data in the context for plugins and extensions.
+     *
+     * @return a modifiable properties map
+     * @since 5.11.0
+     */
+    Map<String, String> getProperties();
 }

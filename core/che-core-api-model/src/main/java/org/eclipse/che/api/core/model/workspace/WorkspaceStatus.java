@@ -28,8 +28,9 @@ public enum WorkspaceStatus {
      * <p>Workspace becomes starting only if it was {@link #STOPPED}.
      * The status map:
      * <pre>
-     *  STOPPED -> <b>STARTING</b> -> RUNNING (normal behaviour)
-     *  STOPPED -> <b>STARTING</b> -> STOPPED (failed to start)
+     *  STOPPED -> <b>STARTING</b> -> RUNNING  (normal behaviour)
+     *  STOPPED -> <b>STARTING</b> -> STOPPED  (failed to start)
+     *  STOPPED -> <b>STARTING</b> -> STOPPING (explicitly stopped)
      * </pre>
      */
     STARTING,
@@ -61,10 +62,12 @@ public enum WorkspaceStatus {
     /**
      * Workspace considered as stopping if and only if its active environment is shutting down.
      *
-     * <p>Workspace is in stopping status only if it was in {@link #RUNNING} status before.
+     * <p>Workspace is in stopping status only if it was in {@link #RUNNING} or
+     * {@link #STARTING} status before.
      * The status map:
      * <pre>
-     *  RUNNING -> <b>STOPPING</b> -> STOPPED (normal behaviour)/(error while stopping)
+     *  RUNNING  -> <b>STOPPING</b> -> STOPPED (normal behaviour)/(error while stopping)
+     *  STARTING -> <b>STOPPING</b> -> STOPPED (stopped while starting)
      * </pre>
      */
     STOPPING,

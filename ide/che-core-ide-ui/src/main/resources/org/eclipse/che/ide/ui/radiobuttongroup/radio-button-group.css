@@ -30,6 +30,9 @@
     background: inherit;
     display: inline-block;
     vertical-align: middle;
+    color: #aaaaaa;
+    font-size: buttonFontSize;
+    font-family: mainFontFamily;
 }
 
 .mx-button label svg {
@@ -40,6 +43,10 @@
     fill: toolbarIconColor;
     -webkit-filter: drop-shadow(0 0.5px 0 rgba(0, 0, 0, 0.3));
     filter: drop-shadow(0 0.5px 0 rgba(0, 0, 0, 0.3));
+}
+
+.mx-button label:hover {
+    color: toolbarHoverIconColor;
 }
 
 .mx-button label:hover svg {
@@ -53,6 +60,7 @@
 .mx-button input:checked + label {
     background: perspectiveSwitcherBackgroundColor;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    color: #eeeeee;
 }
 
 .mx-button:first-child label {

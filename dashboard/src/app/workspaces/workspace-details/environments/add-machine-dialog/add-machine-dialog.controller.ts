@@ -74,7 +74,7 @@ export class AddMachineDialogController {
   setDefaultData(): void {
     this.machine = {
       'agents': [
-        'org.eclipse.che.terminal', 'org.eclipse.che.ssh'
+        'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'
       ],
       'servers': {},
       'attributes': {}

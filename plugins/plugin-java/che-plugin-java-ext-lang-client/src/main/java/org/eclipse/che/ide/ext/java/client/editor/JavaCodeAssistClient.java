@@ -17,7 +17,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
@@ -36,9 +35,8 @@ import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newCallback;
-import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newPromise;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
 /**
@@ -119,28 +117,21 @@ public class JavaCodeAssistClient {
      *         the content to format
      */
     public Promise<List<Change>> format(final int offset, final int length, final String content) {
-
-        return newPromise(new AsyncPromiseHelper.RequestCall<List<Change>>() {
-            @Override
-            public void makeCall(AsyncCallback<List<Change>> callback) {
-                String url =
-                        appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/format?offset=" + offset + "&length=" +
-                        length;
-                asyncRequestFactory.createPostRequest(url, null)
-                                   .header(CONTENT_TYPE, MimeType.TEXT_PLAIN)
-                                   .data(content)
-                                   .send(newCallback(callback, unmarshallerFactory.newListUnmarshaller(Change.class)));
-            }
-        }).then(new Function<List<Change>, List<Change>>() {
+        return getFormatChanges(offset, length, content).then(new Function<List<Change>, List<Change>>() {
             @Override
             public List<Change> apply(List<Change> arg) throws FunctionException {
-                final List<Change> changes = new ArrayList<>();
-                for (Change change : arg) {
-                    changes.add(change);
-                }
-                return changes;
+                return arg.stream().collect(Collectors.toList());
             }
         });
+    }
+
+    private Promise<List<Change>> getFormatChanges(final int offset, final int length, final String content) {
+        final String baseUrl = appContext.getDevMachine().getWsAgentBaseUrl();
+        final String url = baseUrl + CODE_ASSIST_URL_PREFIX + "/format?offset=" + offset + "&length=" + length;
+        return asyncRequestFactory.createPostRequest(url, null)
+                                  .header(CONTENT_TYPE, MimeType.TEXT_PLAIN)
+                                  .data(content)
+                                  .send(unmarshallerFactory.newListUnmarshaller(Change.class));
     }
 
     /**

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.context;
 
-import com.google.common.collect.Sets;
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -19,9 +18,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
@@ -52,21 +48,20 @@ import org.eclipse.che.ide.resources.ResourceManagerInitializer;
 import org.eclipse.che.ide.resources.impl.ResourceDeltaImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
-import org.eclipse.che.ide.util.Arrays;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
-import static java.util.Arrays.binarySearch;
-import static java.util.Arrays.copyOf;
-import static java.util.Arrays.sort;
-import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.gwt.user.client.Random.nextInt;
+import static java.util.Collections.addAll;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.SYNCHRONIZED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 /**
@@ -84,34 +79,40 @@ public class AppContextImpl implements AppContext,
                                        WorkspaceStartedEvent.Handler,
                                        WorkspaceStoppedEvent.Handler,
                                        ResourceManagerInitializer {
+    private static final String APP_ID =  String.valueOf(nextInt(Integer.MAX_VALUE));
 
-    private static final Project[] NO_PROJECTS = {};
+    private final QueryParameters                        queryParameters;
+    private final List<String>                           projectsInImport;
+    private final EventBus                               eventBus;
+    private final ResourceManager.ResourceManagerFactory resourceManagerFactory;
+    private final Provider<EditorAgent>                  editorAgentProvider;
+    private final Provider<AppStateManager>              appStateManager;
 
-    private final BrowserQueryFieldRenderer browserQueryFieldRenderer;
-    private final List<String>              projectsInImport;
+    private final List<Project>  rootProjects      = newArrayList();
+    private final List<Resource> selectedResources = newArrayList();
 
-    private Workspace           usersWorkspace;
+    private Workspace           userWorkspace;
     private CurrentUser         currentUser;
     private FactoryDto          factory;
     private Path                projectsRoot;
     private ActiveRuntime       runtime;
+    private ResourceManager     resourceManager;
+    private Map<String, String> properties;
+
     /**
      * List of actions with parameters which comes from startup URL.
      * Can be processed after IDE initialization as usual after starting ws-agent.
      */
     private List<StartUpAction> startAppActions;
 
-    private Resource   currentResource;
-    private Resource[] currentResources;
-
     @Inject
     public AppContextImpl(EventBus eventBus,
-                          BrowserQueryFieldRenderer browserQueryFieldRenderer,
+                          QueryParameters queryParameters,
                           ResourceManager.ResourceManagerFactory resourceManagerFactory,
                           Provider<EditorAgent> editorAgentProvider,
                           Provider<AppStateManager> appStateManager) {
         this.eventBus = eventBus;
-        this.browserQueryFieldRenderer = browserQueryFieldRenderer;
+        this.queryParameters = queryParameters;
         this.resourceManagerFactory = resourceManagerFactory;
         this.editorAgentProvider = editorAgentProvider;
         this.appStateManager = appStateManager;
@@ -124,29 +125,39 @@ public class AppContextImpl implements AppContext,
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
+    private static native String masterFromIDEConfig() /*-{
+        if ($wnd.IDE && $wnd.IDE.config) {
+            return $wnd.IDE.config.restContext;
+        } else {
+            return null;
+        }
+    }-*/;
+
     @Override
     public Workspace getWorkspace() {
-        return usersWorkspace;
+        return userWorkspace;
     }
 
     @Override
     public void setWorkspace(Workspace workspace) {
         if (workspace != null) {
-            usersWorkspace = workspace;
-            runtime = new ActiveRuntime(workspace.getRuntime());
+            userWorkspace = workspace;
+            if (workspace.getRuntime() != null) {
+                runtime = new ActiveRuntime(workspace.getRuntime());
+            }
         } else {
-            usersWorkspace = null;
+            userWorkspace = null;
             runtime = null;
         }
     }
 
     @Override
     public String getWorkspaceId() {
-        if (usersWorkspace == null) {
+        if (userWorkspace == null) {
             throw new IllegalArgumentException(getClass() + " Workspace can not be null.");
         }
 
-        return usersWorkspace.getId();
+        return userWorkspace.getId();
     }
 
     @Override
@@ -198,7 +209,6 @@ public class AppContextImpl implements AppContext,
         return runtime.getDevMachine();
     }
 
-
     @Override
     public void initResourceManager(final Callback<ResourceManager, Exception> callback) {
         if (runtime.getDevMachine() == null) {
@@ -206,35 +216,28 @@ public class AppContextImpl implements AppContext,
             callback.onFailure(new NullPointerException("Dev machine is not initialized"));
         }
 
-        browserQueryFieldRenderer.setProjectName("");
-
-        if (projects != null) {
-            for (Project project : projects) {
+        if (!rootProjects.isEmpty()) {
+            for (Project project : rootProjects) {
                 eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
             }
-            projects = null;
+            rootProjects.clear();
         }
 
         resourceManager = resourceManagerFactory.newResourceManager(runtime.getDevMachine());
-        resourceManager.getWorkspaceProjects().then(new Operation<Project[]>() {
-            @Override
-            public void apply(Project[] projects) throws OperationException {
-                AppContextImpl.this.projects = projects;
-                java.util.Arrays.sort(AppContextImpl.this.projects, ResourcePathComparator.getInstance());
-                callback.onSuccess(resourceManager);
-                eventBus.fireEvent(new WorkspaceReadyEvent(projects));
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                callback.onFailure((Exception)error.getCause());
-            }
+        resourceManager.getWorkspaceProjects().then(projects -> {
+            rootProjects.clear();
+            addAll(rootProjects, projects);
+            rootProjects.sort(ResourcePathComparator.getInstance());
+            callback.onSuccess(resourceManager);
+            eventBus.fireEvent(new WorkspaceReadyEvent(projects));
+        }).catchError(error -> {
+            callback.onFailure((Exception)error.getCause());
         });
     }
 
     @Override
     public String getWorkspaceName() {
-        return usersWorkspace.getConfig().getName();
+        return userWorkspace.getConfig().getName();
     }
 
     /** {@inheritDoc} */
@@ -243,67 +246,58 @@ public class AppContextImpl implements AppContext,
         final ResourceDelta delta = event.getDelta();
         final Resource resource = delta.getResource();
 
-        /* Note: There is important to keep projects array in sorted state, because it is mutable and removing projects from it
-           need array to be sorted. Search specific projects realized with binary search. */
-
-        if (!(resource.getResourceType() == PROJECT && resource.getLocation().segmentCount() == 1)) {
-            return;
-        }
-
-        if (projects == null) {
-            return; //Normal situation, workspace config updated and project has not been loaded fully. Just skip this situation.
-        }
-
         if (delta.getKind() == ADDED) {
-            Project[] newProjects = copyOf(projects, projects.length + 1);
-            newProjects[projects.length] = (Project)resource;
-            projects = newProjects;
-            sort(projects, ResourcePathComparator.getInstance());
-        } else if (delta.getKind() == REMOVED) {
-            int size = projects.length;
-            int index = java.util.Arrays.binarySearch(projects, resource, ResourcePathComparator.getInstance());
-            int numMoved = projects.length - index - 1;
-            if (numMoved > 0) {
-                System.arraycopy(projects, index + 1, projects, index, numMoved);
-            }
-            projects = copyOf(projects, --size);
+            if ((delta.getFlags() & (MOVED_FROM | MOVED_TO)) != 0) {
 
-            if (currentResource != null && currentResource.equals(delta.getResource())) {
-                currentResource = null;
-            }
-
-            if (currentResources != null) {
-                for (Resource currentResource : currentResources) {
-                    if (currentResource.equals(delta.getResource())) {
-                        currentResources = Arrays.remove(currentResources, currentResource);
-                    }
-                }
-            }
-        } else if (delta.getKind() == UPDATED) {
-            int index = -1;
-
-            // Project may be moved to another location, so we need to remove previous one and store new project in cache.
-
-            if (delta.getFlags() == MOVED_FROM) {
-                for (int i = 0; i < projects.length; i++) {
-                    if (projects[i].getLocation().equals(delta.getFromPath())) {
-                        index = i;
+                for (Project rootProject : rootProjects) {
+                    if (rootProject.getLocation().equals(delta.getFromPath()) && resource.isProject()) {
+                        rootProjects.set(rootProjects.indexOf(rootProject), resource.asProject());
                         break;
                     }
                 }
-            } else {
-                index = binarySearch(projects, resource);
+
+                for (Resource selectedResource : selectedResources) {
+                    if (selectedResource.getLocation().equals(delta.getFromPath())) {
+                        selectedResources.set(selectedResources.indexOf(selectedResource), resource);
+                        break;
+                    }
+                }
+            } else if (resource.getLocation().segmentCount() == 1 && resource.isProject()) {
+                boolean exists = rootProjects.stream().anyMatch(it -> it.getLocation().equals(resource.getLocation()));
+
+                if (!exists) {
+                    rootProjects.add(resource.asProject());
+                    rootProjects.sort(ResourcePathComparator.getInstance());
+                }
+            }
+        } else if (delta.getKind() == REMOVED) {
+
+            for (Project rootProject : rootProjects) {
+                if (rootProject.getLocation().equals(resource.getLocation()) && resource.isProject()) {
+                    rootProjects.remove(rootProjects.indexOf(rootProject));
+                    break;
+                }
             }
 
-            if (index != -1) {
-                projects[index] = (Project)resource;
+            for (Resource selectedResource : selectedResources) {
+                if (selectedResource.getLocation().equals(resource.getLocation())) {
+                    selectedResources.remove(selectedResources.indexOf(selectedResource));
+                    break;
+                }
+            }
+        } else if (delta.getKind() == UPDATED) {
+
+            for (Project rootProject : rootProjects) {
+                if (rootProject.getLocation().equals(resource.getLocation()) && resource.isProject()) {
+                    rootProjects.set(rootProjects.indexOf(rootProject), resource.asProject());
+                    break;
+                }
             }
 
-            sort(projects, ResourcePathComparator.getInstance());
-        } else if (delta.getKind() == SYNCHRONIZED && resource.isProject() && resource.getLocation().segmentCount() == 1) {
-            for (int i = 0; i < projects.length; i++) {
-                if (projects[i].getLocation().equals(resource.getLocation())) {
-                    projects[i] = (Project)resource;
+            for (Resource selectedResource : selectedResources) {
+                if (selectedResource.getLocation().equals(resource.getLocation())) {
+                    selectedResources.set(selectedResources.indexOf(selectedResource), resource);
+                    break;
                 }
             }
         }
@@ -325,56 +319,22 @@ public class AppContextImpl implements AppContext,
             return;
         }
 
-        browserQueryFieldRenderer.setProjectName("");
+        selectedResources.clear();
 
-        currentResource = null;
-        currentResources = null;
-
-        if (selection == null || selection.getHeadElement() == null) {
-            return;
-        }
-
-        final Object headObject = selection.getHeadElement();
-        final List<?> allObjects = selection.getAllElements();
-
-        if (headObject instanceof HasDataObject) {
-            Object data = ((HasDataObject)headObject).getData();
-
-            if (data instanceof Resource) {
-                currentResource = (Resource)data;
-            }
-        } else if (headObject instanceof Resource) {
-            currentResource = (Resource)headObject;
-        }
-
-        Set<Resource> resources = Sets.newHashSet();
-
-        for (Object object : allObjects) {
-            if (object instanceof HasDataObject) {
-                Object data = ((HasDataObject)object).getData();
-
-                if (data instanceof Resource) {
-                    resources.add((Resource)data);
+        if (selection != null) {
+            for (Object o : selection.getAllElements()) {
+                if (o instanceof HasDataObject && ((HasDataObject)o).getData() instanceof Resource) {
+                    selectedResources.add((Resource)((HasDataObject)o).getData());
+                } else if (o instanceof Resource) {
+                    selectedResources.add((Resource)o);
                 }
-            } else if (object instanceof Resource) {
-                resources.add((Resource)object);
             }
         }
-
-        currentResources = resources.toArray(new Resource[resources.size()]);
     }
-
-    private final EventBus                               eventBus;
-    private final ResourceManager.ResourceManagerFactory resourceManagerFactory;
-    private final Provider<EditorAgent>                  editorAgentProvider;
-    private final Provider<AppStateManager>              appStateManager;
-
-    private ResourceManager resourceManager;
-    private Project[]       projects;
 
     @Override
     public Project[] getProjects() {
-        return projects == null ? new Project[0] : projects;
+        return rootProjects.toArray(new Project[rootProjects.size()]);
     }
 
     @Override
@@ -386,22 +346,21 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public Resource getResource() {
-        return currentResource;
+        return selectedResources.isEmpty() ? null : selectedResources.get(0);
     }
 
     @Override
     public Resource[] getResources() {
-        return currentResources;
+        return selectedResources.toArray(new Resource[selectedResources.size()]);
     }
 
     @Override
     public Project getRootProject() {
-        if (projects == null) {
+        if (rootProjects.isEmpty()) {
             return null;
         }
 
-        if (currentResource == null || currentResources == null) {
-
+        if (selectedResources.isEmpty()) {
             EditorAgent editorAgent = editorAgentProvider.get();
             if (editorAgent == null) {
                 return null;
@@ -416,37 +375,36 @@ public class AppContextImpl implements AppContext,
 
             if (file instanceof SyntheticNode) {
                 final Path projectPath = ((SyntheticNode)file).getProject();
-                for (Project project : projects) {
+                for (Project project : rootProjects) {
                     if (project.getLocation().equals(projectPath)) {
                         return project;
                     }
                 }
             }
-        }
 
-        if (currentResource == null) {
             return null;
-        }
+        } else {
+            Project root = null;
 
-        Project root = null;
-
-        for (Project project : projects) {
-            if (project.getLocation().isPrefixOf(currentResource.getLocation())) {
-                root = project;
+            for (Project project : rootProjects) {
+                if (project.getLocation().isPrefixOf(selectedResources.get(0).getLocation())) {
+                    root = project;
+                    break;
+                }
             }
-        }
 
-        if (root == null) {
-            return null;
-        }
-
-        for (int i = 1; i < currentResources.length; i++) {
-            if (!root.getLocation().isPrefixOf(currentResources[i].getLocation())) {
+            if (root == null) {
                 return null;
             }
-        }
 
-        return root;
+            for (int i = 1; i < selectedResources.size(); i++) {
+                if (!root.getLocation().isPrefixOf(selectedResources.get(i).getLocation())) {
+                    return null;
+                }
+            }
+
+            return root;
+        }
     }
 
     @Override
@@ -461,25 +419,19 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-        appStateManager.get().persistWorkspaceState(getWorkspaceId()).then(new Operation<Void>() {
-            @Override
-            public void apply(Void arg) throws OperationException {
-                browserQueryFieldRenderer.setProjectName("");
-                for (Project project : projects) {
-                    eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
-                }
-
-                projects = NO_PROJECTS; //avoid NPE
-                resourceManager = null;
+        appStateManager.get().persistWorkspaceState(getWorkspaceId()).then(ignored -> {
+            for (Project project : rootProjects) {
+                eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
             }
+
+            rootProjects.clear();
+            resourceManager = null;
         });
 
-        //goto close all editors
-        final EditorAgent editorAgent = editorAgentProvider.get();
-        final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
-        for (EditorPartPresenter editor : openedEditors) {
-            editorAgent.closeEditor(editor);
-        }
+        clearRuntime();
+    }
+
+    private void clearRuntime() {
         runtime = null;
     }
 
@@ -489,8 +441,8 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public String getMasterEndpoint() {
-        String fromUrl = this.browserQueryFieldRenderer.getParameterFromURLByName("master");
-        if(fromUrl == null || fromUrl.isEmpty())
+        String fromUrl = queryParameters.getByName("master");
+        if (fromUrl == null || fromUrl.isEmpty())
             return masterFromIDEConfig();
         else
             return fromUrl;
@@ -498,11 +450,16 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public String getDevAgentEndpoint() {
-        String fromUrl = this.browserQueryFieldRenderer.getParameterFromURLByName("agent");
-        if(fromUrl == null || fromUrl.isEmpty())
+        String fromUrl = queryParameters.getByName("agent");
+        if (fromUrl == null || fromUrl.isEmpty())
             return runtime.getDevMachine().getWsAgentBaseUrl();
         else
             return fromUrl;
+    }
+
+    @Override
+    public String getAppId() {
+        return APP_ID;
     }
 
     @Override
@@ -510,12 +467,11 @@ public class AppContextImpl implements AppContext,
         return runtime;
     }
 
-
-    private static native String masterFromIDEConfig() /*-{
-        if ($wnd.IDE && $wnd.IDE.config) {
-            return $wnd.IDE.config.restContext;
-        } else {
-            return null;
+    @Override
+    public Map<String, String> getProperties() {
+        if (properties == null) {
+            properties = new HashMap<>();
         }
-    }-*/;
+        return properties;
+    }
 }

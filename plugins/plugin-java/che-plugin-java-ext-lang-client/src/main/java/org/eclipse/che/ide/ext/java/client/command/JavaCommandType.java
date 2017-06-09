@@ -22,7 +22,7 @@ import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.ClasspathMacro;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.OutputDirMacro;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.SourcepathMacro;
-import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
+import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +61,7 @@ public class JavaCommandType implements CommandType {
         pages = new LinkedList<>();
         pages.add(page);
 
-        iconRegistry.registerIcon(new Icon(ID + ".commands.category.icon", resources.javaCategoryIcon()));
+        iconRegistry.registerIcon(new Icon("command.type." + ID, resources.javaCategoryIcon()));
     }
 
     @Override
@@ -86,12 +86,13 @@ public class JavaCommandType implements CommandType {
 
     @Override
     public String getCommandLineTemplate() {
+
         return "cd " + currentProjectPathMacro.getName() +
-               " && javac -classpath " + classpathMacro.getName() +
+               "\njavac -classpath " + classpathMacro.getName() +
                " -sourcepath " + sourcepathMacro.getName() +
                " -d " + outputDirMacro.getName() +
                " src/Main.java" +
-               " && java -classpath " + classpathMacro.getName() + outputDirMacro.getName() +
+               "\njava -classpath " + classpathMacro.getName() + outputDirMacro.getName() +
                " Main";
     }
 

@@ -11,6 +11,11 @@
 'use strict';
 import {ListComponentsController} from '../list-components.controller';
 
+interface IComponent {
+  name: string;
+  version: string;
+}
+
 /**
  * @ngdoc controller
  * @name list.components.controller:EditComponentDialogController
@@ -21,10 +26,9 @@ export class EditComponentDialogController {
   $mdDialog: ng.material.IDialogService;
 
   index: number;
-  popupTitle: string;
   name: string;
   version: string;
-  components: Array<any>;
+  components: Array<IComponent>;
   usedComponentsName: Array<string>;
   callbackController: ListComponentsController;
 
@@ -35,19 +39,17 @@ export class EditComponentDialogController {
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
 
-    let isAddMode: boolean = (this.index === -1);
-    let component: any = isAddMode ? {name: '', version: ''} : this.components[this.index];
+    let isAddMode = (this.index === -1);
+    let component = isAddMode ? {name: '', version: ''} : this.components[this.index];
     this.name = component.name;
     this.version = component.version;
 
     this.usedComponentsName = [];
-    this.components.forEach((component) => {
+    this.components.forEach((component: IComponent) => {
       if (this.name !== component.name) {
         this.usedComponentsName.push(component.name);
       }
     });
-
-    this.popupTitle = isAddMode ? 'Add a new component' : 'Edit the component';
   }
 
   /**

@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.java.server.che;
 
-
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.project.server.EditorWorkingCopyManager;
 import org.eclipse.che.ide.ext.java.shared.dto.HighlightedPosition;
 import org.eclipse.che.ide.ext.java.shared.dto.ReconcileResult;
 import org.eclipse.che.jdt.javaeditor.JavaReconciler;
@@ -34,6 +36,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Evgen Vidolob
@@ -58,7 +61,10 @@ public class ReconcileTest extends BaseTest {
 
     @Before
     public void init() throws Exception {
-        reconciler = new JavaReconciler(new SemanticHighlightingReconciler());
+        RequestTransmitter requestTransmitter = mock(RequestTransmitter.class);
+        EventService eventService = new EventService();
+        EditorWorkingCopyManager editorWorkingCopyManager = new EditorWorkingCopyManager(null, eventService, requestTransmitter);
+        reconciler = new JavaReconciler(new SemanticHighlightingReconciler(), eventService, requestTransmitter, null, editorWorkingCopyManager);
         this.workingCopy = project.findType("p1.X").getCompilationUnit(); //.getWorkingCopy(this.wcOwner, null);
     }
 

@@ -83,6 +83,7 @@ public class CustomComboBox extends FocusWidget implements HasChangeHandlers {
         comboBoxElement.appendChild(RESOURCES.arrow().getSvg().getElement());
 
         optionsPanel.setVisible(false);
+        optionsPanel.ensureDebugId("custom-combobox-content-panel");
 
         addDomHandler(new BlurHandler() {
             @Override

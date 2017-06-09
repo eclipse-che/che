@@ -94,7 +94,7 @@ public class JavaDebuggerFileHandler implements ActiveFileHandler {
             public void apply(Optional<File> file) throws OperationException {
                 if (file.isPresent()) {
                     handleActivatedFile(file.get(), callback, location.getLineNumber());
-                    eventBus.fireEvent(FileEvent.createOpenFileEvent(file.get()));
+                    editorAgent.openEditor(file.get());
                 } else {
                     callback.onFailure(new IllegalStateException("File is undefined"));
                 }
@@ -134,7 +134,7 @@ public class JavaDebuggerFileHandler implements ActiveFileHandler {
                        };
 
                        handleActivatedFile(file, downloadSourceCallback, location.getLineNumber());
-                       eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
+                       editorAgent.openEditor(file);
                    }
                })
                .catchError(new Operation<PromiseError>() {

@@ -1,0 +1,132 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.ide.command.editor.page.goal;
+
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.inject.Inject;
+
+import org.eclipse.che.ide.api.command.CommandGoal;
+import org.eclipse.che.ide.api.command.CommandGoalRegistry;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.dialogs.InputCallback;
+import org.eclipse.che.ide.command.editor.EditorMessages;
+import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
+import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
+
+import java.util.Optional;
+import java.util.Set;
+
+/**
+ * {@link CommandEditorPage} which allows to edit command's goal.
+ *
+ * @author Artem Zatsarynnyi
+ */
+public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.ActionDelegate {
+
+    private final GoalPageView        view;
+    private final CommandGoalRegistry goalRegistry;
+    private final EditorMessages      messages;
+    private final DialogFactory       dialogFactory;
+
+    /** Initial value of the command's goal. */
+    private String initialGoal;
+
+    @Inject
+    public GoalPage(GoalPageView view,
+                    CommandGoalRegistry goalRegistry,
+                    EditorMessages messages,
+                    DialogFactory dialogFactory) {
+        super(messages.pageGoalTitle());
+
+        this.view = view;
+        this.goalRegistry = goalRegistry;
+        this.messages = messages;
+        this.dialogFactory = dialogFactory;
+
+        view.setDelegate(this);
+    }
+
+    @Override
+    public IsWidget getView() {
+        return view;
+    }
+
+    @Override
+    protected void initialize() {
+        initialGoal = editedCommand.getGoal();
+
+        view.setAvailableGoals(goalRegistry.getAllGoals());
+        view.setGoal(initialGoal);
+    }
+
+    @Override
+    public boolean isDirty() {
+        if (editedCommand == null) {
+            return false;
+        }
+
+        return !(initialGoal.equals(editedCommand.getGoal()));
+    }
+
+    @Override
+    public void onGoalChanged(String goalId) {
+        editedCommand.setGoal(goalId);
+        notifyDirtyStateChanged();
+    }
+
+    @Override
+    public void onCreateGoal() {
+        createGoal("");
+    }
+
+    /** Asks user for the the new goal name nad creates it if another one with the same name doesn't exists. */
+    private void createGoal(String initialName) {
+        final InputCallback inputCallback = value -> {
+            final String newGoalName = value.trim();
+
+            final Set<CommandGoal> allGoals = goalRegistry.getAllGoals();
+
+            final Optional<CommandGoal> existingGoal = allGoals.stream()
+                                                               .filter(goal -> goal.getId().equalsIgnoreCase(newGoalName))
+                                                               .findAny();
+
+            if (existingGoal.isPresent()) {
+                dialogFactory.createMessageDialog(messages.pageGoalNewGoalTitle(),
+                                                  messages.pageGoalNewGoalAlreadyExistsMessage(existingGoal.get().getId()),
+                                                  () -> createGoal(newGoalName)).show();
+            } else {
+                setGoal(newGoalName);
+            }
+        };
+
+        dialogFactory.createInputDialog(messages.pageGoalNewGoalTitle(),
+                                        messages.pageGoalNewGoalLabel(),
+                                        initialName,
+                                        0,
+                                        initialName.length(),
+                                        messages.pageGoalNewGoalButtonCreate(),
+                                        inputCallback,
+                                        null).show();
+    }
+
+    /** Set the specified goal name for the currently edited command. */
+    private void setGoal(String goalName) {
+        editedCommand.setGoal(goalName);
+
+        Set<CommandGoal> allGoals = goalRegistry.getAllGoals();
+        allGoals.add(goalRegistry.getGoalForId(goalName));
+
+        view.setAvailableGoals(allGoals);
+        view.setGoal(goalName);
+
+        notifyDirtyStateChanged();
+    }
+}

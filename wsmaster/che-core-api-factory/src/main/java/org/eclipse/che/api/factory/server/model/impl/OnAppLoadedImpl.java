@@ -34,7 +34,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.persistence.CascadeType.ALL;
 
 @Entity(name = "OnAppLoaded")
-@Table(name = "onapploaded")
+@Table(name = "che_factory_on_app_loaded_action")
 public class OnAppLoadedImpl implements OnAppLoaded {
 
     @Id
@@ -43,9 +43,9 @@ public class OnAppLoadedImpl implements OnAppLoaded {
     private Long id;
 
     @OneToMany(cascade = ALL, orphanRemoval = true)
-    @JoinTable(name = "onapploaded_action",
-               joinColumns = @JoinColumn(name = "onapploaded_id"),
-               inverseJoinColumns = @JoinColumn(name = "actions_entityid"))
+    @JoinTable(name = "che_factory_on_app_loaded_action_value",
+               joinColumns = @JoinColumn(name = "on_app_loaded_id"),
+               inverseJoinColumns = @JoinColumn(name = "action_entity_id"))
     private List<ActionImpl> actions;
 
     public OnAppLoadedImpl() {}

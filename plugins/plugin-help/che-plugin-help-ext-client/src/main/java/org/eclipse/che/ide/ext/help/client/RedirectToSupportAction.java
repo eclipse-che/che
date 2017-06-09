@@ -18,6 +18,8 @@ import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /**
  * Redirect to support window
  *
@@ -39,5 +41,10 @@ public class RedirectToSupportAction extends Action {
     @Override
     public void actionPerformed(ActionEvent e) {
         Window.open(productInfoDataProvider.getSupportLink(), "_blank", null);
+    }
+
+    @Override
+    public void update(ActionEvent event) {
+        event.getPresentation().setVisible(!isNullOrEmpty(productInfoDataProvider.getSupportLink()));
     }
 }

@@ -62,12 +62,14 @@ public class DefaultActionGroupTest {
         defaultActionGroup = new DefaultActionGroup(actionManager);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void shouldNotAddSameActionTwice() {
         Action action = mock(Action.class);
 
         defaultActionGroup.add(action, new Constraints(AFTER, "someAction"));
         defaultActionGroup.add(action, new Constraints(BEFORE, "someAction"));
+
+        assertThat(defaultActionGroup.getChildrenCount()).isEqualTo(1);
     }
 
     @Test

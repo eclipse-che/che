@@ -132,6 +132,25 @@ public class CommitTest {
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
+    public void testChangeMessageOfLastCommitWithSpecifiedPath(GitConnectionFactory connectionFactory) throws GitException, IOException {
+        //given
+        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+        addFile(connection, "NewFile.txt", CONTENT);
+        connection.add(AddParams.create(ImmutableList.of("NewFile.txt")));
+        connection.commit(CommitParams.create("First commit"));
+        int beforeCommitsCount = connection.log(LogParams.create()).getCommits().size();
+
+        //when
+        CommitParams commitParams = CommitParams.create("Changed message").withFiles(singletonList("NewFile.txt")).withAmend(true);
+        connection.commit(commitParams);
+
+        //then
+        int afterCommitsCount = connection.log(LogParams.create()).getCommits().size();
+        assertEquals(beforeCommitsCount, afterCommitsCount);
+        assertEquals(connection.log(LogParams.create()).getCommits().get(0).getMessage(), commitParams.getMessage());
+    }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
     public void testCommitSeparateFiles(GitConnectionFactory connectionFactory) throws GitException, IOException {
         //given
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
@@ -148,7 +167,7 @@ public class CommitTest {
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
-          expectedExceptions = GitException.class)
+          expectedExceptions = GitException.class, expectedExceptionsMessageRegExp = "No changes added to commit")
     public void testCommitWithNotStagedChanges(GitConnectionFactory connectionFactory) throws GitException, IOException {
         //given
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
@@ -167,7 +186,7 @@ public class CommitTest {
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
-          expectedExceptions = GitException.class)
+          expectedExceptions = GitException.class, expectedExceptionsMessageRegExp = "Nothing to commit, working directory clean")
     public void testCommitWithCleanIndex(GitConnectionFactory connectionFactory) throws GitException, IOException {
         //given
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);

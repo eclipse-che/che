@@ -10,13 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.navigation.node;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
-import org.eclipse.che.api.promises.client.callback.PromiseHelper;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
@@ -36,6 +33,8 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 
 /**
  * Representation of java type for the java navigation tree.
@@ -71,22 +70,19 @@ public class TypeNode extends AbstractPresentationNode implements HasAction {
     /** {@inheritDoc} */
     @Override
     public Promise<List<Node>> getChildrenImpl() {
-        return PromiseHelper.newPromise(new AsyncPromiseHelper.RequestCall<List<Node>>() {
-            @Override
-            public void makeCall(AsyncCallback<List<Node>> callback) {
-                List<Node> child = new ArrayList<>();
+        return createFromAsyncRequest(callback -> {
+            List<Node> child = new ArrayList<>();
 
-                createTypeChildren(child, type, isFromSuper);
+            createTypeChildren(child, type, isFromSuper);
 
-                if (type.isPrimary()) {
-                    for (Type type : compilationUnit.getSuperTypes()) {
-                        createTypeChildren(child, type, true);
-                    }
+            if (type.isPrimary()) {
+                for (Type type : compilationUnit.getSuperTypes()) {
+                    createTypeChildren(child, type, true);
                 }
-
-                Collections.sort(child, new NodeComparator());
-                callback.onSuccess(child);
             }
+
+            Collections.sort(child, new NodeComparator());
+            callback.onSuccess(child);
         });
     }
 

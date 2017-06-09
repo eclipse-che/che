@@ -34,7 +34,7 @@ import org.eclipse.che.ide.ext.git.client.BranchSearcher;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
@@ -48,7 +48,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import static org.eclipse.che.ide.ext.git.client.compare.branchList.BranchListPresenter.BRANCH_LIST_COMMAND_NAME;
+import static org.eclipse.che.ide.ext.git.client.compare.branchlist.BranchListPresenter.BRANCH_LIST_COMMAND_NAME;
 import static org.eclipse.che.ide.ext.git.client.remote.RemotePresenter.REMOTE_REPO_COMMAND_NAME;
 
 /**
@@ -342,8 +342,10 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
     void handleError(@NotNull Throwable throwable, StatusNotification notification, GitOutputConsole console) {
         notification.setStatus(FAIL);
         if (throwable instanceof UnauthorizedException) {
-            console.printError(constant.messagesNotAuthorized());
-            notification.setTitle(constant.messagesNotAuthorized());
+            console.printError(constant.messagesNotAuthorizedTitle());
+            console.print(constant.messagesNotAuthorizedContent());
+            notification.setTitle(constant.messagesNotAuthorizedTitle());
+            notification.setContent(constant.messagesNotAuthorizedContent());
             return;
         }
 

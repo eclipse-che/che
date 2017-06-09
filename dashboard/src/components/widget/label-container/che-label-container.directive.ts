@@ -29,7 +29,8 @@ export class CheLabelContainer {
     // scope values
     this.scope = {
       labelName:'@cheLabelName',
-      labelDescription: '@?cheLabelDescription'
+      labelDescription: '@?cheLabelDescription',
+      alignment:'@cheAlignment'
     };
 
   }

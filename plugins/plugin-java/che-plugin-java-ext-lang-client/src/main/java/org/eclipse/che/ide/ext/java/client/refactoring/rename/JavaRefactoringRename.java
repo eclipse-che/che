@@ -19,8 +19,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 import org.eclipse.che.ide.api.editor.document.Document;
@@ -34,6 +32,7 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
+import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -48,6 +47,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.LinkedData;
 import org.eclipse.che.ide.ext.java.shared.dto.LinkedModeModel;
 import org.eclipse.che.ide.ext.java.shared.dto.LinkedPositionGroup;
 import org.eclipse.che.ide.ext.java.shared.dto.Region;
+import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeInfo;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.LinkedRenameRefactoringApply;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringResult;
@@ -80,6 +80,7 @@ public class JavaRefactoringRename implements FileEventHandler {
     private final JavaLocalizationConstant locale;
     private final RefactoringServiceClient refactoringServiceClient;
     private final DtoFactory               dtoFactory;
+    private final ClientServerEventService clientServerEventService;
     private final DialogFactory            dialogFactory;
     private final NotificationManager      notificationManager;
 
@@ -94,6 +95,7 @@ public class JavaRefactoringRename implements FileEventHandler {
                                  RefactoringUpdater refactoringUpdater,
                                  JavaLocalizationConstant locale,
                                  RefactoringServiceClient refactoringServiceClient,
+                                 ClientServerEventService clientServerEventService,
                                  DtoFactory dtoFactory,
                                  EventBus eventBus,
                                  DialogFactory dialogFactory,
@@ -101,6 +103,7 @@ public class JavaRefactoringRename implements FileEventHandler {
         this.renamePresenter = renamePresenter;
         this.refactoringUpdater = refactoringUpdater;
         this.locale = locale;
+        this.clientServerEventService = clientServerEventService;
         this.dialogFactory = dialogFactory;
         this.refactoringServiceClient = refactoringServiceClient;
         this.dtoFactory = dtoFactory;
@@ -170,7 +173,9 @@ public class JavaRefactoringRename implements FileEventHandler {
         createRenamePromise.then(new Operation<RenameRefactoringSession>() {
             @Override
             public void apply(RenameRefactoringSession session) throws OperationException {
-                activateLinkedModeIntoEditor(session, textEditor.getDocument());
+                clientServerEventService.sendFileTrackingSuspendEvent().then(success -> {
+                    activateLinkedModeIntoEditor(session, textEditor.getDocument());
+                });
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
@@ -241,12 +246,6 @@ public class JavaRefactoringRename implements FileEventHandler {
         });
     }
 
-    private void disableAutoSave() {
-        if (linkedEditor instanceof EditorWithAutoSave) {
-            ((EditorWithAutoSave)linkedEditor).disableAutoSave();
-        }
-    }
-
     private void performRename(RenameRefactoringSession session) {
         final LinkedRenameRefactoringApply dto = createLinkedRenameRefactoringApplyDto(newName, session.getSessionId());
         Promise<RefactoringResult> applyModelPromise = refactoringServiceClient.applyLinkedModeRename(dto);
@@ -256,15 +255,20 @@ public class JavaRefactoringRename implements FileEventHandler {
                 switch (result.getSeverity()) {
                     case OK:
                     case INFO:
-                        final VirtualFile file = textEditor.getDocument().getFile();
+                        List<ChangeInfo> changes = result.getChanges();
+                        refactoringUpdater.updateAfterRefactoring(changes).then(arg -> {
+                            final VirtualFile file = textEditor.getDocument().getFile();
 
-                        if (file instanceof Resource) {
-                            final Optional<Project> project = ((Resource)file).getRelatedProject();
+                            if (file instanceof Resource) {
+                                final Optional<Project> project = ((Resource)file).getRelatedProject();
 
-                            refactoringServiceClient.reindexProject(project.get().getLocation().toString());
-                        }
+                                refactoringServiceClient.reindexProject(project.get().getLocation().toString());
+                            }
 
-                        refactoringUpdater.updateAfterRefactoring(result.getChanges());
+                            enableAutoSave();
+                            refactoringUpdater.handleMovingFiles(changes).then(clientServerEventService.sendFileTrackingResumeEvent());
+                        });
+
                         break;
                     case WARNING:
                     case ERROR:
@@ -276,6 +280,8 @@ public class JavaRefactoringRename implements FileEventHandler {
                         break;
                     case FATAL:
                         undoChanges();
+
+                        clientServerEventService.sendFileTrackingResumeEvent();
 
                         notificationManager.notify(locale.failedToRename(), result.getEntries().get(0).getMessage(), FAIL, FLOAT_MODE);
                         break;
@@ -301,6 +307,12 @@ public class JavaRefactoringRename implements FileEventHandler {
         }
     }
 
+    private void disableAutoSave() {
+        if (linkedEditor instanceof EditorWithAutoSave) {
+            ((EditorWithAutoSave)linkedEditor).disableAutoSave();
+        }
+    }
+
     private void undoChanges() {
         if (linkedEditor instanceof UndoableEditor) {
             ((UndoableEditor)linkedEditor).getUndoRedo().undo();
@@ -312,21 +324,14 @@ public class JavaRefactoringRename implements FileEventHandler {
                                           locale.renameWithWarnings(),
                                           locale.showRenameWizard(),
                                           locale.buttonCancel(),
-                                          new ConfirmCallback() {
-                                              @Override
-                                              public void accepted() {
-                                                  isActiveLinkedEditor = true;
+                                          () -> {
+                                              isActiveLinkedEditor = true;
 
-                                                  refactor(textEditor);
+                                              refactor(textEditor);
 
-                                                  isActiveLinkedEditor = false;
-                                              }
+                                              isActiveLinkedEditor = false;
                                           },
-                                          new CancelCallback() {
-                                              @Override
-                                              public void cancelled() {
-                                              }
-                                          }).show();
+                                          clientServerEventService::sendFileTrackingResumeEvent).show();
     }
 
     @NotNull

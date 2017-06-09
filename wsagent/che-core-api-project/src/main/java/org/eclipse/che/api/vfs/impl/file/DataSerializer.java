@@ -18,7 +18,10 @@ import java.io.IOException;
  * Writes object to stream and restores object from stream. Implementation has full control over format of serialization.
  *
  * @author andrew00x
+ *
+ * @deprecated VFS components are now considered deprecated and will be replaced by standard JDK routines.
  */
+@Deprecated
 public interface DataSerializer<T> {
     /**
      * Writes <code>value</code> to <code>output</code>.

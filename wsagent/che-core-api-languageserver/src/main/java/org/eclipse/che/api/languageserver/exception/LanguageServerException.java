@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.ServerException;
 /**
  * @author Anatoliy Bazko
  */
+@SuppressWarnings("serial")
 public class LanguageServerException extends ServerException {
     public LanguageServerException(String message) {
         super(message);

@@ -15,12 +15,12 @@ import com.google.inject.Provider;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.wizard.WizardPage;
-import org.eclipse.che.plugin.php.ide.PhpExtension;
 import org.eclipse.che.plugin.php.shared.Constants;
 
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.validation.constraints.NotNull;
 
 
 /**
@@ -43,7 +43,7 @@ public class PhpProjectWizardRegistrar implements ProjectWizardRegistrar {
 
     @NotNull
     public String getCategory() {
-        return PhpExtension.PHP_CATEGORY;
+        return Constants.PHP_CATEGORY;
     }
 
     @NotNull

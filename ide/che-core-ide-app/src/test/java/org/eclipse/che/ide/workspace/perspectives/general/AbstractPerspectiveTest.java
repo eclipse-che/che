@@ -23,7 +23,6 @@ import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;
-import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.PartStackView.TabPosition;
 import org.eclipse.che.ide.part.PartStackPresenter;
@@ -44,11 +43,11 @@ import java.util.Arrays;
 
 import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 import static org.eclipse.che.ide.api.parts.PartStackType.INFORMATION;
+import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.LEFT;
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
 import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.anyDouble;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -295,6 +294,16 @@ public class AbstractPerspectiveTest {
             if (editingPartStackPresenter != null) {
                 partStacks.put(EDITING, editingPartStackPresenter);
             }
+        }
+
+        @Override
+        public String getPerspectiveId() {
+            return SOME_TEXT;
+        }
+
+        @Override
+        public String getPerspectiveName() {
+            return "Dummy";
         }
 
         @Override

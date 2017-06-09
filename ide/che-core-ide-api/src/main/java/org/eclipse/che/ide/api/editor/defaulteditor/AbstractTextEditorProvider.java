@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.editor.defaulteditor;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.editor.EditorProvider;
-import org.eclipse.che.ide.api.editor.editorconfig.AutoSaveTextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.util.loging.Log;
@@ -25,7 +25,7 @@ import org.eclipse.che.ide.util.loging.Log;
  * implementation for the {@link #getId()} and {@link #getDescription()} methods.
  * <p>The method {@link #getEditor()} returns {@link TextEditor}
  * that is initialized by configuration returned by {@link #getEditorConfiguration()} method.
- * <p>The method {@link #getEditorConfiguration()} returns {@link AutoSaveTextEditorConfiguration}
+ * <p>The method {@link #getEditorConfiguration()} returns {@link DefaultTextEditorConfiguration}
  * instance and may be overridden in order to provide another configuration for the editor
  * which is returned by {@link #getEditor()} method.
  *
@@ -38,7 +38,7 @@ public abstract class AbstractTextEditorProvider implements EditorProvider {
 
     /** Returns configuration for initializing an editor returned by {@link #getEditor()} method. */
     protected TextEditorConfiguration getEditorConfiguration() {
-        return new AutoSaveTextEditorConfiguration();
+        return new DefaultTextEditorConfiguration();
     }
 
     @Override

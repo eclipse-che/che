@@ -117,18 +117,6 @@ describe('ComposeEnvironmentManager', () => {
       });
     }));
 
-    it('should be allowed rename machine', () => {
-      let canRenameMachine = envManager.canRenameMachine(testMachine);
-
-      expect(canRenameMachine).toBe(true);
-    });
-
-    it('should be allowed delete machine', () => {
-      let canDeleteMachine = envManager.canDeleteMachine(testMachine);
-
-      expect(canDeleteMachine).toBe(true);
-    });
-
     it('should be allowed edit environment variables', () => {
       let canEditEnvVariables = envManager.canEditEnvVariables(testMachine);
 
@@ -166,6 +154,21 @@ describe('ComposeEnvironmentManager', () => {
       expect(memoryLimit).toEqual(2147483648);
     });
 
+    it('should update environment\'s recipe via machine\'s source', () => {
+      let oldMachines = envManager.getMachines(environment),
+          oldSource = envManager.getSource(oldMachines[0]),
+          source = 'eclipse/node';
+
+      envManager.setSource(oldMachines[0], source);
+      let newEnvironment = envManager.getEnvironment(environment, oldMachines),
+          newMachines = envManager.getMachines(newEnvironment),
+          newSource = envManager.getSource(newMachines[0]);
+
+      expect(newSource.image).toEqual(source);
+
+      expect(newSource.image).not.toEqual(oldSource);
+    });
+
   });
 
   describe('for recipe from location', () => {
@@ -191,24 +194,6 @@ describe('ComposeEnvironmentManager', () => {
 
       machines = envManager.getMachines(environment);
     }));
-
-    it('shouldn\'t be allowed rename machine', () => {
-      let canRenameMachine = envManager.canRenameMachine(machines[0]);
-
-      expect(canRenameMachine).toBe(false);
-    });
-
-    it('shouldn\'t be allowed edit environment variables', () => {
-      let canDeleteMachine = envManager.canDeleteMachine(machines[0]);
-
-      expect(canDeleteMachine).toBe(false);
-    });
-
-    it('shouldn\'t be allowed delete machine', () => {
-      let canEditEnvVariables = envManager.canDeleteMachine(machines[0]);
-
-      expect(canEditEnvVariables).toBe(false);
-    });
 
     it('shouldn\'t return any source', () => {
       let source = envManager.getSource(machines[0]);

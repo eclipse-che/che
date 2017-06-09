@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.dependenciesupdater;
 
-import org.eclipse.che.ide.extension.machine.client.outputspanel.console.DefaultOutputConsole;
+import org.eclipse.che.ide.console.DefaultOutputConsole;
 
 import java.util.LinkedList;
 import java.util.List;

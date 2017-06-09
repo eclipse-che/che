@@ -54,7 +54,18 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROJECT;
 @Extension(title = "Java", version = "3.0.0")
 public class JavaExtension {
 
-    private final String GROUP_ASSISTANT_REFACTORING = "assistantRefactoringGroup";
+    public static final  String OPEN_IMPLEMENTATION         = "openImplementation";
+    public static final  String SHOW_QUICK_DOC              = "showQuickDoc";
+    public static final  String JAVA_CLASS_STRUCTURE        = "javaClassStructure";
+    public static final  String ORGANIZE_IMPORTS            = "organizeImports";
+    public static final  String PARAMETERS_INFO             = "parametersInfo";
+    public static final  String QUICK_FIX                   = "quickFix";
+    public static final  String OPEN_JAVA_DECLARATION       = "openJavaDeclaration";
+    public static final  String JAVA_RENAME_REFACTORING     = "javaRenameRefactoring";
+    public static final  String JAVA_CUT_REFACTORING        = "javaCutRefactoring";
+    public static final  String JAVA_MOVE_REFACTORING       = "javaMoveRefactoring";
+    public static final  String JAVA_FIND_USAGES            = "javaFindUsages";
+    private static final String GROUP_ASSISTANT_REFACTORING = "assistantRefactoringGroup";
 
     @Inject
     public JavaExtension(FileTypeRegistry fileTypeRegistry,
@@ -113,17 +124,17 @@ public class JavaExtension {
         refactorGroup.add(renameRefactoringAction);
         assistantGroup.add(refactorGroup, new Constraints(Anchor.BEFORE, "updateDependency"));
 
-        actionManager.registerAction("showQuickDoc", quickDocumentationAction);
-        actionManager.registerAction("openJavaDeclaration", openDeclarationAction);
-        actionManager.registerAction("openImplementation", openImplementationAction);
-        actionManager.registerAction("javaRenameRefactoring", renameRefactoringAction);
-        actionManager.registerAction("javaMoveRefactoring", moveAction);
-        actionManager.registerAction("javaCutRefactoring", cutAction);
-        actionManager.registerAction("javaFindUsages", findUsagesAction);
-        actionManager.registerAction("javaClassStructure", fileStructureAction);
-        actionManager.registerAction("organizeImports", organizeImportsAction);
-        actionManager.registerAction("parametersInfo", parametersHintsAction);
-        actionManager.registerAction("quickFix", quickFixAction);
+        actionManager.registerAction(SHOW_QUICK_DOC, quickDocumentationAction);
+        actionManager.registerAction(OPEN_JAVA_DECLARATION, openDeclarationAction);
+        actionManager.registerAction(OPEN_IMPLEMENTATION, openImplementationAction);
+        actionManager.registerAction(JAVA_RENAME_REFACTORING, renameRefactoringAction);
+        actionManager.registerAction(JAVA_MOVE_REFACTORING, moveAction);
+        actionManager.registerAction(JAVA_CUT_REFACTORING, cutAction);
+        actionManager.registerAction(JAVA_FIND_USAGES, findUsagesAction);
+        actionManager.registerAction(JAVA_CLASS_STRUCTURE, fileStructureAction);
+        actionManager.registerAction(ORGANIZE_IMPORTS, organizeImportsAction);
+        actionManager.registerAction(PARAMETERS_INFO, parametersHintsAction);
+        actionManager.registerAction(QUICK_FIX, quickFixAction);
 
         assistantGroup.add(quickDocumentationAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
         assistantGroup.add(quickFixAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
@@ -149,31 +160,31 @@ public class JavaExtension {
         DefaultActionGroup editorContextMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU);
 
         editorContextMenuGroup.add(quickDocumentationAction, new Constraints(Anchor.AFTER, "format"));
-        editorContextMenuGroup.add(quickFixAction, new Constraints(Anchor.AFTER, "showQuickDoc"));
-        editorContextMenuGroup.add(openDeclarationAction, new Constraints(Anchor.AFTER, "quickFix"));
-        editorContextMenuGroup.add(refactorGroup, new Constraints(Anchor.AFTER, "openJavaDeclaration"));
+        editorContextMenuGroup.add(quickFixAction, new Constraints(Anchor.AFTER, SHOW_QUICK_DOC));
+        editorContextMenuGroup.add(openDeclarationAction, new Constraints(Anchor.AFTER, QUICK_FIX));
+        editorContextMenuGroup.add(refactorGroup, new Constraints(Anchor.AFTER, OPEN_JAVA_DECLARATION));
         editorContextMenuGroup.add(fileStructureAction, new Constraints(Anchor.AFTER, GROUP_ASSISTANT_REFACTORING));
 
         if (UserAgent.isMac()) {
-            keyBinding.getGlobal().addKey(new KeyBuilder().alt().control().charCode('b').build(), "openImplementation");
-            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('j').build(), "showQuickDoc");
-            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode(KeyCodeMap.F12).build(), "javaClassStructure");
-            keyBinding.getGlobal().addKey(new KeyBuilder().alt().control().charCode('o').build(), "organizeImports");
-            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('p').build(), "parametersInfo");
-            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode(KeyCodeMap.ENTER).build(), "quickFix");
+            keyBinding.getGlobal().addKey(new KeyBuilder().alt().control().charCode('b').build(), OPEN_IMPLEMENTATION);
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('j').build(), SHOW_QUICK_DOC);
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode(KeyCodeMap.F12).build(), JAVA_CLASS_STRUCTURE);
+            keyBinding.getGlobal().addKey(new KeyBuilder().alt().control().charCode('o').build(), ORGANIZE_IMPORTS);
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('p').build(), PARAMETERS_INFO);
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode(KeyCodeMap.ENTER).build(), QUICK_FIX);
         } else {
-            keyBinding.getGlobal().addKey(new KeyBuilder().alt().action().charCode('b').build(), "openImplementation");
-            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('q').build(), "showQuickDoc");
-            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode(KeyCodeMap.F12).build(), "javaClassStructure");
-            keyBinding.getGlobal().addKey(new KeyBuilder().alt().action().charCode('o').build(), "organizeImports");
-            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('p').build(), "parametersInfo");
-            keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.ENTER).build(), "quickFix");
+            keyBinding.getGlobal().addKey(new KeyBuilder().alt().action().charCode('b').build(), OPEN_IMPLEMENTATION);
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('q').build(), SHOW_QUICK_DOC);
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode(KeyCodeMap.F12).build(), JAVA_CLASS_STRUCTURE);
+            keyBinding.getGlobal().addKey(new KeyBuilder().alt().action().charCode('o').build(), ORGANIZE_IMPORTS);
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('p').build(), PARAMETERS_INFO);
+            keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.ENTER).build(), QUICK_FIX);
         }
-        keyBinding.getGlobal().addKey(new KeyBuilder().none().charCode(KeyCodeMap.F4).build(), "openJavaDeclaration");
-        keyBinding.getGlobal().addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F6).build(), "javaRenameRefactoring");
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('x').build(), "javaCutRefactoring");
-        keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.F6).build(), "javaMoveRefactoring");
-        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F7).build(), "javaFindUsages");
+        keyBinding.getGlobal().addKey(new KeyBuilder().none().charCode(KeyCodeMap.F4).build(), OPEN_JAVA_DECLARATION);
+        keyBinding.getGlobal().addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F6).build(), JAVA_RENAME_REFACTORING);
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('x').build(), JAVA_CUT_REFACTORING);
+        keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.F6).build(), JAVA_MOVE_REFACTORING);
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F7).build(), JAVA_FIND_USAGES);
     }
 
     @Inject

@@ -15,8 +15,6 @@ import {CheWorkspaceItem} from './list-workspaces/workspace-item/workspace-item.
 import {CheWorkspaceStatus} from './list-workspaces/workspace-status-action/workspace-status.directive';
 import {WorkspaceStatusController} from './list-workspaces/workspace-status-action/workspace-status.controller';
 import {WorkspaceDetailsController} from './workspace-details/workspace-details.controller';
-import {WorkspaceStacksController} from './workspace-details/workspace-stacks/workspace-stacks.controller';
-import {WorkspaceStacks} from './workspace-details/workspace-stacks/workspace-stacks.directive';
 import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive';
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
 import {WorkspaceEditModeOverlay} from './workspace-edit-mode/workspace-edit-mode-overlay.directive';
@@ -50,13 +48,13 @@ import {WorkspaceStatusIndicator} from './workspace-status/workspace-status-indi
 
 import {CheStackLibraryFilterController} from './workspace-details/select-stack/stack-library/stack-library-filter/che-stack-library-filter.controller';
 import {CheStackLibraryFilter}     from './workspace-details/select-stack/stack-library/stack-library-filter/che-stack-library-filter.directive';
-import {CreateProjectStackLibrarySelectedStackFilter} from './workspace-details/select-stack/stack-library/create-project-stack-library-selected-stack.filter';
-
 import {WorkspaceEnvironmentsController} from './workspace-details/environments/environments.controller';
 import {WorkspaceEnvironments} from './workspace-details/environments/environments.directive';
 import {WorkspaceMachineConfigController} from './workspace-details/environments/machine-config/machine-config.controller';
 import {WorkspaceMachineConfig} from './workspace-details/environments/machine-config/machine-config.directive';
 import {EditMachineNameDialogController} from  './workspace-details/environments/machine-config/edit-machine-name-dialog/edit-machine-name-dialog.controller';
+import {DeleteDevMachineDialogController} from './workspace-details/environments/machine-config/delete-dev-machine-dialog/delete-dev-machine-dialog.controller';
+import {DevMachineLabel} from './workspace-details/environments/machine-config/dev-machine-label/dev-machine-label.directive';
 
 import {ListEnvVariablesController} from './workspace-details/environments/list-env-variables/list-env-variables.controller';
 import {ListEnvVariables} from './workspace-details/environments/list-env-variables/list-env-variables.directive';
@@ -83,17 +81,12 @@ import {ListAgents} from  './workspace-details/environments/list-agents/list-age
  */
 export class WorkspacesConfig {
 
-  constructor(register) {
-
-    new CreateProjectStackLibrarySelectedStackFilter(register);
-
+  constructor(register: che.IRegisterService) {
     register.controller('WorkspaceDetailsSshCtrl', WorkspaceDetailsSshCtrl);
     register.directive('workspaceDetailsSsh', WorkspaceDetailsSsh);
 
     register.controller('ListWorkspacesCtrl', ListWorkspacesCtrl);
     register.controller('WorkspaceDetailsController', WorkspaceDetailsController);
-    register.controller('WorkspaceStacksController', WorkspaceStacksController);
-    register.directive('workspaceStacks', WorkspaceStacks);
 
     register.directive('cheWorkspaceItem', CheWorkspaceItem);
     register.controller('WorkspaceItemCtrl', WorkspaceItemCtrl);
@@ -137,7 +130,7 @@ export class WorkspacesConfig {
     register.directive('cheStackLibrarySelecter', CheStackLibrarySelecter);
 
     register.controller('WorkspaceSelectStackController', WorkspaceSelectStackController);
-    register.directive('cheWorkspaceSelectStack', WorkspaceSelectStack);
+    register.directive('workspaceSelectStack', WorkspaceSelectStack);
 
     register.controller('CheStackLibraryFilterController', CheStackLibraryFilterController);
     register.directive('cheStackLibraryFilter', CheStackLibraryFilter);
@@ -147,6 +140,8 @@ export class WorkspacesConfig {
     register.controller('WorkspaceMachineConfigController', WorkspaceMachineConfigController);
     register.directive('workspaceMachineConfig', WorkspaceMachineConfig);
     register.controller('EditMachineNameDialogController', EditMachineNameDialogController);
+    register.controller('DeleteDevMachineDialogController', DeleteDevMachineDialogController);
+    register.directive('devMachineLabel', DevMachineLabel);
 
     register.controller('ListEnvVariablesController', ListEnvVariablesController);
     register.directive('listEnvVariables', ListEnvVariables);
@@ -164,23 +159,20 @@ export class WorkspacesConfig {
     register.controller('ListAgentsController', ListAgentsController);
     register.directive('listAgents', ListAgents);
 
-    let locationProvider = {
-      title: (params: any) => { return params.workspaceName; },
-      templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
-      controller: 'WorkspaceDetailsController',
-      controllerAs: 'workspaceDetailsController'
-    };
-
     // config routes
-    register.app.config(function ($routeProvider) {
+    register.app.config(($routeProvider: any) => {
       $routeProvider.accessWhen('/workspaces', {
         title: 'Workspaces',
         templateUrl: 'app/workspaces/list-workspaces/list-workspaces.html',
         controller: 'ListWorkspacesCtrl',
         controllerAs: 'listWorkspacesCtrl'
       })
-      .accessWhen('/workspace/:namespace/:workspaceName', locationProvider)
-      .accessWhen('/workspace/:namespace/:workspaceName/:page', locationProvider)
+      .accessWhen('/workspace/:namespace*/:workspaceName', {
+        title: (params: any) => { return params.workspaceName; },
+        templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
+        controller: 'WorkspaceDetailsController',
+        controllerAs: 'workspaceDetailsController'
+      })
       .accessWhen('/create-workspace', {
         title: 'New Workspace',
         templateUrl: 'app/workspaces/workspace-details/workspace-details.html',

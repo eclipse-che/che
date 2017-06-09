@@ -20,7 +20,7 @@ public class MavenProfile extends MavenModelBase {
 
     private final String id;
     private final String source;
-    private final MavenBuildBase build = new MavenBuildBase();
+    private final MavenBuild build = new MavenBuild();
 
     private MavenActivation activation;
 
@@ -37,7 +37,7 @@ public class MavenProfile extends MavenModelBase {
         return source;
     }
 
-    public MavenBuildBase getBuild() {
+    public MavenBuild getBuild() {
         return build;
     }
 

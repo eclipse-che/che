@@ -52,7 +52,9 @@ final class CompareViewImpl extends Window implements CompareView {
     @UiField
     SimplePanel     comparePanel;
     @UiField
-    Label           revision;
+    Label           leftTitle;
+    @UiField
+    Label           rightTitle;
 
     @UiField(provided = true)
     final GitLocalizationConstant locale;
@@ -96,7 +98,6 @@ final class CompareViewImpl extends Window implements CompareView {
         comparePanel.getElement().setId(Document.get().createUniqueId());
     }
 
-    /** {@inheritDoc} */
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
@@ -112,26 +113,29 @@ final class CompareViewImpl extends Window implements CompareView {
         });
     }
 
-    /** {@inheritDoc} */
     @Override
-    public void show(String oldContent, String newContent, String revision, String file) {
+    public void setColumnTitles(String leftTitle, String rightTitle) {
+        this.leftTitle.setText(leftTitle);
+        this.rightTitle.setText(rightTitle);
+    }
+
+    @Override
+    public void show(String oldContent, String newContent, String fileName, boolean readOnly) {
         dockPanel.setSize(String.valueOf((com.google.gwt.user.client.Window.getClientWidth() / 100) * 95) + "px",
                           String.valueOf((com.google.gwt.user.client.Window.getClientHeight() / 100) * 90) + "px");
 
         super.show();
 
-        this.revision.setText(revision + locale.compareReadOnlyTitle());
-
         FileOptions newFile = compareFactory.createFieOptions();
-        newFile.setReadOnly(false);
+        newFile.setReadOnly(readOnly);
 
         FileOptions oldFile = compareFactory.createFieOptions();
         oldFile.setReadOnly(true);
 
         newFile.setContent(newContent);
-        newFile.setName(file);
+        newFile.setName(fileName);
         oldFile.setContent(oldContent);
-        oldFile.setName(file);
+        oldFile.setName(fileName);
 
         CompareConfig compareConfig = compareFactory.createCompareConfig();
         compareConfig.setNewFile(newFile);

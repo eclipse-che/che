@@ -59,6 +59,9 @@ Variables:
   DEFAULT_CHE_LOG_LEVEL=INFO
   CHE_LOG_LEVEL=${CHE_LOG_LEVEL:-${DEFAULT_CHE_LOG_LEVEL}}
 
+  DEFAULT_CHE_LOGS_DIR="${CATALINA_HOME}/logs/"
+  export CHE_LOGS_DIR=${CHE_LOGS_DIR:-${DEFAULT_CHE_LOGS_DIR}}
+
   DEFAULT_CHE_DEBUG_SERVER=false
   CHE_DEBUG_SERVER=${CHE_DEBUG_SERVER:-${DEFAULT_CHE_DEBUG_SERVER}}
 
@@ -79,9 +82,9 @@ usage () {
 set_environment_variables () {
   ### Set value of derived environment variables.
 
-  # CHE_DOCKER_MACHINE_HOST is used internally by Che to set its IP address
+  # CHE_DOCKER_IP is used internally by Che to set its IP address
   if [[ -n "${CHE_IP}" ]]; then
-    export CHE_DOCKER_MACHINE_HOST="${CHE_IP}"
+    export CHE_DOCKER_IP="${CHE_IP}"
   fi
 
   # Convert Tomcat environment variables to POSIX format.
@@ -112,7 +115,6 @@ set_environment_variables () {
   export CATALINA_BASE="${CHE_HOME}/tomcat"
   export ASSEMBLY_BIN_DIR="${CATALINA_HOME}/bin"
   export CHE_LOGS_LEVEL="${CHE_LOG_LEVEL}"
-  export CHE_LOGS_DIR="${CATALINA_HOME}/logs/"
 }
 
 docker_exec() {
@@ -235,23 +237,25 @@ init() {
       echo "!!!"
       exit 1
     fi
-    export CHE_USER_ID=`id -u ${CHE_USER}`:`getent group docker | cut -d: -f3`
-    sudo chown -R ${CHE_USER}:docker ${CHE_DATA}
-    sudo chown -R ${CHE_USER}:docker ${CHE_HOME}
+    export CHE_USER_ID=${CHE_USER}
+    sudo chown -R ${CHE_USER} ${CHE_DATA}
+    sudo chown -R ${CHE_USER} ${CHE_HOME}
+    sudo chown -R ${CHE_USER} ${CHE_LOGS_DIR}
   fi
   ### Are we going to use the embedded che.properties or one provided by user?`
   ### CHE_LOCAL_CONF_DIR is internal Che variable that sets where to load
+  export CHE_LOCAL_CONF_DIR="/conf"
   if [ -f "/conf/che.properties" ]; then
     echo "Found custom che.properties..."
-    export CHE_LOCAL_CONF_DIR="/conf"
     if [ "$CHE_USER" != "root" ]; then
-      sudo chown -R ${CHE_USER}:docker ${CHE_LOCAL_CONF_DIR}
+      sudo chown -R ${CHE_USER} ${CHE_LOCAL_CONF_DIR}
     fi
   else
-    echo "Using embedded che.properties... Copying template to ${CHE_DATA_HOST}/conf."
-    mkdir -p /data/conf
-    cp -rf "${CHE_HOME}/conf/che.properties" /data/conf/che.properties
-    export CHE_LOCAL_CONF_DIR="/data/conf"
+    if [ ! -d /conf ]; then
+        mkdir -p /conf
+    fi
+    echo "Using embedded che.properties... Copying template to ${CHE_LOCAL_CONF_DIR}/che.properties"
+    cp -rf "${CHE_HOME}/conf/che.properties" ${CHE_LOCAL_CONF_DIR}/che.properties
   fi
 
   # Update the provided che.properties with the location of the /data mounts
@@ -263,13 +267,13 @@ init() {
   sed -i "/che.workspace.agent.dev=/c\che.workspace.agent.dev=${CHE_DATA_HOST}/lib/ws-agent.tar.gz" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.workspace.terminal_linux_amd64=/c\che.workspace.terminal_linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/terminal" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.workspace.terminal_linux_arm7=/c\che.workspace.terminal_linux_arm7=${CHE_DATA_HOST}/lib/linux_arm7/terminal" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.workspace.exec_linux_amd64=/c\che.workspace.exec_linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/exec" $CHE_LOCAL_CONF_DIR/che.properties
 
-  # CHE_DOCKER_MACHINE_HOST_EXTERNAL must be set if you are in a VM.
-  HOSTNAME=${CHE_DOCKER_MACHINE_HOST_EXTERNAL:-$(get_docker_external_hostname)}
+  # CHE_DOCKER_IP_EXTERNAL must be set if you are in a VM.
+  HOSTNAME=${CHE_DOCKER_IP_EXTERNAL:-$(get_docker_external_hostname)}
   if has_external_hostname; then
     # Internal property used by Che to set hostname.
-    # See: LocalDockerInstanceRuntimeInfo.java#L9
-    export CHE_DOCKER_MACHINE_HOST_EXTERNAL=${HOSTNAME}
+    export CHE_DOCKER_IP_EXTERNAL=${HOSTNAME}
   fi
   ### Necessary to allow the container to write projects to the folder
   export CHE_WORKSPACE_STORAGE="${CHE_DATA_HOST}/workspaces"
@@ -304,10 +308,10 @@ get_che_data_from_host() {
 }
 
 get_che_server_container_id() {
-  # Returning `hostname` doesn't work when running Che on OpenShift/Kubernetes.
+  # Returning `hostname` doesn't work when running Che on OpenShift/Kubernetes/Docker Cloud.
   # In these cases `hostname` correspond to the pod ID that is different from
   # the container ID
-  hostname
+  echo $(basename "$(head /proc/1/cgroup || hostname)");
 }
 
 is_docker_for_mac_or_windows() {

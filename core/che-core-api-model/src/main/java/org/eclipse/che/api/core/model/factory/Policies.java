@@ -33,11 +33,6 @@ public interface Policies {
     Long getUntil();
 
     /**
-     * Re-open projects on factory 2-nd click
-     */
-    String getMatch();
-
-    /**
      * Workspace creation strategy
      */
     String getCreate();

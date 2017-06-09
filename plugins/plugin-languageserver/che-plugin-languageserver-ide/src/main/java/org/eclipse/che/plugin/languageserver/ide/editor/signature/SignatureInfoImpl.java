@@ -12,10 +12,10 @@ package org.eclipse.che.plugin.languageserver.ide.editor.signature;
 
 import com.google.common.base.Optional;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.ParameterInformationDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.SignatureInformationDTO;
 import org.eclipse.che.ide.api.editor.signature.ParameterInfo;
 import org.eclipse.che.ide.api.editor.signature.SignatureInfo;
+import org.eclipse.lsp4j.ParameterInformation;
+import org.eclipse.lsp4j.SignatureInformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +26,11 @@ import java.util.List;
 class SignatureInfoImpl implements SignatureInfo {
 
 
-    private final SignatureInformationDTO dto;
+    private final SignatureInformation dto;
 
     private List<ParameterInfo> parameterInfos;
 
-    public SignatureInfoImpl(SignatureInformationDTO dto) {
+    public SignatureInfoImpl(SignatureInformation dto) {
         this.dto = dto;
     }
 
@@ -48,7 +48,7 @@ class SignatureInfoImpl implements SignatureInfo {
     public Optional<List<ParameterInfo>> getParameters() {
         if (parameterInfos == null && dto.getParameters() != null) {
             parameterInfos = new ArrayList<>(dto.getParameters().size());
-            for (ParameterInformationDTO informationDTO : dto.getParameters()) {
+            for (ParameterInformation informationDTO : dto.getParameters()) {
                 parameterInfos.add(new ParamterInfoImpl(informationDTO));
             }
             return Optional.of(parameterInfos);

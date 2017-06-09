@@ -11,6 +11,7 @@
 package org.eclipse.che.commons.test.tck;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.persistence.EntityManagerFactory;
 
 /**
@@ -26,10 +27,10 @@ import javax.persistence.EntityManagerFactory;
  */
 public class JpaCleaner implements TckResourcesCleaner {
     @Inject
-    private EntityManagerFactory entityManagerFactory;
+    private Provider<EntityManagerFactory> entityManagerFactory;
 
     @Override
     public void clean() {
-        entityManagerFactory.close();
+        entityManagerFactory.get().close();
     }
 }

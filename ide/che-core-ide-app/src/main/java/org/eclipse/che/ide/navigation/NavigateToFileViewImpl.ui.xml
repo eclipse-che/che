@@ -15,33 +15,67 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field='res' type='org.eclipse.che.ide.Resources'/>
     <ui:with field='locale' type='org.eclipse.che.ide.CoreLocalizationConstant'/>
+
     <ui:style>
-        .emptyBorder {
-            margin: 6px;
-        }
-
-        .spacingTop {
-            margin-top: 5px;
-        }
-
         .labelMargin {
             margin: 5px 0;
         }
 
-        .box {
-            -moz-box-sizing: border-box;
-            box-sizing: border-box;
-            -webkit-box-sizing: border-box;
+        .suggestionsPanel {
+            position: fixed;
+            width: 400px;
+            height: 10px;
+            overflow: hidden;
+            z-index: 65535;
+            transition: all 0.2s ease-in-out;
+            border: 1px solid completionPopupBorderColor;
+            border-radius: 0 0 3px 3px;
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.50);
+        }
+
+        .noborder {
+            border: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-color: completionPopupBackgroundColor;
+        }
+
+        .noborder * {
+            font-weight: normal;
+            font-style: normal;
+            font-size: 11px;
+            font-family: "Open Sans", sans-serif;
+        }
+
+        .noborder tr > td:first-child {
+            padding-left: 3px;
+        }
+
+        .noborder tr > td:last-child {
+            padding-right: 3px;
+        }
+
+        .noborder table {
+            border-width: 0;
+            border-spacing: 0;
         }
     </ui:style>
-    <g:DockLayoutPanel unit="PX" width="400px" height="100px" addStyleNames="{style.emptyBorder}" debugId="file-navigateToFile-mainPanel">
+
+    <g:DockLayoutPanel unit="PX" width="400px" height="75px" debugId="file-navigateToFile-mainPanel">
         <g:center>
-            <g:FlowPanel addStyleNames="{style.emptyBorder} {style.spacingTop}">
+            <g:FlowPanel>
                 <g:Label width="100%" addStyleNames="{style.labelMargin}" text="{locale.navigateToFileViewFileFieldTitle}"/>
-                <g:SuggestBox ui:field="files" width="100%" addStyleNames="{style.box}" debugId="file-navigateToFile-fileName"/>
+                <g:TextBox ui:field="fileName" width="387px" height="18px" />
                 <g:Label width="100%" addStyleNames="{style.labelMargin} {res.coreCss.greyFontColor}" text="{locale.navigateToFileViewFileFieldPrompt}"/>
-                <g:Label ui:field="errLabel" width="100%" addStyleNames="{style.labelMargin} {res.coreCss.errorFont}"/>
+
+                <g:FlowPanel ui:field="suggestionsPanel" styleName="{style.suggestionsPanel}" visible="false">
+                    <g:HTML ui:field="suggestionsContainer" styleName="{style.noborder}"></g:HTML>
+                </g:FlowPanel>
             </g:FlowPanel>
         </g:center>
     </g:DockLayoutPanel>
+
 </ui:UiBinder>

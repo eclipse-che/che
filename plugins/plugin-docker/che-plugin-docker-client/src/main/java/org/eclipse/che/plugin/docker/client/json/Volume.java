@@ -30,4 +30,15 @@ public class Volume {
     public String toString() {
         return "{}";
     }
+
+    @Override
+    public int hashCode() {
+        return 19;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        return o instanceof Volume;
+    }
 }

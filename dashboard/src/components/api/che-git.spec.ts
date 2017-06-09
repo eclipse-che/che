@@ -16,11 +16,6 @@
 describe('CheGit', function () {
 
   /**
-   * User Factory for the test
-   */
-  var factory;
-
-  /**
    * API builder.
    */
   var apiBuilder;
@@ -68,7 +63,7 @@ describe('CheGit', function () {
       var agentUrl = 'localhost:3232/wsagent/ext';
       var workspaceId = 'workspace123test';
       var projectPath = '/testProject';
-      var localUrl = 'http://eclipse.org/che/git/f1/' + workspaceId + projectPath;
+      var localUrl = 'https://eclipse.org/che/git/f1/' + workspaceId + projectPath;
       var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
       var workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
 
@@ -158,15 +153,6 @@ describe('CheGit', function () {
 
       // now, check url
       var urlArray = factory.getRemoteUrlArrayByKey(projectPath);
-      remoteArray.sort(function (a, b) {
-        if (a.name > b.name) {
-          return 1;
-        }
-        if (a.name < b.name) {
-          return -1;
-        }
-        return 0;
-      });
 
       // check
       expect(remoteArray.join()).toEqual(urlArray.join());

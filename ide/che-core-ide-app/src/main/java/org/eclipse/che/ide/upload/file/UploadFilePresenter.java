@@ -19,10 +19,10 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationListener;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Container;
@@ -31,7 +31,6 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 
 /**
@@ -47,6 +46,7 @@ public class UploadFilePresenter implements UploadFileView.ActionDelegate {
     private final AppContext               appContext;
     private final EventBus                 eventBus;
     private final NotificationManager      notificationManager;
+    private final EditorAgent              editorAgent;
     private final CoreLocalizationConstant locale;
     private       Container                container;
 
@@ -55,12 +55,14 @@ public class UploadFilePresenter implements UploadFileView.ActionDelegate {
                                AppContext appContext,
                                EventBus eventBus,
                                NotificationManager notificationManager,
-                               CoreLocalizationConstant locale) {
+                               CoreLocalizationConstant locale,
+                               EditorAgent editorAgent) {
         this.appContext = appContext;
         this.eventBus = eventBus;
         this.view = view;
         this.locale = locale;
         this.notificationManager = notificationManager;
+        this.editorAgent = editorAgent;
         this.view.setDelegate(this);
 
         this.view.setEnabledUploadButton(false);
@@ -102,7 +104,7 @@ public class UploadFilePresenter implements UploadFileView.ActionDelegate {
                         @Override
                         public void onClick(Notification notification) {
                             if (!clicked) {
-                                eventBus.fireEvent(FileEvent.createOpenFileEvent(file.get()));
+                                editorAgent.openEditor(file.get());
                                 clicked = true;
                                 notification.setListener(null);
                                 notification.setContent("");

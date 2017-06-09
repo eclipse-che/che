@@ -10,15 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.signature;
 
-import io.typefox.lsapi.ServerCapabilities;
-
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.SignatureHelpDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -35,6 +31,8 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 
 import java.util.List;
 
@@ -64,11 +62,11 @@ public class LanguageServerSignatureHelp implements SignatureHelpProvider {
 
     @Override
     public Promise<Optional<SignatureHelp>> signatureHelp(Document document, int offset) {
-        TextDocumentPositionParamsDTO paramsDTO = helper.createTDPP(document, offset);
-        Promise<SignatureHelpDTO> promise = client.signatureHelp(paramsDTO);
-        return promise.then(new Function<SignatureHelpDTO, Optional<SignatureHelp>>() {
+        TextDocumentPositionParams paramsDTO = helper.createTDPP(document, offset);
+        Promise<org.eclipse.lsp4j.SignatureHelp> promise = client.signatureHelp(paramsDTO);
+        return promise.then(new Function<org.eclipse.lsp4j.SignatureHelp, Optional<SignatureHelp>>() {
             @Override
-            public Optional<SignatureHelp> apply(SignatureHelpDTO arg) throws FunctionException {
+            public Optional<SignatureHelp> apply(org.eclipse.lsp4j.SignatureHelp arg) throws FunctionException {
                 if (arg == null) {
                     return Optional.absent();
                 }

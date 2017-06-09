@@ -24,7 +24,10 @@ import elemental.html.DivElement;
 import elemental.js.dom.JsElement;
 
 import org.eclipse.che.ide.util.browser.UserAgent;
+
+import com.google.common.base.Strings;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.UIObject;
 
 
 /** Utility methods for DOM manipulation. */
@@ -283,6 +286,14 @@ public final class DomUtils {
             parent = null;
         }
         return (JsElement)parent;
+    }
+
+    public static void ensureDebugId(Element element, String id) {
+        final String uniqueId = com.google.gwt.dom.client.Document.get().createUniqueId();
+        final String trimId = Strings.nullToEmpty(id).trim();
+        final String debugId = Strings.isNullOrEmpty(trimId) ? uniqueId : trimId + "-" + uniqueId;
+
+        UIObject.ensureDebugId((com.google.gwt.dom.client.Element)element, debugId);
     }
 
     private DomUtils() {

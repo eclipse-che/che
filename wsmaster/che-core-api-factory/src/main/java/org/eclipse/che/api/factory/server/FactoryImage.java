@@ -19,10 +19,10 @@ import java.util.Objects;
 @Embeddable
 public class FactoryImage {
 
-    @Column(name = "imagedata")
+    @Column(name = "image_data")
     private byte[] imageData;
 
-    @Column(name = "mediatype")
+    @Column(name = "media_type")
     private String mediaType;
 
     @Column(name = "name")

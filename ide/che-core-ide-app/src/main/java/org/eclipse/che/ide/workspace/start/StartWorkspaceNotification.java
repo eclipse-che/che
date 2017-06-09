@@ -107,7 +107,7 @@ public class StartWorkspaceNotification {
             @Override
             public void onFailure(Exception reason) {
             }
-        }, false, restore.getValue().booleanValue());
+        }, restore.getValue());
     }
 
 }

@@ -11,9 +11,11 @@
 package org.eclipse.che.plugin.docker.machine;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.core.util.JsonRpcEndpointToMachineNameHolder;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
@@ -24,12 +26,16 @@ import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerState;
+import org.eclipse.che.plugin.docker.client.json.ImageConfig;
+import org.eclipse.che.plugin.docker.client.json.ImageInfo;
+import org.eclipse.che.plugin.docker.client.json.Volume;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
@@ -50,42 +56,52 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKER_FILE_TYPE;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 @Listeners(MockitoTestNGListener.class)
 public class MachineProviderImplTest {
-    private static final String  CONTAINER_ID           = "containerId";
-    private static final String  WORKSPACE_ID           = "wsId";
-    private static final String  MACHINE_NAME           = "machineName";
-    private static final String  USER_TOKEN             = "userToken";
-    private static final String  USER_NAME              = "user";
-    private static final boolean SNAPSHOT_USE_REGISTRY  = true;
-    private static final int     MEMORY_SWAP_MULTIPLIER = 0;
-    private static final String  ENV_NAME               = "env";
-    private static final String  NETWORK_NAME           = "networkName";
+    private static final String   CONTAINER_ID           = "containerId";
+    private static final String   WORKSPACE_ID           = "wsId";
+    private static final String   MACHINE_NAME           = "machineName";
+    private static final String   USER_TOKEN             = "userToken";
+    private static final String   USER_NAME              = "user";
+    private static final boolean  SNAPSHOT_USE_REGISTRY  = true;
+    private static final int      MEMORY_SWAP_MULTIPLIER = 0;
+    private static final String   ENV_NAME               = "env";
+    private static final String   NETWORK_NAME           = "networkName";
+    private static final String[] DEFAULT_CMD            = new String[] {"some", "command"};
+    private static final String[] DEFAULT_ENTRYPOINT     = new String[] {"entry", "point"};
 
     @Mock
     private DockerConnector dockerConnector;
@@ -100,6 +116,12 @@ public class MachineProviderImplTest {
     private DockerInstanceStopDetector dockerInstanceStopDetector;
 
     @Mock
+    private RequestTransmitter transmitter;
+
+    @Mock
+    private JsonRpcEndpointToMachineNameHolder jsonRpcEndpointToMachineNameHolder;
+
+    @Mock
     private DockerNode dockerNode;
 
     @Mock
@@ -112,12 +134,30 @@ public class MachineProviderImplTest {
     private ContainerState containerState;
 
     @Mock
+    private ImageInfo imageInfo;
+
+    @Mock
+    private ImageConfig imageConfig;
+
+    @Mock
     private RecipeRetriever recipeRetriever;
 
     @Mock
     private WindowsPathEscaper pathEscaper;
 
     private MachineProviderImpl provider;
+
+    private class MockConnectorProvider extends DockerConnectorProvider {
+
+        public MockConnectorProvider() {
+            super(Collections.emptyMap(), "default");
+        }
+
+        @Override
+        public DockerConnector get() {
+            return dockerConnector;
+        }
+    }
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -137,8 +177,12 @@ public class MachineProviderImplTest {
         when(dockerConnector.createContainer(any(CreateContainerParams.class)))
                 .thenReturn(new ContainerCreated(CONTAINER_ID, new String[0]));
         when(dockerConnector.inspectContainer(any(InspectContainerParams.class))).thenReturn(containerInfo);
+        when(dockerConnector.inspectContainer(anyString())).thenReturn(containerInfo);
         when(containerInfo.getState()).thenReturn(containerState);
-        when(containerState.isRunning()).thenReturn(false);
+        when(containerState.getStatus()).thenReturn("running");
+        when(dockerConnector.inspectImage(anyString())).thenReturn(imageInfo);
+        when(imageInfo.getConfig()).thenReturn(imageConfig);
+        when(imageConfig.getCmd()).thenReturn(new String[] {"tail", "-f", "/dev/null"});
     }
 
     @AfterMethod
@@ -170,6 +214,39 @@ public class MachineProviderImplTest {
         createInstanceFromSnapshot(repo, tag, registry);
 
         verify(dockerConnector, never()).pull(eq(PullParams.create(repo).withTag(tag)), any(ProgressMonitor.class));
+    }
+
+    @Test
+    public void shouldPullDockerImageIfAlwaysPullIsTrueEvenIfImageExistsLocally() throws Exception {
+        provider = spy(new MachineProviderBuilder().setDoForcePullImage(true)
+                                                   .build());
+        doReturn(true).when(provider).isDockerImageExistLocally(anyString());
+
+        createInstanceFromRecipe();
+
+        verify(dockerConnector).pull(any(PullParams.class), any(ProgressMonitor.class));
+    }
+
+    @Test
+    public void shouldPullDockerImageIfAlwaysPullIsFalseButImageDoesNotExist() throws Exception {
+        provider = spy(new MachineProviderBuilder().setDoForcePullImage(false)
+                                                   .build());
+        doReturn(false).when(provider).isDockerImageExistLocally(anyString());
+
+        createInstanceFromRecipe();
+
+        verify(dockerConnector).pull(any(PullParams.class), any(ProgressMonitor.class));
+    }
+
+    @Test
+    public void shouldNotPullDockerImageIfAlwaysPullIsFalseAndTheImageExistLocally() throws Exception {
+        provider = spy(new MachineProviderBuilder().setDoForcePullImage(false)
+                                                   .build());
+        doReturn(true).when(provider).isDockerImageExistLocally(anyString());
+
+        createInstanceFromRecipe();
+
+        verify(dockerConnector, never()).pull(any(PullParams.class), any(ProgressMonitor.class));
     }
 
     @Test
@@ -342,16 +419,37 @@ public class MachineProviderImplTest {
         assertEquals(((long)argumentCaptor.getValue().getContainerConfig().getHostConfig().getCpuPeriod()), 200);
     }
 
-    @Test
-    public void shouldBeAbleToCreateContainerWithCpuQuota() throws Exception {
-        provider = spy(new MachineProviderBuilder().setCpuQuota(200)
+    @Test(dataProvider = "dnsResolverTestProvider")
+    public void shouldSetDnsResolversOnContainerCreation(String[] dnsResolvers) throws Exception {
+        provider = spy(new MachineProviderBuilder().setDnsResolvers(dnsResolvers)
                                                    .build());
 
         createInstanceFromRecipe();
 
         ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture());
-        assertEquals(((long)argumentCaptor.getValue().getContainerConfig().getHostConfig().getCpuQuota()), 200);
+        assertEqualsNoOrder(argumentCaptor.getValue().getContainerConfig().getHostConfig().getDns(), dnsResolvers);
+    }
+
+    @DataProvider(name = "dnsResolverTestProvider")
+    public static Object[][] dnsResolverTestProvider() {
+        return new Object[][] {
+                {new String[]{}},
+                {new String[]{"8.8.8.8", "7.7.7.7", "9.9.9.9"}},
+                {new String[]{"9.9.9.9"}},
+                {null},
+        };
+    }
+
+    @Test
+    public void shouldSetNullDnsResolversOnContainerCreationByDefault() throws Exception {
+        provider = spy(new MachineProviderBuilder().build());
+
+        createInstanceFromRecipe();
+
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertEqualsNoOrder(argumentCaptor.getValue().getContainerConfig().getHostConfig().getDns(), null);
     }
 
     @Test
@@ -669,63 +767,269 @@ public class MachineProviderImplTest {
     }
 
     @Test
-    public void shouldBindCommonAndDevVolumesToContainerOnDevInstanceCreationFromRecipe() throws Exception {
-        Set<String> devVolumes = new HashSet<>(asList("/etc:/tmp/etc:ro", "/some/thing:/home/some/thing"));
-        Set<String> commonVolumes =
-                new HashSet<>(asList("/some/thing/else:/home/some/thing/else", "/other/path:/home/other/path"));
+    public void shouldAddBindMountAndRegularVolumesOnInstanceCreationFromRecipe() throws Exception {
+        String[] bindMountVolumesFromMachine = new String[] {"/my/bind/mount1:/from/host1",
+                                                             "/my/bind/mount2:/from/host2:ro",
+                                                             "/my/bind/mount3:/from/host3:ro,Z"};
+        String[] volumesFromMachine = new String[] {"/projects",
+                                                    "/something",
+                                                    "/something/else"};
+        String[] expectedBindMountVolumes = new String[] {"/my/bind/mount1:/from/host1",
+                                                          "/my/bind/mount2:/from/host2:ro",
+                                                          "/my/bind/mount3:/from/host3:ro,Z"};
+        Map<String, Volume> expectedVolumes = Stream.of("/projects",
+                                                        "/something",
+                                                        "/something/else")
+                                                    .collect(toMap(Function.identity(), v -> new Volume()));
 
-        final ArrayList<String> expectedVolumes = new ArrayList<>();
-        expectedVolumes.addAll(devVolumes);
-        expectedVolumes.addAll(commonVolumes);
-
-        provider = new MachineProviderBuilder().setDevMachineVolumes(devVolumes)
-                                               .setAllMachineVolumes(commonVolumes)
+        provider = new MachineProviderBuilder().setDevMachineVolumes(emptySet())
+                                               .setAllMachineVolumes(emptySet())
                                                .build();
 
-        final boolean isDev = true;
-
         CheServiceImpl service = createService();
-        service.setVolumes(null);
-        createInstanceFromRecipe(isDev, service);
+        service.setVolumes(Stream.concat(Stream.of(bindMountVolumesFromMachine), Stream.of(volumesFromMachine))
+                                 .collect(Collectors.toList()));
+        createInstanceFromRecipe(service, true);
 
 
         ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture());
-        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        final String[] actualBinds = argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds();
-        assertEquals(actualBinds.length, expectedVolumes.size());
-        assertEquals(new HashSet<>(asList(actualBinds)), new HashSet<>(expectedVolumes));
+        String[] actualBindMountVolumes = argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds();
+        Map<String, Volume> actualVolumes = argumentCaptor.getValue().getContainerConfig().getVolumes();
+        assertEquals(actualVolumes, expectedVolumes);
+        assertEqualsNoOrder(actualBindMountVolumes, expectedBindMountVolumes);
     }
 
     @Test
-    public void shouldBindCommonVolumesOnlyToContainerOnNonDevInstanceCreationFromRecipe() throws Exception {
-        Set<String> devVolumes = new HashSet<>(asList("/etc:/tmp/etc:ro", "/some/thing:/home/some/thing"));
-        Set<String> commonVolumes =
-                new HashSet<>(asList("/some/thing/else:/home/some/thing/else", "/other/path:/home/other/path"));
+    public void shouldAddBindMountAndRegularVolumesOnInstanceCreationFromSnapshot() throws Exception {
+        String[] bindMountVolumesFromMachine = new String[] {"/my/bind/mount1:/from/host1",
+                                                             "/my/bind/mount2:/from/host2:ro",
+                                                             "/my/bind/mount3:/from/host3:ro,Z"};
+        String[] volumesFromMachine = new String[] {"/projects",
+                                                    "/something",
+                                                    "/something/else"};
+        String[] expectedBindMountVolumes = new String[] {"/my/bind/mount1:/from/host1",
+                                                          "/my/bind/mount2:/from/host2:ro",
+                                                          "/my/bind/mount3:/from/host3:ro,Z"};
+        Map<String, Volume> expectedVolumes = Stream.of("/projects",
+                                                        "/something",
+                                                        "/something/else")
+                                                    .collect(toMap(Function.identity(), v -> new Volume()));
 
-        final ArrayList<String> expectedVolumes = new ArrayList<>();
-        expectedVolumes.addAll(commonVolumes);
-
-        provider = new MachineProviderBuilder().setDevMachineVolumes(devVolumes)
-                                               .setAllMachineVolumes(commonVolumes)
+        provider = new MachineProviderBuilder().setDevMachineVolumes(emptySet())
+                                               .setAllMachineVolumes(emptySet())
                                                .build();
 
-        final boolean isDev = false;
-
-
         CheServiceImpl service = createService();
-        service.setVolumes(null);
-        createInstanceFromRecipe(isDev, service);
+        service.setVolumes(Stream.concat(Stream.of(bindMountVolumesFromMachine), Stream.of(volumesFromMachine))
+                                 .collect(Collectors.toList()));
+        createInstanceFromSnapshot(service, true);
 
 
         ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture());
-        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        final String[] actualBinds = argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds();
-        assertEquals(actualBinds.length, expectedVolumes.size());
-        assertEquals(new HashSet<>(asList(actualBinds)), new HashSet<>(expectedVolumes));
+        String[] actualBindMountVolumes = argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds();
+        Map<String, Volume> actualVolumes = argumentCaptor.getValue().getContainerConfig().getVolumes();
+        assertEquals(actualVolumes, expectedVolumes);
+        assertEqualsNoOrder(actualBindMountVolumes, expectedBindMountVolumes);
+    }
+
+    @Test
+    public void shouldAddAllVolumesOnDevInstanceCreationFromRecipe() throws Exception {
+        String[] bindMountVolumesFromMachine = new String[] {"/my/bind/mount1:/from/host1",
+                                                             "/my/bind/mount2:/from/host2:ro",
+                                                             "/my/bind/mount3:/from/host3:ro,Z"};
+        String[] volumesFromMachine = new String[] {"/projects",
+                                                    "/something",
+                                                    "/something/else"};
+        String[] allMachinesSystemVolumes = new String[] {"/some/thing/else:/home/some/thing/else",
+                                                          "/other/path:/home/other/path",
+                                                          "/home/other/path2"};
+        String[] devMachinesSystemVolumes = new String[] {"/etc:/tmp/etc:ro",
+                                                          "/some/thing:/home/some/thing",
+                                                          "/some/thing2:/home/some/thing2:ro,z",
+                                                          "/home/some/thing3"};
+        String[] expectedBindMountVolumes = new String[] {"/my/bind/mount1:/from/host1",
+                                                          "/my/bind/mount2:/from/host2:ro",
+                                                          "/my/bind/mount3:/from/host3:ro,Z",
+                                                          "/some/thing/else:/home/some/thing/else",
+                                                          "/other/path:/home/other/path",
+                                                          "/etc:/tmp/etc:ro",
+                                                          "/some/thing:/home/some/thing",
+                                                          "/some/thing2:/home/some/thing2:ro,z"};
+        Map<String, Volume> expectedVolumes = Stream.of("/projects",
+                                                        "/something",
+                                                        "/something/else",
+                                                        "/home/other/path2",
+                                                        "/home/some/thing3")
+                                                    .collect(toMap(Function.identity(), v -> new Volume()));
+
+
+        provider = new MachineProviderBuilder()
+                .setDevMachineVolumes(new HashSet<>(asList(devMachinesSystemVolumes)))
+                .setAllMachineVolumes(new HashSet<>(asList(allMachinesSystemVolumes)))
+                .build();
+
+        CheServiceImpl service = createService();
+        service.setVolumes(Stream.concat(Stream.of(bindMountVolumesFromMachine), Stream.of(volumesFromMachine))
+                                 .collect(Collectors.toList()));
+        createInstanceFromRecipe(service, true);
+
+
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+
+        String[] actualBindMountVolumes = argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds();
+        Map<String, Volume> actualVolumes = argumentCaptor.getValue().getContainerConfig().getVolumes();
+        assertEquals(actualVolumes, expectedVolumes);
+        assertEqualsNoOrder(actualBindMountVolumes, expectedBindMountVolumes);
+    }
+
+    @Test
+    public void shouldAddAllVolumesOnDevInstanceCreationFromSnapshot() throws Exception {
+        String[] bindMountVolumesFromMachine = new String[] {"/my/bind/mount1:/from/host1",
+                                                             "/my/bind/mount2:/from/host2:ro",
+                                                             "/my/bind/mount3:/from/host3:ro,Z"};
+        String[] volumesFromMachine = new String[] {"/projects",
+                                                    "/something",
+                                                    "/something/else"};
+        String[] allMachinesSystemVolumes = new String[] {"/some/thing/else:/home/some/thing/else",
+                                                          "/other/path:/home/other/path",
+                                                          "/home/other/path2"};
+        String[] devMachinesSystemVolumes = new String[] {"/etc:/tmp/etc:ro",
+                                                          "/some/thing:/home/some/thing",
+                                                          "/some/thing2:/home/some/thing2:ro,z",
+                                                          "/home/some/thing3"};
+        String[] expectedBindMountVolumes = new String[] {"/my/bind/mount1:/from/host1",
+                                                          "/my/bind/mount2:/from/host2:ro",
+                                                          "/my/bind/mount3:/from/host3:ro,Z",
+                                                          "/some/thing/else:/home/some/thing/else",
+                                                          "/other/path:/home/other/path",
+                                                          "/etc:/tmp/etc:ro",
+                                                          "/some/thing:/home/some/thing",
+                                                          "/some/thing2:/home/some/thing2:ro,z"};
+        Map<String, Volume> expectedVolumes = Stream.of("/projects",
+                                                        "/something",
+                                                        "/something/else",
+                                                        "/home/other/path2",
+                                                        "/home/some/thing3")
+                                                    .collect(toMap(Function.identity(), v -> new Volume()));
+
+
+        provider = new MachineProviderBuilder()
+                .setDevMachineVolumes(new HashSet<>(asList(devMachinesSystemVolumes)))
+                .setAllMachineVolumes(new HashSet<>(asList(allMachinesSystemVolumes)))
+                .build();
+
+        CheServiceImpl service = createService();
+        service.setVolumes(Stream.concat(Stream.of(bindMountVolumesFromMachine), Stream.of(volumesFromMachine))
+                                 .collect(Collectors.toList()));
+        createInstanceFromSnapshot(service, true);
+
+
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+
+        String[] actualBindMountVolumes = argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds();
+        Map<String, Volume> actualVolumes = argumentCaptor.getValue().getContainerConfig().getVolumes();
+        assertEquals(actualVolumes, expectedVolumes);
+        assertEqualsNoOrder(actualBindMountVolumes, expectedBindMountVolumes);
+    }
+
+    @Test
+    public void shouldAddCommonsSystemVolumesOnlyOnNonDevInstanceCreationFromRecipe() throws Exception {
+        String[] bindMountVolumesFromMachine = new String[] {"/my/bind/mount1:/from/host1",
+                                                             "/my/bind/mount2:/from/host2:ro",
+                                                             "/my/bind/mount3:/from/host3:ro,Z"};
+        String[] volumesFromMachine = new String[] {"/projects",
+                                                    "/something",
+                                                    "/something/else"};
+        String[] allMachinesSystemVolumes = new String[] {"/some/thing/else:/home/some/thing/else",
+                                                          "/other/path:/home/other/path",
+                                                          "/home/other/path2"};
+        String[] devMachinesSystemVolumes = new String[] {"/etc:/tmp/etc:ro",
+                                                          "/some/thing:/home/some/thing",
+                                                          "/some/thing2:/home/some/thing2:ro,z",
+                                                          "/home/some/thing3"};
+        String[] expectedBindMountVolumes = new String[] {"/my/bind/mount1:/from/host1",
+                                                          "/my/bind/mount2:/from/host2:ro",
+                                                          "/my/bind/mount3:/from/host3:ro,Z",
+                                                          "/some/thing/else:/home/some/thing/else",
+                                                          "/other/path:/home/other/path"};
+        Map<String, Volume> expectedVolumes = Stream.of("/projects",
+                                                        "/something",
+                                                        "/something/else",
+                                                        "/home/other/path2")
+                                                    .collect(toMap(Function.identity(), v -> new Volume()));
+
+
+        provider = new MachineProviderBuilder()
+                .setDevMachineVolumes(new HashSet<>(asList(devMachinesSystemVolumes)))
+                .setAllMachineVolumes(new HashSet<>(asList(allMachinesSystemVolumes)))
+                .build();
+
+        CheServiceImpl service = createService();
+        service.setVolumes(Stream.concat(Stream.of(bindMountVolumesFromMachine), Stream.of(volumesFromMachine))
+                                 .collect(Collectors.toList()));
+        createInstanceFromRecipe(service, false);
+
+
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+
+        String[] actualBindMountVolumes = argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds();
+        Map<String, Volume> actualVolumes = argumentCaptor.getValue().getContainerConfig().getVolumes();
+        assertEquals(actualVolumes, expectedVolumes);
+        assertEqualsNoOrder(actualBindMountVolumes, expectedBindMountVolumes);
+    }
+
+    @Test
+    public void shouldAddCommonsSystemVolumesOnlyOnNonDevInstanceCreationFromSnapshot() throws Exception {
+        String[] bindMountVolumesFromMachine = new String[] {"/my/bind/mount1:/from/host1",
+                                                             "/my/bind/mount2:/from/host2:ro",
+                                                             "/my/bind/mount3:/from/host3:ro,Z"};
+        String[] volumesFromMachine = new String[] {"/projects",
+                                                    "/something",
+                                                    "/something/else"};
+        String[] allMachinesSystemVolumes = new String[] {"/some/thing/else:/home/some/thing/else",
+                                                          "/other/path:/home/other/path",
+                                                          "/home/other/path2"};
+        String[] devMachinesSystemVolumes = new String[] {"/etc:/tmp/etc:ro",
+                                                          "/some/thing:/home/some/thing",
+                                                          "/some/thing2:/home/some/thing2:ro,z",
+                                                          "/home/some/thing3"};
+        String[] expectedBindMountVolumes = new String[] {"/my/bind/mount1:/from/host1",
+                                                          "/my/bind/mount2:/from/host2:ro",
+                                                          "/my/bind/mount3:/from/host3:ro,Z",
+                                                          "/some/thing/else:/home/some/thing/else",
+                                                          "/other/path:/home/other/path"};
+        Map<String, Volume> expectedVolumes = Stream.of("/projects",
+                                                        "/something",
+                                                        "/something/else",
+                                                        "/home/other/path2")
+                                                    .collect(toMap(Function.identity(), v -> new Volume()));
+
+
+        provider = new MachineProviderBuilder()
+                .setDevMachineVolumes(new HashSet<>(asList(devMachinesSystemVolumes)))
+                .setAllMachineVolumes(new HashSet<>(asList(allMachinesSystemVolumes)))
+                .build();
+
+        CheServiceImpl service = createService();
+        service.setVolumes(Stream.concat(Stream.of(bindMountVolumesFromMachine), Stream.of(volumesFromMachine))
+                                 .collect(Collectors.toList()));
+        createInstanceFromSnapshot(service, false);
+
+
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+
+        String[] actualBindMountVolumes = argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds();
+        Map<String, Volume> actualVolumes = argumentCaptor.getValue().getContainerConfig().getVolumes();
+        assertEquals(actualVolumes, expectedVolumes);
+        assertEqualsNoOrder(actualBindMountVolumes, expectedBindMountVolumes);
     }
 
     @Test
@@ -828,6 +1132,32 @@ public class MachineProviderImplTest {
     }
 
     @Test
+    public void shouldAddMachineNameEnvVariableOnDevInstanceCreationFromRecipe() throws Exception {
+        String wsId = "myWs";
+        createInstanceFromRecipe(true, wsId);
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
+                           .contains(DockerInstanceRuntimeInfo.CHE_MACHINE_NAME + "=" + MACHINE_NAME),
+                   "Machine Name variable is missing. Required " + DockerInstanceRuntimeInfo.CHE_MACHINE_NAME + "=" +
+                   MACHINE_NAME +
+                   ". Found " + Arrays.toString(argumentCaptor.getValue().getContainerConfig().getEnv()));
+    }
+
+    @Test
+    public void shouldAddMachineNameEnvVariableOnNonDevInstanceCreationFromRecipe() throws Exception {
+        String wsId = "myWs";
+        createInstanceFromRecipe(false, wsId);
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
+                           .contains(DockerInstanceRuntimeInfo.CHE_MACHINE_NAME + "=" + MACHINE_NAME),
+                   "Machine Name variable is missing. Required " + DockerInstanceRuntimeInfo.CHE_MACHINE_NAME + "=" +
+                   MACHINE_NAME +
+                   ". Found " + Arrays.toString(argumentCaptor.getValue().getContainerConfig().getEnv()));
+    }
+
+    @Test
     public void shouldAddWorkspaceIdEnvVariableOnDevInstanceCreationFromSnapshot() throws Exception {
         String wsId = "myWs";
         createInstanceFromSnapshot(true, wsId);
@@ -841,14 +1171,14 @@ public class MachineProviderImplTest {
     }
 
     @Test
-    public void shouldNotAddWorkspaceIdEnvVariableOnNonDevInstanceCreationFromRecipe() throws Exception {
+    public void shouldAddWorkspaceIdEnvVariableOnNonDevInstanceCreationFromRecipe() throws Exception {
         String wsId = "myWs";
         createInstanceFromRecipe(false, wsId);
         ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture());
-        assertFalse(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
+        assertTrue(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
                             .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
-                    "Non dev machine should not contains " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID);
+                    "Non dev machine should contains " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID);
     }
 
     @Test
@@ -1077,15 +1407,157 @@ public class MachineProviderImplTest {
         assertEquals(containerConfig.getNetworkingConfig().getEndpointsConfig().get(NETWORK_NAME).getLinks(), links);
     }
 
+    @Test
+    public void shouldBeAbleToCreateContainerWithCpuQuota() throws Exception {
+        // given
+        provider = spy(new MachineProviderBuilder().setCpuQuota(200)
+                                                   .build());
+
+        // when
+        createInstanceFromRecipe();
+
+        // then
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertEquals(((long)argumentCaptor.getValue().getContainerConfig().getHostConfig().getCpuQuota()), 200);
+    }
+
+    @Test(dataProvider = "terminatingContainerEntrypointCmd")
+    public void shouldChangeEntrypointCmdToTailfDevNullIfTheyAreIdentifiedAsTerminating(String[] entrypoint,
+                                                                                        String[] cmd)
+            throws Exception {
+        // given
+        when(imageConfig.getCmd()).thenReturn(cmd);
+        when(imageConfig.getEntrypoint()).thenReturn(entrypoint);
+
+        // when
+        createInstanceFromRecipe();
+
+        // then
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertNull(argumentCaptor.getValue().getContainerConfig().getEntrypoint());
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getCmd(), new String[] {"tail", "-f", "/dev/null"});
+    }
+
+    @DataProvider(name = "terminatingContainerEntrypointCmd")
+    public static Object[][] terminatingContainerEntrypointCmd() {
+        return new Object[][] {
+                // entrypoint and cmd are unset
+                {null, null},
+                // entrypoint is unset
+                {null, new String[] {"/bin/bash"}},
+                {null, new String[] {"/bin/sh"}},
+                {null, new String[] {"bash"}},
+                {null, new String[] {"sh"}},
+                {null, new String[] {"/bin/sh", "-c", "/bin/bash"}},
+                {null, new String[] {"/bin/sh", "-c", "/bin/sh"}},
+                {null, new String[] {"/bin/sh", "-c", "bash"}},
+                {null, new String[] {"/bin/sh", "-c", "sh"}},
+                // cmd is unset
+                {new String[] {"/bin/sh", "-c"}, null},
+                {new String[] {"/bin/bash", "-c"}, null},
+                {new String[] {"bash", "-c"}, null},
+                {new String[] {"sh", "-c"}, null},
+                {new String[] {"/bin/bash"}, null},
+                {new String[] {"/bin/sh"}, null},
+                {new String[] {"bash"}, null},
+                {new String[] {"sh"}, null},
+                {new String[] {"/bin/sh", "-c", "/bin/bash"}, null},
+                {new String[] {"/bin/sh", "-c", "/bin/sh"}, null},
+                {new String[] {"/bin/sh", "-c", "bash"}, null},
+                {new String[] {"/bin/sh", "-c", "sh"}, null},
+                // entrypoint and cmd are set
+                {new String[] {"/bin/sh", "-c"}, new String[] {"bash"}},
+                {new String[] {"/bin/bash", "-c"}, new String[] {"sh"}},
+                {new String[] {"bash", "-c"}, new String[] {"/bin/bash"}},
+                {new String[] {"sh", "-c"}, new String[] {"/bin/sh"}},
+                {new String[] {"/bin/bash"}, new String[] {"/bin/bash"}},
+                {new String[] {"/bin/sh"}, new String[] {"/bin/bash"}},
+                {new String[] {"bash"}, new String[] {"/bin/bash"}},
+                {new String[] {"sh"}, new String[] {"/bin/bash"}},
+                {new String[] {"/bin/sh", "-c", "/bin/bash"}, new String[] {"/bin/bash"}},
+                {new String[] {"/bin/sh", "-c", "/bin/sh"}, new String[] {"/bin/bash"}},
+                {new String[] {"/bin/sh", "-c", "bash"}, new String[] {"/bin/bash"}},
+                {new String[] {"/bin/sh", "-c", "sh"}, new String[] {"/bin/bash"}},
+                };
+    }
+
+    @Test(dataProvider = "nonTerminatingContainerEntrypointCmd")
+    public void shouldNotChangeEntrypointCmdIfTheyAreNotIdentified(String[] entrypoint,
+                                                                   String[] cmd) throws Exception {
+        // given
+        when(imageConfig.getCmd()).thenReturn(cmd);
+        when(imageConfig.getEntrypoint()).thenReturn(entrypoint);
+
+        // when
+        createInstanceFromRecipe();
+
+        // then
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertEqualsNoOrder(argumentCaptor.getValue().getContainerConfig().getEntrypoint(), DEFAULT_ENTRYPOINT);
+        assertEqualsNoOrder(argumentCaptor.getValue().getContainerConfig().getCmd(), DEFAULT_CMD);
+    }
+
+    @DataProvider(name = "nonTerminatingContainerEntrypointCmd")
+    public static Object[][] nonTerminatingContainerEntrypointCmd() {
+        return new Object[][] {
+                {new String[] {"/bin/sh", "-c"}, new String[] {"tail", "-f", "/dev/null"}},
+                {new String[] {"/bin/sh", "-c"}, new String[] {"tailf", "/dev/null"}},
+                {new String[] {"/bin/sh", "-c"}, new String[] {"./entrypoint.sh", "something"}},
+                {new String[] {"/bin/sh", "-c"}, new String[] {"./entrypoint.sh"}},
+                {new String[] {"/bin/sh", "-c"}, new String[] {"ping google.com"}},
+                {new String[] {"sh", "-c"}, new String[] {"./entrypoint.sh"}},
+                {new String[] {"bash", "-c"}, new String[] {"./entrypoint.sh"}},
+                {new String[] {"/bin/bash", "-c"}, new String[] {"./entrypoint.sh"}},
+                // terminating cmd but we don't recognize it since it is not used luckily and we should limit
+                // list of handled variants
+                {new String[] {"/bin/sh", "-c"}, new String[] {"echo", "something"}},
+                {new String[] {"/bin/sh", "-c"}, new String[] {"ls"}},
+                };
+    }
+
+    @Test(dataProvider = "acceptableStartedContainerStatus")
+    public void shouldNotThrowExceptionIfContainerStatusIsAcceptable(String status) throws Exception {
+        // given
+        when(containerState.getStatus()).thenReturn(status);
+
+        // when
+        createInstanceFromRecipe();
+
+        // then
+        verify(dockerConnector).inspectContainer(CONTAINER_ID);
+        verify(containerState).getStatus();
+    }
+
+    @DataProvider(name = "acceptableStartedContainerStatus")
+    public static Object[][] acceptableStartedContainerStatus() {
+        return new Object[][] {
+                // in case status is not returned for some reason, e.g. docker doesn't provide it
+                {null},
+                // expected status
+                {"running"},
+                // unknown status, pass for compatibility
+                {"some thing"}
+        };
+    }
+
+    @Test(expectedExceptions = ServerException.class,
+          expectedExceptionsMessageRegExp = MachineProviderImpl.CONTAINER_EXITED_ERROR)
+    public void shouldThrowExceptionIfContainerExitedRightAfterStart() throws Exception {
+        // given
+        when(containerState.getStatus()).thenReturn("exited");
+
+        // when
+        createInstanceFromRecipe();
+    }
+
     private CheServiceImpl createInstanceFromRecipe() throws Exception {
         CheServiceImpl service = createService();
         createInstanceFromRecipe(service);
 
         return service;
-    }
-
-    private void createInstanceFromRecipe(boolean isDev, CheServiceImpl service) throws Exception {
-        createInstanceFromRecipe(service, isDev, WORKSPACE_ID);
     }
 
     private void createInstanceFromRecipe(boolean isDev) throws Exception {
@@ -1173,14 +1645,14 @@ public class MachineProviderImplTest {
                               LineConsumer.DEV_NULL);
     }
 
-    public CheServiceImpl createService() {
+    private CheServiceImpl createService() {
         CheServiceImpl service = new CheServiceImpl();
         service.setId("testId");
         service.setImage("image");
-        service.setCommand(asList("some", "command"));
+        service.setCommand(asList(DEFAULT_CMD));
         service.setContainerName("cont_name");
         service.setDependsOn(asList("dep1", "dep2"));
-        service.setEntrypoint(asList("entry", "point"));
+        service.setEntrypoint(asList(DEFAULT_ENTRYPOINT));
         service.setExpose(asList("1010", "1111"));
         service.setEnvironment(singletonMap("some", "var"));
         service.setLabels(singletonMap("some", "label"));
@@ -1198,7 +1670,7 @@ public class MachineProviderImplTest {
         private Set<String>      devMachineVolumes;
         private Set<String>      allMachineVolumes;
         private Set<Set<String>> extraHosts;
-        private boolean          doForcePullOnBuild;
+        private boolean          doForcePullImage;
         private boolean          privilegedMode;
         private int              pidsLimit;
         private Set<String>      devMachineEnvVars;
@@ -1211,13 +1683,14 @@ public class MachineProviderImplTest {
         private String           cpuSet;
         private long             cpuPeriod;
         private long             cpuQuota;
+        private String[]         dnsResolvers;
 
         public MachineProviderBuilder() {
             devMachineEnvVars = emptySet();
             allMachineEnvVars = emptySet();
             snapshotUseRegistry = SNAPSHOT_USE_REGISTRY;
             privilegedMode = false;
-            doForcePullOnBuild = false;
+            doForcePullImage = false;
             additionalNetworks = emptySet();
             devMachineServers = emptySet();
             allMachineServers = emptySet();
@@ -1240,6 +1713,11 @@ public class MachineProviderImplTest {
 
         public MachineProviderBuilder setSnapshotUseRegistry(boolean snapshotUseRegistry) {
             this.snapshotUseRegistry = snapshotUseRegistry;
+            return this;
+        }
+
+        public MachineProviderBuilder setDoForcePullImage(boolean doForcePullImage) {
+            this.doForcePullImage = doForcePullImage;
             return this;
         }
 
@@ -1308,16 +1786,23 @@ public class MachineProviderImplTest {
             return this;
         }
 
+        public MachineProviderBuilder setDnsResolvers(String[] dnsResolvers) {
+            this.dnsResolvers = dnsResolvers;
+            return this;
+        }
+
         MachineProviderImpl build() throws IOException {
-            return new MachineProviderImpl(dockerConnector,
+            return new MachineProviderImpl(new MockConnectorProvider(),
                                            credentialsReader,
                                            dockerMachineFactory,
                                            dockerInstanceStopDetector,
+                                           transmitter,
+                                           jsonRpcEndpointToMachineNameHolder,
                                            devMachineServers,
                                            allMachineServers,
                                            devMachineVolumes,
                                            allMachineVolumes,
-                                           doForcePullOnBuild,
+                                           doForcePullImage,
                                            privilegedMode,
                                            pidsLimit,
                                            devMachineEnvVars,
@@ -1331,7 +1816,9 @@ public class MachineProviderImplTest {
                                            cpuPeriod,
                                            cpuQuota,
                                            pathEscaper,
-                                           extraHosts);
+                                           extraHosts,
+                                           dnsResolvers,
+                                           emptyMap());
         }
     }
 }

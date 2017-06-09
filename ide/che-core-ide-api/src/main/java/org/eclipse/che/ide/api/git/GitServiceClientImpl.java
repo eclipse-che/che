@@ -835,7 +835,9 @@ public class GitServiceClientImpl implements GitServiceClient {
         }
         params.append("&noRenames=").append(noRenames);
         params.append("&renameLimit=").append(renameLimit);
-        params.append("&commitA=").append(commitA);
+        if (commitA != null) {
+            params.append("&commitA=").append(commitA);
+        }
         if (commitB != null) {
             params.append("&commitB=").append(commitB);
         }

@@ -15,8 +15,6 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -30,6 +28,8 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
+import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.Range;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.List;
@@ -44,7 +44,7 @@ public class OpenLocationPresenter extends BasePresenter implements OpenLocation
     private final WorkspaceAgent          workspaceAgent;
     private final OpenFileInEditorHelper  helper;
     private final NotificationManager     notificationManager;
-    private final String title;
+    private final String                  title;
 
     @Inject
     public OpenLocationPresenter(LanguageServerResources resources,
@@ -65,10 +65,10 @@ public class OpenLocationPresenter extends BasePresenter implements OpenLocation
 
 
     //TODO maybe we should use some generic data object not a DTO
-    public void openLocation(Promise<List<LocationDTO>> promise) {
-        promise.then(new Operation<List<LocationDTO>>() {
+    public void openLocation(Promise<List<Location>> promise) {
+        promise.then(new Operation<List<Location>>() {
             @Override
-            public void apply(List<LocationDTO> arg) throws OperationException {
+            public void apply(List<Location> arg) throws OperationException {
                 showLocations(arg);
             }
         }).catchError(new Operation<PromiseError>() {
@@ -84,7 +84,7 @@ public class OpenLocationPresenter extends BasePresenter implements OpenLocation
                 .notify(title, arg.getMessage(), StatusNotification.Status.FAIL, StatusNotification.DisplayMode.FLOAT_MODE);
     }
 
-    private void showLocations(List<LocationDTO> locations) {
+    private void showLocations(List<Location> locations) {
         view.setLocations(locations);
         openPart();
     }
@@ -120,8 +120,8 @@ public class OpenLocationPresenter extends BasePresenter implements OpenLocation
     }
 
     @Override
-    public void onLocationSelected(LocationDTO location) {
-        RangeDTO range = location.getRange();
+    public void onLocationSelected(Location location) {
+        Range range = location.getRange();
         helper.openFile(location.getUri(), new TextRange(new TextPosition(
                 range.getStart().getLine(),
                 range.getStart().getCharacter()), new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter())));

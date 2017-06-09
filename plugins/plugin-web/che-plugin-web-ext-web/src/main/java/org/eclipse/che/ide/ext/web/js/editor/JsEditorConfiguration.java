@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.web.js.editor;
 
-import org.eclipse.che.ide.ext.web.html.editor.AutoEditStrategyFactory;
 import org.eclipse.che.ide.api.editor.changeintercept.ChangeInterceptorProvider;
 import org.eclipse.che.ide.api.editor.changeintercept.TextChangeInterceptor;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
-import org.eclipse.che.ide.api.editor.editorconfig.AutoSaveTextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
+import org.eclipse.che.ide.ext.web.html.editor.AutoEditStrategyFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,9 +26,9 @@ import java.util.Set;
 /**
  * The JS type editor configuration.
  * 
- * @author <a href="mailto:evidolob@exoplatform.com">Evgen Vidolob</a>
+ * @author Evgen Vidolob
  */
-public class JsEditorConfiguration extends AutoSaveTextEditorConfiguration {
+public class JsEditorConfiguration extends DefaultTextEditorConfiguration {
 
     private Set<AutoEditStrategyFactory> autoEditStrategyFactories;
     private DefaultCodeAssistProcessor   defaultProcessor;

@@ -15,6 +15,7 @@ import {Log} from "./spi/log/log";
 import {CheDir} from "./internal/dir/che-dir";
 import {CheTest} from "./internal/test/che-test";
 import {CheAction} from "./internal/action/che-action";
+import {ErrorMessage} from "./spi/error/error-message";
 /**
  * Entry point of this library providing commands.
  * @author Florent Benoit
@@ -79,6 +80,12 @@ export class EntryPoint {
 
             // handle error of the promise
             promise.catch((error) => {
+                let exitCode : number = 1;
+                if (error instanceof ErrorMessage) {
+                    exitCode = error.getExitCode();
+                    error = error.getError();
+                }
+
                 try {
                     let errorMessage = JSON.parse(error);
                     if (errorMessage.message) {
@@ -92,7 +99,7 @@ export class EntryPoint {
                         console.log(error.stack);
                     }
                 }
-                process.exit(1);
+                process.exit(exitCode);
             });
 
         } catch (e) {

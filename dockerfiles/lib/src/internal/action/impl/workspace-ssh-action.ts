@@ -16,10 +16,6 @@ import {AuthData} from "../../../api/wsmaster/auth/auth-data";
 import {Workspace} from "../../../api/wsmaster/workspace/workspace";
 import {ArgumentProcessor} from "../../../spi/decorator/argument-processor";
 import {Log} from "../../../spi/log/log";
-import {MachineServiceClientImpl} from "../../../api/wsmaster/machine/machine-service-client";
-import {UUID} from "../../../utils/uuid";
-import {CheFileStructWorkspaceCommand} from "../../dir/chefile-struct/che-file-struct";
-import {CheFileStructWorkspaceCommandImpl} from "../../dir/chefile-struct/che-file-struct";
 import {Ssh} from "../../../api/wsmaster/ssh/ssh";
 /**
  * This class is handling the connection to a workspace with default ssh key (or custom one)

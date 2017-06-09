@@ -13,7 +13,7 @@ package org.eclipse.che.ide.project;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * Registry for implementations of {@link org.eclipse.che.ide.project.ResolvingProjectStateHolder}.
+ * Registry for implementations of {@link ResolvingProjectStateHolder}.
  *
  * @author Roman Nikitenko
  */

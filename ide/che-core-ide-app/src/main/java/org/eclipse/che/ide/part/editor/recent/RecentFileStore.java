@@ -18,10 +18,12 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
 import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.util.Pair;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -30,6 +32,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 
 /**
  * Default implementation of Recent File List.
@@ -37,7 +40,7 @@ import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
  * @author Vlad Zhukovskiy
  */
 @Singleton
-public class RecentFileStore implements RecentFileList, FileEventHandler {
+public class RecentFileStore implements RecentFileList {
 
     public static final int    MAX_FILES_IN_STACK         = 25;
     public static final int    MAX_PATH_LENGTH_TO_DISPLAY = 50;
@@ -60,23 +63,37 @@ public class RecentFileStore implements RecentFileList, FileEventHandler {
         this.actionManager = actionManager;
         this.recentFileActionFactory = recentFileActionFactory;
 
-        eventBus.addHandler(FileEvent.TYPE, this);
+        eventBus.addHandler(FileEvent.TYPE, event -> {
+            if (event.getOperationType() == OPEN) {
+                VirtualFile file = event.getFile();
+                if (file instanceof File) {
+                    add((File)file);
+                }
+            }
+        });
+
+        eventBus.addHandler(ResourceChangedEvent.getType(), event -> {
+            if (event.getDelta().getKind() != REMOVED) {
+                return;
+            }
+
+            final Resource resource = event.getDelta().getResource();
+
+            if (!resource.isFile()) {
+                return;
+            }
+
+            if (recentStorage.contains(resource.asFile())) {
+                if (!remove(resource.asFile())) {
+                    Log.warn(getClass(), "File has not been removed from recent list");
+                }
+            }
+        });
     }
 
     private void ensureGroupExist() {
         if (recentGroup == null) {
             recentGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RECENT_FILES);
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onFileOperation(FileEvent event) {
-        if (event.getOperationType() == OPEN) {
-            VirtualFile file = event.getFile();
-            if (file instanceof File) {
-                add((File)file);
-            }
         }
     }
 

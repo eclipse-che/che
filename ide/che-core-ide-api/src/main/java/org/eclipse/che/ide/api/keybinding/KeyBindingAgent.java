@@ -16,6 +16,8 @@ import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
 
+import java.util.List;
+
 /**
  * Public interface of the key binding management.
  * The key binding defines the key sequence that should be used to invoke the command.
@@ -23,6 +25,7 @@ import org.eclipse.che.commons.annotation.Nullable;
  * named schemes that the user may activate.
  *
  * @author <a href="mailto:evidolob@exoplatform.com">Evgen Vidolob</a>
+ * @author <a href="mailto:ak@nuxeo.com">Arnaud Kervern</a>
  * @version $Id:
  */
 @SDK(title = "ide.api.ui.keyBinding")
@@ -39,8 +42,11 @@ public interface KeyBindingAgent {
     /**
      * Get build in Eclipse key binding scheme.
      *
+     * @deprecated Eclipse should not be accessed like that, use {@link KeyBindingAgent#getScheme(String)} or
+     *             {@link KeyBindingAgent#getActive()}
      * @return the Eclipse scheme.
      */
+    @Deprecated
     Scheme getEclipse();
 
     /**
@@ -49,6 +55,25 @@ public interface KeyBindingAgent {
      * @return the scheme
      */
     Scheme getActive();
+
+    /**
+     * Register a new scheme
+     * @param scheme to register
+     */
+    void addScheme(Scheme scheme);
+
+    /**
+     * Get a registered Scheme, and return null if nothing is corresponding.
+     * @param id of the registered scheme
+     * @return the expected scheme, or null.
+     */
+    Scheme getScheme(String id);
+
+    /** List registered schemes */
+    List<Scheme> getSchemes();
+
+    /** Change active scheme using his identifier */
+    void setActive(@NotNull String scheme);
 
     /**
      * @return keyboard shortcut for the action with the specified <code>actionId</code>

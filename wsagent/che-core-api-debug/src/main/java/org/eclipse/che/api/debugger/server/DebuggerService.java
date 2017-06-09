@@ -19,7 +19,6 @@ import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
 import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.action.ActionDto;
-import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
@@ -96,12 +95,13 @@ public class DebuggerService {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public DebugSessionDto getDebugSession(@PathParam("id") String sessionId) throws DebuggerException {
-        DebuggerInfo debuggerInfo = debuggerManager.getDebugger(sessionId).getInfo();
+        Debugger debugger = debuggerManager.getDebugger(sessionId);
 
         DebugSessionDto debugSessionDto = newDto(DebugSessionDto.class);
-        debugSessionDto.setDebuggerInfo(asDto(debuggerInfo));
+        debugSessionDto.setDebuggerInfo(DtoConverter.asDto(debugger.getInfo()));
         debugSessionDto.setId(sessionId);
         debugSessionDto.setType(debuggerManager.getDebuggerType(sessionId));
+        debugSessionDto.setBreakpoints(DtoConverter.breakpointsAsDtos(debugger.getAllBreakpoints()));
 
         return debugSessionDto;
     }

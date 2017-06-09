@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessResponseDto;
@@ -19,8 +20,7 @@ import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessSubscribeResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessUnSubscribeResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.UpdateSubscriptionResponseDto;
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.machine.execagent.ExecAgentPromise;
+import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
 
 import java.util.List;
 
@@ -40,7 +40,7 @@ public interface ExecAgentCommandManager {
      *
      * @return exec agent promise with appropriate dto
      */
-    ExecAgentPromise<ProcessStartResponseDto> startProcess(String endpointId, Command command);
+    ExecAgentConsumer<ProcessStartResponseDto> startProcess(String endpointId, Command command);
 
     /**
      * Call exec agent to kill a process with specified identifier
@@ -52,7 +52,7 @@ public interface ExecAgentCommandManager {
      *
      * @return promise with appropriate dto
      */
-    Promise<ProcessKillResponseDto> killProcess(String endpointId, int pid);
+    JsonRpcPromise<ProcessKillResponseDto> killProcess(String endpointId, int pid);
 
     /**
      * Call for a subscription to events related to a specified process after defined timestamp
@@ -69,7 +69,7 @@ public interface ExecAgentCommandManager {
      *
      * @return exec agent promise with appropriate dto
      */
-    ExecAgentPromise<ProcessSubscribeResponseDto> subscribe(String endpointId, int pid, List<String> eventTypes, String after);
+    ExecAgentConsumer<ProcessSubscribeResponseDto> subscribe(String endpointId, int pid, List<String> eventTypes, String after);
 
     /**
      * Call for a cancellation of a subscription to events related to a specific process after defined
@@ -86,7 +86,7 @@ public interface ExecAgentCommandManager {
      *
      * @return promise with appropriate dto
      */
-    Promise<ProcessUnSubscribeResponseDto> unsubscribe(String endpointId, int pid, List<String> eventTypes, String after);
+    JsonRpcPromise<ProcessUnSubscribeResponseDto> unsubscribe(String endpointId, int pid, List<String> eventTypes, String after);
 
     /**
      * Call for an update of a subscription to events related to a specific process.
@@ -100,7 +100,7 @@ public interface ExecAgentCommandManager {
      *
      * @return promise with appropriate dto
      */
-    Promise<UpdateSubscriptionResponseDto> updateSubscription(String endpointId, int pid, List<String> eventTypes);
+    JsonRpcPromise<UpdateSubscriptionResponseDto> updateSubscription(String endpointId, int pid, List<String> eventTypes);
 
     /**
      * Call for a report on proess logs of a specific process.
@@ -122,7 +122,7 @@ public interface ExecAgentCommandManager {
      *
      * @return promise with appropriate dto
      */
-    Promise<List<GetProcessLogsResponseDto>> getProcessLogs(String endpointId, int pid, String from, String till, int limit, int skip);
+    JsonRpcPromise<List<GetProcessLogsResponseDto>> getProcessLogs(String endpointId, int pid, String from, String till, int limit, int skip);
 
     /**
      * Call for a process info
@@ -134,7 +134,7 @@ public interface ExecAgentCommandManager {
      *
      * @return promise with appropriate dto
      */
-    Promise<GetProcessResponseDto> getProcess(String endpointId, int pid);
+    JsonRpcPromise<GetProcessResponseDto> getProcess(String endpointId, int pid);
 
     /**
      * Call for a process info
@@ -147,5 +147,5 @@ public interface ExecAgentCommandManager {
      *
      * @return promise with appropriate dto
      */
-    Promise<List<GetProcessesResponseDto>> getProcesses(String endpointId, boolean all);
+    JsonRpcPromise<List<GetProcessesResponseDto>> getProcesses(String endpointId, boolean all);
 }

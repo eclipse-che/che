@@ -11,7 +11,6 @@
 package org.eclipse.che.commons.test.db;
 
 import org.eclipse.che.commons.test.tck.JpaCleaner;
-import org.h2.jdbcx.JdbcDataSource;
 import org.h2.tools.RunScript;
 
 import javax.sql.DataSource;
@@ -26,10 +25,21 @@ public class H2JpaCleaner extends JpaCleaner {
 
     private final DataSource dataSource;
 
+    private H2DBTestServer server;
+
+    public H2JpaCleaner(H2DBTestServer server) {
+        this(server.getDataSource());
+        this.server = server;
+    }
+
     public H2JpaCleaner(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
+    /**
+     * @deprecated use {@link H2JpaCleaner(H2DBTestServer)} instead.
+     */
+    @Deprecated
     public H2JpaCleaner() {
         this(H2TestHelper.inMemoryDefault());
     }
@@ -37,10 +47,14 @@ public class H2JpaCleaner extends JpaCleaner {
     @Override
     public void clean() {
         super.clean();
-        try (Connection conn = dataSource.getConnection()) {
-            RunScript.execute(conn, new StringReader("SHUTDOWN"));
-        } catch (SQLException x) {
-            throw new RuntimeException(x.getMessage(), x);
+        if (server != null) {
+            server.shutdown();
+        } else {
+            try (Connection conn = dataSource.getConnection()) {
+                RunScript.execute(conn, new StringReader("SHUTDOWN"));
+            } catch (SQLException x) {
+                throw new RuntimeException(x.getMessage(), x);
+            }
         }
     }
 }

@@ -61,7 +61,7 @@ import static org.mockito.Mockito.when;
 
 @Listeners(value = {MockitoTestNGListener.class})
 public class FactoryBaseValidatorTest {
-    private static final String VALID_REPOSITORY_URL = "http://github.com/codenvy/cloudide";
+    private static final String VALID_REPOSITORY_URL = "https://github.com/codenvy/cloudide";
     private static final String VALID_PROJECT_PATH   = "/cloudide";
     private static final String ID                   = "id";
 

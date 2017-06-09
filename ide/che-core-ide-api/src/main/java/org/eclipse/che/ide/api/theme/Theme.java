@@ -265,12 +265,63 @@ public interface Theme {
      */
     String getDisabledMenuColor();
 
+    /** Background color of the Commands toolbar. */
+    String getCommandsToolbarBackgroundColor();
+
+    /** Background of the Processes list's label on the Commands toolbar. */
+    String getCommandsToolbarProcessesLabelBackground();
+
+    /** Border of the Processes list's label on the Commands toolbar. */
+    String getCommandsToolbarProcessesLabelBorder();
+
+    /** Color of the machine name label on the Commands toolbar. */
+    String getCommandsToolbarMachineNameColor();
+
+    /** Color of the command name label on the Commands toolbar. */
+    String getCommandsToolbarCommandNameColor();
+
+    /** Color of the projects table's header in the command editor. */
+    String getCommandEditorProjectsTableHeaderColor();
+
+    /** Color of the projects table's row in the command editor. */
+    String getCommandEditorProjectsTableRowColor();
+
+    /** Border of the project switcher in the command editor. */
+    String getCommandEditorProjectSwitcherBorder();
+
     /**
      * Background color of the {@link com.google.gwt.user.client.ui.DialogBox}
      *
      * @return the color
      */
     String getDialogContentBackground();
+
+    /** Background of the DropdownList widget. */
+    String getDropdownListBackground();
+
+    /** Background of the hovered DropdownList widget. */
+    String getHoveredDropdownListBackground();
+
+    /** Background of the active DropdownList widget. */
+    String getActiveDropdownListBackground();
+
+    /** Border of the DropdownList widget. */
+    String getDropdownListBorder();
+
+    /** Color of the button for opening DropdownList. */
+    String getDropdownListButtonColor();
+
+    /** Background of the MenuButton widget. */
+    String getMenuButtonBackground();
+
+    /** Background of the hovered MenuButton widget. */
+    String getHoveredMenuButtonBackground();
+
+    /** Background of the active MenuButton widget. */
+    String getActiveMenuButtonBackground();
+
+    /** Border of the MenuButton widget. */
+    String getMenuButtonBorder();
 
     /**
      * Background color of default button.

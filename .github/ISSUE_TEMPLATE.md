@@ -6,10 +6,10 @@ Please help us by providing all of the details listed below. A complete and thou
 
 **Reproduction Steps:**
 
-**Che version:**    <!--- Retrieve with 'docker run eclipse/che version' - it is also the value of :<version> tag -->
-
 **OS and version:**    
 
-**Docker version:** <!--- Use 'docker version' to get the client and engine versions -->   
+**Diagnostics:** 
+<!-- Provide output of 'docker run <DOCKER_OPTIONS> eclise/che info' -->
 
-**Che cli.log output:**  <!--- This file is in the path mounted to `:/data` -->
+<!-- If asked, provide a support bundle with 'docker run <DOCKER_OPTIONS> eclise/che info --bundle' -->
+<!-- If asked, provide CLI debugging info by adding '--trace' to your commands -->

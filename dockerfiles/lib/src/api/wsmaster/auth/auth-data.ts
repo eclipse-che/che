@@ -37,7 +37,12 @@ export class AuthData {
         if (hostname) {
             this.hostname = hostname;
         } else {
-            this.hostname = this.DEFAULT_HOSTNAME;
+            // handle CHE_HOST if any
+            if (process.env.CHE_HOST) {
+                this.hostname = process.env.CHE_HOST;
+            } else {
+                this.hostname = this.DEFAULT_HOSTNAME;
+            }
         }
 
         if (port) {
@@ -51,6 +56,13 @@ export class AuthData {
             }
         }
 
+        let hostProtocol :string = process.env.CHE_HOST_PROTOCOL;
+        if (hostProtocol && hostProtocol === "https") {
+            this.secured = true;
+            if (this.port == 80) {
+                this.port = 443;
+            }
+        }
 
         if (token) {
             this.token = token;
@@ -178,9 +190,7 @@ export class AuthData {
         }
 
         let authData: AuthData = new AuthData(urlObject.hostname, port);
-        if (isSecured) {
-            authData.secured = true;
-        }
+        authData.secured = isSecured;
 
         authData.username = username;
         authData.password = password;

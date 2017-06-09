@@ -13,5 +13,9 @@ cp -rf /files/docs /copy
 
 # do not copy che.env if exist
 if [ ! -f  /copy/che.env ]; then
+    # if exist add addon env values to main env file.
+    if [ -f /etc/puppet/addon.env ]; then
+        cat /etc/puppet/addon.env >> /etc/puppet/manifests/che.env
+    fi
     cp /etc/puppet/manifests/che.env /copy
 fi

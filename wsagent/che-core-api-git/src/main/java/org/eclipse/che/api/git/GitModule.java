@@ -23,7 +23,6 @@ import org.eclipse.che.inject.DynaModule;
  *
  * @author andrew00x
  */
-@DynaModule
 public class GitModule extends AbstractModule {
 
     /** {@inheritDoc} */
@@ -37,6 +36,9 @@ public class GitModule extends AbstractModule {
         Multibinder<ValueProviderFactory> multiBinder = Multibinder.newSetBinder(binder(), ValueProviderFactory.class);
         multiBinder.addBinding().to(GitValueProviderFactory.class);
 
+
+        bind(GitUserResolver.class).to(LocalGitUserResolver.class);
+
         bind(GitService.class);
         bind(GitExceptionMapper.class);
         bind(BranchListWriter.class);
@@ -47,7 +49,7 @@ public class GitModule extends AbstractModule {
         bind(TagListWriter.class);
         bind(GitWebSocketMessenger.class);
 
-        //bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);
+        Multibinder.newSetBinder(binder(), CredentialsProvider.class).addBinding().to(GitBasicAuthenticationCredentialsProvider.class);
 
         bind(GitCheckoutDetector.class).asEagerSingleton();
     }

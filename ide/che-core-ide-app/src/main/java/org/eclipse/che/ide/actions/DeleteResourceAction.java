@@ -31,6 +31,7 @@ import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.resources.DeleteResourceManager;
 
 import javax.validation.constraints.NotNull;
@@ -104,7 +105,9 @@ public class DeleteResourceAction extends AbstractPerspectiveAction implements P
         final Resource[] resources = appContext.getResources();
 
         event.getPresentation().setVisible(true);
-        event.getPresentation().setEnabled(resources != null && resources.length > 0 && !(partPresenter instanceof TextEditor));
+        event.getPresentation().setEnabled(resources != null
+                                           && resources.length > 0 && !(partPresenter instanceof TextEditor)
+                                           && !(partPresenter.getSelection() instanceof Selection.NoSelectionProvided));
     }
 
     /** {@inheritDoc} */

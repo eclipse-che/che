@@ -20,16 +20,15 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.execagent.ExecAgentPromise;
-import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.util.UUID;
 
 import javax.validation.constraints.NotNull;
+import java.util.function.Consumer;
 
 /**
  * Simple command manager which allows to run native commands within the workspace Docker container.
- * Please note that the actual call is delegated to the MachineServiceClient service.
+ *
  *
  * @author Mathias Schaefer <mathias.schaefer@eclipsesource.com>
  */
@@ -38,15 +37,14 @@ public class CommandManager {
 
     private final DtoFactory              dtoFactory;
     private final ExecAgentCommandManager commandManager;
-    private final NotificationManager     notificationManager;
     private final AppContext              appContext;
 
     @Inject
-    public CommandManager(DtoFactory dtoFactory, ExecAgentCommandManager commandManager, NotificationManager notificationManager,
+    public CommandManager(DtoFactory dtoFactory,
+                          ExecAgentCommandManager commandManager,
                           AppContext appContext) {
         this.dtoFactory = dtoFactory;
         this.commandManager = commandManager;
-        this.notificationManager = notificationManager;
         this.appContext = appContext;
     }
 
@@ -67,11 +65,11 @@ public class CommandManager {
     }
 
     public void executeCommand(final CommandDto command, @NotNull final String machineID) {
-        final ExecAgentPromise<ProcessStartResponseDto> promise = commandManager.startProcess(machineID, command);
+        final ExecAgentConsumer<ProcessStartResponseDto> consumer = commandManager.startProcess(machineID, command);
 
-        promise.then(new Operation<ProcessStartResponseDto>() {
+        consumer.then(new Consumer<ProcessStartResponseDto>() {
             @Override
-            public void apply(ProcessStartResponseDto arg) throws OperationException {
+            public void accept(ProcessStartResponseDto arg) {
                 //Do nothing in this example
             }
         });

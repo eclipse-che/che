@@ -83,6 +83,8 @@ public class DockerMachineModule extends AbstractModule {
         envParserMapBinder.addBinding("dockerfile").to(DockerfileEnvironmentParser.class);
         envParserMapBinder.addBinding("dockerimage").to(DockerImageEnvironmentParser.class);
 
+        allMachinesEnvVars.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ApiEndpointEnvVariableProvider.class);
+
         // Provides set of sets of strings instead of set of strings.
         // This allows providers to return empty set as a value if no value should be added by provider.
         // .permitDuplicates() is needed to allow different providers add empty sets.

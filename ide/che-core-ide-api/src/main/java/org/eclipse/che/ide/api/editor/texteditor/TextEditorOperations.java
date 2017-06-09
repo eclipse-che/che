@@ -15,7 +15,7 @@ package org.eclipse.che.ide.api.editor.texteditor;
  * the clients about the ability of the target to perform the specified
  * operation at the current point in time.
  *
- * @author <a href="mailto:evidolob@exoplatform.com">Evgen Vidolob</a>
+ * @author Evgen Vidolob
  * @version $Id:
  */
 public interface TextEditorOperations {

@@ -21,10 +21,12 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
-import org.eclipse.che.ide.collections.js.JsoArray;
 import org.eclipse.che.ide.api.hotkeys.HasHotKeyItems;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.api.keybinding.Scheme;
+import org.eclipse.che.ide.collections.js.JsoArray;
 import org.eclipse.che.ide.util.StringUtils;
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 import org.eclipse.che.ide.util.input.KeyMapUtil;
@@ -40,6 +42,7 @@ import java.util.Map;
  *
  * @author Alexander Andrienko
  * @author Artem Zatsarynnyi
+ * @author <a href="mailto:ak@nuxeo.com">Arnaud Kervern</a>
  */
 @Singleton
 public class HotKeysDialogPresenter implements HotKeysDialogView.ActionDelegate {
@@ -55,6 +58,7 @@ public class HotKeysDialogPresenter implements HotKeysDialogView.ActionDelegate 
 
     private List<HotKeyItem> ideHotKey;
     private List<HotKeyItem> editorHotKeys;
+    private String           selectedSchemeId;
 
     private Map<String, List<HotKeyItem>> categories;
 
@@ -76,6 +80,12 @@ public class HotKeysDialogPresenter implements HotKeysDialogView.ActionDelegate 
 
     @Override
     public void showHotKeys() {
+        showHotKeys(keyBindingAgent.getActive().getSchemeId());
+    }
+
+    public void showHotKeys(String scheme) {
+        selectedSchemeId = keyBindingAgent.getScheme(scheme).getSchemeId();
+
         ideHotKey = getIDEHotKey();
         editorHotKeys = getEditorHotKey();
 
@@ -88,20 +98,27 @@ public class HotKeysDialogPresenter implements HotKeysDialogView.ActionDelegate 
         }
 
         view.setData(categories);
+        view.setSchemes(selectedSchemeId, keyBindingAgent.getSchemes());
         view.renderKeybindings();
         view.show();
     }
 
     private List<HotKeyItem> getIDEHotKey() {
         List<HotKeyItem> ideHotKeys = new ArrayList<>();
+        Scheme scheme = keyBindingAgent.getScheme(selectedSchemeId);
 
         for (String actionId : actionManager.getActionIds("")) {
-            CharCodeWithModifiers charCodeWithModifiers = keyBindingAgent.getKeyBinding(actionId);
-            if (charCodeWithModifiers != null) {
-                String hotKey = KeyMapUtil.getShortcutText(keyBindingAgent.getKeyBinding(actionId));
+            boolean isGlobal = false;
+            CharCodeWithModifiers activeCharCodeWithModifiers = scheme.getKeyBinding(actionId);
+            if (activeCharCodeWithModifiers == null) {
+                activeCharCodeWithModifiers = keyBindingAgent.getKeyBinding(actionId);
+                isGlobal = true;
+            }
+            if (activeCharCodeWithModifiers != null) {
+                String hotKey = KeyMapUtil.getShortcutText(activeCharCodeWithModifiers);
                 String description = actionManager.getAction(actionId).getTemplatePresentation().getDescription();
                 if (description != null && !description.isEmpty()) {
-                    ideHotKeys.add(new HotKeyItem(description, hotKey));
+                    ideHotKeys.add(new HotKeyItem(description, hotKey, isGlobal));
                 }
             }
         }
@@ -118,7 +135,13 @@ public class HotKeysDialogPresenter implements HotKeysDialogView.ActionDelegate 
     }
 
     @Override
-    public void onOkClicked() {
+    public void onSaveClicked() {
+        keyBindingAgent.setActive(selectedSchemeId);
+        view.hide();
+    }
+
+    @Override
+    public void onCloseClicked() {
         view.hide();
     }
 
@@ -129,7 +152,7 @@ public class HotKeysDialogPresenter implements HotKeysDialogView.ActionDelegate 
             nodesArray.add(wrapCategory(entry.getKey()));
             for (HotKeyItem hotKeyItem : entry.getValue()) {
                 if (hotKeyItem.getActionDescription() != null) {
-                    nodesArray.add(wrapHotKey(hotKeyItem.getHotKey(), hotKeyItem.getActionDescription()));
+                    nodesArray.add(wrapHotKey(hotKeyItem.getHotKey(), hotKeyItem.getActionDescription(), hotKeyItem.isGlobal()));
                 }
             }
         }
@@ -144,7 +167,7 @@ public class HotKeysDialogPresenter implements HotKeysDialogView.ActionDelegate 
         return div;
     }
 
-    private static Element wrapHotKey(String hotKey, String description) {
+    private static Element wrapHotKey(String hotKey, String description, boolean global) {
         final DivElement containerDiv = Document.get().createDivElement();
         final DivElement hotKeyDiv = Document.get().createDivElement();
         final DivElement descriptionDiv = Document.get().createDivElement();
@@ -193,6 +216,11 @@ public class HotKeysDialogPresenter implements HotKeysDialogView.ActionDelegate 
 
         view.setData(categories);
         view.renderKeybindings();
+    }
+
+    @Override
+    public void onSchemeSelectionChanged() {
+        showHotKeys(view.getSelectedScheme());
     }
 
     private List<HotKeyItem> filterCategory(List<HotKeyItem> hotKeyItems, String expectedText) {

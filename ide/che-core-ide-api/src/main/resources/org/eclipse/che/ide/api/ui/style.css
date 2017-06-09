@@ -232,6 +232,18 @@
 @eval radioButtonBackgroundColor org.eclipse.che.ide.api.theme.Style.getRadioButtonBackgroundColor();
 @eval disabledMenuItemColor org.eclipse.che.ide.api.theme.Style.getDeisabledMenuColor();
 
+/*Commands toolbar*/
+@eval commandsToolbarBackgroundColor org.eclipse.che.ide.api.theme.Style.getCommandsToolbarBackgroundColor();
+@eval commandsToolbarProcessesLabelBackground org.eclipse.che.ide.api.theme.Style.getCommandsToolbarProcessesLabelBackground();
+@eval commandsToolbarProcessesLabelBorder org.eclipse.che.ide.api.theme.Style.getCommandsToolbarProcessesLabelBorder();
+@eval commandsToolbarMachineNameColor org.eclipse.che.ide.api.theme.Style.getCommandsToolbarMachineNameColor();
+@eval commandsToolbarCommandNameColor org.eclipse.che.ide.api.theme.Style.getCommandsToolbarCommandNameColor();
+
+/*Commands editor*/
+@eval commandEditorProjectsTableHeaderColor org.eclipse.che.ide.api.theme.Style.getCommandEditorProjectsTableHeaderColor();
+@eval commandEditorProjectsTableRowColor org.eclipse.che.ide.api.theme.Style.getCommandEditorProjectsTableRowColor();
+@eval commandEditorProjectSwitcherBorder org.eclipse.che.ide.api.theme.Style.getCommandEditorProjectSwitcherBorder();
+
 /*Icons colors*/
 @eval blueIconColor org.eclipse.che.ide.api.theme.Style.theme.getBlueIconColor();
 @eval redIconColor org.eclipse.che.ide.api.theme.Style.theme.getRedIconColor();
@@ -269,6 +281,19 @@
 @eval dialogBottomCenter org.eclipse.che.ide.api.theme.Style.theme.tabBorderColor();
 @eval dialogBottomRight org.eclipse.che.ide.api.theme.Style.theme.tabBorderColor();
 @eval dialogContentBackground org.eclipse.che.ide.api.theme.Style.getDialogContentBackground();
+
+/*DropdownList*/
+@eval dropdownListBackground org.eclipse.che.ide.api.theme.Style.getDropdownListBackground();
+@eval hoveredDropdownListBackground org.eclipse.che.ide.api.theme.Style.getHoveredDropdownListBackground();
+@eval activeDropdownListBackground org.eclipse.che.ide.api.theme.Style.getActiveDropdownListBackground();
+@eval dropdownListBorder org.eclipse.che.ide.api.theme.Style.getDropdownListBorder();
+@eval dropdownListButtonColor org.eclipse.che.ide.api.theme.Style.getDropdownListButtonColor();
+
+/*MenuButton*/
+@eval menuButtonBackground org.eclipse.che.ide.api.theme.Style.getMenuButtonBackground();
+@eval hoveredMenuButtonBackground org.eclipse.che.ide.api.theme.Style.getHoveredMenuButtonBackground();
+@eval activeMenuButtonBackground org.eclipse.che.ide.api.theme.Style.getActiveMenuButtonBackground();
+@eval menuButtonBorder org.eclipse.che.ide.api.theme.Style.getActiveMenuButtonBorder();
 
 /*Window*/
 @eval windowContentBackground org.eclipse.che.ide.api.theme.Style.getWindowContentBackground();

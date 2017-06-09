@@ -36,6 +36,7 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
     private String                  restContext;
     private NotificationManager     notificationManager;
     private AsyncCallback<Void>     callback;
+    private AppContext              appContext;
 
     @Inject
     public UploadSshKeyPresenter(UploadSshKeyView view,
@@ -47,6 +48,7 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
         this.constant = constant;
         this.restContext = appContext.getMasterEndpoint();
         this.notificationManager = notificationManager;
+        this.appContext = appContext;
     }
 
     /** Show dialog. */
@@ -71,7 +73,15 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
             return;
         }
         view.setEncoding(FormPanel.ENCODING_MULTIPART);
-        view.setAction(restContext + "/ssh");
+
+        String action = restContext + "/ssh";
+
+        String csrfToken = appContext.getProperties().get("X-CSRF-Token");
+        if (csrfToken != null) {
+            action += "?X-CSRF-Token=" + csrfToken;
+        }
+
+        view.setAction(action);
         view.submit();
     }
 

@@ -2,16 +2,16 @@
 
 This sample extension illustrate how to extend Che IDE by using native web components (HTML/JS) not based on GWT.
 
-Read the tutorial at: https://eclipse-che.readme.io/v5.0/docs/embed-htmljs
+Read the tutorial at: https://www.eclipse.org/che/docs/plugins/embed-htmljs/index.html
 
 
 ## How to test sample-plugin-embedjs plugin
 
 ### 1- Link to IDE Assembly
 
-The plugin-embedjs extension is only a client-side (IDE) extension. You have to introduce the extension as a dependency in `/che/assembly/assembly-ide-war/pom.xml`. 
+The plugin-embedjs extension is only a client-side (IDE) extension. You have to introduce the extension as a dependency in `/che/assembly/assembly-ide-war/pom.xml`.
 
-Add: 
+Add:
 ```XML
 ...
 <dependency>
@@ -54,14 +54,18 @@ mvn clean install
 
 ```Shell
 # Start Che using the CLI with your new assembly
-# Replace <version> with the actual directory name
-export CHE_ASSEMBLY=path_to_che_sources/assembly/assembly-main/target/eclipse-che-<version>/eclipse-che-<version>
-che start
+# Replace <local-repo> with the path to your Che repository, to use local binaries in your local image
+# Replace <version> with the actual version you are working on
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                    -v <local-path>:/data \
+                    -v <local-repo>:/repo \
+                       eclipse/che:<version> start --debug
+
 ```
 
 
 ### Documentation resources
 
-- IDE Setup: https://eclipse-che.readme.io/v5.0/docs/setup-che-workspace  
-- Building Extensions: https://eclipse-che.readme.io/v5.0/docs/create-and-build-extensions
-- Run local Eclipse Che binaries: https://eclipse-che.readme.io/v5.0/docs/usage-docker#local-eclipse-che-binaries
+- IDE Setup: https://www.eclipse.org/che/docs/plugins/setup-che-workspace/index.html
+- Building Extensions: https://www.eclipse.org/che/docs/plugins/create-and-build-extensions/index.html
+- Run local Eclipse Che binaries: https://www.eclipse.org/che/docs/setup/configuration/index.html#development-mode

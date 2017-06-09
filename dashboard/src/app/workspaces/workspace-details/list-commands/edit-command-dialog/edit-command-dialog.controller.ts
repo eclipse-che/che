@@ -21,7 +21,6 @@ export class EditCommandDialogController {
   $mdDialog: ng.material.IDialogService;
   index: number;
   name: string;
-  popupTitle: string;
   previewUrl: string;
   commandLine: string;
   commands: Array<any>;
@@ -49,8 +48,6 @@ export class EditCommandDialogController {
         this.usedCommandsName.push(command.name);
       }
     });
-
-    this.popupTitle = isAddMode ? 'Add a new command' : 'Edit the command';
   }
 
   /**

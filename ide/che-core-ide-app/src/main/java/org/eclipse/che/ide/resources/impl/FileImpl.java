@@ -55,12 +55,6 @@ class FileImpl extends ResourceImpl implements File {
 
     /** {@inheritDoc} */
     @Override
-    public String getMediaType() {
-        throw new UnsupportedOperationException();
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public boolean isReadOnly() {
         return false;
     }

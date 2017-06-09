@@ -32,7 +32,9 @@ export class CheInputBox implements ng.IDirective {
     placeHolder: '@chePlaceHolder',
     pattern: '@chePattern',
     myForm: '=cheForm',
-    isChanged: '&ngChange'
+    isChanged: '&ngChange',
+    readonly: '=cheReadonly',
+    disabled: '=cheDisabled'
   };
 
   /**
@@ -50,17 +52,24 @@ export class CheInputBox implements ng.IDirective {
    * @returns {string} the template
    */
   template(element, attrs) {
-    var inputName = attrs.cheName;
-    var labelName = attrs.cheLabelName || '';
-    var placeHolder = attrs.chePlaceHolder;
-    var pattern = attrs.chePattern;
+    let inputName = attrs.cheName;
+    let labelName = attrs.cheLabelName || '';
+    let placeHolder = attrs.chePlaceHolder;
+    let pattern = attrs.chePattern;
+    let isMandatory = angular.isDefined(attrs.required) ? true : false;
 
-    var template = '<div class="che-input-box">'
+    let template = '<div class="che-input-box">'
       + '<md-input-container hide-gt-xs ng-class="{\'che-input-box-mobile-no-label\': !labelName}">'
       + '<label ng-if="labelName">' + labelName + '</label>'
       + '<input type="text" name="' + inputName + '"';
     if (attrs.chePattern) {
       template = template + ' pattern="' + pattern + '"';
+    }
+    if (attrs.cheReadonly) {
+      template = template + ' ng-readonly="readonly"';
+    }
+    if (attrs.cheDisabled) {
+      template = template + ' ng-disabled="disabled"';
     }
 
     template = template + ' ng-trim="false" data-ng-model="valueModel" >'
@@ -77,7 +86,16 @@ export class CheInputBox implements ng.IDirective {
     if (attrs.chePattern) {
       template = template + ' pattern="' + pattern + '"';
     }
+    if (attrs.cheReadonly) {
+      template = template + ' ng-readonly="readonly"';
+    }
+    if (attrs.cheDisabled) {
+      template = template + ' ng-disabled="disabled"';
+    }
     template = template + ' data-ng-model="valueModel">';
+    if (isMandatory) {
+      template += '<span class="che-input-asterisk">*</span>';
+    }
 
     if (attrs.cheWidth === 'auto') {
       template = template + '<div class="che-input-box-desktop-hidden-text">{{valueModel ? valueModel : placeHolder}}</div>';

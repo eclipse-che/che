@@ -17,6 +17,7 @@ import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.InitialAuthConfig;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
@@ -28,9 +29,14 @@ import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
 import org.eclipse.che.plugin.docker.machine.DockerProcess;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URI;
@@ -40,12 +46,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author Alexander Garagatyi
  */
+@Listeners(MockitoTestNGListener.class)
 public class DockerProcessTest {
     private DockerConnectorConfiguration dockerConnectorConfiguration;
     private DockerConnector              docker;
     private String                       container;
 
     private AtomicInteger pidGenerator = new AtomicInteger(1);
+
+    @Mock
+    private DockerConnectorProvider dockerConnectorProvider;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -62,6 +72,7 @@ public class DockerProcessTest {
                                                                   .withCmd("tail", "-f", "/dev/null")));
         container = containerCreated.getId();
         docker.startContainer(StartContainerParams.create(containerCreated.getId()));
+        when(dockerConnectorProvider.get()).thenReturn(docker);
     }
 
     @AfterMethod
@@ -97,7 +108,7 @@ public class DockerProcessTest {
                                          new DockerApiVersionPathPrefixProvider(""));
         }
         Command command = new CommandImpl("tailf", "tail -f /dev/null", "mvn");
-        final DockerProcess dockerProcess = new DockerProcess(docker,
+        final DockerProcess dockerProcess = new DockerProcess(dockerConnectorProvider,
                                                               command,
                                                               container,
                                                               "outputChannel",

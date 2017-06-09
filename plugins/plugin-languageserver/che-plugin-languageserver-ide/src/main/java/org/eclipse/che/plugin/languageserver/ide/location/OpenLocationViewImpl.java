@@ -14,7 +14,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.HasAction;
@@ -28,6 +27,7 @@ import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
+import org.eclipse.lsp4j.Location;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
@@ -59,10 +59,10 @@ public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelega
     }
 
     @Override
-    public void setLocations(List<LocationDTO> locations) {
+    public void setLocations(List<Location> locations) {
         tree.getNodeStorage().clear();
         //TODO workaround, tree has bug with adding list of nodes
-        for (LocationDTO location : locations) {
+        for (Location location : locations) {
             tree.getNodeStorage().add(new LocationNode(location));
         }
 
@@ -74,10 +74,10 @@ public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelega
     }
 
     private class LocationNode extends AbstractTreeNode implements HasAction, HasPresentation {
-        private final LocationDTO location;
-        private NodePresentation nodePresentation;
+        private final Location         location;
+        private       NodePresentation nodePresentation;
 
-        public LocationNode(LocationDTO location) {
+        public LocationNode(Location location) {
             this.location = location;
         }
 

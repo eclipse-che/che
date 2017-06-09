@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.signature;
 
-import io.typefox.lsapi.ServerCapabilities;
+import org.eclipse.lsp4j.ServerCapabilities;
 
 /**
  * @author Evgen Vidolob

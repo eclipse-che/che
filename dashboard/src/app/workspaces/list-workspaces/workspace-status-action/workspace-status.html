@@ -13,12 +13,12 @@
 <div class="workspaces-status" ng-class="{'workspaces-busy' : workspaceStatusController.workspace.status === 'STARTING'}">
   <span class="fa fa-play"
         data-ng-click="workspaceStatusController.startWorkspace()"
-        ng-show="(workspaceStatusController.workspace.status === 'STOPPED' || workspaceStatusController.workspace.status === 'STARTING')"
-        ng-class="{'disabled' : workspaceStatusController.workspace.status !== 'STOPPED'}"
+        ng-show="(workspaceStatusController.workspace.status !== 'RUNNING' && workspaceStatusController.workspace.status !== 'STOPPING' && workspaceStatusController.workspace.status !== 'SNAPSHOTTING')"
+        ng-class="{'disabled' : workspaceStatusController.workspace.status === 'STARTING'}"
         tooltip="Run workspace"></span>
   <span class="fa fa-stop"
         data-ng-click="workspaceStatusController.stopWorkspace()"
         ng-show="(workspaceStatusController.workspace.status === 'RUNNING' || workspaceStatusController.workspace.status === 'STOPPING' || workspaceStatusController.workspace.status === 'SNAPSHOTTING')"
-        ng-class="{'disabled' : workspaceStatusController.workspace.status !== 'RUNNING'}"
+        ng-class="{'disabled' : workspaceStatusController.workspace.status === 'STOPPING' || workspaceDetailsController.workspace.status === 'SNAPSHOTTING'}"
         tooltip="Stop workspace"></span>
 </div>

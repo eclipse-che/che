@@ -12,12 +12,12 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import elemental.dom.Element;
 import elemental.js.dom.JsElement;
-import io.typefox.lsapi.DiagnosticSeverity;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.DiagnosticDTO;
 import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
@@ -42,10 +42,10 @@ public class DiagnosticAnnotation extends Annotation {
     private static JsElement fgWarningElement = new SVGImage(RESOURCES.markWarning()).getElement().cast();
     private static JsElement fgErrorElement   = new SVGImage(RESOURCES.markError()).getElement().cast();
 
-    private DiagnosticDTO diagnostic;
+    private Diagnostic diagnostic;
     private Element imageElement = null;
 
-    public DiagnosticAnnotation(DiagnosticDTO diagnostic) {
+    public DiagnosticAnnotation(Diagnostic diagnostic) {
 
         this.diagnostic = diagnostic;
 
@@ -77,6 +77,10 @@ public class DiagnosticAnnotation extends Annotation {
                     break;
             }
         }
+    }
+
+    public Diagnostic getDiagnostic() {
+        return diagnostic;
     }
 
     @Override

@@ -112,4 +112,13 @@ public interface EditorPartPresenter extends PartPresenter {
      *         <code>true</code> if unsaved changed should be saved, and <code>false</code> if unsaved changed should be discarded
      */
     void close(boolean save);
+
+    /**
+     * Called when part is going to closing.
+     * Part can deny closing, by calling {@code callback#onFailure}.
+     *
+     * @param callback
+     *         callback to allow or deny closing the part
+     */
+    void onClosing(AsyncCallback<Void> callback);
 }

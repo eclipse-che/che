@@ -19,12 +19,13 @@ import {StackController} from '../stack.controller';
  * @author Oleksii Orel
  */
 export class SelectTemplateController {
-  $mdDialog: ng.material.IDialogService;
-  templates: Array<che.IProject>;
   stack: che.IStack;
   selectedTemplates: Array<che.IProject>;
-  callbackController: StackController;
   projectsOrderBy: string;
+
+  private $mdDialog: ng.material.IDialogService;
+  private templates: Array<che.IProject>;
+  private callbackController: StackController;
 
 
   /**

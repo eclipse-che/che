@@ -35,7 +35,7 @@
                    che-place-holder="Port number"
                    ng-model="editServerDialogController.port"
                    type="number"
-                   min="1024"
+                   min="0"
                    max="65535"
                    custom-validator="editServerDialogController.isUniquePort($value)"
                    aria-label="Server port number"
@@ -56,22 +56,21 @@
                    ng-model="editServerDialogController.protocol"
                    type="type"
                    aria-label="Server protocol"
-                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-          <div ng-message="pattern">The reference should not contain special characters like space, dollar, etc.</div>
+                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/"
+                   required>
+          <div ng-message="required">A protocol is required.</div>
+          <div ng-message="pattern">The protocol should not contain special characters like space, dollar, etc.</div>
         </che-input>
       </div>
     </che-label-container>
+    <div layout="row" layout-align="end end">
+      <che-button-primary che-button-title="{{editServerDialogController.toEdit ? 'Update' : 'Add'}}"
+                          ng-disabled="editServerForm.$invalid"
+                          ng-click="editServerDialogController.saveServer()"></che-button-primary>
 
-    <che-label-container>
-      <div layout="row">
-        <che-button-primary che-button-title="{{editServerDialogController.toEdit ? 'Update' : 'Add'}}"
-                            ng-disabled="editServerForm.$invalid"
-                            ng-click="editServerDialogController.saveServer()"></che-button-primary>
-
-        <che-button-notice che-button-title="Cancel"
-                           ng-click="editServerDialogController.hide()"
-                           tabindex="0"></che-button-notice>
-      </div>
-    </che-label-container>
+      <che-button-notice che-button-title="Close"
+                         ng-click="editServerDialogController.hide()"
+                         tabindex="0"></che-button-notice>
+    </div>
   </ng-form>
 </che-popup>

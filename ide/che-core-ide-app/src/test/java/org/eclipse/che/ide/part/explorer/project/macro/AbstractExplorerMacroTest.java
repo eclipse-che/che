@@ -37,14 +37,16 @@ import static org.mockito.Mockito.when;
  */
 public class AbstractExplorerMacroTest {
 
-    public static final String FILE_1_NAME   = "file_1";
-    public static final String FILE_2_NAME   = "file_2";
-    public static final String FOLDER_PATH   = "/project";
-    public static final String FILE_1_PATH   = FOLDER_PATH + "/file_1";
-    public static final String FILE_2_PATH   = FOLDER_PATH + "/file_2";
-    public static final String PROJECTS_ROOT = "/projects";
-    public static final String PROJECT_NAME  = "project-name";
-    public static final String PROJECT_TYPE  = "type";
+    public static final String FILE_1_NAME             = "file_1.ext";
+    public static final String FILE_1_NAME_WITHOUT_EXT = "file_1";
+    public static final String FILE_2_NAME             = "file_2.ext";
+    public static final String FILE_2_NAME_WITHOUT_EXT = "file_2";
+    public static final String FOLDER_PATH             = "/project";
+    public static final String FILE_1_PATH             = FOLDER_PATH + "/file_1.ext";
+    public static final String FILE_2_PATH             = FOLDER_PATH + "/file_2.ext";
+    public static final String PROJECTS_ROOT           = "/projects";
+    public static final String PROJECT_NAME            = "project-name";
+    public static final String PROJECT_TYPE            = "type";
 
     @Mock
     PromiseProvider promiseProvider;
@@ -97,6 +99,9 @@ public class AbstractExplorerMacroTest {
         when(selectionModel.getSelectedNodes()).thenReturn(Lists.<Node>newArrayList(node1));
         when(node1.getData()).thenReturn(file1);
         when(file1.getName()).thenReturn(FILE_1_NAME);
+        when(file1.isFile()).thenReturn(true);
+        when(file1.asFile()).thenReturn(file1);
+        when(file1.getNameWithoutExtension()).thenReturn(FILE_1_NAME_WITHOUT_EXT);
         when(file1.getParent()).thenReturn(folder);
         when(file1.getLocation()).thenReturn(Path.valueOf(FILE_1_PATH));
         when(file1.getRelatedProject()).thenReturn(Optional.of(project));
@@ -110,12 +115,18 @@ public class AbstractExplorerMacroTest {
         when(node1.getData()).thenReturn(file1);
         when(node2.getData()).thenReturn(file2);
         when(file1.getName()).thenReturn(FILE_1_NAME);
+        when(file1.isFile()).thenReturn(true);
+        when(file1.asFile()).thenReturn(file1);
+        when(file1.getNameWithoutExtension()).thenReturn(FILE_1_NAME_WITHOUT_EXT);
         when(file1.getParent()).thenReturn(folder);
         when(file1.getLocation()).thenReturn(Path.valueOf(FILE_1_PATH));
         when(file1.getRelatedProject()).thenReturn(Optional.of(project));
         when(project.getName()).thenReturn(PROJECT_NAME);
         when(project.getType()).thenReturn(PROJECT_TYPE);
         when(file2.getName()).thenReturn(FILE_2_NAME);
+        when(file2.isFile()).thenReturn(true);
+        when(file2.asFile()).thenReturn(file2);
+        when(file2.getNameWithoutExtension()).thenReturn(FILE_2_NAME_WITHOUT_EXT);
         when(file2.getParent()).thenReturn(folder);
         when(file2.getLocation()).thenReturn(Path.valueOf(FILE_2_PATH));
         when(file2.getRelatedProject()).thenReturn(Optional.of(project));

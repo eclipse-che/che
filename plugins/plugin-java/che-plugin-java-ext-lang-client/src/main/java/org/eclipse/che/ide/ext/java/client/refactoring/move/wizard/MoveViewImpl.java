@@ -176,7 +176,7 @@ final class MoveViewImpl extends Window implements MoveView {
 
     /** {@inheritDoc} */
     @Override
-    public void setTreeOfDestinations(List<JavaProject> projects) {
+    public void setTreeOfDestinations(RefactorInfo refactorInfo, List<JavaProject> projects) {
         final SingleSelectionModel<Object> selectionModel = new SingleSelectionModel<>();
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -198,7 +198,9 @@ final class MoveViewImpl extends Window implements MoveView {
                 }
             }
         });
-        CellTree tree = new CellTree(new ProjectsAndPackagesModel(projects, selectionModel, resources), null, cellTreeResources);
+        CellTree tree = new CellTree(new ProjectsAndPackagesModel(projects, refactorInfo, selectionModel, resources),
+                                     null,
+                                     cellTreeResources);
         tree.setAnimationEnabled(true);
         treePanel.clear();
         treePanel.add(tree);

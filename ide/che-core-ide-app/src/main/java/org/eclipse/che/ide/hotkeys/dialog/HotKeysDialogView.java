@@ -12,8 +12,9 @@ package org.eclipse.che.ide.hotkeys.dialog;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
+import org.eclipse.che.ide.api.keybinding.Scheme;
+import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import java.util.Map;
  *
  * @author Alexander Andrienko
  * @author Artem Zatsarynnyi
+ * @author @author <a href="mailto:ak@nuxeo.com">Arnaud Kervern</a>
  */
 @ImplementedBy(HotKeysDialogViewImpl.class)
 public interface HotKeysDialogView extends View<HotKeysDialogView.ActionDelegate> {
@@ -44,13 +46,21 @@ public interface HotKeysDialogView extends View<HotKeysDialogView.ActionDelegate
      */
     void setData(Map<String, List<HotKeyItem>> data);
 
+    void setSchemes(String select, List<Scheme> schemes);
+
+    /** Value of selected scheme in the ListBox field */
+    String getSelectedScheme();
+
     interface ActionDelegate {
 
         /** Show list hotKeys. */
         void showHotKeys();
 
-        /** Perform some action in response to user's clicking 'Ok' button. */
-        void onOkClicked();
+        /** Perform some action in response to user's clicking 'Save' button. */
+        void onSaveClicked();
+
+        /** Perform some action in response to user's clicking 'Close' button. */
+        void onCloseClicked();
 
         /** Will be called when 'Print' button clicked. */
         void onPrintClicked();
@@ -62,5 +72,8 @@ public interface HotKeysDialogView extends View<HotKeysDialogView.ActionDelegate
          *         text for filter keybindings
          */
         void onFilterValueChanged(String filteredText);
+
+        /** Perform some action in response to scheme selection change */
+        void onSchemeSelectionChanged();
     }
 }

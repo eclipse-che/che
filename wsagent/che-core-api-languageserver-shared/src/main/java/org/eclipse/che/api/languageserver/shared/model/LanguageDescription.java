@@ -10,30 +10,87 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.shared.model;
 
+
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Anatolii Bazko
  */
-public interface LanguageDescription {
+public class LanguageDescription {
     /**
      * The language id.
      */
-    String getLanguageId();
-
+    private String       languageId;
     /**
      * The optional content types this language is associated with.
      */
-    List<String> getMimeTypes();
-
+    private List<String> mimeTypes;
     /**
      * The fileExtension this language is associated with. At least one extension must be provided.
      */
-    List<String> getFileExtensions();
-
+    private List<String> fileExtensions;
     /**
      * The optional highlighting configuration to support client side syntax highlighting.
      * The format is client (editor) dependent.
      */
-    String getHighlightingConfiguration();
+    private String       highlightingConfiguration;
+
+    public String getLanguageId() {
+        return this.languageId;
+    }
+
+    public void setLanguageId(final String languageId) {
+        this.languageId = languageId;
+    }
+
+    public List<String> getMimeTypes() {
+        return this.mimeTypes;
+    }
+
+    public void setMimeTypes(final List<String> mimeTypes) {
+        this.mimeTypes = mimeTypes;
+    }
+
+    public List<String> getFileExtensions() {
+        return this.fileExtensions;
+    }
+
+    public void setFileExtensions(final List<String> fileExtensions) {
+        this.fileExtensions = fileExtensions;
+    }
+
+    public String getHighlightingConfiguration() {
+        return this.highlightingConfiguration;
+    }
+
+    public void setHighlightingConfiguration(final String highlightingConfiguration) {
+        this.highlightingConfiguration = highlightingConfiguration;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LanguageDescription that = (LanguageDescription)o;
+        return Objects.equals(languageId, that.languageId) &&
+               Objects.equals(mimeTypes, that.mimeTypes) &&
+               Objects.equals(fileExtensions, that.fileExtensions) &&
+               Objects.equals(highlightingConfiguration, that.highlightingConfiguration);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(languageId, mimeTypes, fileExtensions, highlightingConfiguration);
+    }
+
+    @Override
+    public String toString() {
+        return "LanguageDescriptionImpl{" +
+               "languageId='" + languageId + '\'' +
+               ", mimeTypes=" + mimeTypes +
+               ", fileExtensions=" + fileExtensions +
+               ", highlightingConfiguration='" + highlightingConfiguration + '\'' +
+               '}';
+    }
 }

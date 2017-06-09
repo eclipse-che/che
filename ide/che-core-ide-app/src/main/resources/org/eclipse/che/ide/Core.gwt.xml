@@ -36,5 +36,6 @@
     <inherits name="com.google.common.base.Base"/>
     <inherits name="com.google.common.collect.Collect"/>
     <inherits name="org.eclipse.che.providers.Providers"/>
+    <inherits name="org.eclipse.che.security.OAuth"/>
     <source path=""/>
 </module>

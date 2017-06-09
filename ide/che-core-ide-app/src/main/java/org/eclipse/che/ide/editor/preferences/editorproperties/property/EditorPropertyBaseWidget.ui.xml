@@ -47,8 +47,8 @@
 
         .valuePanel > .gwt-TextBox {
             text-align: right;
-            min-height: 20px;
-            margin: 3px 5px 3px 0;
+            min-height: 19px;
+            margin: 1px 5px 1px 0;
         }
     </ui:style>
 

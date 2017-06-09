@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.maven.server;
 
+import org.eclipse.che.maven.data.MavenExplicitProfiles;
 import org.eclipse.che.maven.data.MavenModel;
 
 import java.io.File;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Collection;
 
 /**
  * Implementation of {@link MavenRemoteServer} which use Maven 3.2.*
@@ -24,7 +26,7 @@ import java.rmi.server.UnicastRemoteObject;
 public class MavenRemoteServerImpl extends MavenRmiObject implements MavenRemoteServer {
     @Override
     public void configure(MavenServerLogger logger, MavenServerDownloadListener downloadListener) throws RemoteException {
-         MavenServerContext.setLoggerAndListener(logger, downloadListener);
+        MavenServerContext.setLoggerAndListener(logger, downloadListener);
     }
 
     @Override
@@ -33,7 +35,7 @@ public class MavenRemoteServerImpl extends MavenRmiObject implements MavenRemote
             MavenServerImpl mavenServer = new MavenServerImpl(settings);
             UnicastRemoteObject.exportObject(mavenServer, 0);
             return mavenServer;
-        } catch (RemoteException e){
+        } catch (RemoteException e) {
             e.printStackTrace();
             throw getRuntimeException(e);
         }
@@ -43,6 +45,22 @@ public class MavenRemoteServerImpl extends MavenRmiObject implements MavenRemote
     public MavenModel interpolateModel(MavenModel model, File projectDir) throws RemoteException {
         try {
             return MavenServerImpl.interpolateModel(model, projectDir);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw getRuntimeException(e);
+        }
+    }
+
+    @Override
+    public ProfileApplicationResult applyProfiles(MavenModel model,
+                                                  File projectDir,
+                                                  MavenExplicitProfiles explicitProfiles,
+                                                  Collection<String> alwaysOnProfiles) throws RemoteException {
+        try {
+            return MavenServerImpl.applyProfiles(model,
+                                                 projectDir,
+                                                 explicitProfiles,
+                                                 alwaysOnProfiles);
         } catch (Exception e) {
             e.printStackTrace();
             throw getRuntimeException(e);

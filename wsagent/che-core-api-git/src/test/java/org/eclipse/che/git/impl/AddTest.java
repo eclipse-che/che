@@ -14,6 +14,7 @@ import static org.eclipse.che.git.impl.GitTestUtil.CONTENT;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
+import static org.eclipse.che.git.impl.GitTestUtil.deleteFile;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -27,6 +28,7 @@ import org.eclipse.che.api.git.params.AddParams;
 import org.eclipse.che.api.git.params.CommitParams;
 import org.eclipse.che.api.git.params.LsFilesParams;
 import org.eclipse.che.api.git.shared.AddRequest;
+import org.eclipse.che.api.git.shared.StatusFormat;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -38,6 +40,7 @@ import java.util.List;
 /**
  * @author Eugene Voevodin
  * @author Sergii Kabnashniuk.
+ * @author Mykola Morhun
  */
 public class AddTest {
 
@@ -94,4 +97,27 @@ public class AddTest {
         assertEquals(listFiles.size(), 1);
         assertTrue(listFiles.get(0).contains("README.txt"));
     }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class)
+    public void testAddDeletedFile(GitConnectionFactory connectionFactory) throws GitException, IOException {
+        // given
+        GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
+        addFile(connection, "README.txt", CONTENT);
+        addFile(connection, "CHANGELOG.txt", "WE'VE FIXED ALL BUGS");
+        connection.add(AddParams.create(ImmutableList.of("README.txt", "CHANGELOG.txt")));
+        connection.commit(CommitParams.create("Initial add"));
+
+        // when
+        // remove file from disk
+        deleteFile(connection, "CHANGELOG.txt");
+        // add all files to index
+        connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
+
+        // then
+        // the deleted file is added to index, so it becomes removed for git
+        List<String> stagedDeletedFiles = connection.status(StatusFormat.SHORT).getRemoved();
+        assertEquals(stagedDeletedFiles.size(), 1);
+        assertEquals(stagedDeletedFiles.get(0), "CHANGELOG.txt");
+    }
+
 }

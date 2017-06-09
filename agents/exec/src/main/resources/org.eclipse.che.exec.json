@@ -1,0 +1,13 @@
+{
+  "id": "org.eclipse.che.exec",
+  "name": "Exec-agent",
+  "description": "Agent for command execution",
+  "dependencies": [],
+  "properties": {},
+  "servers": {
+    "exec-agent": {
+      "port": "4412/tcp",
+      "protocol": "http"
+    }
+  }
+}

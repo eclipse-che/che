@@ -17,6 +17,8 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.view.client.TreeViewModel;
 
 import org.eclipse.che.ide.ext.java.client.JavaResources;
+import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
+import org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragment;
 import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragmentRoot;
@@ -31,11 +33,16 @@ import java.util.List;
  */
 public class ProjectsAndPackagesModel implements TreeViewModel {
     private List<JavaProject>            projects;
+    private final RefactorInfo           refactorInfo;
     private SingleSelectionModel<Object> selectionModel;
     private JavaResources                resources;
 
-    public ProjectsAndPackagesModel(List<JavaProject> projects, SingleSelectionModel<Object> selectionModel, JavaResources resources) {
+    public ProjectsAndPackagesModel(List<JavaProject> projects,
+                                    RefactorInfo refactorInfo,
+                                    SingleSelectionModel<Object> selectionModel,
+                                    JavaResources resources) {
         this.projects = projects;
+        this.refactorInfo = refactorInfo;
         this.selectionModel = selectionModel;
         this.resources = resources;
     }
@@ -72,6 +79,9 @@ public class ProjectsAndPackagesModel implements TreeViewModel {
         }
 
         if (value instanceof PackageFragmentRoot) {
+            if (RefactoredItemType.PACKAGE.equals(refactorInfo.getRefactoredItemType())) {
+                return null;
+            }
             return new DefaultNodeInfo<>(new ListDataProvider<>(((PackageFragmentRoot)value).getPackageFragments()),
                                                         new AbstractCell<PackageFragment>() {
                                                             @Override

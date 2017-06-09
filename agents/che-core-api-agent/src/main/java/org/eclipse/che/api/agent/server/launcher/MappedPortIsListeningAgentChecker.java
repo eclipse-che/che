@@ -22,7 +22,10 @@ import java.net.Socket;
  * Verifies that agent was started successfully by checking that specified local port is listened in a machine.
  *
  * @author Alexander Garagatyi
+ * @deprecated It is needed to be sure that the right service is up on the given port.
+ * Also, some proxies (like docker-proxy) response that the port is listened but actually it is forwarded only.
  */
+@Deprecated
 public class MappedPortIsListeningAgentChecker implements AgentLaunchingChecker {
     private final String exposedPort;
 

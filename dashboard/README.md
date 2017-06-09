@@ -1,5 +1,5 @@
 ## About Eclipse Che
-Eclipse Che is a next generation Eclipse IDE and open source alternative to IntelliJ. This repository is licensed under the Eclipse Public License 1.0. Visit [Eclipse Che's Web site](http://eclipse.org/che) for feature information or the main [Che assembly repository](http://github.com/codenvy/che) for a description of all participating repositories.
+Eclipse Che is a next generation Eclipse IDE and open source alternative to IntelliJ. This repository is licensed under the Eclipse Public License 1.0. Visit [Eclipse Che's Web site](https://eclipse.org/che) for feature information or the main [Che assembly repository](https://github.com/codenvy/che) for a description of all participating repositories.
 
 Che Dashboard
 ==============
@@ -8,15 +8,8 @@ Che Dashboard
 - Python `v2.7.x`(`v3.x.x`currently not supported)
 - Node.js `v4.x.x` (`v5.x.x` / `v6.x.x` are currently not supported)
 - npm
-- Bower
-- gulp
-- typings
 
-Installation instructions for Node.js and npm can be found on the following [link](https://docs.npmjs.com/getting-started/installing-node). Bower and gulp are CLI utilities which are installed via npm:
-
-```sh
-$ npm install --global bower gulp typings
-```
+Installation instructions for Node.js and npm can be found on the following [link](https://docs.npmjs.com/getting-started/installing-node). 
 
 #Quick start
 

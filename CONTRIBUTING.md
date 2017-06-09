@@ -29,4 +29,4 @@ Therefore:
 
 Contributing Improvements
 -------------------------
-If you are interested in fixing issues and contributing directly to the code base, please the document [How to Contribute](https://github.com/eclipse/che/wiki/How-To-Contribute).
+If you are interested in fixing issues and contributing directly to the code base, [please see our wiki](https://github.com/eclipse/che/wiki/How-To-Contribute).

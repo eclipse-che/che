@@ -14,7 +14,8 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.languageserver.shared.lsapi.LanguageDescriptionDTO;
+
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -25,15 +26,18 @@ import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.editor.orion.client.OrionContentTypeRegistrant;
 import org.eclipse.che.ide.editor.orion.client.OrionHoverRegistrant;
+import org.eclipse.che.ide.editor.orion.client.OrionOccurrencesRegistrant;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionContentTypeOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionHighlightingConfigurationOverlay;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorProvider;
+import org.eclipse.che.plugin.languageserver.ide.highlighting.OccurrencesProvider;
 import org.eclipse.che.plugin.languageserver.ide.hover.HoverProvider;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -45,13 +49,15 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
 
 
     private final LanguageServerRegistryServiceClient serverLanguageRegistry;
-    private final FileTypeRegistry fileTypeRegistry;
-    private final LanguageServerResources resources;
-    private final EditorRegistry editorRegistry;
-    private final OrionContentTypeRegistrant contentTypeRegistrant;
-    private final OrionHoverRegistrant orionHoverRegistrant;
-    private final LanguageServerEditorProvider editorProvider;
-    private final HoverProvider hoverProvider;
+    private final FileTypeRegistry                    fileTypeRegistry;
+    private final LanguageServerResources             resources;
+    private final EditorRegistry                      editorRegistry;
+    private final OrionContentTypeRegistrant          contentTypeRegistrant;
+    private final OrionHoverRegistrant                orionHoverRegistrant;
+    private final OrionOccurrencesRegistrant          orionOccurrencesRegistrant;
+    private final LanguageServerEditorProvider        editorProvider;
+    private final HoverProvider                       hoverProvider;
+    private final OccurrencesProvider                 occurrencesProvider;
 
     private final Map<String, String> ext2langId = new HashMap<>();
 
@@ -62,27 +68,31 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                                           EditorRegistry editorRegistry,
                                           OrionContentTypeRegistrant contentTypeRegistrant,
                                           OrionHoverRegistrant orionHoverRegistrant,
+                                          OrionOccurrencesRegistrant orionOccurrencesRegistrant,
                                           LanguageServerEditorProvider editorProvider,
-                                          HoverProvider hoverProvider) {
+                                          HoverProvider hoverProvider,
+                                          OccurrencesProvider occurrencesProvider) {
         this.serverLanguageRegistry = serverLanguageRegistry;
         this.fileTypeRegistry = fileTypeRegistry;
         this.resources = resources;
         this.editorRegistry = editorRegistry;
         this.contentTypeRegistrant = contentTypeRegistrant;
         this.orionHoverRegistrant = orionHoverRegistrant;
+        this.orionOccurrencesRegistrant = orionOccurrencesRegistrant;
         this.editorProvider = editorProvider;
         this.hoverProvider = hoverProvider;
+        this.occurrencesProvider = occurrencesProvider;
     }
 
     @Override
     public void start(final Callback<WsAgentComponent, Exception> callback) {
-        Promise<List<LanguageDescriptionDTO>> registeredLanguages = serverLanguageRegistry.getSupportedLanguages();
-        registeredLanguages.then(new Operation<List<LanguageDescriptionDTO>>() {
+        Promise<List<LanguageDescription>> registeredLanguages = serverLanguageRegistry.getSupportedLanguages();
+        registeredLanguages.then(new Operation<List<LanguageDescription>>() {
             @Override
-            public void apply(List<LanguageDescriptionDTO> langs) throws OperationException {
+            public void apply(List<LanguageDescription> langs) throws OperationException {
                 if (!langs.isEmpty()) {
                     JsArrayString contentTypes = JsArrayString.createArray().cast();
-                    for (LanguageDescriptionDTO lang : langs) {
+                    for (LanguageDescription lang : langs) {
                         String primaryExtension = lang.getFileExtensions().get(0);
                         for (String ext : lang.getFileExtensions()) {
                             final FileType fileType = new FileType(resources.file(), ext);
@@ -108,11 +118,12 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                             config.setId(lang.getLanguageId() + ".highlighting");
                             config.setContentTypes(contentTypeId);
                             config.setPatterns(lang.getHighlightingConfiguration());
-
+                            Logger logger = Logger.getLogger(LanguageServerFileTypeRegister.class.getName());
                             contentTypeRegistrant.registerFileType(contentType, config);
                         }
                     }
                     orionHoverRegistrant.registerHover(contentTypes, hoverProvider);
+                    orionOccurrencesRegistrant.registerOccurrencesHandler(contentTypes, occurrencesProvider);
                 }
                 callback.onSuccess(LanguageServerFileTypeRegister.this);
             }

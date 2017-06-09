@@ -12,8 +12,6 @@ package org.eclipse.che.api.user.server.jpa;
 
 import com.google.inject.AbstractModule;
 
-import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao.RemovePreferencesBeforeUserRemovedEventSubscriber;
-import org.eclipse.che.api.user.server.jpa.JpaProfileDao.RemoveProfileBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
@@ -31,7 +29,5 @@ public class UserJpaModule extends AbstractModule {
         bind(UserDao.class).to(JpaUserDao.class);
         bind(ProfileDao.class).to(JpaProfileDao.class);
         bind(PreferenceDao.class).to(JpaPreferenceDao.class);
-        bind(RemoveProfileBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
-        bind(RemovePreferencesBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
     }
 }

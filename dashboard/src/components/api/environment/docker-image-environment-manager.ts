@@ -69,7 +69,11 @@ export class DockerImageEnvironmentManager extends EnvironmentManager {
    * @returns {che.IWorkspaceEnvironment} environment's configuration
    */
   getEnvironment(environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[]): che.IWorkspaceEnvironment {
-    return super.getEnvironment(environment, machines);
+    let newEnvironment = super.getEnvironment(environment, machines);
+
+    newEnvironment.recipe.location = machines[0].recipe.location;
+
+    return newEnvironment;
   }
 
   /**
@@ -80,4 +84,24 @@ export class DockerImageEnvironmentManager extends EnvironmentManager {
    */
   getSource(machine: IEnvironmentManagerMachine): any {
     return {image: machine.recipe.location};
-  }}
+  }
+
+  /**
+   * Updates machine's image
+   *
+   * @param {IEnvironmentManagerMachine} machine
+   * @param {String} image
+   */
+  setSource(machine: IEnvironmentManagerMachine, image: string): void {
+    machine.recipe.location = image;
+  }
+
+  /**
+   * @param {IEnvironmentManagerMachine} machine
+   * @param {Object} envVariables
+   */
+  setEnvVariables(machine: IEnvironmentManagerMachine, envVariables: any): void {
+    this.$log.warn('Cannot set environment variable');
+  }
+
+}

@@ -11,7 +11,6 @@
 package org.eclipse.che.api.machine.server.jpa;
 
 import com.google.inject.TypeLiteral;
-import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -19,16 +18,20 @@ import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
+import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.db.H2TestHelper;
+import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
+import org.h2.Driver;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -40,10 +43,18 @@ public class JpaTckModule extends TckModule {
 
     @Override
     protected void configure() {
-        install(new JpaPersistModule("main"));
+        H2DBTestServer server = H2DBTestServer.startDefault();
+        install(new PersistTestModuleBuilder().setDriver(Driver.class)
+                                              .runningOn(server)
+                                              .addEntityClasses(RecipeImpl.class,
+                                                                SnapshotImpl.class,
+                                                                AccountImpl.class,
+                                                                TestWorkspaceEntity.class)
+                                              .setExceptionHandler(H2ExceptionHandler.class)
+                                              .build());
         bind(DBInitializer.class).asEagerSingleton();
-        bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(H2TestHelper.inMemoryDefault(), "che-schema"));
-        bind(TckResourcesCleaner.class).to(H2JpaCleaner.class);
+        bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
+        bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
 
         bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).toInstance(new JpaTckRepository<>(RecipeImpl.class));
         bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {}).toInstance(new JpaTckRepository<>(SnapshotImpl.class));

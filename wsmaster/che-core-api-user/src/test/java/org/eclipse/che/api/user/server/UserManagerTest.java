@@ -14,33 +14,37 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
+import org.eclipse.che.api.user.server.event.PostUserPersistedEvent;
+import org.eclipse.che.api.user.server.event.UserCreatedEvent;
+import org.eclipse.che.api.user.server.event.UserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.concurrent.Callable;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 /**
@@ -53,19 +57,33 @@ import static org.testng.Assert.fail;
 public class UserManagerTest {
 
     @Mock
-    private UserDao       userDao;
+    private UserDao                userDao;
     @Mock
-    private ProfileDao    profileDao;
+    private ProfileDao             profileDao;
     @Mock
-    private PreferenceDao preferencesDao;
+    private PreferenceDao          preferencesDao;
+    @Mock
+    private EventService           eventService;
+    @Mock
+    private PostUserPersistedEvent postUserPersistedEvent;
+    @Mock
+    private BeforeUserRemovedEvent beforeUserRemovedEvent;
 
     private UserManager manager;
 
     @BeforeMethod
     public void setUp() {
         initMocks(this);
+        manager = new UserManager(userDao, profileDao, preferencesDao, eventService, new String[] {"reserved"});
 
-        manager = new UserManager(userDao, profileDao, preferencesDao, new String[] {"reserved"});
+        when(eventService.publish(any())).thenAnswer(invocationOnMock -> {
+            Object arg = invocationOnMock.getArguments()[0];
+            if (arg instanceof BeforeUserRemovedEvent) {
+                return beforeUserRemovedEvent;
+            } else {
+                return postUserPersistedEvent;
+            }
+        });
     }
 
     @Test
@@ -77,29 +95,6 @@ public class UserManagerTest {
         verify(userDao).create(any(UserImpl.class));
         verify(profileDao).create(any(ProfileImpl.class));
         verify(preferencesDao).setPreferences(anyString(), anyMapOf(String.class, String.class));
-    }
-
-    @Test(dataProvider = "rollback")
-    public void shouldTryToRollbackWhenEntityCreationFailed(Callable preAction) throws Exception {
-        preAction.call();
-
-        // Creating new user
-        try {
-            manager.create(new UserImpl(null, "test@email.com", "testName", null, null), false);
-            fail("Had to throw Exception");
-        } catch (Exception x) {
-            // defined by userDao mock
-        }
-
-        // Capturing identifier
-        final ArgumentCaptor<UserImpl> captor = ArgumentCaptor.forClass(UserImpl.class);
-        verify(userDao).create(captor.capture());
-        final String userId = captor.getValue().getId();
-
-        // Verifying rollback
-        verify(userDao).remove(userId);
-        verify(preferencesDao).remove(userId);
-        verify(profileDao).remove(userId);
     }
 
     @Test
@@ -254,33 +249,104 @@ public class UserManagerTest {
         manager.create(user, false);
     }
 
-    @DataProvider(name = "rollback")
-    public Object[][] rollbackTestPreActions() throws Exception {
-        return new Callable[][] {
+    @Test
+    public void shouldFireBeforeUserRemovedEventOnRemoveExistedUser() throws Exception {
+        final UserImpl user = new UserImpl("identifier", "test@email.com", "testName", "password", Collections.singletonList("alias"));
+        when(userDao.getById(user.getId())).thenReturn(user);
 
-                // User creation mocking
-                {() -> {
-                    doThrow(new ServerException("error"))
-                            .when(userDao)
-                            .create(any());
-                    return null;
-                }},
+        manager.remove(user.getId());
 
-                // Preferences creation mocking
-                {() -> {
-                    doThrow(new ServerException("error"))
-                            .when(preferencesDao)
-                            .setPreferences(anyString(), any());
-                    return null;
-                }},
+        ArgumentCaptor<Object> firedEvents = ArgumentCaptor.forClass(Object.class);
+        verify(eventService, times(2)).publish(firedEvents.capture());
 
-                // Profile creation mocking
-                {() -> {
-                    doThrow(new ServerException("error"))
-                            .when(profileDao)
-                            .create(any());
-                    return null;
-                }}
-        };
+        // the first event - BeforeUserRemovedEvent
+        // the second event - UserRemovedEvent
+        Object event = firedEvents.getAllValues().get(0);
+        assertTrue(event instanceof BeforeUserRemovedEvent, "Not a BeforeUserRemovedEvent");
+        assertEquals(((BeforeUserRemovedEvent)event).getUser(), user);
+    }
+
+    @Test
+    public void shouldFireUserRemovedEventOnRemoveExistedUser() throws Exception {
+        final UserImpl user = new UserImpl("identifier", "test@email.com", "testName", "password", Collections.singletonList("alias"));
+        when(userDao.getById(user.getId())).thenReturn(user);
+
+        manager.remove(user.getId());
+
+        ArgumentCaptor<Object> firedEvents = ArgumentCaptor.forClass(Object.class);
+        verify(eventService, times(2)).publish(firedEvents.capture());
+
+        // the first event - BeforeUserRemovedEvent
+        // the second event - UserRemovedEvent
+        Object event = firedEvents.getAllValues().get(1);
+        assertTrue(event instanceof UserRemovedEvent, "Not a UserRemovedEvent");
+        assertEquals(((UserRemovedEvent)event).getUserId(), user.getId());
+    }
+
+    @Test
+    public void shouldNotRemoveUserWhenSubscriberThrowsExceptionOnRemoveExistedUser() throws Exception {
+        final UserImpl user = new UserImpl("identifier", "test@email.com", "testName", "password", Collections.singletonList("alias"));
+        when(userDao.getById(user.getId())).thenReturn(user);
+        doThrow(new ServerException("error")).when(beforeUserRemovedEvent).propagateException();
+
+        try {
+            manager.remove(user.getId());
+            fail("ServerException expected.");
+        } catch (ServerException ignored) {
+        }
+
+        ArgumentCaptor<Object> firedEvents = ArgumentCaptor.forClass(Object.class);
+        verify(eventService, times(1)).publish(firedEvents.capture());
+
+        assertTrue(firedEvents.getValue() instanceof BeforeUserRemovedEvent, "Not a BeforeUserRemovedEvent");
+    }
+
+    @Test
+    public void shouldFirePostUserPersistedEventNewUserCreatedAndBeforeCommit() throws Exception {
+        final UserImpl user = new UserImpl("identifier", "test@email.com", "testName", "password", Collections.singletonList("alias"));
+
+        manager.create(user, false);
+
+        ArgumentCaptor<Object> firedEvents = ArgumentCaptor.forClass(Object.class);
+        verify(eventService, times(2)).publish(firedEvents.capture());
+
+        // the first event - PostUserPersistedEvent
+        // the second event - UserCreatedEvent
+        Object event = firedEvents.getAllValues().get(0);
+        assertTrue(event instanceof PostUserPersistedEvent, "Not a PostUserPersistedEvent");
+        assertEquals(((PostUserPersistedEvent)event).getUser(), user);
+    }
+
+    @Test
+    public void shouldFireUserCreatedEventOnNewUserCreated() throws Exception {
+        final UserImpl user = new UserImpl("identifier", "test@email.com", "testName", "password", Collections.singletonList("alias"));
+
+        manager.create(user, false);
+
+        ArgumentCaptor<Object> firedEvents = ArgumentCaptor.forClass(Object.class);
+        verify(eventService, times(2)).publish(firedEvents.capture());
+
+        // the first event - PostUserPersistedEvent
+        // the second event - UserCreatedEvent
+        Object event = firedEvents.getAllValues().get(1);
+        assertTrue(event instanceof UserCreatedEvent, "Not a UserCreatedEvent");
+        assertEquals(((UserCreatedEvent)event).getUser(), user);
+    }
+
+    @Test
+    public void shouldNotCreteUserWhenSubscriberThrowsExceptionOnCreatingNewUser() throws Exception {
+        final UserImpl user = new UserImpl("identifier", "test@email.com", "testName", "password", Collections.singletonList("alias"));
+        doThrow(new ServerException("error")).when(postUserPersistedEvent).propagateException();
+
+        try {
+            manager.create(user, false);
+            fail("ServerException expected.");
+        } catch (ServerException ignored) {
+        }
+
+        ArgumentCaptor<Object> firedEvents = ArgumentCaptor.forClass(Object.class);
+        verify(eventService, times(1)).publish(firedEvents.capture());
+
+        assertTrue(firedEvents.getValue() instanceof PostUserPersistedEvent, "Not a PostUserPersistedEvent");
     }
 }

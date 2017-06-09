@@ -21,8 +21,8 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
-import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.api.user.AskCredentialsDialog;
+import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
@@ -52,7 +52,7 @@ public class AddPresenter extends SubversionActionPresenter {
                            NotificationManager notificationManager,
                            SubversionOutputConsoleFactory consoleFactory,
                            SubversionExtensionLocalizationConstants constants,
-                           SubversionCredentialsDialog credentialsDialog,
+                           AskCredentialsDialog credentialsDialog,
                            SubversionClientService service,
                            ProcessesPanelPresenter processesPanelPresenter,
                            StatusColors statusColors) {

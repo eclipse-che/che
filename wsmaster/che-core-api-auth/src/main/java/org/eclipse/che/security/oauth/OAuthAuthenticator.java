@@ -25,6 +25,7 @@ import com.google.api.client.util.store.MemoryDataStoreFactory;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonParseException;
+import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 import org.eclipse.che.security.oauth.shared.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public abstract class OAuthAuthenticator {
     private static final Logger LOG = LoggerFactory.getLogger(OAuthAuthenticator.class);
 
-    private   AuthorizationCodeFlow flow;
+    protected AuthorizationCodeFlow flow;
     protected Map<Pattern, String>  redirectUrisMap;
 
     /**
@@ -260,7 +261,7 @@ public abstract class OAuthAuthenticator {
      * when user have expired token and it can't be refreshed then {@code null} will be returned
      * @throws IOException
      *         when error occurs during token loading
-     * @see org.eclipse.che.api.auth.oauth.OAuthTokenProvider#getToken(String, String)
+     * @see OAuthTokenProvider#getToken(String, String)
      */
     public OAuthToken getToken(String userId) throws IOException {
         if (!isConfigured()) {

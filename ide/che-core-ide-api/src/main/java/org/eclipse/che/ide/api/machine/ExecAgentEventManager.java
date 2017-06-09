@@ -16,6 +16,8 @@ import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEvent
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
 import org.eclipse.che.api.promises.client.Operation;
 
+import java.util.function.Consumer;
+
 /**
  * Manages registration of operations related to different kinds of even sent by exec agent
  *
@@ -23,52 +25,52 @@ import org.eclipse.che.api.promises.client.Operation;
  */
 public interface ExecAgentEventManager {
     /**
-     * Registers an operation that is performed when 'process died' event is received
+     * Registers an consumer that is performed when 'process died' event is received
      *
      * @param endpointId
      *         endpoint identifier
      * @param pid
      *         process identifier
-     * @param operation
-     *         operation to be performed
+     * @param consumer
+     *         consumer to be performed
      */
-    void registerProcessDiedOperation(String endpointId, int pid, Operation<ProcessDiedEventDto> operation);
+    void registerProcessDiedConsumer(String endpointId, int pid, Consumer<ProcessDiedEventDto> consumer);
 
     /**
-     * Registers an operation that is performed when 'process started' event is received
+     * Registers an consumer that is performed when 'process started' event is received
      *
      * @param endpointId
      *         endpoint identifier
      * @param pid
      *         process identifier
-     * @param operation
-     *         operation to be performed
+     * @param consumer
+     *         consumer to be performed
      */
-    void registerProcessStartedOperation(String endpointId, int pid, Operation<ProcessStartedEventDto> operation);
+    void registerProcessStartedConsumer(String endpointId, int pid, Consumer<ProcessStartedEventDto> consumer);
 
     /**
-     * Registers an operation that is performed when 'process standard error' event is received
+     * Registers an consumer that is performed when 'process standard error' event is received
      *
      * @param endpointId
      *         endpoint identifier
      * @param pid
      *         process identifier
-     * @param operation
-     *         operation to be performed
+     * @param consumer
+     *         consumer to be performed
      */
-    void registerProcessStdErrOperation(String endpointId, int pid, Operation<ProcessStdErrEventDto> operation);
+    void registerProcessStdErrConsumer(String endpointId, int pid, Consumer<ProcessStdErrEventDto> consumer);
 
     /**
-     * Registers an operation that is performed when 'process standard output' event is received
+     * Registers an consumer that is performed when 'process standard output' event is received
      *
      * @param endpointId
      *         endpoint identifier
      * @param pid
      *         process identifier
-     * @param operation
-     *         operation to be performed
+     * @param consumer
+     *         consumer to be performed
      */
-    void registerProcessStdOutOperation(String endpointId, int pid, Operation<ProcessStdOutEventDto> operation);
+    void registerProcessStdOutConsumer(String endpointId, int pid, Consumer<ProcessStdOutEventDto> consumer);
 
     /**
      * Removes all registered event handler operations for the process associated with a PID
@@ -78,5 +80,5 @@ public interface ExecAgentEventManager {
      * @param pid
      *         process identifier
      */
-    void cleanPidOperations(String endpointId, int pid);
+    void cleanPidConsumer(String endpointId, int pid);
 }

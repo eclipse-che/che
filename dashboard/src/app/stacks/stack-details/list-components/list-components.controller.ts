@@ -9,6 +9,12 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
+
+interface IComponent {
+  name: string;
+  version: string;
+}
 
 /**
  * @ngdoc controller
@@ -28,12 +34,15 @@ export class ListComponentsController {
 
   componentsOnChange: Function;
 
+  private confirmDialogService: ConfirmDialogService;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog: ng.material.IDialogService) {
+  constructor($mdDialog: ng.material.IDialogService, confirmDialogService: ConfirmDialogService) {
     this.$mdDialog = $mdDialog;
+    this.confirmDialogService = confirmDialogService;
 
     this.isNoSelected = true;
     this.isBulkChecked = false;
@@ -48,7 +57,7 @@ export class ListComponentsController {
   updateSelectedStatus(): void {
     this.selectedComponentsNumber = 0;
     this.isBulkChecked = this.components.length > 0;
-    this.components.forEach((component) => {
+    this.components.forEach((component: IComponent) => {
       if (this.componentsSelectedStatus[component.name]) {
         this.selectedComponentsNumber++;
       } else {
@@ -61,7 +70,7 @@ export class ListComponentsController {
    * Change component selection
    * @param name: string
    */
-  changeComponentSelection(name): void {
+  changeComponentSelection(name: string): void {
     this.componentsSelectedStatus[name] = !this.componentsSelectedStatus[name];
     this.updateSelectedStatus();
   }
@@ -84,9 +93,9 @@ export class ListComponentsController {
    */
   selectAllComponents(): void {
     this.selectedComponentsNumber = this.components.length;
-    this.components.forEach((component) => {
+    this.components.forEach((component: IComponent) => {
       this.componentsSelectedStatus[component.name] = true;
-    })
+    });
   }
 
   /**
@@ -104,9 +113,10 @@ export class ListComponentsController {
    * @param version: string
    */
   addComponent(name: string, version: string): void {
-    let component: any = {};
-    component.name = name;
-    component.version = version ? version : '---';
+    let component: IComponent = {
+      name: name,
+      version: version ? version : '---'
+    };
     this.components.push(component);
   }
 
@@ -117,7 +127,7 @@ export class ListComponentsController {
    * @param version: string
    */
   updateComponent(index: number, name: string, version: string): void {
-    if(index === -1){
+    if (index === -1) {
       this.addComponent(name, version);
     } else {
       this.components[index].name = name;
@@ -161,14 +171,14 @@ export class ListComponentsController {
    */
   deleteSelectedComponents(): void {
     this.showDeleteConfirmation(this.selectedComponentsNumber).then(() => {
-      this.components.reduceRight((previousValue, currentValue, index, array) => {
+      this.components.reduceRight((previousValue: IComponent, currentValue: IComponent, index: number, array: Array<IComponent>) => {
         if (this.componentsSelectedStatus[currentValue.name]) {
           array.splice(index, 1);
         }
       }, []);
       this.deselectAllComponents();
       this.componentsOnChange();
-    })
+    });
   }
 
   /**
@@ -177,19 +187,13 @@ export class ListComponentsController {
    * @returns {ng.IPromise<any>}
    */
   showDeleteConfirmation(numberToDelete: number): ng.IPromise<any> {
-    let confirmTitle = 'Would you like to delete ';
+    let content = 'Would you like to delete ';
     if (numberToDelete > 1) {
-      confirmTitle += 'these ' + numberToDelete + ' components?';
+      content += 'these ' + numberToDelete + ' components?';
     } else {
-      confirmTitle += 'this selected component?';
+      content += 'this selected component?';
     }
-    let confirm = this.$mdDialog.confirm()
-      .title(confirmTitle)
-      .ariaLabel('Remove component')
-      .ok('Delete!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true);
 
-    return this.$mdDialog.show(confirm);
+    return this.confirmDialogService.showConfirmDialog('Remove components', content, 'Delete');
   }
 }

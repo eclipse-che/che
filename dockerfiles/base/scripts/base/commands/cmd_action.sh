@@ -9,21 +9,35 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_action() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} action <ACTION_NAME> [ACTION_PARAMETERS]\n"
+  text "\n"
+  text "Executes a REST action against ${CHE_MINI_PRODUCT_NAME} server or workspace.\n"
+  text "\n"
+  text "ACTIONS:\n"
+  text "  create-start-workspace\n"
+  text "  add-user\n"
+  text "  remove-user\n"
+  text "  execute-command\n"
+  text "  list-workspaces\n"
+  text "  workspace-ssh\n"
+  text "  get-ssh-data\n"
+  text "  graceful-stop\n"
+  text "\n"
+  text "Run '${CHE_IMAGE_FULLNAME} action' for action parameters"
+  text "\n"
+}
+
+pre_cmd_action() {
+  # Not loaded as part of the init process to save on download time
+  load_utilities_images_if_not_done
+}
+
+post_cmd_action() {
+  :
+}
+
 cmd_action() {
-  debug $FUNCNAME
-
-  if container_exist_by_name $CHE_SERVER_CONTAINER_NAME; then
-    CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_SERVER_CONTAINER_NAME)
-    if container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID} && \
-       server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
-
-        # Not loaded as part of the init process to save on download time
-        update_image_if_not_found ${UTILITY_IMAGE_CHEACTION}
-        docker_run -it ${UTILITY_IMAGE_CHEACTION} "$@"
-
-       return
-    fi
-  fi
-
-  info "action" "The system is not running."
+  docker_run $(get_docker_run_terminal_options) ${UTILITY_IMAGE_CHEACTION} "$@"
 }

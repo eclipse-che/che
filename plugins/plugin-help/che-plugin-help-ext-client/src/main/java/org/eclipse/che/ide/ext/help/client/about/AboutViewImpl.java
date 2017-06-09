@@ -15,6 +15,8 @@ import org.eclipse.che.ide.ext.help.client.AboutResources;
 import org.eclipse.che.ide.ext.help.client.HelpExtensionLocalizationConstant;
 import org.eclipse.che.ide.ui.window.Window;
 import org.vectomatic.dom.svg.ui.SVGImage;
+import org.vectomatic.dom.svg.ui.SVGResource;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -25,6 +27,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import java.util.Objects;
+
+import static java.util.Objects.nonNull;
 
 /**
  * UI for {@link AboutView}.
@@ -74,7 +80,10 @@ public class AboutViewImpl extends Window implements AboutView {
         });
         addButtonToFooter(btnOk);
 
-        logoPanel.add(new SVGImage(productInfoDataProvider.getLogo()));
+        final SVGResource logo = productInfoDataProvider.getLogo();
+        if (nonNull(logo)) {
+            logoPanel.add(new SVGImage(logo));
+        }
     }
 
     /** {@inheritDoc} */

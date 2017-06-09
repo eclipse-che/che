@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.newresource;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -26,6 +27,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.dialogs.InputDialog;
 import org.eclipse.che.ide.api.dialogs.InputValidator;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Folder;
@@ -52,10 +54,11 @@ public class NewFolderAction extends AbstractNewResourceAction {
                            DialogFactory dialogFactory,
                            EventBus eventBus,
                            AppContext appContext,
-                           NotificationManager notificationManager) {
+                           NotificationManager notificationManager,
+                           Provider<EditorAgent> editorAgentProvider) {
         super(localizationConstant.actionNewFolderTitle(),
               localizationConstant.actionNewFolderDescription(),
-              resources.defaultFolder(), dialogFactory, localizationConstant, eventBus, appContext, notificationManager);
+              resources.defaultFolder(), dialogFactory, localizationConstant, eventBus, appContext, notificationManager, editorAgentProvider);
         this.folderNameValidator = new FolderNameValidator();
     }
 

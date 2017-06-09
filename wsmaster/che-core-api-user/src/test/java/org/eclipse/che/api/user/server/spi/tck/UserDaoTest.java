@@ -13,14 +13,9 @@ package org.eclipse.che.api.user.server.spi.tck;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.user.server.Constants;
-import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.eclipse.che.api.user.server.event.PostUserPersistedEvent;
-import org.eclipse.che.api.user.server.event.UserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -39,15 +34,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toSet;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertTrue;
 
 /**
@@ -62,6 +58,8 @@ public class UserDaoTest {
     public static final String SUITE_NAME = "UserDaoTck";
 
     private static final int COUNT_OF_USERS = 5;
+
+    private static final String NAME_PREFIX = "user_name-";
 
     private UserImpl[] users;
 
@@ -80,7 +78,7 @@ public class UserDaoTest {
 
         for (int i = 0; i < users.length; i++) {
             final String id = NameGenerator.generate("user", Constants.ID_LENGTH);
-            final String name = "user_name-" + i;
+            final String name = NAME_PREFIX + i;
             final String email = name + "@eclipse.org";
             final String password = NameGenerator.generate("", Constants.PASSWORD_LENGTH);
             final List<String> aliases = new ArrayList<>(asList("google:" + name, "github:" + name));
@@ -262,28 +260,6 @@ public class UserDaoTest {
         assertEqualsNoPassword(userDao.getById(newUser.getId()), newUser);
     }
 
-    @Test(dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingUserById",
-          expectedExceptions = NotFoundException.class)
-    public void shouldNotCreateUserWhenSubscriberThrowsExceptionOnUserStoring() throws Exception {
-        final UserImpl newUser = new UserImpl("user123",
-                                              "user123@eclipse.org",
-                                              "user_name",
-                                              "password",
-                                              asList("google:user123", "github:user123"));
-        CascadeEventSubscriber<PostUserPersistedEvent> subscriber = mockCascadeEventSubscriber();
-        doThrow(new ConflictException("error")).when(subscriber).onCascadeEvent(any());
-        eventService.subscribe(subscriber, PostUserPersistedEvent.class);
-
-        try {
-            userDao.create(newUser);
-            fail("UserDao#create had to throw conflict exception");
-        } catch (ConflictException ignored) {
-        }
-
-        eventService.unsubscribe(subscriber, PostUserPersistedEvent.class);
-        userDao.getById(newUser.getId());
-    }
-
     @Test(expectedExceptions = ConflictException.class)
     public void shouldThrowConflictExceptionWhenCreatingUserWithExistingId() throws Exception {
         final UserImpl newUser = new UserImpl(users[0].getId(),
@@ -401,51 +377,6 @@ public class UserDaoTest {
     }
 
     @Test
-    public void shouldFireBeforeUserRemovedEventOnRemoveExistedUser() throws Exception {
-        final UserImpl user = users[0];
-        final BeforeUserRemovedEvent[] firedEvent = {null};
-        EventSubscriber<BeforeUserRemovedEvent> beforeUserRemovedSubscriber = event -> firedEvent[0] = event;
-        eventService.subscribe(beforeUserRemovedSubscriber, BeforeUserRemovedEvent.class);
-
-        userDao.remove(user.getId());
-
-        assertNotNull(firedEvent[0]);
-        assertEquals(firedEvent[0].getUser().getId(), user.getId());
-        eventService.unsubscribe(beforeUserRemovedSubscriber, BeforeUserRemovedEvent.class);
-    }
-
-    @Test
-    public void shouldFireUserRemovedEventOnRemoveExistedUser() throws Exception {
-        final UserImpl user = users[0];
-        final UserRemovedEvent[] firedEvent = {null};
-        EventSubscriber<UserRemovedEvent> userRemovedSubscriber = event -> firedEvent[0] = event;
-        eventService.subscribe(userRemovedSubscriber, UserRemovedEvent.class);
-
-        userDao.remove(user.getId());
-
-        assertNotNull(firedEvent[0]);
-        assertEquals(firedEvent[0].getUserId(), user.getId());
-        eventService.unsubscribe(userRemovedSubscriber, UserRemovedEvent.class);
-    }
-
-    @Test(dependsOnMethods = "shouldGetUserById")
-    public void shouldNotRemoveUserWhenSubscriberThrowsExceptionOnUserRemoving() throws Exception {
-        final UserImpl user = users[0];
-        CascadeEventSubscriber<BeforeUserRemovedEvent> subscriber = mockCascadeEventSubscriber();
-        doThrow(new ServerException("error")).when(subscriber).onCascadeEvent(any());
-        eventService.subscribe(subscriber, BeforeUserRemovedEvent.class);
-
-        try {
-            userDao.remove(user.getId());
-            fail("UserDao#remove had to throw server exception");
-        } catch (ServerException ignored) {
-        }
-
-        assertEqualsNoPassword(userDao.getById(user.getId()), user);
-        eventService.unsubscribe(subscriber, BeforeUserRemovedEvent.class);
-    }
-
-    @Test
     public void shouldNotThrowAnyExceptionWhenRemovingNonExistingUser() throws Exception {
         userDao.remove("non-existing-user");
     }
@@ -490,6 +421,72 @@ public class UserDaoTest {
                             .stream()
                             .filter(u -> u.getPassword() == null)
                             .count(), users.length);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void throwsNpeWhenGettingByNamePartWithNullEmailPart() throws Exception {
+        userDao.getByNamePart(null, 0, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void throwsIllegalArgExceptionWhenGettingByNamePartWithNegativeMaxItems() throws Exception {
+        userDao.getByNamePart(NAME_PREFIX, -1, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void throwsIllegalArgExceptionWhenGettingByNamePartWithNegativeSkipCount() throws Exception {
+        userDao.getByNamePart(NAME_PREFIX, 10, -1);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void throwsIllegalArgExceptionWhenGettingByNamePartWithSkipCountThatGreaterThanLimit() throws Exception {
+        userDao.getByNamePart(NAME_PREFIX, 10, 0xffffffffL);
+    }
+
+    @Test
+    public void getsUsersByNamePart() throws Exception {
+        Set<UserImpl> actual = stream(users).map(u -> new UserImpl(u.getId(),
+                                                                   u.getEmail(),
+                                                                   u.getName(),
+                                                                   null,
+                                                                   u.getAliases())).collect(toSet());
+
+        Set<UserImpl> expect = new HashSet<>(userDao.getByNamePart(NAME_PREFIX, users.length, 0).getItems());
+
+        assertEquals(actual, expect);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void throwsNpeWhenGettingByEmailPartWithNullEmailPart() throws Exception {
+        userDao.getByEmailPart(null, 0, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void throwsIllegalArgExceptionWhenGettingByEmailPartWithNegativeMaxItems() throws Exception {
+        userDao.getByEmailPart(NAME_PREFIX, -1, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void throwsIllegalArgExceptionWhenGettingByEmailPartWithNegativeSkipCount() throws Exception {
+        userDao.getByEmailPart(NAME_PREFIX, 10, -1);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void throwsIllegalArgExceptionWhenGettingByEmailPartWithSkipCountThatGreaterThanLimit() throws Exception {
+        userDao.getByEmailPart(NAME_PREFIX, 10, 0xffffffffL);
+    }
+
+    @Test
+    public void getsUsersByEmailPart() throws Exception {
+        Set<UserImpl> actual = stream(users).map(u -> new UserImpl(u.getId(),
+                                                                   u.getEmail(),
+                                                                   u.getName(),
+                                                                   null,
+                                                                   u.getAliases())).collect(toSet());
+
+        Set<UserImpl> expect = new HashSet<>(userDao.getByEmailPart(NAME_PREFIX, users.length, 0).getItems());
+
+        assertEquals(actual, expect);
     }
 
     private static void assertEqualsNoPassword(User actual, User expected) {

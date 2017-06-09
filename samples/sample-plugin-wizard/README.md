@@ -11,30 +11,30 @@ The **Plugin Wizard** is a demo plugin showing:
 
 ## Plugin overview
 
-### Create a new Project Type 
+### Create a new Project Type
 
 - Defining new project type:
 https://github.com/eclipse/che/blob/master/samples/sample-plugin-wizard/che-sample-plugin-wizard-server/src/main/java/org/eclipse/che/plugin/sample/wizard/projecttype/SampleProjectType.java
 
-- Register the project type on the server side through Guice injection: 
+- Register the project type on the server side through Guice injection:
 https://github.com/eclipse/che/blob/master/samples/sample-plugin-wizard/che-sample-plugin-wizard-server/src/main/java/org/eclipse/che/plugin/sample/wizard/inject/SampleWizardModule.java
 
-- Create the UI for the wizard (view and presenter), and have it registered into the wizard registry. 
+- Create the UI for the wizard (view and presenter), and have it registered into the wizard registry.
 https://github.com/eclipse/che/tree/master/samples/sample-plugin-wizard/che-sample-plugin-wizard-ide/src/main/java/org/eclipse/che/plugin/sample/wizard/ide/wizard
 
   - SamplePageView.java - interface of wizard page
-  - SamplePageViewImpl.java - implementation of the wizard page 
+  - SamplePageViewImpl.java - implementation of the wizard page
   - SamplePageViewImpl.ui.xml - UI Declaration of wizard page
   - SamplePagePresenter.java - logic of wizard page
   - SampleWizardRegistrar - class that register new wizard
- 
+
 - Use GIN injection to register the new wizard
 https://github.com/eclipse/che/blob/master/samples/sample-plugin-wizard/che-sample-plugin-wizard-ide/src/main/java/org/eclipse/che/plugin/sample/wizard/ide/inject/SampleWizardGinModule.java
 
 
 ### Create a new File Type
 
-- Create an action which allow to create a new X source file: 
+- Create an action which allow to create a new X source file:
 https://github.com/eclipse/che/blob/master/samples/sample-plugin-wizard/che-sample-plugin-wizard-ide/src/main/java/org/eclipse/che/plugin/sample/wizard/ide/action/NewXFileAction.java
 
 - Register the X filetype to FileTypeRegistry action:
@@ -61,9 +61,9 @@ https://github.com/eclipse/che/blob/master/samples/sample-plugin-wizard/che-samp
 
 ### 1- Link to IDE assembly
 
-The plugin-wizard extension has a client-side (IDE) part and an server part. It also includes some code shared between the IDE and the server. You have to introduce the extension as a dependency in `/che/assembly/assembly-ide-war/pom.xml`. 
+The plugin-wizard extension has a client-side (IDE) part and an server part. It also includes some code shared between the IDE and the server. You have to introduce the extension as a dependency in `/che/assembly/assembly-ide-war/pom.xml`.
 
-Add: 
+Add:
 ```XML
 ...
 <dependency>
@@ -82,9 +82,9 @@ You can insert the dependency anywhere in the list. After you have inserted it, 
 
 ### 2- Link to WS-Agent assembly
 
-Introduce the server part of the extension as a dependency in `/che/assembly/assembly-wsagent-war`. 
+Introduce the server part of the extension as a dependency in `/che/assembly/assembly-wsagent-war`.
 
-Add: 
+Add:
 ```XML
 ...
 <dependency>
@@ -139,14 +139,18 @@ mvn clean install
 
 ```Shell
 # Start Che using the CLI with your new assembly
-# Replace <version> with the actual directory name
-export CHE_ASSEMBLY=path_to_che_sources/assembly/assembly-main/target/eclipse-che-<version>/eclipse-che-<version>
-che start
+# Replace <local-repo> with the path to your Che repository, to use local binaries in your local image
+# Replace <version> with the actual version you are working on
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                    -v <local-path>:/data \
+                    -v <local-repo>:/repo \
+                       eclipse/che:<version> start --debug
+
 ```
 
 
 ### Documentation resources
 
-- IDE Setup: https://eclipse-che.readme.io/v5.0/docs/setup-che-workspace  
-- Building Extensions: https://eclipse-che.readme.io/v5.0/docs/create-and-build-extensions
-- Run local Eclipse Che binaries: https://eclipse-che.readme.io/v5.0/docs/usage-docker#local-eclipse-che-binaries
+- IDE Setup: https://www.eclipse.org/che/docs/plugins/setup-che-workspace/index.html
+- Building Extensions: https://www.eclipse.org/che/docs/plugins/create-and-build-extensions/index.html
+- Run local Eclipse Che binaries: https://www.eclipse.org/che/docs/setup/configuration/index.html#development-mode

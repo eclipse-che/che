@@ -57,3 +57,20 @@
     margin-left: 10px;
 }
 
+.isGlobal > div {
+    opacity: 0.6;
+}
+
+.selectionPanel {
+    margin: 3px 4px;
+}
+
+.selectionListBox {
+    float: right;
+}
+
+.selectionLabel {
+    float: left;
+    margin-top: 3px;
+    margin-left: 5px;
+}

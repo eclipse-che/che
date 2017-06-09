@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.resources;
 
-import com.google.common.annotations.Beta;
-
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.resource.Path;
 
@@ -53,16 +51,6 @@ public interface VirtualFile {
      * @return non-null display name.
      */
     String getDisplayName();
-
-    /**
-     * Returns media type for the virtual file. Media type may be a {@code null} for folders or for those files that
-     * don't have media type.
-     *
-     * @return media type or null.
-     * @deprecated this method is going to be removed soon, because we don't use media type for any purposes
-     */
-    @Deprecated
-    String getMediaType();
 
     /**
      * Returns {@code true} in case if virtual file doesn't have ability to be updated.

@@ -14,7 +14,6 @@
 import {AdministrationController} from './administration.controller';
 import {DockerRegistryList} from './docker-registry/docker-registry-list/docker-registry-list.directive';
 import {DockerRegistryListController} from './docker-registry/docker-registry-list/docker-registry-list.controller';
-import {AddRegistryController} from './docker-registry/docker-registry-list/add-registry/add-registry.controller';
 import {EditRegistryController} from './docker-registry/docker-registry-list/edit-registry/edit-registry.controller';
 
 
@@ -25,8 +24,6 @@ export class AdministrationConfig {
 
     register.directive('dockerRegistryList', DockerRegistryList);
     register.controller('DockerRegistryListController', DockerRegistryListController);
-
-    register.controller('AddRegistryController', AddRegistryController);
 
     register.controller('EditRegistryController', EditRegistryController);
 

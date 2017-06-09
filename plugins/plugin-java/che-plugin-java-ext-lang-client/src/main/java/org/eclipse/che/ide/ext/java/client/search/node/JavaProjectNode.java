@@ -10,13 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.search.node;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
-import org.eclipse.che.api.promises.client.callback.PromiseHelper;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragment;
@@ -29,6 +26,9 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 
 /**
  * @author Evgen Vidolob
@@ -51,17 +51,18 @@ public class JavaProjectNode extends AbstractPresentationNode {
 
     @Override
     protected Promise<List<Node>> getChildrenImpl() {
-        return PromiseHelper.newPromise(new AsyncPromiseHelper.RequestCall<List<Node>>() {
-            @Override
-            public void makeCall(AsyncCallback<List<Node>> callback) {
-                List<Node> children = new ArrayList<>();
-                for (PackageFragmentRoot packageFragmentRoot : project.getPackageFragmentRoots()) {
-                    for (PackageFragment packageFragment : packageFragmentRoot.getPackageFragments()) {
-                        children.add(nodeFactory.create(packageFragment, matches, packageFragmentRoot));
-                    }
-                }
-                callback.onSuccess(children);
+        return createFromAsyncRequest(callback -> {
+            final List<Node> childrenNodes = new ArrayList<>();
+            for (PackageFragmentRoot packageFragmentRoot : project.getPackageFragmentRoots()) {
+                final List<PackageFragment> packageFragments = packageFragmentRoot.getPackageFragments();
+                final List<Node> nodes = packageFragments.stream()
+                                                         .map(packageFragment -> nodeFactory.create(packageFragment,
+                                                                                                    matches,
+                                                                                                    packageFragmentRoot))
+                                                         .collect(Collectors.toList());
+                childrenNodes.addAll(nodes);
             }
+            callback.onSuccess(childrenNodes);
         });
     }
 

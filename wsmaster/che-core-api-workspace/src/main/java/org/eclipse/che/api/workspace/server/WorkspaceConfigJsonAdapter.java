@@ -151,6 +151,7 @@ public class WorkspaceConfigJsonAdapter {
 
         // dev-machine agents
         final JsonArray agents = new JsonArray();
+        agents.add(new JsonPrimitive("org.eclipse.che.exec"));
         agents.add(new JsonPrimitive("org.eclipse.che.terminal"));
         agents.add(new JsonPrimitive("org.eclipse.che.ws-agent"));
         agents.add(new JsonPrimitive("org.eclipse.che.ssh"));

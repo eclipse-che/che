@@ -14,9 +14,11 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -33,9 +35,10 @@ public class NewFileAction extends AbstractNewResourceAction {
                          DialogFactory dialogFactory,
                          EventBus eventBus,
                          AppContext appContext,
-                         NotificationManager notificationManager) {
+                         NotificationManager notificationManager,
+                         Provider<EditorAgent> editorAgentProvider) {
         super(localizationConstant.actionNewFileTitle(),
               localizationConstant.actionNewFileDescription(),
-              resources.defaultFile(), dialogFactory, localizationConstant, eventBus, appContext, notificationManager);
+              resources.defaultFile(), dialogFactory, localizationConstant, eventBus, appContext, notificationManager, editorAgentProvider);
     }
 }

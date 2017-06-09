@@ -13,6 +13,8 @@ package org.eclipse.che.api.debug.shared.dto;
 import org.eclipse.che.api.debug.shared.model.DebugSession;
 import org.eclipse.che.dto.shared.DTO;
 
+import java.util.List;
+
 /**
  * @author Anatoliy Bazko
  */
@@ -35,4 +37,10 @@ public interface DebugSessionDto extends DebugSession {
     void setType(String type);
 
     DebugSessionDto withType(String type);
+
+    List<BreakpointDto> getBreakpoints();
+
+    void setBreakpoints(List<BreakpointDto> breakpoints);
+
+    DebugSessionDto withBreakpoints(List<BreakpointDto> breakpoints);
 }

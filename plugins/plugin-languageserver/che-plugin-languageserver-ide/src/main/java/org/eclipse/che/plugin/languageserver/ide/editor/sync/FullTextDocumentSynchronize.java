@@ -13,13 +13,13 @@ package org.eclipse.che.plugin.languageserver.ide.editor.sync;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentContentChangeEventDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.VersionedTextDocumentIdentifierDTO;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.lsp4j.DidChangeTextDocumentParams;
+import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
+import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 
 import java.util.Collections;
 
@@ -31,7 +31,7 @@ import java.util.Collections;
 @Singleton
 class FullTextDocumentSynchronize implements TextDocumentSynchronize {
 
-    private final DtoFactory dtoFactory;
+    private final DtoFactory                dtoFactory;
     private final TextDocumentServiceClient textDocumentService;
 
     @Inject
@@ -44,14 +44,14 @@ class FullTextDocumentSynchronize implements TextDocumentSynchronize {
     public void syncTextDocument(DocumentChangeEvent event, int version) {
         Document document = event.getDocument().getDocument();
 
-        DidChangeTextDocumentParamsDTO changeDTO = dtoFactory.createDto(DidChangeTextDocumentParamsDTO.class);
+        DidChangeTextDocumentParams changeDTO = dtoFactory.createDto(DidChangeTextDocumentParams.class);
         String uri = document.getFile().getLocation().toString();
         changeDTO.setUri(uri);
-        VersionedTextDocumentIdentifierDTO versionedDocId = dtoFactory.createDto(VersionedTextDocumentIdentifierDTO.class);
+        VersionedTextDocumentIdentifier versionedDocId = dtoFactory.createDto(VersionedTextDocumentIdentifier.class);
         versionedDocId.setUri(uri);
         versionedDocId.setVersion(version);
         changeDTO.setTextDocument(versionedDocId);
-        TextDocumentContentChangeEventDTO actualChange = dtoFactory.createDto(TextDocumentContentChangeEventDTO.class);
+        TextDocumentContentChangeEvent actualChange = dtoFactory.createDto(TextDocumentContentChangeEvent.class);
 
         actualChange.setText(event.getDocument().getDocument().getContents());
         changeDTO.setContentChanges(Collections.singletonList(actualChange));

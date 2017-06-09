@@ -14,6 +14,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project.ProjectRequest;
 import org.eclipse.che.ide.api.resources.marker.Marker;
@@ -478,6 +479,7 @@ public interface Resource extends Comparable<Resource> {
      * @return the bound instance of {@link Project} or null
      * @since 5.1.0
      */
+    @Nullable
     Project getProject();
 
     /**

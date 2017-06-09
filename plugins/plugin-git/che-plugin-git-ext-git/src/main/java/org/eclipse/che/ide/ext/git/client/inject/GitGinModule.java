@@ -18,19 +18,19 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
-import org.eclipse.che.ide.ext.git.client.GitCheckoutStatusNotificationOperation;
+import org.eclipse.che.ide.ext.git.client.GitCheckoutStatusNotificationHandler;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexView;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexViewImpl;
 import org.eclipse.che.ide.ext.git.client.branch.BranchView;
 import org.eclipse.che.ide.ext.git.client.branch.BranchViewImpl;
 import org.eclipse.che.ide.ext.git.client.commit.CommitView;
 import org.eclipse.che.ide.ext.git.client.commit.CommitViewImpl;
-import org.eclipse.che.ide.ext.git.client.compare.branchList.BranchListView;
-import org.eclipse.che.ide.ext.git.client.compare.branchList.BranchListViewImpl;
-import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListView;
-import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListViewImpl;
-import org.eclipse.che.ide.ext.git.client.compare.revisionsList.RevisionListView;
-import org.eclipse.che.ide.ext.git.client.compare.revisionsList.RevisionListViewImpl;
+import org.eclipse.che.ide.ext.git.client.compare.branchlist.BranchListView;
+import org.eclipse.che.ide.ext.git.client.compare.branchlist.BranchListViewImpl;
+import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListView;
+import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListViewImpl;
+import org.eclipse.che.ide.ext.git.client.compare.revisionslist.RevisionListView;
+import org.eclipse.che.ide.ext.git.client.compare.revisionslist.RevisionListViewImpl;
 import org.eclipse.che.ide.ext.git.client.fetch.FetchView;
 import org.eclipse.che.ide.ext.git.client.fetch.FetchViewImpl;
 import org.eclipse.che.ide.ext.git.client.history.HistoryView;
@@ -58,6 +58,8 @@ import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitView;
 import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitViewImpl;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesView;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesViewImpl;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelViewImpl;
 
 /** @author Andrey Plotnikov */
 @ExtensionGinModule
@@ -74,7 +76,7 @@ public class GitGinModule extends AbstractGinModule {
         bind(RemoveFromIndexView.class).to(RemoveFromIndexViewImpl.class).in(Singleton.class);
         bind(RevisionListView.class).to(RevisionListViewImpl.class).in(Singleton.class);
         bind(CommitView.class).to(CommitViewImpl.class).in(Singleton.class);
-        bind(ChangedListView.class).to(ChangedListViewImpl.class).in(Singleton.class);
+        bind(ChangesListView.class).to(ChangesListViewImpl.class).in(Singleton.class);
         bind(BranchView.class).to(BranchViewImpl.class).in(Singleton.class);
         bind(BranchListView.class).to(BranchListViewImpl.class).in(Singleton.class);
         bind(MergeView.class).to(MergeViewImpl.class).in(Singleton.class);
@@ -86,10 +88,10 @@ public class GitGinModule extends AbstractGinModule {
         bind(PullView.class).to(PullViewImpl.class).in(Singleton.class);
         bind(HistoryView.class).to(HistoryViewImpl.class).in(Singleton.class);
         bind(GitOutputPartView.class).to(GitOutputPartViewImpl.class);
-
+        bind(ChangesPanelView.class).to(ChangesPanelViewImpl.class);
         install(new GinFactoryModuleBuilder().implement(GitOutputConsole.class, GitOutputConsolePresenter.class)
                                              .build(GitOutputConsoleFactory.class));
 
-        bind(GitCheckoutStatusNotificationOperation.class).asEagerSingleton();
+        bind(GitCheckoutStatusNotificationHandler.class).asEagerSingleton();
     }
 }

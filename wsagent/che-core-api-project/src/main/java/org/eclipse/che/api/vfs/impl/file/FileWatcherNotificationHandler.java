@@ -14,6 +14,10 @@ import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 
 import java.io.File;
 
+/**
+ * @deprecated VFS components are now considered deprecated and will be replaced by standard JDK routines.
+ */
+@Deprecated
 public interface FileWatcherNotificationHandler {
     void handleFileWatcherEvent(FileWatcherEventType eventType, File watchRoot, String subPath, boolean isDir);
 

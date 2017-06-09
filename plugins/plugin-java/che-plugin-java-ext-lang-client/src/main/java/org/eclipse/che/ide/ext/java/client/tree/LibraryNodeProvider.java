@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.java.client.tree;
 
 import com.google.common.annotations.Beta;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
@@ -32,6 +33,7 @@ import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
  * @author Vlad Zhukovskiy
  */
 @Beta
+@Singleton
 public class LibraryNodeProvider implements NodeInterceptor {
 
     private final JavaNodeFactory  nodeFactory;

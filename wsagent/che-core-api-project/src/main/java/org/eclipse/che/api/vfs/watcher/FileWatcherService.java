@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.ClosedWatchServiceException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.WatchEvent;
@@ -31,6 +32,7 @@ import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchEvent.Modifier;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -41,6 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 import static java.lang.Thread.currentThread;
+import static java.nio.file.Files.exists;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
@@ -166,7 +169,7 @@ public class FileWatcherService {
         }
     }
 
-    boolean isStopped(){
+    boolean isStopped() {
         return executor.isShutdown();
     }
 
@@ -183,6 +186,10 @@ public class FileWatcherService {
      *         directory
      */
     public void register(Path dir) {
+        if (!Files.exists(dir)) {
+            LOG.debug("Trying to register directory '{}' but it does not exist", dir);
+            return;
+        }
         LOG.debug("Registering directory '{}'", dir);
         if (keys.values().contains(dir)) {
             int previous = registrations.get(dir);
@@ -205,6 +212,10 @@ public class FileWatcherService {
      * method decreases by one registration counter that corresponds to
      * directory specified by the argument. If registration counter comes to
      * zero directory watching is totally cancelled.
+     * <p>
+     * If this method is called for not existing directory nothing happens.
+     * <p>
+     * If this method is called for not registered directory nothing happens.
      *
      * @param dir
      *         directory
@@ -212,12 +223,28 @@ public class FileWatcherService {
     void unRegister(Path dir) {
         LOG.debug("Canceling directory '{}' registration", dir);
 
+        Predicate<Entry<WatchKey, Path>> equalsDir = it -> it.getValue().equals(dir);
+
+        if (!exists(dir)) {
+            LOG.debug("Trying to unregister directory '{}' while it does not exist", dir);
+
+            registrations.remove(dir);
+
+            keys.entrySet().stream().filter(equalsDir).map(Entry::getKey).forEach(WatchKey::cancel);
+            keys.entrySet().removeIf(equalsDir);
+
+            return;
+        }
+
+        if (!registrations.containsKey(dir)) {
+            LOG.debug("Trying to unregister directory '{}' while it is not registered", dir);
+            return;
+        }
+
         int previous = registrations.get(dir);
         if (previous == 1) {
             LOG.debug("Stopping watching directory '{}'", dir);
             registrations.remove(dir);
-
-            Predicate<Entry<WatchKey, Path>> equalsDir = it -> it.getValue().equals(dir);
 
             keys.entrySet().stream().filter(equalsDir).map(Entry::getKey).forEach(WatchKey::cancel);
             keys.entrySet().removeIf(equalsDir);
@@ -257,6 +284,8 @@ public class FileWatcherService {
                 WatchKey watchKey = service.take();
                 Path dir = keys.get(watchKey);
 
+                List<WatchEvent<?>> watchEvents = watchKey.pollEvents();
+
                 if (suspended.get()) {
                     resetAndRemove(watchKey, dir);
 
@@ -264,7 +293,7 @@ public class FileWatcherService {
                     continue;
                 }
 
-                for (WatchEvent<?> event : watchKey.pollEvents()) {
+                for (WatchEvent<?> event : watchEvents) {
                     Kind<?> kind = event.kind();
 
                     if (kind == OVERFLOW) {
@@ -297,8 +326,9 @@ public class FileWatcherService {
 
     private void resetAndRemove(WatchKey watchKey, Path dir) {
         if (!watchKey.reset()) {
-            registrations.remove(dir);
-
+            if (dir != null) {
+                registrations.remove(dir);
+            }
             keys.remove(watchKey);
         }
     }

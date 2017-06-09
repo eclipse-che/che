@@ -49,6 +49,11 @@ public interface ProductInfoDataProvider {
     SVGResource getLogo();
 
     /**
+     * @return waterMark logo
+     */
+    SVGResource getWaterMarkLogo();
+
+    /**
      * @return title for support action which displayed in Help menu.
      */
     String getSupportTitle();

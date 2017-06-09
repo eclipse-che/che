@@ -23,7 +23,6 @@ public final class Constants {
     public static final String SNIPPET_REL_ATT                  = "snippet";
     public static final String FACTORY_ACCEPTANCE_REL_ATT       = "accept";
     public static final String NAMED_FACTORY_ACCEPTANCE_REL_ATT = "accept-named";
-    public static final String ACCEPTED_REL_ATT                 = "accepted";
 
     // factory snippet types
     public static final String MARKDOWN_SNIPPET_TYPE = "markdown";

@@ -12,5 +12,5 @@
 
 FROM alpine:3.4
 
-COPY entrypoint.sh /bin/entrypoint.sh
-ENTRYPOINT ["/bin/entrypoint.sh"]
+COPY /src/ /ip/
+ENTRYPOINT ["/ip/entrypoint.sh"]

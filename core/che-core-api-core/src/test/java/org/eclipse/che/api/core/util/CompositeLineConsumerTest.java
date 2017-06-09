@@ -29,6 +29,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Mykola Morhun
@@ -49,7 +50,7 @@ public class CompositeLineConsumerTest {
 
     @BeforeMethod
     public void beforeMethod() throws Exception {
-        subConsumers = new LineConsumer[] { lineConsumer1, lineConsumer2, lineConsumer3 };
+        subConsumers = new LineConsumer[] {lineConsumer1, lineConsumer2, lineConsumer3};
         compositeLineConsumer = new CompositeLineConsumer(subConsumers);
     }
 
@@ -86,8 +87,7 @@ public class CompositeLineConsumerTest {
     public Object[][] subConsumersExceptions() {
         return new Throwable[][] {
                 {new ConsumerAlreadyClosedException("Error")},
-                {new ClosedByInterruptException()}
-        };
+                };
     }
 
     @Test(dataProvider = "subConsumersExceptions")
@@ -132,7 +132,19 @@ public class CompositeLineConsumerTest {
         }
     }
 
-    private LineConsumer[] appendTo(LineConsumer[] base, LineConsumer... toAppend ) {
+    @Test
+    public void stopsWritingOnceInterrupted() throws Exception {
+        doThrow(new ClosedByInterruptException()).when(lineConsumer2).writeLine("test");
+
+        compositeLineConsumer.writeLine("test");
+
+        assertTrue(Thread.interrupted());
+        verify(lineConsumer1).writeLine("test");
+        verify(lineConsumer2).writeLine("test");
+        verify(lineConsumer3, never()).writeLine("test");
+    }
+
+    private LineConsumer[] appendTo(LineConsumer[] base, LineConsumer... toAppend) {
         List<LineConsumer> allElements = new ArrayList<>();
         allElements.addAll(Arrays.asList(base));
         allElements.addAll(Arrays.asList(toAppend));

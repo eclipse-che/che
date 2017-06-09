@@ -16,16 +16,19 @@ import com.google.inject.name.Named;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
-import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.docker.machine.local.node.provider.LocalWorkspaceFolderPathProvider;
 
 import java.io.File;
 import java.io.IOException;
 
+import static java.lang.System.getenv;
+import static org.eclipse.che.commons.lang.IoUtil.deleteRecursive;
+
 /**
  * Local implementation of the {@link WorkspaceFilesCleaner}.
  *
  * @author Alexander Andrienko
+ * @author Igor Vinokur
  */
 @Singleton
 public class LocalWorkspaceFilesCleaner implements WorkspaceFilesCleaner {
@@ -44,9 +47,9 @@ public class LocalWorkspaceFilesCleaner implements WorkspaceFilesCleaner {
     @Override
     public void clear(Workspace workspace) throws IOException {
         String workspacePath = workspaceFolderPathProvider.getPathByName(workspace.getConfig().getName());
-        File workspaceStorage = new File(workspacePath);
-        if (!workspacePath.equals(hostProjectsFolder) && workspaceStorage.exists()) {
-            IoUtil.deleteRecursive(workspaceStorage);
+        if (!workspacePath.equals(hostProjectsFolder)) {
+            // Remove the workspace folder located in the Che instance docker container.
+            deleteRecursive(new File(workspacePath.replace(getenv("CHE_INSTANCE"), "")));
         }
     }
 }

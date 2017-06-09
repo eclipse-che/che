@@ -9,31 +9,30 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheProfile} from './che-profile.factory';
+import {CheAPIBuilder} from './builder/che-api-builder.factory';
+import {CheHttpBackend} from './test/che-http-backend';
 
 /**
  * Test of the CheProfile
  */
-describe('CheProfile', function () {
-
+describe('CheProfile', () => {
   /**
    * Profile Factory for the test
    */
-  var factory;
-
+  let factory: CheProfile;
   /**
    * API builder.
    */
-  var apiBuilder;
-
+  let apiBuilder: CheAPIBuilder;
   /**
    * Backend for handling http operations
    */
-  var httpBackend;
-
+  let httpBackend: ng.IHttpBackendService;
   /**
    * che backend
    */
-  var cheBackend;
+  let cheBackend: CheHttpBackend;
 
   /**
    *  setup module
@@ -43,7 +42,7 @@ describe('CheProfile', function () {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject(function (cheProfile, cheAPIBuilder, cheHttpBackend) {
+  beforeEach(inject((cheProfile: CheProfile, cheAPIBuilder: CheAPIBuilder, cheHttpBackend: CheHttpBackend) => {
     factory = cheProfile;
     apiBuilder = cheAPIBuilder;
     cheBackend = cheHttpBackend;
@@ -53,7 +52,7 @@ describe('CheProfile', function () {
   /**
    * Check assertion after the test
    */
-  afterEach(function () {
+  afterEach(() => {
     httpBackend.verifyNoOutstandingExpectation();
     httpBackend.verifyNoOutstandingRequest();
   });
@@ -61,67 +60,71 @@ describe('CheProfile', function () {
   /**
    * Check that we're able to fetch profile
    */
-  it('Fetch profile', function () {
-      // setup tests objects
-      var profileId = 'idDefaultUser';
-      var email = 'eclipseChe@eclipse.org';
-      var firstName = 'FirstName';
-      var lastName = 'LastName';
-
-      var defaultProfile = apiBuilder.getProfileBuilder().withId(profileId).withEmail(email).withFirstName(firstName).withLastName(lastName).build();
-
-      // providing request
-      // add defaultProfile on Http backend
-      cheBackend.addDefaultProfile(defaultProfile);
+  it('Fetch profile', () => {
+      const testProfile = apiBuilder.getProfileBuilder()
+        .withId('idDefaultUser')
+        .withEmail('eclipseChe@eclipse.org')
+        .withFirstName('FirstName')
+        .withLastName('LastName')
+        .build();
 
       // setup backend
+      cheBackend.addDefaultProfile(testProfile);
       cheBackend.setup();
 
-      // fetch profile
       factory.fetchProfile();
 
-      // expecting GETs
       httpBackend.expectGET('/api/profile');
-      // flush command
+
       httpBackend.flush();
 
-      // now, check profile
-      var profile = factory.getProfile();
+      const profile = factory.getProfile();
 
-      // check id, email, firstName and lastName in profile attributes
-      expect(profile.id).toEqual(profileId);
-      expect(profile.email).toEqual(email);
-      expect(profile.attributes.firstName).toEqual(firstName);
-      expect(profile.attributes.lastName).toEqual(lastName);
+      expect(profile).toEqual(profile);
     }
   );
 
   /**
    * Check that we're able to set attributes into profile
    */
-  it('Set attributes', function () {
-      // setup tests object
-      var testAttributes = {lastName: '<none>', email: 'eclipseChe@eclipse.org'};
+  it('Set current user attributes', () => {
+      const testProfile = apiBuilder.getProfileBuilder()
+        .withEmail('test@test.com')
+        .withFirstName('testName')
+        .build();
 
       // setup backend
+      cheBackend.setAttributes(testProfile.atributes);
       cheBackend.setup();
-      cheBackend.setAttributes(testAttributes);
 
-      // fetch profile
-      factory.setAttributes(testAttributes);
+      factory.setAttributes(testProfile.atributes);
 
-      // expecting a PUT
       httpBackend.expectPUT('/api/profile/attributes');
 
-      // flush command
+      httpBackend.flush();
+    }
+  );
+
+  it('Set attributes for the user by Id', () => {
+      const testProfile = apiBuilder.getProfileBuilder()
+        .withId('testId')
+        .withEmail('test@test.com')
+        .withFirstName('testName')
+        .build();
+
+      // setup backend
+      cheBackend.setAttributes(testProfile.attributes, testProfile.userId);
+      cheBackend.setup();
+
+      factory.setAttributes(testProfile.attributes, testProfile.userId);
+
+      httpBackend.expectPUT(`/api/profile/${testProfile.id}/attributes`);
+
       httpBackend.flush();
 
-      // now, check profile
-      var profile = factory.getProfile();
+      const profile = factory.getProfileById(testProfile.userId);
 
-      // check profile new attributes
-      expect(profile.attributes).toEqual(testAttributes);
-
+      expect(profile.attributes).toEqual(testProfile.attributes);
     }
   );
 

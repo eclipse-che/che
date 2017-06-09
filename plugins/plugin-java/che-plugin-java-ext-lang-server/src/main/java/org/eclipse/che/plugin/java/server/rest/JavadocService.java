@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.java.server.rest;
 
+import org.eclipse.che.JavadocUrlProvider;
 import org.eclipse.che.jdt.JavadocFinder;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -31,11 +32,11 @@ import javax.ws.rs.core.UriBuilder;
 @Path("java/javadoc")
 public class JavadocService {
 
-    private final String agentEndpoint;
+    private final JavadocUrlProvider urlProvider;
 
     @Inject
-    public JavadocService(@Named("wsagent.endpoint") String agentEndpoint) {
-        this.agentEndpoint = agentEndpoint;
+    public JavadocService(JavadocUrlProvider urlProvider) {
+        this.urlProvider = urlProvider;
     }
 
     @GET
@@ -50,7 +51,7 @@ public class JavadocService {
         final IJavaProject project = JavaModelManager.getJavaModelManager()
                                                      .getJavaModel()
                                                      .getJavaProject(projectPath);
-        final String urlPart = getUrlPart(projectPath);
+        final String urlPart = urlProvider.getJavadocUrl(projectPath);
         return new JavadocFinder(urlPart).findJavadoc(project, fqn, offset);
     }
 
@@ -64,16 +65,8 @@ public class JavadocService {
         final IJavaProject project = JavaModelManager.getJavaModelManager()
                                                      .getJavaModel()
                                                      .getJavaProject(projectPath);
-        final String urlPart = getUrlPart(projectPath);
+        final String urlPart = urlProvider.getJavadocUrl(projectPath);
         return new JavadocFinder(urlPart).findJavadoc4Handle(project, handle);
     }
 
-    private String getUrlPart(String projectPath) {
-        return UriBuilder.fromUri(agentEndpoint)
-                         .queryParam("projectpath", projectPath)
-                         .path(JavadocService.class)
-                         .path(JavadocService.class, "get")
-                         .build()
-                         .toString() + "&handle=";
-    }
 }

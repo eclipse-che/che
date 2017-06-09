@@ -46,5 +46,18 @@ public final class DTOHierarchy {
         void setParentField(String parentField);
 
         ChildDto withParentField(String parentField);
+
+        ChildDto getShadowedField();
+
+        void setShadowedField(ChildDto v);
     }
+
+    @DTO
+    public interface GrandchildDto extends ChildDto {
+
+        GrandchildDto getShadowedField();
+
+        void setShadowedField(GrandchildDto v);
+    }
+
 }

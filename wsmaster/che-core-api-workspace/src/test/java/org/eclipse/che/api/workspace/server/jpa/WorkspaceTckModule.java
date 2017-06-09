@@ -11,24 +11,35 @@
 package org.eclipse.che.api.workspace.server.jpa;
 
 import com.google.inject.TypeLiteral;
-import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
+import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
+import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
-import org.eclipse.che.commons.test.db.H2TestHelper;
+import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
+import org.h2.Driver;
 
 import java.util.Collection;
 
@@ -39,10 +50,28 @@ public class WorkspaceTckModule extends TckModule {
 
     @Override
     protected void configure() {
-        install(new JpaPersistModule("main"));
+        H2DBTestServer server = H2DBTestServer.startDefault();
+        install(new PersistTestModuleBuilder().setDriver(Driver.class)
+                                              .runningOn(server)
+                                              .addEntityClasses(AccountImpl.class,
+                                                                WorkspaceImpl.class,
+                                                                WorkspaceConfigImpl.class,
+                                                                ProjectConfigImpl.class,
+                                                                EnvironmentImpl.class,
+                                                                EnvironmentRecipeImpl.class,
+                                                                ExtendedMachineImpl.class,
+                                                                SourceStorageImpl.class,
+                                                                ServerConf2Impl.class,
+                                                                StackImpl.class,
+                                                                CommandImpl.class,
+                                                                SnapshotImpl.class,
+                                                                RecipeImpl.class)
+                                              .addEntityClass("org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
+                                              .setExceptionHandler(H2ExceptionHandler.class)
+                                              .build());
         bind(DBInitializer.class).asEagerSingleton();
-        bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(H2TestHelper.inMemoryDefault(), "che-schema"));
-        bind(TckResourcesCleaner.class).to(H2JpaCleaner.class);
+        bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
+        bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
 
         bind(new TypeLiteral<TckRepository<AccountImpl>>() {}).toInstance(new JpaTckRepository<>(AccountImpl.class));
         bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());

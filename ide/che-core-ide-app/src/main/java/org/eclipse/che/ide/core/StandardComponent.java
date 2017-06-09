@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.core;
 
-import org.eclipse.che.ide.api.component.Component;
-import org.eclipse.che.ide.util.loging.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * @author Evgen Vidolob

@@ -14,7 +14,6 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.ChoiceDialog;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
@@ -47,9 +46,6 @@ import org.eclipse.che.ide.ui.dialogs.message.MessageDialogFooter;
 import org.eclipse.che.ide.ui.dialogs.message.MessageDialogPresenter;
 import org.eclipse.che.ide.ui.dialogs.message.MessageDialogView;
 import org.eclipse.che.ide.ui.dialogs.message.MessageDialogViewImpl;
-import org.eclipse.che.ide.ui.dropdown.DropDownListFactory;
-import org.eclipse.che.ide.ui.dropdown.DropDownWidget;
-import org.eclipse.che.ide.ui.dropdown.DropDownWidgetImpl;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.panel.SubPanelPresenter;
@@ -110,11 +106,6 @@ public class UiModule extends AbstractGinModule {
                         .implement(ChoiceDialog.class, ChoiceDialogPresenter.class)
                         .implement(InputDialog.class, InputDialogPresenter.class)
                         .build(DialogFactory.class));
-
-        // drop down list widget
-        install(new GinFactoryModuleBuilder()
-                        .implement(DropDownWidget.class, DropDownWidgetImpl.class)
-                        .build(DropDownListFactory.class));
 
         // multi-split panel
         install(new GinFactoryModuleBuilder()

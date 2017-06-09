@@ -17,24 +17,28 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-import org.eclipse.che.api.machine.server.spi.impl.AbstractMachineProcess;
 import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Inject;
-
 import java.io.IOException;
+import java.util.Map;
 
 import static java.lang.String.format;
 
 /**
- * Ssh machine implementation of {@link InstanceProcess}
+ * Ssh machine process implementation.
  *
  * @author Alexander Garagatyi
  */
-public class SshMachineProcess extends AbstractMachineProcess implements InstanceProcess {
-    private final String    commandLine;
-    private final SshClient sshClient;
+public class SshMachineProcess  {
+
+    private final SshClient           sshClient;
+    private final String              name;
+    private final String              commandLine;
+    private final String              type;
+    private final Map<String, String> attributes;
+    private final int                 pid;
+    private final String              outputChannel;
 
     private volatile boolean started;
 
@@ -45,13 +49,16 @@ public class SshMachineProcess extends AbstractMachineProcess implements Instanc
                              @Nullable @Assisted("outputChannel") String outputChannel,
                              @Assisted int pid,
                              @Assisted SshClient sshClient) {
-        super(command, pid, outputChannel);
         this.sshClient = sshClient;
         this.commandLine = command.getCommandLine();
         this.started = false;
+        this.name = command.getName();
+        this.type = command.getType();
+        this.attributes = command.getAttributes();
+        this.pid = pid;
+        this.outputChannel = outputChannel;
     }
 
-    @Override
     public boolean isAlive() {
         if (!started) {
             return false;
@@ -66,12 +73,10 @@ public class SshMachineProcess extends AbstractMachineProcess implements Instanc
         }
     }
 
-    @Override
     public void start() throws ConflictException, MachineException {
         start(null);
     }
 
-    @Override
     public void start(LineConsumer output) throws ConflictException, MachineException {
         if (started) {
             throw new ConflictException("Process already started.");
@@ -89,20 +94,43 @@ public class SshMachineProcess extends AbstractMachineProcess implements Instanc
         }
     }
 
-    @Override
     public void checkAlive() throws MachineException, NotFoundException {
         if (!started) {
             throw new NotFoundException("Process is not started yet");
         }
 
         if (sshProcess.getExitCode() != -1) {
-            throw new NotFoundException(format("Process with pid %s not found", getPid()));
+            throw new NotFoundException(format("Process with pid %s not found", pid));
         }
     }
 
-    @Override
     public void kill() throws MachineException {
         sshProcess.kill();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public int getPid() {
+        return pid;
+    }
+
+    public String getCommandLine() {
+        return commandLine;
+    }
+
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public String getOutputChannel() {
+        return outputChannel;
     }
 
     private static class PrefixingLineConsumer implements LineConsumer {

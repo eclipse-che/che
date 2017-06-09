@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.python.languageserver;
 
-import io.typefox.lsapi.services.LanguageServer;
-import io.typefox.lsapi.services.json.JsonBasedLanguageServer;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.eclipse.che.api.languageserver.shared.model.impl.LanguageDescriptionImpl;
 import org.eclipse.che.plugin.python.shared.ProjectAttributes;
+import org.eclipse.lsp4j.jsonrpc.Launcher;
+import org.eclipse.lsp4j.services.LanguageClient;
+import org.eclipse.lsp4j.services.LanguageServer;
 
 import javax.inject.Singleton;
 import java.io.IOException;
@@ -32,18 +32,11 @@ import static java.util.Arrays.asList;
 @Singleton
 public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate {
 
-    private static final String[] EXTENSIONS  = new String[] {ProjectAttributes.PYTHON_EXT};
-    private static final String[] MIME_TYPES  = new String[] {"text/x-python"};
-    private static final LanguageDescriptionImpl description;
+    private static final String[] EXTENSIONS = new String[]{ProjectAttributes.PYTHON_EXT};
+    private static final String[] MIME_TYPES = new String[]{"text/x-python"};
+    private static final LanguageDescription description;
 
     private final Path launchScript;
-
-    static {
-        description = new LanguageDescriptionImpl();
-        description.setFileExtensions(asList(EXTENSIONS));
-        description.setLanguageId(ProjectAttributes.PYTHON_ID);
-        description.setMimeTypes(Arrays.asList(MIME_TYPES));
-    }
 
     public PythonLanguageSeverLauncher() {
         launchScript = Paths.get(System.getenv("HOME"), "che/ls-python/launch.sh");
@@ -73,9 +66,18 @@ public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate 
     }
 
     @Override
-    protected LanguageServer connectToLanguageServer(Process languageServerProcess) throws LanguageServerException {
-        JsonBasedLanguageServer languageServer = new JsonBasedLanguageServer();
-        languageServer.connect(languageServerProcess.getInputStream(), languageServerProcess.getOutputStream());
-        return languageServer;
+    protected LanguageServer connectToLanguageServer(final Process languageServerProcess, LanguageClient client) {
+        Launcher<LanguageServer> launcher = Launcher.createLauncher(client, LanguageServer.class,
+                                                                    languageServerProcess.getInputStream(),
+                                                                    languageServerProcess.getOutputStream());
+        launcher.startListening();
+        return launcher.getRemoteProxy();
+    }
+
+    static {
+        description = new LanguageDescription();
+        description.setFileExtensions(asList(EXTENSIONS));
+        description.setLanguageId(ProjectAttributes.PYTHON_ID);
+        description.setMimeTypes(Arrays.asList(MIME_TYPES));
     }
 }

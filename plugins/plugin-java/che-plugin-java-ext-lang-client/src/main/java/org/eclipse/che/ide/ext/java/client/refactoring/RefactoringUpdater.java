@@ -15,17 +15,20 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
+import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.ExternalResourceDelta;
+import org.eclipse.che.ide.api.resources.ModificationTracker;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeInfo;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.resource.Path;
@@ -36,6 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -56,6 +60,8 @@ public class RefactoringUpdater {
     private final DeletedFilesController        deletedFilesController;
     private final EventBus                      eventBus;
     private final EditorAgent                   editorAgent;
+    private final ClientServerEventService      clientServerEventService;
+    private final PromiseProvider               promises;
 
     @Inject
     public RefactoringUpdater(AppContext appContext,
@@ -63,13 +69,17 @@ public class RefactoringUpdater {
                               WorkspaceAgent workspaceAgent,
                               DeletedFilesController deletedFilesController,
                               EventBus eventBus,
-                              EditorAgent editorAgent) {
+                              EditorAgent editorAgent,
+                              ClientServerEventService clientServerEventService,
+                              PromiseProvider promises) {
         this.appContext = appContext;
         this.editorMultiPartStack = editorMultiPartStack;
         this.workspaceAgent = workspaceAgent;
         this.deletedFilesController = deletedFilesController;
         this.eventBus = eventBus;
         this.editorAgent = editorAgent;
+        this.clientServerEventService = clientServerEventService;
+        this.promises = promises;
     }
 
     /**
@@ -80,9 +90,9 @@ public class RefactoringUpdater {
      * @param changes
      *         applied changes
      */
-    public void updateAfterRefactoring(List<ChangeInfo> changes) {
+    public Promise<Void> updateAfterRefactoring(List<ChangeInfo> changes) {
         if (changes == null || changes.isEmpty()) {
-            return;
+            return promises.resolve(null);
         }
 
         ExternalResourceDelta[] deltas = new ExternalResourceDelta[0];
@@ -128,34 +138,53 @@ public class RefactoringUpdater {
         }
 
         if (deltas.length > 0) {
-            appContext.getWorkspaceRoot().synchronize(deltas).then(new Operation<ResourceDelta[]>() {
-                @Override
-                public void apply(final ResourceDelta[] appliedDeltas) throws OperationException {
-                    for (ResourceDelta delta : appliedDeltas) {
-                        eventBus.fireEvent(new RevealResourceEvent(delta.getToPath()));
-                    }
-                    for (EditorPartPresenter editorPartPresenter : editorAgent.getOpenedEditors()) {
-                        final String path = editorPartPresenter.getEditorInput().getFile().getLocation().toString();
-                        if (pathChanged.contains(path)) {
-                            eventBus.fireEvent(
-                                    new FileContentUpdateEvent(editorPartPresenter.getEditorInput().getFile().getLocation().toString()));
-                        }
-                    }
-                    setActiveEditor();
+            List<EditorPartPresenter> editorsToUpdate = editorAgent.getOpenedEditors().stream()
+                                                                   .filter(editor -> {
+                                                                       VirtualFile file = editor.getEditorInput().getFile();
+                                                                       String editorPath = file.getLocation().toString();
+                                                                       return pathChanged.contains(editorPath);
+                                                                   })
+                                                                   .collect(toList());
+            return appContext.getWorkspaceRoot().synchronize(deltas).then(appliedDeltas -> {
+                for (ResourceDelta delta : appliedDeltas) {
+                    eventBus.fireEvent(new RevealResourceEvent(delta.getToPath()));
                 }
-            });
+            }).then(updateEditors(editorsToUpdate));
         } else {
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                @Override
-                public void execute() {
-                    for (EditorPartPresenter editorPartPresenter : editorAgent.getOpenedEditors()) {
-                        eventBus.fireEvent(
-                                new FileContentUpdateEvent(editorPartPresenter.getEditorInput().getFile().getLocation().toString()));
-                    }
-                    setActiveEditor();
-                }
-            });
+            return updateEditors(editorAgent.getOpenedEditors());
         }
+    }
+
+    private Promise<Void> updateEditors(List<EditorPartPresenter> editorsToUpdate) {
+        return promises.create(callback -> Scheduler.get().scheduleDeferred(() -> {
+            editorsToUpdate.forEach(editor -> updateFileContent(editor.getEditorInput().getFile()));
+
+            setActiveEditor();
+            callback.onSuccess(null);
+        }));
+    }
+
+    private void updateFileContent(VirtualFile virtualFile) {
+        String path = virtualFile.getLocation().toString();
+
+        if (virtualFile instanceof ModificationTracker) {
+            String modificationStamp = ((ModificationTracker)virtualFile).getModificationStamp();
+            eventBus.fireEvent(new FileContentUpdateEvent(path, modificationStamp));
+            return;
+        }
+
+        eventBus.fireEvent(new FileContentUpdateEvent(path));
+    }
+
+    public Promise<Void> handleMovingFiles(List<ChangeInfo> changes) {
+        changes.stream()
+               .filter(change -> !isNullOrEmpty(change.getOldPath()))
+               .forEach(change -> {
+                   String path = change.getPath();
+                   String oldPath = change.getOldPath();
+                   clientServerEventService.sendFileTrackingMoveEvent(path, oldPath);
+               });
+        return promises.resolve(null);
     }
 
     private void registerRemovedFile(ChangeInfo change) {

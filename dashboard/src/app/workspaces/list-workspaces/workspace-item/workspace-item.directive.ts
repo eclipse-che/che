@@ -16,6 +16,15 @@
  * @param{object} workspace
  */
 export class CheWorkspaceItem {
+  restrict: string;
+  require: string[];
+  templateUrl: string;
+  controller: string;
+  controllerAs: string;
+  bindToController: boolean;
+  scope: {
+    [propName: string]: string;
+  };
 
   /**
    * Default constructor.

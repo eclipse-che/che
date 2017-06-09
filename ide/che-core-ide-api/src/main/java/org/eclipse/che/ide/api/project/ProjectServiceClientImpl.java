@@ -11,25 +11,19 @@
 package org.eclipse.che.ide.api.project;
 
 import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
-import org.eclipse.che.api.promises.client.callback.PromiseHelper;
 import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.MimeType;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
@@ -40,7 +34,6 @@ import org.eclipse.che.ide.rest.UrlBuilder;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.websocket.Message;
 import org.eclipse.che.ide.websocket.MessageBuilder;
-import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
@@ -51,6 +44,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.gwt.http.client.RequestBuilder.DELETE;
 import static com.google.gwt.http.client.RequestBuilder.POST;
 import static com.google.gwt.http.client.RequestBuilder.PUT;
+import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENTTYPE;
@@ -141,41 +135,31 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     @Override
     public Promise<Void> importProject(final Path path,
                                        final SourceStorageDto source) {
-        return PromiseHelper.newPromise(new AsyncPromiseHelper.RequestCall<Void>() {
-            @Override
-            public void makeCall(final AsyncCallback<Void> callback) {
-                final String url = PROJECT + IMPORT + path(path.toString());
+        return createFromAsyncRequest(callback -> {
+            final String url = PROJECT + IMPORT + path(path.toString());
+            final Message message = new MessageBuilder(POST, url).data(dtoFactory.toJson(source))
+                                                                 .header(CONTENTTYPE, APPLICATION_JSON)
+                                                                 .build();
 
-                final Message message = new MessageBuilder(POST, url).data(dtoFactory.toJson(source))
-                                                                     .header(CONTENTTYPE, APPLICATION_JSON)
-                                                                     .build();
-
-                wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
-                    @Override
-                    public void apply(MessageBus messageBus) throws OperationException {
-                        try {
-                            messageBus.send(message, new RequestCallback<Void>() {
-                                @Override
-                                protected void onSuccess(Void result) {
-                                    callback.onSuccess(result);
-                                }
-
-                                @Override
-                                protected void onFailure(Throwable exception) {
-                                    callback.onFailure(exception);
-                                }
-                            });
-                        } catch (WebSocketException e) {
-                            callback.onFailure(e);
+            wsAgentStateController.getMessageBus().then(messageBus -> {
+                try {
+                    messageBus.send(message, new RequestCallback<Void>() {
+                        @Override
+                        protected void onSuccess(Void result) {
+                            callback.onSuccess(result);
                         }
-                    }
-                }).catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError arg) throws OperationException {
-                        callback.onFailure(arg.getCause());
-                    }
-                });
-            }
+
+                        @Override
+                        protected void onFailure(Throwable exception) {
+                            callback.onFailure(exception);
+                        }
+                    });
+                } catch (WebSocketException e) {
+                    callback.onFailure(e);
+                }
+            }).catchError(error -> {
+                callback.onFailure(error.getCause());
+            });
         });
     }
 

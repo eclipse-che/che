@@ -21,6 +21,9 @@ public final class Constants {
     /** PHP Project Type ID */
     public static String PHP_PROJECT_TYPE_ID = "php";
 
+    /** PHP Project category **/
+    public static String PHP_CATEGORY        = "PHP";
+
     /** PHP Language */
     public static String PHP_LANG = "php";
 

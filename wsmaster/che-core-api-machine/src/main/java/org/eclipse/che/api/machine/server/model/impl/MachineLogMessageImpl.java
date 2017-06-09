@@ -11,6 +11,8 @@
 package org.eclipse.che.api.machine.server.model.impl;
 
 import org.eclipse.che.api.core.model.machine.MachineLogMessage;
+import org.eclipse.che.api.machine.shared.dto.MachineLogMessageDto;
+import org.eclipse.che.dto.server.DtoFactory;
 
 import java.util.Objects;
 
@@ -62,7 +64,6 @@ public class MachineLogMessageImpl implements MachineLogMessage {
 
     @Override
     public String toString() {
-        return "MachineLogMessageImpl{machineName='" + machineName +
-               "', content='" + content + "'}";
+        return DtoFactory.newDto(MachineLogMessageDto.class).withContent(content).withMachineName(machineName).toString();
     }
 }

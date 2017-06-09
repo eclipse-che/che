@@ -8,24 +8,20 @@
  * Contributors:
  *   Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.che.plugin.docker.machine;
-
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.eclipse.che.api.core.model.machine.ServerProperties;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a strategy for resolving Servers associated with workspace containers.
@@ -33,6 +29,7 @@ import com.google.inject.name.Named;
  * {@link ServerImpl} objects.
  *
  * @author Angel Misevski <amisevsk@redhat.com>
+ * @author Alexander Garagatyi
  * @see ServerEvaluationStrategyProvider
  */
 public abstract class ServerEvaluationStrategy {
@@ -45,9 +42,11 @@ public abstract class ServerEvaluationStrategy {
      * Gets a map of all <strong>internal</strong> addresses exposed by the container in the form of
      * {@code "<address>:<port>"}
      *
-     * @param containerInfo the ContainerInfo object that describes the container.
-     * @param internalAddress address passed into {@code getServers}; used as fallback if address cannot be
-     *        retrieved from containerInfo.
+     * @param containerInfo
+     *         the ContainerInfo object that describes the container.
+     * @param internalAddress
+     *         address passed into {@code getServers}; used as fallback if address cannot be
+     *         retrieved from containerInfo.
      * @return a Map of port protocol (e.g. "4401/tcp") to address (e.g. "172.17.0.1:32317")
      */
     protected abstract Map<String, String> getInternalAddressesAndPorts(ContainerInfo containerInfo,
@@ -57,9 +56,11 @@ public abstract class ServerEvaluationStrategy {
      * Gets a map of all <strong>external</strong> addresses exposed by the container in the form of
      * {@code "<address>:<port>"}
      *
-     * @param containerInfo the ContainerInfo object that describes the container.
-     * @param internalAddress address passed into {@code getServers}; used as fallback if address cannot be
-     *        retrieved from containerInfo.
+     * @param containerInfo
+     *         the ContainerInfo object that describes the container.
+     * @param internalAddress
+     *         address passed into {@code getServers}; used as fallback if address cannot be
+     *         retrieved from containerInfo.
      * @return a Map of port protocol (e.g. "4401/tcp") to address (e.g. "localhost:32317")
      */
     protected abstract Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo,
@@ -72,10 +73,13 @@ public abstract class ServerEvaluationStrategy {
      * <p>Keys consist of port number and transport protocol (tcp or udp) separated by
      * a forward slash (e.g. 8080/tcp)
      *
-     * @param containerInfo the {@link ContainerInfo} describing the container.
-     * @param internalHost alternative hostname to use, if address cannot be obtained from containerInfo
-     * @param serverConfMap additional Map of {@link ServerConfImpl}. Configurations here override those found
-     *        in containerInfo.
+     * @param containerInfo
+     *         the {@link ContainerInfo} describing the container.
+     * @param internalHost
+     *         alternative hostname to use, if address cannot be obtained from containerInfo
+     * @param serverConfMap
+     *         additional Map of {@link ServerConfImpl}. Configurations here override those found
+     *         in containerInfo.
      * @return a Map of the servers exposed by the container.
      */
     public Map<String, ServerImpl> getServers(ContainerInfo containerInfo,
@@ -83,7 +87,7 @@ public abstract class ServerEvaluationStrategy {
                                               Map<String, ServerConfImpl> serverConfMap) {
 
         Map<String, List<PortBinding>> portBindings;
-        Map<String, String> labels = Collections.emptyMap();;
+        Map<String, String> labels = Collections.emptyMap();
 
         if (containerInfo.getNetworkSettings() != null && containerInfo.getNetworkSettings().getPorts() != null) {
             portBindings = containerInfo.getNetworkSettings().getPorts();
@@ -141,13 +145,16 @@ public abstract class ServerEvaluationStrategy {
      *
      * <p>{@code che:server:<portProtocol>:[ref|path|protocol]}
      *
-     * @param portProtocol the port binding associated with the server
-     * @param labels a map holding the relevant values for reference, protocol, and path
-     *        for the given {@code portProtocol}
-     * @param serverConfMap a map of {@link ServerConfImpl} with {@code portProtocol} as
-     *        keys.
+     * @param portProtocol
+     *         the port binding associated with the server
+     * @param labels
+     *         a map holding the relevant values for reference, protocol, and path
+     *         for the given {@code portProtocol}
+     * @param serverConfMap
+     *         a map of {@link ServerConfImpl} with {@code portProtocol} as
+     *         keys.
      * @return {@code ServerConfImpl}, obtained from {@code serverConfMap} if possible,
-     *         or from {@code labels} if there is no entry in {@code serverConfMap}.
+     * or from {@code labels} if there is no entry in {@code serverConfMap}.
      */
     private ServerConfImpl getServerConfImpl(String portProtocol,
                                              Map<String, String> labels,
@@ -187,5 +194,46 @@ public abstract class ServerEvaluationStrategy {
             serverConf.setRef("Server-" + portProtocol.replace('/', '-'));
         }
         return serverConf;
+    }
+
+    /**
+     * Transforms address and server ports into map where
+     * key is port and optional transport protocol and value is address port of server.
+     *
+     * <p/>Example:
+     * When method accepts address my-host.com and ports:
+     * <pre>{@code
+     * {
+     *     "7070" : [
+     *         "hostIp" : "127.0.0.1",
+     *         "hostPort" : "32720"
+     *     ],
+     *     "8080/tcp" : [
+     *         "hostIp" : "127.0.0.1",
+     *         "hostPort" : "32721"
+     *     ],
+     *     "9090/udp" : [
+     *         "hostIp" : "127.0.0.1",
+     *         "hostPort" : "32722"
+     *     ]
+     * }
+     * }</pre>
+     * this method returns:
+     * <pre>{@code
+     * {
+     *     "7070" : "my-host.com:32720",
+     *     "8080/tcp" : "my-host.com:32721",
+     *     "9090/udp" : "my-host.com:32722"
+     * }
+     * }</pre>
+     */
+    protected Map<String, String> getExposedPortsToAddressPorts(String address, Map<String, List<PortBinding>> ports) {
+        Map<String, String> addressesAndPorts = new HashMap<>();
+        for (Map.Entry<String, List<PortBinding>> portEntry : ports.entrySet()) {
+            // there is one value always
+            String port = portEntry.getValue().get(0).getHostPort();
+            addressesAndPorts.put(portEntry.getKey(), address + ":" + port);
+        }
+        return addressesAndPorts;
     }
 }

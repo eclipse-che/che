@@ -77,6 +77,18 @@ public class ProjectPerspective extends AbstractPerspective {
         infoPanel.go(view.getInformationPanel());
     }
 
+
+    @Override
+    public String getPerspectiveId() {
+        return PROJECT_PERSPECTIVE_ID;
+    }
+
+
+    @Override
+    public String getPerspectiveName() {
+        return PROJECT_PERSPECTIVE_ID;
+    }
+
     /** {@inheritDoc} */
     @Override
     public void go(@NotNull AcceptsOneWidget container) {

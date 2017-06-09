@@ -144,6 +144,11 @@ public class TextEditorPartViewImpl extends Composite implements TextEditorPartV
     }
 
     @Override
+    public void setInfoPanelVisible(boolean visible) {
+        infoPanel.setVisible(visible);
+    }
+
+    @Override
     public void initInfoPanel(final String mode, final Keymap keymap,
                               final int lineCount, final int tabSize) {
         this.infoPanel.createDefaultState(mode, lineCount, tabSize);

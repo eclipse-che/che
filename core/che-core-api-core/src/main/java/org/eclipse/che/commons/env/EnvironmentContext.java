@@ -57,10 +57,16 @@ public class EnvironmentContext {
         setSubject(other.getSubject());
     }
 
+    /**
+     * Returns subject or {@link Subject#ANONYMOUS} in case when subject is null.
+     */
     public Subject getSubject() {
-        return subject;
+        return subject == null ? Subject.ANONYMOUS : subject;
     }
 
+    /**
+     * Sets subject.
+     */
     public void setSubject(Subject subject) {
         this.subject = subject;
     }

@@ -14,6 +14,9 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -29,10 +32,12 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
+import org.eclipse.che.ide.api.keybinding.Scheme;
 import org.eclipse.che.ide.hotkeys.HotKeyResources;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.Category;
 import org.eclipse.che.ide.ui.list.CategoryRenderer;
+import org.eclipse.che.ide.ui.listbox.CustomListBox;
 import org.eclipse.che.ide.ui.window.Window;
 
 import java.util.ArrayList;
@@ -44,6 +49,7 @@ import java.util.Map;
  *
  * @author Alexander Andrienko
  * @author Artem Zatsarynnyi
+ * @author @author <a href="mailto:ak@nuxeo.com">Arnaud Kervern</a>
  */
 @Singleton
 public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
@@ -67,6 +73,9 @@ public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
                 public void renderElement(Element element, HotKeyItem hotKeyItem) {
                     element.setInnerText(hotKeyItem.getActionDescription());
                     element.addClassName(hotKeyResources.css().description());
+                    if (hotKeyItem.isGlobal()) {
+                        element.addClassName(hotKeyResources.css().isGlobal());
+                    }
 
                     DivElement hotKeyElem = Document.get().createDivElement();
                     hotKeyElem.setInnerText(hotKeyItem.getHotKey());
@@ -89,7 +98,9 @@ public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
     private ActionDelegate    delegate;
     private String            filteredValue;
 
-    Button okButton;
+    Button saveButton;
+
+    Button closeButton;
 
     Button printButton;
 
@@ -98,6 +109,12 @@ public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
 
     @UiField
     TextBox filterInput;
+
+    @UiField
+    CustomListBox selectionListBox;
+
+    @UiField
+    FlowPanel selectionPanel;
 
     @Inject
     public HotKeysDialogViewImpl(KeyMapViewImplUiBinder uiBinder,
@@ -111,14 +128,22 @@ public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
         this.setTitle(locale.keyBindingsDialogTitle());
         this.setWidget(uiBinder.createAndBindUi(this));
 
-        okButton = createButton(locale.ok(), "keybindings-okButton-btn", new ClickHandler() {
+        saveButton = createButton(locale.save(), "keybindings-saveButton-btn", new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                delegate.onOkClicked();
+                delegate.onSaveClicked();
             }
         });
-        addButtonToFooter(okButton);
-        okButton.addStyleName(resources.windowCss().primaryButton());
+        addButtonToFooter(saveButton);
+        saveButton.addStyleName(resources.windowCss().primaryButton());
+
+        closeButton = createButton(locale.close(), "keybindings-closeButton-btn", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                delegate.onCloseClicked();
+            }
+        });
+        addButtonToFooter(closeButton);
 
         printButton = createButton(locale.print(), "keybindings-printButton-btn", new ClickHandler() {
             @Override
@@ -132,19 +157,28 @@ public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
         categoriesList = new ArrayList<>();
         category.add(list);
         filterInput.getElement().setAttribute("placeholder", "Search");
+        selectionListBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent changeEvent) {
+                delegate.onSchemeSelectionChanged();
+            }
+        });
+
+        // Override DockLayoutPanel Overflow to correctly display ListBox
+        selectionPanel.getElement().getParentElement().getStyle().setOverflow(Style.Overflow.VISIBLE);
     }
 
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
     }
-    
+
     @Override
     public void hide() {
         super.hide();
         resetFilter();
     }
-    
+
     @Override
     public void renderKeybindings() {
         list.clear();
@@ -154,8 +188,25 @@ public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
     @Override
     public void setData(Map<String, List<HotKeyItem>> data) {
         categoriesList.clear();
-        for (Map.Entry<String, List<HotKeyItem>> elem: data.entrySet()) {
+        for (Map.Entry<String, List<HotKeyItem>> elem : data.entrySet()) {
             categoriesList.add(new Category<>(elem.getKey(), keyBindingsRenderer, elem.getValue(), keyBindingsEventDelegate));
+        }
+    }
+
+    @Override
+    public String getSelectedScheme() {
+        return selectionListBox.getValue();
+    }
+
+    @Override
+    public void setSchemes(String select, List<Scheme> schemes) {
+        selectionListBox.clear();
+        for (Scheme s : schemes) {
+            selectionListBox.addItem(s.getDescription(), s.getSchemeId());
+            if (s.getSchemeId().equals(select)) {
+                // TODO Might be a better way to select item
+                selectionListBox.setSelectedIndex(selectionListBox.getItemCount() - 1);
+            }
         }
     }
 

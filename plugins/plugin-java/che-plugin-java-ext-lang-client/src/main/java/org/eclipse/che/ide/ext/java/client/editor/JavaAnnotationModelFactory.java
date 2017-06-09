@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.java.client.editor;
 
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
-import org.eclipse.che.ide.api.editor.texteditor.EditorHandle;
 
 /**
  * Factory for {@link JavaAnnotationModel} instances.
@@ -20,7 +19,6 @@ public interface JavaAnnotationModelFactory {
     /**
      * Builds an instance of {@link JavaAnnotationModel}.
      * 
-     * @param editorHandle an {@link EditorHandle}
      * @param docPositionMap a doc position map model
      * @return a java annotation model
      */

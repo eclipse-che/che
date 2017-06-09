@@ -12,16 +12,13 @@
 import {CheAPI} from '../../components/api/che-api.factory';
 
 export class CheNavBarController {
-  links = [{
-    href: '#/create-workspace',
-    name: 'New Workspace'
-  }];
   menuItemUrl = {
     dashboard: '#/',
     workspaces: '#/workspaces',
     administration: '#/administration',
     // subsections
     plugins: '#/admin/plugins',
+    factories: '#/factories',
     account: '#/account',
     stacks: '#/stacks'
   };
@@ -33,7 +30,6 @@ export class CheNavBarController {
   private $route: ng.route.IRouteService;
   private cheAPI: CheAPI;
   private profile: che.IProfile;
-  private email: string;
 
   /**
    * Default constructor
@@ -48,15 +44,6 @@ export class CheNavBarController {
     this.$window = $window;
 
     this.profile = cheAPI.getProfile().getProfile();
-    if (this.profile.email) {
-      this.email = this.profile.email;
-    } else {
-      this.profile.$promise.then(() => {
-        this.email = this.profile.email ? this.profile.email : 'N/A ';
-      }, () => {
-        this.email = 'N/A ';
-      });
-    }
 
     // highlight navbar menu item
     $scope.$on('$locationChangeStart', () => {
@@ -65,6 +52,7 @@ export class CheNavBarController {
     });
 
     cheAPI.getWorkspace().fetchWorkspaces();
+    cheAPI.getFactory().fetchFactories();
   }
 
   reload(): void {
@@ -80,6 +68,10 @@ export class CheNavBarController {
 
   getWorkspacesNumber(): number {
     return this.cheAPI.getWorkspace().getWorkspaces().length;
+  }
+
+  getFactoriesNumber(): number {
+    return this.cheAPI.getFactory().getPageFactories().length;
   }
 
   openLinkInNewTab(url: string): void {

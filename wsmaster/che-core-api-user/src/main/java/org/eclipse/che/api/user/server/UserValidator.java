@@ -55,7 +55,7 @@ public class UserValidator {
             throw new BadRequestException("User name required");
         }
         if (!isValidName(user.getName())) {
-            throw new BadRequestException("Username must contain only letters and digits");
+            throw new BadRequestException("Username may only contain alphanumeric characters or single hyphens inside");
         }
         if (isNullOrEmpty(user.getEmail())) {
             throw new BadRequestException("User email required");

@@ -79,6 +79,18 @@ public interface EditorWidget extends IsWidget,
      */
     void setReadOnly(boolean isReadOnly);
 
+    /** Sets whether the annotation ruler is visible. */
+    void setAnnotationRulerVisible(boolean show);
+
+    /** Sets whether the folding ruler is visible. */
+    void setFoldingRulerVisible(boolean show);
+
+    /** Sets whether the zoom ruler is visible. */
+    void setZoomRulerVisible(boolean show);
+
+    /** Sets whether the overview ruler is visible. */
+    void setOverviewRulerVisible(boolean show);
+
     /**
      * Returns the readonly state of the editor.
      *

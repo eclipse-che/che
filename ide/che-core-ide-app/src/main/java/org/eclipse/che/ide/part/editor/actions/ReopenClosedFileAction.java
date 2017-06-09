@@ -18,7 +18,6 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 
@@ -56,6 +55,6 @@ public class ReopenClosedFileAction extends EditorAbstractAction {
         EditorPartPresenter lastClosed = currentPartStack.getLastClosed();
         VirtualFile file = lastClosed.getEditorInput().getFile();
 
-        eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
+        editorAgent.openEditor(file);
     }
 }

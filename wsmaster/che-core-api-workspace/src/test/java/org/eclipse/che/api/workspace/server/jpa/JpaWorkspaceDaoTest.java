@@ -14,6 +14,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.tck.JpaCleaner;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
@@ -122,7 +123,9 @@ public class JpaWorkspaceDaoTest {
     public void shouldSyncDbAttributesWhileUpdatingWorkspace() throws Exception {
         final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
         final WorkspaceImpl workspace = createWorkspace("id", account, "name");
-
+        if (workspace.getConfig() != null) {
+            workspace.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        }
         // persist the workspace
         manager.getTransaction().begin();
         manager.persist(account);
@@ -136,17 +139,16 @@ public class JpaWorkspaceDaoTest {
                  .get(0)
                  .getAttributes()
                  .put("new-attr", singletonList("value"));
-        workspaceDao.update(workspace);
+        WorkspaceImpl result = workspaceDao.update(workspace);
 
         manager.clear();
 
         // check it's okay
-        assertEquals(workspaceDao.get(workspace.getId())
-                                 .getConfig()
-                                 .getProjects()
-                                 .get(0)
-                                 .getAttributes()
-                                 .size(), 3);
+        assertEquals(result.getConfig()
+                           .getProjects()
+                           .get(0)
+                           .getAttributes()
+                           .size(), 3);
     }
 
     private long asLong(String query) {

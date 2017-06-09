@@ -17,7 +17,11 @@
  * @author Oleksii Kurinnyi
  */
 export class NavbarRecentWorkspaces {
-
+  restrict: string;
+  templateUrl: string;
+  controller: string;
+  controllerAs: string;
+  bindToController: boolean;
 
   /**
    * Default constructor that is using resource

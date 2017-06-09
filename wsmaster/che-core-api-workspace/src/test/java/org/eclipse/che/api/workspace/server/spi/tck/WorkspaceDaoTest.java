@@ -51,6 +51,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Matchers.any;
@@ -436,6 +437,24 @@ public class WorkspaceDaoTest {
         workspace1.getConfig().setName(workspace2.getConfig().getName());
 
         workspaceDao.update(workspace1);
+    }
+
+    @Test(dependsOnMethods = "shouldGetWorkspaceById")
+    public void createsWorkspaceWithAProjectConfigContainingLongAttributeValues() throws Exception {
+        WorkspaceImpl workspace = createWorkspace("new-workspace", accounts[0], "new-name");
+        ProjectConfigImpl project = workspace.getConfig().getProjects().get(0);
+
+        // long string
+        char[] chars = new char[100_000];
+        Arrays.fill(chars, 0, chars.length / 2, 'x');
+        Arrays.fill(chars, chars.length / 2, chars.length, 'y');
+        String value = new String(chars);
+        project.getAttributes().put("long_value1", singletonList(value));
+        project.getAttributes().put("long_value2", singletonList(value));
+
+        workspaceDao.create(workspace);
+
+        assertEquals(workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace));
     }
 
     @Test(expectedExceptions = NullPointerException.class)

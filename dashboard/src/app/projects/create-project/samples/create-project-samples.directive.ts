@@ -15,25 +15,31 @@
  * @author Florent Benoit
  */
 export class CreateProjectSamples {
-  $timeout: ng.ITimeoutService;
   bindToController: boolean;
   restrict: string;
   controller: string;
   templateUrl: string;
   controllerAs: string;
 
+  scope: {
+    [propName: string]: string
+  };
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($timeout: ng.ITimeoutService) {
-    this.$timeout = $timeout;
+  constructor() {
     this.restrict = 'E';
     this.templateUrl = 'app/projects/create-project/samples/create-project-samples.html';
-
 
     this.controller = 'CreateProjectSamplesController';
     this.controllerAs = 'createProjectSamplesController';
     this.bindToController = true;
+
+    this.scope = {
+      currentStackTags: '=',
+      projectSampleOnSelect: '&'
+    };
   }
 }

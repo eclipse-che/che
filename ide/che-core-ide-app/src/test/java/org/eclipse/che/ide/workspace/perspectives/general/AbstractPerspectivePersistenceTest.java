@@ -26,6 +26,7 @@ import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.part.PartStackPresenter;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
@@ -39,6 +40,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -109,6 +111,8 @@ public class AbstractPerspectivePersistenceTest {
         when(view.getNavigationPanel()).thenReturn(simplePanel);
         when(view.getInformationPanel()).thenReturn(simpleLayoutPanel);
         when(view.getToolPanel()).thenReturn(simplePanel);
+
+        when(partStackPresenter.getPartStackState()).thenReturn(PartStack.State.NORMAL);
 
         when(controllerFactory.createController(Matchers.<SplitLayoutPanel>anyObject(),
                                                 Matchers.<SimplePanel>anyObject())).thenReturn(workBenchController);
@@ -222,6 +226,42 @@ public class AbstractPerspectivePersistenceTest {
         verify(partProvider).get();
 
         verify(partStackPresenter).addPart(partPresenter);
+    }
+
+    @Test
+    public void shouldRestoreMaximizedPartStack() throws Exception {
+        JsonObject state = Json.createObject();
+
+        JsonObject parts = Json.createObject();
+        state.put("PART_STACKS", parts);
+
+        JsonObject partStack = Json.createObject();
+        parts.put("INFORMATION", partStack);
+
+        partStack.put("STATE", PartStack.State.MAXIMIZED.name());
+
+        JsonArray partsArray = Json.createArray();
+        partStack.put("PARTS", partsArray);
+
+        JsonObject part = Json.createObject();
+        partsArray.set(0, part);
+        part.put("CLASS", "foo.Bar");
+
+        partStack.put("SIZE", 142);
+
+        // partStackPresenter.getParts() must return non empty list
+        final List<PartPresenter> partPresenters = new ArrayList<>();
+        partPresenters.add(partPresenter);
+        when(partStackPresenter.getParts()).thenAnswer(new Answer<List<? extends PartPresenter>>() {
+            @Override
+            public List<? extends PartPresenter> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return partPresenters;
+            }
+        });
+
+        perspective.loadState(state);
+
+        verify(workBenchController, never()).setSize(142d);
     }
 
 }

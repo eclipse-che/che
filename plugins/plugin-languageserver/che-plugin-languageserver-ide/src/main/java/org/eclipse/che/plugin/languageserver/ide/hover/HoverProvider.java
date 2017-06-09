@@ -14,9 +14,6 @@ import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.HoverDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.MarkedStringDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -32,11 +29,11 @@ import org.eclipse.che.ide.util.StringUtils;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
+import org.eclipse.lsp4j.Hover;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.typefox.lsapi.MarkedString;
 
 /**
  * Provides hover LS functionality for Orion editor.
@@ -70,22 +67,22 @@ public class HoverProvider implements OrionHoverHandler {
         }
 
         LanguageServerEditorConfiguration configuration = (LanguageServerEditorConfiguration)editor.getConfiguration();
-        if (configuration.getServerCapabilities().isHoverProvider() == null || !configuration.getServerCapabilities().isHoverProvider()) {
+        if (configuration.getServerCapabilities().getHoverProvider() == null
+            || !configuration.getServerCapabilities().getHoverProvider()) {
             return null;
         }
 
         Document document = editor.getDocument();
-        TextDocumentPositionParamsDTO paramsDTO = helper.createTDPP(document, context.getOffset());
+        TextDocumentPositionParams paramsDTO = helper.createTDPP(document, context.getOffset());
 
-
-        Promise<HoverDTO> promise = client.hover(paramsDTO);
-        Promise<OrionHoverOverlay> then = promise.then(new Function<HoverDTO, OrionHoverOverlay>() {
+        Promise<Hover> promise = client.hover(paramsDTO);
+        Promise<OrionHoverOverlay> then = promise.then(new Function<Hover, OrionHoverOverlay>() {
             @Override
-            public OrionHoverOverlay apply(HoverDTO arg) throws FunctionException {
+            public OrionHoverOverlay apply(Hover arg) throws FunctionException {
                 OrionHoverOverlay hover = OrionHoverOverlay.create();
                 hover.setType("markdown");
                 String content = renderContent(arg);
-                //do not show hover with only white spaces
+                // do not show hover with only white spaces
                 if (StringUtils.isNullOrWhitespace(content)) {
                     return null;
                 }
@@ -94,17 +91,11 @@ public class HoverProvider implements OrionHoverHandler {
                 return hover;
             }
 
-            private String renderContent(HoverDTO hover) {
+            private String renderContent(Hover hover) {
                 List<String> contents = new ArrayList<String>();
-                for (MarkedStringDTO dto : hover.getContents()) {
-                    String lang = dto.getLanguage();
-                    if (lang == null || MarkedString.PLAIN_STRING.equals(lang)) {
-                        // plain markdown text
-                        contents.add(dto.getValue());
-                    } else {
-                        // markdown code block
-                        contents.add("```" + lang + "\n" + dto.getValue() + "\n```");
-                    }
+                for (String dto : hover.getContents()) {
+                    // plain markdown text
+                    contents.add(dto);
                 }
                 return Joiner.on("\n\n").join(contents);
             }

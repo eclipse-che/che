@@ -1,0 +1,59 @@
+<!--
+
+    CODENVY CONFIDENTIAL
+    __________________
+
+     [2015] - [2016] Codenvy, S.A.
+     All Rights Reserved.
+
+    NOTICE:  All information contained herein is, and remains
+    the property of Codenvy S.A. and its suppliers,
+    if any.  The intellectual and technical concepts contained
+    herein are proprietary to Codenvy S.A.
+    and its suppliers and may be covered by U.S. and Foreign Patents,
+    patents in process, and are protected by trade secret or copyright law.
+    Dissemination of this information or reproduction of this material
+    is strictly forbidden unless prior written permission is obtained
+    from Codenvy S.A..
+
+-->
+<che-list-item flex ng-mouseover="hover=true" ng-mouseout="hover=false">
+  <div flex="100"
+       layout="row"
+       layout-align="start stretch"
+       class="che-list-item-row">
+    <div layout="row"
+         layout-align="start center"
+         class="che-checkbox-area"
+         ng-if="factoryItemController.isSelectable === true">
+      <che-list-item-checked ng-model="factoryItemController.isSelect"
+                             che-aria-label-checkbox="Factory {{factoryItemController.factory.name}}"
+                             ng-click="factoryItemController.onCheckboxClick()"></che-list-item-checked>
+    </div>
+    <div flex
+         layout-xs="column" layout-gt-xs="row"
+         layout-align-gt-xs="start center"
+         layout-align-xs="start start"
+         class="che-list-item-details">
+      <div flex-gt-xs="25"
+           class="che-list-item-name"
+           ng-click="factoryItemController.redirectToFactoryDetails();">
+        <span class="che-xs-header noselect" hide-gt-xs>Factory</span>
+        <span tooltip="Created: {{factoryItemController.factory.creator.created | amDateFormat:'dddd, MMMM Do, YYYY'}}"
+              class="che-hover">{{factoryItemController.factory.name ? factoryItemController.factory.name : factoryItemController.getFactoryLinks()[0]}}</span>
+      </div>
+      <div flex-gt-xs="60" ng-click="factoryItemController.redirectToFactoryDetails();">
+        <span class="che-xs-header noselect" hide-gt-xs>RAM</span>
+        <span class="factory-consumed-value">{{factoryItemController.getMemoryLimit()}}</span>
+      </div>
+      <div flex-gt-xs="15">
+        <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
+        <span class="che-list-actions">
+          <a tooltip="Open in IDE" ng-href="#/load-factory/{{factoryItemController.factory.id}}">
+            <span class="fa fa-chevron-circle-right factory-action"></span>
+          </a>
+        </span>
+      </div>
+    </div>
+  </div>
+</che-list-item>

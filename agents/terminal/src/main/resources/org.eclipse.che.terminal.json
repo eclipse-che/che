@@ -1,0 +1,13 @@
+{
+  "id": "org.eclipse.che.terminal",
+  "name": "Terminal",
+  "description": "Embedded web terminal",
+  "dependencies": [],
+  "properties": {},
+  "servers": {
+    "terminal": {
+      "port": "4411/tcp",
+      "protocol": "http"
+    }
+  }
+}

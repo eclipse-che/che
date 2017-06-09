@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.java.client.refactoring.rename;
 
 import com.google.common.base.Optional;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -18,6 +19,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
@@ -35,6 +37,9 @@ import org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.RenamePresenter;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
+import org.eclipse.che.ide.util.loging.Log;
+
+import java.util.List;
 
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType.COMPILATION_UNIT;
@@ -50,11 +55,13 @@ import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredIte
 @Singleton
 public class RenameRefactoringAction extends AbstractPerspectiveAction implements ActivePartChangedHandler {
 
-    private final EditorAgent           editorAgent;
-    private final RenamePresenter       renamePresenter;
-    private final JavaRefactoringRename javaRefactoringRename;
-    private final AppContext            appContext;
-    private final FileTypeRegistry      fileTypeRegistry;
+    private final EditorAgent              editorAgent;
+    private final RenamePresenter          renamePresenter;
+    private final JavaLocalizationConstant locale;
+    private final JavaRefactoringRename    javaRefactoringRename;
+    private final AppContext               appContext;
+    private final FileTypeRegistry         fileTypeRegistry;
+    private final DialogFactory            dialogFactory;
 
     private boolean editorInFocus;
 
@@ -65,13 +72,16 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction implement
                                    JavaLocalizationConstant locale,
                                    JavaRefactoringRename javaRefactoringRename,
                                    AppContext appContext,
-                                   FileTypeRegistry fileTypeRegistry) {
+                                   FileTypeRegistry fileTypeRegistry,
+                                   DialogFactory dialogFactory) {
         super(null, locale.renameRefactoringActionName(), locale.renameRefactoringActionDescription());
         this.editorAgent = editorAgent;
         this.renamePresenter = renamePresenter;
+        this.locale = locale;
         this.javaRefactoringRename = javaRefactoringRename;
         this.appContext = appContext;
         this.fileTypeRegistry = fileTypeRegistry;
+        this.dialogFactory = dialogFactory;
         this.editorInFocus = false;
 
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
@@ -79,7 +89,32 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction implement
 
     @Override
     public void actionPerformed(ActionEvent event) {
+        List<EditorPartPresenter> dirtyEditors = editorAgent.getDirtyEditors();
+        if (dirtyEditors.isEmpty()) {
+            performAction();
+            return;
+        }
 
+        AsyncCallback<Void> savingOperationCallback = new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Log.error(getClass(), caught);
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                performAction();
+            }
+        };
+
+        dialogFactory.createConfirmDialog(locale.unsavedDataDialogTitle(),
+                                          locale.unsavedDataDialogPromptSaveChanges(),
+                                          () -> editorAgent.saveAll(savingOperationCallback),
+                                          null)
+                     .show();
+    }
+
+    private void performAction() {
         if (editorInFocus) {
             final EditorPartPresenter editorPart = editorAgent.getActiveEditor();
             if (editorPart == null || !(editorPart instanceof TextEditor)) {

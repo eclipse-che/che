@@ -11,9 +11,7 @@
 package org.eclipse.che.ide.ui.multisplitpanel.tab;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -30,6 +28,9 @@ import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
+
+import static com.google.gwt.dom.client.NativeEvent.BUTTON_LEFT;
+import static com.google.gwt.dom.client.NativeEvent.BUTTON_MIDDLE;
 
 /**
  * Widget that represents a tab.
@@ -58,7 +59,10 @@ public class TabWidget extends Composite implements Tab {
     private ActionDelegate delegate;
 
     @Inject
-    public TabWidget(PartStackUIResources resources, @Assisted String title, @Assisted SVGResource icon, @Assisted boolean closable) {
+    public TabWidget(PartStackUIResources resources,
+                     @Assisted String title,
+                     @Assisted SVGResource icon,
+                     @Assisted boolean closable) {
         this.resources = resources;
         this.title = title;
         this.icon = icon;
@@ -73,12 +77,7 @@ public class TabWidget extends Composite implements Tab {
         addDomHandler(this, DoubleClickEvent.getType());
 
         if (closable) {
-            closeButton.addDomHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    delegate.onTabClosing(TabWidget.this);
-                }
-            }, ClickEvent.getType());
+            closeButton.addDomHandler(event -> delegate.onTabClosing(TabWidget.this), ClickEvent.getType());
         } else {
             closeButton.setVisible(false);
         }
@@ -106,9 +105,9 @@ public class TabWidget extends Composite implements Tab {
 
     @Override
     public void onClick(@NotNull ClickEvent event) {
-        if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
+        if (BUTTON_LEFT == event.getNativeButton()) {
             delegate.onTabClicked(this);
-        } else if (NativeEvent.BUTTON_MIDDLE == event.getNativeButton()) {
+        } else if (BUTTON_MIDDLE == event.getNativeButton()) {
             delegate.onTabClosing(this);
         }
     }
@@ -125,5 +124,4 @@ public class TabWidget extends Composite implements Tab {
 
     interface TabItemWidgetUiBinder extends UiBinder<Widget, TabWidget> {
     }
-
 }

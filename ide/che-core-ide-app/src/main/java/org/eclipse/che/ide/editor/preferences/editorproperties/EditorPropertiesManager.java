@@ -43,13 +43,17 @@ import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProp
 import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties.SHOW_ZOOM_RULER;
 import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties.SMART_INDENTATION;
 import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties.TAB_SIZE;
+import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties.SOFT_WRAP;
 
 /**
  * The class contains methods to simplify the work with editor properties.
  *
+ * @deprecated in favor of {@link org.eclipse.che.ide.editor.preferences.EditorPreferencesManager}
+ *
  * @author Roman Nikitenko
  */
 @Singleton
+@Deprecated
 public class EditorPropertiesManager {
 
     /** The editor settings property name. */
@@ -67,6 +71,7 @@ public class EditorPropertiesManager {
 
         names.put(TAB_SIZE.toString(), locale.propertyTabSize());
         names.put(EXPAND_TAB.toString(), locale.propertyExpandTab());
+        names.put(SOFT_WRAP.toString(), locale.propertySoftWrap());
         names.put(AUTO_PAIR_PARENTHESES.toString(), locale.propertyAutoPairParentheses());
         names.put(AUTO_PAIR_BRACES.toString(), locale.propertyAutoPairBraces());
         names.put(AUTO_PAIR_SQUARE_BRACKETS.toString(), locale.propertyAutoPairSquareBrackets());
@@ -94,6 +99,9 @@ public class EditorPropertiesManager {
         // TextViewOptions (tabs)
         defaultProperties.put(TAB_SIZE.toString(), new JSONNumber(4));
         defaultProperties.put(EXPAND_TAB.toString(), JSONBoolean.getInstance(true));
+
+        //Soft wrap
+        defaultProperties.put(SOFT_WRAP.toString(), JSONBoolean.getInstance(false));
 
         // SourceCodeActions (typing)
         defaultProperties.put(AUTO_PAIR_PARENTHESES.toString(), JSONBoolean.getInstance(true));

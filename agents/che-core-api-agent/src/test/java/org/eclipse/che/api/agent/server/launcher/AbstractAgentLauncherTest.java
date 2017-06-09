@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.launcher;
 
+import org.eclipse.che.api.agent.server.exception.AgentStartException;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.api.machine.server.spi.InstanceNode;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
@@ -26,9 +29,13 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -37,6 +44,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * @author Alexander Garagatyi
@@ -59,10 +67,11 @@ public class AbstractAgentLauncherTest {
         launcher = spy(new TestAgentLauncher(500, 100, agentChecker));
 
         when(agent.getScript()).thenReturn("script content");
-        doReturn(process).when(launcher).start(any(Instance.class), any(Agent.class));
+        doReturn(process).when(launcher).start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
         when(agentChecker.isLaunched(any(Agent.class),
                                      any(InstanceProcess.class),
                                      any(Instance.class))).thenReturn(true);
+        when(machine.getNode()).thenReturn(mock(InstanceNode.class));
     }
 
     @Test
@@ -85,7 +94,7 @@ public class AbstractAgentLauncherTest {
         launcher.launch(machine, agent);
 
         // then
-        verify(launcher, never()).start(any(Instance.class), any(Agent.class));
+        verify(launcher, never()).start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
         verify(agent).getScript();
         verifyNoMoreInteractions(agent);
         verifyZeroInteractions(machine);
@@ -100,7 +109,7 @@ public class AbstractAgentLauncherTest {
         launcher.launch(machine, agent);
 
         // then
-        verify(launcher, never()).start(any(Instance.class), any(Agent.class));
+        verify(launcher, never()).start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
         verify(agent).getScript();
         verifyNoMoreInteractions(agent);
         verifyZeroInteractions(machine);
@@ -126,11 +135,11 @@ public class AbstractAgentLauncherTest {
                                                   any(Instance.class));
     }
 
-    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "Fail launching agent .*. Workspace ID:.*")
+    @Test(expectedExceptions = AgentStartException.class, expectedExceptionsMessageRegExp = "Fail launching agent .*. Workspace ID:.*")
     public void shouldNotCheckIfAgentIsLaunchedMoreThanAgentMaxStartTime() throws Exception {
         // given
         launcher = spy(new TestAgentLauncher(200, 100, agentChecker));
-        doReturn(process).when(launcher).start(any(Instance.class), any(Agent.class));
+        doReturn(process).when(launcher).start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
         when(agentChecker.isLaunched(any(Agent.class),
                                      any(InstanceProcess.class),
                                      any(Instance.class))).thenReturn(false)
@@ -153,7 +162,7 @@ public class AbstractAgentLauncherTest {
     public void shouldNotCheckMoreFrequentThanAgentCheckDelay() throws Exception {
         // given
         launcher = spy(new TestAgentLauncher(200, 10, agentChecker));
-        doReturn(process).when(launcher).start(any(Instance.class), any(Agent.class));
+        doReturn(process).when(launcher).start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
         // record time of each check of agent state
         ArrayList<Long> checkTimestamps = new ArrayList<>(5);
         Answer<Boolean> recordTimestampAndReturnFalse = invocationOnMock -> {
@@ -241,13 +250,76 @@ public class AbstractAgentLauncherTest {
         String agentScript = "testAgentScript";
         when(agent.getId()).thenReturn(agentId);
         when(agent.getScript()).thenReturn(agentScript);
-        when(launcher.start(any(Instance.class), any(Agent.class))).thenCallRealMethod();
+        when(launcher.start(any(Instance.class), any(Agent.class), any(LineConsumer.class))).thenCallRealMethod();
 
         // when
         launcher.launch(machine, agent);
 
         // then
         verify(machine).createProcess(eq(new CommandImpl(agentId, agentScript, "agent")), eq(null));
+    }
+
+    @Test(expectedExceptions = AgentStartException.class, expectedExceptionsMessageRegExp = "Fail launching agent .*\\. Workspace ID:.*")
+    public void shouldLogAgentStartLogsIfTimeoutReached() throws Exception {
+        // given
+        launcher = spy(new TestAgentLauncher(-1, 100, agentChecker));
+        when(agentChecker.isLaunched(any(Agent.class),
+                                     any(InstanceProcess.class),
+                                     any(Instance.class))).thenReturn(false);
+
+        doReturn(process).when(launcher).start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
+
+        // when
+        try {
+            launcher.launch(machine, agent);
+            fail("Should throw AgentStartException");
+        } catch (AgentStartException e) {
+            // then
+            verify(launcher).logAsErrorAgentStartLogs(anyObject(), anyString(), anyString());
+            // rethrow exception to verify message
+            throw e;
+        }
+    }
+
+    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "An error on agent start")
+    public void shouldLogAgentStartLogsIfMachineExceptionOccurs() throws Exception {
+        // given
+        doThrow(new MachineException("An error on agent start"))
+                .when(launcher).start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
+
+        // when
+        try {
+            launcher.launch(machine, agent);
+            fail("Should throw ServerException");
+        } catch (ServerException e) {
+            // then
+            verify(launcher).logAsErrorAgentStartLogs(anyObject(), anyString(), anyString());
+            // rethrow exception to verify message
+            throw e;
+        }
+    }
+
+    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "An error on process kill")
+    public void shouldLogAgentStartLogsIfMachineExceptionOccursAfterAgentStartTimeoutHadReached() throws Exception {
+        // given
+        launcher = spy(new TestAgentLauncher(-1, 100, agentChecker));
+        when(agentChecker.isLaunched(any(Agent.class),
+                                     any(InstanceProcess.class),
+                                     any(Instance.class))).thenReturn(false);
+
+        doReturn(process).when(launcher).start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
+        doThrow(new MachineException("An error on process kill")).when(process).kill();
+
+        // when
+        try {
+            launcher.launch(machine, agent);
+            fail("Should throw ServerException");
+        } catch (ServerException e) {
+            // then
+            verify(launcher).logAsErrorAgentStartLogs(anyObject(), anyString(), anyString());
+            // rethrow exception to verify message
+            throw e;
+        }
     }
 
     private static class TestAgentLauncher extends AbstractAgentLauncher {
@@ -258,8 +330,8 @@ public class AbstractAgentLauncherTest {
         }
 
         @Override
-        protected InstanceProcess start(Instance machine, Agent agent) throws ServerException {
-            return super.start(machine, agent);
+        protected InstanceProcess start(Instance machine, Agent agent, LineConsumer lineConsumer) throws ServerException {
+            return super.start(machine, agent, lineConsumer);
         }
 
         @Override

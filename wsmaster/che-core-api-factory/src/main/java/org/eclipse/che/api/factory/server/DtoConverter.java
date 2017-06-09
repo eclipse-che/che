@@ -102,7 +102,6 @@ public final class DtoConverter {
 
     public static PoliciesDto asDto(Policies policies) {
         return newDto(PoliciesDto.class).withCreate(policies.getCreate())
-                                        .withMatch(policies.getMatch())
                                         .withReferer(policies.getReferer())
                                         .withSince(policies.getSince())
                                         .withUntil(policies.getUntil());

@@ -16,9 +16,9 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.api.component.Component;
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.workspace.WorkspaceWidgetFactory;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidget;
@@ -39,7 +39,7 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
     private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
     private final WorkspaceWidgetFactory              widgetFactory;
     private final CreateWorkspacePresenter            createWorkspacePresenter;
-    private final BrowserQueryFieldRenderer           browserQueryFieldRenderer;
+    private final BrowserAddress                      browserAddress;
 
     private WorkspaceDto                              selectedWorkspace;
     private Callback<Component, Exception>            callback;
@@ -50,14 +50,14 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
                                    Provider<DefaultWorkspaceComponent> wsComponentProvider,
                                    WorkspaceWidgetFactory widgetFactory,
                                    CreateWorkspacePresenter createWorkspacePresenter,
-                                   BrowserQueryFieldRenderer browserQueryFieldRenderer) {
+                                   BrowserAddress browserAddress) {
         this.view = view;
         this.view.setDelegate(this);
 
         this.wsComponentProvider = wsComponentProvider;
         this.widgetFactory = widgetFactory;
         this.createWorkspacePresenter = createWorkspacePresenter;
-        this.browserQueryFieldRenderer = browserQueryFieldRenderer;
+        this.browserAddress = browserAddress;
     }
 
     /**
@@ -74,7 +74,7 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
 
         view.clearWorkspacesPanel();
 
-        String workspaceName = browserQueryFieldRenderer.getWorkspaceName();
+        String workspaceName = browserAddress.getWorkspaceName();
 
         createWsWidgets(workspaces);
 

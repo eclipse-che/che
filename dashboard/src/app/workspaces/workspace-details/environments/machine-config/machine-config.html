@@ -22,20 +22,19 @@
       <i class="config-title-action-show fa"
          ng-class="{'fa-chevron-circle-down': workspaceMachineConfigController.machineIsOpened, 'fa-chevron-circle-right': !workspaceMachineConfigController.machineIsOpened}"></i>
       <div class="config-title">{{workspaceMachineConfigController.machineName}}</div>
+      <dev-machine-label ng-if="workspaceMachineConfigController.machineConfig.isDev"></dev-machine-label>
     </div>
     <div layout="row" layout-align="center center"
          class="config-title-action-edit"
          tooltip="Edit"
-         ng-if="workspaceMachineConfigController.machineConfig.canRenameMachine"
          ng-click="workspaceMachineConfigController.showEditDialog($event)">
-      <i class="config-title-action-edit fa fa-pencil" aria-hidden="true"></i>
+      <i class="fa fa-pencil" aria-hidden="true"></i>
     </div>
     <div flex ng-click="workspaceMachineConfigController.machineIsOpened=!workspaceMachineConfigController.machineIsOpened">
-      <span class="che-list-actions">
-          <span ng-if="workspaceMachineConfigController.machineConfig.canDeleteMachine && !workspaceMachineConfigController.machineConfig.isDev"
-                ng-click="workspaceMachineConfigController.deleteMachine()">
-            <span class="fa fa-trash-o"></span>
-          </span>
+    </div>
+    <div class="che-list-actions">
+      <span class="config-title-action-delete" ng-click="workspaceMachineConfigController.deleteMachine($event)">
+        <span class="fa fa-trash-o"></span>
       </span>
     </div>
   </div>
@@ -45,12 +44,17 @@
 
     <!-- Source -->
     <che-label-container che-label-name="Source"
-                         ng-if="workspaceMachineConfigController.machineConfig.source">
-      <div class="config-paragraph">
-        <p ng-repeat="(key, val) in workspaceMachineConfigController.machineConfig.source">
-          <span class="recipe-item-name">{{key}}:</span>{{val}}
-        </p>
-      </div>
+                         ng-if="workspaceMachineConfigController.machineConfig.source.image">
+      <ng-form flex name="workspaceMachineConfigForm" class="config-machine-source">
+        <che-input-box ng-model="workspaceMachineConfigController.newImage"
+                       ng-change="workspaceMachineConfigController.changeSource()"
+                       che-name="source"
+                       che-place-holder="Image"
+                       che-form="workspaceMachineConfigForm"
+                       required>
+          <div ng-message="required">An image is required.</div>
+        </che-input-box>
+      </ng-form>
     </che-label-container>
 
     <!-- RAM -->
@@ -103,8 +107,7 @@
     <!-- Delete -->
     <che-label-container class="config-delete-label"
                          che-label-name="Delete machine"
-                         che-label-description="Environment should contain at least one machine."
-                         ng-if="workspaceMachineConfigController.machineConfig.canDeleteMachine">
+                         che-label-description="Environment should contain at least one machine.">
       <che-button-danger che-button-title="Delete"
                          ng-disabled="workspaceMachineConfigController.machineConfig.isDev"
                          ng-click="workspaceMachineConfigController.deleteMachine()"></che-button-danger>

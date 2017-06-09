@@ -1,0 +1,50 @@
+<!--
+
+    CODENVY CONFIDENTIAL
+    __________________
+
+     [2015] - [2016] Codenvy, S.A.
+     All Rights Reserved.
+
+    NOTICE:  All information contained herein is, and remains
+    the property of Codenvy S.A. and its suppliers,
+    if any.  The intellectual and technical concepts contained
+    herein are proprietary to Codenvy S.A.
+    and its suppliers and may be covered by U.S. and Foreign Patents,
+    patents in process, and are protected by trade secret or copyright law.
+    Dissemination of this information or reproduction of this material
+    is strictly forbidden unless prior written permission is obtained
+    from Codenvy S.A..
+
+-->
+<md-content class="factory-from-workspace" flex>
+  <div class="factory-from-workspace-search">
+    <che-search che-placeholder="Search for workspaces"
+                ng-model="factoryFromWorkspaceCtrl.workspaceFilter.config.name"></che-search>
+  </div>
+  <span class="projects-list-workspace-name">{{factoryFromWorkspaceCtrl.getWorkspaceName(workspaceId)}}</span>
+                  <span ng-show="(workspaces | filter:factoryFromWorkspaceCtrl.workspaceFilter).length == 0 && workspaces.length > 0"
+                        class="workspace-list-empty">No workspaces found</span>
+  </che-list-title>
+  <che-list>
+    <che-list-item ng-show="(factoryFromWorkspaceCtrl.workspaces | filter:factoryFromWorkspaceCtrl.workspaceFilter).length > 0"
+    ng-repeat="workspace in factoryFromWorkspaceCtrl.workspaces | filter:factoryFromWorkspaceCtrl.workspaceFilter"
+                    flex-gt-sm="100" flex="33" ng-mouseover="hover=true" ng-mouseout="hover=false">
+      <div layout-gt-sm="row" flex="100" layout-align="start center" class="project-list-row"
+           ng-click="factoryFromWorkspaceCtrl.getFactoryContentFromWorkspace(workspace)">
+        <div class="workspace-list-static-icon" layout-align="center center">
+          <div class="workspace-icon">
+            <md-icon md-font-icon="fa fa-server"></md-icon>
+          </div>
+        </div>
+        <div flex layout="column"
+             layout-align-gt="start center"
+             layout-align-sm="center center">
+          <div class="project-name">
+            <a class="codenvy-hover">{{workspace.config.name}}</a>
+          </div>
+        </div>
+      </div>
+    </che-list-item>
+  </che-list>
+</md-content>

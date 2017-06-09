@@ -34,4 +34,6 @@ RUN mkdir -p /version \
     && docker -v
 
 COPY scripts/base /scripts/base/
+COPY scripts/entrypoint.sh /scripts/entrypoint.sh
 
+RUN chmod u+x /scripts/entrypoint.sh

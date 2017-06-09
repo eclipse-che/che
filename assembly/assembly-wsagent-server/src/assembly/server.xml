@@ -137,11 +137,7 @@
         <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
         -->
 
-        <!-- Access log processes all example.
-             Documentation at: /docs/config/valve.html
-             Note: The pattern used is equivalent to using pattern="common" -->
-        <Valve className="ch.qos.logback.access.tomcat.LogbackValve" quiet="true"
-               filename="${catalina.home}/conf/logback-access-localhost.xml" />
+        <Valve className="ch.qos.logback.access.tomcat.LogbackValve" quiet="true" />
 
       </Host>
     </Engine>

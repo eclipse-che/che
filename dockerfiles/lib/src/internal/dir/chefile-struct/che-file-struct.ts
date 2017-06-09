@@ -124,6 +124,8 @@ export class CheFileStructWorkspaceRuntimeDocker {
     content : string;
     image : string;
     location: string;
+    composefile: string;
+    dockerfile: string;
 }
 
 export class CheFileStructWorkspaceRuntime {

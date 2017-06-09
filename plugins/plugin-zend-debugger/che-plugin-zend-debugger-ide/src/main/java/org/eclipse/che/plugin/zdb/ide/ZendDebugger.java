@@ -13,6 +13,9 @@ package org.eclipse.che.plugin.zdb.ide;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
@@ -22,7 +25,6 @@ import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import org.eclipse.che.plugin.debugger.ide.debug.BasicActiveFileHandler;
 import org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType;
@@ -41,24 +43,28 @@ public class ZendDebugger extends AbstractDebugger {
 
     @Inject
     public ZendDebugger(DebuggerServiceClient service,
+                        RequestTransmitter transmitter,
+                        RequestHandlerConfigurator configurator,
                         DtoFactory dtoFactory,
                         LocalStorageProvider localStorageProvider,
-                        MessageBusProvider messageBusProvider,
                         EventBus eventBus,
                         BasicActiveFileHandler activeFileHandler,
                         NotificationManager notificationManager,
                         DebuggerManager debuggerManager,
-                        BreakpointManager breakpointManager) {
+                        BreakpointManager breakpointManager,
+                        RequestHandlerManager requestHandlerManager) {
         super(service,
+              transmitter,
+              configurator,
               dtoFactory,
               localStorageProvider,
-              messageBusProvider,
               eventBus,
               activeFileHandler,
               debuggerManager,
               notificationManager,
               breakpointManager,
-              ID);
+              ID,
+              requestHandlerManager);
     }
 
     @Override
@@ -75,7 +81,7 @@ public class ZendDebugger extends AbstractDebugger {
     @Override
     protected DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties) {
         return new DebuggerDescriptor("Zend Debugger",
-                "Zend Debugger, port: " + connectionProperties.get(ZendDbgConfigurationType.ATTR_DEBUG_PORT));
+                                      "Zend Debugger, port: " + connectionProperties.get(ZendDbgConfigurationType.ATTR_DEBUG_PORT));
     }
 
 }

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.debug.shared.model;
 
+import java.util.List;
+
 /**
  * Debug session.
  *
@@ -30,4 +32,9 @@ public interface DebugSession {
      * Debugger type.
      */
     String getType();
+
+    /**
+     * Returns active breakpoints.
+     */
+    List<? extends Breakpoint> getBreakpoints();
 }

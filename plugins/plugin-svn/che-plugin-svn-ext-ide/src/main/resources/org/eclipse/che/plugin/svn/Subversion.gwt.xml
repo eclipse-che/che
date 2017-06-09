@@ -22,7 +22,6 @@
     <inherits name="com.google.gwt.inject.Inject"/>
     <inherits name="org.eclipse.che.ide.Core"/>
     <inherits name="org.eclipse.che.ide.ui.CodenvyUI"/>
-    <inherits name="org.eclipse.che.ide.extension.machine.Machine"/>
 
     <source path="ide"/>
     <source path="shared"/>

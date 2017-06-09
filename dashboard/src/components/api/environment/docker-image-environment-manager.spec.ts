@@ -11,6 +11,8 @@
 'use strict';
 
 import {DockerImageEnvironmentManager} from './docker-image-environment-manager';
+import IWorkspaceEnvironment = _che.IWorkspaceEnvironment;
+import {IEnvironmentManagerMachine, IEnvironmentManagerMachineServer} from './environment-manager-machine';
 
 /**
  * Test the environment manager for docker image based recipes
@@ -18,7 +20,7 @@ import {DockerImageEnvironmentManager} from './docker-image-environment-manager'
  */
 
 describe('DockerImageEnvironmentManager', () => {
-  let envManager, environment, machines;
+  let envManager: DockerImageEnvironmentManager, environment: IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[];
 
   beforeEach(inject(($log: ng.ILogService) => {
     envManager = new DockerImageEnvironmentManager($log);
@@ -40,18 +42,6 @@ describe('DockerImageEnvironmentManager', () => {
     machines = envManager.getMachines(environment);
   }));
 
-  it('cannot rename machine', () => {
-    let canRenameMachine = envManager.canRenameMachine(machines[0]);
-
-    expect(canRenameMachine).toBe(false);
-  });
-
-  it('cannot delete machine', () => {
-    let canDeleteMachine = envManager.canDeleteMachine(machines[0]);
-
-    expect(canDeleteMachine).toBe(false);
-  });
-
   it('cannot edit environment variables', () => {
     let canEditEnvVariables = envManager.canEditEnvVariables(machines[0]);
 
@@ -68,7 +58,7 @@ describe('DockerImageEnvironmentManager', () => {
   it('should return servers', () => {
     let servers = envManager.getServers(machines[0]);
 
-    let expectedServers = environment.machines['dev-machine'].servers;
+    let expectedServers = <IEnvironmentManagerMachineServer>environment.machines['dev-machine'].servers;
     Object.keys(expectedServers).forEach((serverRef: string) => {
       expectedServers[serverRef].userScope = true;
     });
@@ -88,5 +78,15 @@ describe('DockerImageEnvironmentManager', () => {
 
     expect(isDev).toBe(true);
   });
+
+  it('should update environment\'s recipe via machine\'s source', () => {
+    let machines = envManager.getMachines(environment),
+        newSource = 'eclipse/node';
+
+    envManager.setSource(machines[0], newSource);
+    let newEnvironment = envManager.getEnvironment(environment, machines);
+    expect(newEnvironment.recipe.location).toEqual(newSource);
+  });
+
 });
 

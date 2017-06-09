@@ -25,6 +25,10 @@
             line-height: 25px;
         }
 
+        .mainSection {
+            margin-bottom: 40px;
+        }
+
         .titleSection {
             background-color: editorPreferenceCategoryBackgroundColor;
             line-height: 25px;
@@ -34,17 +38,17 @@
             margin-left: 5px;
         }
 
-        .tables {
+        .selection {
             float: right;
+            margin-right: 5px;
         }
     </ui:style>
 
-    <g:FlowPanel>
+    <g:FlowPanel addStyleNames="{style.mainSection}">
         <g:FlowPanel addStyleNames="{style.titleSection}">
             <g:Label text="{constants.keysSectionLabel}" addStyleNames="{style.sectionLabel}"/>
         </g:FlowPanel>
         <g:Label text="{constants.keybindingsLabel}" addStyleNames="{style.label}"/>
-        <che:CustomListBox ui:field="keyBindingSelection" addStyleNames="{style.tables}"/>
+        <che:CustomListBox ui:field="keyBindingSelection" addStyleNames="{style.selection}"/>
     </g:FlowPanel>
 </ui:UiBinder>
-

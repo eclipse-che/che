@@ -34,7 +34,6 @@ public interface AutoCompleteResources extends SimpleList.Resources, Popup.Resou
         String container();
 
         String items();
-
-        String noborder();
     }
+
 }

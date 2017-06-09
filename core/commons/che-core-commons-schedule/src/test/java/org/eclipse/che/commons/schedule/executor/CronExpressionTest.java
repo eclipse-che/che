@@ -156,7 +156,7 @@ public class CronExpressionTest {
         Date pdate = cronExpression.getNextValidTimeAfter(new Date());
         while (++i < 26) {
             Date date = cronExpression.getNextValidTimeAfter(pdate);
-            LOG.info("fireTime: " + date + ", previousFireTime: " + pdate);
+            LOG.debug("fireTime: " + date + ", previousFireTime: " + pdate);
             assertFalse(pdate.equals(date), "Next fire time is the same as previous fire time!");
             pdate = date;
         }
@@ -174,7 +174,7 @@ public class CronExpressionTest {
         Date pdate = cronExpression.getNextValidTimeAfter(new Date());
         while (++i < 26) {
             Date date = cronExpression.getNextValidTimeAfter(pdate);
-            LOG.info("fireTime: " + date + ", previousFireTime: " + pdate);
+            LOG.debug("fireTime: " + date + ", previousFireTime: " + pdate);
             assertFalse(pdate.equals(date), "Next fire time is the same as previous fire time!");
             pdate = date;
         }

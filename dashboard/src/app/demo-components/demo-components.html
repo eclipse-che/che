@@ -236,5 +236,18 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
 
     </md-tab>
 
+    <md-tab label="Filter">
+
+      <div layout="column">
+        Number round filter:
+        <div data-ng-repeat="number in demoComponentsCtrl.numbersToRound">
+          <div data-ng-repeat="precision in demoComponentsCtrl.precisions">
+            <span>Number <b>{{number}}</b> with precision <b>{{precision}}</b> is <b>{{number | cheNumberRoundFilter:precision}}</b></span>
+          </div>
+        </div>
+      </div>
+
+    </md-tab>
+
   </md-tabs>
 </md-content>

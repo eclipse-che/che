@@ -107,7 +107,6 @@ public abstract class BaseTest {
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
         projectManager = new ProjectManager(vfsProvider,
-                                            eventService,
                                             projectTypeRegistry,
                                             projectRegistry,
                                             projectHandlerRegistry,

@@ -37,16 +37,24 @@ export class CheListHeader {
     this.scope = {
       inputPlaceholder: '@?cheInputPlaceholder',
       inputValue: '=?cheSearchModel',
+      onSearchChange: '&?cheOnSearchChange',
       addButtonTitle: '@?cheAddButtonTitle',
       addButtonHref: '@?cheAddButtonHref',
       onAdd: '&?cheOnAdd',
       importButtonTitle: '@?cheImportButtonTitle',
       onImport: '&?cheOnImport',
       deleteButtonTitle: '@?cheDeleteButtonTitle',
+      deleteButtonDisable: '=?cheDeleteButtonDisable',
+      deleteButtonDisableMessage: '@?cheDeleteButtonDisableMessage',
       onDelete: '&?cheOnDelete',
+      filterValues: '=?cheFilterValues',
+      onFilterChanged: '=?cheOnFilterChanged',
+      hideAdd: '=?cheHideAdd',
       hideDelete: '=?cheHideDelete',
       hideSearch: '=?cheHideSearch',
-      hideHeader: '=?cheHideHeader'
+      hideHeader: '=?cheHideHeader',
+      hideFilter: '=?cheHideFilter'
     };
+
   }
 }

@@ -12,11 +12,10 @@ package org.eclipse.che.ide.part.editor.recent;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.resources.File;
 
 import javax.validation.constraints.NotNull;
@@ -32,15 +31,14 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  */
 public class RecentFileAction extends AbstractPerspectiveAction {
 
-    private final File file;
-    private final EventBus eventBus;
+    private final File        file;
+    private final EditorAgent editorAgent;
 
     @Inject
-    public RecentFileAction(@Assisted File file,
-                            EventBus eventBus) {
+    public RecentFileAction(@Assisted File file, EditorAgent editorAgent) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), getShortPath(file.getLocation().toString()), null, null, null);
         this.file = file;
-        this.eventBus = eventBus;
+        this.editorAgent = editorAgent;
     }
 
     /** {@inheritDoc} */
@@ -52,7 +50,7 @@ public class RecentFileAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
+        editorAgent.openEditor(file);
     }
 
     /**

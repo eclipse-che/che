@@ -16,11 +16,21 @@
  */
 export class CheStackLibraryFilterController {
 
+  private $scope: ng.IScope;
+  private $timeout: ng.ITimeoutService;
+  private selectedIndex: number;
+  private chip: string;
+  private keys: Array<string>;
+  private stackTags: Array<string>;
+  private suggestions: Array<string>;
+  private selectedTags: Array<string>;
+  private onTagsChanges: Function;
+  private selectSuggestion: Function;
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($scope, $mdConstant, $timeout) {
+  constructor($scope: ng.IScope, $mdConstant: any, $timeout: ng.ITimeoutService) {
     this.$scope = $scope;
     this.$timeout = $timeout;
     this.chip = '';
@@ -33,59 +43,44 @@ export class CheStackLibraryFilterController {
 
   /**
    * Transform chip into tag
-   * @param chip the string to make a tag
-   * @returns {*}
-     */
-  transformChip(chip) {
+   * @param chip {string} the string to make a tag
+   * @returns {string}
+   */
+  transformChip(chip: string): string {
     chip = chip.toLowerCase();
-
     // if partial input
     if (this.selectedIndex > -1) {
         chip = this.suggestions[this.selectedIndex].toLowerCase();
     }
-
     // if already selected
-    let selected = this.selectedTags.some(tag => tag.toLowerCase() === chip);
-    if (selected) {
+    if (this.selectedTags.some((tag: string) => tag.toLowerCase() === chip)) {
       return null;
     }
-
     // if match some tag
-    let tag;
-    for (var i=0; i<this.suggestions.length; i++) {
-      if (this.suggestions[i].toLowerCase() === chip) {
-          tag = this.suggestions[i];
-          break;
-      }
-    }
-    if (tag) {
-      return tag;
-    }
+    let tag = this.suggestions.find((tag: string) => tag.toLowerCase() === chip);
 
-    // query string isn't matched any tag
-    // don't add new tag
-    return null;
+    return tag ? tag : null;
   }
 
   /**
    * Callback called when tag added
    */
-  onAdd() {
-    this.$scope.$emit('event:updateFilter', this.selectedTags);
+  onAdd(): void {
+    this.onTagsChanges({tags: this.selectedTags});
   }
 
   /**
    * Callback called when tag removed
    */
-  onRemove() {
-    this.$scope.$emit('event:updateFilter', this.selectedTags);
+  onRemove(): void {
+    this.onTagsChanges({tags: this.selectedTags});
   }
 
   /**
    * Callback called when search query changed
-   * @param query the string to compare with tags
+   * @param query {string} the string to compare with tags
    */
-  querySearch(query) {
+  querySearch(query: string): void {
     query = query.trim().toLowerCase();
 
     let result = [];
@@ -97,7 +92,7 @@ export class CheStackLibraryFilterController {
     }
 
     // exclude already selected tags and filter by substring
-    result = this.ngModel.filter((tag) => this.selectedTags.indexOf(tag) === -1 && tag.toLowerCase().indexOf(query) === 0);
+    result = this.stackTags.filter((tag: string) => this.selectedTags.indexOf(tag) === -1 && tag.toLowerCase().indexOf(query) === 0);
 
     this.suggestions = result;
 
@@ -108,19 +103,19 @@ export class CheStackLibraryFilterController {
 
     // set first suggestion as selected
     this.$timeout(() => {
-        this.$scope.$broadcast('selectSuggestion');
+      this.selectSuggestion(0);
     });
   }
 
   /**
    * Called when user clicked on suggestion to select it
-   * @param tag
+   * @param tag {string}
    */
-  onSelectSuggestion(tag) {
+  onSelectSuggestion(tag: string): void {
     // add tag to selected
-    if (this.transformChip(tag)){
+    if (this.transformChip(tag)) {
       this.selectedTags.push(tag);
-      this.onAdd(tag);
+      this.onAdd();
     }
 
     // clear suggestions and previous input

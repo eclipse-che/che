@@ -46,12 +46,6 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
   }
 
   @Override
-  protected String getModuleSuffix(TreeLogger logger, LinkerContext context)
-      throws UnableToCompleteException {
-    return "";
-  }
-
-  @Override
   protected String getSelectionScriptTemplate(TreeLogger logger,
       LinkerContext context) throws UnableToCompleteException {
     return "com/google/gwt/webworker/linker/DedicatedWorkerTemplate.js";

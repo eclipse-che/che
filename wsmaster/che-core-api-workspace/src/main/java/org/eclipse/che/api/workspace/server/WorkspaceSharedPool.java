@@ -10,19 +10,24 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.inject.Inject;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -35,12 +40,35 @@ public class WorkspaceSharedPool {
 
     private final ExecutorService executor;
 
-    public WorkspaceSharedPool() {
-        executor = Executors.newFixedThreadPool(2 * Runtime.getRuntime().availableProcessors(),
-                                                new ThreadFactoryBuilder().setNameFormat("WorkspaceSharedPool-%d")
-                                                                          .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-                                                                          .setDaemon(false)
-                                                                          .build());
+    @Inject
+    public WorkspaceSharedPool(@Named("che.workspace.pool.type") String poolType,
+                               @Named("che.workspace.pool.exact_size") @Nullable String exactSizeProp,
+                               @Named("che.workspace.pool.cores_multiplier") @Nullable String coresMultiplierProp) {
+        ThreadFactory factory = new ThreadFactoryBuilder().setNameFormat("WorkspaceSharedPool-%d")
+                                                          .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                                                          .setDaemon(false)
+                                                          .build();
+        switch (poolType.toLowerCase()) {
+            case "cached":
+                executor = Executors.newCachedThreadPool(factory);
+                break;
+            case "fixed":
+                Integer exactSize = exactSizeProp == null ? null : Ints.tryParse(exactSizeProp);
+                int size;
+                if (exactSize != null && exactSize > 0) {
+                    size = exactSize;
+                } else {
+                    size = Runtime.getRuntime().availableProcessors();
+                    Integer coresMultiplier = coresMultiplierProp == null ? null : Ints.tryParse(coresMultiplierProp);
+                    if (coresMultiplier != null && coresMultiplier > 0) {
+                        size *= coresMultiplier;
+                    }
+                }
+                executor = Executors.newFixedThreadPool(size, factory);
+                break;
+            default:
+                throw new IllegalArgumentException("The type of the pool '" + poolType + "' is not supported");
+        }
     }
 
     /** Returns an {@link ExecutorService} managed by this pool instance. */
@@ -65,34 +93,37 @@ public class WorkspaceSharedPool {
     }
 
     /**
-     * Terminates this pool, may be called multiple times,
-     * waits until pool is terminated or timeout reached.
+     * Asynchronously runs the given task wrapping it with {@link ThreadLocalPropagateContext#wrap(Runnable)}
      *
-     * @return true if executor successfully terminated and false if not
-     * terminated(either await termination timeout is reached or thread was interrupted)
+     * @param runnable
+     *         task to run
+     * @return completable future bounded to the task
      */
-    @PostConstruct
-    public boolean terminateAndWait() {
-        if (executor.isShutdown()) {
-            return true;
-        }
-        Logger logger = LoggerFactory.getLogger(getClass());
-        executor.shutdown();
-        try {
-            logger.info("Shutdown workspace threads pool, wait 30s to stop normally");
-            if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
-                executor.shutdownNow();
-                logger.info("Interrupt workspace threads pool, wait 60s to stop");
-                if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-                    logger.error("Couldn't terminate workspace threads pool");
-                    return false;
+    public CompletableFuture<Void> runAsync(Runnable runnable) {
+        return CompletableFuture.runAsync(ThreadLocalPropagateContext.wrap(runnable), executor);
+    }
+
+    /**
+     * Terminates this pool if it's not terminated yet.
+     */
+    void shutdown() {
+        if (!executor.isShutdown()) {
+            Logger logger = LoggerFactory.getLogger(getClass());
+            executor.shutdown();
+            try {
+                logger.info("Shutdown workspace threads pool, wait 30s to stop normally");
+                if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+                    executor.shutdownNow();
+                    logger.info("Interrupt workspace threads pool, wait 60s to stop");
+                    if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                        logger.error("Couldn't shutdown workspace threads pool");
+                    }
                 }
+            } catch (InterruptedException x) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
             }
-        } catch (InterruptedException x) {
-            executor.shutdownNow();
-            Thread.currentThread().interrupt();
-            return false;
+            logger.info("Workspace threads pool is terminated");
         }
-        return true;
     }
 }

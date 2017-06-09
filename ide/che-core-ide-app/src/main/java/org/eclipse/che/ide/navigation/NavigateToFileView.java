@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.navigation;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 
+import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.resource.Path;
 
@@ -27,28 +27,46 @@ import java.util.List;
  */
 @ImplementedBy(NavigateToFileViewImpl.class)
 public interface NavigateToFileView extends View<NavigateToFileView.ActionDelegate> {
-    /** Needs for delegate some function into NavigateToFile view. */
-    interface ActionDelegate {
-        /**
-         * Called when suggestions are requested.
-         *
-         * @param query
-         *         query string
-         * @param callback
-         *         callback
-         */
-        void onRequestSuggestions(String query, AsyncCallback<List<Path>> callback);
 
-        /** Called when file selected. */
+    /**
+     * Is needed to delegate actions to corresponding presenter.
+     */
+    interface ActionDelegate {
+
+        /**
+         * Is called when file name is changed.
+         *
+         * @param fileName
+         *          file name
+         */
+        void onFileNameChanged(String fileName);
+
+        /**
+         * Is called when file is selected.
+         *
+         * @param path
+         *          file path
+         */
         void onFileSelected(Path path);
+
     }
 
-    /** Clear input. */
-    void clearInput();
+    /**
+     * Show popup.
+     */
+    void showPopup();
 
-    /** Close dialog. */
-    void close();
+    /**
+     * Hide popup.
+     */
+    void hidePopup();
 
-    /** Show dialog. */
-    void showDialog();
+    /**
+     * Show suggestion popup with list of items.
+     *
+     * @param items
+     *      items of suggestions
+     */
+    void showItems(List<ItemReference> items);
+
 }

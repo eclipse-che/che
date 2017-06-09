@@ -11,11 +11,13 @@
 'use strict';
 
 import {Register} from '../components/utils/register';
+import {FactoryConfig} from './factories/factories-config';
 
 import {ComponentsConfig} from '../components/components-config';
 
 import {AdminsConfig} from './admin/admin-config';
 import {AdministrationConfig} from './administration/administration-config';
+import {DiagnosticsConfig} from './diagnostics/diagnostics-config';
 import {CheColorsConfig} from './colors/che-color.constant';
 import {CheOutputColorsConfig} from './colors/che-output-colors.constant';
 import {CheCountriesConfig} from './constants/che-countries.constant';
@@ -29,7 +31,6 @@ import {ProxySettingsConfig} from './proxy/proxy-settings.constant';
 import {WorkspacesConfig} from './workspaces/workspaces-config';
 import {StacksConfig} from './stacks/stacks-config';
 import {DemoComponentsCtrl} from './demo-components/demo-components.controller';
-import {DocsConfig} from './documentation/docs-config';
 
 
 // init module
@@ -115,8 +116,8 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
     $rootScope.waitingLoaded = false;
     $rootScope.showIDE = false;
 
-    workspaceDetailsService.addSection('Projects', '<workspace-details-projects></workspace-details-projects>', 'icon-ic_inbox_24px');
-    workspaceDetailsService.addSection('SSH', '<workspace-details-ssh></workspace-details-ssh>', 'icon-ic_vpn_key_24px');
+    workspaceDetailsService.addPage('Projects', '<workspace-details-projects></workspace-details-projects>', 'icon-ic_inbox_24px');
+    workspaceDetailsService.addPage('SSH', '<workspace-details-ssh></workspace-details-ssh>', 'icon-ic_vpn_key_24px');
 
     // here only to create instances of these components
     cheIdeFetcher;
@@ -374,10 +375,11 @@ new ComponentsConfig(instanceRegister);
 new AdminsConfig(instanceRegister);
 new AdministrationConfig(instanceRegister);
 new IdeConfig(instanceRegister);
+new DiagnosticsConfig(instanceRegister);
 
 new NavbarConfig(instanceRegister);
 new ProjectsConfig(instanceRegister);
 new WorkspacesConfig(instanceRegister);
 new DashboardConfig(instanceRegister);
 new StacksConfig(instanceRegister);
-new DocsConfig(instanceRegister);
+new FactoryConfig(instanceRegister);

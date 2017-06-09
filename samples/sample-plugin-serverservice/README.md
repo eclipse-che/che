@@ -1,17 +1,17 @@
 ## Description
 
-This sample plugin  show how to implement server service and how they are consumed from the client IDE. 
+This sample plugin  show how to implement server service and how they are consumed from the client IDE.
 
-Read the tutorial at: https://eclipse-che.readme.io/v5.0/docs/serverworkspace-access
+Read the tutorial at: https://www.eclipse.org/che/docs/plugins/serverworkspace-access/index.html
 
 
 ## How to test sample-serverservice plugin
 
 ### 1- Link to IDE assembly
 
-The plugin-serverservice has both part, an IDE extension and a server extension. You have to introduce the extension as a dependency in `/che/assembly/assembly-ide-war/pom.xml`. 
+The plugin-serverservice has both part, an IDE extension and a server extension. You have to introduce the extension as a dependency in `/che/assembly/assembly-ide-war/pom.xml`.
 
-Add: 
+Add:
 ```XML
 ...
 <dependency>
@@ -24,9 +24,9 @@ You can insert the dependency anywhere in the list. After you have inserted it, 
 
 ### 2- Link to WS-Master assembly
 
-The plugin-serverservice has a server side part. You have to introduce the extension as a dependency in `/che/assembly/assembly-wsmaster-war/pom.xml`. 
+The plugin-serverservice has a server side part. You have to introduce the extension as a dependency in `/che/assembly/assembly-wsmaster-war/pom.xml`.
 
-Add: 
+Add:
 ```XML
 ...
 <dependency>
@@ -73,14 +73,18 @@ mvn clean install
 
 ```Shell
 # Start Che using the CLI with your new assembly
-# Replace <version> with the actual directory name
-export CHE_ASSEMBLY=path_to_che_sources/assembly/assembly-main/target/eclipse-che-<version>/eclipse-che-<version>
-che start
+# Replace <local-repo> with the path to your Che repository, to use local binaries in your local image
+# Replace <version> with the actual version you are working on
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                    -v <local-path>:/data \
+                    -v <local-repo>:/repo \
+                       eclipse/che:<version> start --debug
+
 ```
 
 
 ### Documentation resources
 
-- IDE Setup: https://eclipse-che.readme.io/v5.0/docs/setup-che-workspace  
-- Building Extensions: https://eclipse-che.readme.io/v5.0/docs/create-and-build-extensions
-- Run local Eclipse Che binaries: https://eclipse-che.readme.io/v5.0/docs/usage-docker#local-eclipse-che-binaries
+- IDE Setup: https://www.eclipse.org/che/docs/plugins/setup-che-workspace/index.html
+- Building Extensions: https://www.eclipse.org/che/docs/plugins/create-and-build-extensions/index.html
+- Run local Eclipse Che binaries: https://www.eclipse.org/che/docs/setup/configuration/index.html#development-mode

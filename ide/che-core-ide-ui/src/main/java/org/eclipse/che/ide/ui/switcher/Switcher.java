@@ -30,16 +30,69 @@ import com.google.gwt.user.client.ui.SimpleCheckBox;
  * @author Ann Shumilova
  */
 public class Switcher extends Composite implements HasValue<Boolean> {
-    private static final Resources resources = GWT.create(Resources.class);
 
-    static {
-        resources.switcherCSS().ensureInjected();
-    }
+    private static final Resources RESOURCES = GWT.create(Resources.class);
 
     SimpleCheckBox checkbox;
 
+    public Switcher() {
+        FlowPanel mainPanel = new FlowPanel();
+        mainPanel.setStyleName(RESOURCES.switcherCSS().onoffswitch());
+
+        final String elementId = DOM.createUniqueId();
+
+        checkbox = new SimpleCheckBox();
+        checkbox.getElement().setId(elementId);
+        checkbox.setName("onoffswitch");
+        checkbox.setStyleName(RESOURCES.switcherCSS().onoffswitchCheckbox());
+        mainPanel.add(checkbox);
+
+        Element label = DOM.createLabel();
+        label.setClassName(RESOURCES.switcherCSS().onoffswitchLabel());
+        label.setAttribute("for", elementId);
+
+        Element inner = DOM.createDiv();
+        inner.setClassName(RESOURCES.switcherCSS().onoffswitchInner());
+        label.appendChild(inner);
+
+        Element sw = DOM.createDiv();
+        sw.setClassName(RESOURCES.switcherCSS().onoffswitchSwitch());
+        label.appendChild(sw);
+
+        mainPanel.getElement().appendChild(label);
+
+        initWidget(mainPanel);
+    }
+
+    @Override
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Boolean> handler) {
+        return checkbox.addValueChangeHandler(handler);
+    }
+
+    @Override
+    public Boolean getValue() {
+        return checkbox.getValue();
+    }
+
+    @Override
+    public void setValue(Boolean value) {
+        checkbox.setValue(value);
+    }
+
+    @Override
+    public void setValue(Boolean value, boolean fireEvents) {
+        checkbox.setValue(value);
+
+        if (fireEvents) {
+            ValueChangeEvent.fire(this, value);
+        }
+    }
+
     public interface Resources extends ClientBundle {
-        public interface SwitcherCSS extends CssResource {
+        @Source({"switcher.css", "org/eclipse/che/ide/api/ui/style.css"})
+        SwitcherCSS switcherCSS();
+
+        interface SwitcherCSS extends CssResource {
             String onoffswitchInner();
 
             String onoffswitch();
@@ -49,69 +102,10 @@ public class Switcher extends Composite implements HasValue<Boolean> {
             String onoffswitchLabel();
 
             String onoffswitchCheckbox();
-
-        }
-
-        @Source({"switcher.css", "org/eclipse/che/ide/api/ui/style.css"})
-        SwitcherCSS switcherCSS();
-    }
-
-
-    public Switcher() {
-        FlowPanel mainPanel = new FlowPanel();
-        mainPanel.setStyleName(resources.switcherCSS().onoffswitch());
-
-        checkbox = new SimpleCheckBox();
-        checkbox.getElement().setId("switcher");
-        checkbox.setName("onoffswitch");
-        checkbox.setStyleName(resources.switcherCSS().onoffswitchCheckbox());
-        mainPanel.add(checkbox);
-
-        Element label = DOM.createLabel();
-        label.setClassName(resources.switcherCSS().onoffswitchLabel());
-        label.setAttribute("for", "switcher");
-
-        Element inner = DOM.createDiv();
-        inner.setClassName(resources.switcherCSS().onoffswitchInner());
-        label.appendChild(inner);
-
-        Element sw = DOM.createDiv();
-        sw.setClassName(resources.switcherCSS().onoffswitchSwitch());
-        label.appendChild(sw);
-
-        mainPanel.getElement().appendChild(label);
-
-        initWidget(mainPanel);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Boolean> handler) {
-        return checkbox.addValueChangeHandler(handler);
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public Boolean getValue() {
-        return checkbox.getValue();
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public void setValue(Boolean value) {
-        checkbox.setValue(value);
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public void setValue(Boolean value, boolean fireEvents) {
-        checkbox.setValue(value);
-        if (fireEvents) {
-            ValueChangeEvent.fire(this, value);
         }
     }
 
+    static {
+        RESOURCES.switcherCSS().ensureInjected();
+    }
 }

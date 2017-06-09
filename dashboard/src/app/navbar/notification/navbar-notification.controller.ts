@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {ApplicationNotifications} from '../../../components/notification/application-notifications.factory';
 
 
 /**
@@ -17,20 +18,51 @@
  */
 export class NavbarNotificationController {
 
+  private applicationNotifications: ApplicationNotifications;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(applicationNotifications) {
+  constructor(applicationNotifications: ApplicationNotifications, $scope: ng.IScope) {
     this.applicationNotifications = applicationNotifications;
+    $scope.$on("$mdMenuClose", () => {
+      this.removeReadNotifications();
+    });
   }
 
-  getNotificationsCount() {
+  /**
+   * Returns the number of notifications to be shown to user.
+   * @returns {number} number of the notifications
+   */
+  getNotificationsCount(): number {
     return this.applicationNotifications.getNotifications().length;
   }
 
-  getNotifications() {
+  /**
+   * Returns the list of notifications.
+   *
+   * @returns {Array<any>} notifications
+   */
+  getNotifications(): Array<any> {
     return this.applicationNotifications.getNotifications();
+  }
+
+  /**
+   * Remove notifications, that are considered read by the user.
+   */
+  removeReadNotifications(): void {
+    let notificationsToRemove = [];
+    let notifications = this.applicationNotifications.getNotifications()
+    notifications.forEach((notification: any) => {
+      if (notification.removeOnRead) {
+        notificationsToRemove.push(notification);
+      }
+    });
+
+    notificationsToRemove.forEach((notification: any) => {
+      this.applicationNotifications.removeNotification(notification);
+    });
   }
 }
 

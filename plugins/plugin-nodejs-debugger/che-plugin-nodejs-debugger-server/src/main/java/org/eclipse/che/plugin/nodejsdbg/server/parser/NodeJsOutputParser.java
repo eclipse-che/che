@@ -12,6 +12,8 @@ package org.eclipse.che.plugin.nodejsdbg.server.parser;
 
 import org.eclipse.che.plugin.nodejsdbg.server.NodeJsOutput;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.regex.Pattern;
 
@@ -61,6 +63,7 @@ public interface NodeJsOutputParser<T> {
     };
 
     class NodeJsOutputRegExpParser implements NodeJsOutputParser<String> {
+        private static final Logger LOG = LoggerFactory.getLogger(NodeJsOutputRegExpParser.class);
         private final Pattern pattern;
 
         public NodeJsOutputRegExpParser(Pattern pattern) {
@@ -74,6 +77,7 @@ public interface NodeJsOutputParser<T> {
 
         @Override
         public String parse(NodeJsOutput nodeJsOutput) throws NodeJsDebuggerParseException {
+            LOG.debug("{} parse {}", pattern.pattern(), nodeJsOutput.getOutput());
             return nodeJsOutput.getOutput();
         }
     }

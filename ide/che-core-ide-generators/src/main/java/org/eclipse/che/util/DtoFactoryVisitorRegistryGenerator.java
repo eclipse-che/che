@@ -44,22 +44,17 @@ public class DtoFactoryVisitorRegistryGenerator {
      * Entry point. --rootDir is the optional parameter.
      *
      * @param args
+     * @throws IOException 
      */
-    public static void main(String[] args) {
-        try {
-            File rootFolder = GeneratorUtils.getRootFolder(args);
-            System.out.println(" ------------------------------------------------------------------------ ");
-            System.out.println("Searching for DTO");
-            System.out.println(" ------------------------------------------------------------------------ ");
+    public static void main(String[] args) throws IOException {
+        File rootFolder = GeneratorUtils.getRootFolder(args);
+        System.out.println(" ------------------------------------------------------------------------ ");
+        System.out.println("Searching for DTO");
+        System.out.println(" ------------------------------------------------------------------------ ");
 
-            // find all DtoFactoryVisitors
-            findDtoFactoryVisitors();
-            generateExtensionManager(rootFolder);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-            // error
-            System.exit(1);//NOSONAR
-        }
+        // find all DtoFactoryVisitors
+        findDtoFactoryVisitors();
+        generateExtensionManager(rootFolder);
     }
 
     /**

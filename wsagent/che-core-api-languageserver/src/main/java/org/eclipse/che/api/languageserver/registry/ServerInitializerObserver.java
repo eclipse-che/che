@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import io.typefox.lsapi.ServerCapabilities;
-import io.typefox.lsapi.services.LanguageServer;
-
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.services.LanguageServer;
 
 /**
  * @author Anatoliy Bazko
@@ -24,9 +23,9 @@ public interface ServerInitializerObserver {
      * Notifies observers when server is initialized and ready to use.
      *
      * @param server
-     *      the {@link LanguageServer}
+     *         the {@link LanguageServer}
      * @param capabilities
-     *      the supported capabilities by server
+     *         the supported capabilities by server
      * @param languageDescription
      * @param projectPath
      */

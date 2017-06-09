@@ -12,17 +12,17 @@ package org.eclipse.che.plugin.languageserver.ide.editor.signature;
 
 import com.google.common.base.Optional;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.ParameterInformationDTO;
 import org.eclipse.che.ide.api.editor.signature.ParameterInfo;
+import org.eclipse.lsp4j.ParameterInformation;
 
 /**
  * @author Evgen Vidolob
  */
 class ParamterInfoImpl implements ParameterInfo {
 
-    private final ParameterInformationDTO dto;
+    private final ParameterInformation dto;
 
-    public ParamterInfoImpl(ParameterInformationDTO dto) {
+    public ParamterInfoImpl(ParameterInformation dto) {
         this.dto = dto;
     }
 

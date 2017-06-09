@@ -1,6 +1,28 @@
-.list-ports
+.list-servers
   *
     outline none !important
+
+  .list-servers-item-runtime
+    display table
+    margin 6px 0
+
+    & div
+      line-height 28px
+
+    .list-servers-item-runtime-address
+      display table-row
+
+      & > div
+        display table-cell
+
+      .title
+        padding-right 5px
+
+    .list-servers-item-runtime-url
+      display table-row
+
+      & > div
+        display table-cell
 
   .che-list
     margin-bottom 12px
@@ -26,3 +48,12 @@
 
   .che-list-header md-item
     border-top none
+
+  .che-list-item-content
+    display block
+
+  .che-list-item-details
+    cursor inherit
+
+  md-item
+    display block

@@ -31,14 +31,39 @@ declare namespace _che {
 
   }
 
+  export namespace widget {
+
+    export interface ICheListHelper {
+      areAllItemsSelected: boolean;
+      isNoItemSelected: boolean;
+      itemsSelectionStatus: any;
+      visibleItemsNumber: number;
+      selectAllItems(): void;
+      deselectAllItems(): void;
+      changeBulkSelection(): void;
+      updateBulkSelectionStatus(): void;
+      getSelectedItems(): any[];
+      getVisibleItems(): any[];
+      setList(itemsList: any[], key: string, isSelectable?: (item: any) => boolean): void;
+      applyFilter(name: string, ...filterProps: any[]);
+      clearFilters(): void;
+    }
+
+    export interface ICheListHelperFactory {
+      getHelper(id: string): ICheListHelper;
+      removeHelper(id: string): void;
+    }
+
+  }
+
   export interface IRegisterService {
     app: ng.IModule;
     directive(name: string, constructorFn: Function);
-    filter(name: string, constructorFn: Function): che.IRegisterService;
-    controller(name: string, constructorFn: Function): che.IRegisterService;
-    service(name: string, constructorFn: Function): che.IRegisterService;
-    provider(name: string, constructorFn: ng.IServiceProvider): che.IRegisterService;
-    factory(name: string, constructorFn: Function): che.IRegisterService;
+    filter(name: string, constructorFn: Function): IRegisterService;
+    controller(name: string, constructorFn: Function): IRegisterService;
+    service(name: string, constructorFn: Function): IRegisterService;
+    provider(name: string, constructorFn: ng.IServiceProvider): IRegisterService;
+    factory(name: string, constructorFn: Function): IRegisterService;
   }
 
   export interface IWorkspaceCommand {
@@ -59,7 +84,8 @@ declare namespace _che {
     creator?: string;
     scope?: string;
     components?: Array<any>;
-    source: any;
+    links?: Array<any>;
+    source?: any;
     workspaceConfig: IWorkspaceConfig;
   }
 
@@ -68,7 +94,6 @@ declare namespace _che {
     name: string;
     projects?: any;
     links?: Array<any>;
-    runtime?: any;
     temporary?: boolean;
     status?: string;
     namespace?: string;
@@ -79,6 +104,8 @@ declare namespace _che {
     };
     config: IWorkspaceConfig;
     runtime?: IWorkspaceRuntime;
+    isLocked?: boolean;
+    usedResources: string;
   }
 
   export interface IWorkspaceConfig {
@@ -87,7 +114,7 @@ declare namespace _che {
     environments: {
       [envName: string]: IWorkspaceEnvironment
     };
-    projects: Array <any>;
+    projects?: Array <any>;
     commands?: Array <any>;
   }
 
@@ -95,12 +122,14 @@ declare namespace _che {
     machines: {
       [machineName: string]: IEnvironmentMachine
     };
-    recipe: {
-      content?: string;
-      location?: string;
-      contentType: string;
-      type: string;
-    };
+    recipe: IRecipe;
+  }
+
+  export interface IRecipe {
+    content?: string;
+    location?: string;
+    contentType?: string;
+    type: string;
   }
 
   export interface IEnvironmentMachine {
@@ -154,20 +183,34 @@ declare namespace _che {
     url: string;
   }
 
+  export interface IProjectSource {
+    location: string;
+    parameters?: {
+      [paramName: string]: string
+    };
+    type?: string;
+  }
+
+  export interface IProjectTemplate {
+    name: string;
+    displayName?: string;
+    description: string;
+    source?: IProjectSource;
+    path?: string;
+    commands?: Array<any>;
+    projectType?: string;
+    type?: string;
+    tags?: Array<string>;
+    attributes?: any;
+    options?: Array<any>;
+    workspaceId?: string;
+    workspaceName?: string;
+    projects?: IProject[];
+  }
+
   export interface IProject {
     name: string;
-    displayName: string;
-    description: string;
-    source: {
-      location: string;
-      parameters: any;
-      type: string;
-    };
-    commands: Array<any>;
-    projectType: string;
-    tags: Array<string>;
-    attributes: Array<any>;
-    options: Array<any>;
+    source: IProjectSource;
     workspaceId?: string;
     workspaceName?: string;
   }
@@ -177,19 +220,9 @@ declare namespace _che {
   }
 
   export interface IImportProject {
-    source: {
-      type?: string;
-      location: string;
-      parameters: Object;
-    };
-    project: {
-      name: string;
-      type?: string;
-      description: string;
-      commands?: Array<any>;
-      attributes?: Array<any>;
-      options?: Array<any>;
-    };
+    source: IProjectSource;
+    project?: IProjectTemplate;
+    projects?: IProjectTemplate[];
   }
 
   export interface IEditorOptions {
@@ -204,11 +237,64 @@ declare namespace _che {
     errors: Array<string>;
   }
 
-  export interface IProfile {
-    attributes?: Object;
+  export interface IProfileAttributes {
+      firstName?: string;
+      lastName?: string;
+      [propName: string]: string | number;
+  }
+
+  export interface IProfile extends ng.resource.IResourceClass<any> {
+    attributes?: IProfileAttributes;
     email: string;
     links?: Array<any>;
     userId: string;
     $promise?: any;
+  }
+
+  export interface INamespace {
+    id: string;
+    label: string;
+    location: string;
+  }
+
+  export interface IUser {
+    attributes: {
+      firstName?: string;
+      lastName?: string;
+      [propName: string]: string | number;
+    };
+    id: string;
+    name: string;
+    email: string;
+    aliases: Array<string>;
+  }
+
+  export interface IFactory {
+    id: string;
+    name?: string;
+    v: string;
+    workspace: IWorkspaceConfig;
+    creator: any;
+    ide?: any;
+    button?: any;
+    policies?: any;
+  }
+
+  export interface IRegistry {
+    url: string;
+    username: string;
+    password: string;
+  }
+
+  interface IRequestData {
+    userId?: string;
+    maxItems?: string;
+    skipCount?: string;
+    [param: string]: string;
+  }
+
+  interface IPageInfo {
+    countPages: number;
+    currentPageNumber: number;
   }
 }

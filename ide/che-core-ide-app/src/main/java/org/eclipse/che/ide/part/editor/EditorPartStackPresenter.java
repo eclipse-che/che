@@ -24,10 +24,10 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
 import org.eclipse.che.ide.api.editor.EditorWithErrors.EditorState;
-import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
@@ -92,6 +92,7 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
     private final ActionManager                    actionManager;
     private final ClosePaneAction                  closePaneAction;
     private final CloseAllTabsPaneAction           closeAllTabsPaneAction;
+    private final EditorAgent                      editorAgent;
     private final Map<EditorPaneMenuItem, TabItem> items;
 
     //this list need to save order of added parts
@@ -118,7 +119,8 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
                                     EditorPaneMenu editorPaneMenu,
                                     ActionManager actionManager,
                                     ClosePaneAction closePaneAction,
-                                    CloseAllTabsPaneAction closeAllTabsPaneAction) {
+                                    CloseAllTabsPaneAction closeAllTabsPaneAction,
+                                    EditorAgent editorAgent) {
         super(eventBus, partMenu, partStackEventHandler, tabItemFactory, partsComparator, view, null);
         this.editorPaneMenuItemFactory = editorPaneMenuItemFactory;
         this.eventBus = eventBus;
@@ -127,6 +129,7 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
         this.actionManager = actionManager;
         this.closePaneAction = closePaneAction;
         this.closeAllTabsPaneAction = closeAllTabsPaneAction;
+        this.editorAgent = editorAgent;
         this.view.setDelegate(this);
         this.items = new HashMap<>();
         this.partsOrder = new LinkedList<>();
@@ -211,8 +214,18 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
         editorPart.addPropertyListener(new PropertyListener() {
             @Override
             public void propertyChanged(PartPresenter source, int propId) {
-                if (propId == EditorPartPresenter.PROP_INPUT && source instanceof EditorPartPresenter) {
-                    editorTab.setReadOnlyMark(((EditorPartPresenter)source).getEditorInput().getFile().isReadOnly());
+                if (!(source instanceof EditorPartPresenter)) {
+                    return;
+                }
+
+                boolean isReadOnly = ((EditorPartPresenter)source).getEditorInput().getFile().isReadOnly();
+                if (propId == EditorPartPresenter.PROP_INPUT) {
+                    editorTab.setReadOnlyMark(isReadOnly);
+                    return;
+                }
+
+                if (!isReadOnly && propId == EditorPartPresenter.PROP_DIRTY) {
+                    editorTab.setUnsavedDataMark(((EditorPartPresenter)source).isDirty());
                 }
             }
         });
@@ -341,7 +354,7 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
             Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                 @Override
                 public void execute() {
-                    eventBus.fireEvent(FileEvent.createCloseFileEvent((EditorTab)tabItem));
+                    editorAgent.closeEditor(((EditorTab)tabItem).getRelativeEditorPart());
                 }
             });
         }
@@ -502,7 +515,7 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
             final TabItem tabItem = item.getData();
             if (tabItem instanceof EditorTab) {
                 EditorTab editorTab = (EditorTab)tabItem;
-                eventBus.fireEvent(FileEvent.createCloseFileEvent(editorTab));
+                editorAgent.closeEditor(editorTab.getRelativeEditorPart());
             }
         }
     }

@@ -10,12 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.sync;
 
-import io.typefox.lsapi.TextDocumentSyncKind;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.lsp4j.TextDocumentSyncKind;
 
 /**
  * Provide synchronizes for according {@link TextDocumentSyncKind}

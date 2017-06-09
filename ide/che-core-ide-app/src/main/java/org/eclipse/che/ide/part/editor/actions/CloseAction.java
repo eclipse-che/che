@@ -17,8 +17,9 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.parts.EditorTab;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 
 /**
  * Performs closing selected editor.
@@ -43,6 +44,10 @@ public class CloseAction extends EditorAbstractAction {
         if (editorTab == null) {
             return;
         }
-        eventBus.fireEvent(FileEvent.createCloseFileEvent(editorTab));
+
+        final VirtualFile editorFile = getEditorFile(e);
+        final EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(editorFile.getLocation());
+
+        editorAgent.closeEditor(openedEditor);
     }
 }

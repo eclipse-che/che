@@ -43,8 +43,76 @@ public class Style {
         return theme.getDisabledMenuColor();
     }
 
+    public static String getCommandsToolbarBackgroundColor() {
+        return theme.getCommandsToolbarBackgroundColor();
+    }
+
+    public static String getCommandsToolbarProcessesLabelBackground() {
+        return theme.getCommandsToolbarProcessesLabelBackground();
+    }
+
+    public static String getCommandsToolbarProcessesLabelBorder() {
+        return theme.getCommandsToolbarProcessesLabelBorder();
+    }
+
+    public static String getCommandsToolbarMachineNameColor() {
+        return theme.getCommandsToolbarMachineNameColor();
+    }
+
+    public static String getCommandsToolbarCommandNameColor() {
+        return theme.getCommandsToolbarCommandNameColor();
+    }
+
+    public static String getCommandEditorProjectsTableHeaderColor() {
+        return theme.getCommandEditorProjectsTableHeaderColor();
+    }
+
+    public static String getCommandEditorProjectsTableRowColor() {
+        return theme.getCommandEditorProjectsTableRowColor();
+    }
+
+    public static String getCommandEditorProjectSwitcherBorder() {
+        return theme.getCommandEditorProjectSwitcherBorder();
+    }
+
     public static String getDialogContentBackground() {
         return theme.getDialogContentBackground();
+    }
+
+    public static String getDropdownListBackground() {
+        return theme.getDropdownListBackground();
+    }
+
+    public static String getHoveredDropdownListBackground() {
+        return theme.getHoveredDropdownListBackground();
+    }
+
+    public static String getActiveDropdownListBackground() {
+        return theme.getActiveDropdownListBackground();
+    }
+
+    public static String getDropdownListBorder() {
+        return theme.getDropdownListBorder();
+    }
+
+    public static String getDropdownListButtonColor() {
+        return theme.getDropdownListButtonColor();
+    }
+
+    public static String getMenuButtonBackground() {
+        return theme.getMenuButtonBackground();
+    }
+
+    public static String getHoveredMenuButtonBackground() {
+        return theme.getHoveredMenuButtonBackground();
+    }
+
+    public static String getActiveMenuButtonBackground() {
+        return theme.getActiveMenuButtonBackground();
+    }
+
+    public static String getActiveMenuButtonBorder() {
+        return theme.getMenuButtonBorder();
     }
 
     public static String getButtonBackground() {

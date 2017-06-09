@@ -27,6 +27,8 @@ import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
+import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -246,10 +248,14 @@ public class ProjectConfigImpl implements ProjectConfig {
     }
 
     @PostLoad
+    @PostUpdate
+    @PostPersist
     private void postLoadAttributes() {
-        attributes = dbAttributes.values()
-                                 .stream()
-                                 .collect(toMap(attr -> attr.name, attr -> attr.values));
+        if (dbAttributes != null) {
+            attributes = dbAttributes.values()
+                                     .stream()
+                                     .collect(toMap(attr -> attr.name, attr -> attr.values));
+        }
     }
 
     @Entity(name = "ProjectAttribute")

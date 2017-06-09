@@ -10,13 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.search.node;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
-import org.eclipse.che.api.promises.client.callback.PromiseHelper;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
@@ -26,7 +23,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Field;
 import org.eclipse.che.ide.ext.java.shared.dto.model.ImportDeclaration;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Initializer;
-import org.eclipse.che.ide.ext.java.shared.dto.model.Method;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Type;
 import org.eclipse.che.ide.ext.java.shared.dto.search.Match;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
@@ -37,6 +33,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 
 /**
  * Represent java type.
@@ -70,43 +69,41 @@ public class TypeNode extends AbstractPresentationNode {
 
     @Override
     protected Promise<List<Node>> getChildrenImpl() {
-        return PromiseHelper.newPromise(new AsyncPromiseHelper.RequestCall<List<Node>>() {
-            @Override
-            public void makeCall(AsyncCallback<List<Node>> callback) {
-                List<Node> child = new ArrayList<>();
-                if (compilationUnit != null && type.isPrimary()) {
-                    for (ImportDeclaration importDeclaration : compilationUnit.getImports()) {
-                        createNodeForAllMatches(importDeclaration.getHandleIdentifier(), child);
+        return createFromAsyncRequest(callback -> {
+            List<Node> children = new ArrayList<>();
+            if (compilationUnit != null && type.isPrimary()) {
+                for (ImportDeclaration importDeclaration : compilationUnit.getImports()) {
+                    createNodeForAllMatches(importDeclaration.getHandleIdentifier(), children);
+                }
+                for (Type subType : compilationUnit.getTypes()) {
+                    if (subType == type) {
+                        continue;
                     }
-                    for (Type subType : compilationUnit.getTypes()) {
-                        if (subType == type) {
-                            continue;
-                        }
-                        child.add(nodeFactory.create(subType, compilationUnit, classFile, matches));
-                    }
+                    children.add(nodeFactory.create(subType, compilationUnit, classFile, matches));
                 }
-                createNodeForAllMatches(type.getHandleIdentifier(), child);
-
-                for (Initializer initializer : type.getInitializers()) {
-                    createNodeForAllMatches(initializer.getHandleIdentifier(), child);
-                }
-
-                for (Field field : type.getFields()) {
-                    createNodeForAllMatches(field.getHandleIdentifier(), child);
-                }
-
-                for (Type subType : type.getTypes()) {
-                    child.add(nodeFactory.create(subType, compilationUnit, classFile, matches));
-                }
-
-                for (Method method : type.getMethods()) {
-                    child.add(nodeFactory.create(method, matches, compilationUnit, classFile));
-                }
-
-                Collections.sort(child, new NodeComparator());
-                callback.onSuccess(child);
-
             }
+            createNodeForAllMatches(type.getHandleIdentifier(), children);
+
+            for (Initializer initializer : type.getInitializers()) {
+                createNodeForAllMatches(initializer.getHandleIdentifier(), children);
+            }
+
+            for (Field field : type.getFields()) {
+                createNodeForAllMatches(field.getHandleIdentifier(), children);
+            }
+
+            final List<Node> typeNodes = type.getTypes().stream()
+                                             .map(subType -> nodeFactory.create(subType, compilationUnit, classFile, matches))
+                                             .collect(Collectors.toList());
+            children.addAll(typeNodes);
+
+            final List<Node> methodNodes = type.getMethods().stream()
+                                               .map(method -> nodeFactory.create(method, matches, compilationUnit, classFile))
+                                               .collect(Collectors.toList());
+            children.addAll(methodNodes);
+
+            Collections.sort(children, new NodeComparator());
+            callback.onSuccess(children);
         });
     }
 

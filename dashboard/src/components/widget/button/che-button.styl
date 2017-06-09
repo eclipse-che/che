@@ -30,8 +30,15 @@ che-button-notice .md-button.md-accent.md-raised.md-hue-2.md-button.md-chenotice
 che-button-primary .md-button.md-default-theme.md-hue-2.md-accent.md-raised, che-button-primary .md-button.md-maincontent-theme-theme.md-hue-2.md-accent.md-raised
   che-button-style()
 
-che-button-primary button.md-button.che-button.md-accent.md-default-theme.md-hue-2[disabled]
-  background-color transparent
+che-button-primary
+  button.md-button.che-button.md-accent.md-default-theme.md-hue-2[disabled]
+    background-color rgba(0, 0, 0, 0.12) !important
+    position relative
+    border-color rgba(128,128,128,0.12);
+    cursor default
+
+    span
+      color $label-info-color !important
 
 che-button-primary-flat .md-button.md-default-theme.md-hue-2.md-accent, che-button-primary-flat .md-button.md-maincontent-theme-theme.md-hue-2.md-accent
   che-flat-button-style()
@@ -57,11 +64,11 @@ che-button-cancel-flat .md-button.md-checancel-theme.md-hue-2.md-accent
   margin-top -6px
   margin-right 10px
 
-che-button-danger .md-button:hover,
-che-button-notice .md-button:hover,
-che-button-warning .md-button:hover,
-che-button-default .md-button:hover,
-che-button-save-flat .md-button:hover,
-che-button-cancel-flat .md-button:hover,
-che-button-primary .md-button:hover
+che-button-danger:not([disabled]) .md-button:hover,
+che-button-notice:not([disabled]) .md-button:hover,
+che-button-warning:not([disabled]) .md-button:hover,
+che-button-default:not([disabled]) .md-button:hover,
+che-button-save-flat:not([disabled]) .md-button:hover,
+che-button-cancel-flat:not([disabled]) .md-button:hover,
+che-button-primary:not([disabled]) .md-button:hover
   che-brightness(90%)

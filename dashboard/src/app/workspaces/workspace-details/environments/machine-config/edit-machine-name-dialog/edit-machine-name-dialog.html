@@ -1,4 +1,5 @@
-<md-dialog flex="50"
+<che-popup title="Edit machine name"
+           on-close="editMachineNameDialogController.hide()"
            class="edit-machine-name-dialog-content">
   <ng-form flex layout="column" name="machineNameForm">
     <che-label-container che-label-name="Name">
@@ -18,15 +19,15 @@
     </che-label-container>
 
     <che-label-container>
-      <div layout="row">
+      <div layout="row" layout-align="end end">
         <che-button-primary che-button-title="Update"
                             ng-disabled="machineNameForm.$invalid"
                             ng-click="editMachineNameDialogController.updateMachineName()"></che-button-primary>
 
-        <che-button-notice che-button-title="Cancel"
+        <che-button-notice che-button-title="Close"
                            ng-click="editMachineNameDialogController.hide()"
                            tabindex="0"></che-button-notice>
       </div>
     </che-label-container>
   </ng-form>
-</md-dialog>
+</che-popup>

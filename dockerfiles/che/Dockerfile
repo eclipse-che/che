@@ -20,18 +20,15 @@
 #             -v /home/user/che/storage:/home/user/che/storage \
 #             codenvy/che-server
 #           
-FROM alpine:3.4
+FROM openjdk:8u111-jre-alpine
 
 ENV LANG=C.UTF-8 \
-    JAVA_HOME=/usr/lib/jvm/default-jvm/jre \
-    PATH=${PATH}:${JAVA_HOME}/bin \
     DOCKER_VERSION=1.6.0 \
     DOCKER_BUCKET=get.docker.com \
     CHE_IN_CONTAINER=true
 
 RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
-    apk upgrade --update && \
-    apk add --update ca-certificates curl openssl openjdk8 sudo bash && \
+    apk add --update curl openssl sudo bash && \
     curl -sSL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-${DOCKER_VERSION}" -o /usr/bin/docker && \
     chmod +x /usr/bin/docker && \
     echo "%root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \

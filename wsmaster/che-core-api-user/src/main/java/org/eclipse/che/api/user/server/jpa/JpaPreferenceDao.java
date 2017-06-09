@@ -13,13 +13,8 @@ package org.eclipse.che.api.user.server.jpa;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
-import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -127,31 +122,6 @@ public class JpaPreferenceDao implements PreferenceDao {
         if (prefs != null) {
             manager.remove(prefs);
             manager.flush();
-        }
-    }
-
-    @Singleton
-    public static class RemovePreferencesBeforeUserRemovedEventSubscriber
-            extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
-
-        @Inject
-        private EventService     eventService;
-        @Inject
-        private JpaPreferenceDao preferenceDao;
-
-        @PostConstruct
-        public void subscribe() {
-            eventService.subscribe(this, BeforeUserRemovedEvent.class);
-        }
-
-        @PreDestroy
-        public void unsubscribe() {
-            eventService.unsubscribe(this, BeforeUserRemovedEvent.class);
-        }
-
-        @Override
-        public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
-            preferenceDao.remove(event.getUser().getId());
         }
     }
 }

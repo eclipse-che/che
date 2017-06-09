@@ -17,10 +17,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.eclipse.che.api.user.server.event.PostUserPersistedEvent;
-import org.eclipse.che.api.user.server.event.UserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
@@ -32,7 +28,6 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
@@ -53,8 +48,6 @@ public class JpaUserDao implements UserDao {
     protected Provider<EntityManager> managerProvider;
     @Inject
     private   PasswordEncryptor       encryptor;
-    @Inject
-    private   EventService            eventService;
 
     @Override
     @Transactional
@@ -110,8 +103,7 @@ public class JpaUserDao implements UserDao {
     public void remove(String id) throws ServerException {
         requireNonNull(id, "Required non-null id");
         try {
-            Optional<UserImpl> userOpt = doRemove(id);
-            userOpt.ifPresent(user -> eventService.publish(new UserRemovedEvent(user.getId())));
+            doRemove(id);
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
@@ -203,6 +195,60 @@ public class JpaUserDao implements UserDao {
 
     @Override
     @Transactional
+    public Page<UserImpl> getByNamePart(String namePart, int maxItems, long skipCount) throws ServerException {
+        requireNonNull(namePart, "Required non-null name part");
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative");
+        checkArgument(skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
+                      "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
+        try {
+            final List<UserImpl> list = managerProvider.get()
+                                                       .createNamedQuery("User.getByNamePart", UserImpl.class)
+                                                       .setParameter("name", namePart.toLowerCase())
+                                                       .setMaxResults(maxItems)
+                                                       .setFirstResult((int)skipCount)
+                                                       .getResultList()
+                                                       .stream()
+                                                       .map(JpaUserDao::erasePassword)
+                                                       .collect(toList());
+            final long count = managerProvider.get()
+                                              .createNamedQuery("User.getByNamePartCount", Long.class)
+                                              .setParameter("name", namePart.toLowerCase())
+                                              .getSingleResult();
+            return new Page<>(list, skipCount, maxItems, count);
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
+    }
+
+    @Override
+    @Transactional
+    public Page<UserImpl> getByEmailPart(String emailPart, int maxItems, long skipCount) throws ServerException {
+        requireNonNull(emailPart, "Required non-null email part");
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative");
+        checkArgument(skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
+                      "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
+        try {
+            final List<UserImpl> list = managerProvider.get()
+                                                       .createNamedQuery("User.getByEmailPart", UserImpl.class)
+                                                       .setParameter("email", emailPart.toLowerCase())
+                                                       .setMaxResults(maxItems)
+                                                       .setFirstResult((int)skipCount)
+                                                       .getResultList()
+                                                       .stream()
+                                                       .map(JpaUserDao::erasePassword)
+                                                       .collect(toList());
+            final long count = managerProvider.get()
+                                              .createNamedQuery("User.getByEmailPartCount", Long.class)
+                                              .setParameter("email", emailPart.toLowerCase())
+                                              .getSingleResult();
+            return new Page<>(list, skipCount, maxItems, count);
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
+    }
+
+    @Override
+    @Transactional
     public long getTotalCount() throws ServerException {
         try {
             return managerProvider.get().createNamedQuery("User.getTotalCount", Long.class).getSingleResult();
@@ -216,7 +262,6 @@ public class JpaUserDao implements UserDao {
         EntityManager manage = managerProvider.get();
         manage.persist(user);
         manage.flush();
-        eventService.publish(new PostUserPersistedEvent(new UserImpl(user))).propagateException();
     }
 
     @Transactional
@@ -237,16 +282,13 @@ public class JpaUserDao implements UserDao {
     }
 
     @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
-    protected Optional<UserImpl> doRemove(String id) throws ServerException {
+    protected void doRemove(String id) {
         final EntityManager manager = managerProvider.get();
         final UserImpl user = manager.find(UserImpl.class, id);
-        if (user == null) {
-            return Optional.empty();
+        if (user != null) {
+            manager.remove(user);
+            manager.flush();
         }
-        eventService.publish(new BeforeUserRemovedEvent(user)).propagateException();
-        manager.remove(user);
-        manager.flush();
-        return Optional.of(user);
     }
 
     // Returns user instance copy without password

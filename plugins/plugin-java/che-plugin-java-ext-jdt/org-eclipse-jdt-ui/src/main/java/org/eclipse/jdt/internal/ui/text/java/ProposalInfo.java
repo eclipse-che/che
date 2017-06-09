@@ -90,15 +90,13 @@ public class ProposalInfo {
 	private String extractJavadoc(IJavaElement element) throws CoreException {
 		if (element instanceof IMember) {
             return JavadocContentAccess2.getHTMLContent((IMember)element, true, UrlContextProvider
-                    .get(WorkspaceIdProvider.getWorkspaceId(), element.getJavaProject().getPath().toString()));
+                    .get(element.getJavaProject().getPath().toString()));
         } else if (element instanceof IPackageDeclaration) {
             return JavadocContentAccess2
-                    .getHTMLContent((IPackageDeclaration)element, UrlContextProvider.get(WorkspaceIdProvider.getWorkspaceId(),
-                                                                                         element.getJavaProject().getPath().toString()));
+                    .getHTMLContent((IPackageDeclaration)element, UrlContextProvider.get(element.getJavaProject().getPath().toString()));
         } else if (element instanceof IPackageFragment) {
             return JavadocContentAccess2
-                    .getHTMLContent((IPackageFragment)element, UrlContextProvider.get(WorkspaceIdProvider.getWorkspaceId(),
-                                                                                      element.getJavaProject().getPath().toString()));
+                    .getHTMLContent((IPackageFragment)element, UrlContextProvider.get(element.getJavaProject().getPath().toString()));
         }
         return null;
 	}

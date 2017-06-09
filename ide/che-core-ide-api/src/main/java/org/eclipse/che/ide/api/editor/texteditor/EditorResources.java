@@ -12,7 +12,6 @@ package org.eclipse.che.ide.api.editor.texteditor;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
 
 /** Resources interface for the editor. */
 public interface EditorResources extends ClientBundle {

@@ -203,8 +203,93 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String getCommandsToolbarBackgroundColor() {
+        return "#bcbdbf";
+    }
+
+    @Override
+    public String getCommandsToolbarProcessesLabelBackground() {
+        return "#d0d0d0";
+    }
+
+    @Override
+    public String getCommandsToolbarProcessesLabelBorder() {
+        return "solid 0.6px #818181";
+    }
+
+    @Override
+    public String getCommandsToolbarMachineNameColor() {
+        return "#737373";
+    }
+
+    @Override
+    public String getCommandsToolbarCommandNameColor() {
+        return "#737373";
+    }
+
+    @Override
+    public String getCommandEditorProjectsTableHeaderColor() {
+        return "#ddd";
+    }
+
+    @Override
+    public String getCommandEditorProjectsTableRowColor() {
+        return "#ffffff";
+    }
+
+    @Override
+    public String getCommandEditorProjectSwitcherBorder() {
+        return "solid 1px #979797";
+    }
+
+    @Override
     public String getDialogContentBackground() {
         return "#FFFFFF";
+    }
+
+    @Override
+    public String getDropdownListBackground() {
+        return "#ffffff";
+    }
+
+    @Override
+    public String getHoveredDropdownListBackground() {
+        return "#ffffff";
+    }
+
+    @Override
+    public String getActiveDropdownListBackground() {
+        return "#ffffff";
+    }
+
+    @Override
+    public String getDropdownListBorder() {
+        return "solid 0.6px #818181";
+    }
+
+    @Override
+    public String getDropdownListButtonColor() {
+        return "#737373";
+    }
+
+    @Override
+    public String getMenuButtonBackground() {
+        return "#ffffff";
+    }
+
+    @Override
+    public String getHoveredMenuButtonBackground() {
+        return "#ffffff";
+    }
+
+    @Override
+    public String getActiveMenuButtonBackground() {
+        return "#ffffff";
+    }
+
+    @Override
+    public String getMenuButtonBorder() {
+        return "solid 0.6px #818181";
     }
 
     @Override

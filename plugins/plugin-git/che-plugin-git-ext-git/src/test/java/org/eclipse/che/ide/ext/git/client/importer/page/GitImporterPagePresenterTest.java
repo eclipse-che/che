@@ -247,7 +247,7 @@ public class GitImporterPagePresenterTest {
     @Test
     public void keepDirectorySelectedTest() {
 //        Map<String, String> parameters = new HashMap<>();
-//        when(source.getParameters()).thenReturn(parameters);
+//        when(source.getQueryParameters()).thenReturn(parameters);
 //        when(view.getDirectoryName()).thenReturn("directory");
 //
 //        presenter.keepDirectorySelected(true);
@@ -274,7 +274,7 @@ public class GitImporterPagePresenterTest {
     @Test
     public void keepDirectoryNameChangedAndKeepDirectorySelectedTest() {
 //        Map<String, String> parameters = new HashMap<>();
-//        when(source.getParameters()).thenReturn(parameters);
+//        when(source.getQueryParameters()).thenReturn(parameters);
 //        when(view.getDirectoryName()).thenReturn("directory");
 //        when(view.keepDirectory()).thenReturn(true);
 //
@@ -290,7 +290,7 @@ public class GitImporterPagePresenterTest {
     public void keepDirectoryNameChangedAndKeepDirectoryUnSelectedTest() {
 //        Map<String, String> parameters = new HashMap<>();
 //        parameters.put("keepDirectory", "directory");
-//        when(source.getParameters()).thenReturn(parameters);
+//        when(source.getQueryParameters()).thenReturn(parameters);
 //        when(view.keepDirectory()).thenReturn(false);
 //
 //        presenter.keepDirectoryNameChanged("directory");

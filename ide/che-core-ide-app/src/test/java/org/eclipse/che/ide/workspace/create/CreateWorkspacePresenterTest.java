@@ -32,7 +32,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
+import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.workspace.WorkspaceComponent;
@@ -85,7 +85,7 @@ public class CreateWorkspacePresenterTest {
     @Mock
     private RecipeServiceClient          recipeServiceClient;
     @Mock
-    private BrowserQueryFieldRenderer    browserQueryFieldRenderer;
+    private BrowserAddress               browserAddress;
 
     //additional mocks
     @Mock
@@ -172,7 +172,7 @@ public class CreateWorkspacePresenterTest {
     public void dialogShouldBeShown() {
         presenter.show(Collections.singletonList(usersWorkspaceDto), componentCallback);
 
-        verify(browserQueryFieldRenderer).getWorkspaceName();
+        verify(browserAddress).getWorkspaceName();
         verify(view).setWorkspaceName(anyString());
 
         verify(view).show();

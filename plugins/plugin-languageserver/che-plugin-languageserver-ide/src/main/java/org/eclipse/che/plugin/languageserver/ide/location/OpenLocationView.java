@@ -12,9 +12,9 @@ package org.eclipse.che.plugin.languageserver.ide.location;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
+import org.eclipse.lsp4j.Location;
 
 import java.util.List;
 
@@ -24,12 +24,12 @@ import java.util.List;
 @ImplementedBy(OpenLocationViewImpl.class)
 public interface OpenLocationView extends View<OpenLocationView.ActionDelegate> {
 
-    void setLocations(List<LocationDTO> locations);
+    void setLocations(List<Location> locations);
 
     void setTitle(String title);
 
-    interface ActionDelegate extends BaseActionDelegate{
+    interface ActionDelegate extends BaseActionDelegate {
 
-        void onLocationSelected(LocationDTO location);
+        void onLocationSelected(Location location);
     }
 }

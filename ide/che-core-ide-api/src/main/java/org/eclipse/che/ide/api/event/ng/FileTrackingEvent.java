@@ -26,7 +26,9 @@ import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperation
  * server side VFS file watching from client.
  *
  * @author Dmitry Kuleshov
+ * @deprecated use {@link ClientServerEventService} directly
  */
+@Deprecated
 public class FileTrackingEvent extends GwtEvent<FileTrackingEvent.FileTrackingEventHandler> {
 
     public static Type<FileTrackingEventHandler> TYPE = new Type<>();

@@ -25,6 +25,7 @@ import static org.testng.Assert.assertNotNull;
  * @author Yevhenii Voevodin
  */
 @Listeners(TckListener.class)
+@Test(suiteName = "tck")
 public class TckComponentsTest {
 
     @Inject

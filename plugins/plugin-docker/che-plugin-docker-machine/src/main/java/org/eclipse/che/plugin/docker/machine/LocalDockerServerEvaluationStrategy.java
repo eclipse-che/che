@@ -8,20 +8,20 @@
  * Contributors:
  *   Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.che.plugin.docker.machine;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
@@ -49,8 +49,8 @@ public class LocalDockerServerEvaluationStrategy extends ServerEvaluationStrateg
     protected String externalAddressProperty;
 
     @Inject
-    public LocalDockerServerEvaluationStrategy (@Nullable @Named("che.docker.ip") String internalAddress,
-                                                @Nullable @Named("che.docker.ip.external") String externalAddress) {
+    public LocalDockerServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String internalAddress,
+                                               @Nullable @Named("che.docker.ip.external") String externalAddress) {
         this.internalAddressProperty = internalAddress;
         this.externalAddressProperty = externalAddress;
     }
@@ -93,13 +93,6 @@ public class LocalDockerServerEvaluationStrategy extends ServerEvaluationStrateg
                                  externalAddressContainer :
                                  internalHost;
 
-        Map<String, List<PortBinding>> portBindings = containerInfo.getNetworkSettings().getPorts();
-
-        Map<String, String> addressesAndPorts = new HashMap<>();
-        for (String portKey : portBindings.keySet()) {
-            String port = portBindings.get(portKey).get(0).getHostPort();
-            addressesAndPorts.put(portKey, externalAddress + ":" + port);
-        }
-        return addressesAndPorts;
+        return getExposedPortsToAddressPorts(externalAddress, containerInfo.getNetworkSettings().getPorts());
     }
 }

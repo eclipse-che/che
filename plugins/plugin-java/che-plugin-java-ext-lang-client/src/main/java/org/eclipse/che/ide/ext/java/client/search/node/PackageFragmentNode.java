@@ -10,16 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.search.node;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
-import org.eclipse.che.api.promises.client.callback.PromiseHelper;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.shared.dto.model.ClassFile;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragment;
 import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragmentRoot;
@@ -32,6 +28,9 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 
 /**
  * Node represent package fragment.
@@ -59,26 +58,24 @@ public class PackageFragmentNode extends AbstractPresentationNode {
 
     @Override
     protected Promise<List<Node>> getChildrenImpl() {
-        return PromiseHelper.newPromise(new AsyncPromiseHelper.RequestCall<List<Node>>() {
-            @Override
-            public void makeCall(AsyncCallback<List<Node>> callback) {
-                List<Node> child = new ArrayList<Node>();
-                if (packageFragment.getKind() == PackageFragmentRoot.K_SOURCE) {
-                    for (CompilationUnit compilationUnit : packageFragment.getCompilationUnits()) {
-                        for (Type type : compilationUnit.getTypes()) {
-                            if (type.isPrimary()) {
-                                child.add(nodeFactory.create(type, compilationUnit, null, matches));
-                            }
-                        }
-                    }
-                } else {
-                    for (ClassFile classFile : packageFragment.getClassFiles()) {
-                        child.add(nodeFactory.create(classFile.getType(), null, classFile, matches));
-                    }
+        return createFromAsyncRequest(callback -> {
+            final List<Node> children = new ArrayList<>();
+            if (packageFragment.getKind() == PackageFragmentRoot.K_SOURCE) {
+                for (CompilationUnit compilationUnit : packageFragment.getCompilationUnits()) {
+                    final List<Type> types = compilationUnit.getTypes();
+                    final List<Node> nodes = types.stream()
+                                                  .filter(Type::isPrimary)
+                                                  .map(type -> nodeFactory.create(type, compilationUnit, null, matches))
+                                                  .collect(Collectors.toList());
+                    children.addAll(nodes);
                 }
-
-                callback.onSuccess(child);
+            } else {
+                children.addAll(packageFragment.getClassFiles().stream()
+                                               .map(classFile -> nodeFactory.create(classFile.getType(), null, classFile, matches))
+                                               .collect(Collectors.toList()));
             }
+
+            callback.onSuccess(children);
         });
     }
 
