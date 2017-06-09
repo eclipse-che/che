@@ -69,7 +69,7 @@ func (ec *EventsCaptor) Events() []process.Event {
 //   In this case capturing is interrupted done <- false
 func (ec *EventsCaptor) Capture() {
 	ec.eventsChan = make(chan process.Event)
-	ec.interruptChan = make(chan bool)
+	ec.interruptChan = make(chan bool, 1)
 	ec.done = make(chan bool)
 
 	go func() {
