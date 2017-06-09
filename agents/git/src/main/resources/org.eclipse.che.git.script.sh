@@ -9,7 +9,7 @@
 #   Codenvy, S.A. - initial API and implementation
 #
 
-SCRIPT_FILE="/home/user/.ssh/git.sh"
+SCRIPT_FILE=~/.ssh/git.sh
 
 token=$(if [ "$USER_TOKEN" != "dummy_token" ]; then echo "$USER_TOKEN"; fi)
 che_host=$(cat /etc/hosts | grep che-host | awk '{print $1;}')
@@ -52,7 +52,7 @@ user_email="$(${request} "$api_url/preferences$(if [ -n "$token" ]; then echo "?
 git config --global user.name \""$user_name"\"
 git config --global user.email \""$user_email"\"
 
-if [ -z "$(cat /home/user/.bashrc | grep GIT_SSH)" ]
+if [ -z "$(cat ~/.bashrc | grep GIT_SSH)" ]
 then
-    printf '\n export GIT_SSH='"$SCRIPT_FILE" >> /home/user/.bashrc
+    printf '\n export GIT_SSH='"$SCRIPT_FILE" >> ~/.bashrc
 fi
