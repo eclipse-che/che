@@ -7,6 +7,7 @@
 #
 # Contributors:
 #   Marian Labuda - Initial Implementation
+#   Roman Iuvshyn
 
 source /dockerfiles/cli/tests/test_base.sh
 
@@ -17,8 +18,8 @@ setup() {
 }
 
 teardown() {
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE stop --skip:nightly --skip:pull
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE destroy --quiet --skip:nightly --skip:pull
+  kill_running_named_container chetest
+  remove_named_container chetest
 }
 
 @test "test cli 'start' command with default settings" {
@@ -28,7 +29,6 @@ teardown() {
     [ "$output" = "Default port 8080 for che server is used. Cannot run this test on default che server port" ]
   fi
   tmp_path="${TESTRUN_DIR}"/cli_cmd_start_with_default_params
-  echo $tmp_path
   mkdir -p "${tmp_path}"
 
   #WHEN
@@ -47,7 +47,6 @@ teardown() {
     [ "$output" = "Default port 8080 for che server is used. Cannot run this test on default che server port" ]
   fi
   tmp_path="${TESTRUN_DIR}"/cli_cmd_stop_with_default_settings
-  echo $tmp_path
   mkdir -p "${tmp_path}"
   docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE start --skip:nightly --skip:pull
   [[ "$(docker inspect --format='{{.State.Running}}' chetest)" == "true" ]]
@@ -58,9 +57,7 @@ teardown() {
   docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE stop --skip:nightly --skip:pull
 
   #THEN
-  #check that state is not set because CLI stop command also removes container.
-  [[ "$(docker inspect --format='{{.State.Running}}' chetest)" == "" ]]
-  #check that stopped container actully removed
+  #check that container is stopped and removed
   [[ "$(docker ps -a)" != *"chetest"* ]]
 }
 
@@ -71,18 +68,18 @@ teardown() {
     [ "$output" = "Default port 8080 for che server is used. Cannot run this test on default che server port" ]
   fi
   tmp_path="${TESTRUN_DIR}"/cli_cmd_restart_with_default_settings
-  echo $tmp_path
   mkdir -p "${tmp_path}"
   docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE start --skip:nightly --skip:pull
   [[ "$(docker inspect --format='{{.State.Running}}' chetest)" == "true" ]]
   ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} chetest)
   curl -fsS http://${ip_address}:8080  > /dev/null
+  che_container_id=$(docker inspect --format="{{.Id}}" chetest)
 
   #WHEN
   docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE restart --skip:nightly --skip:pull
 
   #THEN
-  [[ "$(docker inspect --format='{{.State.Running}}' chetest)" == "true" ]]
+  [[ "$(docker inspect --format="{{.Id}}" chetest)" != "$che_container_id" ]]
   ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} chetest)
   curl -fsS http://${ip_address}:8080  > /dev/null
 }
