@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.extension.Extension;
+import org.eclipse.che.plugin.testing.ide.action.RunTestAction;
 
 import java.util.Set;
 
@@ -33,26 +34,31 @@ public class TestingExtension {
     @Inject
     public TestingExtension(ActionManager actionManager,
                             TestLocalizationConstant localization,
-                            Set<TestAction> testActions) {
+                            Set<TestAction> testActions,
+                            RunTestAction runTestAction) {
 
         DefaultActionGroup runMenu = (DefaultActionGroup) actionManager.getAction(GROUP_RUN);
         DefaultActionGroup testMainMenu = new DefaultActionGroup(localization.actionGroupMenuName(), true,
                 actionManager);
         actionManager.registerAction("TestingMainGroup", testMainMenu);
-        for (TestAction testAction : testActions) {
-            testAction.addMainMenuItems(testMainMenu);
-            testMainMenu.addSeparator();
-        }
+
+//        for (TestAction testAction : testActions) {
+//            testAction.addMainMenuItems(testMainMenu);
+//            testMainMenu.addSeparator();
+//        }
+        actionManager.registerAction("RunTestClassOrMethod", runTestAction);
+        testMainMenu.add(runTestAction);
         runMenu.addSeparator();
         runMenu.add(testMainMenu);
         DefaultActionGroup explorerMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
         DefaultActionGroup testContextMenu = new DefaultActionGroup(localization.contextActionGroupMenuName(), true,
                 actionManager);
         actionManager.registerAction("TestingContextGroup", testContextMenu);
-        for (TestAction testAction : testActions) {
-            testAction.addContextMenuItems(testContextMenu);
-            testContextMenu.addSeparator();
-        }
+//        for (TestAction testAction : testActions) {
+//            testAction.addContextMenuItems(testContextMenu);
+//            testContextMenu.addSeparator();
+//        }
+        testContextMenu.add(runTestAction);
         explorerMenu.addSeparator();
         explorerMenu.add(testContextMenu);
         explorerMenu.addSeparator();

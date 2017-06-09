@@ -30,6 +30,8 @@ import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.api.promises.client.js.ResolveFunction;
 import org.eclipse.che.api.testing.shared.Constants;
+import org.eclipse.che.api.testing.shared.TestDetectionContext;
+import org.eclipse.che.api.testing.shared.TestDetectionResult;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.ide.MimeType;
@@ -271,6 +273,14 @@ public class TestServiceClient {
                 .methodName(Constants.RUN_TESTS_METHOD)
                 .paramsAsDto(context)
                 .sendAndReceiveResultAsBoolean();
+    }
+
+    public JsonRpcPromise<TestDetectionResult> detectTests(TestDetectionContext context) {
+        return requestTransmitter.newRequest()
+                .endpointId("ws-agent")
+                .methodName(Constants.TESTING_RPC_TEST_DETECTION_NAME)
+                .paramsAsDto(context)
+                .sendAndReceiveResultAsDto(TestDetectionResult.class);
     }
 
 }
