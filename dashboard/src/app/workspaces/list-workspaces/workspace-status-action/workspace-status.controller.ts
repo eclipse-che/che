@@ -53,7 +53,7 @@ export class WorkspaceStatusController {
   }
 
   stopWorkspace(): void {
-    if (this.isLoading || !this.workspace || this.workspace.status !== 'RUNNING') {
+    if (this.isLoading || !this.workspace || (this.workspace.status !== 'RUNNING' && this.workspace.status !== 'STARTING')) {
       return;
     }
 
