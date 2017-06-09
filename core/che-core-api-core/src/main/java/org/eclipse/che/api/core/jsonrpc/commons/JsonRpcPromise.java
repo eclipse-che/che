@@ -51,7 +51,7 @@ public class JsonRpcPromise<R> {
      */
     public JsonRpcPromise<R> onTimeout(Runnable runnable) {
         checkNotNull(runnable, "JSON RPC timeout runnable argument must not be null");
-        checkState(this.successConsumer == null, "JSON RPC timeout runnable field must not be set");
+        checkState(this.timeoutRunnable == null, "JSON RPC timeout runnable field must not be set");
         this.timeoutRunnable = runnable;
         return this;
     }
