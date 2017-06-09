@@ -70,6 +70,9 @@ import {TemplateSelectorController} from './create-workspace/project-source-sele
 import {TemplateSelectorSvc} from './create-workspace/project-source-selector/template-selector/template-selector.service';
 import {TemplateSelector} from './create-workspace/project-source-selector/template-selector/template-selector.directive';
 import {TemplateSelectorItem} from './create-workspace/project-source-selector/template-selector/template-selector-item/template-selector-item.directive';
+import {ProjectMetadataController} from './create-workspace/project-source-selector/project-metadata/project-metadata.controller';
+import {ProjectMetadataService} from './create-workspace/project-source-selector/project-metadata/project-metadata.service';
+import {ProjectMetadata} from './create-workspace/project-source-selector/project-metadata/project-metadata.directive';
 
 import {CheWorkspaceRamAllocationSliderController} from './workspace-ram-slider/che-workspace-ram-allocation-slider.controller';
 import {CheWorkspaceRamAllocationSlider} from './workspace-ram-slider/che-workspace-ram-allocation-slider.directive';
@@ -203,6 +206,9 @@ export class WorkspacesConfig {
     register.service('templateSelectorSvc', TemplateSelectorSvc);
     register.directive('templateSelector', TemplateSelector);
     register.directive('templateSelectorItem', TemplateSelectorItem);
+    register.controller('ProjectMetadataController', ProjectMetadataController);
+    register.service('projectMetadataService', ProjectMetadataService);
+    register.directive('projectMetadata', ProjectMetadata);
 
     register.controller('CheStackLibraryFilterController', CheStackLibraryFilterController);
     register.directive('cheStackLibraryFilter', CheStackLibraryFilter);
