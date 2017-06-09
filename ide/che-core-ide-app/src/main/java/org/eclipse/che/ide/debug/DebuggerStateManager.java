@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.debug;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.che.api.debug.shared.dto.DebugSessionStateDto;
-import org.eclipse.che.api.debug.shared.model.DebugSessionState;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -37,14 +38,13 @@ import com.google.web.bindery.event.shared.EventBus;
 @Singleton
 public class DebuggerStateManager {
 
-    public static final String                      LOCAL_STORAGE_DEBUGGER_STATES_KEY_PREFIX = "che-debugger-session-states-";
-    private static final List<DebugSessionStateDto> EMPTY_LIST                               = new ArrayList<>();
+    public static final String LOCAL_STORAGE_DEBUGGER_STATES_KEY_PREFIX = "che-debugger-session-states-";
 
-    private final EventBus                          eventBus;
-    private final LocalStorage                      localStorage;
-    private final DtoFactory                        dtoFactory;
-    private final String                            storageUniqueKey;
-    private final String                            workspaceId;
+    private final EventBus     eventBus;
+    private final LocalStorage localStorage;
+    private final DtoFactory   dtoFactory;
+    private final String       storageUniqueKey;
+    private final String       workspaceId;
 
     @Inject
     public DebuggerStateManager(AppContext appContext,
@@ -68,8 +68,8 @@ public class DebuggerStateManager {
      * @return debugger state
      */
     public DebugSessionStateDto getDebuggerState(String debuggerType) {
-        List<DebugSessionStateDto> debugSessionStates = readStateData();
-        return findStoredState(debugSessionStates, debuggerType);
+        Map<String, DebugSessionStateDto> debugSessionStates = readStateData();
+        return debugSessionStates.get(debuggerType);
     }
 
     /**
@@ -78,11 +78,8 @@ public class DebuggerStateManager {
      * @param debugSessionState
      */
     public void setDebuggerState(DebugSessionStateDto debugSessionState) {
-        List<DebugSessionStateDto> debugSessionStates = readStateData();
-        DebugSessionState matchingSessionState =
-                                               findStoredState(debugSessionStates, debugSessionState.getDebuggerType());
-        debugSessionStates.remove(matchingSessionState);
-        debugSessionStates.add(debugSessionState);
+        Map<String, DebugSessionStateDto> debugSessionStates = readStateData();
+        debugSessionStates.put(debugSessionState.getDebuggerType(), debugSessionState);
         writeStateData(debugSessionStates);
     }
 
@@ -92,9 +89,8 @@ public class DebuggerStateManager {
      * @param debuggerType
      */
     public void removeDebuggerState(String debuggerType) {
-        List<DebugSessionStateDto> debugSessionStates = readStateData();
-        DebugSessionState matchingSessionState = findStoredState(debugSessionStates, debuggerType);
-        debugSessionStates.remove(matchingSessionState);
+        Map<String, DebugSessionStateDto> debugSessionStates = readStateData();
+        debugSessionStates.remove(debuggerType);
         writeStateData(debugSessionStates);
     }
 
@@ -110,35 +106,28 @@ public class DebuggerStateManager {
         });
     }
 
-    private List<DebugSessionStateDto> readStateData() {
+    private Map<String, DebugSessionStateDto> readStateData() {
         if (localStorage == null) {
-            return EMPTY_LIST;
+            return new HashMap<>();
         }
         String data = localStorage.getItem(storageUniqueKey);
         if (data != null && !data.isEmpty()) {
-            return dtoFactory.createListDtoFromJson(data, DebugSessionStateDto.class);
+            List<DebugSessionStateDto> dssList = dtoFactory.createListDtoFromJson(data, DebugSessionStateDto.class);
+            return dssList.stream().collect(Collectors.toMap(DebugSessionStateDto::getDebuggerType, dss -> dss));
         }
-        return EMPTY_LIST;
+        return new HashMap<>();
     };
 
-    private void writeStateData(List<DebugSessionStateDto> debugSessionStates) {
+    private void writeStateData(Map<String, DebugSessionStateDto> debugSessionStates) {
         if (localStorage == null) {
             return;
         }
         if (debugSessionStates == null || debugSessionStates.isEmpty()) {
             localStorage.removeItem(storageUniqueKey);
         } else {
-            localStorage.setItem(storageUniqueKey, dtoFactory.toJson(debugSessionStates));
+            localStorage.setItem(storageUniqueKey,
+                                 dtoFactory.toJson(debugSessionStates.values().stream().collect(Collectors.toList())));
         }
-    }
-
-    private DebugSessionStateDto findStoredState(List<DebugSessionStateDto> debugSessionStates, String debuggerType) {
-        for (DebugSessionStateDto storedSessionState : debugSessionStates) {
-            if (debuggerType.equals(storedSessionState.getDebuggerType())) {
-                return storedSessionState;
-            }
-        }
-        return null;
     }
 
     private void cleanup(WorkspaceServiceClient workspaceServiceClient) {
@@ -151,7 +140,7 @@ public class DebuggerStateManager {
             if (key != null && key.startsWith(LOCAL_STORAGE_DEBUGGER_STATES_KEY_PREFIX)) {
                 String workspaceId = key.substring(LOCAL_STORAGE_DEBUGGER_STATES_KEY_PREFIX.length());
                 Promise<WorkspaceDto> workspace = workspaceServiceClient.getWorkspace(workspaceId);
-                workspace.catchError(arg -> {
+                workspace.catchError(error -> {
                     localStorage.removeItem(key);
                 });
             }
