@@ -27,11 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -206,26 +204,4 @@ public class OAuthAuthenticationService {
         return oauth;
     }
 
-    @POST
-    @Path("token")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public void setToken(@Required @QueryParam("oauth_provider") String oauthProvider, //
-                         OAuthToken token) throws ServerException {
-        if (token == null) {
-            throw new ServerException("No token provided");
-        }
-
-        OAuthAuthenticator provider = providers.getAuthenticator(oauthProvider);
-        if (provider == null) {
-            throw new ServerException("\"" + oauthProvider + "\" oauth provider not registered");
-        }
-
-        String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
-
-        try {
-            provider.setToken(userId, token);
-        } catch (IOException e) {
-            throw new ServerException(e.getMessage());
-        }
-    }
 }
