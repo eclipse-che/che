@@ -49,3 +49,5 @@ echo "Running functionals bats tests for info command"
 run_test_in_docker_container cmd_info_tests.bats
 echo "Running functionals bats tests for config command"
 run_test_in_docker_container cmd_config_tests.bats
+echo "Running functionals bats tests for backup / restore commands"
+run_test_in_docker_container cmd_backup_restore_tests.bats
