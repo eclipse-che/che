@@ -13,11 +13,9 @@ package org.eclipse.che.plugin.docker.compose.yaml;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.plugin.docker.compose.ComposeEnvironment;
 import org.eclipse.che.plugin.docker.compose.ComposeServiceImpl;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
@@ -39,9 +37,6 @@ import static org.testng.Assert.fail;
  */
 @Listeners(MockitoTestNGListener.class)
 public class EnvironmentDeserializerTest {
-
-    @Mock
-    private RecipeDownloader recipeDownloader;
 
     @InjectMocks
     private ComposeEnvironmentParser parser;
@@ -74,7 +69,7 @@ public class EnvironmentDeserializerTest {
                  + "  image: codenvy/ubuntu_jdk8\n"
                  + "  environment:\n"
                  + "   MYSQL_ROOT_PASSWORD: ",
-                 ImmutableMap.of("MYSQL_ROOT_PASSWORD", "")
+                 ImmutableMap.of("MYSQL_ROOT_PASSWORD", null)
                 },
 
                 // dictionary format, value of variable contains colon sign
