@@ -14,6 +14,8 @@
                  ng-required>
         <che-error-messages che-message-scope="workspace-details-environment"
                             che-message-name="Recipe content">
+<!--      TODO: remove this empty ng-message after investigating the first message crashing problem      -->
+          <div ng-message></div>
           <div ng-message="required">The recipe is required.</div>
           <div ng-message="customValidator">{{workspaceRecipeAuthoringController.recipeValidationError}}</div>
         </che-error-messages>
