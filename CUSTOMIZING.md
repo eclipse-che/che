@@ -1,15 +1,14 @@
 Eclipse Che is a platform for creating distributed developer tooling. There are numerous ways to extend, modify, and customize Eclipse Che. This document itemizes all of the resources available for customizing Che. We have documentation pages, tutorials, and specifications.
 
 #### Stacks
-A stack is the configuration of a runtime that can be used to power a workspace. Users choose the stack that powers a workspace within the user dashboard. Stacks have a recipe that defines how the container should be created and also meta data that defines the tags associated with the stack. 
-* [Add Your Stacks to Che](https://www.eclipse.org/che/docs/workspace/stacks/#custom-stacks-for-che)
-* [Stack Data Model](https://www.eclipse.org/che/docs/workspace/stacks)
-* [Che Included Stacks](https://www.eclipse.org/che/docs/workspace/stacks/#section-ready-to-go-stacks)
-* [Add Your Stack to Default Che Assembly](https://www.eclipse.org/che/docs/workspace/stacks#adding-stacks-to-the-che-default-assembly)
-* * TODO: Update this link to point to wiki page that can be updated by community
+A stack is the configuration of a runtime that can be used to power a workspace. Users choose the stack that powers a workspace within the user dashboard. Stacks have a recipe that defines how the container should be created and also meta data that defines the tags associated with the stack.
+* [Add Your Stacks to Che](https://www.eclipse.org/che/docs/devops/runtime-stacks/index.html#stack-administration)
+* [Stack Data Model](https://www.eclipse.org/che/docs/devops/runtime-stacks-data-model/index.html)
+* [Che Included Stacks](https://www.eclipse.org/che/docs/devops/runtime-stacks/index.html#stack-library)
+* [Add Your Stack to Default Che Assembly](https://www.eclipse.org/che/docs/devops/runtime-stacks/index.html#adding-stacks-to-the-che-default-assembly)
 
 #### Recipes
-A recipe defines the runtime of a workspace environment.  Workspaces can have multiple environments, each with their own runtime.  Che supports different kinds of runtimes, but the default is Docker letting us make use of [Dockerfiles](https://docs.docker.com/engine/reference/builder/) as recipes. 
+A recipe defines the runtime of a workspace environment.  Workspaces can have multiple environments, each with their own runtime.  Che supports different kinds of runtimes, but the default is Docker letting us make use of [Dockerfiles](https://docs.docker.com/engine/reference/builder/) as recipes.
 * [Recipes](https://www.eclipse.org/che/docs/workspace/recipes)
 * [Writing Custom Recipes](https://www.eclipse.org/che/docs/workspace/recipes/#section-authoring-custom-recipes)
 * [Che Included Recipes](https://github.com/eclipse/che-dockerfiles)
@@ -49,7 +48,7 @@ IDE extensions are compiled into JavaScript with other extensions to create a si
 * [Parts](https://www.eclipse.org/che/docs/plugins/parts)
 * [Commands](https://www.eclipse.org/che/docs/plugins/helloworld-extension)
 * [Events](https://www.eclipse.org/che/docs/plugins/introduction/#actions)
-* * TODO: Panels 
+* * TODO: Panels
 * * TODO: Popups
 * * TODO: Wizards
 
@@ -59,7 +58,7 @@ Server-side extensions are libraries that are deployed into the workspace agent 
 * * TODO: Adding Custom Services into Workspace Agent
 
 #### Workspace REST API
-IDE extensions have access to a default set of workspace APIs that are deployed within each workspace. These APIs are available through a Swagger configuration. 
+IDE extensions have access to a default set of workspace APIs that are deployed within each workspace. These APIs are available through a Swagger configuration.
 * [Swagger](https://www.eclipse.org/che/docs/server/rest-api)
 * [Authentication](https://www.eclipse.org/che/docs/setup/managing/#authenticated-access)
 * [Workspaces](https://www.eclipse.org/che/docs/server/create-workspaces/)
