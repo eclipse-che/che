@@ -66,19 +66,16 @@ public class InstallerService {
 
     private void handleInstallerStatus(InstallerStatusEvent installerStatusEvent) {
         //TODO: spi actions hereSyst
-       LOG.warn(installerStatusEvent.toString());
        eventService.publish(installerStatusEvent);
     }
 
     private void handleBootstrapperStatus(BootstrapperStatusEvent bootstrapperStatusEvent) {
         //TODO: spi actions here
-        LOG.warn(bootstrapperStatusEvent.toString());
         eventService.publish(bootstrapperStatusEvent);
     }
 
     private void handleInstallerLog(InstallerOutputEvent installerOutputEvent) {
         //TODO: spi actions here
-        LOG.warn(installerOutputEvent.toString());
         eventService.publish(installerOutputEvent);
     }
 }
