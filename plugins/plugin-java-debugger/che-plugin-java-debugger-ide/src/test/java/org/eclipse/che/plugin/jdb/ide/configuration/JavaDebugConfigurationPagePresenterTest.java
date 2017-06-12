@@ -16,6 +16,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -23,6 +25,10 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static java.lang.Boolean.TRUE;
 import static org.mockito.Matchers.eq;
@@ -44,6 +50,8 @@ public class JavaDebugConfigurationPagePresenterTest {
     private AppContext                     appContext;
     @Mock
     private MachineImpl                    devMachine;
+    @Mock
+    private WorkspaceImpl                  workspace;
 
     @Mock
     private DebugConfiguration configuration;
@@ -55,9 +63,16 @@ public class JavaDebugConfigurationPagePresenterTest {
     public void setUp() {
         when(configuration.getHost()).thenReturn(HOST);
         when(configuration.getPort()).thenReturn(PORT);
-//        when(appContext.getDevMachine()).thenReturn(devMachine);
-        when(devMachine.getName()).thenReturn("devMachine");
 
+        ServerImpl server = mock(ServerImpl.class);
+        when(server.getUrl()).thenReturn("http://preview.com");
+        Map<String, ServerImpl> servers = new HashMap<>();
+        servers.put("8000/tcp", server);
+        when(devMachine.getServers()).thenReturn(servers);
+
+        when(workspace.getDevMachine()).thenReturn(Optional.of(devMachine));
+        when(appContext.getWorkspace()).thenReturn(workspace);
+        when(devMachine.getName()).thenReturn("devMachine");
 
         pagePresenter.resetFrom(configuration);
     }

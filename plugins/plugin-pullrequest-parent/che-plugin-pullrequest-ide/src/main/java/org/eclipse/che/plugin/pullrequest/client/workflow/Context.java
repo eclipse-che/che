@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.pullrequest.client.workflow;
 
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.plugin.pullrequest.client.events.ContextPropertyChangeEvent;
 import org.eclipse.che.plugin.pullrequest.client.vcs.VcsService;
 import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
@@ -17,7 +18,6 @@ import org.eclipse.che.plugin.pullrequest.shared.dto.Configuration;
 import org.eclipse.che.plugin.pullrequest.shared.dto.PullRequest;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.ArrayList;

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.pullrequest.client.workflow;
 
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.plugin.pullrequest.client.events.ContextInvalidatedEvent;
 import org.eclipse.che.plugin.pullrequest.client.events.CurrentContextChangedEvent;
 import org.eclipse.che.plugin.pullrequest.client.events.StepEvent;
@@ -20,7 +21,6 @@ import com.google.common.base.Optional;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
