@@ -40,6 +40,13 @@ public class LocalDockerSinglePortServerEvaluationStrategyTest {
     private static final String CONTAINERCONFIG_HOSTNAME = "che-ws-y6jwknht0efzczit-4086112300-fm0aj";
     private static final String WORKSPACE_ID             = "79rfwhqaztq2ru2k";
 
+    private static final String WORKSPACE_ID_VALUE    = WORKSPACE_ID;
+    private static final String WORKSPACE_ID_PROPERTY = "CHE_WORKSPACE_ID=" + WORKSPACE_ID_VALUE;
+
+    private static final String MACHINE_NAME_VALUE    = "myMachine";
+    private static final String MACHINE_NAME_PROPERTY = "CHE_MACHINE_NAME=" + MACHINE_NAME_VALUE;
+
+    
     @Mock
     private ContainerInfo   containerInfo;
     @Mock
@@ -56,6 +63,9 @@ public class LocalDockerSinglePortServerEvaluationStrategyTest {
     private Map<String, String> labels;
 
     private String[] env;
+    
+    private String[] envContainerConfig;
+    
 
     @BeforeMethod
     public void setUp() {
@@ -83,6 +93,10 @@ public class LocalDockerSinglePortServerEvaluationStrategyTest {
         when(containerConfig.getHostname()).thenReturn(CONTAINERCONFIG_HOSTNAME);
         when(containerConfig.getEnv()).thenReturn(env);
         when(containerConfig.getLabels()).thenReturn(labels);
+        
+        envContainerConfig = new String[]{WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY};
+        when(containerConfig.getEnv()).thenReturn(envContainerConfig);
+
     }
 
     /**
@@ -92,7 +106,7 @@ public class LocalDockerSinglePortServerEvaluationStrategyTest {
     @Test
     public void shouldUseServerRefToBuildAddressWhenAvailable() throws Exception {
         // given
-        strategy = new LocalDockerSinglePortServerEvaluationStrategy(null, null, false);
+        strategy = new LocalDockerSinglePortServerEvaluationStrategy(null, null, false).withThrowOnUnknownHost(false);
 
         final Map<String, ServerImpl> expectedServers = getExpectedServers(CHE_DOCKER_IP_EXTERNAL,
                                                                            CONTAINERCONFIG_HOSTNAME,
