@@ -56,7 +56,7 @@ public class DefaultServerEvaluationStrategy extends ServerEvaluationStrategy {
                                  internalAddressProperty :
                                  internalHost;
 
-        return getExposedPortsToAddressPorts(internalAddress, containerInfo.getNetworkSettings().getPorts());
+        return getExposedPortsToAddressPorts(internalAddress, containerInfo.getNetworkSettings().getPorts(), false);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class DefaultServerEvaluationStrategy extends ServerEvaluationStrategy {
                                  internalAddressProperty :
                                  internalHost;
 
-        return super.getExposedPortsToAddressPorts(externalAddress, containerInfo.getNetworkSettings().getPorts());
+        return super.getExposedPortsToAddressPorts(externalAddress, containerInfo.getNetworkSettings().getPorts(), false);
     }
 
     @Override

@@ -68,26 +68,14 @@ public class LocalDockerServerEvaluationStrategy extends ServerEvaluationStrateg
             useExposedPorts = false;
         }
 
-        Map<String, List<PortBinding>> portBindings = containerInfo.getNetworkSettings().getPorts();
-
-        Map<String, String> addressesAndPorts = new HashMap<>();
-        for (Map.Entry<String, List<PortBinding>> portEntry : portBindings.entrySet()) {
-            String exposedPort = portEntry.getKey().split("/")[0];
-            String ephemeralPort = portEntry.getValue().get(0).getHostPort();
-            if (useExposedPorts) {
-                addressesAndPorts.put(portEntry.getKey(), internalAddress + ":" + exposedPort);
-            } else {
-                addressesAndPorts.put(portEntry.getKey(), internalAddress + ":" + ephemeralPort);
-            }
-        }
-        return addressesAndPorts;
+        return getExposedPortsToAddressPorts(internalAddress, containerInfo.getNetworkSettings().getPorts(), useExposedPorts);
     }
 
     @Override
     protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo,
                                                                String internalHost) {
         String cheExternalAddress = getCheExternalAddress(containerInfo, internalHost);
-        return getExposedPortsToAddressPorts(cheExternalAddress, containerInfo.getNetworkSettings().getPorts());
+        return getExposedPortsToAddressPorts(cheExternalAddress, containerInfo.getNetworkSettings().getPorts(), false);
     }
 
     protected String getCheExternalAddress(ContainerInfo containerInfo, String internalHost) {
