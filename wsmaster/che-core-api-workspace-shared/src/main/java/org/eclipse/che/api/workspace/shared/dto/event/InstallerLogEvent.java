@@ -12,10 +12,12 @@ package org.eclipse.che.api.workspace.shared.dto.event;
 
 import org.eclipse.che.dto.shared.DTO;
 /**
+ * Installer log event DTO.
+ *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */
 @DTO
-public interface InstallerOutputEvent {
+public interface InstallerLogEvent {
 
     enum Stream {
         STDOUT,
@@ -26,40 +28,40 @@ public interface InstallerOutputEvent {
 
     void setText(String text);
 
-    InstallerOutputEvent withText(String text);
+    InstallerLogEvent withText(String text);
 
 
-    InstallerOutputEvent.Stream getStream();
+    InstallerLogEvent.Stream getStream();
 
-    void setStream(InstallerOutputEvent.Stream stream);
+    void setStream(InstallerLogEvent.Stream stream);
 
-    InstallerOutputEvent withStream(InstallerOutputEvent.Stream stream);
+    InstallerLogEvent withStream(InstallerLogEvent.Stream stream);
 
 
     String getInstaller();
 
     void setInstaller(String installer);
 
-    InstallerOutputEvent withInstaller(String installer);
+    InstallerLogEvent withInstaller(String installer);
 
 
     String getMachineName();
 
     void setMachineName(String machineName);
 
-    InstallerOutputEvent withMachineName(String machineName);
+    InstallerLogEvent withMachineName(String machineName);
 
 
     RuntimeId getRuntimeId();
 
     void setRuntimeId(RuntimeId runtimeId);
 
-    InstallerOutputEvent withRuntimeId(RuntimeId runtimeId);
+    InstallerLogEvent withRuntimeId(RuntimeId runtimeId);
 
 
     String getTime();
 
     void setTime(String time);
 
-    InstallerOutputEvent withTime(String time);
+    InstallerLogEvent withTime(String time);
 }

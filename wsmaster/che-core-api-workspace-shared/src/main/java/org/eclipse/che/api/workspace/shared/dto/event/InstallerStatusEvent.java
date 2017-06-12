@@ -12,7 +12,10 @@ package org.eclipse.che.api.workspace.shared.dto.event;
 
 import org.eclipse.che.dto.shared.DTO;
 /**
+ * Installer status event DTO.
+ *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
+ *
  */
 @DTO
 public interface InstallerStatusEvent {

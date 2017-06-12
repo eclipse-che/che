@@ -13,6 +13,8 @@ package org.eclipse.che.api.workspace.shared.dto.event;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
+ * Bootstrapper event status DTO.
+ *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */
 @DTO

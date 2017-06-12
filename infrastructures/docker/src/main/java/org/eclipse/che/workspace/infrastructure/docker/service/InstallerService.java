@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker.service;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.shared.dto.event.BootstrapperStatusEvent;
-import org.eclipse.che.api.workspace.shared.dto.event.InstallerOutputEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.InstallerLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.InstallerStatusEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +23,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
+ * Service for handling bootstrapper & installer events.
+ *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */
 @Singleton
@@ -56,16 +58,14 @@ public class InstallerService {
 
         requestHandler.newConfiguration()
                       .methodName("installer/log")
-                      .paramsAsDto(InstallerOutputEvent.class)
+                      .paramsAsDto(InstallerLogEvent.class)
                       .noResult()
                       .withConsumer(this::handleInstallerLog);
 
     }
 
-
-
     private void handleInstallerStatus(InstallerStatusEvent installerStatusEvent) {
-        //TODO: spi actions hereSyst
+        //TODO: spi actions here
        eventService.publish(installerStatusEvent);
     }
 
@@ -74,8 +74,8 @@ public class InstallerService {
         eventService.publish(bootstrapperStatusEvent);
     }
 
-    private void handleInstallerLog(InstallerOutputEvent installerOutputEvent) {
+    private void handleInstallerLog(InstallerLogEvent installerLogEvent) {
         //TODO: spi actions here
-        eventService.publish(installerOutputEvent);
+        eventService.publish(installerLogEvent);
     }
 }
