@@ -50,7 +50,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public abstract class OAuthAuthenticator {
     private static final Logger LOG = LoggerFactory.getLogger(OAuthAuthenticator.class);
 
-    private   AuthorizationCodeFlow flow;
+    protected AuthorizationCodeFlow flow;
     protected Map<Pattern, String>  redirectUrisMap;
 
     /**

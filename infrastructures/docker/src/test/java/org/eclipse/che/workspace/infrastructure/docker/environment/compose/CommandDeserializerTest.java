@@ -70,8 +70,7 @@ public class CommandDeserializerTest {
         assertEquals(environment.get("MYSQL_PASSWORD"), "password");
         assertTrue(service.getExpose().containsAll(asList("4403", "5502")));
 
-        assertTrue(service.getCommand().containsAll(commandWords));
-        assertEquals(service.getCommand().size(), commandNumberOfWords);
+        assertEquals(service.getCommand(), commandWords);
     }
 
     @DataProvider(name = "validCommand")
@@ -138,7 +137,7 @@ public class CommandDeserializerTest {
                 {"\"echo ${PWD}\"", asList("echo", "${PWD}"), 2},
                 {"\"(Test)\"", singletonList("(Test)"), 1},
 
-                {"", singletonList(""), 1},
+                {"", null, 1},
         };
     }
 
