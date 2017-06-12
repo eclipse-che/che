@@ -77,6 +77,8 @@ import static org.mockito.Mockito.when;
  *
  * @author David Festal
  */
+// FIXME: spi ide
+@Ignore
 @RunWith(GwtMockitoTestRunner.class)
 public class TestServiceClientTest implements MockitoPrinter {
 
