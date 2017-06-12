@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -111,18 +110,15 @@ public class ResponseDispatcher {
     }
 
     private void dispatchResult(String endpointId, JsonRpcResponse response, String key) {
-        JsonRpcResult result = response.getResult();
-        if (result.isSingle()) {
-            Optional.ofNullable(singleTypedPromises.remove(key)).ifPresent(
-                    promise -> promise.getSuccessConsumer().ifPresent(
-                            consumer -> promise.getType().ifPresent(
-                                    type -> consumer.accept(endpointId, composer.composeOne(result, type)))));
-        } else {
-            Optional.ofNullable(listTypedPromises.remove(key)).ifPresent(
-                    promise -> promise.getSuccessConsumer().ifPresent(
-                            consumer -> promise.getType().ifPresent(
-                                    type -> consumer.accept(endpointId, composer.composeMany(result, type)))));
-        }
+        Optional.ofNullable(listTypedPromises.remove(key)).ifPresent(
+                promise -> promise.getSuccessConsumer().ifPresent(
+                        consumer -> promise.getType().ifPresent(
+                                type -> consumer.accept(endpointId, composer.composeMany(response.getResult(), type)))));
+
+        Optional.ofNullable(singleTypedPromises.remove(key)).ifPresent(
+                promise -> promise.getSuccessConsumer().ifPresent(
+                        consumer -> promise.getType().ifPresent(
+                                type -> consumer.accept(endpointId, composer.composeOne(response.getResult(), type)))));
     }
 
     private void dispatchError(String endpointId, JsonRpcResponse response, String key) {

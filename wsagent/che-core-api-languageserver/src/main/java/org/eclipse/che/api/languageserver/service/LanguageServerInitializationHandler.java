@@ -18,8 +18,6 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 
-import static java.lang.Thread.sleep;
-
 @Singleton
 public class LanguageServerInitializationHandler {
 
