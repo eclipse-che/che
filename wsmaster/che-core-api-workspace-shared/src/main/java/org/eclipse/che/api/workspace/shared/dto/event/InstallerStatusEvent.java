@@ -19,7 +19,8 @@ public interface InstallerStatusEvent {
 
     enum Status {
         STARTING,
-        FINISHED,
+        RUNNING,
+        DONE,
         FAILED
     }
 
@@ -31,11 +32,25 @@ public interface InstallerStatusEvent {
     InstallerStatusEvent withStatus(InstallerStatusEvent.Status status);
 
 
-    String getInstallerName();
+    String getInstaller();
 
-    void setInstallerName(String installerName);
+    void setInstaller(String installer);
 
-    InstallerStatusEvent withInstallerName(String installerName);
+    InstallerStatusEvent withInstaller(String installer);
+
+
+    String getMachineName();
+
+    void setMachineName(String machineName);
+
+    InstallerStatusEvent withMachineName(String machineName);
+    
+
+    RuntimeId getRuntimeId();
+
+    void setRuntimeId(RuntimeId runtimeId);
+
+    InstallerStatusEvent withRuntimeId(RuntimeId runtimeId);
     
 
     String getError();
@@ -45,9 +60,9 @@ public interface InstallerStatusEvent {
     InstallerStatusEvent withError(String error);
     
 
-    String getTimestamp();
+    String getTime();
 
-    void setTimestamp(String timestamp);
+    void setTime(String time);
 
-    InstallerStatusEvent withTimestamp(String timestamp);
+    InstallerStatusEvent withTime(String time);
 }

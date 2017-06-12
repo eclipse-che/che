@@ -11,55 +11,57 @@
 package org.eclipse.che.api.workspace.shared.dto.event;
 
 import org.eclipse.che.dto.shared.DTO;
+
 /**
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */
 @DTO
-public interface InstallerOutputEvent {
-
-    enum Stream {
-        STDOUT,
-        STDERR
+public interface BootstrapperStatusEvent {
+    enum Status {
+        READY,
+        DONE,
+        FAILED
     }
 
-    String getText();
 
-    void setText(String text);
+    BootstrapperStatusEvent.Status getStatus();
 
-    InstallerOutputEvent withText(String text);
+    void setStatus(BootstrapperStatusEvent.Status status);
 
-
-    InstallerOutputEvent.Stream getStream();
-
-    void setStream(InstallerOutputEvent.Stream stream);
-
-    InstallerOutputEvent withStream(InstallerOutputEvent.Stream stream);
+    BootstrapperStatusEvent withStatus(BootstrapperStatusEvent.Status status);
 
 
     String getInstaller();
 
     void setInstaller(String installer);
 
-    InstallerOutputEvent withInstaller(String installer);
+    BootstrapperStatusEvent withInstaller(String installer);
 
 
     String getMachineName();
 
     void setMachineName(String machineName);
 
-    InstallerOutputEvent withMachineName(String machineName);
+    BootstrapperStatusEvent withMachineName(String machineName);
 
 
     RuntimeId getRuntimeId();
 
     void setRuntimeId(RuntimeId runtimeId);
 
-    InstallerOutputEvent withRuntimeId(RuntimeId runtimeId);
+    BootstrapperStatusEvent withRuntimeId(RuntimeId runtimeId);
+
+
+    String getError();
+
+    void setError(String error);
+
+    BootstrapperStatusEvent withError(String error);
 
 
     String getTime();
 
     void setTime(String time);
 
-    InstallerOutputEvent withTime(String time);
+    BootstrapperStatusEvent withTime(String time);
 }

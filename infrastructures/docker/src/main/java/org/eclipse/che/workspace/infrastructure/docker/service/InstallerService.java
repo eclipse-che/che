@@ -12,9 +12,9 @@ package org.eclipse.che.workspace.infrastructure.docker.service;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.shared.dto.event.BootstrapperStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.InstallerOutputEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.InstallerStatusEvent;
-import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,49 +43,42 @@ public class InstallerService {
     public void configureMethods() {
 
         requestHandler.newConfiguration()
-                      .methodName("status")
+                      .methodName("bootstrapper/statusChanged")
+                      .paramsAsDto(BootstrapperStatusEvent.class)
+                      .noResult()
+                      .withConsumer(this::handleBootstrapperStatus);
+
+        requestHandler.newConfiguration()
+                      .methodName("installer/statusChanged")
                       .paramsAsDto(InstallerStatusEvent.class)
                       .noResult()
                       .withConsumer(this::handleInstallerStatus);
 
         requestHandler.newConfiguration()
-                      .methodName("server/status")
-                      .paramsAsDto(ServerStatusEvent.class)
-                      .noResult()
-                      .withConsumer(this::handleServerStatus);
-
-        requestHandler.newConfiguration()
-                      .methodName("logs/stdout")
+                      .methodName("installer/log")
                       .paramsAsDto(InstallerOutputEvent.class)
                       .noResult()
-                      .withConsumer(this::handleInstallerOutput);
+                      .withConsumer(this::handleInstallerLog);
 
-        requestHandler.newConfiguration()
-                      .methodName("logs/stderr")
-                      .paramsAsDto(InstallerOutputEvent.class)
-                      .noResult()
-                      .withConsumer(this::handleInstallerError);
     }
 
 
 
     private void handleInstallerStatus(InstallerStatusEvent installerStatusEvent) {
-        //TODO: spi actions here
+        //TODO: spi actions hereSyst
+       LOG.warn(installerStatusEvent.toString());
        eventService.publish(installerStatusEvent);
     }
 
-    private void handleServerStatus(ServerStatusEvent serverStatusEvent) {
+    private void handleBootstrapperStatus(BootstrapperStatusEvent bootstrapperStatusEvent) {
         //TODO: spi actions here
-        eventService.publish(serverStatusEvent);
+        LOG.warn(bootstrapperStatusEvent.toString());
+        eventService.publish(bootstrapperStatusEvent);
     }
 
-    private void handleInstallerOutput(InstallerOutputEvent installerOutputEvent) {
+    private void handleInstallerLog(InstallerOutputEvent installerOutputEvent) {
         //TODO: spi actions here
-        eventService.publish(installerOutputEvent);
-    }
-
-    private void handleInstallerError(InstallerOutputEvent installerOutputEvent) {
-        //TODO: spi actions here
+        LOG.warn(installerOutputEvent.toString());
         eventService.publish(installerOutputEvent);
     }
 }
