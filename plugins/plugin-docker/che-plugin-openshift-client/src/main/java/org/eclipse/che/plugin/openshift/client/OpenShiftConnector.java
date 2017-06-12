@@ -59,6 +59,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
+import org.eclipse.che.plugin.docker.client.json.ContainerState;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
@@ -105,6 +106,10 @@ import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.ContainerStateRunning;
+import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
+import io.fabric8.kubernetes.api.model.ContainerStateWaiting;
+import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.DoneableEndpoints;
 import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -1260,11 +1265,12 @@ public class OpenShiftConnector extends DockerConnector {
      * @param pod
      * @param containerId
      * @return
+     * @throws OpenShiftException 
      */
     private ContainerInfo createContainerInfo(Service svc,
                                               ImageInfo imageInfo,
                                               Pod pod,
-                                              String containerId) {
+                                              String containerId) throws OpenShiftException {
 
         // In Che on OpenShift, we only have one container per pod.
         Container container = pod.getSpec().getContainers().get(0);
@@ -1318,9 +1324,37 @@ public class OpenShiftConnector extends DockerConnector {
         info.setNetworkSettings(networkSettings);
         info.setHostConfig(hostConfig);
         info.setImage(imageInfo.getConfig().getImage());
+
+        // In Che on OpenShift, we only have one container per pod.
+        info.setState(getContainerStates(pod).get(0));
         return info;
     }
 
+    private List<ContainerState> getContainerStates(final Pod pod) throws OpenShiftException {
+        List<ContainerState> containerStates = new ArrayList<>();
+        List<ContainerStatus> containerStatuses = pod.getStatus().getContainerStatuses();
+        for (ContainerStatus status : containerStatuses) {
+            io.fabric8.kubernetes.api.model.ContainerState state = status.getState();
+
+            ContainerStateTerminated terminated = state.getTerminated();
+            ContainerStateWaiting waiting = state.getWaiting();
+            ContainerStateRunning running = state.getRunning();
+
+            ContainerState containerState = new ContainerState();
+
+            if (terminated != null) {
+                containerState.setStatus("exited");
+            } else if (waiting != null) {
+                containerState.setStatus("paused");
+            } else if (running != null) {
+                containerState.setStatus("running");
+            } else {
+                throw new OpenShiftException("Fail to detect the state of container with id " + status.getContainerID());
+            }
+            containerStates.add(containerState);
+        }
+        return containerStates;
+    }
 
     private void cleanUpWorkspaceResources(String deploymentName) throws IOException {
 
