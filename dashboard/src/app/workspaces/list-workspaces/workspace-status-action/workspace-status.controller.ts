@@ -37,7 +37,8 @@ export class WorkspaceStatusController {
   }
 
   startWorkspace(): void {
-    if (this.isLoading || !this.workspace || !this.workspace.config || !(this.workspace.status === 'STOPPED' || this.workspace.status === 'ERROR')) {
+    let status = this.getWorkspaceStatus();
+    if (this.isLoading || !this.workspace || !this.workspace.config || !(status === 'STOPPED' || status === 'ERROR')) {
       return;
     }
 
@@ -53,7 +54,8 @@ export class WorkspaceStatusController {
   }
 
   stopWorkspace(): void {
-    if (this.isLoading || !this.workspace || this.workspace.status !== 'RUNNING') {
+    let status = this.getWorkspaceStatus();
+    if (this.isLoading || !this.workspace || (status !== 'RUNNING' && status !== 'STARTING')) {
       return;
     }
 
@@ -68,4 +70,32 @@ export class WorkspaceStatusController {
     });
   }
 
+  /**
+   * Returns current status of workspace
+   * @returns {String}
+   */
+  getWorkspaceStatus(): string {
+    let workspace = this.cheWorkspace.getWorkspaceById(this.workspace.id);
+    return workspace ? workspace.status : 'unknown';
+  }
+
+  /**
+   * Is show run button.
+   *
+   * @returns {boolean}
+   */
+  isShowRun(): boolean {
+    let status = this.getWorkspaceStatus();
+    return status !== 'RUNNING' && status !== 'STOPPING' && status !== 'SNAPSHOTTING' && status !== 'STARTING';
+  }
+
+  /**
+   * Is stop button disabled.
+   *
+   * @returns {boolean}
+   */
+  isStopDisabled(): boolean {
+    let status = this.getWorkspaceStatus();
+    return status === 'STOPPING' || status === 'SNAPSHOTTING'
+  }
 }

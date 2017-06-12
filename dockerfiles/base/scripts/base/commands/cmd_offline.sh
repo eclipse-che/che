@@ -38,8 +38,8 @@ post_cmd_offline() {
 cmd_offline() {
   # Read in optional stack images
   readarray -t STACK_IMAGE_LIST < /version/$CHE_VERSION/images-stacks
-  readarray -t BOOTSTRAP_IMAGE_LIST < ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-bootstrap
-  readarray -t UTILITY_IMAGE_LIST < ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-utilities
+  BOOTSTRAP_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-bootstrap)
+  UTILITY_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-utilities)
 
   # List all images to be saved
   if [[ $# -gt 0 ]] && [[ $1 = "--list" ]]; then
@@ -71,7 +71,9 @@ cmd_offline() {
     info "offline" "Optional: (repeat --image:<name> for stack, --all-stacks, or --no-stacks)"
     for STACK in $(seq 0 $((${#STACK_IMAGE_LIST[@]}-1)))
     do
-      info "offline" "  STACK: ${STACK_IMAGE_LIST[$STACK]}"
+      if [ ! -z ${STACK_IMAGE_LIST[$STACK]} ]; then
+          info "offline" "  STACK: ${STACK_IMAGE_LIST[$STACK]}"
+      fi
     done
 
     return 1
@@ -111,7 +113,9 @@ cmd_offline() {
       --all-stacks)
         for STACK in $(seq 0 $((${#STACK_IMAGE_LIST[@]}-1)))
         do
-          download_and_save_image ${STACK_IMAGE_LIST[$STACK]}
+          if [ ! -z ${STACK_IMAGE_LIST[$STACK]} ]; then
+              download_and_save_image ${STACK_IMAGE_LIST[$STACK]}
+          fi
         done
         break
         shift ;;
@@ -135,7 +139,7 @@ download_and_save_image() {
 }
 
 save_image(){
-  TAR_NAME=$(echo $1 | sed "s|\/|_|")
+  TAR_NAME=$(echo $1 | sed "s|\/|_|g")
 
   if [ ! -f $CHE_CONTAINER_OFFLINE_FOLDER/$TAR_NAME.tar ]; then
     info "offline" "Saving $CHE_HOST_OFFLINE_FOLDER/$TAR_NAME.tar..."

@@ -377,9 +377,9 @@ public final class ResourceManager {
         return findResource(path, true).thenPromise(resource -> {
             if (resource.isPresent()) {
                 if (resource.get().isProject()) {
-                    throw new IllegalStateException("Project already exists");
+                    return promises.reject(new IllegalStateException("Project already exists"));
                 } else if (resource.get().isFile()) {
-                    throw new IllegalStateException("File can not be converted to project");
+                    return promises.reject(new IllegalStateException("File can not be converted to project"));
                 }
 
                 return update(path, createRequest);
@@ -391,7 +391,7 @@ public final class ResourceManager {
             final List<NewProjectConfigDto> configDtoList = asDto(projectConfigList);
 
             return ps.createBatchProjects(configDtoList).thenPromise(
-                    configList -> ps.getProjects().then((Function<List<ProjectConfigDto>, Project>)updatedConfiguration -> {
+                    configList -> ps.getProjects().thenPromise(updatedConfiguration -> {
                         //cache new configs
                         cachedConfigs = updatedConfiguration.toArray(new ProjectConfigDto[updatedConfiguration.size()]);
 
@@ -401,11 +401,11 @@ public final class ResourceManager {
                                 store.register(newResource);
                                 eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(newResource, ADDED | DERIVED)));
 
-                                return newResource;
+                                return promises.resolve(newResource);
                             }
                         }
 
-                        throw new IllegalStateException("Created project is not found");
+                        return promises.reject(new IllegalStateException("Created project is not found"));
                     }));
         });
     }
