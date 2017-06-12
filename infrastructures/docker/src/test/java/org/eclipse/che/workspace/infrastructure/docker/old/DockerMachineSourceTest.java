@@ -11,7 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.DockerMachineSource;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -56,7 +56,8 @@ public class DockerMachineSourceTest {
      * Check that all the constructor are valid and not throwing exception based on data provider
      */
     @Test(dataProvider = "image-ids")
-    public void testConstructors(String location, String registry, String repository, String tag, String digest) throws MachineException {
+    public void testConstructors(String location, String registry, String repository, String tag, String digest)
+            throws  InternalInfrastructureException {
         DockerMachineSource
                 source1 = new DockerMachineSource(repository).withTag(tag).withRegistry(registry).withDigest(digest);
         assertEquals(source1.getLocation(), location);
@@ -82,8 +83,8 @@ public class DockerMachineSourceTest {
     /**
      * Check valid source type
      */
-    @Test(expectedExceptions = MachineException.class)
-    public void testInvalidSourceType() throws MachineException {
+    @Test(expectedExceptions = InternalInfrastructureException.class)
+    public void testInvalidSourceType() throws InternalInfrastructureException {
         when(machineSource.getType()).thenReturn("invalid");
         new DockerMachineSource(machineSource);
     }
@@ -91,8 +92,8 @@ public class DockerMachineSourceTest {
     /**
      * Check invalid format
      */
-    @Test(expectedExceptions = MachineException.class)
-    public void testInvalidFormat() throws MachineException {
+    @Test(expectedExceptions = InternalInfrastructureException.class)
+    public void testInvalidFormat() throws InternalInfrastructureException {
         when(machineSource.getType()).thenReturn("image");
         when(machineSource.getLocation()).thenReturn("@image");
         new DockerMachineSource(machineSource);
