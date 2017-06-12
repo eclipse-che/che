@@ -25,7 +25,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.ssh.server.jpa.JpaSshDao.RemoveSshKeysBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
@@ -46,8 +45,12 @@ import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -71,18 +74,19 @@ import org.testng.annotations.Test;
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 import javax.persistence.EntityManagerFactory;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createAccount;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createPreferences;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createProfile;
-import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createSnapshot;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createSshPair;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createUser;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createWorkspace;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -104,7 +108,6 @@ public class CascadeRemovalTest {
     private UserDao       userDao;
     private ProfileDao    profileDao;
     private WorkspaceDao  workspaceDao;
-    private SnapshotDao   snapshotDao;
     private SshDao        sshDao;
 
     /** Account and User are a root of dependency tree. */
@@ -128,12 +131,6 @@ public class CascadeRemovalTest {
     private SshPairImpl sshPair1;
     private SshPairImpl sshPair2;
 
-    /** Snapshots depend on workspace. */
-    private SnapshotImpl snapshot1;
-    private SnapshotImpl snapshot2;
-    private SnapshotImpl snapshot3;
-    private SnapshotImpl snapshot4;
-
     private H2DBTestServer server;
 
     @BeforeMethod
@@ -152,13 +149,11 @@ public class CascadeRemovalTest {
                                                                         WorkspaceConfigImpl.class,
                                                                         ProjectConfigImpl.class,
                                                                         EnvironmentImpl.class,
-                                                                        EnvironmentRecipeImpl.class,
-                                                                        ExtendedMachineImpl.class,
+                                                                        MachineConfigImpl.class,
                                                                         SourceStorageImpl.class,
-                                                                        ServerConf2Impl.class,
+                                                                        ServerConfigImpl.class,
                                                                         StackImpl.class,
                                                                         CommandImpl.class,
-                                                                        SnapshotImpl.class,
                                                                         RecipeImpl.class,
                                                                         SshPairImpl.class)
                                                       .addEntityClass("org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
@@ -179,7 +174,8 @@ public class CascadeRemovalTest {
                 install(new WorkspaceJpaModule());
 //                install(new MachineJpaModule());
                 bind(WorkspaceManager.class);
-                final WorkspaceRuntimes wR = mock(WorkspaceRuntimes.class);
+                
+                WorkspaceRuntimes wR = spy(new WorkspaceRuntimes(mock(EventService.class), Collections.emptySet(), mock(WorkspaceSharedPool.class)));
                 when(wR.hasRuntime(anyString())).thenReturn(false);
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);
@@ -197,7 +193,6 @@ public class CascadeRemovalTest {
         preferenceDao = injector.getInstance(PreferenceDao.class);
         profileDao = injector.getInstance(ProfileDao.class);
         sshDao = injector.getInstance(SshDao.class);
-        snapshotDao = injector.getInstance(SnapshotDao.class);
         workspaceDao = injector.getInstance(WorkspaceDao.class);
     }
 
@@ -221,8 +216,6 @@ public class CascadeRemovalTest {
         assertTrue(preferenceDao.getPreferences(user.getId()).isEmpty());
         assertTrue(sshDao.get(user.getId()).isEmpty());
         assertTrue(workspaceDao.getByNamespace(user.getName()).isEmpty());
-        assertTrue(snapshotDao.findSnapshots(workspace1.getId()).isEmpty());
-        assertTrue(snapshotDao.findSnapshots(workspace2.getId()).isEmpty());
     }
 
     @Test(dataProvider = "beforeUserRemoveRollbackActions")
@@ -270,8 +263,6 @@ public class CascadeRemovalTest {
 
         // Check all the data rolled back
         assertFalse(workspaceDao.getByNamespace(user.getName()).isEmpty());
-        assertFalse(snapshotDao.findSnapshots(workspace1.getId()).isEmpty());
-        assertFalse(snapshotDao.findSnapshots(workspace2.getId()).isEmpty());
         wipeTestData();
     }
 
@@ -298,18 +289,9 @@ public class CascadeRemovalTest {
         sshDao.create(sshPair1 = createSshPair(user.getId(), "service", "name1"));
         sshDao.create(sshPair2 = createSshPair(user.getId(), "service", "name2"));
 
-        snapshotDao.saveSnapshot(snapshot1 = createSnapshot("snapshot1", workspace1.getId()));
-        snapshotDao.saveSnapshot(snapshot2 = createSnapshot("snapshot2", workspace1.getId()));
-        snapshotDao.saveSnapshot(snapshot3 = createSnapshot("snapshot3", workspace2.getId()));
-        snapshotDao.saveSnapshot(snapshot4 = createSnapshot("snapshot4", workspace2.getId()));
     }
 
     private void wipeTestData() throws ConflictException, ServerException, NotFoundException {
-        snapshotDao.removeSnapshot(snapshot1.getId());
-        snapshotDao.removeSnapshot(snapshot2.getId());
-        snapshotDao.removeSnapshot(snapshot3.getId());
-        snapshotDao.removeSnapshot(snapshot4.getId());
-
         sshDao.remove(sshPair1.getOwner(), sshPair1.getService(), sshPair1.getName());
         sshDao.remove(sshPair2.getOwner(), sshPair2.getService(), sshPair2.getName());
 

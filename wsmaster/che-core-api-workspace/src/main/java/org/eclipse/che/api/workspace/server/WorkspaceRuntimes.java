@@ -233,7 +233,7 @@ public class WorkspaceRuntimes {
                                                    .withPrevStatus(WorkspaceStatus.STARTING));
                 } catch (InfrastructureException e) {
                     LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
-                    new RuntimeException(e);
+                    throw new RuntimeException(e);
                 }
             }), sharedPool.getExecutor());
             //TODO made complete rework of exceptions.

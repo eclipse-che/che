@@ -13,10 +13,9 @@ package org.eclipse.che.api.workspace.server;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.mockito.testng.MockitoTestNGListener;
@@ -24,12 +23,6 @@ import org.testng.annotations.Listeners;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
 
 /**
  * Covers main cases of {@link WorkspaceManager}.

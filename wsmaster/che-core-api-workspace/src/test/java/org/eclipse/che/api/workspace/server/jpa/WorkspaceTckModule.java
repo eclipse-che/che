@@ -13,6 +13,9 @@ package org.eclipse.che.api.workspace.server.jpa;
 import com.google.inject.TypeLiteral;
 
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.recipe.JpaRecipeDao;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
+import org.eclipse.che.api.recipe.RecipeDao;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -62,7 +65,7 @@ public class WorkspaceTckModule extends TckModule {
                                                                 ServerConfigImpl.class,
                                                                 StackImpl.class,
                                                                 CommandImpl.class,
-                                                                SnapshotImpl.class,
+                                                                OldRecipeImpl.class,
                                                                 RecipeImpl.class)
                                               .addEntityClass("org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
                                               .setExceptionHandler(H2ExceptionHandler.class)
@@ -74,9 +77,11 @@ public class WorkspaceTckModule extends TckModule {
         bind(new TypeLiteral<TckRepository<AccountImpl>>() {}).toInstance(new JpaTckRepository<>(AccountImpl.class));
         bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());
         bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new StackRepository());
+        bind(new TypeLiteral<TckRepository<OldRecipeImpl>>() {}).toInstance(new OldRecipeRepository());
 
         bind(WorkspaceDao.class).to(JpaWorkspaceDao.class);
         bind(StackDao.class).to(JpaStackDao.class);
+        bind(RecipeDao.class).to(JpaRecipeDao.class);
     }
 
     private static class WorkspaceRepository extends JpaTckRepository<WorkspaceImpl> {
@@ -99,6 +104,15 @@ public class WorkspaceTckModule extends TckModule {
             for (StackImpl stack : entities) {
                 stack.getWorkspaceConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
             }
+            super.createAll(entities);
+        }
+    }
+
+    private static class OldRecipeRepository extends JpaTckRepository<OldRecipeImpl> {
+        public OldRecipeRepository() { super(OldRecipeImpl.class); }
+
+        @Override
+        public void createAll(Collection<? extends OldRecipeImpl> entities) throws TckRepositoryException {
             super.createAll(entities);
         }
     }

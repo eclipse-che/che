@@ -17,12 +17,7 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.account.spi.jpa.JpaAccountDao;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.recipe.JpaRecipeDao;
-import org.eclipse.che.api.machine.server.jpa.JpaSnapshotDao;
-import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.recipe.RecipeDao;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.ssh.server.jpa.JpaSshDao;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
@@ -37,11 +32,12 @@ import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -109,14 +105,12 @@ public class PostgreSqlTckModule extends TckModule {
                                                                 WorkspaceConfigImpl.class,
                                                                 ProjectConfigImpl.class,
                                                                 EnvironmentImpl.class,
-                                                                EnvironmentRecipeImpl.class,
-                                                                ExtendedMachineImpl.class,
+                                                                RecipeImpl.class,
+                                                                MachineConfigImpl.class,
                                                                 SourceStorageImpl.class,
-                                                                ServerConf2Impl.class,
+                                                                ServerConfigImpl.class,
                                                                 StackImpl.class,
                                                                 CommandImpl.class,
-                                                                SnapshotImpl.class,
-                                                                RecipeImpl.class,
                                                                 SshPairImpl.class)
                                               .addEntityClass("org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
                                               .build());
@@ -145,9 +139,7 @@ public class PostgreSqlTckModule extends TckModule {
 
         // machine
         bind(RecipeDao.class).to(JpaRecipeDao.class);
-        bind(SnapshotDao.class).to(JpaSnapshotDao.class);
         bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).toInstance(new JpaTckRepository<>(RecipeImpl.class));
-        bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {}).toInstance(new JpaTckRepository<>(SnapshotImpl.class));
         bind(new TypeLiteral<TckRepository<Workspace>>() {}).toInstance(new WorkspaceRepoForSnapshots());
 
         // ssh
