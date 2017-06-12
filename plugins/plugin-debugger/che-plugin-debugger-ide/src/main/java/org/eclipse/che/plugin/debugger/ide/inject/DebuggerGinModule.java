@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.plugin.debugger.ide.configuration.DebugConfigurationAction;
 import org.eclipse.che.plugin.debugger.ide.configuration.DebugConfigurationActionFactory;
 import org.eclipse.che.plugin.debugger.ide.configuration.DebugConfigurationsManagerImpl;
@@ -29,9 +30,6 @@ import org.eclipse.che.plugin.debugger.ide.debug.changevalue.ChangeValueView;
 import org.eclipse.che.plugin.debugger.ide.debug.changevalue.ChangeValueViewImpl;
 import org.eclipse.che.plugin.debugger.ide.debug.expression.EvaluateExpressionView;
 import org.eclipse.che.plugin.debugger.ide.debug.expression.EvaluateExpressionViewImpl;
-import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
-import org.eclipse.che.ide.util.storage.BrowserLocalStorageProviderImpl;
-import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 
 /**
  * GIN module for Debugger extension.
@@ -53,7 +51,6 @@ public class DebuggerGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().implement(Action.class, DebugConfigurationAction.class)
                                              .build(DebugConfigurationActionFactory.class));
 
-        bind(LocalStorageProvider.class).to(BrowserLocalStorageProviderImpl.class).in(Singleton.class);
         bind(ToolbarPresenter.class).annotatedWith(DebuggerToolbar.class).to(ToolbarPresenter.class).in(Singleton.class);
     }
 }
