@@ -12,12 +12,12 @@ package org.eclipse.che.ide.projecttype.wizard;
 
 import com.google.common.base.Optional;
 
-import org.eclipse.che.api.core.model.project.ProjectConfig;
-import org.eclipse.che.api.workspace.shared.dto.CommandDto;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;

@@ -52,10 +52,10 @@ public class ServerPortMacro extends AbstractServerMacro {
 
     /** {@inheritDoc} */
     @Override
-    public Set<Macro> getMacros(MachineImpl devMachine) {
+    public Set<Macro> getMacros(MachineImpl machine) {
         final Set<Macro> macros = Sets.newHashSet();
 
-        for (Map.Entry<String, ServerImpl> entry : devMachine.getServers().entrySet()) {
+        for (Map.Entry<String, ServerImpl> entry : machine.getServers().entrySet()) {
 
             if (!entry.getValue().getUrl().contains(":")) {
                 continue;

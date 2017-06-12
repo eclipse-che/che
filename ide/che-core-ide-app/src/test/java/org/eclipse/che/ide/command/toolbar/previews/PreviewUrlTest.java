@@ -13,6 +13,7 @@ package org.eclipse.che.ide.command.toolbar.previews;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +22,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -51,7 +53,9 @@ public class PreviewUrlTest {
         when(devMachine.getName()).thenReturn(MACHINE_NAME);
         when(devMachine.getServers()).thenReturn(servers);
 
-//        when(appContext.getDevMachine()).thenReturn(devMachine);
+        WorkspaceImpl workspace = mock(WorkspaceImpl.class);
+        when(workspace.getDevMachine()).thenReturn(Optional.of(devMachine));
+        when(appContext.getWorkspace()).thenReturn(workspace);
 
         previewUrl = new PreviewUrl(PREVIEW_URL, appContext);
     }

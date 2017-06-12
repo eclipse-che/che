@@ -141,7 +141,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         asyncRequestFactory.createGetRequest(url).send().then(ignored -> {
             checkWsConnection();
         }).catchError(ignored -> {
-            // FIXME: spi
+            // FIXME: spi ide
             new Timer() {
                 @Override
                 public void run() {
@@ -202,7 +202,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         if (messageBus != null) {
             messageBus.cancelReconnection();
         }
-        // FIXME: spi
+        // FIXME: spi ide
         final String wsAgentWebSocketURL = appContext.getDevAgentEndpoint().replaceFirst("http", "ws") + "/ws";
         messageBus = messageBusProvider.createMachineMessageBus(wsAgentWebSocketURL);
         // TODO: need to remove all handlers when ws-agent stopped

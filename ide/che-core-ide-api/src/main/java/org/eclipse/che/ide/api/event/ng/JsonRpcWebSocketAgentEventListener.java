@@ -101,15 +101,15 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
             machine.getServerByName(EXEC_AGENT_REFERENCE)
                    .ifPresent(server -> {
                        String execAgentServerURL = server.getUrl();
-                       execAgentServerURL = execAgentServerURL.replaceFirst("http", "ws") + "/connect"; // FIXME: spi
+                       execAgentServerURL = execAgentServerURL.replaceFirst("http", "ws") + "/connect"; // FIXME: spi ide
                        initializer.initialize(machine.getName(), singletonMap("url", execAgentServerURL));
                    });
 
             final Optional<ServerImpl> wsAgentServer = machine.getServerByName(WSAGENT_REFERENCE);
 
             if (wsAgentServer.isPresent()) {
-                final String wsAgentBaseUrl = wsAgentServer.get().getUrl() + "/api"; // FIXME: spi
-                final String wsAgentWebSocketUrl = wsAgentBaseUrl.replaceFirst("http", "ws") + "/ws"; // FIXME: spi
+                final String wsAgentBaseUrl = wsAgentServer.get().getUrl() + "/api"; // FIXME: spi ide
+                final String wsAgentWebSocketUrl = wsAgentBaseUrl.replaceFirst("http", "ws") + "/ws"; // FIXME: spi ide
                 final String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + appContext.getAppId());
 
                 initializer.initialize("ws-agent", singletonMap("url", wsAgentUrl));

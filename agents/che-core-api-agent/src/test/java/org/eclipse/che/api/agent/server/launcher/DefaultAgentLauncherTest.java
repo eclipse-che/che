@@ -10,30 +10,31 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.launcher;
 
-import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-import org.mockito.Mock;
+//import org.eclipse.che.api.agent.shared.model.Agent;
+//import org.eclipse.che.api.core.util.LineConsumer;
+//import org.eclipse.che.api.machine.server.spi.Instance;
+//import org.eclipse.che.api.machine.server.spi.InstanceProcess;
+//import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 
 /**
  * @author Anatolii Bazko
  */
+// FIXME: spi
 @Listeners(value = {MockitoTestNGListener.class})
 public class DefaultAgentLauncherTest {
-
-    @Mock
-    private Instance                        machine;
-    @Mock
-    private Agent                           agent;
-    @Mock
-    private LineConsumer                    lineConsumer;
-    @Mock
-    private InstanceProcess                 instanceProcess;
-
-    private AgentLauncher agentLauncher;
+//
+//    @Mock
+//    private Instance                        machine;
+//    @Mock
+//    private Agent                           agent;
+//    @Mock
+//    private LineConsumer                    lineConsumer;
+//    @Mock
+//    private InstanceProcess                 instanceProcess;
+//
+//    private AgentLauncher agentLauncher;
 
 //    @BeforeMethod
 //    public void setUp() throws Exception {
