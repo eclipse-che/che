@@ -12,32 +12,35 @@ package org.eclipse.che.api.languageserver.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
+import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
+import org.eclipse.che.api.languageserver.registry.LSOperation;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SymbolInformationDto;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceSymbolParams;
-import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.SymbolInformation;
-import org.eclipse.lsp4j.services.LanguageServer;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyList;
-import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.prefixURI;
 import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.removePrefixUri;
+import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.truish;
 
 /**
- * REST API for the workspace/* services defined in https://github.com/Microsoft/vscode-languageserver-protocol
- * Dispatches onto the {@link LanguageServerRegistryImpl}.
+ * REST API for the workspace/* services defined in
+ * https://github.com/Microsoft/vscode-languageserver-protocol Dispatches onto
+ * the {@link LanguageServerRegistryImpl}.
  *
  * @author Evgen Vidolob
  */
@@ -55,24 +58,32 @@ public class WorkspaceService {
     @Path("symbol")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends SymbolInformationDto> documentSymbol(ExtendedWorkspaceSymbolParams workspaceSymbolParams)
-            throws ExecutionException,
-                   InterruptedException,
-                   LanguageServerException {
-        LanguageServer server = getServer(prefixURI(workspaceSymbolParams.getFileUri()));
-        if (server == null) {
-            return emptyList();
-        }
+    public List<? extends SymbolInformationDto> symbol(ExtendedWorkspaceSymbolParams workspaceSymbolParams)
+                    throws ExecutionException, InterruptedException, LanguageServerException {
+        List<SymbolInformationDto> result = new ArrayList<>();
+        List<InitializedLanguageServer> servers = registry.getApplicableLanguageServers(workspaceSymbolParams.getFileUri()).stream()
+                        .flatMap(Collection::stream).collect(Collectors.toList());
+        LanguageServerRegistryImpl.doInParallel(servers, new LSOperation<InitializedLanguageServer, List<? extends SymbolInformation>>() {
 
-        List<? extends SymbolInformation> informations = server.getWorkspaceService().symbol(workspaceSymbolParams).get();
-        informations.forEach(o -> {
-            Location location = o.getLocation();
-            location.setUri(removePrefixUri(location.getUri()));
-        });
-        return informations.stream().map(o -> new SymbolInformationDto(o)).collect(Collectors.toList());
-    }
+            @Override
+            public boolean canDo(InitializedLanguageServer element) {
+                return truish(element.getInitializeResult().getCapabilities().getWorkspaceSymbolProvider());
+            }
 
-    private LanguageServer getServer(String uri) throws LanguageServerException {
-        return registry.findServer(uri);
+            @Override
+            public CompletableFuture<List<? extends SymbolInformation>> start(InitializedLanguageServer element) {
+                return element.getServer().getWorkspaceService().symbol(workspaceSymbolParams);
+            }
+
+            @Override
+            public boolean handleResult(InitializedLanguageServer element, List<? extends SymbolInformation> locations) {
+                locations.forEach(o -> {
+                    o.getLocation().setUri(removePrefixUri(o.getLocation().getUri()));
+                    result.add(new SymbolInformationDto(o));
+                });
+                return true;
+            }
+        }, 10000);
+        return result;
     }
 }

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import org.eclipse.che.api.languageserver.shared.model.ExtendedInitializeResult;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -27,6 +26,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
+import org.eclipse.lsp4j.ServerCapabilities;
 
 import javax.inject.Inject;
 
@@ -36,7 +36,6 @@ import javax.inject.Inject;
 public class LanguageServerEditorProvider implements AsyncEditorProvider, EditorProvider {
 
     private final LanguageServerRegistry                   registry;
-    private final LoaderFactory                            loaderFactory;
     private final LanguageServerEditorConfigurationFactory editorConfigurationFactory;
    
     @com.google.inject.Inject
@@ -49,7 +48,6 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
                                         PromiseProvider promiseProvider) {
         this.editorConfigurationFactory = editorConfigurationFactory;
         this.registry = registry;
-        this.loaderFactory = loaderFactory;
         this.promiseProvider= promiseProvider;
     }
 
@@ -81,17 +79,17 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
         if (file instanceof File) {
             File resource = (File)file;
 
-            Promise<ExtendedInitializeResult> promise = registry.getOrInitializeServer(resource.getProject().getPath(), file);
-            return promise.thenPromise(new Function<ExtendedInitializeResult, Promise<EditorPartPresenter>>() {
+            Promise<ServerCapabilities> promise = registry.getOrInitializeServer(resource.getProject().getPath(), file);
+            return promise.thenPromise(new Function<ServerCapabilities, Promise<EditorPartPresenter>>() {
                 @Override
-                public Promise<EditorPartPresenter> apply(ExtendedInitializeResult arg) throws FunctionException {
+                public Promise<EditorPartPresenter> apply(ServerCapabilities arg) throws FunctionException {
                     if (editorBuilder == null) {
                         Log.debug(AbstractTextEditorProvider.class, "No builder registered for default editor type - giving up.");
                         return promiseProvider.resolve(null);
                     }
 
                     final TextEditor editor = editorBuilder.buildEditor();
-                    LanguageServerEditorConfiguration configuration = editorConfigurationFactory.build(editor, arg.getCapabilities());
+                    LanguageServerEditorConfiguration configuration = editorConfigurationFactory.build(editor, arg);
                     editor.initialize(configuration);
                     return promiseProvider.resolve(editor);
                 }

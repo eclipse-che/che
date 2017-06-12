@@ -12,6 +12,14 @@ public class ExtendedCompletionItem extends CompletionItem {
 
     private TextDocumentIdentifier textDocumentIdentifier;
 
+    public CompletionItem getItem() {
+        return item;
+    }
+    
+    public void setItem(CompletionItem item) {
+        this.item = item;
+    }
+    
     public TextDocumentIdentifier getTextDocumentIdentifier() {
         return textDocumentIdentifier;
     }

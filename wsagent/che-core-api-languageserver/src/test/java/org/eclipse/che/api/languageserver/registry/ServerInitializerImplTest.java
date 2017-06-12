@@ -13,6 +13,7 @@ package org.eclipse.che.api.languageserver.registry;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -67,14 +68,13 @@ public class ServerInitializerImplTest {
         when(server.initialize(any(InitializeParams.class))).thenReturn(completableFuture);
         when(completableFuture.get()).thenReturn(mock(InitializeResult.class));
 
-        when(launcher.getLanguageId()).thenReturn("languageId");
         when(launcher.launch(anyString(), any())).thenReturn(server);
         doNothing().when(initializer).registerCallbacks(server, launcher);
 
         initializer.addObserver(observer);
-        LanguageServer languageServer = initializer.initialize(languageDescription, launcher, "/path");
+        Pair<LanguageServer, InitializeResult> initResult = initializer.initialize(launcher, "/path").get();
 
-        assertEquals(server, languageServer);
-        verify(observer).onServerInitialized(eq(server), any(ServerCapabilities.class), eq(languageDescription), eq("/path"));
+        assertEquals(server, initResult.first);
+        verify(observer).onServerInitialized(launcher, eq(server), any(ServerCapabilities.class), eq("/path"));
     }
 }

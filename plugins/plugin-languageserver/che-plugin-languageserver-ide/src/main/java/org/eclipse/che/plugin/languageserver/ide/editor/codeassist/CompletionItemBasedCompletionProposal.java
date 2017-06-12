@@ -82,7 +82,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
     @Override
     public void getAdditionalProposalInfo(final AsyncCallback<Widget> callback) {
-        if (completionItem.getDocumentation() == null && canResolve()) {
+        if (completionItem.getItem().getDocumentation() == null && canResolve()) {
             resolve().then(new Operation<ExtendedCompletionItem>() {
                 @Override
                 public void apply(ExtendedCompletionItem item) throws OperationException {
@@ -102,7 +102,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     }
 
     private Widget createAdditionalInfoWidget() {
-        String documentation = completionItem.getDocumentation();
+        String documentation = completionItem.getItem().getDocumentation();
         if (documentation == null || documentation.trim().isEmpty()) {
             documentation = "No documentation found.";
         }
@@ -122,7 +122,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     public String getDisplayString() {
         SafeHtmlBuilder builder = new SafeHtmlBuilder();
 
-        String label = completionItem.getLabel();
+        String label = completionItem.getItem().getLabel();
         int pos = 0;
         for (Match highlight : highlights) {
             if (highlight.getStart() == highlight.getEnd()) {
@@ -141,8 +141,8 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
             appendPlain(builder, label.substring(pos));
         }
 
-        if (completionItem.getDetail() != null) {
-            appendDetail(builder, completionItem.getDetail());
+        if (completionItem.getItem().getDetail() != null) {
+            appendDetail(builder, completionItem.getItem().getDetail());
         }
 
         return builder.toSafeHtml().asString();
@@ -173,10 +173,10 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     public void getCompletion(final CompletionCallback callback) {
         if (canResolve()) {
             resolve().then(completionItem -> {
-                callback.onCompletion(new CompletionImpl(completionItem, currentWord, offset));
+                callback.onCompletion(new CompletionImpl(completionItem.getItem(), currentWord, offset));
             });
         } else {
-            callback.onCompletion(new CompletionImpl(completionItem, currentWord, offset));
+            callback.onCompletion(new CompletionImpl(completionItem.getItem(), currentWord, offset));
         }
     }
 

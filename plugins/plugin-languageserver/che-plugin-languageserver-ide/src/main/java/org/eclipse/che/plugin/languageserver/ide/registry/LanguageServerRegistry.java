@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -24,12 +23,13 @@ import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryJsonRpcClient;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
+import org.eclipse.lsp4j.ServerCapabilities;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-
 
 /**
  * @author Anatoliy Bazko
@@ -37,10 +37,9 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 @Singleton
 public class LanguageServerRegistry {
     private final LanguageServerRegistryJsonRpcClient                                     jsonRpcClient;
-    private final LanguageServerRegistryServiceClient                                     client;
+    private final LanguageServerRegistryServiceClient client;
     private       LoaderFactory                                                           loaderFactory;
     private       NotificationManager                                                     notificationManager;
-    private final EventBus                            eventBus;
 
     private final Map<FileType, LanguageDescription>                                      registeredFileTypes = new ConcurrentHashMap<>();
     private final PromiseProvider                                                         promiseProvider;
@@ -52,35 +51,30 @@ public class LanguageServerRegistry {
                                   NotificationManager notificationManager,
                                   LanguageServerRegistryJsonRpcClient jsonRpcClient,
                                   LanguageServerRegistryServiceClient client, 
-                                  PromiseProvider promiseProvider,
-                                  FileTypeRegistry fileTypeRegistry) {
-        this.eventBus = eventBus;
+                                  PromiseProvider promiseProvider) {
+
+
         this.loaderFactory = loaderFactory;
         this.notificationManager = notificationManager;
         this.jsonRpcClient = jsonRpcClient;
         this.client = client;
-        this.promiseProvider = promiseProvider;
-        this.fileTypeRegistry = fileTypeRegistry;
     }
 
-    public Promise<ExtendedInitializeResult> getOrInitializeServer(String projectPath, VirtualFile file) {
-            //call initialize service
-            final MessageLoader loader = loaderFactory.newLoader("Initializing Language Server for " + file.getName());
-            loader.show();
-
-            client.initializeServer(file.getLocation().toString()).then(arg -> {
-                loader.hide();
-            }).catchError(arg -> {
-                notificationManager.notify("Initializing Language Server for " + file.getName(), arg.getMessage(), FAIL, EMERGE_MODE);
-                loader.hide();
-            });
-            //wait for response
-            return CallbackPromiseHelper.createFromCallback(callback -> callbackMap.put(key, callback));
-        }
+    public Promise<ServerCapabilities> getOrInitializeServer(String projectPath, VirtualFile file) {
+        // call initialize service
+        final MessageLoader loader = loaderFactory.newLoader("Initializing Language Server for " + file.getName());
+        loader.show();
+        return client.initializeServer(file.getLocation().toString()).then(arg -> {
+            loader.hide();
+        }).catchError(arg -> {
+            notificationManager.notify("Initializing Language Server for " + file.getName(), arg.getMessage(), FAIL, EMERGE_MODE);
+            loader.hide();
+        });
     }
 
     /**
      * Register file type for a language description
+     * 
      * @param type
      * @param description
      */
@@ -90,7 +84,9 @@ public class LanguageServerRegistry {
     }
 
     /**
-     * Get the language that is registered for this file. May return null if none is found.
+     * Get the language that is registered for this file. May return null if
+     * none is found.
+     * 
      * @param file
      * @return
      */

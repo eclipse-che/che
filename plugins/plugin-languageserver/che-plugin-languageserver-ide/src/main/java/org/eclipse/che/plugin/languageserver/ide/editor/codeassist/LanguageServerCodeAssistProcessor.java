@@ -142,14 +142,14 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
     private void computeProposals(String currentWord, int offset, CodeAssistCallback callback) {
         List<CompletionProposal> proposals = newArrayList();
         for (ExtendedCompletionItem item : latestCompletionResult.getCompletionList().getItems()) {
-            List<Match> highlights = filter(currentWord, item);
+            List<Match> highlights = filter(currentWord, item.getItem());
             if (highlights != null) {
                 proposals.add(new CompletionItemBasedCompletionProposal(item,
                                                                         currentWord,
                                                                         documentServiceClient,
                                                                         latestCompletionResult.getDocumentId(),
                                                                         resources,
-                                                                        imageProvider.getIcon(item.getKind()),
+                                                                        imageProvider.getIcon(item.getItem().getKind()),
                                                                         serverCapabilities,
                                                                         highlights,
                                                                         offset));

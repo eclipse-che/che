@@ -1,39 +1,28 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.eclipse.lsp4j.InitializeResult;
+import java.util.List;
 
+public class LanguageServerDescription  {
+    private final String id;
+    private final List<String> languageIds;
+    private final List<DocumentFilter> documentFilters;
 
-/**
- * Simple container for {@link InitializeResult} and {@link LanguageDescription}
- *
- * @author Evgen Vidolob
- */
-public class LanguageServerDescription {
-    private final InitializeResult    initializeResult;
-    private final LanguageDescription languageDescription;
-
-    public LanguageServerDescription(InitializeResult initializeResult,
-                                     LanguageDescription languageDescription) {
-        this.initializeResult = initializeResult;
-        this.languageDescription = languageDescription;
+    public LanguageServerDescription(String id, List<String> languageIds, List<DocumentFilter> documentFilters) {
+        this.id = id;
+        this.languageIds = languageIds;
+        this.documentFilters = documentFilters;
     }
 
-    public InitializeResult getInitializeResult() {
-        return initializeResult;
+    public String getId() {
+        return id;
     }
 
-    public LanguageDescription getLanguageDescription() {
-        return languageDescription;
+    public List<String> getLanguageIds() {
+        return languageIds;
     }
+
+    public List<DocumentFilter> getDocumentFilters() {
+        return documentFilters;
+    }
+
 }

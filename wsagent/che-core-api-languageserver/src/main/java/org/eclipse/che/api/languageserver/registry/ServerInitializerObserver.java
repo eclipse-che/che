@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
+import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -29,8 +30,8 @@ public interface ServerInitializerObserver {
      * @param languageDescription
      * @param projectPath
      */
-    void onServerInitialized(LanguageServer server,
+    void onServerInitialized(LanguageServerLauncher launcher, 
+                             LanguageServer server,
                              ServerCapabilities capabilities,
-                             LanguageDescription languageDescription,
                              String projectPath);
 }

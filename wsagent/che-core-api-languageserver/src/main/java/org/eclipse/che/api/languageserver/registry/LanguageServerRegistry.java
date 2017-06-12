@@ -11,28 +11,34 @@
 package org.eclipse.che.api.languageserver.registry;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.shared.ProjectLangugageKey;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.lsp4j.services.LanguageServer;
+import org.eclipse.lsp4j.ServerCapabilities;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Anatoliy Bazko
  */
 public interface LanguageServerRegistry {
     /**
-     * Finds appropriate language server according to file name.
+     * Finds appropriate language servers according to file uri.
+     * @throws LanguageServerException 
      */
-    @Nullable
-    LanguageServer findServer(String fileUri) throws LanguageServerException;
+    List<Collection<InitializedLanguageServer>> getApplicableLanguageServers(String fileUri) throws LanguageServerException;
 
     /**
      * Returns all available servers.
      */
     List<LanguageDescription> getSupportedLanguages();
+    
+    /**
+     * Initialize the language servers that apply to this file
+     * @param fileUri
+     * @return 
+     * @throws LanguageServerException 
+     */
+    ServerCapabilities initialize(String fileUri) throws LanguageServerException;
 
-    Map<ProjectLangugageKey, LanguageServerDescription> getInitializedLanguages();
+    ServerCapabilities getCapabilities(String fileUri) throws LanguageServerException;
 }
