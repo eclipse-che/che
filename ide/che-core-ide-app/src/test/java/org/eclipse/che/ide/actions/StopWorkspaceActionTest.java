@@ -12,13 +12,13 @@ package org.eclipse.che.ide.actions;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.CurrentWorkspaceManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,7 +46,7 @@ public class StopWorkspaceActionTest {
     @Mock
     private CurrentWorkspaceManager  workspaceManager;
     @Mock
-    private Workspace                workspace;
+    private WorkspaceImpl            workspace;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private ActionEvent   actionEvent;
@@ -67,6 +67,9 @@ public class StopWorkspaceActionTest {
 
     @Test
     public void actionShouldBeUpdated() {
+        when(workspace.getRuntime()).thenReturn(mock(RuntimeImpl.class));
+        when(appContext.getWorkspace()).thenReturn(workspace);
+
         action.updateInPerspective(actionEvent);
 
         verify(actionEvent, times(2)).getPresentation();
@@ -74,8 +77,6 @@ public class StopWorkspaceActionTest {
 
     @Test
     public void actionShouldBePerformed() throws Exception {
-        DevMachine devMachine = mock(DevMachine.class);
-        when(devMachine.getName()).thenReturn("id");
         when(appContext.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn("id");
 

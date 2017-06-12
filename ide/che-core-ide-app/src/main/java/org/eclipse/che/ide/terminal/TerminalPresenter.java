@@ -111,7 +111,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
 
                     if (terminalServer.isPresent()) {
                         final String terminalServerURL = terminalServer.get().getUrl();
-                        // FIXME: spi
+                        // FIXME: spi ide
                         connectToTerminalWebSocket(terminalServerURL.replaceFirst("http", "ws") + "/pty");
                     } else {
                         throw new OperationException("Machine " + machine.getName() + " doesn't provide terminal server.");

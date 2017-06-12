@@ -226,7 +226,7 @@ public class BreakpointStorageImpl implements BreakpointStorage {
             if (key != null && key.startsWith(LOCAL_STORAGE_BREAKPOINTS_KEY_PREFIX)) {
                 String wsId = key.substring(LOCAL_STORAGE_BREAKPOINTS_KEY_PREFIX.length());
 
-                // FIXME: spi
+                // FIXME: spi ide
 //                Promise<WorkspaceDto> workspace = workspaceServiceClient.getWorkspace(wsId);
 //                workspace.catchError(arg -> {
 //                    storage.removeItem(key);

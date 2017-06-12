@@ -26,20 +26,8 @@
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-agent</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-agent-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-core</artifactId>
         </dependency>
     </dependencies>
     <build>

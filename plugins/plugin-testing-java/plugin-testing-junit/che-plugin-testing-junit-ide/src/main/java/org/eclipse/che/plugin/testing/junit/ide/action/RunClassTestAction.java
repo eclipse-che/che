@@ -10,13 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.junit.ide.action;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.validation.constraints.NotNull;
+import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -33,7 +27,12 @@ import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
 
-import com.google.inject.Inject;
+import javax.validation.constraints.NotNull;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * @author Mirage Abeysekara
