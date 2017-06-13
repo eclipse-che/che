@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.explorer;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
@@ -32,14 +32,12 @@ import org.eclipse.che.ide.api.command.CommandRemovedEvent.CommandRemovedHandler
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent.CommandUpdatedHandler;
-import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.command.CommandResources;
@@ -90,7 +88,7 @@ public class CommandsExplorerPresenterTest {
     @Mock
     private NodeFactory                               nodeFactory;
     @Mock
-    private EditorAgent                               editorAgent;
+    private Provider<EditorAgent>                     editorAgentProvider;
     @Mock
     private AppContext                                appContext;
     @Mock
@@ -108,8 +106,6 @@ public class CommandsExplorerPresenterTest {
     @Captor
     private ArgumentCaptor<Operation<PromiseError>> errorOperationCaptor;
     @Captor
-    private ArgumentCaptor<Operation<CommandImpl>>  commandOperationCaptor;
-    @Captor
     private ArgumentCaptor<Operation<CommandType>>  commandTypeOperationCaptor;
 
     @Test
@@ -119,18 +115,9 @@ public class CommandsExplorerPresenterTest {
 
     @Test
     public void testStart() throws Exception {
-        Callback callback = mock(Callback.class);
-
-        presenter.start(callback);
-
-        verify(workspaceAgent).openPart(presenter, PartStackType.NAVIGATION, Constraints.LAST);
-        verifyViewRefreshed();
-
         verify(eventBus).addHandler(eq(CommandAddedEvent.getType()), any(CommandAddedHandler.class));
         verify(eventBus).addHandler(eq(CommandRemovedEvent.getType()), any(CommandRemovedHandler.class));
         verify(eventBus).addHandler(eq(CommandUpdatedEvent.getType()), any(CommandUpdatedHandler.class));
-
-        verify(callback).onSuccess(presenter);
     }
 
     @Test
@@ -139,7 +126,7 @@ public class CommandsExplorerPresenterTest {
 
         presenter.go(container);
 
-        verify(refreshViewTask).delayAndSelectCommand(isNull(CommandImpl.class));
+        verifyViewRefreshed();
         verify(container).setWidget(view);
     }
 

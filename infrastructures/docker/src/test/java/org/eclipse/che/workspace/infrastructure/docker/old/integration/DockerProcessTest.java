@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old.integration;
 
-import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
@@ -33,10 +30,8 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -90,23 +85,23 @@ public class DockerProcessTest {
      * If default access to docker is UNIX socket try to reconfigure docker connector for this test.<br>
      * This test may fail if system doesn't allow such access.
      */
-    @Test(expectedExceptions = MachineException.class,
-          expectedExceptionsMessageRegExp = "Command output read timeout is reached. Process is still running and has id \\d+ inside machine")
-    public void shouldThrowErrorWithRealPIDIfSocketTimeoutExceptionHappens() throws Exception {
-        DockerConnectorConfiguration dockerConnectorConfiguration = this.dockerConnectorConfiguration;
-        DockerConnector docker = this.docker;
-        if ("unix".equals(dockerConnectorConfiguration.getDockerDaemonUri().getScheme())) {
-            // access through unix socket - reconfigure to use tcp
-            dockerConnectorConfiguration = new DockerConnectorConfiguration(new URI("http://localhost:2375"),
-                                                                            null,
-                                                                            new InitialAuthConfig(),
-                                                                            new DefaultNetworkFinder());
-            docker = new DockerConnector(dockerConnectorConfiguration,
-                                         new DockerConnectionFactory(dockerConnectorConfiguration),
-                                         new DockerRegistryAuthResolver(null, null),
-                                         new DockerApiVersionPathPrefixProvider(""));
-        }
-        Command command = new CommandImpl("tailf", "tail -f /dev/null", "mvn");
+//    @Test(expectedExceptions = MachineException.class,
+//          expectedExceptionsMessageRegExp = "Command output read timeout is reached. Process is still running and has id \\d+ inside machine")
+//    public void shouldThrowErrorWithRealPIDIfSocketTimeoutExceptionHappens() throws Exception {
+//        DockerConnectorConfiguration dockerConnectorConfiguration = this.dockerConnectorConfiguration;
+//        DockerConnector docker = this.docker;
+//        if ("unix".equals(dockerConnectorConfiguration.getDockerDaemonUri().getScheme())) {
+//            // access through unix socket - reconfigure to use tcp
+//            dockerConnectorConfiguration = new DockerConnectorConfiguration(new URI("http://localhost:2375"),
+//                                                                            null,
+//                                                                            new InitialAuthConfig(),
+//                                                                            new DefaultNetworkFinder());
+//            docker = new DockerConnector(dockerConnectorConfiguration,
+//                                         new DockerConnectionFactory(dockerConnectorConfiguration),
+//                                         new DockerRegistryAuthResolver(null, null),
+//                                         new DockerApiVersionPathPrefixProvider(""));
+//        }
+//        Command command = new CommandImpl("tailf", "tail -f /dev/null", "mvn");
 //        final DockerProcess dockerProcess = new DockerProcess(dockerConnectorProvider,
 //                                                              command,
 //                                                              container,
@@ -115,7 +110,7 @@ public class DockerProcessTest {
 //                                                              pidGenerator.incrementAndGet());
 //
 //        dockerProcess.start(new SOUTLineConsumer());
-    }
+//    }
 
     static class SOUTLineConsumer implements LineConsumer {
         @Override

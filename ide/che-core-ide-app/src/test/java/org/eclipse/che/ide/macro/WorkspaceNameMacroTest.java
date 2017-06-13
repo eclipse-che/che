@@ -13,15 +13,17 @@ package org.eclipse.che.ide.macro;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.macro.WorkspaceNameMacro;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceConfigImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,7 +50,11 @@ public class WorkspaceNameMacroTest {
 
     @Before
     public void init() throws Exception {
-        when(appContext.getWorkspaceName()).thenReturn(WS_NAME);
+        WorkspaceImpl workspace = mock(WorkspaceImpl.class);
+        WorkspaceConfigImpl workspaceConfig = mock(WorkspaceConfigImpl.class);
+        when(workspaceConfig.getName()).thenReturn(WS_NAME);
+        when(workspace.getConfig()).thenReturn(workspaceConfig);
+        when(appContext.getWorkspace()).thenReturn(workspace);
 
         provider = new WorkspaceNameMacro(appContext, promiseProvider, localizationConstants);
     }

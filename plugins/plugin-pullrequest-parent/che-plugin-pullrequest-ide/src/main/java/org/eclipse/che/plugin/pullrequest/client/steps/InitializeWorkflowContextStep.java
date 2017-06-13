@@ -10,32 +10,32 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.pullrequest.client.steps;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.inject.Singleton;
+
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.git.shared.Remote;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.plugin.pullrequest.client.ContributeMessages;
 import org.eclipse.che.plugin.pullrequest.client.vcs.VcsServiceProvider;
 import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
 import org.eclipse.che.plugin.pullrequest.client.workflow.Context;
 import org.eclipse.che.plugin.pullrequest.client.workflow.Step;
 import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowExecutor;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import com.google.inject.Singleton;
-
-import org.eclipse.che.api.core.model.project.ProjectConfig;
-import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.plugin.pullrequest.shared.ContributionProjectTypeConstants.CONTRIBUTE_TO_BRANCH_VARIABLE_NAME;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.plugin.pullrequest.shared.ContributionProjectTypeConstants.CONTRIBUTE_TO_BRANCH_VARIABLE_NAME;
 
 /**
  * This step initialize the contribution workflow context.

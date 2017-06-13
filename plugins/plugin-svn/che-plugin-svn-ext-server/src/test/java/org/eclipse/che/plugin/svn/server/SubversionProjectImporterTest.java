@@ -15,7 +15,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.multibindings.Multibinder;
 
-import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 public class SubversionProjectImporterTest {
 
     @Mock
-    private ProfileDao userProfileDao;
+    private ProfileDao            userProfileDao;
     @Mock
     private RepositoryUrlProvider repositoryUrlProvider;
     @Mock

@@ -104,7 +104,7 @@ public class WorkspaceStatusHandler {
     }
 
     public void handleWorkspaceRunning(Workspace workspace) {
-        // FIXME: spi
+        // FIXME: spi ide
         // should be set on server `ws-agent` has been started
         ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf("/projects"));
 

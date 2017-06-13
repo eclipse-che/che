@@ -14,11 +14,11 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.command.goal.DebugGoal;
 import org.eclipse.che.ide.command.goal.RunGoal;
 import org.eclipse.che.ide.command.toolbar.CommandCreationGuide;
@@ -92,7 +92,7 @@ public class ExecuteCommandPresenterTest {
     @Test
     public void shouldExecuteCommandOnMachine() throws Exception {
         CommandImpl command = mock(CommandImpl.class);
-        Machine machine = mock(Machine.class);
+        MachineImpl machine = mock(MachineImpl.class);
 
         presenter.onCommandExecute(command, machine);
 

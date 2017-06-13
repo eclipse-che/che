@@ -10,18 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.palette;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.workspace.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.machine.chooser.MachineChooser;
 import org.junit.Test;
@@ -73,10 +72,10 @@ public class CommandsPalettePresenterTest {
     private PaletteMessages messages;
 
     @Mock
-    private Promise<Machine> machinePromise;
+    private Promise<MachineImpl> machinePromise;
 
     @Captor
-    private ArgumentCaptor<Operation<Machine>> selectedMachineCaptor;
+    private ArgumentCaptor<Operation<MachineImpl>> selectedMachineCaptor;
 
     @Captor
     private ArgumentCaptor<Map<CommandGoal, List<CommandImpl>>> filteredCommandsCaptor;
@@ -130,15 +129,15 @@ public class CommandsPalettePresenterTest {
     @Test
     public void shouldExecuteCommand() throws Exception {
         // given
-        Workspace workspace = mock(Workspace.class);
+        WorkspaceImpl workspace = mock(WorkspaceImpl.class);
         when(appContext.getWorkspace()).thenReturn(workspace);
 
-        WorkspaceRuntimeDto workspaceRuntime = mock(WorkspaceRuntimeDto.class);
+        RuntimeImpl workspaceRuntime = mock(RuntimeImpl.class);
         when(workspace.getRuntime()).thenReturn(workspaceRuntime);
 
-        List<MachineDto> machines = new ArrayList<>(1);
-        MachineDto chosenMachine = mock(MachineDto.class);
-        machines.add(chosenMachine);
+        Map<String, MachineImpl> machines = new HashMap<>();
+        MachineImpl chosenMachine = mock(MachineImpl.class);
+        machines.put("machine_id", chosenMachine);
         when(workspaceRuntime.getMachines()).thenReturn(machines);
 
         when(machineChooser.show()).thenReturn(machinePromise);

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.client;
+package org.eclipse.che.ide.actions;
 
 import org.eclipse.che.ide.api.app.StartUpAction;
 import org.eclipse.che.ide.actions.StartUpActionsParser;

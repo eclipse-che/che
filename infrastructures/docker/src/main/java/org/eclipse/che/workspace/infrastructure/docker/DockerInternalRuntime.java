@@ -14,12 +14,16 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
+import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
@@ -59,6 +63,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     private final MachineStarter                         serviceStarter;
     private final SnapshotDao                            snapshotDao;
     private final DockerRegistryClient                   dockerRegistryClient;
+    private final RuntimeIdentity                        identity;
+    private final EventService                           eventService;
 
 
     public DockerInternalRuntime(DockerRuntimeContext context,
@@ -71,10 +77,13 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                  MachineStarter serviceStarter,
                                  SnapshotDao snapshotDao,
                                  DockerRegistryClient dockerRegistryClient,
-                                 DockerRuntimeContext.StartSynchronizer startSynchronizer) {
+                                 DockerRuntimeContext.StartSynchronizer startSynchronizer,
+                                 RuntimeIdentity identity, EventService eventService) {
         super(context, urlRewriter);
         this.devMachineName = devMachineName;
         this.dockerEnvironment = dockerEnvironment;
+        this.identity = identity;
+        this.eventService = eventService;
         this.properties = new HashMap<>();
         this.startSynchronizer = startSynchronizer;
         this.contextsStorage = contextsStorage;
@@ -98,7 +107,24 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             while (machineName != null) {
                 DockerContainerConfig service = dockerEnvironment.getServices().get(machineName);
                 checkStartInterruption();
-                dockerMachine = startMachine(machineName, service, startOptions, machineName.equals(devMachineName));
+                eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
+                                               .withIdentity(DtoConverter.asDto(identity))
+                                               .withEventType(MachineStatusEvent.EventType.STARTING)
+                                               .withMachineName(machineName));
+                try {
+                    dockerMachine = startMachine(machineName, service, startOptions, machineName.equals(devMachineName));
+                    eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
+                                                   .withIdentity(DtoConverter.asDto(identity))
+                                                   .withEventType(MachineStatusEvent.EventType.RUNNING)
+                                                   .withMachineName(machineName));
+                } catch (InfrastructureException e) {
+                    eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
+                                                   .withIdentity(DtoConverter.asDto(identity))
+                                                   .withEventType(MachineStatusEvent.EventType.FAILED)
+                                                   .withMachineName(machineName)
+                                                   .withError(e.getMessage()));
+                    throw e;
+                }
                 checkStartInterruption();
                 startSynchronizer.addMachine(machineName, dockerMachine);
                 startQueue.poll();
@@ -250,6 +276,10 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             for (Map.Entry<String, DockerMachine> dockerMachineEntry : startSynchronizer.removeMachines().entrySet()) {
                 try {
                     dockerMachineEntry.getValue().destroy();
+                    eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
+                                                   .withIdentity(DtoConverter.asDto(identity))
+                                                   .withEventType(MachineStatusEvent.EventType.STOPPED)
+                                                   .withMachineName(dockerMachineEntry.getKey()));
                 } catch (InfrastructureException e) {
                     LOG.error(format("Error occurs on destroying of docker machine '%s' in workspace '%s'. Container '%s'",
                                      dockerMachineEntry.getKey(),

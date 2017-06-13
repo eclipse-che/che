@@ -31,7 +31,7 @@ public class DevMachine extends MachineEntityImpl {
         super(name, devMachineDescriptor);
     }
 
-    // FIXME: spi
+    // FIXME: spi ide
     @Deprecated
     public String getWsAgentWebSocketUrl() {
         return getWsAgentBaseUrl().replaceFirst("http", "ws") + "/ws";
@@ -60,7 +60,7 @@ public class DevMachine extends MachineEntityImpl {
                 url = url.substring(0, url.length() - 1);
             }
 
-            // FIXME: spi
+            // FIXME: spi ide
             return url + "/api";
         }
 

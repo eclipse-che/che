@@ -13,9 +13,6 @@ package org.eclipse.che.ide.macro;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
-import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -23,7 +20,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.macro.BaseMacro;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
-import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,16 +58,10 @@ public class ServerPortMacroTest {
     private AppContext appContext;
 
     @Mock
-    private DevMachine devMachine;
+    private MachineImpl machine;
 
     @Mock
-    private Machine machine;
-
-    @Mock
-    private MachineRuntimeInfo machineRuntimeInfo;
-
-    @Mock
-    private Server server;
+    private ServerImpl server;
 
     private ServerPortMacro macro;
 
@@ -82,7 +74,7 @@ public class ServerPortMacroTest {
 
     @Test
     public void getMacros() throws Exception {
-        final Set<Macro> macros = macro.getMacros(devMachine);
+        final Set<Macro> macros = macro.getMacros(machine);
 
         assertEquals(macros.size(), 2);
 
@@ -114,10 +106,7 @@ public class ServerPortMacroTest {
     }
 
     protected void registerMacros() {
-        when(devMachine.getDescriptor()).thenReturn(machine);
-        when(machine.getRuntime()).thenReturn(machineRuntimeInfo);
-        doReturn(Collections.<String, Server>singletonMap(WS_AGENT_PORT, server)).when(machineRuntimeInfo).getServers();
-        when(server.getAddress()).thenReturn(ADDRESS);
+        doReturn(Collections.singletonMap(WS_AGENT_PORT, server)).when(machine).getServers();
+        when(server.getUrl()).thenReturn(ADDRESS);
     }
-
 }

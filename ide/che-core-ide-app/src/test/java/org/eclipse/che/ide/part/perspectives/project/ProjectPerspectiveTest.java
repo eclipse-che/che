@@ -20,13 +20,16 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStackView;
+import org.eclipse.che.ide.command.explorer.CommandsExplorerPresenter;
 import org.eclipse.che.ide.part.PartStackPresenter;
-import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.part.PartStackPresenterFactory;
 import org.eclipse.che.ide.part.PartStackViewFactory;
 import org.eclipse.che.ide.part.WorkBenchControllerFactory;
 import org.eclipse.che.ide.part.WorkBenchPartController;
+import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.part.perspectives.general.PerspectiveViewImpl;
+import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.providers.DynaProvider;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,25 +63,31 @@ public class ProjectPerspectiveTest {
 
     //additional mocks
     @Mock
-    private FlowPanel               panel;
+    private FlowPanel                 panel;
     @Mock
-    private SplitLayoutPanel        layoutPanel;
+    private SplitLayoutPanel          layoutPanel;
     @Mock
-    private SimplePanel             simplePanel;
+    private SimplePanel               simplePanel;
     @Mock
-    private SimpleLayoutPanel       simpleLayoutPanel;
+    private SimpleLayoutPanel         simpleLayoutPanel;
     @Mock
-    private WorkBenchPartController workBenchController;
+    private WorkBenchPartController   workBenchController;
     @Mock
-    private PartStackView           partStackView;
+    private PartStackView             partStackView;
     @Mock
-    private PartStackPresenter      partStackPresenter;
+    private PartStackPresenter        partStackPresenter;
     @Mock
-    private AcceptsOneWidget        container;
+    private AcceptsOneWidget          container;
     @Mock
-    private DynaProvider            dynaProvider;
+    private DynaProvider              dynaProvider;
     @Mock
-    private NotificationManager     notificationManager;
+    private NotificationManager       notificationManager;
+    @Mock
+    private ProjectExplorerPresenter  projectExplorerPresenter;
+    @Mock
+    private CommandsExplorerPresenter commandsExplorerPresenter;
+    @Mock
+    private ProcessesPanelPresenter   processesPanelPresenter;
 
     private ProjectPerspective perspective;
 
@@ -112,7 +121,10 @@ public class ProjectPerspectiveTest {
                                              controllerFactory,
                                              eventBus,
                                              dynaProvider,
-                                             notificationManager);
+                                             projectExplorerPresenter,
+                                             commandsExplorerPresenter,
+                                             notificationManager,
+                                             processesPanelPresenter);
     }
 
     @Test
