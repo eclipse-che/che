@@ -11,29 +11,24 @@
 package org.eclipse.che.api.core.model.workspace.runtime;
 
 /**
- * Status of Machine
+ * Describes possible bootstrapper statuses.
  *
- * @author gazarenkov
+ * @author Max Shaposhnik (mshaposh@redhat.com)
  */
-public enum MachineStatus {
+public enum BootstrapperStatus {
 
     /**
-     * Machine is starting
+     * Bootstrapper is ready to work, start installers, push events, etc.
      */
-    STARTING,
-    /**
-     * Machine is up and running
-     */
-    RUNNING,
+    AVAILABLE,
 
     /**
-     * Machine is not running
+     * Bootstrapping done, everything is started ok.
      */
-    STOPPED,
+    DONE,
 
     /**
-     * Machine failed
+     * Bootstrapping failed (when any installer fails or any error occurs).
      */
-    FAILED;
-
+    FAILED
 }

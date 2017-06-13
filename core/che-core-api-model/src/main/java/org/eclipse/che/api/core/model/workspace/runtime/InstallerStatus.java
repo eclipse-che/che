@@ -11,29 +11,29 @@
 package org.eclipse.che.api.core.model.workspace.runtime;
 
 /**
- * Status of Machine
+ * Describes possible installer statuses.
  *
- * @author gazarenkov
+ * @author Max Shaposhnik (mshaposh@redhat.com)
  */
-public enum MachineStatus {
+public enum InstallerStatus {
 
     /**
-     * Machine is starting
+     * Installer is started by bootstrapper.
      */
     STARTING,
+
     /**
-     * Machine is up and running
+     * Installer successfully started, defined server is running.
      */
     RUNNING,
 
     /**
-     * Machine is not running
+     * Installer successfully started, no servers was defined.
      */
-    STOPPED,
+    DONE,
 
     /**
-     * Machine failed
+     * Installer failed.
      */
-    FAILED;
-
+    FAILED
 }
