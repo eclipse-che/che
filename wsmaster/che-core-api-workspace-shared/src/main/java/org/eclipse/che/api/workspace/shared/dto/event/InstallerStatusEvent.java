@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.shared.dto.event;
 
+import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.dto.shared.DTO;
 /**
  * Installer status event DTO.
@@ -47,13 +48,13 @@ public interface InstallerStatusEvent {
     void setMachineName(String machineName);
 
     InstallerStatusEvent withMachineName(String machineName);
-    
 
-    RuntimeId getRuntimeId();
 
-    void setRuntimeId(RuntimeId runtimeId);
+    RuntimeIdentityDto getRuntimeId();
 
-    InstallerStatusEvent withRuntimeId(RuntimeId runtimeId);
+    void setRuntimeId(RuntimeIdentityDto runtimeId);
+
+    InstallerStatusEvent withRuntimeId(RuntimeIdentityDto runtimeId);
     
 
     String getError();

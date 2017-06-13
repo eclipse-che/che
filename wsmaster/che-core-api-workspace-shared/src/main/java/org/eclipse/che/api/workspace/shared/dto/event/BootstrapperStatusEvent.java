@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.shared.dto.event;
 
+import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -47,11 +48,11 @@ public interface BootstrapperStatusEvent {
     BootstrapperStatusEvent withMachineName(String machineName);
 
 
-    RuntimeId getRuntimeId();
+    RuntimeIdentityDto getRuntimeId();
 
-    void setRuntimeId(RuntimeId runtimeId);
+    void setRuntimeId(RuntimeIdentityDto runtimeId);
 
-    BootstrapperStatusEvent withRuntimeId(RuntimeId runtimeId);
+    BootstrapperStatusEvent withRuntimeId(RuntimeIdentityDto runtimeId);
 
 
     String getError();
