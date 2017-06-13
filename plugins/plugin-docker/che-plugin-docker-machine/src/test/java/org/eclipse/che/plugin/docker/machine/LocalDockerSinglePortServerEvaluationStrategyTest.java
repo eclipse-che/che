@@ -46,6 +46,8 @@ public class LocalDockerSinglePortServerEvaluationStrategyTest {
     private static final String MACHINE_NAME_VALUE    = "myMachine";
     private static final String MACHINE_NAME_PROPERTY = "CHE_MACHINE_NAME=" + MACHINE_NAME_VALUE;
 
+    private static final String IS_DEV_MACHINE_VALUE    = "true";
+    private static final String IS_DEV_MACHINE_PROPERTY = "CHE_IS_DEV_MACHINE=" + IS_DEV_MACHINE_VALUE;
     
     @Mock
     private ContainerInfo   containerInfo;
@@ -94,7 +96,7 @@ public class LocalDockerSinglePortServerEvaluationStrategyTest {
         when(containerConfig.getEnv()).thenReturn(env);
         when(containerConfig.getLabels()).thenReturn(labels);
         
-        envContainerConfig = new String[]{WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY};
+        envContainerConfig = new String[]{WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY, IS_DEV_MACHINE_PROPERTY};
         when(containerConfig.getEnv()).thenReturn(envContainerConfig);
 
     }

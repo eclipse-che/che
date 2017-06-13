@@ -666,6 +666,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         // register workspace ID and Machine Name
         env.put(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID, workspaceId);
         env.put(DockerInstanceRuntimeInfo.CHE_MACHINE_NAME, machineName);
+        env.put(DockerInstanceRuntimeInfo.CHE_IS_DEV_MACHINE, Boolean.toString(isDev));
 
         composeService.getExpose().addAll(portsToExpose);
         composeService.getEnvironment().putAll(env);

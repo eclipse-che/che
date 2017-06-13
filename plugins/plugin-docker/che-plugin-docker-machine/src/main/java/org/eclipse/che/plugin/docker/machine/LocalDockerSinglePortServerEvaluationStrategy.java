@@ -11,19 +11,11 @@
 
 package org.eclipse.che.plugin.docker.machine;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
-import org.eclipse.che.plugin.docker.client.json.PortBinding;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 
 /**
@@ -48,6 +40,6 @@ public class LocalDockerSinglePortServerEvaluationStrategy extends CustomServerE
                                                          @Nullable @Named("che.docker.ip.external") String externalAddress,
                                                          @Named("che.docker.server_evaluation_strategy.secure.external.urls") boolean secureExternalUrls
                                                          ) {
-        super(internalAddress, externalAddress, "<serverName>-<workspaceIdWithoutPrefix>-<externalAddress>", secureExternalUrls ? "https" : "http", null, true);
+        super(internalAddress, externalAddress, "<serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<externalAddress>", secureExternalUrls ? "https" : "http", null, true);
     }
 }

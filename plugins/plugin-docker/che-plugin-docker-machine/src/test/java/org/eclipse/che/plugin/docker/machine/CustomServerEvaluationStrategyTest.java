@@ -49,6 +49,9 @@ public class CustomServerEvaluationStrategyTest {
     private static final String MACHINE_NAME_VALUE    = "myMachine";
     private static final String MACHINE_NAME_PROPERTY = "CHE_MACHINE_NAME=" + MACHINE_NAME_VALUE;
 
+    private static final String IS_DEV_MACHINE_VALUE    = "true";
+    private static final String IS_DEV_MACHINE_PROPERTY = "CHE_IS_DEV_MACHINE=" + IS_DEV_MACHINE_VALUE;
+
     @Mock
     private ContainerConfig containerConfig;
 
@@ -76,7 +79,7 @@ public class CustomServerEvaluationStrategyTest {
         when(containerConfig.getLabels()).thenReturn(containerLabels);
         when(containerConfig.getExposedPorts()).thenReturn(containerExposedPorts);
 
-        envContainerConfig = new String[]{WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY};
+        envContainerConfig = new String[]{WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY, IS_DEV_MACHINE_PROPERTY};
         when(containerConfig.getEnv()).thenReturn(envContainerConfig);
 
         when(containerInfo.getNetworkSettings()).thenReturn(networkSettings);
@@ -213,7 +216,7 @@ public class CustomServerEvaluationStrategyTest {
         exposedPorts.add("4401/tcp");
         exposedPorts.add("4411/tcp");
         exposedPorts.add("8080/tcp");
-        List<String> env = Arrays.asList(WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY);
+        List<String> env = Arrays.asList(WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY, IS_DEV_MACHINE_PROPERTY);
         this.customServerEvaluationStrategy =
                 new CustomServerEvaluationStrategy("127.0.0.1", null, "<externalAddress>-<workspaceId>", "https", "8080");
         CustomServerEvaluationStrategy.RenderingEvaluation renderingEvaluation = this.customServerEvaluationStrategy
@@ -233,7 +236,7 @@ public class CustomServerEvaluationStrategyTest {
         exposedPorts.add("4401/tcp");
         exposedPorts.add("4411/tcp");
         exposedPorts.add("8080/tcp");
-        List<String> env = Arrays.asList(WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY);
+        List<String> env = Arrays.asList(WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY, IS_DEV_MACHINE_PROPERTY);
         this.customServerEvaluationStrategy =
                 new CustomServerEvaluationStrategy("127.0.0.1", "127.0.0.1", "<externalAddress>-<workspaceId>", "https", "8080");
         CustomServerEvaluationStrategy.RenderingEvaluation renderingEvaluation = this.customServerEvaluationStrategy
@@ -253,7 +256,7 @@ public class CustomServerEvaluationStrategyTest {
         exposedPorts.add("4401/tcp");
         exposedPorts.add("4411/tcp");
         exposedPorts.add("8080/tcp");
-        List<String> env = Arrays.asList(WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY);
+        List<String> env = Arrays.asList(WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY, IS_DEV_MACHINE_PROPERTY);
         this.customServerEvaluationStrategy =
                 new CustomServerEvaluationStrategy("127.0.0.1", "300.300.300.300", "<externalAddress>-<workspaceId>", "https", "8080");
         CustomServerEvaluationStrategy.RenderingEvaluation renderingEvaluation = this.customServerEvaluationStrategy

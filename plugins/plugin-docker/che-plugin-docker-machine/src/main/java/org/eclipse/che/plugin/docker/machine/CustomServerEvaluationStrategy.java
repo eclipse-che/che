@@ -58,6 +58,11 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
     public static final String CHE_MACHINE_NAME_PROPERTY = "CHE_MACHINE_NAME=";
 
     /**
+     * Name of the property to get the property that indicates if the machine is the dev machine
+     */
+    public static final String CHE_IS_DEV_MACHINE_PROPERTY = "CHE_IS_DEV_MACHINE=";
+
+    /**
      * Used to store the address set by property {@code che.docker.ip}, if applicable.
      */
     protected String internalAddressProperty;
@@ -397,6 +402,7 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
             globalPropertiesMap.put("wildcardNipDomain", getWildcardNipDomain(externalAddress));
             globalPropertiesMap.put("wildcardXipDomain", getWildcardXipDomain(externalAddress));
             globalPropertiesMap.put("chePort", chePort);
+            globalPropertiesMap.put("isDevMachine", getIsDevMachine());
         }
 
         /**
@@ -409,9 +415,23 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
                 this.initialized = true;
             }
             ST stringTemplate = new ST(template);
-            globalPropertiesMap.forEach((key, value) -> stringTemplate.add(key, value));
+            globalPropertiesMap.forEach((key, value) -> stringTemplate.add(key, 
+                                                                           "isDevMachine".equals(key) ? 
+                                                                               Boolean.parseBoolean(value)
+                                                                               : value));
             stringTemplate.add("serverName", portsToRefName.get(port));
             return stringTemplate.render();
+        }
+
+        /**
+         * returns if the current machine is the dev machine
+         *
+         * @return true if the curent machine is the dev machine
+         */
+        protected String getIsDevMachine() {
+            return Arrays.stream(env).filter(env -> env.startsWith(CHE_IS_DEV_MACHINE_PROPERTY))
+                         .map(s -> s.substring(CHE_IS_DEV_MACHINE_PROPERTY.length()))
+                         .findFirst().get();
         }
 
         /**
