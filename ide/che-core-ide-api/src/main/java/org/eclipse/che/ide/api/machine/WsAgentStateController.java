@@ -230,7 +230,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
             messageBus.cancelReconnection();
         }
         // FIXME: spi ide
-        final String wsAgentWebSocketURL = appContext.getDevAgentEndpoint().replaceFirst("http", "ws") + "/ws1";
+        final String wsAgentWebSocketURL = appContext.getDevAgentEndpoint().replaceFirst("http", "ws") + "/ws";
 
         messageBus = messageBusProvider.createMachineMessageBus(wsAgentWebSocketURL);
         // TODO: need to remove all handlers when ws-agent stopped
