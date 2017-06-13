@@ -48,6 +48,6 @@ public class LocalDockerSinglePortServerEvaluationStrategy extends CustomServerE
                                                          @Nullable @Named("che.docker.ip.external") String externalAddress,
                                                          @Named("che.docker.server_evaluation_strategy.secure.external.urls") boolean secureExternalUrls
                                                          ) {
-        super(internalAddress, externalAddress, "<serverName>-<workspaceId>-<externalAddress>", secureExternalUrls ? "https" : "http", null, true);
+        super(internalAddress, externalAddress, "<serverName>-<workspaceIdWithoutPrefix>-<externalAddress>", secureExternalUrls ? "https" : "http", null, true);
     }
 }

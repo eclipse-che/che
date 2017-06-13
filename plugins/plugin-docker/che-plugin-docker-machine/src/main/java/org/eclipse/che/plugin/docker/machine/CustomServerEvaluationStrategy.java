@@ -392,6 +392,7 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
             globalPropertiesMap.put("externalAddress", externalAddress);
             globalPropertiesMap.put("externalIP", externalIP);
             globalPropertiesMap.put("workspaceId", getWorkspaceId());
+            globalPropertiesMap.put("workspaceIdWithoutPrefix", getWorkspaceId().replaceFirst("workspace",""));
             globalPropertiesMap.put("machineName", getMachineName());
             globalPropertiesMap.put("wildcardNipDomain", getWildcardNipDomain(externalAddress));
             globalPropertiesMap.put("wildcardXipDomain", getWildcardXipDomain(externalAddress));
