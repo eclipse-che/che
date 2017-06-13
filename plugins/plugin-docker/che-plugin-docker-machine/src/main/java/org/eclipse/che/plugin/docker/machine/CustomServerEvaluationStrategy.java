@@ -103,12 +103,12 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
      * Default constructor
      */
     @Inject
-    public CustomServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String internalAddress,
-                                          @Nullable @Named("che.docker.ip.external") String externalAddress,
+    public CustomServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String cheDockerIp,
+                                          @Nullable @Named("che.docker.ip.external") String cheDockerIpExternal,
                                           @Nullable @Named("che.docker.server_evaluation_strategy.custom.template") String cheDockerCustomExternalTemplate,
                                           @Nullable @Named("che.docker.server_evaluation_strategy.custom.external.protocol") String cheDockerCustomExternalProtocol,
                                           @Named("che.port") String chePort) {
-        this(internalAddress, externalAddress, cheDockerCustomExternalTemplate, cheDockerCustomExternalProtocol, chePort, false);
+        this(cheDockerIp, cheDockerIpExternal, cheDockerCustomExternalTemplate, cheDockerCustomExternalProtocol, chePort, false);
     }
 
     /**
@@ -130,9 +130,9 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
 
     @Override
     protected Map<String, String> getInternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
-        String internalAddressContainer = containerInfo.getNetworkSettings().getIpAddress();
+        final String internalAddressContainer = containerInfo.getNetworkSettings().getIpAddress();
         
-        String internalAddress;
+        final String internalAddress;
         
         if (useContainerAddress) {
             internalAddress = !isNullOrEmpty(internalAddressContainer) ?
