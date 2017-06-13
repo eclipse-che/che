@@ -20,7 +20,7 @@ public enum BootstrapperStatus {
     /**
      * Bootstrapper is ready to work, start installers, push events, etc.
      */
-    READY,
+    AVAILABLE,
 
     /**
      * Bootstrapping done, everything is started ok.
