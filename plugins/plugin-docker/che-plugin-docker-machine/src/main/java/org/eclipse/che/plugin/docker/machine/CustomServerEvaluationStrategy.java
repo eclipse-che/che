@@ -165,11 +165,11 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
         
         if (isNullOrEmpty(cheDockerCustomExternalTemplate)) {
             return getExposedPortsToAddressPorts(renderingEvaluation.getExternalAddress(), ports, false);
-        } else {
-            return ports.keySet().stream()
+        }
+        
+        return ports.keySet().stream()
                 .collect(Collectors.toMap(portKey -> portKey,
                                           portKey -> renderingEvaluation.render(cheDockerCustomExternalTemplate, portKey)));
-        }
     }
 
 
@@ -281,13 +281,13 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
                     !isNullOrEmpty(gatewayAddressContainer) ?
                     gatewayAddressContainer :
                     this.internalHost;
-            } else {
-                return externalAddressProperty != null ?
+            }
+            
+            return externalAddressProperty != null ?
                     externalAddressProperty :
                     internalAddressProperty != null ?
                     internalAddressProperty :
                     this.internalHost;
-            }
         }
     }
 
