@@ -32,7 +32,6 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
-import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.factory.FactoryAcceptedEvent;
 import org.eclipse.che.ide.api.factory.FactoryAcceptedHandler;
 import org.eclipse.che.ide.api.parts.PartStack;
@@ -106,7 +105,7 @@ public class ContributionMixinProvider {
     }
 
     private void subscribeToSelectionChangedEvent() {
-        eventBus.addHandler(SelectionChangedEvent.TYPE, new SelectionChangedHandler() {
+        eventBus.addHandler(SelectionChangedEvent.TYPE, new SelectionChangedEvent.Handler() {
             @Override
             public void onSelectionChanged(SelectionChangedEvent event) {
                 processCurrentProject();

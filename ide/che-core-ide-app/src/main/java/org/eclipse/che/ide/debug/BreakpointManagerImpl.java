@@ -30,7 +30,7 @@ import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.project.DeleteProjectEvent;
+import org.eclipse.che.ide.api.event.ProjectDeletedEvent;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
@@ -372,7 +372,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
 
         eventBus.addHandler(EditorOpenedEvent.TYPE, event -> onOpenEditor(event.getFile().getLocation().toString(), event.getEditor()));
 
-        eventBus.addHandler(DeleteProjectEvent.TYPE, event -> {
+        eventBus.addHandler(ProjectDeletedEvent.TYPE, event -> {
             if (breakpoints.isEmpty()) {
                 return;
             }

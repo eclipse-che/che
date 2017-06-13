@@ -28,7 +28,6 @@ import org.eclipse.che.ide.api.action.PromisableAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.selection.Selection;
@@ -71,7 +70,7 @@ public class DeleteResourceAction extends AbstractPerspectiveAction implements P
         this.deleteResourceManager = deleteResourceManager;
         this.appContext = appContext;
 
-        eventBus.addHandler(ActivePartChangedEvent.TYPE, new ActivePartChangedHandler() {
+        eventBus.addHandler(ActivePartChangedEvent.TYPE, new ActivePartChangedEvent.Handler() {
             @Override
             public void onActivePartChanged(ActivePartChangedEvent event) {
                 partPresenter = event.getActivePart();

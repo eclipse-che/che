@@ -19,7 +19,6 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -36,7 +35,7 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  * @author Vlad Zhukovskiy
  */
 @Singleton
-public class RefreshPathAction extends AbstractPerspectiveAction implements ActivePartChangedHandler {
+public class RefreshPathAction extends AbstractPerspectiveAction implements ActivePartChangedEvent.Handler {
 
     private final AppContext appContext;
 

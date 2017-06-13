@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event;
 
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
@@ -17,16 +18,24 @@ import com.google.gwt.event.shared.GwtEvent;
  *
  * @author Evgen Vidolob
  */
-public class HttpSessionDestroyedEvent extends GwtEvent<HttpSessionDestroyedHandler> {
-    public static Type<HttpSessionDestroyedHandler> TYPE = new Type<HttpSessionDestroyedHandler>();
+public class HttpSessionDestroyedEvent extends GwtEvent<HttpSessionDestroyedEvent.Handler> {
+
+    public interface Handler extends EventHandler {
+
+        void onHttpSessionDestroyed(HttpSessionDestroyedEvent event);
+
+    }
+
+    public static Type<Handler> TYPE = new Type<>();
 
     @Override
-    public Type<HttpSessionDestroyedHandler> getAssociatedType() {
+    public Type<Handler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
-    protected void dispatch(HttpSessionDestroyedHandler handler) {
+    protected void dispatch(Handler handler) {
         handler.onHttpSessionDestroyed(this);
     }
+
 }

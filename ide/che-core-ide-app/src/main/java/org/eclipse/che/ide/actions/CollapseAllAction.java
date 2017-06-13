@@ -18,7 +18,6 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
@@ -28,7 +27,7 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
  * @author Vlad Zhukovskiy
  */
 @Singleton
-public class CollapseAllAction extends Action implements ActivePartChangedHandler {
+public class CollapseAllAction extends Action implements ActivePartChangedEvent.Handler {
 
     private ProjectExplorerPresenter projectExplorer;
 

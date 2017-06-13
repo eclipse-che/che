@@ -18,7 +18,6 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ToggleAction;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 
@@ -28,7 +27,7 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
  * @author Vitaliy Guliy
  */
 @Singleton
-public class ShowConsoleTreeAction extends ToggleAction implements ActivePartChangedHandler {
+public class ShowConsoleTreeAction extends ToggleAction implements ActivePartChangedEvent.Handler {
 
     private final ProcessesPanelPresenter processesPanelPresenter;
 

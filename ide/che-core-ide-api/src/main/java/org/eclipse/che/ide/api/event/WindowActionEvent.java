@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event;
 
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.user.client.Window;
 
@@ -18,10 +19,28 @@ import com.google.gwt.user.client.Window;
  *
  * @author Artem Zatsarynnyi
  */
-public class WindowActionEvent extends GwtEvent<WindowActionHandler> {
+public class WindowActionEvent extends GwtEvent<WindowActionEvent.Handler> {
+
+    public interface Handler extends EventHandler {
+        /**
+         * Fired just before the Codenvy browser's tab closes or navigates to a different site.
+         *
+         * @param event
+         *         {@link WindowActionEvent}
+         */
+        void onWindowClosing(WindowActionEvent event);
+
+        /**
+         * Fired after the Codenvy browser's tab closed or navigated to a different site.
+         *
+         * @param event
+         *         {@link WindowActionEvent}
+         */
+        void onWindowClosed(WindowActionEvent event);
+    }
 
     /** Type class used to register this event. */
-    public static Type<WindowActionHandler> TYPE = new Type<>();
+    public static Type<Handler> TYPE = new Type<>();
 
     /** Set of possible Window Actions. */
     public enum WindowAction {
@@ -47,7 +66,7 @@ public class WindowActionEvent extends GwtEvent<WindowActionHandler> {
     }
 
     @Override
-    public Type<WindowActionHandler> getAssociatedType() {
+    public Type<Handler> getAssociatedType() {
         return TYPE;
     }
 
@@ -61,7 +80,7 @@ public class WindowActionEvent extends GwtEvent<WindowActionHandler> {
     }
 
     @Override
-    protected void dispatch(WindowActionHandler handler) {
+    protected void dispatch(Handler handler) {
         switch (windowAction) {
             case CLOSING:
                 handler.onWindowClosing(this);
@@ -73,4 +92,5 @@ public class WindowActionEvent extends GwtEvent<WindowActionHandler> {
                 break;
         }
     }
+
 }

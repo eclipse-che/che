@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event;
 
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -19,8 +20,19 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
  *
  * @author Artem Zatsarynnyi
  */
-public class ConfigureProjectEvent extends GwtEvent<ConfigureProjectHandler> {
-    public static Type<ConfigureProjectHandler> TYPE = new Type<>();
+public class ConfigureProjectEvent extends GwtEvent<ConfigureProjectEvent.Handler> {
+
+    public interface Handler extends EventHandler {
+        /**
+         * Called when someone wants to configure the currently opened project.
+         *
+         * @param event
+         *         the fired {@link ConfigureProjectEvent}
+         */
+        void onConfigureProject(ConfigureProjectEvent event);
+    }
+
+    public static Type<Handler> TYPE = new Type<>();
 
     private final ProjectConfigDto projectConfig;
 
@@ -29,16 +41,17 @@ public class ConfigureProjectEvent extends GwtEvent<ConfigureProjectHandler> {
     }
 
     @Override
-    public Type<ConfigureProjectHandler> getAssociatedType() {
+    public Type<Handler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
-    protected void dispatch(ConfigureProjectHandler handler) {
+    protected void dispatch(Handler handler) {
         handler.onConfigureProject(this);
     }
 
     public ProjectConfigDto getProject() {
         return projectConfig;
     }
+
 }

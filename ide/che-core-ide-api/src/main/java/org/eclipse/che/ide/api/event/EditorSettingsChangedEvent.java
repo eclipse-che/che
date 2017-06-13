@@ -18,10 +18,10 @@ import com.google.gwt.event.shared.GwtEvent;
  *
  * @author Roman Nikitenko
  */
-public class EditorSettingsChangedEvent extends GwtEvent<EditorSettingsChangedEvent.EditorSettingsChangedHandler> {
+public class EditorSettingsChangedEvent extends GwtEvent<EditorSettingsChangedEvent.Handler> {
 
     /** Handles Editor Settings Changed Event */
-    public interface EditorSettingsChangedHandler extends EventHandler {
+    public interface Handler extends EventHandler {
         /**
          * Perform actions when editor's settings has been changed.
          *
@@ -31,15 +31,16 @@ public class EditorSettingsChangedEvent extends GwtEvent<EditorSettingsChangedEv
         void onEditorSettingsChanged(EditorSettingsChangedEvent event);
     }
 
-    public static final Type<EditorSettingsChangedHandler> TYPE = new Type<>();
+    public static final Type<Handler> TYPE = new Type<>();
 
     @Override
-    public Type<EditorSettingsChangedHandler> getAssociatedType() {
+    public Type<Handler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
-    protected void dispatch(EditorSettingsChangedHandler handler) {
+    protected void dispatch(Handler handler) {
         handler.onEditorSettingsChanged(this);
     }
+
 }

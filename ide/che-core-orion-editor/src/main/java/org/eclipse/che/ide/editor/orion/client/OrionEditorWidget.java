@@ -67,7 +67,6 @@ import org.eclipse.che.ide.api.editor.texteditor.EditorWidget;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.LineStyler;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
-import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.editor.orion.client.events.HasScrollHandlers;
@@ -786,7 +785,7 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
             orionSettingsController.setEditorViewOverlay(arg);
 
             final OrionContentAssistOverlay contentAssist = editorOverlay.getContentAssist();
-            eventBus.addHandler(SelectionChangedEvent.TYPE, new SelectionChangedHandler() {
+            eventBus.addHandler(SelectionChangedEvent.TYPE, new SelectionChangedEvent.Handler() {
                 @Override
                 public void onSelectionChanged(SelectionChangedEvent event) {
                     if (contentAssist.isActive()) {

@@ -45,12 +45,9 @@ import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.editor.texteditor.HasReadOnlyProperty;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
-import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
-import org.eclipse.che.ide.api.event.WindowActionHandler;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
@@ -90,9 +87,9 @@ import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 @Singleton
 public class EditorAgentImpl implements EditorAgent,
                                         EditorPartCloseHandler,
-                                        ActivePartChangedHandler,
-                                        SelectionChangedHandler,
-                                        WindowActionHandler,
+                                        ActivePartChangedEvent.Handler,
+                                        SelectionChangedEvent.Handler,
+                                        WindowActionEvent.Handler,
                                         StateComponent,
                                         WorkspaceStoppedEvent.Handler {
 

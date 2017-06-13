@@ -28,8 +28,6 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.EditorDirtyStateChangedEvent;
-import org.eclipse.che.ide.api.event.EditorDirtyStateChangedHandler;
-import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
@@ -163,7 +161,7 @@ public class JavaDebuggerFileHandler implements ActiveFileHandler {
         if (handler != null) {
             handler.removeHandler();
         }
-        handler = eventBus.addHandler(EditorDirtyStateChangedEvent.TYPE, new EditorDirtyStateChangedHandler() {
+        handler = eventBus.addHandler(EditorDirtyStateChangedEvent.TYPE, new EditorDirtyStateChangedEvent.Handler() {
             @Override
             public void onEditorDirtyStateChanged(EditorDirtyStateChangedEvent event) {
                 if (file.equals(event.getEditor().getEditorInput().getFile())) {

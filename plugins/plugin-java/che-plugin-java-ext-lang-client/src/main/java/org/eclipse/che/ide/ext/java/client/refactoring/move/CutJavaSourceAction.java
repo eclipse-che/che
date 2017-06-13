@@ -20,7 +20,6 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -39,7 +38,7 @@ import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
  * @author Valeriy Svydenko
  */
 @Singleton
-public class CutJavaSourceAction extends Action implements ActivePartChangedHandler {
+public class CutJavaSourceAction extends Action implements ActivePartChangedEvent.Handler {
     private final MoveAction       moveAction;
     private final FileTypeRegistry fileTypeRegistry;
     private final AppContext       appContext;

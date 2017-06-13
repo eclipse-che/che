@@ -8,8 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.event.project;
+package org.eclipse.che.ide.api.event;
 
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -19,13 +20,25 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
  *
  * @author Dmitry Shnurenko
  */
-public class DeleteProjectEvent extends GwtEvent<DeleteProjectHandler> {
+public class ProjectDeletedEvent extends GwtEvent<ProjectDeletedEvent.Handler> {
 
-    public static Type<DeleteProjectHandler> TYPE = new Type<>();
+    public interface Handler extends EventHandler {
+
+        /**
+         * Performs some actions when user removes a project.
+         *
+         * @param event
+         *         contains information about deleted project
+         */
+        void onProjectDeleted(ProjectDeletedEvent event);
+
+    }
+
+    public static Type<Handler> TYPE = new Type<>();
 
     private final ProjectConfigDto configDto;
 
-    public DeleteProjectEvent(ProjectConfigDto configDto) {
+    public ProjectDeletedEvent(ProjectConfigDto configDto) {
         this.configDto = configDto;
     }
 
@@ -35,12 +48,13 @@ public class DeleteProjectEvent extends GwtEvent<DeleteProjectHandler> {
     }
 
     @Override
-    public Type<DeleteProjectHandler> getAssociatedType() {
+    public Type<Handler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
-    protected void dispatch(DeleteProjectHandler handler) {
+    protected void dispatch(Handler handler) {
         handler.onProjectDeleted(this);
     }
+
 }

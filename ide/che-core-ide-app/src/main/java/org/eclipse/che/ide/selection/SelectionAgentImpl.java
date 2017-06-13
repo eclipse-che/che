@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.selection;
 
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
@@ -25,7 +24,7 @@ import com.google.web.bindery.event.shared.EventBus;
  *
  * @author Nikolay Zamosenchuk
  */
-public class SelectionAgentImpl implements ActivePartChangedHandler, PropertyListener, SelectionAgent {
+public class SelectionAgentImpl implements ActivePartChangedEvent.Handler, PropertyListener, SelectionAgent {
 
     private       PartPresenter activePart;
     private final EventBus      eventBus;

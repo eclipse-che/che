@@ -20,7 +20,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;
@@ -52,7 +51,7 @@ import static org.eclipse.che.ide.api.parts.PartStackType.TOOLING;
  */
 //TODO need rewrite this, remove direct dependency on PerspectiveViewImpl and other GWT Widgets
 public abstract class AbstractPerspective implements Presenter, Perspective,
-        ActivePartChangedHandler, MaximizePartEvent.Handler,
+        ActivePartChangedEvent.Handler, MaximizePartEvent.Handler,
         PerspectiveView.ActionDelegate, PartStack.ActionDelegate {
 
     /** The default size for the part. */

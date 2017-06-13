@@ -16,7 +16,6 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartStack;
 
 /**
@@ -24,7 +23,7 @@ import org.eclipse.che.ide.api.parts.PartStack;
  *
  * @author Vitaliy Guliy
  */
-public class RestorePartAction extends Action implements ActivePartChangedHandler {
+public class RestorePartAction extends Action implements ActivePartChangedEvent.Handler {
 
     private PartStack activePartStack;
 
