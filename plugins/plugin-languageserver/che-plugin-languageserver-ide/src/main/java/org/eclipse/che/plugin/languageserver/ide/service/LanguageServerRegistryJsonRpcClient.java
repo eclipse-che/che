@@ -34,7 +34,7 @@ public class LanguageServerRegistryJsonRpcClient {
                                  .endpointId("ws-agent")
                                  .methodName("languageServer/initialize")
                                  .paramsAsString(path)
-                                 .sendAndReceiveResultAsBoolean(5_000);
+                                 .sendAndReceiveResultAsBoolean(30_000);
     }
 
 }
