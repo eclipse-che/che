@@ -131,8 +131,12 @@ export class WorkspaceRecipeAuthoringController {
     }
   }
 
+  /**
+   * Returns validation state of the recipe.
+   * @returns {boolean}
+   */
   isRecipeValid(): boolean {
-    return this.recipeValidationError.length === 0;
+    return angular.isUndefined(this.recipeValidationError) || this.recipeValidationError.length === 0;
   }
 
   onRecipeChange(): void {
