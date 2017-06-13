@@ -1,5 +1,5 @@
 {
   "id": "org.eclipse.che.git",
-  "name": "Git-Agent",
-  "description": "Agent fetches SSH keys, Git username and email from CHE user preferences, and injects to console Git preferences"
+  "name": "Git-Credentials-Agent",
+  "description": "Agent fetches SSH keys, Git username and email from CHE user preferences, and injects to console Git"
 }
