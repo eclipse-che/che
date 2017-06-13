@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
@@ -39,6 +40,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.che.ide.api.machine.WsAgentState.STARTED;
 import static org.eclipse.che.ide.api.machine.WsAgentState.STOPPED;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
 
 /**
  * Controls workspace agent's state, defines actions to be perform on different events related to websocket
@@ -51,16 +55,17 @@ import static org.eclipse.che.ide.api.machine.WsAgentState.STOPPED;
  */
 @Singleton
 public class WsAgentStateController implements ConnectionOpenedHandler, ConnectionClosedHandler, ConnectionErrorHandler {
-    private final EventBus               eventBus;
-    private final MessageBusProvider     messageBusProvider;
-    private final DialogFactory          dialogFactory;
-    private final AppContext             appContext;
-    private final AsyncRequestFactory    asyncRequestFactory;
-    private final LoaderPresenter        loader;
-    private       MachineImpl             devMachine;
-    private       MessageBus             messageBus;
-    private       WsAgentState           state;
-    private List<AsyncCallback<MessageBus>> messageBusCallbacks = newArrayList();
+    private final EventBus            eventBus;
+    private final MessageBusProvider  messageBusProvider;
+    private final DialogFactory       dialogFactory;
+    private final AppContext          appContext;
+    private final NotificationManager notificationManager;
+    private final AsyncRequestFactory asyncRequestFactory;
+    private final LoaderPresenter     loader;
+    private       MachineImpl         devMachine;
+    private       MessageBus          messageBus;
+    private       WsAgentState        state;
+    private List<AsyncCallback<MessageBus>>  messageBusCallbacks = newArrayList();
     private List<AsyncCallback<MachineImpl>> devMachineCallbacks = newArrayList();
 
     @Inject
@@ -69,13 +74,15 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
                                   MessageBusProvider messageBusProvider,
                                   AsyncRequestFactory asyncRequestFactory,
                                   DialogFactory dialogFactory,
-                                  AppContext appContext) {
+                                  AppContext appContext,
+                                  NotificationManager notificationManager) {
         this.loader = loader;
         this.eventBus = eventBus;
         this.messageBusProvider = messageBusProvider;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dialogFactory = dialogFactory;
         this.appContext = appContext;
+        this.notificationManager = notificationManager;
     }
 
     public void initialize(MachineImpl devMachine) {
@@ -89,6 +96,11 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
     @Override
     public void onClose(WebSocketClosedEvent event) {
+        notificationManager.notify("ws-agent",
+                                   "Can not establish WebSocket connection to ws-agent",
+                                   WARNING,
+                                   FLOAT_MODE);
+
         if (STARTED.equals(state)) {
 //            checkWsAgentHealth();
         }
@@ -96,6 +108,11 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
     @Override
     public void onError() {
+        notificationManager.notify("ws-agent",
+                                   "Can not establish WebSocket connection to ws-agent",
+                                   FAIL,
+                                   FLOAT_MODE);
+
         if (STARTED.equals(state)) {
             state = STOPPED;
             eventBus.fireEvent(WsAgentStateEvent.createWsAgentStoppedEvent());
@@ -111,7 +128,11 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
             public void run() {
                 if (messageBus.getReadyState().equals(MessageBus.ReadyState.OPEN)) {
                     cancel();
-                    started();
+//                    started();
+                    for (AsyncCallback<MessageBus> callback : messageBusCallbacks) {
+                        callback.onSuccess(messageBus);
+                    }
+                    messageBusCallbacks.clear();
                 }
             }
         }.scheduleRepeating(300);
@@ -139,6 +160,12 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         //here we add trailing slash because {@link org.eclipse.che.api.core.rest.ApiInfoService} mapped in this way
         String url = appContext.getDevAgentEndpoint() + '/';
         asyncRequestFactory.createGetRequest(url).send().then(ignored -> {
+            try {
+                started();
+            } catch (Exception ignore) {
+
+            }
+
             checkWsConnection();
         }).catchError(ignored -> {
             // FIXME: spi ide
@@ -156,15 +183,15 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         state = STARTED;
         loader.setSuccess(LoaderPresenter.Phase.STARTING_WORKSPACE_AGENT);
 
-        for (AsyncCallback<MessageBus> callback : messageBusCallbacks) {
-            callback.onSuccess(messageBus);
-        }
-        messageBusCallbacks.clear();
-
-        for (AsyncCallback<MachineImpl> callback : devMachineCallbacks) {
-            callback.onSuccess(devMachine);
-        }
-        devMachineCallbacks.clear();
+//        for (AsyncCallback<MessageBus> callback : messageBusCallbacks) {
+//            callback.onSuccess(messageBus);
+//        }
+//        messageBusCallbacks.clear();
+//
+//        for (AsyncCallback<MachineImpl> callback : devMachineCallbacks) {
+//            callback.onSuccess(devMachine);
+//        }
+//        devMachineCallbacks.clear();
 
         eventBus.fireEvent(WsAgentStateEvent.createWsAgentStartedEvent());
     }
@@ -203,7 +230,8 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
             messageBus.cancelReconnection();
         }
         // FIXME: spi ide
-        final String wsAgentWebSocketURL = appContext.getDevAgentEndpoint().replaceFirst("http", "ws") + "/ws";
+        final String wsAgentWebSocketURL = appContext.getDevAgentEndpoint().replaceFirst("http", "ws") + "/ws1";
+
         messageBus = messageBusProvider.createMachineMessageBus(wsAgentWebSocketURL);
         // TODO: need to remove all handlers when ws-agent stopped
         messageBus.addOnCloseHandler(this);
