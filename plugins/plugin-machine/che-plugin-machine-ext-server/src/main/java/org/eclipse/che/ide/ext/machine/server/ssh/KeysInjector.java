@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.machine.server.ssh;
 
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.ssh.server.SshManager;
+import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.slf4j.Logger;
@@ -55,7 +56,7 @@ public class KeysInjector {
         eventService.subscribe(new EventSubscriber<MachineStatusEvent>() {
             @Override
             public void onEvent(MachineStatusEvent event) {
-                if (event.getEventType() == MachineStatusEvent.EventType.RUNNING) {
+                if (event.getEventType() == MachineStatus.RUNNING) {
                     /*final Instance machine;
                     try {
                         machine = environmentEngine.getMachine(event.getWorkspaceId(),

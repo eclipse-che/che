@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.shared.dto.event;
 
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.dto.shared.DTO;
 
@@ -22,19 +23,12 @@ import org.eclipse.che.dto.shared.DTO;
 //@EventOrigin("machine")
 @DTO
 public interface MachineStatusEvent {
-    enum EventType {
-        STARTING,
-        RUNNING,
-        STOPPED,
-        FAILED
-    }
 
+    MachineStatus getEventType();
 
-    EventType getEventType();
+    void setEventType(MachineStatus eventType);
 
-    void setEventType(EventType eventType);
-
-    MachineStatusEvent withEventType(EventType eventType);
+    MachineStatusEvent withEventType(MachineStatus eventType);
 
     String getError();
 

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.shared.dto.event;
 
+import org.eclipse.che.api.core.model.workspace.runtime.BootstrapperStatus;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.dto.shared.DTO;
 
@@ -20,18 +21,12 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface BootstrapperStatusEvent {
-    enum Status {
-        READY,
-        DONE,
-        FAILED
-    }
 
+    BootstrapperStatus getStatus();
 
-    BootstrapperStatusEvent.Status getStatus();
+    void setStatus(BootstrapperStatus status);
 
-    void setStatus(BootstrapperStatusEvent.Status status);
-
-    BootstrapperStatusEvent withStatus(BootstrapperStatusEvent.Status status);
+    BootstrapperStatusEvent withStatus(BootstrapperStatus status);
 
 
     String getInstaller();

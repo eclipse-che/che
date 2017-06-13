@@ -10,30 +10,24 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.shared.dto.event;
 
+import org.eclipse.che.api.core.model.workspace.runtime.InstallerStatus;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.dto.shared.DTO;
+
 /**
  * Installer status event DTO.
  *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
- *
  */
 @DTO
 public interface InstallerStatusEvent {
 
-    enum Status {
-        STARTING,
-        RUNNING,
-        DONE,
-        FAILED
-    }
 
+    InstallerStatus getStatus();
 
-    InstallerStatusEvent.Status getStatus();
+    void setStatus(InstallerStatus status);
 
-    void setStatus(InstallerStatusEvent.Status status);
-
-    InstallerStatusEvent withStatus(InstallerStatusEvent.Status status);
+    InstallerStatusEvent withStatus(InstallerStatus status);
 
 
     String getInstaller();
@@ -55,14 +49,14 @@ public interface InstallerStatusEvent {
     void setRuntimeId(RuntimeIdentityDto runtimeId);
 
     InstallerStatusEvent withRuntimeId(RuntimeIdentityDto runtimeId);
-    
+
 
     String getError();
 
     void setError(String error);
 
     InstallerStatusEvent withError(String error);
-    
+
 
     String getTime();
 
