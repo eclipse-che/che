@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
@@ -109,18 +110,18 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                 checkStartInterruption();
                 eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
                                                .withIdentity(DtoConverter.asDto(identity))
-                                               .withEventType(MachineStatusEvent.EventType.STARTING)
+                                               .withEventType(MachineStatus.STARTING)
                                                .withMachineName(machineName));
                 try {
                     dockerMachine = startMachine(machineName, service, startOptions, machineName.equals(devMachineName));
                     eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
                                                    .withIdentity(DtoConverter.asDto(identity))
-                                                   .withEventType(MachineStatusEvent.EventType.RUNNING)
+                                                   .withEventType(MachineStatus.RUNNING)
                                                    .withMachineName(machineName));
                 } catch (InfrastructureException e) {
                     eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
                                                    .withIdentity(DtoConverter.asDto(identity))
-                                                   .withEventType(MachineStatusEvent.EventType.FAILED)
+                                                   .withEventType(MachineStatus.FAILED)
                                                    .withMachineName(machineName)
                                                    .withError(e.getMessage()));
                     throw e;
@@ -278,7 +279,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                     dockerMachineEntry.getValue().destroy();
                     eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
                                                    .withIdentity(DtoConverter.asDto(identity))
-                                                   .withEventType(MachineStatusEvent.EventType.STOPPED)
+                                                   .withEventType(MachineStatus.STOPPED)
                                                    .withMachineName(dockerMachineEntry.getKey()));
                 } catch (InfrastructureException e) {
                     LOG.error(format("Error occurs on destroying of docker machine '%s' in workspace '%s'. Container '%s'",
