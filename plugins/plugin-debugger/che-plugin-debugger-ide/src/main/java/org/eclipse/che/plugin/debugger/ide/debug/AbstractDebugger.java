@@ -309,7 +309,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             return Promises.reject(JsPromiseError.create("Debugger is not connected"));
         }
 
-        Promise<SimpleValueDto> promise = service.getValue(debugSessionDto.getId(), asDto(variable));
+        Promise<SimpleValueDto> promise = service.getValue(debugSessionDto.getId(), toDto(variable));
         return promise.then((Function<SimpleValueDto, SimpleValue>)SimpleValueImpl::new);
     }
 
@@ -589,7 +589,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     @Override
     public void setValue(final Variable variable) {
         if (isConnected()) {
-            Promise<Void> promise = service.setValue(debugSessionDto.getId(), asDto(variable));
+            Promise<Void> promise = service.setValue(debugSessionDto.getId(), toDto(variable));
 
             promise.then(it -> {
                 for (DebuggerObserver observer : observers) {
@@ -689,26 +689,26 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         }
     }
 
-    private List<VariableDto> asDto(List<? extends Variable> variables) {
+    private List<VariableDto> toDto(List<? extends Variable> variables) {
         if (variables == null || variables.isEmpty()) {
             return Collections.emptyList();
         }
 
         List<VariableDto> dtos = new ArrayList<>(variables.size());
         for (Variable v : variables) {
-            dtos.add(asDto(v));
+            dtos.add(toDto(v));
         }
         return dtos;
     }
 
-    private VariableDto asDto(Variable variable) {
+    private VariableDto toDto(Variable variable) {
         SimpleValue simpleValue = variable.getValue();
         VariablePath variablePath = variable.getVariablePath();
 
         VariableDto dto = dtoFactory.createDto(VariableDto.class);
         dto.withValue(dtoFactory.createDto(SimpleValueDto.class)
                                 .withString(simpleValue.getString())
-                                .withVariables(asDto(simpleValue.getVariables())));
+                                .withVariables(toDto(simpleValue.getVariables())));
 
         dto.withVariablePath(dtoFactory.createDto(VariablePathDto.class)
                                        .withPath(variablePath.getPath()));

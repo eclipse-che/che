@@ -327,7 +327,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
                                                        .withLocation(newDto(LocationDto.class).withTarget(location.declaringType().name())
                                                                                               .withLineNumber(location.lineNumber())));
         }
-        Collections.sort(breakPoints, BREAKPOINT_COMPARATOR);
+        breakPoints.sort(BREAKPOINT_COMPARATOR);
         return breakPoints;
     }
 
@@ -384,10 +384,11 @@ public class JavaDebugger implements EventsHandler, Debugger {
         List<ThreadDump> threadDumps = new ArrayList<>(threadRefs.size());
 
         for (ThreadReference t : threadRefs) {
-            ThreadStatus status = ThreadStatus.UNKNOWN;
+            ThreadStatus status;
             try {
                 status = ThreadStatus.valueOf(VM.toThreadState(t.status()).toString());
-            } catch (IllegalArgumentException ignored) {
+            } catch (IllegalArgumentException e) {
+                status = ThreadStatus.UNKNOWN;
             }
 
             List<JdiStackFrame> frames = new LinkedList<>();

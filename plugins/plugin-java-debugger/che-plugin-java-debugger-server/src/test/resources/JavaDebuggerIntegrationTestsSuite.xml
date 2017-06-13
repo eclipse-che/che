@@ -11,17 +11,12 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<FindBugsFilter>
-    <Match>
-        <Source name="JavaTreeParser.java"/>
-    </Match>
-    <Match>
-        <Source name="JavaParser.java"/>
-    </Match>
-    <Match>
-        <Source name="JavaLexer.java"/>
-    </Match>
-    <Match>
-        <Source name="DtoServerImpls.java"/>
-    </Match>
-</FindBugsFilter>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Java Debugger Tests" verbose="10" parallel="none">
+    <test name="all">
+        <classes>
+            <class name="org.eclipse.che.plugin.jdb.server.ThreadDumpTest"/>
+            <class name="org.eclipse.che.plugin.jdb.server.JavaDebuggerTest"/>
+        </classes>
+    </test>
+</suite>

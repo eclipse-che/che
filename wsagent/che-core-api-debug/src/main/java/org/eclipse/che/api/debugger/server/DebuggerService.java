@@ -20,6 +20,7 @@ import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.action.ActionDto;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.ThreadDump;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
 import org.eclipse.che.api.debug.shared.model.action.StartAction;
@@ -48,10 +49,9 @@ import javax.ws.rs.core.UriInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.eclipse.che.api.debugger.server.DtoConverter.asDto;
-import static org.eclipse.che.api.debugger.server.DtoConverter.breakpointsAsDtos;
-import static org.eclipse.che.api.debugger.server.DtoConverter.dumpsAsDtos;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -97,11 +97,15 @@ public class DebuggerService {
     public DebugSessionDto getDebugSession(@PathParam("id") String sessionId) throws DebuggerException {
         Debugger debugger = debuggerManager.getDebugger(sessionId);
 
+        List<BreakpointDto> breakpointsDto = debugger.getAllBreakpoints().stream()
+                                                     .map(DtoConverter::asDto)
+                                                     .collect(Collectors.toList());
+
         DebugSessionDto debugSessionDto = newDto(DebugSessionDto.class);
         debugSessionDto.setDebuggerInfo(DtoConverter.asDto(debugger.getInfo()));
         debugSessionDto.setId(sessionId);
         debugSessionDto.setType(debuggerManager.getDebuggerType(sessionId));
-        debugSessionDto.setBreakpoints(DtoConverter.breakpointsAsDtos(debugger.getAllBreakpoints()));
+        debugSessionDto.setBreakpoints(breakpointsDto);
 
         return debugSessionDto;
     }
@@ -145,7 +149,10 @@ public class DebuggerService {
     @Path("{id}/breakpoint")
     @Produces(MediaType.APPLICATION_JSON)
     public List<BreakpointDto> getBreakpoints(@PathParam("id") String sessionId) throws DebuggerException {
-        return breakpointsAsDtos(debuggerManager.getDebugger(sessionId).getAllBreakpoints());
+        return debuggerManager.getDebugger(sessionId).getAllBreakpoints()
+                              .stream()
+                              .map(DtoConverter::asDto)
+                              .collect(Collectors.toList());
     }
 
     @DELETE
@@ -169,10 +176,13 @@ public class DebuggerService {
     }
 
     @GET
-    @Path("{id}/threaddumps")
+    @Path("{id}/threaddump")
     @Produces(MediaType.APPLICATION_JSON)
     public List<ThreadDumpDto> getThreadDumps(@PathParam("id") String sessionId) throws DebuggerException {
-        return dumpsAsDtos(debuggerManager.getDebugger(sessionId).getThreadDumps());
+        List<ThreadDump> threadDumps = debuggerManager.getDebugger(sessionId).getThreadDumps();
+        return threadDumps.stream()
+                          .map(DtoConverter::asDto)
+                          .collect(Collectors.toList());
     }
 
     @GET

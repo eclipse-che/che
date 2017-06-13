@@ -135,7 +135,7 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
 
     @Override
     public Promise<List<ThreadDumpDto>> getThreadDumps(String id) {
-        final String requestUrl = getBaseUrl(id) + "/threaddumps";
+        final String requestUrl = getBaseUrl(id) + "/threaddump";
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .send(dtoUnmarshallerFactory.newListUnmarshaller(ThreadDumpDto.class));
     }

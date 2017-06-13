@@ -23,12 +23,13 @@ import java.util.stream.Collectors;
 
 /** @author andrew00x */
 public class JdiValueImpl implements JdiValue {
-    private final Value             value;
-    private       List<JdiVariable> variables;
+    private final Value value;
+
+    private List<JdiVariable> variables;
 
     public JdiValueImpl(Value value) {
         if (value == null) {
-            throw new IllegalArgumentException("Underlying value may not be null. ");
+            throw new IllegalArgumentException("Underlying value can not be null. ");
         }
         this.value = value;
     }
@@ -70,6 +71,7 @@ public class JdiValueImpl implements JdiValue {
         if (name == null) {
             throw new IllegalArgumentException("Variable name may not be null. ");
         }
+
         for (JdiVariable variable : getVariables()) {
             if (name.equals(variable.getName())) {
                 return variable;

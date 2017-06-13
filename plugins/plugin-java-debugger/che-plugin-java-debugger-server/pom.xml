@@ -11,7 +11,8 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>che-plugin-java-debugger-parent</artifactId>
@@ -23,9 +24,7 @@
     <name>Che Plugin :: Java :: Java Debugger Server</name>
     <properties>
         <docker.showLogs>true</docker.showLogs>
-        <findbugs.excludeFilterFile>${project.build.testSourceDirectory}/../resources/findbugs-exclude.xml</findbugs.excludeFilterFile>
-        <java.image.name>java-8-jdk:debugger</java.image.name>
-        <run.cmd>java -Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=y -Xmx128m com.HelloWorld</run.cmd>
+        <findbugs.excludeFilterFile>${project.build.testOutputDirectory}/findbugs-exclude.xml</findbugs.excludeFilterFile>
     </properties>
     <dependencies>
         <dependency>
@@ -209,10 +208,28 @@
                             <systemPropertyVariables>
                                 <debug.port>${debug.port}</debug.port>
                             </systemPropertyVariables>
-                            <includes>
-                                <include>**/JavaDebuggerTest.java</include>
-                            </includes>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>${project.build.testOutputDirectory}/JavaDebuggerIntegrationTestsSuite.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-sources</id>
+                                <phase>process-test-resources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <chmod file="${project.build.testOutputDirectory}/docker/entrypoint.sh" perm="+x"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                     <plugin>
                         <groupId>io.fabric8</groupId>
@@ -245,13 +262,16 @@
                             <images>
                                 <image>
                                     <alias>java</alias>
-                                    <name>${java.image.name}</name>
+                                    <name>java-8-jdk:debugger</name>
                                     <build>
                                         <from>java:8-jdk</from>
                                         <assembly>
-                                            <descriptor>${project.build.testOutputDirectory}/docker-assembly.xml</descriptor>
+                                            <descriptor>${project.build.testOutputDirectory}/docker/assembly.xml</descriptor>
                                         </assembly>
                                         <workdir>maven</workdir>
+                                        <entryPoint>
+                                            <exec>./entrypoint.sh</exec>
+                                        </entryPoint>
                                     </build>
                                     <run>
                                         <ports>
@@ -264,9 +284,6 @@
                                         <restartPolicy>
                                             <name>always</name>
                                         </restartPolicy>
-                                        <cmd>
-                                            <shell>${run.cmd}</shell>
-                                        </cmd>
                                     </run>
                                 </image>
                             </images>
