@@ -74,6 +74,10 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
     protected PartPresenter activePart;
     protected TabItem       activeTab;
+
+    private TabItem previousActiveTab;
+    private PartPresenter previousActivePart;
+
     protected double        currentSize;
 
     private State state = State.MINIMIZED;
@@ -372,6 +376,12 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
             activeTab.unSelect();
         }
 
+        previousActiveTab = activeTab;
+        previousActivePart = activePart;
+
+        activeTab = null;
+        activeTab = null;
+
         // Notify the part stack state has been changed.
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
@@ -384,23 +394,6 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
     @Override
     public State getPartStackState() {
         return state;
-    }
-
-    @Override
-    public void unMinimize() {
-        // Change the state to COLLAPSED for the following restoring.
-        if (state == State.MINIMIZED) {
-            state = State.COLLAPSED;
-
-            if (delegate != null) {
-                delegate.onRestore(this);
-            }
-        }
-
-//        activeTab = selectedTab;
-//        activePart = parts.get(selectedTab);
-//        activePart.onOpen();
-//        selectActiveTab(activeTab);
     }
 
     @Override
@@ -428,6 +421,10 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
             activeTab.unSelect();
         }
 
+        previousActiveTab = activeTab;
+        previousActivePart = activePart;
+
+        activeTab = null;
         activePart = null;
 
         // Notify the part stack state has been changed.
@@ -437,6 +434,31 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
                 eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
             }
         });
+    }
+
+    @Override
+    public void unMinimize() {
+        if (state != State.MINIMIZED) {
+            return;
+        }
+
+        // Change the state to COLLAPSED for the following restoring.
+        state = State.COLLAPSED;
+
+        if (delegate != null) {
+            delegate.onRestore(this);
+        }
+
+        // Notify the part stack state has been changed.
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
+            }
+        });
+
+        activePart.onOpen();
+        selectActiveTab(activeTab);
     }
 
     @Override
@@ -454,7 +476,6 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         state = State.NORMAL;
 
         if (!parts.isEmpty()) {
-
             if (currentSize < MIN_PART_SIZE) {
                 currentSize = DEFAULT_PART_SIZE;
             }
@@ -468,6 +489,14 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
             if (delegate != null) {
                 delegate.onRestore(this);
             }
+        }
+
+        if (State.COLLAPSED == prevState) {
+            activeTab = previousActiveTab;
+            activePart = previousActivePart;
+
+            previousActiveTab = null;
+            previousActivePart = null;
         }
 
         // Select active tab.
@@ -504,11 +533,6 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
         PartPresenter selectedPart = parts.get(selectedTab);
         view.selectTab(selectedPart);
-    }
-
-    @Override
-    public void showPartMenu(int mouseX, int mouseY) {
-        partMenu.show(mouseX, mouseY);
     }
 
     @Override

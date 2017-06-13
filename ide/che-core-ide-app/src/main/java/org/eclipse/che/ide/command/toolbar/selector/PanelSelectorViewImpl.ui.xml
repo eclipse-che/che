@@ -70,13 +70,14 @@
             height: 36px;
             overflow: hidden;
             box-sizing: border-box;
-            border: 1px solid #3b4d6c;
-            background-color: #383f53;
+            border: 1px solid popupBorderColor;
+            background-color: popupBkgColor;
             z-index: 9999;
             padding-left: 2px;
             padding-right: 2px;
             padding-top: 1px;
             padding-bottom: 1px;
+            box-shadow: 0px 2px 2px 0px popupShadowColor;
         }
 
         .popup > div {
@@ -107,18 +108,18 @@
     </ui:style>
 
     <g:FlowPanel styleName="{style.selector}">
-        <g:FlowPanel ui:field="button" styleName="{style.button}">
+        <g:FlowPanel ui:field="button" styleName="{style.button}" debugId="panelSelector">
             <g:FlowPanel ui:field="iconPanel" styleName="{style.activeSelector}"><svg:SVGImage resource="{resources.panelSelectorLeftBottom}" /></g:FlowPanel>
             <g:FlowPanel styleName="{style.expansionImage}"><svg:SVGImage resource="{dropdownResources.expansionImage}" /></g:FlowPanel>
         </g:FlowPanel>
 
-        <g:FlowPanel ui:field="popup" styleName="{style.popup}">
-            <g:FlowPanel ui:field="selectorLeft"><svg:SVGImage resource="{resources.panelSelectorLeft}" /></g:FlowPanel>
-            <g:FlowPanel ui:field="selectorLeftBottom"><svg:SVGImage resource="{resources.panelSelectorLeftBottom}" /></g:FlowPanel>
-            <g:FlowPanel ui:field="selectorFullEditor"><svg:SVGImage resource="{resources.panelSelectorFullEditor}" /></g:FlowPanel>
-            <g:FlowPanel ui:field="selectorBottom"><svg:SVGImage resource="{resources.panelSelectorBottom}" /></g:FlowPanel>
-            <g:FlowPanel ui:field="selectorRight"><svg:SVGImage resource="{resources.panelSelectorRight}" /></g:FlowPanel>
-            <g:FlowPanel ui:field="selectorLeftRightBottom"><svg:SVGImage resource="{resources.panelSelectorLeftRightBottom}" /></g:FlowPanel>
+        <g:FlowPanel ui:field="popup" styleName="{style.popup}" debugId="panelSelectorPopup">
+            <g:FlowPanel ui:field="selectorLeft" debugId="selectorLeft"><svg:SVGImage resource="{resources.panelSelectorLeft}" /></g:FlowPanel>
+            <g:FlowPanel ui:field="selectorLeftBottom" debugId="selectorLeftBottom"><svg:SVGImage resource="{resources.panelSelectorLeftBottom}" /></g:FlowPanel>
+            <g:FlowPanel ui:field="selectorFullEditor" debugId="selectorFullEditor"><svg:SVGImage resource="{resources.panelSelectorFullEditor}" /></g:FlowPanel>
+            <g:FlowPanel ui:field="selectorBottom" debugId="selectorBottom"><svg:SVGImage resource="{resources.panelSelectorBottom}" /></g:FlowPanel>
+            <g:FlowPanel ui:field="selectorRight" debugId="selectorRight"><svg:SVGImage resource="{resources.panelSelectorRight}" /></g:FlowPanel>
+            <g:FlowPanel ui:field="selectorLeftRightBottom" debugId="selectorLeftRightBottom"><svg:SVGImage resource="{resources.panelSelectorLeftRightBottom}" /></g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>
 
