@@ -159,7 +159,7 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
 
         // create Rendering evaluation
         RenderingEvaluation renderingEvaluation = getOnlineRenderingEvaluation(containerInfo, internalHost);
-        
+
         // get current ports
         Map<String, List<PortBinding>> ports = containerInfo.getNetworkSettings().getPorts();
         
