@@ -11,30 +11,89 @@
 package org.eclipse.che.ide.workspace.events;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.ide.machine.MachineStatusHandler;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.events.MachineFailedEvent;
+import org.eclipse.che.ide.api.machine.events.MachineRunningEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStartingEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStoppedEvent;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
+import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
+import java.util.Optional;
+import java.util.function.BiConsumer;
+
+/**
+ * Handles changes of the machine status and fires
+ * the corresponded events to notify all interested subscribers.
+ */
 @Singleton
 class MachineStatusEventHandler {
 
+    private AppContext appContext;
+
     @Inject
-    void configureMachineStatusHandler(RequestHandlerConfigurator configurator, Provider<MachineStatusHandler> handlerProvider) {
+    void configureMachineStatusHandler(RequestHandlerConfigurator configurator,
+                                       EventBus eventBus,
+                                       AppContext appContext,
+                                       WorkspaceServiceClient workspaceServiceClient) {
+        this.appContext = appContext;
+
+        BiConsumer<String, MachineStatusEvent> operation = (String endpointId, MachineStatusEvent event) -> {
+            Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
+
+            final String machineName = event.getMachineName();
+            final String workspaceId = event.getIdentity().getWorkspaceId();
+
+            workspaceServiceClient.getWorkspace(workspaceId).then(workspace -> {
+                RuntimeDto workspaceRuntime = workspace.getRuntime();
+                if (workspaceRuntime == null) {
+                    return;
+                }
+
+                ((AppContextImpl)appContext).setWorkspace(workspace);
+
+                switch (event.getEventType()) {
+                    case STARTING:
+                        getMachineByName(machineName).ifPresent(m -> eventBus.fireEvent(new MachineStartingEvent(m)));
+                        break;
+                    case RUNNING:
+                        getMachineByName(machineName).ifPresent(m -> eventBus.fireEvent(new MachineRunningEvent(m)));
+                        break;
+                    case STOPPED:
+                        getMachineByName(machineName).ifPresent(m -> eventBus.fireEvent(new MachineStoppedEvent(m)));
+                        break;
+                    case FAILED:
+                        getMachineByName(machineName).ifPresent(m -> eventBus.fireEvent(new MachineFailedEvent(m, event.getError())));
+                        break;
+                }
+            });
+        };
+
         configurator.newConfiguration()
                     .methodName("machine/statusChanged")
                     .paramsAsDto(MachineStatusEvent.class)
                     .noResult()
-                    .withBiConsumer((endpointId, event) -> {
-                        Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
+                    .withBiConsumer(operation);
+    }
 
-                        // Since MachineStatusEventHandler instantiated by GIN eagerly,
-                        // it may be really expensive to instantiate MachineStatusHandler with all it's dependencies.
-                        // So defer that work.
-                        handlerProvider.get().handleMachineStatusChanged(event);
-                    });
+    private Optional<MachineImpl> getMachineByName(String machineName) {
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final RuntimeImpl runtime = workspace.getRuntime();
+
+        if (runtime == null) {
+            return Optional.empty();
+        }
+
+        return runtime.getMachineByName(machineName);
     }
 }

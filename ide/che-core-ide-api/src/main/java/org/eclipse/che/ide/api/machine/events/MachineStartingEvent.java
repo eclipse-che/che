@@ -21,8 +21,8 @@ public class MachineStartingEvent extends GwtEvent<MachineStartingEvent.Handler>
 
     private final MachineImpl machine;
 
-    public MachineStartingEvent(MachineImpl workspace) {
-        this.machine = workspace;
+    public MachineStartingEvent(MachineImpl machine) {
+        this.machine = machine;
     }
 
     public MachineImpl getMachine() {
