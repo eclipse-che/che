@@ -1,5 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Red Hat
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
+import com.google.common.base.Function;
 import org.eclipse.lsp4j.CodeLensOptions;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.DocumentOnTypeFormattingOptions;
@@ -121,71 +132,41 @@ public class ServerCapabilitiesOverlay  {
         return right;
     }
 
-    public Boolean getCodeActionProvider() {
-        return truish(left.getCodeActionProvider()) || truish(right.getCodeActionProvider());
+    
+    private Boolean or(Function<ServerCapabilities, Boolean> f) {
+        Boolean leftVal = f.apply(left);
+        Boolean rightVal = f.apply(right);
+        if (leftVal == null) {
+            return rightVal;
+        }
+        if (rightVal == null) {
+            return leftVal;
+        }
+        return leftVal || rightVal;
     }
-
-    public Boolean getDefinitionProvider() {
-        return truish(left.getDefinitionProvider()) || truish(right.getDefinitionProvider());
-    }
-
-    public Boolean getDocumentFormattingProvider() {
-        return truish(left.getDocumentFormattingProvider()) || truish(right.getDocumentFormattingProvider());
-    }
-
-    public Boolean getDocumentHighlightProvider() {
-        return truish(left.getDocumentHighlightProvider()) || truish(right.getDocumentHighlightProvider());
-    }
-
-    public Boolean getDocumentRangeFormattingProvider() {
-        return truish(left.getDocumentRangeFormattingProvider()) || truish(right.getDocumentRangeFormattingProvider());
-    }
-
-    public Boolean getDocumentSymbolProvider() {
-        return truish(left.getDocumentSymbolProvider()) || truish(right.getDocumentSymbolProvider());
-    }
-
-    public Boolean getHoverProvider() {
-        return truish(left.getHoverProvider()) || truish(right.getHoverProvider());
-    }
-
-    public Boolean getReferencesProvider() {
-        return truish(left.getReferencesProvider()) || truish(right.getReferencesProvider());
-    }
-
-    public Boolean getRenameProvider() {
-        return truish(left.getRenameProvider()) || truish(right.getRenameProvider());
-    }
-
-    public Boolean getWorkspaceSymbolProvider() {
-        return truish(left.getWorkspaceSymbolProvider()) || truish(right.getWorkspaceSymbolProvider());
-    }
-
-    private boolean truish(Boolean b) {
-        return b != null && b;
-    }
-
-    private <T> List<T> listish(List<T> list) {
+    
+   private <T> List<T> listish(List<T> list) {
         return list == null ? Collections.emptyList() : list;
     }
 
     public ServerCapabilities compute() {
+        
         ServerCapabilities result = new ServerCapabilities();
-        result.setCodeActionProvider(getCodeActionProvider());
+        result.setCodeActionProvider(or(ServerCapabilities::getCodeActionProvider));
         result.setCodeLensProvider(getCodeLensProvider());
         result.setCompletionProvider(getCompletionProvider());
-        result.setDefinitionProvider(getDefinitionProvider());
-        result.setDocumentFormattingProvider(getDocumentFormattingProvider());
-        result.setDocumentHighlightProvider(getDocumentHighlightProvider());
+        result.setDefinitionProvider(or(ServerCapabilities::getDefinitionProvider));
+        result.setDocumentFormattingProvider(or(ServerCapabilities::getDocumentFormattingProvider));
+        result.setDocumentHighlightProvider(or(ServerCapabilities::getDocumentHighlightProvider));
         result.setDocumentOnTypeFormattingProvider(getDocumentOnTypeFormattingProvider());
-        result.setDocumentRangeFormattingProvider(getDocumentRangeFormattingProvider());
-        result.setDocumentSymbolProvider(getDocumentSymbolProvider());
-        result.setHoverProvider(getHoverProvider());
-        result.setReferencesProvider(getReferencesProvider());
-        result.setRenameProvider(getRenameProvider());
+        result.setDocumentRangeFormattingProvider(or(ServerCapabilities::getDocumentRangeFormattingProvider));
+        result.setDocumentSymbolProvider(or(ServerCapabilities::getDocumentSymbolProvider));
+        result.setHoverProvider(or(ServerCapabilities::getHoverProvider));
+        result.setReferencesProvider(or(ServerCapabilities::getReferencesProvider));
+        result.setRenameProvider(or(ServerCapabilities::getRenameProvider));
         result.setSignatureHelpProvider(getSignatureHelpProvider());
         result.setTextDocumentSync(getTextDocumentSync());
-        result.setWorkspaceSymbolProvider(getWorkspaceSymbolProvider());
+        result.setWorkspaceSymbolProvider(or(ServerCapabilities::getWorkspaceSymbolProvider));
         
         return result;
     }

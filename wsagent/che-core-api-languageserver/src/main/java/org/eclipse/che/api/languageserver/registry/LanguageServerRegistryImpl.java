@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 @Singleton
 public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     private final static Logger                LOG                 = LoggerFactory.getLogger(LanguageServerRegistryImpl.class);
-    public final static String                 PROJECT_FOLDER_PATH = "/projects";
+    public final static String                 PROJECT_FOLDER_PATH = "file:///projects";
     private final List<LanguageDescription>    languages           = new ArrayList<>();
     private final List<LanguageServerLauncher> launchers           = new ArrayList<>();
 
@@ -102,7 +102,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     public ServerCapabilities getCapabilities(String fileUri) throws LanguageServerException {
         return getApplicableLanguageServers(fileUri).stream().flatMap(Collection::stream)
                         .map(s -> s.getInitializeResult().getCapabilities())
-                        .reduce(null, (left, right) -> new ServerCapabilitiesOverlay(left, right).compute());
+                        .reduce(new ServerCapabilities(), (left, right) -> new ServerCapabilitiesOverlay(left, right).compute());
     }
 
     public ServerCapabilities initialize(String fileUri) throws LanguageServerException {
@@ -224,7 +224,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         List<InitializedLanguageServer> servers = null;
         synchronized (initializedServers) {
             List<InitializedLanguageServer> list = initializedServers.get(projectPath);
-            if (list != null) {
+            if (list == null) {
                 return Collections.emptyList();
             }
             servers = new ArrayList<InitializedLanguageServer>(list);

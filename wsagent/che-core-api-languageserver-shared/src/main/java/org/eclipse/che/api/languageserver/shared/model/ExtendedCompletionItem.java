@@ -9,8 +9,8 @@ import org.eclipse.lsp4j.TextDocumentIdentifier;
  * @author Thomas Mäder
  */
 public class ExtendedCompletionItem extends CompletionItem {
-
     private TextDocumentIdentifier textDocumentIdentifier;
+    private CompletionItem item;
 
     public CompletionItem getItem() {
         return item;

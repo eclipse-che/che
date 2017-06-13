@@ -29,6 +29,10 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
+		<dependency>
+		  <groupId>com.google.guava</groupId>
+		  <artifactId>guava</artifactId>
+		</dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
@@ -44,10 +48,6 @@
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.websocket</groupId>
-            <artifactId>javax.websocket-api</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -71,19 +71,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.lsp4j</groupId>
             <artifactId>org.eclipse.lsp4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.everrest</groupId>
-            <artifactId>everrest-websockets</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -144,6 +136,11 @@
                         <exclude>**/EitherUtil.java</exclude>
                         <exclude>**/JsonUtil.java</exclude>
                         <exclude>**/DtoConversionTest.java</exclude>
+                        <exclude>**/LanguageDescription.java</exclude>
+                       	<exclude>**/ServerCapabilitiesOverlay.java</exclude>
+                       	<exclude>**/DocumentFilter.java</exclude>
+                       	<exclude>**/LanguageServerDescription.java</exclude>
+                       	<exclude>**/LSOperation.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
