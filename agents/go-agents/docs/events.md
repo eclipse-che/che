@@ -15,7 +15,8 @@ The first event in the channel, published when client successfully connected to 
   "method": "connected",
   "params": {
     "time": "2016-09-24T16:40:05.098478609+03:00",
-    "channel": "channel-1",
+    "channel": "tunnel-1",
+    "tunnel": "tunnel-1",
     "text": "Hello!"
   }
 }

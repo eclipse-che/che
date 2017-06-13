@@ -78,6 +78,7 @@ export class CreateProjectController {
 
   private stackId: string;
   private stacks: Array<che.IStack>;
+  private recipeContentCopy: string;
 
   /**
    * Default constructor that is using resource
@@ -1268,7 +1269,9 @@ export class CreateProjectController {
   getStackMachines(environment: any): any {
     let recipeType = environment.recipe.type;
     let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
-
+    if (this.recipeContentCopy && angular.equals(this.recipeContentCopy, environment.recipe.content)) {
+      return this.stackMachines[this.stackId];
+    }
     if (!this.stackMachines[this.stackId] || !this.stackMachines[this.stackId].length) {
       let machines = environmentManager.getMachines(environment);
       machines.forEach((machine: IEnvironmentManagerMachine) => {
@@ -1277,6 +1280,7 @@ export class CreateProjectController {
             environmentManager.setMemoryLimit(machine, this.workspaceRam);
           }
       });
+      this.recipeContentCopy = angular.copy(environment.recipe.content);
       this.stackMachines[this.stackId] = machines;
     }
 
