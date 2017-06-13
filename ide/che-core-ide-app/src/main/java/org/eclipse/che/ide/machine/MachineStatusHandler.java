@@ -35,11 +35,11 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
- * Handles changes in the workspace's environment and fires
+ * Handles changes of the machine status and fires
  * the corresponded events to notify all interested subscribers.
  */
 @Singleton
-public class EnvironmentStatusHandler {
+public class MachineStatusHandler {
 
     private EventBus               eventBus;
     private AppContext             appContext;
@@ -48,11 +48,11 @@ public class EnvironmentStatusHandler {
     private RequestTransmitter     transmitter;
 
     @Inject
-    EnvironmentStatusHandler(EventBus eventBus,
-                             AppContext appContext,
-                             WorkspaceServiceClient workspaceServiceClient,
-                             NotificationManager notificationManager,
-                             RequestTransmitter transmitter) {
+    MachineStatusHandler(EventBus eventBus,
+                         AppContext appContext,
+                         WorkspaceServiceClient workspaceServiceClient,
+                         NotificationManager notificationManager,
+                         RequestTransmitter transmitter) {
         this.eventBus = eventBus;
         this.appContext = appContext;
         this.workspaceServiceClient = workspaceServiceClient;
@@ -60,7 +60,7 @@ public class EnvironmentStatusHandler {
         this.transmitter = transmitter;
     }
 
-    public void handleEnvironmentStatusChanged(MachineStatusEvent event) {
+    public void handleMachineStatusChanged(MachineStatusEvent event) {
         final String machineName = event.getMachineName();
         final String workspaceId = event.getIdentity().getWorkspaceId();
 

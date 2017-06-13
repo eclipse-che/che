@@ -16,14 +16,14 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.ide.machine.EnvironmentStatusHandler;
+import org.eclipse.che.ide.machine.MachineStatusHandler;
 import org.eclipse.che.ide.util.loging.Log;
 
 @Singleton
-class EnvironmentStatusEventHandler {
+class MachineStatusEventHandler {
 
     @Inject
-    void configureEnvironmentStatusHandler(RequestHandlerConfigurator configurator, Provider<EnvironmentStatusHandler> handlerProvider) {
+    void configureMachineStatusHandler(RequestHandlerConfigurator configurator, Provider<MachineStatusHandler> handlerProvider) {
         configurator.newConfiguration()
                     .methodName("machine/statusChanged")
                     .paramsAsDto(MachineStatusEvent.class)
@@ -31,10 +31,10 @@ class EnvironmentStatusEventHandler {
                     .withBiConsumer((endpointId, event) -> {
                         Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
-                        // Since EnvironmentStatusEventHandler instantiated by GIN eagerly,
-                        // it may be really expensive to instantiate EnvironmentStatusHandler with all it's dependencies.
+                        // Since MachineStatusEventHandler instantiated by GIN eagerly,
+                        // it may be really expensive to instantiate MachineStatusHandler with all it's dependencies.
                         // So defer that work.
-                        handlerProvider.get().handleEnvironmentStatusChanged(event);
+                        handlerProvider.get().handleMachineStatusChanged(event);
                     });
     }
 }
