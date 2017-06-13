@@ -17,8 +17,8 @@ setup() {
 }
 
 teardown() {
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE stop --skip:nightly --skip:pull
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --quiet --skip:nightly --skip:pull
+  kill_running_named_container che
+  remove_named_container che
 }
 
 @test "test cli 'backup' command: backup fail if che is running" {
@@ -30,10 +30,7 @@ teardown() {
   tmp_path="${TESTRUN_DIR}"/cli_cmd_backup_fail_if_che_is_running
   mkdir -p "${tmp_path}"
   docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE start --skip:nightly --skip:pull
-  [[ "$(docker inspect --format='{{.State.Running}}' che)" == "true" ]]
-  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} che)
-  curl -fsS http://${ip_address}:8080  > /dev/null
-
+  check_che_state
   #WHEN
   result="$(docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE backup --skip:nightly --skip:pull || true)"
 
@@ -50,10 +47,7 @@ teardown() {
   tmp_path="${TESTRUN_DIR}"/cli_cmd_restore_fail_if_che_is_running
   mkdir -p "${tmp_path}"
   docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE start --skip:nightly --skip:pull
-  [[ "$(docker inspect --format='{{.State.Running}}' che)" == "true" ]]
-  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} che)
-  curl -fsS http://${ip_address}:8080  > /dev/null
-
+  check_che_state
   #WHEN
   result="$(docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE restore --quiet --skip:nightly --skip:pull)"
 
@@ -70,9 +64,7 @@ teardown() {
   tmp_path="${TESTRUN_DIR}"/cli_cmd_restore_fail_if_no_backup_found
   mkdir -p "${tmp_path}"
   docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE start --skip:nightly --skip:pull
-  [[ "$(docker inspect --format='{{.State.Running}}' che)" == "true" ]]
-  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} che)
-  curl -fsS http://${ip_address}:8080  > /dev/null
+  check_che_state
   docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE stop --skip:nightly --skip:pull
 
   #WHEN
@@ -95,9 +87,7 @@ teardown() {
   mkdir -p "${tmp_path}"
   #start che
   docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE start --skip:nightly --skip:pull
-  [[ "$(docker inspect --format='{{.State.Running}}' che)" == "true" ]]
-  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} che)
-  curl -fsS http://${ip_address}:8080  > /dev/null
+  check_che_state
   #create a workspace
 
   ws_create=$(curl 'http://'${ip_address}':8080/api/workspace?namespace=che&attribute=stackId:java-default' -H 'Content-Type: application/json;charset=UTF-8' -H 'Accept: application/json, text/plain, */*' --data-binary '{"defaultEnv":"wksp-1p0b","environments":{"wksp-1p0b":{"recipe":{"location":"eclipse/ubuntu_jdk8","type":"dockerimage"},"machines":{"dev-machine":{"servers":{},"agents":["org.eclipse.che.exec","org.eclipse.che.terminal","org.eclipse.che.ws-agent","org.eclipse.che.ssh"],"attributes":{"memoryLimitBytes":"2147483648"}}}}},"projects":[],"commands":[{"commandLine":"mvn clean install -f ${current.project.path}","name":"build","type":"mvn","attributes":{"goal":"Build","previewUrl":""}}],"name":"backup-restore","links":[]}' --compressed)
@@ -130,9 +120,7 @@ teardown() {
 
   #WHEN
   docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE start --skip:nightly --skip:pull
-  [[ "$(docker inspect --format='{{.State.Running}}' che)" == "true" ]]
-  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} che)
-  curl -fsS http://${ip_address}:8080  > /dev/null
+  check_che_state
 
   #THEN
   [[ "$(curl -fsS http://${ip_address}:8080/api/workspace)" == *"$workspace_name"* ]]

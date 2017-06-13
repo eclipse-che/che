@@ -12,10 +12,6 @@ load '/bats-support/load.bash'
 load '/bats-assert/load.bash'
 source /dockerfiles/cli/tests/test_base.sh
 
-teardown() {
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --quiet --skip:nightly --skip:pull
-}
-
 @test "test CLI 'config' command" {
   #GIVEN
   tmp_path="${TESTRUN_DIR}"/cli_cmd_config
@@ -37,5 +33,4 @@ teardown() {
   [[ -d "${container_tmp_path}"/instance/templates ]]
   [[ -f "${container_tmp_path}"/instance/docker-compose-container.yml ]]
   [[ -f "${container_tmp_path}"/instance/che.ver.do_not_modify ]]
-
 }

@@ -57,3 +57,32 @@ get_free_port() {
   echo $port
 }
 
+check_che_state() {
+  local CHE_CONTAINER_NAME="che"
+  local CHE_PORT="8080"
+  local IS_RUNNING="true"
+  for i in "${@}"
+  do
+      case $i in
+         --che-container-name=*)
+             CHE_CONTAINER_NAME="${i#*=}"
+             shift
+         ;;
+         --che-port=*)
+             CHE_PORT="${i#*=}"
+             shift
+         ;;
+         --is-running=*)
+             IS_RUNNING="${i#*=}"
+             shift
+         ;;
+         *)
+              echo "You've passed unknown option"
+              exit 2
+          ;;
+      esac
+  done
+  [[ "$(docker inspect --format='{{.State.Running}}' $CHE_CONTAINER_NAME)" == "$IS_RUNNING" ]]
+  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} $CHE_CONTAINER_NAME)
+  curl -fsS http://${ip_address}:$CHE_PORT  > /dev/null
+}
