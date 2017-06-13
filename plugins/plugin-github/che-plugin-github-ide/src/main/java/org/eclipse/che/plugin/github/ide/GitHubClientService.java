@@ -32,19 +32,6 @@ import java.util.List;
  * @author Kevin Pollet
  */
 public interface GitHubClientService {
-    /**
-     * Get given repository information.
-     *
-     * @param user
-     *         the owner of the repository.
-     * @param repository
-     *         the repository name.
-     * @param callback
-     *         callback called when operation is done.
-     * @deprecated use {@link #getRepository(String, String)}
-     */
-    @Deprecated
-    void getRepository(@NotNull String user, @NotNull String repository, @NotNull AsyncRequestCallback<GitHubRepository> callback);
 
     /**
      * Get given repository information.
@@ -68,36 +55,8 @@ public interface GitHubClientService {
      *         the owner of the repository.
      * @param repository
      *         the repository name.
-     * @param callback
-     *         callback called when operation is done.
-     * @deprecated use {@link #getForks(String user, String repository)}
-     */
-    @Deprecated
-    void getForks(@NotNull String user, @NotNull String repository, @NotNull AsyncRequestCallback<GitHubRepositoryList> callback);
-
-    /**
-     * Get list of forks for given repository
-     *
-     * @param user
-     *         the owner of the repository.
-     * @param repository
-     *         the repository name.
      */
     Promise<GitHubRepositoryList> getForks(String user, String repository);
-
-    /**
-     * Fork the given repository for the authorized user.
-     *
-     * @param user
-     *         the owner of the repository to fork.
-     * @param repository
-     *         the repository name.
-     * @param callback
-     *         callback called when operation is done.
-     * @deprecated use {@link #fork(String, String)}
-     */
-    @Deprecated
-    void fork(@NotNull String user, @NotNull String repository, @NotNull AsyncRequestCallback<GitHubRepository> callback);
 
     /**
      * Fork the given repository for the authorized user.
@@ -125,20 +84,6 @@ public interface GitHubClientService {
      */
     void commentIssue(@NotNull String user, @NotNull String repository, @NotNull String issue, @NotNull GitHubIssueCommentInput input,
                       @NotNull AsyncRequestCallback<GitHubIssueComment> callback);
-
-    /**
-     * Get pull requests for given repository.
-     *
-     * @param owner
-     *         the repository owner.
-     * @param repository
-     *         the repository name.
-     * @param callback
-     *         callback called when operation is done.
-     * @deprecated use {@link #getPullRequests(String, String)}
-     */
-    @Deprecated
-    void getPullRequests(@NotNull String owner, @NotNull String repository, @NotNull AsyncRequestCallback<GitHubPullRequestList> callback);
 
     /**
      * Get pull requests for given repository.
@@ -178,25 +123,6 @@ public interface GitHubClientService {
                         @NotNull String repository,
                         @NotNull String pullRequestId,
                         @NotNull AsyncRequestCallback<GitHubPullRequest> callback);
-
-    /**
-     * Create a pull request on origin repository
-     *
-     * @param user
-     *         the owner of the repository.
-     * @param repository
-     *         the repository name.
-     * @param input
-     *         the pull request information.
-     * @param callback
-     *         callback called when operation is done.
-     * @deprecated use {@link #createPullRequest(String, String, GitHubPullRequestCreationInput)}
-     */
-    @Deprecated
-    void createPullRequest(@NotNull String user,
-                           @NotNull String repository,
-                           @NotNull GitHubPullRequestCreationInput input,
-                           @NotNull AsyncRequestCallback<GitHubPullRequest> callback);
 
     /**
      * Create a pull request on origin repository
@@ -256,24 +182,8 @@ public interface GitHubClientService {
 
     /**
      * Get the list of the organizations, where authorized user is a member.
-     *
-     * Use {@link #getOrganizations()}.
-     */
-    @Deprecated
-    void getOrganizations(@NotNull AsyncRequestCallback<List<String>> callback);
-
-    /**
-     * Get the list of the organizations, where authorized user is a member.
      */
     Promise<List<GitHubUser>> getOrganizations();
-
-    /**
-     * Get authorized user information.
-     *
-     * Use {@link #getUserInfo()}.
-     */
-    @Deprecated
-    void getUserInfo(@NotNull AsyncRequestCallback<GitHubUser> callback);
 
     /**
      * Get authorized user information.
