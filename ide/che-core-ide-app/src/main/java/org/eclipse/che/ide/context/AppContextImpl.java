@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.context;
 
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -79,7 +80,7 @@ public class AppContextImpl implements AppContext,
                                        WorkspaceStartedEvent.Handler,
                                        WorkspaceStoppedEvent.Handler,
                                        ResourceManagerInitializer {
-    private static final String APP_ID =  String.valueOf(nextInt(Integer.MAX_VALUE));
+    private static final String APP_ID = String.valueOf(nextInt(Integer.MAX_VALUE));
 
     private final QueryParameters                        queryParameters;
     private final List<String>                           projectsInImport;
@@ -123,6 +124,7 @@ public class AppContextImpl implements AppContext,
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
         eventBus.addHandler(WindowActionEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
     }
 
     private static native String masterFromIDEConfig() /*-{
@@ -415,6 +417,11 @@ public class AppContextImpl implements AppContext,
     @Override
     public void onWorkspaceStarted(WorkspaceStartedEvent event) {
         setWorkspace(event.getWorkspace());
+
+        Scheduler.get().scheduleFixedPeriod(() -> {
+            appStateManager.get().persistWorkspaceState(getWorkspaceId());
+            return true;
+        }, 10_000);
     }
 
     @Override
