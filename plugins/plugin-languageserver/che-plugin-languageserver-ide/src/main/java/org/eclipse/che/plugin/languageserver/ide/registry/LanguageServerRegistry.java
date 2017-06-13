@@ -48,7 +48,7 @@ import java.util.Map;
 import static org.eclipse.che.api.languageserver.shared.ProjectExtensionKey.createProjectKey;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
 
 
 /**
@@ -114,7 +114,8 @@ public class LanguageServerRegistry {
                          })
                          .onTimeout(() -> {
                              notificationManager
-                                     .notify("Failed to initialize language server for " + ext + " : " + "due to timeout", FAIL,
+                                     .notify("Possible problem starting a language server", "The server either hangs or starts long",
+                                             WARNING,
                                              EMERGE_MODE);
                              loader.hide();
                          });
