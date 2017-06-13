@@ -29,10 +29,10 @@ teardown() {
   fi
   tmp_path="${TESTRUN_DIR}"/cli_cmd_backup_fail_if_che_is_running
   mkdir -p "${tmp_path}"
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE start --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-cli-command=start --che-cli-extra-options="--skip:nightly --skip:pull"
   check_che_state
   #WHEN
-  result="$(docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE backup --skip:nightly --skip:pull || true)"
+  result=$(execute_cli_command --che-data-path=${tmp_path} --che-cli-command=backup --che-cli-extra-options="--skip:nightly --skip:pull" || true)
 
   #THEN
   [[ $result == *"che is running. Stop before performing a backup."* ]]
@@ -46,10 +46,10 @@ teardown() {
   fi
   tmp_path="${TESTRUN_DIR}"/cli_cmd_restore_fail_if_che_is_running
   mkdir -p "${tmp_path}"
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE start --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-cli-command=start --che-cli-extra-options="--skip:nightly --skip:pull"
   check_che_state
   #WHEN
-  result="$(docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE restore --quiet --skip:nightly --skip:pull)"
+  result=$(execute_cli_command --che-data-path=${tmp_path} --che-cli-command=restore --che-cli-extra-options="--quiet --skip:nightly --skip:pull")
 
   #THEN
   [[ $result == *"Eclipse Che is running. Stop before performing a restore."* ]]
@@ -63,12 +63,12 @@ teardown() {
   fi
   tmp_path="${TESTRUN_DIR}"/cli_cmd_restore_fail_if_no_backup_found
   mkdir -p "${tmp_path}"
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE start --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-cli-command=start --che-cli-extra-options="--skip:nightly --skip:pull"
   check_che_state
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE stop --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-cli-command=stop --che-cli-extra-options="--skip:nightly --skip:pull"
 
   #WHEN
-  result="$(docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE restore --quiet --skip:nightly --skip:pull)"
+  result=$(execute_cli_command --che-data-path=${tmp_path} --che-cli-command=restore --che-cli-extra-options="--quiet --skip:nightly --skip:pull")
 
   #THEN
   [[ $result == *"Backup files not found. To do restore please do backup first."* ]]
@@ -86,7 +86,7 @@ teardown() {
   workspace_name="backup-restore"
   mkdir -p "${tmp_path}"
   #start che
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE start --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-cli-command=start --che-cli-extra-options="--skip:nightly --skip:pull"
   check_che_state
   #create a workspace
 
@@ -94,10 +94,10 @@ teardown() {
   [[ "$ws_create" == *"created"* ]]
   [[ "$ws_create" == *"STOPPED"* ]]
   #stop che
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE stop --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-cli-command=stop --che-cli-extra-options="--skip:nightly --skip:pull"
 
   #WHEN
-  backup=$(docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE backup --skip:nightly --skip:pull)
+  backup=$(execute_cli_command --che-data-path=${tmp_path} --che-cli-command=backup --che-cli-extra-options="--skip:nightly --skip:pull")
 
   #THEN
   [[ "$backup" == *"Saving codenvy data..."* ]]
@@ -107,11 +107,11 @@ teardown() {
   # TEST RESTORE
   #GIVEN
   #destroy to wipe data
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --quiet --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-cli-command=destroy --che-cli-extra-options="--quiet --skip:nightly --skip:pull"
   [[ ! -d "${container_tmp_path}"/instance ]]
   #WHEN
   #perform restore from backup
-  restore=$(docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE restore --quiet --skip:nightly --skip:pull)
+  restore=$(execute_cli_command --che-data-path=${tmp_path} --che-cli-command=restore --che-cli-extra-options="--quiet --skip:nightly --skip:pull")
 
   #THEN
   [[ "$restore" == *"Recovering Eclipse Che data..."* ]]
@@ -119,7 +119,7 @@ teardown() {
   [[ -d "${container_tmp_path}"/instance/data ]]
 
   #WHEN
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE start --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-cli-command=start --che-cli-extra-options="--skip:nightly --skip:pull"
   check_che_state
 
   #THEN

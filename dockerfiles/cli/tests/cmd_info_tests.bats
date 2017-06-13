@@ -22,7 +22,7 @@ source /dockerfiles/cli/tests/test_base.sh
   expected_output_5="Image Registry:"
 
   #WHEN
-  result=$(docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE info)
+  result=$(execute_cli_command --che-data-path=${tmp_path} --che-cli-command=info)
 
   #THEN
   [[ $result == *${expected_output_1}* ]]

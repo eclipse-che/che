@@ -32,7 +32,7 @@ teardown() {
   mkdir -p "${tmp_path}"
 
   #WHEN
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE start --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-container-name=chetest --che-cli-command=start --che-cli-extra-options="--skip:nightly --skip:pull"
 
   #THEN
   check_che_state --che-container-name="chetest"
@@ -46,10 +46,10 @@ teardown() {
   fi
   tmp_path="${TESTRUN_DIR}"/cli_cmd_stop_with_default_settings
   mkdir -p "${tmp_path}"
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE start --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-container-name=chetest --che-cli-command=start --che-cli-extra-options="--skip:nightly --skip:pull"
   check_che_state --che-container-name="chetest"
   #WHEN
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE stop --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-container-name=chetest --che-cli-command=stop --che-cli-extra-options="--skip:nightly --skip:pull"
 
   #THEN
   #check that container is stopped and removed
@@ -64,17 +64,16 @@ teardown() {
   fi
   tmp_path="${TESTRUN_DIR}"/cli_cmd_restart_with_default_settings
   mkdir -p "${tmp_path}"
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE start --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-container-name=chetest --che-cli-command=start --che-cli-extra-options="--skip:nightly --skip:pull"
   check_che_state --che-container-name="chetest"
   che_container_id=$(docker inspect --format="{{.Id}}" chetest)
 
   #WHEN
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE restart --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-container-name=chetest --che-cli-command=restart --che-cli-extra-options="--skip:nightly --skip:pull"
 
   #THEN
   [[ "$(docker inspect --format="{{.Id}}" chetest)" != "$che_container_id" ]]
-  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} chetest)
-  curl -fsS http://${ip_address}:8080  > /dev/null
+  check_che_state --che-container-name="chetest"
 }
 
 @test "test cli 'start' with custom port" {
@@ -83,8 +82,7 @@ teardown() {
   free_port=$(get_free_port)
 
   #WHEN
-  docker run --rm -e CHE_PORT=$free_port -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE start --skip:nightly --skip:pull
-
+  execute_cli_command --che-data-path=${tmp_path} --che-port=$free_port --che-container-name=chetest --che-cli-command=start --che-cli-extra-options="--skip:nightly --skip:pull"
   #THEN
   check_che_state --che-container-name="chetest" --che-port="$free_port"
 }

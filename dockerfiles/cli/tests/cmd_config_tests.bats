@@ -18,7 +18,7 @@ source /dockerfiles/cli/tests/test_base.sh
   container_tmp_path="${CONTAINER_TESTRUN_DIR}"/cli_cmd_config
 
   #WHEN
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE config --skip:nightly --skip:pull
+  execute_cli_command --che-data-path=${tmp_path} --che-cli-command=config --che-cli-extra-options="--skip:nightly --skip:pull"
 
   #THEN
   [[ -d "${container_tmp_path}"/docs ]]

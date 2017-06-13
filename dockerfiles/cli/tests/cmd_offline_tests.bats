@@ -17,7 +17,7 @@ source /dockerfiles/cli/tests/test_base.sh
   mkdir -p "${tmp_path}"
 
   #WHEN
-  result="$(docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE offline --skip:nightly --skip:pull)"
+  result=$(execute_cli_command --che-data-path=${tmp_path} --che-cli-command=offline --che-cli-extra-options="--skip:nightly --skip:pull")
 
   #THEN
   [[ $result == *"Saving che cli image..."* ]]
@@ -46,7 +46,7 @@ source /dockerfiles/cli/tests/test_base.sh
   mkdir -p "${tmp_path}"
 
   #WHEN
-  result="$(docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE offline --image:eclipse/alpine_jdk8 --image:eclipse/debian_jre --skip:nightly --skip:pull)"
+  result=$(execute_cli_command --che-data-path=${tmp_path} --che-cli-command=offline --che-cli-extra-options="--image:eclipse/alpine_jdk8 --image:eclipse/debian_jre --skip:nightly --skip:pull")
 
   #THEN
   [[ $result == *"Saving che cli image..."* ]]
