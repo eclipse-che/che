@@ -257,6 +257,10 @@ public abstract class ServerEvaluationStrategy {
         return addressesAndPorts;
     }
 
+    protected Map<String, String> getExposedPortsToAddressPorts(String address, Map<String, List<PortBinding>> ports) {
+        return getExposedPortsToAddressPorts(address, ports, false);
+    }
+
     
     /**
      * @param protocolForInternalUrl
