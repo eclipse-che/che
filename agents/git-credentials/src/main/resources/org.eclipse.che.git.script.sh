@@ -34,7 +34,7 @@ echo 'api_url='"$api_url" >> ${SCRIPT_FILE}
 echo 'request="'${request}'"' >> ${SCRIPT_FILE}
 # Ssh key request may return key with decoded '=' symbol, so need to replace '\u003d' to '='.
 # TODO remove the replacement after https://github.com/eclipse/che/issues/5253 will be fixed.
-echo 'ssh_key=$(${request} "$api_url/ssh/vcs/find?name=$host$(if [ -n "$token" ]; then echo "&token=$token"; fi)"| grep -Po '\''"privateKey":.*?[^\\\\]",'\''| sed -e "s/\"privateKey\":\"//" | sed -e "s/\\\\\u003d/=/")' >> ${SCRIPT_FILE}
+echo 'ssh_key=$(${request} "$api_url/ssh/vcs/find?name=$host$(if [ -n "$token" ]; then echo "&token=$token"; fi)"| grep -Po '\''"privateKey":.*?[^\\\\]",'\''| sed -e "s/\"privateKey\":\"//" | sed -e "s/\\\\\u003d/=/g")' >> ${SCRIPT_FILE}
 echo 'if [ -n "$ssh_key" ]' >> ${SCRIPT_FILE}
 echo 'then' >> ${SCRIPT_FILE}
 echo '    key_file=$(mktemp)' >> ${SCRIPT_FILE}
