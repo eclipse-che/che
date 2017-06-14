@@ -61,7 +61,7 @@
                     <execution>
                         <id>analyze</id>
                         <configuration>
-                            <skip>true</skip>               
+                            <skip>true</skip>
                         </configuration>
                     </execution>
                 </executions>
@@ -200,7 +200,7 @@
                         <configuration>
                             <target name="copy all original Che files">
                                 <copy todir="${project.build.directory}/patched" verbose="true">
-                                    <fileset dir="${baseCheRepository}/${original-project-basedir}">
+                                    <fileset dir="${basedir}/../../${original-project-basedir}">
                                         <include name="src/**" />
                                     </fileset>
                                 </copy>
@@ -290,8 +290,8 @@
             </activation>
             <dependencies>
                 <dependency>
-                    <groupId>org.eclipse.che.assembly2</groupId>
-                    <artifactId>che-keycloak-plugin-ide</artifactId>
+                    <groupId>org.eclipse.che.plugin</groupId>
+                    <artifactId>che-plugin-keycloak-ide</artifactId>
                 </dependency>
             </dependencies>
         </profile>

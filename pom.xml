@@ -1060,12 +1060,12 @@
                 <version>${che.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.plugins</groupId>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-keycloak-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.plugins</groupId>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-keycloak-server</artifactId>
                 <version>${che.version}</version>
             </dependency>
