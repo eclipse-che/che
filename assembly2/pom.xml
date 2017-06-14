@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2017 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
 <!-- Copyright (c) 2012-2016 Codenvy, S.A. All rights reserved. This program 
     and the accompanying materials are made available under the terms of the 
     Eclipse Public License v1.0 which accompanies this distribution, and is available 
     at http://www.eclipse.org/legal/epl-v10.html Contributors: Codenvy, S.A. 
     - initial API and implementation -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>che-parent</artifactId>
@@ -20,206 +31,13 @@
     <name>Che IDE Assembly2:: Parent</name>
     <modules>
         <module>keycloak-plugin-server</module>
-        <module>keycloak-plugin-ide</module>
+        <!--module>keycloak-plugin-ide</module>
         <module>keycloak-plugin-token-provider</module>
         <module>dashboard</module>
         <module>assembly-wsagent-war</module>
         <module>assembly-wsagent-server</module>
         <module>assembly-ide-war</module>
         <module>assembly-wsmaster-war</module>
-        <module>assembly-main</module>
+        <module>assembly-main</module-->
     </modules>
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-antrun-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>prepare-patch-files</id>
-                            <goals>
-                                <goal>run</goal>
-                            </goals>
-                            <configuration>
-                                <target
-                                    name="prepare the Che patch files to flatten the directory path">
-                                    <delete
-                                        dir="${project.build.directory}/prepared-patches" />
-                                    <delete
-                                        dir="${project.build.directory}/patched" />
-                                    <mkdir
-                                        dir="${project.build.directory}/prepared-patches" />
-                                    <mkdir
-                                        dir="${project.build.directory}/patched" />
-                                    <copy
-                                        todir="${project.build.directory}/prepared-patches"
-                                        verbose="true">
-                                        <fileset dir="${basedir}">
-                                            <include
-                                                name="src/main/patches/**/*.patch" />
-                                        </fileset>
-                                        <chainedmapper>
-                                            <packagemapper
-                                                from="*.patch" to="*.patch" />
-                                            <globmapper
-                                                from="src.main.patches.*.patch"
-                                                to="*.patch" />
-                                        </chainedmapper>
-                                    </copy>
-                                </target>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>copy-patched-files</id>
-                            <goals>
-                                <goal>run</goal>
-                            </goals>
-                            <configuration>
-                                <target
-                                    name="copy original Che files that will be patched">
-                                    <pathconvert pathsep=","
-                                        property="pathForRequiredSourceFiles">
-                                        <mappedresources>
-                                            <fileset dir="${basedir}">
-                                                <include
-                                                    name="src/main/patches/**/*.patch" />
-                                            </fileset>
-                                            <globmapper
-                                                from="src/main/patches/*.patch"
-                                                to="*" />
-                                        </mappedresources>
-                                    </pathconvert>
-                                    <echo>${pathForRequiredSourceFiles}</echo>
-                                    <condition property="noFilesToPatch">
-                                        <equals
-                                            arg1="${pathForRequiredSourceFiles}"
-                                            arg2="" trim="true" />
-                                    </condition>
-                                    <copy
-                                        todir="${project.build.directory}/patched"
-                                        verbose="true">
-                                        <fileset
-                                            dir="${baseCheRepository}/${original-project-basedir}"
-                                            includes="dummy,${pathForRequiredSourceFiles}" />
-                                    </copy>
-                                </target>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>add-source-for-patched-files</id>
-                            <goals>
-                                <goal>add-source</goal>
-                            </goals>
-                            <configuration>
-                                <sources>
-                                    <source>${project.build.directory}/patched/src/main/java</source>
-                                </sources>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>add-resource-for-patched-files</id>
-                            <goals>
-                                <goal>add-resource</goal>
-                            </goals>
-                            <configuration>
-                                <resources>
-                                    <resource>
-                                        <directory>${project.build.directory}/patched/src/main/resources</directory>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>copy-web-resources</id>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-                            <configuration>
-                                <overwrite>true</overwrite>
-                                <outputDirectory>${project.build.directory}/patched/src/main/webapp</outputDirectory>
-                                <resources>
-                                    <resource>
-                                        <directory>src/main/webapp</directory>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-patch-plugin</artifactId>
-                    <version>1.2</version>
-                    <executions>
-                        <execution>
-                            <id>patch-sources</id>
-                            <phase>process-resources</phase>
-                            <goals>
-                                <goal>apply</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <targetDirectory>${project.build.directory}/patched</targetDirectory>
-                        <patchDirectory>${project.build.directory}/prepared-patches</patchDirectory>
-                        <naturalOrderProcessing>true</naturalOrderProcessing>
-                        <optimizations>false</optimizations>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-war-plugin</artifactId>
-                    <configuration>
-                        <warSourceDirectory>${project.build.directory}/patched/src/main/webapp</warSourceDirectory>
-                        <failOnMissingWebXml>false</failOnMissingWebXml>
-                        <dependentWarIncludes>**,META-INF/context.xml,WEB-INF/**</dependentWarIncludes>
-                        <dependentWarExcludes>META-INF/MANIFEST.MF,META-INF/maven/**,WEB-INF/lib/che-plugin-svn-ext-*</dependentWarExcludes>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>analyze</id>
-                            <configuration>
-                                <ignoredUnusedDeclaredDependencies>
-                                    <!-- required because of overlays -->
-                                    <ignoredUnusedDeclaredDependency>org.eclipse.che:assembly-*:war:</ignoredUnusedDeclaredDependency>
-                                    <ignoredUnusedDeclaredDependency>com.redhat.che:che-keycloak-plugin-ide:jar:</ignoredUnusedDeclaredDependency>
-                                    <!-- required because it's declared in fabric8-ide-assembly-wsagent-war, butnot used in the code -->
-                                    <ignoredUnusedDeclaredDependency>com.redhat.che:che-plugin-bayesian-lang-server:jar:</ignoredUnusedDeclaredDependency>
-                                </ignoredUnusedDeclaredDependencies>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
-    <profiles>
-        <profile>
-            <id>withDashboard</id>
-            <activation>
-                <property>
-                    <name>withoutDashboard</name>
-                    <value>!true</value>
-                </property>
-            </activation>
-            <modules>
-                <module>dashboard</module>
-            </modules>
-        </profile>
-    </profiles>
 </project>
