@@ -45,7 +45,10 @@ public abstract class ServerEvaluationStrategy {
     /**
      * @return true if <strong>external</strong> addresses need to be exposed against https, false otherwise
      */
-    protected abstract boolean useHttpsForExternalUrls();
+    protected boolean useHttpsForExternalUrls() {
+        return false;
+    }
+    
 
     /**
      * Gets a map of all <strong>internal</strong> addresses exposed by the container in the form of
