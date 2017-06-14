@@ -173,7 +173,7 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
 
         // get current ports
         Map<String, List<PortBinding>> ports = containerInfo.getNetworkSettings().getPorts();
-        
+
         if (isNullOrEmpty(cheDockerCustomExternalTemplate)) {
             return getExposedPortsToAddressPorts(renderingEvaluation.getExternalAddress(), ports, false);
         }
