@@ -64,7 +64,7 @@ public class GsonJsonRpcComposer implements JsonRpcComposer {
             JsonArray jsonArray = new JsonArray();
             for (int i = 0; i < paramsList.size(); i++) {
                 JsonElement jsonElement = (JsonElement)paramsList.get(i);
-                jsonArray.set(i, jsonElement);
+                jsonArray.add(jsonElement);
             }
             return DtoFactory.getInstance().createListDtoFromJson(jsonArray.toString(), type);
         }
