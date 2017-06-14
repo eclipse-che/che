@@ -22,7 +22,7 @@ source /dockerfiles/cli/tests/test_base.sh
   expected_output_5="Image Registry:"
 
   #WHEN
-  result=$(execute_cli_command --che-data-path=${tmp_path} --che-cli-command=info)
+  result=$(execute_cli_command --che-data-path=${tmp_path} --che-cli-command=info --che-cli-extra-options="--skip:nightly --skip:pull")
 
   #THEN
   [[ $result == *${expected_output_1}* ]]
