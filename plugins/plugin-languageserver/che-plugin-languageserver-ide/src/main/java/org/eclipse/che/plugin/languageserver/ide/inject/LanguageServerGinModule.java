@@ -49,6 +49,9 @@ public class LanguageServerGinModule extends AbstractGinModule {
         GinMapBinder<String, WsAgentComponent> wsAgentComponentsBinder =
                 GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
         wsAgentComponentsBinder.addBinding("Load Language Server file types.").to(LanguageServerFileTypeRegister.class);
+
+        bind(PublishDiagnosticsReceiver.class).asEagerSingleton();
+        bind(ShowMessageJsonRpcReceiver.class).asEagerSingleton();
     }
 
 }
