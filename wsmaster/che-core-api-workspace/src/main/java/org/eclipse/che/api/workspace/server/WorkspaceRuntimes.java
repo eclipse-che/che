@@ -205,12 +205,6 @@ public class WorkspaceRuntimes {
                                         "' because its status is 'RUNNING'");
         }
 
-        eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                       .withWorkspaceId(workspaceId)
-                                       .withStatus(WorkspaceStatus.STARTING)
-                                       .withEventType(EventType.STARTING)
-                                       .withPrevStatus(WorkspaceStatus.STOPPED));
-
         Subject subject = EnvironmentContext.getCurrent().getSubject();
         RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, subject.getUserName());
         try {
@@ -223,6 +217,11 @@ public class WorkspaceRuntimes {
                         + RuntimeInfrastructure.class);
             }
             runtimes.put(workspaceId, runtime);
+            eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                           .withWorkspaceId(workspaceId)
+                                           .withStatus(WorkspaceStatus.STARTING)
+                                           .withEventType(EventType.STARTING)
+                                           .withPrevStatus(WorkspaceStatus.STOPPED));
             return CompletableFuture.runAsync(ThreadLocalPropagateContext.wrap(() -> {
                 try {
                     runtime.start(options);

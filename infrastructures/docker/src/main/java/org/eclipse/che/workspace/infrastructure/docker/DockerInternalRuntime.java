@@ -54,19 +54,18 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
     private static final Logger LOG = getLogger(DockerInternalRuntime.class);
 
-    private final DockerRuntimeContext.StartSynchronizer startSynchronizer;
-    private final Map<String, String>                    properties;
-    private final Queue<String>                          startQueue;
-    private final ContextsStorage                        contextsStorage;
-    private final NetworkLifecycle                       dockerNetworkLifecycle;
-    private final String                                 devMachineName;
-    private final DockerEnvironment                      dockerEnvironment;
-    private final MachineStarter                         serviceStarter;
-    private final SnapshotDao                            snapshotDao;
-    private final DockerRegistryClient                   dockerRegistryClient;
-    private final RuntimeIdentity                        identity;
-    private final EventService                           eventService;
-
+    private final StartSynchronizer    startSynchronizer;
+    private final Map<String, String>  properties;
+    private final Queue<String>        startQueue;
+    private final ContextsStorage      contextsStorage;
+    private final NetworkLifecycle     dockerNetworkLifecycle;
+    private final String               devMachineName;
+    private final DockerEnvironment    dockerEnvironment;
+    private final MachineStarter       serviceStarter;
+    private final SnapshotDao          snapshotDao;
+    private final DockerRegistryClient dockerRegistryClient;
+    private final RuntimeIdentity      identity;
+    private final EventService         eventService;
 
     public DockerInternalRuntime(DockerRuntimeContext context,
                                  String devMachineName,
@@ -78,15 +77,15 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                  MachineStarter serviceStarter,
                                  SnapshotDao snapshotDao,
                                  DockerRegistryClient dockerRegistryClient,
-                                 DockerRuntimeContext.StartSynchronizer startSynchronizer,
-                                 RuntimeIdentity identity, EventService eventService) {
+                                 RuntimeIdentity identity,
+                                 EventService eventService) {
         super(context, urlRewriter);
         this.devMachineName = devMachineName;
         this.dockerEnvironment = dockerEnvironment;
         this.identity = identity;
         this.eventService = eventService;
         this.properties = new HashMap<>();
-        this.startSynchronizer = startSynchronizer;
+        this.startSynchronizer = new StartSynchronizer();
         this.contextsStorage = contextsStorage;
         this.dockerNetworkLifecycle = dockerNetworkLifecycle;
         this.serviceStarter = serviceStarter;
@@ -127,7 +126,12 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                     throw e;
                 }
                 checkStartInterruption();
-                startSynchronizer.addMachine(machineName, dockerMachine);
+                try {
+                    startSynchronizer.addMachine(machineName, dockerMachine);
+                } catch (InfrastructureException e) {
+                    destroyMachineQuietly(machineName, dockerMachine);
+                    throw e;
+                }
                 startQueue.poll();
                 machineName = startQueue.peek();
             }
@@ -274,24 +278,30 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         if (stopOptions != null && "true".equals(stopOptions.get("create-snapshot"))) {
             snapshotMachines(startSynchronizer.removeMachines());
         } else {
-            for (Map.Entry<String, DockerMachine> dockerMachineEntry : startSynchronizer.removeMachines().entrySet()) {
-                try {
-                    dockerMachineEntry.getValue().destroy();
-                    eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
-                                                   .withIdentity(DtoConverter.asDto(identity))
-                                                   .withEventType(MachineStatus.STOPPED)
-                                                   .withMachineName(dockerMachineEntry.getKey()));
-                } catch (InfrastructureException e) {
-                    LOG.error(format("Error occurs on destroying of docker machine '%s' in workspace '%s'. Container '%s'",
-                                     dockerMachineEntry.getKey(),
-                                     getContext().getIdentity().getWorkspaceId(),
-                                     dockerMachineEntry.getValue().getContainer()),
-                              e);
-                }
-            }
+            startSynchronizer.removeMachines()
+                             .forEach(this::destroyMachineQuietly);
         }
         // TODO what happens when context throws exception here
         dockerNetworkLifecycle.destroyNetwork(dockerEnvironment.getNetwork());
+    }
+
+    /**
+     * Destroys specified machine with suppressing exception that occurs while destroying.
+     */
+    private void destroyMachineQuietly(String machineName, DockerMachine machine) {
+        try {
+            machine.destroy();
+            eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
+                                           .withIdentity(DtoConverter.asDto(identity))
+                                           .withEventType(MachineStatus.STOPPED)
+                                           .withMachineName(machineName));
+        } catch (InfrastructureException e) {
+            LOG.error(format("Error occurs on destroying of docker machine '%s' in workspace '%s'. Container '%s'",
+                             machineName,
+                             getContext().getIdentity().getWorkspaceId(),
+                             machine.getContainer()),
+                      e);
+        }
     }
 
     /**
@@ -355,6 +365,61 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             } catch (SnapshotException x) {
                 LOG.error(format("Couldn't remove snapshot '%s', workspace id '%s'", snapshot.getId(), snapshot.getWorkspaceId()), x);
             }
+        }
+    }
+
+    static class StartSynchronizer {
+        private Thread                     startThread;
+        private boolean                    stopCalled;
+        private Map<String, DockerMachine> machines;
+
+        public StartSynchronizer() {
+            this.stopCalled = false;
+            this.machines = new HashMap<>();
+        }
+
+        public synchronized Map<String, ? extends Machine> getMachines() {
+            return Collections.unmodifiableMap(machines);
+        }
+
+        public synchronized void addMachine(String name, DockerMachine machine) throws InternalInfrastructureException {
+            if (machines != null) {
+                machines.put(name, machine);
+            } else {
+                throw new InternalInfrastructureException("Start of runtime is canceled.");
+            }
+        }
+
+        public synchronized Map<String, DockerMachine> removeMachines() throws InfrastructureException {
+            if (machines != null) {
+                Map<String, DockerMachine> machines = this.machines;
+                // unset to identify error if method called second time
+                this.machines = null;
+                return machines;
+            }
+            throw new InfrastructureException("");
+        }
+
+        public synchronized void setStartThread() throws InternalInfrastructureException {
+            if (startThread != null) {
+                throw new InternalInfrastructureException("Docker infrastructure context of workspace already started");
+            }
+            startThread = Thread.currentThread();
+        }
+
+        public synchronized void interruptStartThread() throws InfrastructureException {
+            if (startThread == null) {
+                throw new InternalInfrastructureException("Stop of non started context not allowed");
+            }
+            if (stopCalled) {
+                throw new InternalInfrastructureException("Stop is called twice");
+            }
+            stopCalled = true;
+            startThread.interrupt();
+        }
+
+        public synchronized boolean isStopCalled() {
+            return stopCalled;
         }
     }
 }
