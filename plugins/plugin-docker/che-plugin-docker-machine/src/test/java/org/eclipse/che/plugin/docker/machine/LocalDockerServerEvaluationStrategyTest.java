@@ -210,7 +210,7 @@ public class LocalDockerServerEvaluationStrategyTest {
                                                                     serverConfs);
 
         // then
-        assertEquals(servers.toString(), expectedServers.toString());
+        assertEquals(servers, expectedServers);
     }
 
     private Map<String, ServerImpl> getExpectedServers(String externalAddress,
