@@ -45,6 +45,7 @@ public class LanguageRegistryService {
     }
     
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("initialize")
     public ServerCapabilities initialize(@QueryParam("path") String path) throws LanguageServerException {
         //in most cases starts new LS if not already started

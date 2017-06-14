@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ServerCapabilitiesOverlay  {
+public class ServerCapabilitiesOverlay {
     private ServerCapabilities left;
     private ServerCapabilities right;
 
@@ -34,21 +34,27 @@ public class ServerCapabilitiesOverlay  {
     public CodeLensOptions getCodeLensProvider() {
         CodeLensOptions leftOptions = left.getCodeLensProvider();
         CodeLensOptions rightOptions = right.getCodeLensProvider();
-        if (leftOptions == null && rightOptions == null) {
-            return null;
+        if (leftOptions == null) {
+            return rightOptions;
+        }
+        if (rightOptions == null) {
+            return leftOptions;
         }
         CodeLensOptions result = new CodeLensOptions();
         if (leftOptions != null && leftOptions.isResolveProvider() || rightOptions != null && leftOptions.isResolveProvider()) {
             result.setResolveProvider(true);
-        } 
+        }
         return result;
     }
 
     public CompletionOptions getCompletionProvider() {
         CompletionOptions leftOptions = left.getCompletionProvider();
         CompletionOptions rightOptions = right.getCompletionProvider();
-        if (leftOptions == null && rightOptions == null) {
-            return null;
+        if (leftOptions == null) {
+            return rightOptions;
+        }
+        if (rightOptions == null) {
+            return leftOptions;
         }
 
         CompletionOptions result = new CompletionOptions();
@@ -67,8 +73,11 @@ public class ServerCapabilitiesOverlay  {
     public DocumentOnTypeFormattingOptions getDocumentOnTypeFormattingProvider() {
         DocumentOnTypeFormattingOptions leftOptions = left.getDocumentOnTypeFormattingProvider();
         DocumentOnTypeFormattingOptions rightOptions = right.getDocumentOnTypeFormattingProvider();
-        if (leftOptions == null && rightOptions == null) {
-            return null;
+        if (leftOptions == null) {
+            return rightOptions;
+        }
+        if (rightOptions == null) {
+            return leftOptions;
         }
 
         DocumentOnTypeFormattingOptions result = new DocumentOnTypeFormattingOptions();
@@ -88,19 +97,18 @@ public class ServerCapabilitiesOverlay  {
     public SignatureHelpOptions getSignatureHelpProvider() {
         SignatureHelpOptions leftOptions = left.getSignatureHelpProvider();
         SignatureHelpOptions rightOptions = right.getSignatureHelpProvider();
-        if (leftOptions == null && rightOptions == null) {
-            return null;
+        if (leftOptions == null) {
+            return rightOptions;
+        }
+        if (rightOptions == null) {
+            return leftOptions;
         }
         SignatureHelpOptions result = new SignatureHelpOptions();
 
         List<String> triggerChars = new ArrayList<>();
 
-        if (leftOptions != null) {
-            triggerChars.addAll(listish(leftOptions.getTriggerCharacters()));
-        }
-        if (rightOptions != null) {
-            triggerChars.addAll(listish(rightOptions.getTriggerCharacters()));
-        }
+        triggerChars.addAll(listish(leftOptions.getTriggerCharacters()));
+        triggerChars.addAll(listish(rightOptions.getTriggerCharacters()));
         result.setTriggerCharacters(triggerChars);
         return result;
     }
@@ -132,7 +140,6 @@ public class ServerCapabilitiesOverlay  {
         return right;
     }
 
-    
     private Boolean or(Function<ServerCapabilities, Boolean> f) {
         Boolean leftVal = f.apply(left);
         Boolean rightVal = f.apply(right);
@@ -144,13 +151,13 @@ public class ServerCapabilitiesOverlay  {
         }
         return leftVal || rightVal;
     }
-    
-   private <T> List<T> listish(List<T> list) {
+
+    private <T> List<T> listish(List<T> list) {
         return list == null ? Collections.emptyList() : list;
     }
 
     public ServerCapabilities compute() {
-        
+
         ServerCapabilities result = new ServerCapabilities();
         result.setCodeActionProvider(or(ServerCapabilities::getCodeActionProvider));
         result.setCodeLensProvider(getCodeLensProvider());
@@ -167,7 +174,7 @@ public class ServerCapabilitiesOverlay  {
         result.setSignatureHelpProvider(getSignatureHelpProvider());
         result.setTextDocumentSync(getTextDocumentSync());
         result.setWorkspaceSymbolProvider(or(ServerCapabilities::getWorkspaceSymbolProvider));
-        
+
         return result;
     }
 }

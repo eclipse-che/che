@@ -113,15 +113,17 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         List<LanguageServerLauncher> launchers = findLaunchers(projectPath, fileUri);
         // launchers is the set of things we need to have initialized
 
-        for (LanguageServerLauncher launcher : launchers) {
-            List<LanguageServerLauncher> servers = new ArrayList<>();
-            synchronized (launchedServers) {
+        for (LanguageServerLauncher launcher : new ArrayList<>(launchers)) {
+            synchronized (initializedServers) {
+                List<LanguageServerLauncher> servers = launchedServers.get(projectPath);
 
-                if (!launchedServers.containsKey(projectPath)) {
+                if (servers == null) {
                     servers = new ArrayList<>();
                     launchedServers.put(projectPath, servers);
                 }
-                if (!servers.contains(launcher)) {
+                List<LanguageServerLauncher> servers2 = servers;
+                if (!servers2.contains(launcher)) {
+                    servers2.add(launcher);
                     initializer.initialize(launcher, projectPath).thenAccept(pair -> {
                         synchronized (initializedServers) {
                             List<InitializedLanguageServer> initialized = initializedServers.get(projectPath);
@@ -130,17 +132,18 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                                 initializedServers.put(projectPath, initialized);
                             }
                             initialized.add(new InitializedLanguageServer(pair.first, pair.second, launcher));
+                            launchers.remove(launcher);
                             initializedServers.notifyAll();
                         }
                     }).exceptionally(t -> {
                         LOG.error("Error launching language server " + launcher, t);
                         synchronized (initializedServers) {
                             launchers.remove(launcher);
+                            servers2.remove(launcher);
                             initializedServers.notifyAll();
                         }
                         return null;
                     });
-                    servers.add(launcher);
                 }
             }
         }
@@ -151,8 +154,10 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         // end.
         synchronized (initializedServers) {
             List<InitializedLanguageServer> initForProject = initializedServers.get(projectPath);
-            for (InitializedLanguageServer initialized : initForProject) {
-                launchers.remove(initialized.getLauncher());
+            if (initForProject != null) {
+                for (InitializedLanguageServer initialized : initForProject) {
+                    launchers.remove(initialized.getLauncher());
+                }
             }
             while (!launchers.isEmpty()) {
                 try {

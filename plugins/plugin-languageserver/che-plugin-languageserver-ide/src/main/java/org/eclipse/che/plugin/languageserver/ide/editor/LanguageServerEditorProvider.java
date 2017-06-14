@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.editor.AsyncEditorProvider;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorProvider;
@@ -40,15 +39,12 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
    
     @com.google.inject.Inject
     private EditorBuilder editorBuilder;
-    private final PromiseProvider promiseProvider;
 
     @Inject
     public LanguageServerEditorProvider(LanguageServerEditorConfigurationFactory editorConfigurationFactory,
-                                        LanguageServerRegistry registry, LoaderFactory loaderFactory,
-                                        PromiseProvider promiseProvider) {
+                                        LanguageServerRegistry registry, LoaderFactory loaderFactory) {
         this.editorConfigurationFactory = editorConfigurationFactory;
         this.registry = registry;
-        this.promiseProvider= promiseProvider;
     }
 
     @Override
@@ -80,18 +76,18 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
             File resource = (File)file;
 
             Promise<ServerCapabilities> promise = registry.getOrInitializeServer(resource.getProject().getPath(), file);
-            return promise.thenPromise(new Function<ServerCapabilities, Promise<EditorPartPresenter>>() {
+            return promise.then(new Function<ServerCapabilities, EditorPartPresenter>() {
                 @Override
-                public Promise<EditorPartPresenter> apply(ServerCapabilities arg) throws FunctionException {
+                public EditorPartPresenter apply(ServerCapabilities arg) throws FunctionException {
                     if (editorBuilder == null) {
                         Log.debug(AbstractTextEditorProvider.class, "No builder registered for default editor type - giving up.");
-                        return promiseProvider.resolve(null);
+                        return null;
                     }
 
                     final TextEditor editor = editorBuilder.buildEditor();
                     LanguageServerEditorConfiguration configuration = editorConfigurationFactory.build(editor, arg);
                     editor.initialize(configuration);
-                    return promiseProvider.resolve(editor);
+                    return editor;
                 }
             });
 

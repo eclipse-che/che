@@ -13,8 +13,8 @@ package org.eclipse.che.plugin.languageserver.ide.registry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -37,12 +37,10 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 @Singleton
 public class LanguageServerRegistry {
     private final LanguageServerRegistryJsonRpcClient                                     jsonRpcClient;
-    private final LanguageServerRegistryServiceClient client;
     private       LoaderFactory                                                           loaderFactory;
     private       NotificationManager                                                     notificationManager;
 
     private final Map<FileType, LanguageDescription>                                      registeredFileTypes = new ConcurrentHashMap<>();
-    private final PromiseProvider                                                         promiseProvider;
     private final FileTypeRegistry                                                        fileTypeRegistry;
 
     @Inject
@@ -51,24 +49,26 @@ public class LanguageServerRegistry {
                                   NotificationManager notificationManager,
                                   LanguageServerRegistryJsonRpcClient jsonRpcClient,
                                   LanguageServerRegistryServiceClient client, 
-                                  PromiseProvider promiseProvider) {
+                                  FileTypeRegistry fileTypeRegistry) {
 
 
         this.loaderFactory = loaderFactory;
         this.notificationManager = notificationManager;
         this.jsonRpcClient = jsonRpcClient;
-        this.client = client;
+        this.fileTypeRegistry= fileTypeRegistry;
     }
 
     public Promise<ServerCapabilities> getOrInitializeServer(String projectPath, VirtualFile file) {
         // call initialize service
         final MessageLoader loader = loaderFactory.newLoader("Initializing Language Server for " + file.getName());
         loader.show();
-        return client.initializeServer(file.getLocation().toString()).then(arg -> {
+        return jsonRpcClient.initializeServer(file.getLocation().toString()).then((ServerCapabilities arg) -> {
             loader.hide();
+            return arg;
         }).catchError(arg -> {
             notificationManager.notify("Initializing Language Server for " + file.getName(), arg.getMessage(), FAIL, EMERGE_MODE);
             loader.hide();
+            return null;
         });
     }
 
