@@ -65,12 +65,12 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
     /**
      * Used to store the address set by property {@code che.docker.ip}, if applicable.
      */
-    protected String internalAddressProperty;
+    protected String cheDockerIp;
 
     /**
      * Used to store the address set by property {@code che.docker.ip.external}. if applicable.
      */
-    protected String externalAddressProperty;
+    protected String cheDockerIpExternal;
 
     /**
      * The current port of che.
@@ -120,8 +120,8 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
                                           @Nullable @Named("che.docker.server_evaluation_strategy.custom.external.protocol") String cheDockerCustomExternalProtocol,
                                           @Named("che.port") String chePort,
                                           boolean useContainerAddress) {
-        this.internalAddressProperty = cheDockerIp;
-        this.externalAddressProperty = cheDockerIpExternal;
+        this.cheDockerIp = cheDockerIp;
+        this.cheDockerIpExternal = cheDockerIpExternal;
         this.chePort = chePort;
         this.cheDockerCustomExternalTemplate = cheDockerCustomExternalTemplate;
         this.cheDockerCustomExternalProtocol = cheDockerCustomExternalProtocol;
@@ -140,8 +140,8 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
                 internalHost;
         } else {
             internalAddress =
-                internalAddressProperty != null ?
-                internalAddressProperty :
+                cheDockerIp != null ?
+                cheDockerIp :
                 internalHost;
         }
         
@@ -276,17 +276,17 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
         @Override
         public String getExternalAddress() {
             if (useContainerAddress) {
-                return externalAddressProperty != null ?
-                    externalAddressProperty :
+                return cheDockerIpExternal != null ?
+                    cheDockerIpExternal :
                     !isNullOrEmpty(gatewayAddressContainer) ?
                     gatewayAddressContainer :
                     this.internalHost;
             }
             
-            return externalAddressProperty != null ?
-                    externalAddressProperty :
-                    internalAddressProperty != null ?
-                    internalAddressProperty :
+            return cheDockerIpExternal != null ?
+                    cheDockerIpExternal :
+                    cheDockerIp != null ?
+                    cheDockerIp :
                     this.internalHost;
         }
     }
@@ -383,8 +383,8 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
          * Gets default external address.
          */
         public String getExternalAddress() {
-            return externalAddressProperty != null ?
-                   externalAddressProperty : internalAddressProperty;
+            return cheDockerIpExternal != null ?
+                   cheDockerIpExternal : cheDockerIp;
         }
 
         /**
@@ -393,7 +393,7 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
         protected void populateGlobalProperties() {
             String externalAddress = getExternalAddress();
             String externalIP = getExternalIp(externalAddress);
-            globalPropertiesMap.put("internalIp", internalAddressProperty);
+            globalPropertiesMap.put("internalIp", cheDockerIp);
             globalPropertiesMap.put("externalAddress", externalAddress);
             globalPropertiesMap.put("externalIP", externalIP);
             globalPropertiesMap.put("workspaceId", getWorkspaceId());
