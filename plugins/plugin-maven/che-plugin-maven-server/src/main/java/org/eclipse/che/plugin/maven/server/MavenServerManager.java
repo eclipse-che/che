@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.maven.server;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-
 import org.eclipse.che.maven.data.MavenExplicitProfiles;
 import org.eclipse.che.maven.data.MavenModel;
 import org.eclipse.che.maven.server.MavenRemoteServer;
@@ -192,7 +191,7 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
 
     public JavaParameters buildMavenServerParameters() {
         JavaParameters parameters = new JavaParameters();
-        parameters.setJavaExecutable("java");
+        parameters.setJavaExecutable(System.getProperties().getProperty("java.home") + "/bin/java");
         parameters.setWorkingDirectory(System.getProperty("java.io.tmpdir"));
         parameters.setMainClassName(MAVEN_SERVER_MAIN);
         //TODO read and set MAVEN_OPTS system properties
@@ -203,9 +202,7 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
         String mavenHome = System.getenv("M2_HOME");
         addDirToClasspath(classPath, new File(mavenHome, "lib"));
         File bootDir = new File(mavenHome, "boot");
-        File[] classworlds = bootDir.listFiles((dir, name) -> {
-            return name.contains("classworlds");
-        });
+        File[] classworlds = bootDir.listFiles((dir, name) -> name.contains("classworlds"));
 
         if (classworlds != null) {
             for (File file : classworlds) {
