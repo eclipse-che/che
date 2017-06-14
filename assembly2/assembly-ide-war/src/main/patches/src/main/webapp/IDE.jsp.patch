@@ -1,0 +1,33 @@
+--- src/main/webapp/IDE.jsp
++++ src/main/webapp/IDE.jsp
+@@ -55,7 +55,30 @@
+         };
+
+     </script>
++  <script type="text/javascript" language="javascript" src="/_app/keycloak/keycloak.js"></script>
++  <script>
++    window.keycloak = Keycloak({
++      url: 'https://sso.openshift.io/auth',
++      realm: 'fabric8',
++      clientId: 'openshiftio-public',
++    });
++    window.keycloak.init({ onLoad: 'check-sso', checkLoginIframe: false, }).success(function(authenticated) {
++       console.log('IDE.jsp authenticated with token:'+ window.keycloak.token);
++    }).error(function() {
++       console.log('failed to initialize');
++    });
+
++    // Until there's a synchronous way to call updateToken from within gwt (it's currently
++    // asynchronous), just attempt to refresh it every 5 mins.
++    setInterval(function() { window.keycloak.updateToken()
++        .success(function(refreshed){
++            console.log('IDE.js token.refresh :'+refreshed);
++            if(refreshed){
++                console.log('IDE.js setting token to'+ window.keycloak.token);
++            }
++        })
++        ; }, 300000);
++  </script>
+     <script type="text/javascript" language="javascript" src="/_app/browserNotSupported.js"></script>
+     <script type="text/javascript" language="javascript" async="true" src="/_app/_app.nocache.js"></script>
+ </head>

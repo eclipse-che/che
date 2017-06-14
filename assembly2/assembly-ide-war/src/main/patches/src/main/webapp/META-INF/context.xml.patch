@@ -1,0 +1,8 @@
+--- src/main/webapp/META-INF/context.xml
++++ src/main/webapp/META-INF/context.xml
+@@ -13,4 +13,5 @@
+ -->
+ <Context allowCasualMultipartParsing="true">
+     <Valve className="org.apache.catalina.valves.rewrite.RewriteValve"/>
++    <Valve className="org.keycloak.adapters.tomcat.KeycloakAuthenticatorValve"/>
+ </Context>
