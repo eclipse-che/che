@@ -180,9 +180,7 @@ public class ServerInitializerImpl implements ServerInitializer {
         InitializeParams initializeParams = new InitializeParams();
         initializeParams.setProcessId(PROCESS_ID);
         initializeParams.setRootPath(projectPath);
-        initializeParams.setCapabilities(new ClientCapabilities(){
-
-        });
+        initializeParams.setCapabilities(new ClientCapabilities());
         initializeParams.setClientName(CLIENT_NAME);
         return initializeParams;
     }
