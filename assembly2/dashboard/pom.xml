@@ -124,7 +124,7 @@
                         <configuration>
                             <target name="copy all original Che files">
                                 <copy todir="${project.build.directory}/patched" verbose="true">
-                                    <fileset dir="${baseCheRepository}/${original-project-basedir}">
+                                    <fileset dir="../../dashboard">
                                         <include name="e2e/**" />
                                         <include name="gulp/**" />
                                         <include name="src/**" />
