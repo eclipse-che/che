@@ -171,10 +171,10 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
         if (isNullOrEmpty(cheDockerCustomExternalTemplate)) {
             return getExposedPortsToAddressPorts(renderingEvaluation.getExternalAddress(), ports, false);
         }
-        
+
         return ports.keySet().stream()
-                .collect(Collectors.toMap(portKey -> portKey,
-                                          portKey -> renderingEvaluation.render(cheDockerCustomExternalTemplate, portKey)));
+                  .collect(Collectors.toMap(portKey -> portKey,
+                                            portKey -> renderingEvaluation.render(cheDockerCustomExternalTemplate, portKey)));
     }
 
 
