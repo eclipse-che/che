@@ -1,15 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2017 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
 <!-- Copyright (c) 2012-2016 Codenvy, S.A. All rights reserved. This program 
     and the accompanying materials are made available under the terms of the 
     Eclipse Public License v1.0 which accompanies this distribution, and is available 
     at http://www.eclipse.org/legal/epl-v10.html Contributors: Codenvy, S.A. 
     - initial API and implementation -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.eclipse.che.assembly2</groupId>
         <artifactId>che-assembly2-parent</artifactId>
+        <groupId>org.eclipse.che.assembly2</groupId>
         <version>5.13.0-SNAPSHOT</version>
     </parent>
     <artifactId>fabric8-ide-assembly-ide-war</artifactId>
@@ -22,12 +33,7 @@
         <original-project-name>assembly-ide-war</original-project-name>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <dependencies>
-        <dependency>
-            <groupId>com.redhat.che</groupId>
-            <artifactId>che-nosvn-plugin-ide</artifactId>
-        </dependency>
-    </dependencies>
+    <dependencies />
     <build>
         <plugins>
             <plugin>
@@ -55,7 +61,7 @@
                     <execution>
                         <id>analyze</id>
                         <configuration>
-                            <skip>true</skip>
+                            <skip>true</skip>               
                         </configuration>
                     </execution>
                 </executions>
@@ -193,11 +199,8 @@
                         </goals>
                         <configuration>
                             <target name="copy all original Che files">
-                                <copy
-                                    todir="${project.build.directory}/patched"
-                                    verbose="true">
-                                    <fileset
-                                        dir="${baseCheRepository}/${original-project-basedir}">
+                                <copy todir="${project.build.directory}/patched" verbose="true">
+                                    <fileset dir="${baseCheRepository}/${original-project-basedir}">
                                         <include name="src/**" />
                                     </fileset>
                                 </copy>
@@ -212,8 +215,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <echo append="false"
-                                    file="${project.build.directory}/classes/org/eclipse/che/ide/ext/help/client/BuildInfo.properties">revision = ${revision}
+                                <echo append="false" file="${project.build.directory}/classes/org/eclipse/che/ide/ext/help/client/BuildInfo.properties">revision = ${revision}
                                     buildTime = ${timestamp}
                                     version =
                                     ${project.version}</echo>
@@ -315,10 +317,8 @@
                                 </goals>
                                 <configuration>
                                     <target name="copy all original Che files">
-                                        <delete
-                                            verbose="true">
-                                            <fileset
-                                                dir="${project.build.directory}/prepared-patches">
+                                        <delete verbose="true">
+                                            <fileset dir="${project.build.directory}/prepared-patches">
                                                 <include name="src.main.webapp.IDE.jsp.patch" />
                                                 <include name="src.main.webapp.META-INF.context.xml.patch" />
                                                 <include name="src.main.webapp.WEB-INF.web.xml.patch" />
@@ -351,7 +351,6 @@
                             <groupId>org.eclipse.che.plugin</groupId>
                         </exclusion>
                     </exclusions>
-                    
                 </dependency>
             </dependencies>
         </profile>

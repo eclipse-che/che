@@ -162,16 +162,6 @@
                 <version>${che.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.assembly2</groupId>
-                <artifactId>che-keycloak-plugin-ide</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.assembly2</groupId>
-                <artifactId>che-keycloak-plugin-server</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-account</artifactId>
                 <version>${che.version}</version>
@@ -1067,6 +1057,16 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugins</groupId>
+                <artifactId>che-plugin-keycloak-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugins</groupId>
+                <artifactId>che-plugin-keycloak-server</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
