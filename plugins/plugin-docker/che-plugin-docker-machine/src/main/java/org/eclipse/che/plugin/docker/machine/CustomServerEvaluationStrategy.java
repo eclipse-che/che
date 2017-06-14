@@ -114,14 +114,14 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
     /**
      * Constructor to be called by derived strategies
      */
-    public CustomServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String internalAddress,
-                                          @Nullable @Named("che.docker.ip.external") String externalAddress,
+    public CustomServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String cheDockerIp,
+                                          @Nullable @Named("che.docker.ip.external") String cheDockerIpExternal,
                                           @Nullable @Named("che.docker.server_evaluation_strategy.custom.template") String cheDockerCustomExternalTemplate,
                                           @Nullable @Named("che.docker.server_evaluation_strategy.custom.external.protocol") String cheDockerCustomExternalProtocol,
                                           @Named("che.port") String chePort,
                                           boolean useContainerAddress) {
-        this.internalAddressProperty = internalAddress;
-        this.externalAddressProperty = externalAddress;
+        this.internalAddressProperty = cheDockerIp;
+        this.externalAddressProperty = cheDockerIpExternal;
         this.chePort = chePort;
         this.cheDockerCustomExternalTemplate = cheDockerCustomExternalTemplate;
         this.cheDockerCustomExternalProtocol = cheDockerCustomExternalProtocol;
