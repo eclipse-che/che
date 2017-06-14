@@ -1,16 +1,27 @@
-package com.redhat.che.keycloak.ide;
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.keycloak.ide;
 
-import java.util.List;
+import com.google.common.base.Preconditions;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequest;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.HTTPHeader;
-import com.google.common.base.Preconditions;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+
+import java.util.List;
 
 /**
  * KeycloakAuthAsyncRequestFactory
