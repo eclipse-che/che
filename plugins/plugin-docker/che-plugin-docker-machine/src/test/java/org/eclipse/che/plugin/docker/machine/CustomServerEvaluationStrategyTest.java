@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.eclipse.che.plugin.docker.machine.CustomServerEvaluationStrategy.CHE_WORKSPACE_ID_PREFIX;
 import static org.mockito.Mockito.when;
 
 /**
@@ -43,7 +44,7 @@ public class CustomServerEvaluationStrategyTest {
 
     private static final String ALL_IP_ADDRESS = "0.0.0.0";
 
-    private static final String WORKSPACE_ID_VALUE    = "work123";
+    private static final String WORKSPACE_ID_VALUE    = "workspaceABCDEFG";
     private static final String WORKSPACE_ID_PROPERTY = "CHE_WORKSPACE_ID=" + WORKSPACE_ID_VALUE;
 
     private static final String MACHINE_NAME_VALUE    = "myMachine";
@@ -129,6 +130,34 @@ public class CustomServerEvaluationStrategyTest {
         Assert.assertEquals(portMapping.get("4401/tcp"), WORKSPACE_ID_VALUE);
     }
 
+    /**
+     * Check workspace Id without prefix template
+     */
+    @Test
+    public void testWorkspaceIdWithoutPrefixRule() throws Throwable {
+        this.customServerEvaluationStrategy =
+                new CustomServerEvaluationStrategy("10.0.0.1", "192.168.1.1", "<workspaceIdWithoutPrefix>", "http", "8080");
+
+        Map<String, String> portMapping = this.customServerEvaluationStrategy.getExternalAddressesAndPorts(containerInfo, "localhost");
+
+        Assert.assertTrue(portMapping.containsKey("4401/tcp"));
+        Assert.assertEquals(portMapping.get("4401/tcp"), WORKSPACE_ID_VALUE.replaceFirst(CHE_WORKSPACE_ID_PREFIX, ""));
+    }
+
+    /**
+     * Check the isDevMachine macro in template
+     */
+    @Test
+    public void testIsDevMachine() throws Throwable {
+        this.customServerEvaluationStrategy =
+                new CustomServerEvaluationStrategy("10.0.0.1", "192.168.1.1",
+                                                   "<if(isDevMachine)><workspaceId><else><machineName><endif>", "http", "8080");
+
+        Map<String, String> portMapping = this.customServerEvaluationStrategy.getExternalAddressesAndPorts(containerInfo, "localhost");
+
+        Assert.assertTrue(portMapping.containsKey("4401/tcp"));
+        Assert.assertEquals(portMapping.get("4401/tcp"), WORKSPACE_ID_VALUE);
+    }
 
     /**
      * Check workspace Id template
