@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
-import java.util.Map;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import java.util.Map;
 
 /**
  * Represents a server evaluation strategy for the configuration where the workspace server and
