@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
+import org.eclipse.lsp4j.ServerCapabilities;
 
 @Singleton
 public class LanguageServerInitializationHandler {
@@ -26,10 +27,10 @@ public class LanguageServerInitializationHandler {
         requestHandlerConfigurator.newConfiguration()
                                   .methodName("languageServer/initialize")
                                   .paramsAsString()
-                                  .resultAsBoolean()
+                                  .resultAsDto(ServerCapabilities.class)
                                   .withFunction(path -> {
                                       try {
-                                          return registry.findServer(TextDocumentServiceUtils.prefixURI(path)) != null;
+                                          return registry.initialize(TextDocumentServiceUtils.prefixURI(path));
                                       } catch (LanguageServerException e) {
                                           throw new JsonRpcException(-27000, e.getMessage());
                                       }

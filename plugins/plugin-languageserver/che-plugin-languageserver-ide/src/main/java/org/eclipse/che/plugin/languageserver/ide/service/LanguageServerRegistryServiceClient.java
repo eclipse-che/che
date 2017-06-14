@@ -16,7 +16,6 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.lsp4j.ServerCapabilities;
 
 import java.util.List;
 
@@ -52,11 +51,6 @@ public class LanguageServerRegistryServiceClient {
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .send(unmarshallerFactory.newListUnmarshaller(LanguageDescription.class));
-    }
-
-    public Promise<ServerCapabilities> initializeServer(String path) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + BASE_URI + "/initialize?path=" + path;
-        return asyncRequestFactory.createPostRequest(requestUrl, null).send(unmarshallerFactory.newUnmarshaller(ServerCapabilities.class));
     }
 
 }
