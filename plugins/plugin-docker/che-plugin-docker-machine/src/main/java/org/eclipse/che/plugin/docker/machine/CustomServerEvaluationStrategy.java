@@ -67,6 +67,12 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
      */
     public static final String CHE_WORKSPACE_ID_PREFIX = "workspace";
 
+
+    /**
+     * name of the macro that indicates if the machine is the dev machine
+     */
+    public static final String IS_DEV_MACHINE_MACRO = "isDevMachine";
+
     /**
      * Used to store the address set by property {@code che.docker.ip}, if applicable.
      */
@@ -407,7 +413,7 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
             globalPropertiesMap.put("wildcardNipDomain", getWildcardNipDomain(externalAddress));
             globalPropertiesMap.put("wildcardXipDomain", getWildcardXipDomain(externalAddress));
             globalPropertiesMap.put("chePort", chePort);
-            globalPropertiesMap.put("isDevMachine", getIsDevMachine());
+            globalPropertiesMap.put(IS_DEV_MACHINE_MACRO, getIsDevMachine());
         }
 
         /**
@@ -421,7 +427,7 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
             }
             ST stringTemplate = new ST(template);
             globalPropertiesMap.forEach((key, value) -> stringTemplate.add(key, 
-                                                                           "isDevMachine".equals(key) ? 
+                                                                           IS_DEV_MACHINE_MACRO.equals(key) ? 
                                                                                Boolean.parseBoolean(value)
                                                                                : value));
             stringTemplate.add("serverName", portsToRefName.get(port));
