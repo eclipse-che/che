@@ -1,15 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2017 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
 <!-- Copyright (c) 2012-2016 Codenvy, S.A. All rights reserved. This program 
     and the accompanying materials are made available under the terms of the 
     Eclipse Public License v1.0 which accompanies this distribution, and is available 
     at http://www.eclipse.org/legal/epl-v10.html Contributors: Codenvy, S.A. 
     - initial API and implementation -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.eclipse.che.assembly2</groupId>
         <artifactId>che-assembly2-parent</artifactId>
+        <groupId>org.eclipse.che</groupId>
         <version>5.13.0-SNAPSHOT</version>
     </parent>
     <artifactId>fabric8-ide-assembly-wsagent-war</artifactId>
@@ -40,14 +51,10 @@
             <groupId>com.google.inject.extensions</groupId>
             <artifactId>guice-servlet</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.redhat.che</groupId>
-            <artifactId>che-keycloak-plugin-server</artifactId>
-        </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>com.redhat.che</groupId>
             <artifactId>che-plugin-bayesian-lang-server</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-jaxrs</artifactId>
@@ -60,6 +67,10 @@
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-wsagent-war</artifactId>
             <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.assembly2</groupId>
+            <artifactId>che-keycloak-plugin-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

@@ -17,7 +17,7 @@ import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 import org.everrest.websockets.WSConnectionTracker;
-import com.redhat.che.keycloak.server.KeycloakAuthenticationFilter;
+import org.eclipse.che.keycloak.server.KeycloakAuthenticationFilter;
 import javax.inject.Singleton;
 
 /** @author andrew00x */

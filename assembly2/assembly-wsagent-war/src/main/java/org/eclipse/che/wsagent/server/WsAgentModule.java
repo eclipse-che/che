@@ -15,7 +15,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
-import com.redhat.che.keycloak.server.KeycloakHttpJsonRequestFactory;
+import org.eclipse.che.keycloak.server.KeycloakHttpJsonRequestFactory;
 
 import org.eclipse.che.ApiEndpointAccessibilityChecker;
 import org.eclipse.che.EventBusURLProvider;

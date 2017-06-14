@@ -288,7 +288,7 @@
             </activation>
             <dependencies>
                 <dependency>
-                    <groupId>com.redhat.che</groupId>
+                    <groupId>org.eclipse.che.assembly2</groupId>
                     <artifactId>che-keycloak-plugin-ide</artifactId>
                 </dependency>
             </dependencies>
