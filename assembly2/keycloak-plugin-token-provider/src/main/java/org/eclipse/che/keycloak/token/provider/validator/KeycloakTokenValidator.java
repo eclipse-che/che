@@ -1,20 +1,20 @@
 /*******************************************************************************
- * Copyright (c) 2017 Red Hat inc.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Red Hat - Initial Contribution
+ *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.redhat.che.keycloak.token.provider.validator;
+package org.eclipse.che.keycloak.token.provider.validator;
 
-import javax.inject.Singleton;
+import org.eclipse.che.keycloak.token.provider.exception.KeycloakException;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.redhat.che.keycloak.token.provider.exception.KeycloakException;
+import javax.inject.Singleton;
 
 @Singleton
 public class KeycloakTokenValidator {

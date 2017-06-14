@@ -32,8 +32,8 @@
     <modules>
         <module>keycloak-plugin-server</module>
         <module>keycloak-plugin-ide</module>
-        <!--module>keycloak-plugin-token-provider</module>
-        <module>dashboard</module>
+        <module>keycloak-plugin-token-provider</module>
+        <!--module>dashboard</module>
         <module>assembly-wsagent-war</module>
         <module>assembly-wsagent-server</module>
         <module>assembly-ide-war</module>

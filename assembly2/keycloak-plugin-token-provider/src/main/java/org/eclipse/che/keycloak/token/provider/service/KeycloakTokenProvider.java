@@ -1,21 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2017 Red Hat inc.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Red Hat - Initial Contribution
+ *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.redhat.che.keycloak.token.provider.service;
+package org.eclipse.che.keycloak.token.provider.service;
 
-import java.io.IOException;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.che.keycloak.token.provider.util.UrlHelper;
 
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -27,9 +24,11 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.commons.annotation.Nullable;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redhat.che.keycloak.token.provider.util.UrlHelper;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.io.IOException;
+import java.util.Map;
 
 @Singleton
 public class KeycloakTokenProvider {
