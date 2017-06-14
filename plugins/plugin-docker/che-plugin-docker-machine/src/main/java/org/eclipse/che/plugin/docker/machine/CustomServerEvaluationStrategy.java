@@ -63,6 +63,11 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
     public static final String CHE_IS_DEV_MACHINE_PROPERTY = "CHE_IS_DEV_MACHINE=";
 
     /**
+     * Prefix added in front of the generated name to build the workspaceId
+     */
+    public static final String CHE_WORKSPACE_ID_PREFIX = "workspace";
+
+    /**
      * Used to store the address set by property {@code che.docker.ip}, if applicable.
      */
     protected String cheDockerIp;
@@ -397,7 +402,7 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
             globalPropertiesMap.put("externalAddress", externalAddress);
             globalPropertiesMap.put("externalIP", externalIP);
             globalPropertiesMap.put("workspaceId", getWorkspaceId());
-            globalPropertiesMap.put("workspaceIdWithoutPrefix", getWorkspaceId().replaceFirst("workspace",""));
+            globalPropertiesMap.put("workspaceIdWithoutPrefix", getWorkspaceId().replaceFirst(CHE_WORKSPACE_ID_PREFIX,""));
             globalPropertiesMap.put("machineName", getMachineName());
             globalPropertiesMap.put("wildcardNipDomain", getWildcardNipDomain(externalAddress));
             globalPropertiesMap.put("wildcardXipDomain", getWildcardXipDomain(externalAddress));
