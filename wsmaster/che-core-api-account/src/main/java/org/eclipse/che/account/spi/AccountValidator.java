@@ -69,11 +69,13 @@ public class AccountValidator {
     public String normalizeAccountName(String name, String prefix) throws ServerException {
         String normalized = ILLEGAL_ACCOUNT_NAME_CHARACTERS.matcher(name).replaceAll("");
         String candidate = normalized.isEmpty() ? NameGenerator.generate(prefix, 4) : normalized;
+        candidate = candidate.length() > 39 ? candidate.substring(0, 39) : candidate;
 
         int i = 1;
         try {
             while (accountExists(candidate)) {
-                candidate = normalized.isEmpty() ? NameGenerator.generate(prefix, 4) : normalized + String.valueOf(i++);
+                candidate = candidate.length() == 39 ? NameGenerator.generate(candidate.substring(0, 35), 4)
+                                                     : normalized + String.valueOf(i++);
             }
         } catch (ServerException e) {
             LOG.warn("Error occurred during account name normalization", e);

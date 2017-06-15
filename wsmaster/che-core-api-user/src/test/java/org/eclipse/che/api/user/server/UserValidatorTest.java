@@ -11,6 +11,8 @@
 package org.eclipse.che.api.user.server;
 
 import org.eclipse.che.account.spi.AccountValidator;
+import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.model.user.User;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -19,6 +21,7 @@ import org.testng.annotations.Test;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -30,6 +33,8 @@ import static org.testng.Assert.assertEquals;
  */
 @Listeners(MockitoTestNGListener.class)
 public class UserValidatorTest {
+
+    private final static String LONG_USERNAME = "usernameThatContainsMoreThan39Characters";
 
     @Mock
     private AccountValidator accountValidator;
@@ -59,5 +64,16 @@ public class UserValidatorTest {
 
         assertEquals(userNameValidator.isValidName("toTest"), false);
         verify(accountValidator).isValidName("toTest");
+    }
+
+    @Test(expectedExceptions = BadRequestException.class,
+          expectedExceptionsMessageRegExp = "Username should contain less then 39 characters")
+    public void shouldThrowExceptionIfUsernameIsLongerThan39Characters() throws Exception {
+        //given
+        User user = mock(User.class);
+        when(user.getName()).thenReturn(LONG_USERNAME);
+
+        //when
+        userNameValidator.checkUser(user);
     }
 }

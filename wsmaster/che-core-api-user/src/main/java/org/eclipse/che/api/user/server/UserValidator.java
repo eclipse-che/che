@@ -54,6 +54,9 @@ public class UserValidator {
         if (isNullOrEmpty(user.getName())) {
             throw new BadRequestException("User name required");
         }
+        if (user.getName().length() > 39) {
+            throw new BadRequestException("Username should contain less then 39 characters");
+        }
         if (!isValidName(user.getName())) {
             throw new BadRequestException("Username may only contain alphanumeric characters or single hyphens inside");
         }
