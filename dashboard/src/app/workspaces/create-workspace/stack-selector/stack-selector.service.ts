@@ -53,13 +53,10 @@ export class StackSelectorSvc extends Observable {
    *
    * @return {IPromise<Array<che.IStack>>}
    */
-  fetchStacks(): ng.IPromise<any> {
-    const stacks = this.cheStack.getStacks();
+  getOrFetchStacks(): ng.IPromise<Array<che.IStack>> {
+    const stacks = this.getStacks();
     if (stacks.length) {
-
-      const defer = this.$q.defer();
-      defer.resolve(stacks);
-      return defer.promise;
+      return this.$q.when(stacks);
     }
 
     return this.cheStack.fetchStacks().then(() => {
@@ -69,6 +66,9 @@ export class StackSelectorSvc extends Observable {
         this.$log.error(error);
       }
       return this.$q.when();
+    }).then(() => {
+      const stacks = this.getStacks();
+      return this.$q.when(stacks);
     });
   }
 
@@ -80,7 +80,7 @@ export class StackSelectorSvc extends Observable {
   onStackSelected(stackId: string): void {
     this.stackId = stackId;
 
-    this.publish();
+    this.publish(stackId);
   }
 
   /**

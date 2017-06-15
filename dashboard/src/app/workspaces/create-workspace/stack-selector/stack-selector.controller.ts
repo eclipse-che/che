@@ -127,7 +127,6 @@ export class StackSelectorController {
     this.showFilters = false;
     this.selectedScope = StackSelectorScope.ALL;
     this.stackOrderBy = 'name';
-    this.stacks = [];
     this.stacksByScope = {};
     this.stacksFiltered = [];
     this.environmentManagers = {};
@@ -136,12 +135,10 @@ export class StackSelectorController {
     this.selectedTags = [];
     this.allStackTags = [];
 
-    this.stackSelectorSvc.fetchStacks().then(() => {
-      this.stacks = this.stackSelectorSvc.getStacks();
-      this.updateMachines();
-      this.buildStacksListsByScope();
-      this.buildFilteredList();
-    });
+    this.stacks = this.stackSelectorSvc.getStacks();
+    this.updateMachines();
+    this.buildStacksListsByScope();
+    this.buildFilteredList();
   }
 
   /**

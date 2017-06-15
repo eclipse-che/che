@@ -25,6 +25,10 @@ import {RandomSvc} from '../../../components/utils/random.service';
  */
 export class CreateWorkspaceController {
   /**
+   * Timeout service.
+   */
+  private $timeout: ng.ITimeoutService;
+  /**
    * The registry of environment managers.
    */
   private cheEnvironmentRegistry: CheEnvironmentRegistry;
@@ -76,12 +80,17 @@ export class CreateWorkspaceController {
    * The name of workspace.
    */
   private workspaceName: string;
+  /**
+   * Hide progress loader if <code>true</code>.
+   */
+  private hideLoader: boolean;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor(cheEnvironmentRegistry: CheEnvironmentRegistry, createWorkspaceSvc: CreateWorkspaceSvc, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, randomSvc: RandomSvc) {
+  constructor($timeout: ng.ITimeoutService, cheEnvironmentRegistry: CheEnvironmentRegistry, createWorkspaceSvc: CreateWorkspaceSvc, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, randomSvc: RandomSvc) {
+    this.$timeout = $timeout;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.createWorkspaceSvc = createWorkspaceSvc;
     this.namespaceSelectorSvc = namespaceSelectorSvc;
@@ -93,13 +102,16 @@ export class CreateWorkspaceController {
     this.memoryByMachine = {};
     this.forms = new Map();
 
-    this.namespaceSelectorSvc.fetchNamespaces().then(() => {
-      this.namespaceId = this.namespaceSelectorSvc.getNamespaceId();
-      this.buildListOfUsedNames().then(() => {
-        this.workspaceName = this.randomSvc.getRandString({prefix: 'wksp-', list: this.usedNamesList});
-        this.reValidateName();
-      });
+    this.namespaceId = this.namespaceSelectorSvc.getNamespaceId();
+    this.buildListOfUsedNames().then(() => {
+      this.workspaceName = this.randomSvc.getRandString({prefix: 'wksp-', list: this.usedNamesList});
+      this.reValidateName();
     });
+
+    // loader should be hidden and page content shown
+    // when stacks selector is rendered
+    // and default stack is selected
+    this.hideLoader = false;
   }
 
   /**
@@ -108,6 +120,11 @@ export class CreateWorkspaceController {
    * @param {string} stackId the stack ID
    */
   onStackSelected(stackId: string): void {
+    // tiny timeout for templates selector to be rendered
+    this.$timeout(() => {
+      this.hideLoader = true;
+    }, 10);
+
     this.stack = this.stackSelectorSvc.getStackById(stackId);
 
     const environmentName = this.stack.workspaceConfig.defaultEnv;
@@ -262,8 +279,8 @@ export class CreateWorkspaceController {
       const newEnvironment = this.environmentManager.getEnvironment(environment, this.stackMachines);
       this.stack.workspaceConfig.environments[environmentName] = newEnvironment;
     }
-
-    this.createWorkspaceSvc.createWorkspace(this.stack.workspaceConfig);
+    let attributes = {stackId: this.stack.id};
+    this.createWorkspaceSvc.createWorkspace(this.stack.workspaceConfig, attributes);
   }
 
 }

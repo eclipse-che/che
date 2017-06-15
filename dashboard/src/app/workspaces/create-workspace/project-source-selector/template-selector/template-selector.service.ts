@@ -45,14 +45,12 @@ export class TemplateSelectorSvc {
     this.cheProjectTemplate = cheProjectTemplate;
 
     this.templates = [];
-
-    this.fetchTemplates();
   }
 
   /**
    * Fetches list of templates.
    */
-  fetchTemplates(): ng.IPromise<any> {
+  getOrFetchTemplates(): ng.IPromise<any> {
     const defer = this.$q.defer();
 
     const templates = this.cheProjectTemplate.getAllProjectTemplates();

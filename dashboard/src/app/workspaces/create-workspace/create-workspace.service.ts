@@ -149,11 +149,11 @@ export class CreateWorkspaceSvc {
    * @param {che.IWorkspaceConfig} workspaceConfig the config of workspace which will be created
    * @return {IPromise<any>}
    */
-  createWorkspace(workspaceConfig: che.IWorkspaceConfig): ng.IPromise<any> {
+  createWorkspace(workspaceConfig: che.IWorkspaceConfig, attributes?: any): ng.IPromise<any> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
-    return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, {}).then((workspace: che.IWorkspace) => {
+    return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, attributes).then((workspace: che.IWorkspace) => {
 
       this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv).then(() => {
         this.redirectToIde(namespaceId, workspace);
@@ -167,7 +167,12 @@ export class CreateWorkspaceSvc {
       }).then(() => {
         return this.createProjects(workspace.id, projectTemplates);
       }).then(() => {
+        this.getIDE().ProjectExplorer.refresh();
         return this.importProjects(workspace.id, projectTemplates);
+      }).then(() => {
+        let IDE = this.getIDE();
+        IDE.ProjectExplorer.refresh();
+        IDE.CommandManager.refresh();
       });
     });
   }
@@ -278,6 +283,10 @@ export class CreateWorkspaceSvc {
       }
       return this.$q.when();
     });
+  }
+
+  private getIDE(): any {
+    return (window.frames[0] as any).IDE;
   }
 
 }

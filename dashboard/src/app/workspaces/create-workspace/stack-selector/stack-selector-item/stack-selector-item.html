@@ -19,10 +19,11 @@
           <!-- Icon -->
           <div class="stack-selector-icon-column"
                layout="column" layout-align="center center">
-            <div class="stack-selector-item-icon"
-                 ng-class="{'blank-icon' : !stackIconLink}">
-              <img ng-hide="!stackIconLink" ng-src="{{stackIconLink}}"/>
-              <div ng-hide="stackIconLink" class="chefont cheico-type-blank"></div>
+            <div ng-if="stackIconLink" class="stack-selector-item-icon">
+              <img ng-src="{{stackIconLink}}"/>
+            </div>
+            <div ng-if="!stackIconLink" class="stack-selector-item-icon blank-icon">
+              <div class="chefont cheico-type-blank"></div>
             </div>
           </div>
 
@@ -32,11 +33,11 @@
                  class="stack-selector-item-description">
               <!-- Name cell -->
               <div flex-gt-md="15">
-                <span class="stack-selector-item-name">{{stack.name}}</span>
+                <span class="che-list-item-name">{{stack.name}}</span>
               </div>
               <!-- Description cell -->
               <div flex-gt-md>
-                <span class="stack-selector-item-secondary-color">{{stack.description}}</span>
+                <span class="che-list-item-secondary">{{stack.description}}</span>
               </div>
             </div>
 
@@ -51,11 +52,10 @@
           </div>
 
           <!-- RAM -->
-          <div flex="25">
-            <span class="stack-selector-item-ram-offset stack-selector-item-secondary-color"
+          <div flex="25" layout="row" layout-align="start center">
+            <span class="stack-ram-offset stack-selector-item-secondary-color"
                   ng-if="stackMachines.length === 1">{{stackMachines[0].memoryLimitBytes | changeMemoryUnit:['B','GB']}}</span>
           </div>
-
           <!-- todo Pull number -->
           <!-- not implemented yet -->
 
@@ -74,7 +74,7 @@
                  class="stack-selector-item-machine-name">{{machine.name}}
             </div>
             <div flex="25"
-                 class="stack-selector-item-secondary-color">{{machine.memoryLimitBytes | changeMemoryUnit:['B','GB']}}</div>
+                 class="stack-selector-item-secondary-color stack-ram-offset">{{machine.memoryLimitBytes | changeMemoryUnit:['B','GB']}}</div>
           </div>
         </div>
 
