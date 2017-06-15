@@ -23,7 +23,7 @@
         <groupId>org.eclipse.che.assembly2</groupId>
         <version>5.13.0-SNAPSHOT</version>
     </parent>
-    <artifactId>fabric8-ide-che-dashboard-war</artifactId>
+    <artifactId>che-dashboard-war</artifactId>
     <packaging>war</packaging>
     <name>Fabric8 IDE :: Che Dashboard WAR</name>
     <properties>

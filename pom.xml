@@ -91,32 +91,32 @@
                 <type>war</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>fabric8-ide-assembly-wsagent-war</artifactId>
+                <groupId>org.eclipse.che.assembly2</groupId>
+                <artifactId>assembly-wsagent-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>fabric8-ide-assembly-wsmaster-war</artifactId>
+                <groupId>org.eclipse.che.assembly2</groupId>
+                <artifactId>assembly-wsmaster-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>fabric8-ide-assembly-ide-war</artifactId>
+                <groupId>org.eclipse.che.assembly2</groupId>
+                <artifactId>assembly-ide-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>fabric8-ide-che-dashboard-war</artifactId>
+                <groupId>org.eclipse.che.assembly2</groupId>
+                <artifactId>che-dashboard-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>fabric8-ide-assembly-wsagent-server</artifactId>
+                <groupId>org.eclipse.che.assembly2</groupId>
+                <artifactId>assembly-wsagent-server</artifactId>
                 <version>${che.version}</version>
                 <type>tar.gz</type>
             </dependency>

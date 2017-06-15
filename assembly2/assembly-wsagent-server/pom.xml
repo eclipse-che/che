@@ -23,8 +23,8 @@
     <name>Fabric8 IDE Assembly Workspace Agent Server</name>
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>fabric8-ide-assembly-wsagent-war</artifactId>
+            <groupId>org.eclipse.che.assembly2</groupId>
+            <artifactId>assembly-wsagent-war</artifactId>
             <type>war</type>
         </dependency>
     </dependencies>
