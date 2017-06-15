@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
  *
  * @author amisevsk
  */
+@Singleton
 public class OpenShiftPvcHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpenShiftPvcHelper.class);
