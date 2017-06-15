@@ -40,7 +40,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  * @author Florent Benoit
  * @see ServerEvaluationStrategy
  */
-public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrategy {
+public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
 
     /**
      * Regexp to extract port (under the form 22/tcp or 4401/tcp, etc.) from label references
@@ -58,6 +58,32 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
     public static final String CHE_MACHINE_NAME_PROPERTY = "CHE_MACHINE_NAME=";
 
     /**
+     * Name of the property to get the property that indicates if the machine is the dev machine
+     */
+    public static final String CHE_IS_DEV_MACHINE_PROPERTY = "CHE_IS_DEV_MACHINE=";
+
+    /**
+     * Prefix added in front of the generated name to build the workspaceId
+     */
+    public static final String CHE_WORKSPACE_ID_PREFIX = "workspace";
+
+
+    /**
+     * name of the macro that indicates if the machine is the dev machine
+     */
+    public static final String IS_DEV_MACHINE_MACRO = "isDevMachine";
+
+    /**
+     * Used to store the address set by property {@code che.docker.ip}, if applicable.
+     */
+    protected String cheDockerIp;
+
+    /**
+     * Used to store the address set by property {@code che.docker.ip.external}. if applicable.
+     */
+    protected String cheDockerIpExternal;
+
+    /**
      * The current port of che.
      */
     private final String chePort;
@@ -72,6 +98,17 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
      */
     private String cheDockerCustomExternalTemplate;
 
+    /**
+     * Option to enable the use of the container address, when searching for addresses.
+     */
+    private boolean useContainerAddress;
+
+
+    /**
+     * Option to tell if an exception should be thrown when the host defined in the `externalAddress` isn't known
+     * and cannot be converted into a valid IP.
+     */
+    private boolean throwOnUnknownHost = true;
 
     /**
      * Default constructor
@@ -82,11 +119,48 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
                                           @Nullable @Named("che.docker.server_evaluation_strategy.custom.template") String cheDockerCustomExternalTemplate,
                                           @Nullable @Named("che.docker.server_evaluation_strategy.custom.external.protocol") String cheDockerCustomExternalProtocol,
                                           @Named("che.port") String chePort) {
-        super(cheDockerIp, cheDockerIpExternal);
+        this(cheDockerIp, cheDockerIpExternal, cheDockerCustomExternalTemplate, cheDockerCustomExternalProtocol, chePort, false);
+    }
+
+    /**
+     * Constructor to be called by derived strategies
+     */
+    public CustomServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String cheDockerIp,
+                                          @Nullable @Named("che.docker.ip.external") String cheDockerIpExternal,
+                                          @Nullable @Named("che.docker.server_evaluation_strategy.custom.template") String cheDockerCustomExternalTemplate,
+                                          @Nullable @Named("che.docker.server_evaluation_strategy.custom.external.protocol") String cheDockerCustomExternalProtocol,
+                                          @Named("che.port") String chePort,
+                                          boolean useContainerAddress) {
+        this.cheDockerIp = cheDockerIp;
+        this.cheDockerIpExternal = cheDockerIpExternal;
         this.chePort = chePort;
         this.cheDockerCustomExternalTemplate = cheDockerCustomExternalTemplate;
         this.cheDockerCustomExternalProtocol = cheDockerCustomExternalProtocol;
+        this.useContainerAddress = useContainerAddress;
     }
+
+    @Override
+    protected Map<String, String> getInternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
+        final String internalAddressContainer = containerInfo.getNetworkSettings().getIpAddress();
+
+        final String internalAddress;
+
+        if (useContainerAddress) {
+            internalAddress = !isNullOrEmpty(internalAddressContainer) ?
+                internalAddressContainer :
+                internalHost;
+        } else {
+            internalAddress =
+                cheDockerIp != null ?
+                cheDockerIp :
+                internalHost;
+        }
+
+        boolean useExposedPorts = useContainerAddress && internalAddress != internalHost;
+
+        return getExposedPortsToAddressPorts(internalAddress, containerInfo.getNetworkSettings().getPorts(), useExposedPorts);
+    }
+
 
     /**
      * Override the host for all ports by using the external template.
@@ -99,6 +173,10 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
 
         // get current ports
         Map<String, List<PortBinding>> ports = containerInfo.getNetworkSettings().getPorts();
+
+        if (isNullOrEmpty(cheDockerCustomExternalTemplate)) {
+            return getExposedPortsToAddressPorts(renderingEvaluation.getExternalAddress(), ports, false);
+        }
 
         return ports.keySet().stream()
                     .collect(Collectors.toMap(portKey -> portKey,
@@ -180,6 +258,11 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
          * @return the rendering of the template
          */
         String render(String template, String port);
+
+        /**
+         * Gets default external address.
+         */
+        String getExternalAddress();
     }
 
     /**
@@ -202,14 +285,22 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
         }
 
         @Override
-        protected String getExternalAddress() {
-            return externalAddressProperty != null ?
-                   externalAddressProperty :
-                   internalAddressProperty != null ?
-                   internalAddressProperty :
-                   !isNullOrEmpty(gatewayAddressContainer) ?
-                   gatewayAddressContainer :
-                   this.internalHost;
+        public String getExternalAddress() {
+            if (useContainerAddress) {
+                return cheDockerIpExternal != null ?
+                    cheDockerIpExternal :
+                    cheDockerIp != null ?
+                    cheDockerIp :
+                    !isNullOrEmpty(gatewayAddressContainer) ?
+                    gatewayAddressContainer :
+                    this.internalHost;
+            }
+
+            return cheDockerIpExternal != null ?
+                    cheDockerIpExternal :
+                    cheDockerIp != null ?
+                    cheDockerIp :
+                    this.internalHost;
         }
     }
 
@@ -294,7 +385,7 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
             // add to this map only port without a known ref name
             Map<String, String> portsToUnkownRefName =
                     exposedPorts.stream().filter((port) -> !portsToKnownRefName.containsKey(port))
-                                .collect(Collectors.toMap(p -> p, p -> "Server-" + p.replace('/', '-')));
+                                .collect(Collectors.toMap(p -> p, p -> "server-" + p.replace('/', '-')));
 
             // list of all ports with refName (known/unknown)
             this.portsToRefName = new HashMap(portsToKnownRefName);
@@ -304,9 +395,9 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
         /**
          * Gets default external address.
          */
-        protected String getExternalAddress() {
-            return externalAddressProperty != null ?
-                   externalAddressProperty : internalAddressProperty;
+        public String getExternalAddress() {
+            return cheDockerIpExternal != null ?
+                   cheDockerIpExternal : cheDockerIp;
         }
 
         /**
@@ -315,14 +406,16 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
         protected void populateGlobalProperties() {
             String externalAddress = getExternalAddress();
             String externalIP = getExternalIp(externalAddress);
-            globalPropertiesMap.put("internalIp", internalAddressProperty);
+            globalPropertiesMap.put("internalIp", cheDockerIp);
             globalPropertiesMap.put("externalAddress", externalAddress);
             globalPropertiesMap.put("externalIP", externalIP);
             globalPropertiesMap.put("workspaceId", getWorkspaceId());
+            globalPropertiesMap.put("workspaceIdWithoutPrefix", getWorkspaceId().replaceFirst(CHE_WORKSPACE_ID_PREFIX,""));
             globalPropertiesMap.put("machineName", getMachineName());
             globalPropertiesMap.put("wildcardNipDomain", getWildcardNipDomain(externalAddress));
             globalPropertiesMap.put("wildcardXipDomain", getWildcardXipDomain(externalAddress));
             globalPropertiesMap.put("chePort", chePort);
+            globalPropertiesMap.put(IS_DEV_MACHINE_MACRO, getIsDevMachine());
         }
 
         /**
@@ -335,9 +428,23 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
                 this.initialized = true;
             }
             ST stringTemplate = new ST(template);
-            globalPropertiesMap.forEach((key, value) -> stringTemplate.add(key, value));
+            globalPropertiesMap.forEach((key, value) -> stringTemplate.add(key, 
+                                                                           IS_DEV_MACHINE_MACRO.equals(key) ? 
+                                                                               Boolean.parseBoolean(value)
+                                                                               : value));
             stringTemplate.add("serverName", portsToRefName.get(port));
             return stringTemplate.render();
+        }
+
+        /**
+         * returns if the current machine is the dev machine
+         *
+         * @return true if the curent machine is the dev machine
+         */
+        protected String getIsDevMachine() {
+            return Arrays.stream(env).filter(env -> env.startsWith(CHE_IS_DEV_MACHINE_PROPERTY))
+                         .map(s -> s.substring(CHE_IS_DEV_MACHINE_PROPERTY.length()))
+                         .findFirst().get();
         }
 
         /**
@@ -371,8 +478,11 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
             try {
                 return InetAddress.getByName(externalAddress).getHostAddress();
             } catch (UnknownHostException e) {
-                throw new UnsupportedOperationException("Unable to find the IP for the address '" + externalAddress + "'", e);
+                if (throwOnUnknownHost) {
+                    throw new UnsupportedOperationException("Unable to find the IP for the address '" + externalAddress + "'", e);
+                }
             }
+            return null;
         }
 
         /**
@@ -395,4 +505,13 @@ public class CustomServerEvaluationStrategy extends DefaultServerEvaluationStrat
 
     }
 
+    @Override
+    protected boolean useHttpsForExternalUrls() {
+        return "https".equals(cheDockerCustomExternalProtocol);
+    }
+
+    public CustomServerEvaluationStrategy withThrowOnUnknownHost(boolean throwOnUnknownHost) {
+        this.throwOnUnknownHost = throwOnUnknownHost;
+        return this;
+    }
 }
