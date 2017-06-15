@@ -52,7 +52,7 @@ public class CommandCreationGuide {
     }
 
 
-    /** Shows the guide of creating a command. */
+    /** Shows the guide of creating a command of the 'Run' goal. */
     public void guide() {
         guide(runGoal);
     }

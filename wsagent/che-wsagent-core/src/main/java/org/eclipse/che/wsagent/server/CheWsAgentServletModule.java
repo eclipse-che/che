@@ -12,6 +12,7 @@ package org.eclipse.che.wsagent.server;
 
 import com.google.inject.servlet.ServletModule;
 
+import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 
@@ -27,6 +28,7 @@ import org.everrest.guice.servlet.GuiceEverrestServlet;
 public class CheWsAgentServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
+        filter("/*").through(CheCorsFilter.class);
         serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
     }
 }

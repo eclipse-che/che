@@ -9,66 +9,61 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheAPI} from '../../../../components/api/che-api.factory';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {CheFactoryTemplate} from '../../../../components/api/che-factory-template.factory';
 
 /**
  * Controller for creating factory from a template.
  * @author Oleksii Orel
  */
-export class FactoryFromTemplateCtrl {
+export class FactoryFromTemplateController {
   private $filter: ng.IFilterService;
-  private cheAPI: CheAPI;
+  private cheFactoryTemplate: CheFactoryTemplate;
   private cheNotification: CheNotification;
   private isImporting: boolean;
   private factoryContent: any;
-  private editorOptions: any;
   private templateName: string;
+  private editorState: {isValid: boolean; errors: Array<string>} = {isValid: true, errors: []};
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($filter: ng.IFilterService, cheAPI: CheAPI, cheNotification: CheNotification, $timeout: ng.ITimeoutService) {
+  constructor($filter: ng.IFilterService, cheFactoryTemplate: CheFactoryTemplate, cheNotification: CheNotification, $timeout: ng.ITimeoutService) {
     this.$filter = $filter;
-    this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
+    this.cheFactoryTemplate = cheFactoryTemplate;
 
     this.isImporting = false;
     this.factoryContent = null;
     this.templateName = 'minimal';
-    this.getFactoryTemplate(this.templateName);
 
-    this.editorOptions = {
-      mode: 'application/json',
-      onLoad: (editor: any) => {
-        $timeout(() => {
-          editor.refresh();
-        }, 1000);
-      }
-    };
+    this.updateFactoryContent();
   }
 
-  // gets factory template.
-  getFactoryTemplate(templateName: string) {
-    let factoryContent = this.cheAPI.getFactoryTemplate().getFactoryTemplate(templateName);
-
-    if (factoryContent) {
-      this.factoryContent = this.$filter('json')(factoryContent, 2);
+  /**
+   * Updates factory content.
+   */
+  updateFactoryContent(): void {
+    let factory = this.cheFactoryTemplate.getFactoryTemplate(this.templateName);
+    if (!factory) {
+      this.fetchFactoryTemplate();
       return;
     }
+    this.factoryContent = this.$filter('json')(factory, 2);
+  }
 
+  /**
+   * Fetch factory template.
+   */
+  fetchFactoryTemplate() {
     this.isImporting = true;
-
-    // fetch it:
-    let promise = this.cheAPI.getFactoryTemplate().fetchFactoryTemplate(templateName);
-
-    promise.then((factoryContent: any) => {
-      this.isImporting = false;
-      this.factoryContent = this.$filter('json')(factoryContent, 2);
+    this.cheFactoryTemplate.fetchFactoryTemplate(this.templateName).then((factory: che.IFactory) => {
+      this.factoryContent = this.$filter('json')(factory, 2);
     }, (error: any) => {
-      this.isImporting = false;
       this.cheNotification.showError(error.data.message ? error.data.message : 'Fail to get factory template.');
+    }).finally(() => {
+      this.isImporting = false;
     });
   }
 

@@ -60,7 +60,7 @@ import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
 import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectImageParams;

@@ -18,8 +18,8 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.ButtonBase;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 
@@ -160,7 +160,7 @@ class ProcessWidget extends FlowPanel {
         stopButton.setVisible(!stopped);
     }
 
-    private static class ActionButton extends ButtonBase {
+    private static class ActionButton extends FocusWidget {
         ActionButton(SafeHtml content) {
             super(Document.get().createDivElement());
 

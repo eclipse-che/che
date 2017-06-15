@@ -41,14 +41,14 @@ public class DockerContainerNameGenerator implements ContainerNameGenerator {
      *         unique workspace id, see more (@link WorkspaceConfig#getId)
      * @param machineId
      *         unique machine id, see more {@link Machine#getId()}
-     * @param userName
+     * @param ownerName
      *         name of the user who is docker container owner
      * @param machineName
      *         name of the workspace machine, see more {@link MachineConfig#getName()}
      */
     @Override
-    public String generateContainerName(String workspaceId, String machineId, String userName, String machineName) {
-        String containerName = workspaceId + '_' + machineId + '_' + userName + '_' + machineName;
+    public String generateContainerName(String workspaceId, String machineId, String ownerName, String machineName) {
+        String containerName = workspaceId + '_' + machineId + '_' + ownerName + '_' + machineName;
         return containerName.toLowerCase().replaceAll("[^a-z0-9_-]+", "");
     }
 

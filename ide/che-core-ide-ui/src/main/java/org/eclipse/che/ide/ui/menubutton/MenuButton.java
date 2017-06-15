@@ -12,41 +12,39 @@ package org.eclipse.che.ide.ui.menubutton;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.ButtonBase;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.List;
 import java.util.Optional;
 
+import static com.google.gwt.dom.client.NativeEvent.BUTTON_LEFT;
+import static java.util.Optional.ofNullable;
+
 /** Button with popup menu. */
-public class MenuButton extends ButtonBase {
+public class MenuButton extends FlowPanel {
 
     private static final Resources RESOURCES;
 
     protected final ItemsProvider itemsProvider;
-    private final   Timer         showMenuTimer;
+
+    private final Timer showMenuTimer;
 
     private ActionHandler actionHandler;
-
-    private FlowPanel marker = new FlowPanel();
-    private ItemsList menu;
+    private ItemsList     menu;
 
     public MenuButton(SafeHtml content, ItemsProvider itemsProvider) {
-        super(Document.get().createDivElement());
+        super();
 
         this.itemsProvider = itemsProvider;
 
-        getElement().setInnerSafeHtml(content);
+        addStyleName(RESOURCES.css().menuButton());
 
         showMenuTimer = new Timer() {
             @Override
@@ -55,42 +53,30 @@ public class MenuButton extends ButtonBase {
             }
         };
 
-        addStyleName(RESOURCES.css().button());
-        attachEventHandlers();
+        final FocusWidget mainButton = new MainButton(content);
+        final FocusWidget dropButton = new DropButton();
 
-        itemsProvider.setDataChangedHandler(this::updateButton);
+        add(mainButton);
+        add(dropButton);
+
+        attachMouseEventHandlers(mainButton);
+        attachMouseEventHandlers(dropButton);
     }
 
-    private void attachEventHandlers() {
-        addDomHandler(event -> showMenuTimer.cancel(), MouseOutEvent.getType());
-
-        addDomHandler(event -> {
-            if (event.getNativeButton() == NativeEvent.BUTTON_LEFT) {
+    private void attachMouseEventHandlers(FocusWidget widget) {
+        widget.addMouseOutHandler(event -> showMenuTimer.cancel());
+        widget.addMouseUpHandler(event -> showMenuTimer.cancel());
+        widget.addMouseDownHandler(event -> {
+            if (event.getNativeButton() == BUTTON_LEFT) {
                 showMenuTimer.schedule(1000);
             } else {
                 showMenuTimer.cancel();
-            }
-        }, MouseDownEvent.getType());
-
-        addDomHandler(event -> showMenuTimer.cancel(), MouseUpEvent.getType());
-
-        addClickHandler(event -> {
-            if (menu != null && menu.isShowing()) {
-                return;
-            }
-
-            final Optional<MenuItem> defaultItem = itemsProvider.getDefaultItem();
-
-            if (defaultItem.isPresent()) {
-                getActionHandler().ifPresent(actionHandler -> actionHandler.onAction(defaultItem.get()));
-            } else {
-                showMenu();
             }
         });
     }
 
     public Optional<ActionHandler> getActionHandler() {
-        return Optional.ofNullable(actionHandler);
+        return ofNullable(actionHandler);
     }
 
     /** Set {@link ActionHandler} to handle {@link MenuItem}s selection. */
@@ -98,24 +84,12 @@ public class MenuButton extends ButtonBase {
         this.actionHandler = actionHandler;
     }
 
-    /** Shows or hides 'Open Menu' button. */
-    private void updateButton() {
-        if (itemsProvider.getItems().isEmpty()) {
-            marker.removeFromParent();
-        } else {
-            marker = new FlowPanel();
-            marker.getElement().appendChild(RESOURCES.menuArrow().getSvg().getElement());
-            marker.addStyleName(RESOURCES.css().expandedImage());
-            getElement().appendChild(marker.getElement());
-        }
-    }
-
     private void showMenu() {
-        final List<MenuItem> menuItems = itemsProvider.getItems();
+        final List<MenuItem> items = itemsProvider.getItems();
 
-        if (!menuItems.isEmpty()) {
-            menu = new ItemsList(menuItems, itemsProvider, RESOURCES, null);
-            getActionHandler().ifPresent(actionHandler -> menu.setActionHandler(actionHandler));
+        if (!items.isEmpty()) {
+            menu = new ItemsList(items, itemsProvider, RESOURCES, null);
+            getActionHandler().ifPresent(handler -> menu.setActionHandler(handler));
             menu.setPopupPosition(getAbsoluteLeft(), getAbsoluteTop() + getOffsetHeight());
             menu.show();
         }
@@ -123,16 +97,22 @@ public class MenuButton extends ButtonBase {
 
     public interface Resources extends ClientBundle {
 
-        @Source("rightArrowIcon.svg")
-        SVGResource menuArrow();
-
         @Source({"button.css", "org/eclipse/che/ide/api/ui/style.css"})
         Css css();
+
+        @Source("arrowIcon.svg")
+        SVGResource arrowIcon();
     }
 
     public interface Css extends CssResource {
 
+        String menuButton();
+
         String button();
+
+        String mainButton();
+
+        String dropButton();
 
         String popupPanel();
 
@@ -145,6 +125,54 @@ public class MenuButton extends ButtonBase {
         String arrow();
 
         String label();
+    }
+
+    private class MainButton extends FocusWidget {
+
+        MainButton(SafeHtml content) {
+            super(Document.get().createDivElement());
+
+            getElement().setInnerSafeHtml(content);
+
+            addStyleName(RESOURCES.css().button());
+            addStyleName(RESOURCES.css().mainButton());
+
+            addClickHandler(event -> {
+                if (menu != null && menu.isShowing()) {
+                    return;
+                }
+
+                final Optional<MenuItem> defaultItem = itemsProvider.getDefaultItem();
+
+                if (defaultItem.isPresent()) {
+                    getActionHandler().ifPresent(actionHandler -> actionHandler.onAction(defaultItem.get()));
+                } else {
+                    showMenu();
+                }
+            });
+        }
+    }
+
+    private class DropButton extends FocusWidget {
+
+        DropButton() {
+            super(Document.get().createDivElement());
+
+            addStyleName(RESOURCES.css().button());
+            addStyleName(RESOURCES.css().dropButton());
+
+            final FlowPanel marker = new FlowPanel();
+            marker.getElement().appendChild(RESOURCES.arrowIcon().getSvg().getElement());
+            marker.addStyleName(RESOURCES.css().expandedImage());
+
+            getElement().appendChild(marker.getElement());
+
+            addClickHandler(event -> {
+                if (menu == null || !menu.isShowing()) {
+                    showMenu();
+                }
+            });
+        }
     }
 
     static {

@@ -16,10 +16,10 @@ import org.eclipse.che.ide.api.mvp.View;
 public interface PreviewsView extends View<PreviewsView.ActionDelegate> {
 
     /** Add preview URL to the view. */
-    void addUrl(PreviewUrlItem previewUrlItem);
+    void addUrl(String previewUrl);
 
     /** Remove preview URL from the view. */
-    void removeUrl(PreviewUrlItem previewUrlItem);
+    void removeUrl(String previewUrl);
 
     /** Remove all preview URLs from the view. */
     void removeAllURLs();
@@ -27,6 +27,6 @@ public interface PreviewsView extends View<PreviewsView.ActionDelegate> {
     interface ActionDelegate {
 
         /** Called when preview URL has been chosen. */
-        void onUrlChosen(PreviewUrlItem previewUrlItem);
+        void onUrlChosen(String previewUrl);
     }
 }

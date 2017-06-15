@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.maven.server;
 
+import org.eclipse.che.maven.data.MavenExplicitProfiles;
 import org.eclipse.che.maven.data.MavenModel;
 
 import java.io.File;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Collection;
 
 /**
  * Main interface for maven server.
@@ -29,4 +31,9 @@ public interface MavenRemoteServer extends Remote {
     MavenServer createServer(MavenSettings settings) throws RemoteException;
 
     MavenModel interpolateModel(MavenModel model, File projectDir) throws RemoteException;
+
+    ProfileApplicationResult applyProfiles(MavenModel model,
+                                           File projectDir,
+                                           MavenExplicitProfiles explicitProfiles,
+                                           Collection<String> alwaysOnProfiles) throws RemoteException;
 }

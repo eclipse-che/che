@@ -10,13 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.machine.MachineLogMessage;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.ServerConf;
@@ -51,7 +53,10 @@ import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
+import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
+import org.eclipse.che.plugin.docker.client.json.ImageConfig;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
 import org.eclipse.che.plugin.docker.client.json.Volume;
 import org.eclipse.che.plugin.docker.client.json.container.NetworkingConfig;
@@ -61,10 +66,11 @@ import org.eclipse.che.plugin.docker.client.json.network.NewNetwork;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
+import org.eclipse.che.plugin.docker.client.params.ListImagesParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
@@ -93,6 +99,7 @@ import java.util.regex.Pattern;
 import static java.lang.String.format;
 import static java.lang.Thread.sleep;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -114,13 +121,35 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
     public static final Pattern SNAPSHOT_LOCATION_PATTERN = Pattern.compile("(.+/)?" + MACHINE_SNAPSHOT_PREFIX + ".+");
 
+    static final String CONTAINER_EXITED_ERROR = "We detected that a machine exited unexpectedly. " +
+                                                 "This may be caused by a container in interactive mode " +
+                                                 "or a container that requires additional arguments to start. " +
+                                                 "Please check the container recipe.";
+
+    // CMDs and entrypoints that lead to exiting of container right after start
+    private Set<List<String>> badCMDs        = ImmutableSet.of(singletonList("/bin/bash"),
+                                                               singletonList("/bin/sh"),
+                                                               singletonList("bash"),
+                                                               singletonList("sh"),
+                                                               Arrays.asList("/bin/sh", "-c", "/bin/sh"),
+                                                               Arrays.asList("/bin/sh", "-c", "/bin/bash"),
+                                                               Arrays.asList("/bin/sh", "-c", "bash"),
+                                                               Arrays.asList("/bin/sh", "-c", "sh"));
+    private Set<List<String>> badEntrypoints =
+            ImmutableSet.<List<String>>builder().addAll(badCMDs)
+                                                .add(Arrays.asList("/bin/sh", "-c"))
+                                                .add(Arrays.asList("/bin/bash", "-c"))
+                                                .add(Arrays.asList("sh", "-c"))
+                                                .add(Arrays.asList("bash", "-c"))
+                                                .build();
+
     private final DockerConnector                               docker;
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
     private final ExecutorService                               executor;
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
     private final RequestTransmitter                            transmitter;
     private final JsonRpcEndpointToMachineNameHolder            jsonRpcEndpointToMachineNameHolder;
-    private final boolean                                       doForcePullOnBuild;
+    private final boolean                                       doForcePullImage;
     private final boolean                                       privilegedMode;
     private final int                                           pidsLimit;
     private final DockerMachineFactory                          dockerMachineFactory;
@@ -141,6 +170,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final long                                          cpuQuota;
     private final WindowsPathEscaper                            windowsPathEscaper;
     private final String[]                                      dnsResolvers;
+    private final Map<String, String>                           buildArgs;
 
     @Inject
     public MachineProviderImpl(DockerConnectorProvider dockerProvider,
@@ -153,7 +183,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
                                @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
                                @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
-                               @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
+                               @Named("che.docker.always_pull_image") boolean doForcePullImage,
                                @Named("che.docker.privileged") boolean privilegedMode,
                                @Named("che.docker.pids_limit") int pidsLimit,
                                @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
@@ -168,14 +198,15 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("che.docker.cpu_quota") long cpuQuota,
                                WindowsPathEscaper windowsPathEscaper,
                                @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
-                               @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers)
+                               @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers,
+                               @Named("che.docker.build_args") Map<String, String> buildArgs)
             throws IOException {
         this.docker = dockerProvider.get();
         this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
         this.transmitter = transmitter;
-        this.doForcePullOnBuild = doForcePullOnBuild;
+        this.doForcePullImage = doForcePullImage;
         this.privilegedMode = privilegedMode;
         this.snapshotUseRegistry = snapshotUseRegistry;
         // use-cases:
@@ -196,6 +227,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.windowsPathEscaper = windowsPathEscaper;
         this.pidsLimit = pidsLimit;
         this.dnsResolvers = dnsResolvers;
+        this.buildArgs = buildArgs;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
@@ -264,7 +296,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     }
 
     @Override
-    public Instance startService(String namespace,
+    public Instance startService(String ownerName,
                                  String workspaceId,
                                  String envName,
                                  String machineName,
@@ -314,6 +346,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                  service);
 
             docker.startContainer(StartContainerParams.create(container));
+
+            checkContainerIsRunning(container);
 
             readContainerLogsInSeparateThread(container,
                                               workspaceId,
@@ -400,7 +434,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
         if (service.getBuild() != null && (service.getBuild().getContext() != null ||
                                            service.getBuild().getDockerfileContent() != null)) {
-            buildImage(service, imageName, doForcePullOnBuild, progressMonitor);
+            buildImage(service, imageName, doForcePullImage, progressMonitor);
         } else {
             pullImage(service, imageName, progressMonitor);
         }
@@ -431,6 +465,13 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                 buildImageParams = BuildImageParams.create(service.getBuild().getContext())
                                                    .withDockerfile(service.getBuild().getDockerfilePath());
             }
+            Map<String, String> buildArgs;
+            if (service.getBuild().getArgs() == null || service.getBuild().getArgs().isEmpty()) {
+                buildArgs = this.buildArgs;
+            } else {
+                buildArgs = new HashMap<>(this.buildArgs);
+                buildArgs.putAll(service.getBuild().getArgs());
+            }
             buildImageParams.withForceRemoveIntermediateContainers(true)
                             .withRepository(machineImageName)
                             .withAuthConfigs(dockerCredentials.getCredentials())
@@ -440,7 +481,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                             .withCpusetCpus(cpusetCpus)
                             .withCpuPeriod(cpuPeriod)
                             .withCpuQuota(cpuQuota)
-                            .withBuildArgs(service.getBuild().getArgs());
+                            .withBuildArgs(buildArgs);
 
             docker.buildImage(buildImageParams, progressMonitor);
         } catch (IOException e) {
@@ -479,7 +520,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
         try {
             boolean isSnapshot = SNAPSHOT_LOCATION_PATTERN.matcher(dockerMachineSource.getLocation()).matches();
-            if (!isSnapshot || snapshotUseRegistry) {
+            boolean isImageExistLocally = isDockerImageExistLocally(dockerMachineSource.getRepository());
+            if ((!isSnapshot && (doForcePullImage || !isImageExistLocally)) || (isSnapshot && snapshotUseRegistry)) {
                 PullParams pullParams = PullParams.create(dockerMachineSource.getRepository())
                                                   .withTag(MoreObjects.firstNonNull(dockerMachineSource.getTag(),
                                                                                     LATEST_TAG))
@@ -502,6 +544,18 @@ public class MachineProviderImpl implements MachineInstanceProvider {
             }
         } catch (IOException e) {
             throw new MachineException("Can't create machine from image. Cause: " + e.getLocalizedMessage(), e);
+        }
+    }
+
+    @VisibleForTesting
+    boolean isDockerImageExistLocally(String imageName) {
+        try {
+            return !docker.listImages(ListImagesParams.create()
+                                                      .withFilters(new Filters().withFilter("reference", imageName)))
+                          .isEmpty();
+        } catch (IOException e) {
+            LOG.warn("Failed to check image {} availability. Cause: {}", imageName, e.getMessage(), e);
+            return false; // consider that image doesn't exist locally
         }
     }
 
@@ -568,6 +622,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
         addStaticDockerConfiguration(config);
 
+        setNonExitingContainerCommandIfNeeded(config);
+
         return docker.createContainer(CreateContainerParams.create(config)
                                                            .withContainerName(service.getContainerName()))
                      .getId();
@@ -615,6 +671,36 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         composeService.getEnvironment().putAll(env);
         composeService.getVolumes().addAll(volumes);
         composeService.getNetworks().addAll(additionalNetworks);
+    }
+
+    // We can detect certain situation when container exited right after start.
+    // We can detect
+    //  - when no command/entrypoint is set
+    //  - when most common shell interpreters are used and require additional arguments
+    //  - when most common shell interpreters are used and they require interactive mode which we don't support
+    // When we identify such situation we change CMD/entrypoint in such a way that it runs "tail -f /dev/null".
+    // This command does nothing and lasts until workspace is stopped.
+    // Images such as "ubuntu" or "openjdk" fits this situation.
+    protected void setNonExitingContainerCommandIfNeeded(ContainerConfig containerConfig) throws IOException {
+        ImageConfig imageConfig = docker.inspectImage(containerConfig.getImage()).getConfig();
+        List<String> cmd = imageConfig.getCmd() == null ?
+                           null : Arrays.asList(imageConfig.getCmd());
+        List<String> entrypoint = imageConfig.getEntrypoint() == null ?
+                                  null : Arrays.asList(imageConfig.getEntrypoint());
+
+        if ((entrypoint == null || badEntrypoints.contains(entrypoint)) && (cmd == null || badCMDs.contains(cmd))) {
+            containerConfig.setCmd("tail", "-f", "/dev/null");
+            containerConfig.setEntrypoint((String[])null);
+        }
+    }
+
+    // Inspect container right after start to check if it is running,
+    // otherwise throw error that command should not exit right after container start
+    protected void checkContainerIsRunning(String container) throws IOException, ServerException {
+        ContainerInfo containerInfo = docker.inspectContainer(container);
+        if ("exited".equals(containerInfo.getState().getStatus())) {
+            throw new ServerException(CONTAINER_EXITED_ERROR);
+        }
     }
 
     private void connectContainerToAdditionalNetworks(String container,

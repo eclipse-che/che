@@ -29,12 +29,16 @@ export class CreateProjectSamplesController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($scope, $filter: ng.IFilterService, cheAPI: CheAPI) {
+  constructor($scope: ng.IScope, $filter: ng.IFilterService, cheAPI: CheAPI) {
     this.$filter = $filter;
 
     this.templates = cheAPI.getProjectTemplate().getAllProjectTemplates();
     if (!this.templates.length) {
-      cheAPI.getProjectTemplate().fetchTemplates();
+      const templatesPromise = cheAPI.getProjectTemplate().fetchTemplates();
+      templatesPromise.finally(() => {
+        this.templates = cheAPI.getProjectTemplate().getAllProjectTemplates();
+        this.filterAndSortTemplates();
+      });
     }
 
     $scope.$watch(() => {
@@ -69,7 +73,7 @@ export class CreateProjectSamplesController {
       });
     }
 
-    this.filteredAndSortedTemplates = this.$filter('orderBy')(filteredTemplates, 'projectType', 'displayName');
+    this.filteredAndSortedTemplates = this.$filter('orderBy')(filteredTemplates, ['projectType', 'displayName']);
 
     if (this.filteredAndSortedTemplates.length) {
       this.initItem(this.filteredAndSortedTemplates[0]);
@@ -87,7 +91,6 @@ export class CreateProjectSamplesController {
 
     // set selected item
     this.selectedTemplateName = template.name;
-
     this.projectSampleOnSelect({template: template});
   }
 

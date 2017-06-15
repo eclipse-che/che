@@ -16,8 +16,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.command.CommandResources;
+import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 import org.eclipse.che.ide.ui.dropdown.DropdownList;
+import org.eclipse.che.ide.ui.dropdown.StringItemRenderer;
 
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -27,34 +29,59 @@ import java.util.Map;
 @Singleton
 public class ProcessesListViewImpl implements ProcessesListView {
 
-    private final FlowPanel    rootPanel;
-    private final DropdownList dropdownList;
 
     private final Map<Process, BaseListItem<Process>> listItems;
     private final Map<Process, ProcessItemRenderer>   renderers;
+    private final FlowPanel                           rootPanel;
+    private final DropdownList                        dropdownList;
+    private final EmptyListWidget                     emptyListWidget;
+    private final ToolbarMessages                     messages;
+    private final CreateCommandItem                   createCommandItem;
+    private final CreateCommandItemRenderer           createCommandItemRenderer;
 
     private ActionDelegate delegate;
 
     @Inject
-    public ProcessesListViewImpl(CommandResources resources, EmptyListWidget emptyListWidget) {
+    public ProcessesListViewImpl(CommandResources resources, EmptyListWidget emptyListWidget, ToolbarMessages messages) {
+        this.emptyListWidget = emptyListWidget;
+        this.messages = messages;
+
         listItems = new HashMap<>();
         renderers = new HashMap<>();
 
         final Label label = new Label("EXEC");
         label.addStyleName(resources.commandToolbarCss().processesListLabel());
 
-        dropdownList = new DropdownList(emptyListWidget);
+        dropdownList = new DropdownList(emptyListWidget, true);
         dropdownList.setWidth("100%");
         dropdownList.ensureDebugId("dropdown-processes");
-        dropdownList.syncWidths();
-        dropdownList.setSelectionHandler(item -> listItems.entrySet()
-                                                          .stream()
-                                                          .filter(entry -> item.equals(entry.getValue()))
-                                                          .forEach(entry -> delegate.onProcessChosen(entry.getKey())));
+        dropdownList.setSelectionHandler(item -> {
+            if (item instanceof CreateCommandItem) {
+                delegate.onCreateCommand();
+            } else {
+                listItems.entrySet()
+                         .stream()
+                         .filter(entry -> item.equals(entry.getValue()))
+                         .forEach(entry -> delegate.onProcessChosen(entry.getKey()));
+            }
+        });
 
         rootPanel = new FlowPanel();
         rootPanel.add(label);
         rootPanel.add(dropdownList);
+
+        createCommandItem = new CreateCommandItem();
+        createCommandItemRenderer = new CreateCommandItemRenderer();
+        checkCreateCommandItem();
+    }
+
+    /** Ensures that item for creating command added to the empty list or removed from non empty list. */
+    private void checkCreateCommandItem() {
+        if (listItems.isEmpty()) {
+            dropdownList.addItem(createCommandItem, createCommandItemRenderer);
+        } else {
+            dropdownList.removeItem(createCommandItem);
+        }
     }
 
     @Override
@@ -70,6 +97,8 @@ public class ProcessesListViewImpl implements ProcessesListView {
     @Override
     public void clearList() {
         dropdownList.clear();
+
+        checkCreateCommandItem();
     }
 
     @Override
@@ -92,6 +121,8 @@ public class ProcessesListViewImpl implements ProcessesListView {
         renderers.put(process, renderer);
 
         dropdownList.addItem(listItem, renderer);
+
+        checkCreateCommandItem();
     }
 
     @Override
@@ -103,6 +134,25 @@ public class ProcessesListViewImpl implements ProcessesListView {
             renderers.remove(process);
 
             dropdownList.removeItem(listItem);
+
+            checkCreateCommandItem();
+        }
+    }
+
+    private class CreateCommandItem extends BaseListItem<String> {
+        CreateCommandItem() {
+            super(messages.guideItemLabel("new"));
+        }
+    }
+
+    private class CreateCommandItemRenderer extends StringItemRenderer {
+        CreateCommandItemRenderer() {
+            super(createCommandItem);
+        }
+
+        @Override
+        public Widget renderHeaderWidget() {
+            return emptyListWidget;
         }
     }
 }

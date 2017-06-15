@@ -29,6 +29,7 @@ import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.exception.ExecNotFoundException;
+import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
@@ -68,12 +69,13 @@ import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
 import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
 import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
+import org.eclipse.che.plugin.docker.client.params.ListImagesParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.PushParams;
 import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
@@ -293,13 +295,15 @@ public class DockerConnectorTest {
 
     @Test
     public void shouldBeAbleToGetListImages() throws IOException, JsonParseException {
+        ListImagesParams listImagesParams = ListImagesParams.create();
         List<Image> images = new ArrayList<>();
+        images.add(mock(Image.class));
 
         doReturn(images).when(dockerConnector).parseResponseStreamAndClose(eq(inputStream),
                                                                            Matchers.<TypeToken<List<Image>>>any());
 
         List<Image> returnedImages =
-                dockerConnector.listImages();
+                dockerConnector.listImages(listImagesParams);
 
         verify(dockerConnectionFactory).openConnection(any(URI.class));
         verify(dockerConnection).method(REQUEST_METHOD_GET);
@@ -308,6 +312,23 @@ public class DockerConnectorTest {
         verify(dockerResponse).getStatus();
         verify(dockerResponse).getInputStream();
 
+        assertEquals(returnedImages, images);
+    }
+
+    @Test
+    public void shouldInvokeGetListImagesWithDefaultParamsWhenGetListImagesCalledWithoutParams() throws IOException, JsonParseException {
+        List<Image> images = new ArrayList<>();
+        images.add(mock(Image.class));
+
+        doReturn(images).when(dockerConnector).parseResponseStreamAndClose(eq(inputStream),
+                                                                           Matchers.<TypeToken<List<Image>>>any());
+
+        List<Image> returnedImages =
+                dockerConnector.listImages();
+
+        verify(dockerConnector).listImages((ListImagesParams)captor.capture());
+
+        assertEquals(captor.getValue(), ListImagesParams.create());
         assertEquals(returnedImages, images);
     }
 
@@ -435,6 +456,17 @@ public class DockerConnectorTest {
         InspectImageParams inspectImageParams = InspectImageParams.create(IMAGE);
 
         when(dockerResponse.getStatus()).thenReturn(RESPONSE_ERROR_CODE);
+
+        dockerConnector.inspectImage(inspectImageParams);
+
+        verify(dockerResponse).getStatus();
+    }
+
+    @Test(expectedExceptions = ImageNotFoundException.class, expectedExceptionsMessageRegExp = ERROR_MESSAGE)
+    public void shouldThrowImageNotFoundExceptionOnGettingImageInfoIfResponseCodeIs404() throws IOException {
+        InspectImageParams inspectImageParams = InspectImageParams.create(IMAGE);
+
+        when(dockerResponse.getStatus()).thenReturn(RESPONSE_NOT_FOUND_CODE);
 
         dockerConnector.inspectImage(inspectImageParams);
 
@@ -621,6 +653,17 @@ public class DockerConnectorTest {
         InspectContainerParams inspectContainerParams = InspectContainerParams.create(CONTAINER);
 
         when(dockerResponse.getStatus()).thenReturn(RESPONSE_ERROR_CODE);
+
+        dockerConnector.inspectContainer(inspectContainerParams);
+
+        verify(dockerResponse).getStatus();
+    }
+
+    @Test(expectedExceptions = ContainerNotFoundException.class, expectedExceptionsMessageRegExp = ERROR_MESSAGE)
+    public void shouldThrowContainerNotFoundExceptionOnInspectingContainerIfResponseCodeIs404() throws IOException {
+        InspectContainerParams inspectContainerParams = InspectContainerParams.create(CONTAINER);
+
+        when(dockerResponse.getStatus()).thenReturn(RESPONSE_NOT_FOUND_CODE);
 
         dockerConnector.inspectContainer(inspectContainerParams);
 

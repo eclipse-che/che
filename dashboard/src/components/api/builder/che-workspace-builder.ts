@@ -25,7 +25,6 @@ export class CheWorkspaceBuilder {
 
   constructor() {
     this.workspace = {
-      name: 'test',
       temporary: false,
       config: {
         projects: []
@@ -56,6 +55,26 @@ export class CheWorkspaceBuilder {
 
   withRuntime(runtime: any): CheWorkspaceBuilder {
     this.workspace.runtime = runtime;
+    return this;
+  }
+
+  withNamespace(namespace: string): CheWorkspaceBuilder {
+    this.workspace.namespace = namespace;
+    return this;
+  }
+
+  withStatus(status: string): CheWorkspaceBuilder {
+    this.workspace.status = status;
+    return this;
+  }
+
+  withDefaultEnvironment(defaultEnv: string): CheWorkspaceBuilder {
+    this.workspace.config.defaultEnv = defaultEnv;
+    return this;
+  }
+
+  withEnvironments(environments: any): CheWorkspaceBuilder {
+    this.workspace.config.environments = environments;
     return this;
   }
 

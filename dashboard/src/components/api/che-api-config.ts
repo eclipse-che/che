@@ -21,7 +21,6 @@ import {CheWebsocket} from './che-websocket.factory';
 import {CheProfile} from './che-profile.factory';
 import {ChePreferences} from './che-preferences.factory';
 import {CheService} from './che-service.factory';
-import {CheHttpBackend} from './test/che-http-backend';
 import {CheHttpBackendProviderFactory} from './test/che-http-backend-provider.factory'
 import {CheFactoryTemplate} from './che-factory-template.factory';
 import {CheHttpBackendFactory} from './test/che-http-backend.factory';
@@ -33,10 +32,11 @@ import {CheAgent} from './che-agent.factory';
 import {CheSsh} from './che-ssh.factory';
 import {CheNamespaceRegistry} from './namespace/che-namespace-registry.factory';
 import {CheUser} from './che-user.factory';
+import {ChePageObject} from './paging-resource/page-object.factory';
 
 export class ApiConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
     register.factory('cheWorkspace', CheWorkspace);
     register.factory('cheProjectTemplate', CheProjectTemplate);
     register.factory('cheFactory', CheFactory);
@@ -59,5 +59,6 @@ export class ApiConfig {
     register.factory('cheSsh', CheSsh);
     register.factory('cheNamespaceRegistry', CheNamespaceRegistry);
     register.factory('cheUser', CheUser);
+    register.factory('chePageObject', ChePageObject);
   }
 }

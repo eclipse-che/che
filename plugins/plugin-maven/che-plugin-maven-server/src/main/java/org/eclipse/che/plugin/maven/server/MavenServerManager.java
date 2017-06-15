@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.maven.server;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.eclipse.che.maven.data.MavenExplicitProfiles;
 import org.eclipse.che.maven.data.MavenModel;
 import org.eclipse.che.maven.server.MavenRemoteServer;
 import org.eclipse.che.maven.server.MavenServer;
@@ -20,6 +21,7 @@ import org.eclipse.che.maven.server.MavenServerDownloadListener;
 import org.eclipse.che.maven.server.MavenServerLogger;
 import org.eclipse.che.maven.server.MavenSettings;
 import org.eclipse.che.maven.server.MavenTerminal;
+import org.eclipse.che.maven.server.ProfileApplicationResult;
 import org.eclipse.che.plugin.maven.server.execution.CommandLine;
 import org.eclipse.che.plugin.maven.server.execution.JavaParameters;
 import org.eclipse.che.plugin.maven.server.execution.ProcessExecutor;
@@ -37,6 +39,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -122,6 +125,13 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
         return perform(() -> getOrCreateWrappedObject().interpolateModel(model, projectDir));
     }
 
+    public ProfileApplicationResult applyProfiles(MavenModel model,
+                                                  File projectDir,
+                                                  MavenExplicitProfiles explicitProfiles,
+                                                  Collection<String> alwaysOnProfiles) {
+        return perform(() -> getOrCreateWrappedObject().applyProfiles(model, projectDir, explicitProfiles, alwaysOnProfiles));
+    }
+
     @PreDestroy
     public void shutdown() {
         client.stopAll(false);
@@ -181,7 +191,7 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
 
     public JavaParameters buildMavenServerParameters() {
         JavaParameters parameters = new JavaParameters();
-        parameters.setJavaExecutable("java");
+        parameters.setJavaExecutable(System.getProperties().getProperty("java.home") + "/bin/java");
         parameters.setWorkingDirectory(System.getProperty("java.io.tmpdir"));
         parameters.setMainClassName(MAVEN_SERVER_MAIN);
         //TODO read and set MAVEN_OPTS system properties
@@ -192,9 +202,7 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
         String mavenHome = System.getenv("M2_HOME");
         addDirToClasspath(classPath, new File(mavenHome, "lib"));
         File bootDir = new File(mavenHome, "boot");
-        File[] classworlds = bootDir.listFiles((dir, name) -> {
-            return name.contains("classworlds");
-        });
+        File[] classworlds = bootDir.listFiles((dir, name) -> name.contains("classworlds"));
 
         if (classworlds != null) {
             for (File file : classworlds) {

@@ -13,7 +13,7 @@
 [ -z "${CHE_LOCAL_CONF_DIR}" ]  && CHE_LOCAL_CONF_DIR="${CATALINA_HOME}/conf/"
 
 #Global JAVA options
-[ -z "${JAVA_OPTS}" ]  && JAVA_OPTS="-Xms256m -Xmx1024m  -Djava.security.egd=file:/dev/./urandom"
+[ -z "${JAVA_OPTS}" ]  && JAVA_OPTS="-Xms256m -Xmx1024m -XX:+UseG1GC -XX:+UseStringDeduplication -Djava.security.egd=file:/dev/./urandom"
 
 #Global LOGS DIR
 [ -z "${CHE_LOGS_DIR}" ]  && CHE_LOGS_DIR="$CATALINA_HOME/logs"
@@ -21,6 +21,8 @@
 [ -z "${CHE_LOGS_LEVEL}" ]  && CHE_LOGS_LEVEL="INFO"
 
 [ -z "${JPDA_ADDRESS}" ]  && JPDA_ADDRESS="4403"
+
+[ -z "${UMASK}" ] && UMASK="022"
 
 #Tomcat options
 [ -z "${CATALINA_OPTS}" ]  && CATALINA_OPTS="-Dcom.sun.management.jmxremote  \

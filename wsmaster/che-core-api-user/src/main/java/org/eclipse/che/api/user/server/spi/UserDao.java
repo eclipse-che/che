@@ -29,6 +29,7 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
  * such kind of inconsistencies are expected by design and may be treated further.
  *
  * @author Yevhenii Voevodin
+ * @author Anton Korneta
  */
 public interface UserDao {
 
@@ -175,6 +176,56 @@ public interface UserDao {
      *         when any other error occurs
      */
     Page<UserImpl> getAll(int maxItems, long skipCount) throws ServerException;
+
+    /**
+     * Returns all users whose name contains(case insensitively) specified {@code namePart}.
+     *
+     * @param namePart
+     *         fragment of user's name
+     * @param maxItems
+     *         the maximum number of users to return
+     * @param skipCount
+     *         the number of users to skip
+     * @return list of matched users
+     * @throws NullPointerException
+     *         when {@code namePart} is null
+     * @throws IllegalArgumentException
+     *         when {@code maxItems} or {@code skipCount} is negative or
+     *         when {@code skipCount} more than {@value Integer#MAX_VALUE}
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    Page<UserImpl> getByNamePart(String namePart, int maxItems, long skipCount) throws ServerException;
+
+    /**
+     * Returns all users whose email address contains(case insensitively) specified {@code emailPart}.
+     *
+     * <p>For example if email fragment would be 'CHE' then result of search will include the following:
+     * <pre>
+     *  |        emails          |  result  |
+     *  | Cherkassy@example.com  |    +     |
+     *  | preacher@example.com   |    +     |
+     *  | user@ukr.che           |    +     |
+     *  | johny@example.com      |    -     |
+     *  | CoachEddie@example.com |    +     |
+     * </pre>
+     *
+     * @param emailPart
+     *         fragment of user's email
+     * @param maxItems
+     *         the maximum number of users to return
+     * @param skipCount
+     *         the number of users to skip
+     * @return list of matched users
+     * @throws NullPointerException
+     *         when {@code emailPart} is null
+     * @throws IllegalArgumentException
+     *         when {@code maxItems} or {@code skipCount} is negative or
+     *         when {@code skipCount} more than {@value Integer#MAX_VALUE}
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    Page<UserImpl> getByEmailPart(String emailPart, int maxItems, long skipCount) throws ServerException;
 
     /**
      * Get count of all users from persistent layer.

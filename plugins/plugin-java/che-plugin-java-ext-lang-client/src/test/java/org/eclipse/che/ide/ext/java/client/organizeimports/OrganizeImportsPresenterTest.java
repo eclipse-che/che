@@ -12,13 +12,13 @@ package org.eclipse.che.ide.ext.java.client.organizeimports;
 
 import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -69,39 +69,43 @@ public class OrganizeImportsPresenterTest {
     @Mock
     private NotificationManager      notificationManager;
     @Mock
-    private EventBus                 eventBus;
+    private ClientServerEventService clientServerEventService;
 
     private OrganizeImportsPresenter presenter;
     @Mock
-    private File        file;
+    private File                     file;
     @Mock
-    private Project     relatedProject;
+    private Project                  relatedProject;
     @Mock
-    private Container   srcFolder;
+    private Container                srcFolder;
     @Mock
-    private EditorInput editorInput;
+    private EditorInput              editorInput;
     @Mock
-    private TextEditor  editor;
+    private TextEditor               editor;
 
     @Mock
-    private Document    document;
+    private Document                      document;
     @Mock
     private Promise<OrganizeImportResult> importsPromise;
     @Mock
-    private Promise<List<Change>> resolveConflictsPromise;
+    private Promise<List<Change>>         resolveConflictsPromise;
     @Mock
-    private Promise<String>                  contentPromise;
+    private Promise<String>               contentPromise;
     @Mock
-    private OrganizeImportResult organizeImportResult;
+    private Promise<Void>                 fileTrackingSuspendEventPromise;
     @Mock
-    private Change change;
+    private OrganizeImportResult          organizeImportResult;
+    @Mock
+    private Change                        change;
 
     @Captor
     private ArgumentCaptor<Operation<OrganizeImportResult>> importsOperation;
     @Captor
-    private ArgumentCaptor<Operation<List<Change>>>                    resolveConflictsOperation;
+    private ArgumentCaptor<Operation<List<Change>>>         resolveConflictsOperation;
     @Captor
-    private ArgumentCaptor<Operation<String>>                  contentCaptor;
+    private ArgumentCaptor<Operation<String>>               contentCaptor;
+    @Captor
+    private ArgumentCaptor<Operation<Void>>                 clientServerSuspendOperation;
 
     private ConflictImportDTO conflict1;
     private ConflictImportDTO conflict2;
@@ -122,6 +126,9 @@ public class OrganizeImportsPresenterTest {
         when(srcFolder.getLocation()).thenReturn(Path.valueOf("/project/src"));
         when(relatedProject.getLocation()).thenReturn(Path.valueOf("/project"));
 
+        when(clientServerEventService.sendFileTrackingSuspendEvent()).thenReturn(fileTrackingSuspendEventPromise);
+        when(fileTrackingSuspendEventPromise.then(Matchers.<Operation<Void>>anyObject())).thenReturn(fileTrackingSuspendEventPromise);
+
         when(javaCodeAssistClient.organizeImports(anyString(), anyString())).thenReturn(importsPromise);
         when(importsPromise.then(Matchers.<Operation<OrganizeImportResult>>anyObject())).thenReturn(importsPromise);
 
@@ -130,7 +137,7 @@ public class OrganizeImportsPresenterTest {
                                                  dtoFactory,
                                                  locale,
                                                  notificationManager,
-                                                 eventBus);
+                                                 clientServerEventService);
 
         prepareConflicts();
 
@@ -145,7 +152,11 @@ public class OrganizeImportsPresenterTest {
         when(change.getOffset()).thenReturn(0);
         when(change.getLength()).thenReturn("content".length());
         when(change.getText()).thenReturn("content");
+
         presenter.organizeImports(editor);
+
+        verify(fileTrackingSuspendEventPromise).then(clientServerSuspendOperation.capture());
+        clientServerSuspendOperation.getValue().apply(null);
 
         verify(javaCodeAssistClient).organizeImports(eq("/project"), eq("a.b.A"));
         verify(importsPromise).then(importsOperation.capture());
@@ -177,10 +188,14 @@ public class OrganizeImportsPresenterTest {
         verify(view).setEnableNextButton(true);
 
         verify(view).show(conflict1);
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
     }
 
     private void showOrganizeImportsWindow() throws Exception {
         presenter.organizeImports(editor);
+
+        verify(fileTrackingSuspendEventPromise).then(clientServerSuspendOperation.capture());
+        clientServerSuspendOperation.getValue().apply(null);
 
         List<ConflictImportDTO> result = Arrays.asList(conflict1, conflict2);
         when(organizeImportResult.getConflicts()).thenReturn(result);
@@ -204,6 +219,7 @@ public class OrganizeImportsPresenterTest {
         verify(view).setEnableBackButton(true);
         verify(view).setEnableFinishButton(true);
         verify(view).setEnableNextButton(false);
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
     }
 
     @Test
@@ -222,6 +238,7 @@ public class OrganizeImportsPresenterTest {
         verify(view).setEnableBackButton(false);
         verify(view).setEnableFinishButton(true);
         verify(view).setEnableNextButton(true);
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
     }
 
     @Test
@@ -248,6 +265,6 @@ public class OrganizeImportsPresenterTest {
 
         verify(editor).setFocus();
         verify(view).hide();
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
     }
-
 }

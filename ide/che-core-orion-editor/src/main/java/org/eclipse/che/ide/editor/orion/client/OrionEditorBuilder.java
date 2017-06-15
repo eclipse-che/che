@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
-import org.eclipse.che.ide.api.editor.editorconfig.AutoSaveTextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
 /**
@@ -35,7 +35,7 @@ public class OrionEditorBuilder implements EditorBuilder {
     @Override
     public TextEditor buildEditor() {
         final OrionEditorPresenter editor = orionTextEditorProvider.get();
-        editor.initialize(new AutoSaveTextEditorConfiguration());
+        editor.initialize(new DefaultTextEditorConfiguration());
         return editor;
     }
 }

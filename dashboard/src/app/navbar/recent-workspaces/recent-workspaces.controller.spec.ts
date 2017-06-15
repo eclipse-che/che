@@ -13,6 +13,7 @@ import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import {CheAPIBuilder} from '../../../components/api/builder/che-api-builder.factory';
 import {CheHttpBackend} from '../../../components/api/test/che-http-backend';
 import IdeSvc from '../../ide/ide.service';
+import {CheBranding} from '../../../components/branding/che-branding.factory';
 
 
 /**
@@ -50,14 +51,14 @@ describe('NavbarRecentWorkspacesController', () => {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject(($rootScope: ng.IRootScopeService, cheWorkspace: CheWorkspace, cheAPIBuilder: CheAPIBuilder, cheHttpBackend: CheHttpBackend, $controller: any, ideSvc: IdeSvc, $window: ng.IWindowService, $log: ng.ILogService) => {
+  beforeEach(inject(($rootScope: ng.IRootScopeService, cheWorkspace: CheWorkspace, cheBranding: CheBranding, cheAPIBuilder: CheAPIBuilder, cheHttpBackend: CheHttpBackend, $controller: any, ideSvc: IdeSvc, $window: ng.IWindowService, $log: ng.ILogService) => {
     apiBuilder = cheAPIBuilder;
     cheBackend = cheHttpBackend;
     httpBackend = cheHttpBackend.getHttpBackend();
 
     let scope = $rootScope.$new();
     navbarRecentWorkspacesController = $controller('NavbarRecentWorkspacesController', {
-      ideSvc: IdeSvc, cheWorkspace: cheWorkspace, $window: $window, $log: $log, $scope: scope, $rootScope: $rootScope
+      ideSvc: IdeSvc, cheWorkspace: cheWorkspace, cheBranding: cheBranding, $window: $window, $log: $log, $scope: scope, $rootScope: $rootScope
     });
 
     workspaces = [];

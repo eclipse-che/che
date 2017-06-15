@@ -11,20 +11,18 @@
 package org.eclipse.che.ide.api.machine.execagent;
 
 import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.ide.jsonrpc.JsonRpcRequestBiOperation;
-import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 
-public abstract class AbstractExecAgentEventHandler<P extends DtoWithPid> implements JsonRpcRequestBiOperation<P> {
+public abstract class AbstractExecAgentEventHandler<P extends DtoWithPid> implements BiConsumer<String, P> {
 
-    private final Map<String, Set<Operation<P>>> operationRegistry = new HashMap<>();
+    private final Map<String, Set<Consumer<P>>> operationRegistry = new HashMap<>();
 
     protected void handle(String endpointId, P params) {
         int pid = params.getPid();
@@ -34,32 +32,28 @@ public abstract class AbstractExecAgentEventHandler<P extends DtoWithPid> implem
             return;
         }
 
-        for (Operation<P> operation : operationRegistry.get(key)) {
-            try {
-                operation.apply(params);
-            } catch (OperationException e) {
-                Log.error(getClass(), "Cannot perform operation for DTO: " + params + ", because of " + e.getLocalizedMessage());
-            }
+        for (Consumer<P> consumer : operationRegistry.get(key)) {
+            consumer.accept(params);
         }
     }
 
-    public void registerOperation(String endpointId, int pid, Operation<P> operation) {
+    public void registerConsumer(String endpointId, int pid, Consumer<P> consumer) {
         String key = endpointId + '@' + pid;
         if (!operationRegistry.containsKey(key)) {
-            operationRegistry.put(key, new HashSet<Operation<P>>());
+            operationRegistry.put(key, new HashSet<>());
         }
 
-        operationRegistry.get(key).add(operation);
+        operationRegistry.get(key).add(consumer);
     }
 
-    public void unregisterOperation(String endpointId, int pid, Operation<P> operation) {
+    public void unregisterConsumer(String endpointId, int pid, Consumer<P> consumer) {
         String key = endpointId + '@' + pid;
         if (operationRegistry.containsKey(key)) {
-            operationRegistry.get(key).remove(operation);
+            operationRegistry.get(key).remove(consumer);
         }
     }
 
-    public void unregisterOperations(String endpointId, int pid) {
+    public void unregisterConsumers(String endpointId, int pid) {
         String key = endpointId + '@' + pid;
         operationRegistry.remove(key);
     }

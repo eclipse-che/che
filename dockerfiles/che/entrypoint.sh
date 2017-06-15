@@ -244,17 +244,18 @@ init() {
   fi
   ### Are we going to use the embedded che.properties or one provided by user?`
   ### CHE_LOCAL_CONF_DIR is internal Che variable that sets where to load
+  export CHE_LOCAL_CONF_DIR="/conf"
   if [ -f "/conf/che.properties" ]; then
     echo "Found custom che.properties..."
-    export CHE_LOCAL_CONF_DIR="/conf"
     if [ "$CHE_USER" != "root" ]; then
       sudo chown -R ${CHE_USER} ${CHE_LOCAL_CONF_DIR}
     fi
   else
-    echo "Using embedded che.properties... Copying template to ${CHE_DATA_HOST}/conf."
-    mkdir -p /data/conf
-    cp -rf "${CHE_HOME}/conf/che.properties" /data/conf/che.properties
-    export CHE_LOCAL_CONF_DIR="/data/conf"
+    if [ ! -d /conf ]; then
+        mkdir -p /conf
+    fi
+    echo "Using embedded che.properties... Copying template to ${CHE_LOCAL_CONF_DIR}/che.properties"
+    cp -rf "${CHE_HOME}/conf/che.properties" ${CHE_LOCAL_CONF_DIR}/che.properties
   fi
 
   # Update the provided che.properties with the location of the /data mounts
@@ -307,10 +308,10 @@ get_che_data_from_host() {
 }
 
 get_che_server_container_id() {
-  # Returning `hostname` doesn't work when running Che on OpenShift/Kubernetes.
+  # Returning `hostname` doesn't work when running Che on OpenShift/Kubernetes/Docker Cloud.
   # In these cases `hostname` correspond to the pod ID that is different from
   # the container ID
-  hostname
+  echo $(basename "$(head /proc/1/cgroup || hostname)");
 }
 
 is_docker_for_mac_or_windows() {

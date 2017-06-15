@@ -28,10 +28,22 @@ che:
     - '32001:32001'
     - '32101:32101'
 <% end -%>
+<% if scope.lookupvar('che::che_single_port') == 'true' -%>
+    - 8080
+<% else -%>
     - '<%= scope.lookupvar('che::che_port') -%>:<%= scope.lookupvar('che::che_port') -%>'
+<% end -%>
 <% if scope.lookupvar('che::che_env') == 'development' -%>
     - '<%= scope.lookupvar('che::che_debug_port') -%>:<%= scope.lookupvar('che::che_debug_port') -%>'
 <% end -%>
+<% if scope.lookupvar('che::che_single_port') == 'true' -%>
+  labels:
+    traefik.che.frontend.backend: "che-server"
+    traefik.che.frontend.entryPoints: "http"
+    traefik.che.port: "<%= scope.lookupvar('che::che_port') -%>"
+    traefik.che.frontend.rule: "PathPrefix:/"
+<% end -%>
+
   restart: always
   container_name: <%= ENV["CHE_CONTAINER_NAME"] %>
 <% if scope.lookupvar('che::che_user') != 'root' -%>
@@ -39,4 +51,23 @@ che:
 <% end -%>
 <% if ! @dns_resolvers.empty? -%>
 <%= "  dns:" + "\n" + @dns_resolvers.split(",").map { |val| "    - #{val}" }.join("\n") %>
+<% end -%>
+
+
+<% if scope.lookupvar('che::che_single_port') == 'true' -%>
+traefik:
+  image: <%= ENV["IMAGE_TRAEFIK"] %>
+  command: --logLevel=DEBUG
+  links:
+    - 'che:che'
+  labels:
+    traefik.enable: "false"
+  ports:
+    - '<%= scope.lookupvar('che::che_port') -%>:<%= scope.lookupvar('che::che_port') -%>'
+<% if scope.lookupvar('che::che_env') == 'development' -%>
+    - '7070:7070'
+<% end -%>
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - '<%= scope.lookupvar('che::che_instance') -%>/config/traefik.toml:/etc/traefik/traefik.toml'
 <% end -%>

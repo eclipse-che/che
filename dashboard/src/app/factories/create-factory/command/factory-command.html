@@ -39,36 +39,37 @@
                           ng-disabled="commandsForm.$invalid"></che-button-primary>
     </div>
 
-    <div ng-if="factoryCommandCtrl.factoryObject.workspace.commands.length > 0"
-         class="factory-commands-list">
-      <che-list>
-        <che-list-item ng-repeat="command in factoryCommandCtrl.factoryObject.workspace.commands"
-                       flex="100">
-          <div layout="row" flex>
-            <div layout="column"
-                 layout-align="start start"
-                 class="factory-commands-row-command-name">
-              <span>{{command.name}}</span>
-            </div>
-            <div flex
-                 layout="column"
-                 layout-align="start start"
-                 ng-click="factoryCommandCtrl.editCommand($event, $index)"
-                 class="factory-commands-row-command">
-              {{command.commandLine}}
-            </div>
-            <div flex="10" layout="row" layout-align="center start"
-                 class="che-list-actions">
-              <div ng-click="factoryCommandCtrl.removeCommand($index)" class="factory-commands-widget-actions">
-                <span class="fa fa-times-circle"></span>
+    <md-content md-scroll-y flex class="factory-commands-list">
+      <div ng-if="factoryCommandCtrl.factoryObject.workspace.commands.length > 0">
+        <che-list>
+          <che-list-item ng-repeat="command in factoryCommandCtrl.factoryObject.workspace.commands"
+                         flex="100">
+            <div layout="row" flex>
+              <div layout="column"
+                   layout-align="start start"
+                   class="factory-commands-row-command-name">
+                <span>{{command.name}}</span>
               </div>
-              <div ng-click="factoryCommandCtrl.editCommand($event, $index)" class="factory-commands-widget-actions">
-                <span class="fa fa-edit"></span>
+              <div flex
+                   layout="column"
+                   layout-align="start start"
+                   ng-click="factoryCommandCtrl.editCommand($event, $index)"
+                   class="factory-commands-row-command">
+                {{command.commandLine}}
+              </div>
+              <div flex="10" layout="row" layout-align="center start"
+                   class="che-list-actions">
+                <div ng-click="factoryCommandCtrl.removeCommand($index)" class="factory-commands-widget-actions">
+                  <span class="fa fa-times-circle"></span>
+                </div>
+                <div ng-click="factoryCommandCtrl.editCommand($event, $index)" class="factory-commands-widget-actions">
+                  <span class="fa fa-edit"></span>
+                </div>
               </div>
             </div>
-          </div>
-        </che-list-item>
-      </che-list>
-    </div>
+          </che-list-item>
+        </che-list>
+      </div>
+    </md-content>
   </div>
 </form>

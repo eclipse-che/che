@@ -1121,9 +1121,6 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("failed.to.get.processes")
     String failedToGetProcesses(String machineId);
 
-    @Key("control.devMachine.category")
-    String devMachineCategory();
-
     @Key("control.runCommand.empty.params")
     String runCommandEmptyParamsMessage();
 

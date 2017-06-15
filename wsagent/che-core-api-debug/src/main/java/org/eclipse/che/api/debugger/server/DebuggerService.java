@@ -12,15 +12,12 @@ package org.eclipse.che.api.debugger.server;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerNotFoundException;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
+import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.action.ActionDto;
-import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
@@ -30,6 +27,8 @@ import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerNotFoundException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -94,12 +93,13 @@ public class DebuggerService {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public DebugSessionDto getDebugSession(@PathParam("id") String sessionId) throws DebuggerException {
-        DebuggerInfo debuggerInfo = debuggerManager.getDebugger(sessionId).getInfo();
+        Debugger debugger = debuggerManager.getDebugger(sessionId);
 
         DebugSessionDto debugSessionDto = newDto(DebugSessionDto.class);
-        debugSessionDto.setDebuggerInfo(asDto(debuggerInfo));
+        debugSessionDto.setDebuggerInfo(asDto(debugger.getInfo()));
         debugSessionDto.setId(sessionId);
         debugSessionDto.setType(debuggerManager.getDebuggerType(sessionId));
+        debugSessionDto.setBreakpoints(asBreakpointsDto(debugger.getAllBreakpoints()));
 
         return debugSessionDto;
     }

@@ -26,10 +26,10 @@ import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /** Presenter for {@link CommandEditorPage} which allows to edit command's applicable projects. */
 public class ProjectsPage extends AbstractCommandEditorPage implements ProjectsPageView.ActionDelegate,
@@ -39,7 +39,7 @@ public class ProjectsPage extends AbstractCommandEditorPage implements ProjectsP
     private final AppContext       appContext;
 
     /** Initial value of the applicable projects list. */
-    private List<String> applicableProjectsInitial;
+    private Set<String> applicableProjectsInitial;
 
     @Inject
     public ProjectsPage(ProjectsPageView view,
@@ -65,7 +65,7 @@ public class ProjectsPage extends AbstractCommandEditorPage implements ProjectsP
     protected void initialize() {
         final ApplicableContext context = editedCommand.getApplicableContext();
 
-        applicableProjectsInitial = new ArrayList<>(context.getApplicableProjects());
+        applicableProjectsInitial = new HashSet<>(context.getApplicableProjects());
 
         refreshProjects();
     }

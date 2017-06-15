@@ -34,7 +34,7 @@ describe('If recipe has content', () => {
       },
       'recipe': {
         'type': 'dockerfile',
-        'content': 'FROM codenvy/ubuntu_jdk8\nENV myName=\"John Doe\" myDog=Rex\\ The\\ Dog \\\n    myCat=fluffy',
+        'content': 'FROM codenvy/ubuntu_jdk8\nENV myName="John Doe" myDog=Rex\\ The\\ Dog \\\n    myCat=fluffy',
         'contentType': 'text/x-dockerfile'
       }
     };

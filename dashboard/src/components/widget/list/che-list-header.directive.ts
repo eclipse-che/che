@@ -37,6 +37,7 @@ export class CheListHeader {
     this.scope = {
       inputPlaceholder: '@?cheInputPlaceholder',
       inputValue: '=?cheSearchModel',
+      onSearchChange: '&?cheOnSearchChange',
       addButtonTitle: '@?cheAddButtonTitle',
       addButtonHref: '@?cheAddButtonHref',
       onAdd: '&?cheOnAdd',

@@ -49,8 +49,15 @@ import java.util.Objects;
                 @NamedQuery(name = "User.getAll",
                             query = "SELECT u FROM Usr u"),
                 @NamedQuery(name = "User.getTotalCount",
-                            query = "SELECT COUNT(u) FROM Usr u")
-
+                            query = "SELECT COUNT(u) FROM Usr u"),
+                @NamedQuery(name = "User.getByEmailPart",
+                            query = "SELECT u FROM Usr u WHERE LOWER(u.email) LIKE CONCAT('%', :email, '%')"),
+                @NamedQuery(name = "User.getByEmailPartCount",
+                            query = "SELECT COUNT(u) FROM Usr u WHERE LOWER(u.email) LIKE CONCAT('%', :email, '%')"),
+                @NamedQuery(name = "User.getByNamePart",
+                            query = "SELECT u FROM Usr u WHERE LOWER(u.name) LIKE CONCAT('%', :name, '%')"),
+                @NamedQuery(name = "User.getByNamePartCount",
+                            query = "SELECT COUNT(u) FROM Usr u WHERE LOWER(u.name) LIKE CONCAT('%', :name, '%')")
         }
 )
 @Table(name = "usr")

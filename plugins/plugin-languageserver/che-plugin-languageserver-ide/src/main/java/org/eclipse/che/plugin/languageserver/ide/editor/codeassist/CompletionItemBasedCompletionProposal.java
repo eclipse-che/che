@@ -36,6 +36,7 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.TextEdit;
 
 import java.util.List;
 
@@ -47,6 +48,7 @@ import static org.eclipse.che.ide.api.theme.Style.theme;
  */
 public class CompletionItemBasedCompletionProposal implements CompletionProposal {
 
+    private final String                    currentWord;
     private final TextDocumentServiceClient documentServiceClient;
     private final TextDocumentIdentifier    documentId;
     private final LanguageServerResources   resources;
@@ -58,6 +60,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     private       boolean                   resolved;
 
     CompletionItemBasedCompletionProposal(ExtendedCompletionItem completionItem,
+                                          String currentWord,
                                           TextDocumentServiceClient documentServiceClient,
                                           TextDocumentIdentifier documentId,
                                           LanguageServerResources resources,
@@ -66,6 +69,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
                                           List<Match> highlights,
                                           int offset) {
         this.completionItem = completionItem;
+        this.currentWord = currentWord;
         this.documentServiceClient = documentServiceClient;
         this.documentId = documentId;
         this.resources = resources;
@@ -167,7 +171,13 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
     @Override
     public void getCompletion(final CompletionCallback callback) {
-        callback.onCompletion(new CompletionImpl(completionItem, offset));
+        if (canResolve()) {
+            resolve().then(completionItem -> {
+                callback.onCompletion(new CompletionImpl(completionItem, currentWord, offset));
+            });
+        } else {
+            callback.onCompletion(new CompletionImpl(completionItem, currentWord, offset));
+        }
     }
 
     private boolean canResolve() {
@@ -185,10 +195,12 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     private static class CompletionImpl implements Completion {
 
         private CompletionItem completionItem;
+        private String         currentWord;
         private int            offset;
 
-        public CompletionImpl(CompletionItem completionItem, int offset) {
+        public CompletionImpl(CompletionItem completionItem, String currentWord, int offset) {
             this.completionItem = completionItem;
+            this.currentWord = currentWord;
             this.offset = offset;
         }
 
@@ -202,17 +214,25 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
                         new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
                 document.replace(startOffset, endOffset - startOffset, completionItem.getTextEdit().getNewText());
             } else {
-                String insertText = completionItem.getInsertText() == null ? completionItem.getLabel() : completionItem.getInsertText();
-                document.replace(document.getCursorOffset() - offset, offset, insertText);
+                int currentWordLength = currentWord.length();
+                int cursorOffset = document.getCursorOffset();
+                if (completionItem.getInsertText() == null) {
+                    document.replace(cursorOffset - currentWordLength, currentWordLength, completionItem.getLabel());
+                } else {
+                    document.replace(cursorOffset - offset, offset, completionItem.getInsertText());
+                }
             }
         }
 
         @Override
         public LinearRange getSelection(Document document) {
-            Range range = completionItem.getTextEdit().getRange();
-            int startOffset = document
-                                      .getIndexFromPosition(new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()))
-                              + completionItem.getTextEdit().getNewText().length();
+            final TextEdit textEdit = completionItem.getTextEdit();
+            if (textEdit == null) {
+                return LinearRange.createWithStart(document.getCursorOffset()).andLength(0);
+            }
+            Range range = textEdit.getRange();
+            TextPosition textPosition = new TextPosition(range.getStart().getLine(), range.getStart().getCharacter());
+            int startOffset = document.getIndexFromPosition(textPosition) + textEdit.getNewText().length();
             return LinearRange.createWithStart(startOffset).andLength(0);
         }
 

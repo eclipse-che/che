@@ -17,9 +17,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonSyntaxException;
 
-import org.apache.commons.fileupload.FileItem;
 import org.eclipse.che.api.agent.server.filters.AddExecAgentInEnvironmentUtil;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
@@ -40,7 +38,6 @@ import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.URLEncodedUtils;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -73,13 +70,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Boolean.parseBoolean;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.eclipse.che.api.factory.server.FactoryLinksHelper.createLinks;
 
 /**
@@ -139,69 +133,10 @@ public class FactoryService extends Service {
         this.factoryParametersResolvers = factoryParametersResolverHolder.getFactoryParametersResolvers();
     }
 
-    /**
-     * @deprecated this is a legacy method for functionality that is no longer exists.
-     * use {@link #saveFactory(FactoryDto)}
-     */
-    @POST
-    @Consumes(MULTIPART_FORM_DATA)
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Create a new factory based on configuration and factory images",
-                  notes = "The field 'factory' is required")
-    @ApiResponses({@ApiResponse(code = 200, message = "Factory successfully created"),
-                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
-                   @ApiResponse(code = 403, message = "The user does not have rights to create factory"),
-                   @ApiResponse(code = 409, message = "When factory with given name and creator already exists"),
-                   @ApiResponse(code = 500, message = "Internal server error occurred")})
-    @Deprecated
-    public FactoryDto saveFactory(Iterator<FileItem> formData) throws ForbiddenException,
-                                                                      ConflictException,
-                                                                      BadRequestException,
-                                                                      ServerException {
-        try {
-            final Set<FactoryImage> images = new HashSet<>();
-            FactoryDto factory = null;
-            while (formData.hasNext()) {
-                final FileItem item = formData.next();
-                switch (item.getFieldName()) {
-                    case ("factory"): {
-                        try (InputStream factoryData = item.getInputStream()) {
-                            factory = factoryBuilder.build(factoryData);
-                        } catch (JsonSyntaxException ex) {
-                            throw new BadRequestException("Invalid JSON value of the field 'factory' provided");
-                        }
-                        break;
-                    }
-                    case ("image"): {
-                        try (InputStream imageData = item.getInputStream()) {
-                            final FactoryImage image = createImage(imageData,
-                                                                   item.getContentType(),
-                                                                   NameGenerator.generate(null, 16));
-                            if (image.hasContent()) {
-                                images.add(image);
-                            }
-                        }
-                        break;
-                    }
-                    default:
-                        //DO NOTHING
-                }
-            }
-            requiredNotNull(factory, "factory configuration");
-            processDefaults(factory);
-            AddExecAgentInEnvironmentUtil.addExecAgent(factory.getWorkspace());
-            createValidator.validateOnCreate(factory);
-            return injectLinks(asDto(factoryManager.saveFactory(factory, images)), images);
-        } catch (IOException ioEx) {
-            throw new ServerException(ioEx.getLocalizedMessage(), ioEx);
-        }
-    }
-
     @POST
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Create a new factory based on configuration",
-                  notes = "Factory will be created without images")
+    @ApiOperation(value = "Create a new factory based on configuration")
     @ApiResponses({@ApiResponse(code = 200, message = "Factory successfully created"),
                    @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 403, message = "User does not have rights to create factory"),
@@ -214,8 +149,9 @@ public class FactoryService extends Service {
         requiredNotNull(factory, "Factory configuration");
         factoryBuilder.checkValid(factory);
         processDefaults(factory);
+        AddExecAgentInEnvironmentUtil.addExecAgent(factory.getWorkspace());
         createValidator.validateOnCreate(factory);
-        return injectLinks(asDto(factoryManager.saveFactory(factory)), null);
+        return injectLinks(asDto(factoryManager.saveFactory(factory)));
     }
 
     @GET
@@ -242,7 +178,7 @@ public class FactoryService extends Service {
         if (validate) {
             acceptValidator.validateOnAccept(factoryDto);
         }
-        return injectLinks(factoryDto, factoryManager.getFactoryImages(factoryId));
+        return injectLinks(factoryDto);
     }
 
     @GET
@@ -277,7 +213,7 @@ public class FactoryService extends Service {
         checkArgument(!query.isEmpty(), "Query must contain at least one attribute");
         final List<FactoryDto> factories = new ArrayList<>();
         for (Factory factory : factoryManager.getByAttribute(maxItems, skipCount, query)) {
-            factories.add(injectLinks(asDto(factory), null));
+            factories.add(injectLinks(asDto(factory)));
         }
         return factories;
     }
@@ -312,8 +248,7 @@ public class FactoryService extends Service {
         factoryBuilder.checkValid(update, true);
         // validate the new content
         createValidator.validateOnCreate(update);
-        return injectLinks(asDto(factoryManager.updateFactory(update)),
-                           factoryManager.getFactoryImages(factoryId));
+        return injectLinks(asDto(factoryManager.updateFactory(update)));
     }
 
     @DELETE
@@ -330,75 +265,6 @@ public class FactoryService extends Service {
                               String id) throws ForbiddenException,
                                                 ServerException {
         factoryManager.removeFactory(id);
-    }
-
-    /**
-     * @deprecated this is a legacy method for functionality that is no longer exists.
-     * There is no alternative for this method.
-     */
-    @GET
-    @Path("/{id}/image")
-    @Produces("image/*")
-    @ApiOperation(value = "Get factory image",
-                  notes = "If image identifier is not specified then first found image will be returned")
-    @ApiResponses({@ApiResponse(code = 200, message = "Response contains requested factory image"),
-                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
-                   @ApiResponse(code = 404, message = "Factory or factory image not found"),
-                   @ApiResponse(code = 500, message = "Internal server error")})
-    @Deprecated
-    public Response getImage(@ApiParam(value = "Factory identifier")
-                             @PathParam("id")
-                             String factoryId,
-                             @ApiParam(value = "Image identifier")
-                             @QueryParam("imgId")
-                             String imageId) throws NotFoundException,
-                                                    BadRequestException,
-                                                    ServerException {
-        final Set<FactoryImage> images;
-        if (isNullOrEmpty(imageId)) {
-            if ((images = factoryManager.getFactoryImages(factoryId)).isEmpty()) {
-                LOG.warn("Default image for factory {} is not found.", factoryId);
-                throw new NotFoundException("Default image for factory " + factoryId + " is not found.");
-            }
-        } else {
-            if ((images = factoryManager.getFactoryImages(factoryId, imageId)).isEmpty()) {
-                LOG.warn("Image with id {} is not found.", imageId);
-                throw new NotFoundException("Image with id " + imageId + " is not found.");
-            }
-        }
-        final FactoryImage image = images.iterator().next();
-        return Response.ok(image.getImageData(), image.getMediaType()).build();
-    }
-
-    /**
-     * @deprecated this is a legacy method for functionality that is no longer exists.
-     * There is no alternative for this method.
-     */
-    @GET
-    @Path("/{id}/snippet")
-    @Produces(TEXT_PLAIN)
-    @ApiOperation(value = "Get factory snippet",
-                  notes = "If snippet type is not specified then default 'url' will be used")
-    @ApiResponses({@ApiResponse(code = 200, message = "Response contains requested factory snippet"),
-                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
-                   @ApiResponse(code = 404, message = "Factory or factory snippet not found"),
-                   @ApiResponse(code = 500, message = "Internal server error")})
-    @Deprecated
-    public String getFactorySnippet(@ApiParam(value = "Factory identifier")
-                                    @PathParam("id")
-                                    String factoryId,
-                                    @ApiParam(value = "Snippet type",
-                                              required = true,
-                                              allowableValues = "url, html, iframe, markdown",
-                                              defaultValue = "url")
-                                    @DefaultValue("url")
-                                    @QueryParam("type")
-                                    String type) throws NotFoundException,
-                                                        BadRequestException,
-                                                        ServerException {
-        final String factorySnippet = factoryManager.getFactorySnippet(factoryId, type, uriInfo.getBaseUri());
-        checkArgument(factorySnippet != null, "Snippet type \"" + type + "\" is unsupported.");
-        return factorySnippet;
     }
 
     @GET
@@ -458,7 +324,7 @@ public class FactoryService extends Service {
                 if (validate) {
                     acceptValidator.validateOnAccept(factory);
                 }
-                return injectLinks(factory, null);
+                return injectLinks(factory);
             }
         }
         // no match
@@ -466,10 +332,9 @@ public class FactoryService extends Service {
     }
 
     /**
-     * Injects factory links. If factory is named then accept named link will be injected,
-     * if {@code images} is not null and not empty then image links will be injected
+     * Injects factory links. If factory is named then accept named link will be injected.
      */
-    private FactoryDto injectLinks(FactoryDto factory, Set<FactoryImage> images) {
+    private FactoryDto injectLinks(FactoryDto factory) {
         String username = null;
         if (factory.getCreator() != null && factory.getCreator().getUserId() != null) {
             try {
@@ -478,9 +343,7 @@ public class FactoryService extends Service {
                 // when impossible to get username then named factory link won't be injected
             }
         }
-        return factory.withLinks(images != null && !images.isEmpty()
-                                 ? createLinks(factory, images, getServiceContext(), username)
-                                 : createLinks(factory, getServiceContext(), username));
+        return factory.withLinks(createLinks(factory, getServiceContext(), username));
     }
 
     /**

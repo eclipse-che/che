@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.commons.xml.NewElement.createElement;
 import static java.util.Collections.emptyList;
 
@@ -38,7 +39,7 @@ import static java.util.Collections.emptyList;
  *
  * @author Eugene Voevodin
  */
-public class Build {
+public class Build extends BuildBase {
 
     private static final ElementMapper<Resource> RESOURCE_MAPPER = new ResourceMapper();
     private static final ElementMapper<Plugin>   PLUGIN_MAPPER   = new PluginMapper();
@@ -54,9 +55,11 @@ public class Build {
     Element buildElement;
 
     public Build() {
+        super();
     }
 
     Build(Element buildElement) {
+        super(buildElement);
         this.buildElement = buildElement;
         sourceDirectory = buildElement.getChildText("sourceDirectory");
         testSourceDirectory = buildElement.getChildText("testSourceDirectory");
@@ -343,8 +346,21 @@ public class Build {
         return plugins == null ? plugins = new ArrayList<>() : plugins;
     }
 
-    NewElement asXMLElement() {
+    public NewElement asXMLElement() {
         final NewElement xmlBuildElement = createElement("build");
+        if (!isNullOrEmpty(getDefaultGoal())) {
+            xmlBuildElement.appendChild(createElement("defaultGoal", getDefaultGoal()));
+        }
+        if (!isNullOrEmpty(getFinalName())) {
+            xmlBuildElement.appendChild(createElement("finalName", getFinalName()));
+        }
+        if (resources != null && !resources.isEmpty()) {
+            xmlBuildElement.appendChild(newResourcesElement(resources));
+        }
+        final List<Resource> testResources = getTestResources();
+        if (testResources != null && !testResources.isEmpty()) {
+            xmlBuildElement.appendChild(newTestResourcesElement(testResources));
+        }
         if (sourceDirectory != null) {
             xmlBuildElement.appendChild(createElement("sourceDirectory", sourceDirectory));
         }

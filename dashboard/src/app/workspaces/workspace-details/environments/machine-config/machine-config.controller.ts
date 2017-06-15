@@ -233,7 +233,6 @@ export class WorkspaceMachineConfigController {
    * @param {MouseEvent} $event
    * @returns {ng.IPromise<any>}
    */
-  // todo
   showDeleteDevMachineDialog($event: MouseEvent): ng.IPromise<any> {
     return this.$mdDialog.show({
       targetEvent: $event,

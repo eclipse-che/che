@@ -12,6 +12,7 @@
 
 import {EnvironmentManager} from './environment-manager';
 import {IEnvironmentManagerMachine} from './environment-manager-machine';
+import {ComposeParser, IComposeRecipe} from './compose-parser';
 
 /**
  * This is the implementation of environment manager that handles the docker compose format.
@@ -51,16 +52,13 @@ import {IEnvironmentManagerMachine} from './environment-manager-machine';
  *  @author Ann Shumilova
  */
 
-interface IComposeRecipe {
-  services: {
-    [machineName: string]: any
-  };
-}
-
 export class ComposeEnvironmentManager extends EnvironmentManager {
+  parser: ComposeParser;
 
   constructor($log: ng.ILogService) {
     super($log);
+
+    this.parser = new ComposeParser();
   }
 
   get editorMode(): string {
@@ -76,7 +74,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
   _parseRecipe(content: string): IComposeRecipe {
     let recipe = null;
     try {
-      recipe = this._validate(jsyaml.load(content));
+      recipe = this.parser.parse(content);
     } catch (e) {
       this.$log.error(e);
     }
@@ -84,39 +82,16 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
   }
 
   /**
-   * Validate given recipe
-   *
-   * @param {IComposeRecipe} recipe
-   * @returns {IComposeRecipe | *}
-   * @private
-   */
-  _validate(recipe: IComposeRecipe): IComposeRecipe | void {
-    if (!recipe.services) {
-      throw new Error('Recipe should contain services section.');
-    }
-
-    let services: any = Object.keys(recipe.services);
-    services.forEach((serviceName: string) => {
-      let serviceFields: any = Object.keys(recipe.services[serviceName] || {});
-      if (!serviceFields || (serviceFields.indexOf('build') < 0 && serviceFields.indexOf('image') < 0)) {
-        throw new Error('Service \'' + serviceName + '\' should contain \'build\' or \'image\' section.');
-      }
-    });
-
-    return recipe;
-  }
-
-  /**
    * Dumps recipe object
    *
-   * @param recipe {object} recipe object
+   * @param recipe {IComposeRecipe} recipe object
    * @returns {string} recipe content
    */
 
   _stringifyRecipe(recipe: IComposeRecipe): string {
     let content = '';
     try {
-      content = jsyaml.dump(recipe);
+      content = this.parser.dump(recipe);
     } catch (e) {
       this.$log.error(e);
     }

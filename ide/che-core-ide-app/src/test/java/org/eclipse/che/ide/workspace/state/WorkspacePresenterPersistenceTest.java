@@ -106,4 +106,5 @@ public class WorkspacePresenterPersistenceTest {
 
         verify(perspective1).loadState(perspective1State);
     }
+
 }

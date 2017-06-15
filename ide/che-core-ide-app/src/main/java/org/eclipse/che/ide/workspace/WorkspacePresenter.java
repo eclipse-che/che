@@ -174,4 +174,5 @@ public class WorkspacePresenter implements Presenter, WorkspaceView.ActionDelega
             }
         }
     }
+
 }

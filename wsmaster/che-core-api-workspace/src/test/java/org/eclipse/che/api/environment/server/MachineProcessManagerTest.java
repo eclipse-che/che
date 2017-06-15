@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server;
 
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.JsonRpcEndpointIdsHolder;

@@ -13,6 +13,8 @@ package org.eclipse.che.ide.editor.preferences.editorproperties.sections;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.editor.EditorLocalizationConstants;
+
+import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties.ENABLE_AUTO_SAVE;
 import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties.SOFT_WRAP;
 
 import java.util.Arrays;
@@ -29,7 +31,7 @@ public class EditPropertiesSection implements EditorPropertiesSection {
     @Inject
     public EditPropertiesSection(EditorLocalizationConstants locale) {
         this.locale = locale;
-        properties = Arrays.asList(SOFT_WRAP.toString());
+        properties = Arrays.asList(ENABLE_AUTO_SAVE.toString(), SOFT_WRAP.toString());
     }
 
     @Override

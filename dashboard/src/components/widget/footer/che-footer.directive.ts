@@ -52,54 +52,39 @@ export class CheFooter {
    * </example>
    * @author Ann Shumilova
    */
-  restrict: string = 'E';
-  replace: boolean = true;
-  transclude: boolean = true;
+  private restrict: string;
+  private replace: boolean;
+  private transclude: boolean;
 
-  /**
-   * Template for the current footer
-   * @param {ng.IAugmentedJQuery} element
-   * @param {any} attrs
-   * @returns {string} the template
-   */
-  template(element: ng.IAugmentedJQuery, attrs: any) {
-    let logo = attrs.cheLogo;
-    let version = attrs.cheVersion;
-    let productName  = attrs.cheProductName;
-    let supportEmail = attrs.cheSupportEmail;
-    let supportHelpPath = attrs.cheSupportHelpPath;
-    let supportHelpTitle = attrs.cheSupportHelpTitle;
+  private bindToController: boolean;
+  private controller: string;
+  private controllerAs: string;
+  private templateUrl: string;
 
-    let template = '<div class=\"che-footer\" layout=\"row\" layout-align=\"start center\">';
-    if (logo) {
-      template += '<img class=\"che-footer-logo\" ng-src=\"' + logo + '\" alt=\"logo\">';
-    }
-    if (version) {
-      template += '<span class=\"che-footer-version\">' + version + '</span>';
-    }
-    template += '<div flex />';
-    template += '<ng-transclude></ng-transclude>';
+  private scope: {
+    [propName: string]: string
+  };
 
-    // email
-    if (supportEmail) {
-      let subject = '?subject=' + encodeURIComponent('Wishes for ' + productName);
-      template += '<a class=\"che-footer-button-blue che-footer-button\" ng-href=\"mailto:' + supportEmail + subject + '\">Make a wish<a/>';
-    }
+  constructor() {
+    this.templateUrl = 'components/widget/footer/che-footer.html';
 
-    // docs
-    template += '<a class=\"che-footer-button-blue che-footer-button\" href=\"/docs\" target=\"_blank\">Docs<a/>';
+    this.restrict = 'E';
+    this.replace = true;
+    this.transclude = true;
+    this.bindToController = true;
+    this.controller = 'CheFooterController';
+    this.controllerAs = 'cheFooterController';
 
-    // help
-    if (supportHelpPath && supportHelpTitle) {
-      template += '<a class=\"che-footer-button-blue che-footer-button\" ng-href=\"' + supportHelpPath + '\" target=\"_blank\">' + supportHelpTitle + '<a/>';
-    }
-
-    // diagnostics
-    template += '<a class=\"che-footer-button-blue che-footer-button\" ng-href=\"#/diagnostic\">Diagnostics<a/>';
-
-    template += '</div>';
-    return template;
+    this.scope = {
+      supportHelpPath: '@cheSupportHelpPath',
+      supportHelpTitle: '@cheSupportHelpTitle',
+      supportEmail: '@cheSupportEmail',
+      logo: '@cheLogo',
+      version: '@cheVersion',
+      productName: '@cheProductName',
+      links: '=cheLinks',
+      email: '=?cheEmail'
+    };
   }
-
 }
 

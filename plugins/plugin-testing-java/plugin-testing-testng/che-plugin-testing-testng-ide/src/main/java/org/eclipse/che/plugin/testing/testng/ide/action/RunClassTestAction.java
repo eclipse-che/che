@@ -10,17 +10,21 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.testng.ide.action;
 
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
+
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
@@ -33,49 +37,63 @@ import com.google.inject.Inject;
 /**
  * @author Mirage Abeysekara
  */
-public class RunClassTestAction extends JavaEditorAction 
-implements RunTestActionDelegate.Source {
+public class RunClassTestAction extends AbstractPerspectiveAction
+                                       implements RunTestActionDelegate.Source {
 
-    private final NotificationManager notificationManager;
-    private final TestResultPresenter presenter;
-    private final TestServiceClient   service;
+    private final NotificationManager   notificationManager;
+    private final TestResultPresenter   presenter;
+    private final TestServiceClient     service;
+    private final AppContext            appContext;
     private final RunTestActionDelegate delegate;
 
     @Inject
     public RunClassTestAction(TestNGResources resources,
                               NotificationManager notificationManager,
-                              EditorAgent editorAgent,
-                              FileTypeRegistry fileTypeRegistry,
+                              AppContext appContext,
                               TestResultPresenter presenter,
                               TestServiceClient service,
                               TestNGLocalizationConstant localization) {
-        super(localization.actionRunClassTitle(), localization.actionRunClassDescription(), resources.testIcon(),
-              editorAgent, fileTypeRegistry);
+        super(singletonList(PROJECT_PERSPECTIVE_ID), localization.actionRunClassTitle(),
+              localization.actionRunClassDescription(), null, resources.testIcon());
         this.notificationManager = notificationManager;
-        this.editorAgent = editorAgent;
         this.presenter = presenter;
         this.service = service;
+        this.appContext = appContext;
         this.delegate = new RunTestActionDelegate(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Map<String, String> parameters = new HashMap<>();
-        EditorPartPresenter editorPart = editorAgent.getActiveEditor();
-        final VirtualFile file = editorPart.getEditorInput().getFile();
-        String fqn = JavaUtil.resolveFQN(file);
-        parameters.put("fqn", fqn);
-        parameters.put("runClass", "true");
-        
-        delegate.doRunTests(e, parameters);
+        Resource resource = appContext.getResource();
+        if (resource instanceof File) {
+            File file = ((File)resource);
+            String fqn = JavaUtil.resolveFQN((VirtualFile)file);
+            Map<String, String> parameters = new HashMap<>();
+            parameters.put("fqn", fqn);
+            parameters.put("runClass", "true");
+            delegate.doRunTests(e, parameters);
+        }
     }
 
     @Override
-    protected void updateProjectAction(ActionEvent e) {
-        super.updateProjectAction(e);
+    public void updateInPerspective(@NotNull ActionEvent e) {
+        Resource resource = appContext.getResource();
+        if (!(resource instanceof File) || resource.getProject() == null) {
+            e.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+
         e.getPresentation().setVisible(true);
+
+        String projectType = resource.getProject().getType();
+        if (!"maven".equals(projectType)) {
+            e.getPresentation().setEnabled(false);
+        }
+
+        boolean enable = "java".equals(((File)resource).getExtension());
+        e.getPresentation().setEnabled(enable);
     }
-    
+
     @Override
     public NotificationManager getNotificationManager() {
         return notificationManager;

@@ -109,6 +109,24 @@ public class MavenProjectManagerTest {
     }
 
     @Test
+    public void testResolveProjectWithProfiles() throws Exception {
+        when(project.getFile(MavenConstants.POM_FILE_NAME)).thenReturn(pom);
+        when(pom.getLocation()).thenReturn(new Path(MavenProjectManagerTest.class.getResource("/multi-module-with-profiles/pom.xml").getFile()));
+        when(pom.getFullPath()).thenReturn(new Path("/multi-module-with-profiles/pom.xml"));
+        when(project.getFullPath()).thenReturn(new Path("/multi-module-with-profiles/"));
+
+        projectManager.addListener(listener);
+        MavenProject mavenProject = new MavenProject(project, workspace);
+        mavenProject.read(project, manager);
+        MavenKey mavenKey = mavenProject.getMavenKey();
+        assertThat(mavenKey).isNotNull();
+
+        projectManager.resolveMavenProject(project, mavenProject);
+        verify(listener).projectResolved(any(), any());
+        assertThat(mavenProject.getModules().size()).isEqualTo(3);
+    }
+
+    @Test
     public void testNotValidResolveProject() throws Exception {
         when(project.getFile(MavenConstants.POM_FILE_NAME)).thenReturn(pom);
         when(pom.getLocation()).thenReturn(new Path(MavenProjectManagerTest.class.getResource("/BadProject/pom.xml").getFile()));

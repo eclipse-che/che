@@ -17,7 +17,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.ProcessKillResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessSubscribeResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
@@ -37,6 +36,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
@@ -136,77 +136,60 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     }
 
     @Override
-    public Operation<ProcessStdErrEventDto> getStdErrOperation() {
-        return new Operation<ProcessStdErrEventDto>() {
-            @Override
-            public void apply(ProcessStdErrEventDto event) throws OperationException {
-                String text = event.getText();
-                boolean carriageReturn = text.endsWith("\r");
-                String color = "red";
-                view.print(text, carriageReturn, color);
+    public Consumer<ProcessStdErrEventDto> getStdErrConsumer() {
+        return event -> {
+            String text = event.getText();
+            boolean carriageReturn = text.endsWith("\r");
+            String color = "red";
+            view.print(text, carriageReturn, color);
 
-                for (ActionDelegate actionDelegate : actionDelegates) {
-                    actionDelegate.onConsoleOutput(CommandOutputConsolePresenter.this);
-                }
+            for (ActionDelegate actionDelegate : actionDelegates) {
+                actionDelegate.onConsoleOutput(CommandOutputConsolePresenter.this);
             }
         };
     }
 
     @Override
-    public Operation<ProcessStdOutEventDto> getStdOutOperation() {
-        return new Operation<ProcessStdOutEventDto>() {
-            @Override
-            public void apply(ProcessStdOutEventDto event) throws OperationException {
-                String stdOutMessage = event.getText();
-                boolean carriageReturn = stdOutMessage.endsWith("\r");
-                view.print(stdOutMessage, carriageReturn);
+    public Consumer<ProcessStdOutEventDto> getStdOutConsumer() {
+        return event -> {
+            String stdOutMessage = event.getText();
+            boolean carriageReturn = stdOutMessage.endsWith("\r");
+            view.print(stdOutMessage, carriageReturn);
 
-                for (ActionDelegate actionDelegate : actionDelegates) {
-                    actionDelegate.onConsoleOutput(CommandOutputConsolePresenter.this);
-                }
+            for (ActionDelegate actionDelegate : actionDelegates) {
+                actionDelegate.onConsoleOutput(CommandOutputConsolePresenter.this);
             }
         };
 
     }
 
     @Override
-    public Operation<ProcessStartedEventDto> getProcessStartedOperation() {
-        return new Operation<ProcessStartedEventDto>() {
-            @Override
-            public void apply(ProcessStartedEventDto event) throws OperationException {
-                finished = false;
-                view.enableStopButton(true);
-                view.toggleScrollToEndButton(true);
+    public Consumer<ProcessStartedEventDto> getProcessStartedConsumer() {
+        return event -> {
+            finished = false;
+            view.enableStopButton(true);
+            view.toggleScrollToEndButton(true);
 
-                pid = event.getPid();
+            pid = event.getPid();
 
-                eventBus.fireEvent(new ProcessStartedEvent(pid, machine));
-            }
+            eventBus.fireEvent(new ProcessStartedEvent(pid, machine));
         };
     }
 
     @Override
-    public Operation<ProcessDiedEventDto> getProcessDiedOperation() {
-        return new Operation<ProcessDiedEventDto>() {
-            @Override
-            public void apply(ProcessDiedEventDto event) throws OperationException {
-                finished = true;
-                view.enableStopButton(false);
-                view.toggleScrollToEndButton(false);
+    public Consumer<ProcessDiedEventDto> getProcessDiedConsumer() {
+        return event -> {
+            finished = true;
+            view.enableStopButton(false);
+            view.toggleScrollToEndButton(false);
 
-                eventBus.fireEvent(new ProcessFinishedEvent(pid, machine));
-            }
+            eventBus.fireEvent(new ProcessFinishedEvent(pid, machine));
         };
     }
 
     @Override
-    public Operation<ProcessSubscribeResponseDto> getProcessSubscribeOperation() {
-        return new Operation<ProcessSubscribeResponseDto>() {
-            @Override
-            public void apply(ProcessSubscribeResponseDto process) throws OperationException {
-                pid = process.getPid();
-            }
-        };
+    public Consumer<ProcessSubscribeResponseDto> getProcessSubscribeConsumer() {
+        return process -> pid = process.getPid();
     }
 
     @Override
@@ -239,12 +222,8 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         if (isFinished()) {
             commandExecutor.executeCommand(command, machine);
         } else {
-            execAgentCommandManager.killProcess(machine.getId(), pid).then(new Operation<ProcessKillResponseDto>() {
-                @Override
-                public void apply(ProcessKillResponseDto arg) throws OperationException {
-                    commandExecutor.executeCommand(command, machine);
-                }
-            });
+            execAgentCommandManager.killProcess(machine.getId(), pid)
+                                   .onSuccess(() -> commandExecutor.executeCommand(command, machine));
         }
     }
 

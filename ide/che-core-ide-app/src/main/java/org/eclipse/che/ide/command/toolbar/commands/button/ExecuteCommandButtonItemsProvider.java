@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.command.toolbar.commands.button;
 
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.ui.menubutton.ItemsProvider;
@@ -29,16 +30,18 @@ import static java.util.stream.Collectors.toList;
 /** Provides items for {@link ExecuteCommandButton}. */
 public class ExecuteCommandButtonItemsProvider implements ItemsProvider {
 
-    private final Set<CommandImpl> commands;
     private final AppContext       appContext;
     private final MenuItemsFactory menuItemsFactory;
+    private final CommandGoal      goal;
+    private final Set<CommandImpl> commands;
 
     private DataChangedHandler dataChangedHandler;
     private MenuItem           defaultItem;
 
-    ExecuteCommandButtonItemsProvider(AppContext appContext, MenuItemsFactory menuItemsFactory) {
+    ExecuteCommandButtonItemsProvider(AppContext appContext, MenuItemsFactory menuItemsFactory, CommandGoal goal) {
         this.appContext = appContext;
         this.menuItemsFactory = menuItemsFactory;
+        this.goal = goal;
         this.commands = new HashSet<>();
     }
 
@@ -64,7 +67,7 @@ public class ExecuteCommandButtonItemsProvider implements ItemsProvider {
         }
 
         if (items.isEmpty()) {
-            items.add(menuItemsFactory.newGuideItem());
+            items.add(menuItemsFactory.newGuideItem(goal));
         }
 
         return items;

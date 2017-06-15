@@ -19,9 +19,10 @@
       <div flex="100" layout="row">
         <div flex="15" class="header-search-icon" ng-show="!inputValue"><i class="fa fa-search"></i></div>
         <div flex class="header-search-input">
-          <input type="text" maxlength="128" placeholder="{{inputPlaceholder}}" data-ng-model="inputValue">
+          <input type="text" maxlength="128" placeholder="{{inputPlaceholder}}"
+                 data-ng-model="inputValue" ng-change="onSearchChange({str: inputValue})">
         </div>
-        <div flex="10" class="header-close-icon" ng-click="inputValue=''" ng-show="inputValue"><i class="fa fa-close"></i></div>
+        <div flex="10" class="header-close-icon" ng-click="inputValue='';onSearchChange({str: ''})" ng-show="inputValue"><i class="fa fa-close"></i></div>
       </div>
     </div>
     <che-filter-selector che-values="filterValues"

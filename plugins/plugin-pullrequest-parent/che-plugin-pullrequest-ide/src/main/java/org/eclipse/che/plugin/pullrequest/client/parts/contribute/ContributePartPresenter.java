@@ -10,20 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.pullrequest.client.parts.contribute;
 
-import org.eclipse.che.plugin.pullrequest.client.ContributeMessages;
-import org.eclipse.che.plugin.pullrequest.client.events.ContextInvalidatedEvent;
-import org.eclipse.che.plugin.pullrequest.client.events.ContextInvalidatedHandler;
-import org.eclipse.che.plugin.pullrequest.client.events.ContextPropertyChangeEvent;
-import org.eclipse.che.plugin.pullrequest.client.events.ContextPropertyChangeHandler;
-import org.eclipse.che.plugin.pullrequest.client.events.CurrentContextChangedEvent;
-import org.eclipse.che.plugin.pullrequest.client.events.CurrentContextChangedHandler;
-import org.eclipse.che.plugin.pullrequest.client.events.StepEvent;
-import org.eclipse.che.plugin.pullrequest.client.events.StepHandler;
-import org.eclipse.che.plugin.pullrequest.client.steps.CommitWorkingTreeStep;
-import org.eclipse.che.plugin.pullrequest.client.workflow.Context;
-import org.eclipse.che.plugin.pullrequest.client.workflow.Step;
-import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowExecutor;
-import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowStatus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -43,6 +29,20 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.plugin.pullrequest.client.ContributeMessages;
+import org.eclipse.che.plugin.pullrequest.client.events.ContextInvalidatedEvent;
+import org.eclipse.che.plugin.pullrequest.client.events.ContextInvalidatedHandler;
+import org.eclipse.che.plugin.pullrequest.client.events.ContextPropertyChangeEvent;
+import org.eclipse.che.plugin.pullrequest.client.events.ContextPropertyChangeHandler;
+import org.eclipse.che.plugin.pullrequest.client.events.CurrentContextChangedEvent;
+import org.eclipse.che.plugin.pullrequest.client.events.CurrentContextChangedHandler;
+import org.eclipse.che.plugin.pullrequest.client.events.StepEvent;
+import org.eclipse.che.plugin.pullrequest.client.events.StepHandler;
+import org.eclipse.che.plugin.pullrequest.client.steps.CommitWorkingTreeStep;
+import org.eclipse.che.plugin.pullrequest.client.workflow.Context;
+import org.eclipse.che.plugin.pullrequest.client.workflow.Step;
+import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowExecutor;
+import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowStatus;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -247,8 +247,8 @@ public class ContributePartPresenter extends BasePresenter implements Contribute
     public void onOpenPullRequestOnVcsHost() {
         final Context context = workflowExecutor.getCurrentContext();
 
-        Window.open(context.getVcsHostingService().makePullRequestUrl(context.getUpstreamRepositoryOwner(),
-                                                                      context.getUpstreamRepositoryName(),
+        Window.open(context.getVcsHostingService().makePullRequestUrl(context.getOriginRepositoryOwner(),
+                                                                      context.getOriginRepositoryName(),
                                                                       context.getPullRequestIssueNumber()), "", "");
     }
 

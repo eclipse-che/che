@@ -20,6 +20,8 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 
+import java.util.function.Consumer;
+
 /**
  * Describes requirements for the console for command output.
  *
@@ -54,7 +56,7 @@ public interface CommandOutputConsole extends OutputConsole {
      *
      * @return operation
      */
-    Operation<ProcessStdErrEventDto> getStdErrOperation();
+    Consumer<ProcessStdErrEventDto> getStdErrConsumer();
 
     /**
      * Get an output console related operations that should be performed when
@@ -62,7 +64,7 @@ public interface CommandOutputConsole extends OutputConsole {
      *
      * @return operation
      */
-    Operation<ProcessStdOutEventDto> getStdOutOperation();
+    Consumer<ProcessStdOutEventDto> getStdOutConsumer();
 
     /**
      * Get an output console related operations that should be performed when
@@ -70,7 +72,7 @@ public interface CommandOutputConsole extends OutputConsole {
      *
      * @return operation
      */
-    Operation<ProcessStartedEventDto> getProcessStartedOperation();
+    Consumer<ProcessStartedEventDto> getProcessStartedConsumer();
 
     /**
      * Get an output console related operations that should be performed when
@@ -78,7 +80,7 @@ public interface CommandOutputConsole extends OutputConsole {
      *
      * @return operation
      */
-    Operation<ProcessDiedEventDto> getProcessDiedOperation();
+    Consumer<ProcessDiedEventDto> getProcessDiedConsumer();
 
     /**
      * Get an output console related operations that should be performed when
@@ -86,7 +88,7 @@ public interface CommandOutputConsole extends OutputConsole {
      *
      * @return operation
      */
-    Operation<ProcessSubscribeResponseDto> getProcessSubscribeOperation();
+    Consumer<ProcessSubscribeResponseDto> getProcessSubscribeConsumer();
 
     /**
      * Print raw string data inside the output console

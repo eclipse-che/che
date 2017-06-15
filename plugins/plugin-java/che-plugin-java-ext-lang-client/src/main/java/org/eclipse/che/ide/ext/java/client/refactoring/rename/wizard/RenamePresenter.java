@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -22,13 +20,12 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.ng.FileTrackingEvent;
+import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
@@ -46,7 +43,6 @@ import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeCreationResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeInfo;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringSession;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatusEntry;
@@ -57,12 +53,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ValidateNewName;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.MOVE;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingMoveEvent;
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingResumeEvent;
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingSuspendEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
@@ -93,7 +83,7 @@ public class RenamePresenter implements ActionDelegate {
     private final DtoFactory                         dtoFactory;
     private final RefactoringServiceClient           refactorService;
     private final DialogFactory                      dialogFactory;
-    private final EventBus                           eventBus;
+    private final ClientServerEventService           clientServerEventService;
 
     private RenameRefactoringSession renameRefactoringSession;
     private RefactorInfo             refactorInfo;
@@ -108,16 +98,16 @@ public class RenamePresenter implements ActionDelegate {
                            NotificationManager notificationManager,
                            PreviewPresenter previewPresenter,
                            RefactoringServiceClient refactorService,
+                           ClientServerEventService clientServerEventService,
                            DtoFactory dtoFactory,
-                           DialogFactory dialogFactory,
-                           EventBus eventBus) {
+                           DialogFactory dialogFactory) {
         this.view = view;
         this.similarNamesConfigurationPresenter = similarNamesConfigurationPresenter;
         this.locale = locale;
         this.refactoringUpdater = refactoringUpdater;
         this.editorAgent = editorAgent;
         this.notificationManager = notificationManager;
-        this.eventBus = eventBus;
+        this.clientServerEventService = clientServerEventService;
         this.view.setDelegate(this);
         this.appContext = appContext;
         this.previewPresenter = previewPresenter;
@@ -319,7 +309,10 @@ public class RenamePresenter implements ActionDelegate {
                         }
                         break;
                     default:
-                        applyRefactoring(session);
+                        clientServerEventService.sendFileTrackingSuspendEvent().then(success -> {
+                            applyRefactoring(session);
+                        });
+
                 }
             }
         }).catchError(new Operation<PromiseError>() {
@@ -333,69 +326,50 @@ public class RenamePresenter implements ActionDelegate {
     private void showWarningDialog(final RefactoringSession session, ChangeCreationResult changeCreationResult) {
         List<RefactoringStatusEntry> entries = changeCreationResult.getStatus().getEntries();
 
+        ConfirmCallback confirmCallback = () -> clientServerEventService.sendFileTrackingSuspendEvent().then(success -> {
+            applyRefactoring(session);
+        });
+
         dialogFactory.createConfirmDialog(locale.warningOperationTitle(),
                                           entries.isEmpty() ? locale.warningOperationContent() : entries.get(0).getMessage(),
                                           locale.renameRename(),
                                           locale.buttonCancel(),
-                                          new ConfirmCallback() {
-                                              @Override
-                                              public void accepted() {
-                                                  applyRefactoring(session);
-                                              }
-                                          },
-                                          new CancelCallback() {
-                                              @Override
-                                              public void cancelled() {
-                                              }
+                                          confirmCallback,
+                                          () -> {
                                           }).show();
     }
 
     private void applyRefactoring(RefactoringSession session) {
-        eventBus.fireEvent(newFileTrackingSuspendEvent());
-        refactorService.applyRefactoring(session).then(new Operation<RefactoringResult>() {
-            @Override
-            public void apply(RefactoringResult arg) throws OperationException {
-                if (arg.getSeverity() == OK) {
-                    view.hide();
-                    refactoringUpdater.updateAfterRefactoring(arg.getChanges());
-
-                    final Resource[] resources = refactorInfo != null ? refactorInfo.getResources() : null;
-                    Project project = null;
-
-                    if (resources != null && resources.length == 1) {
-                        final Optional<Project> optProject = resources[0].getRelatedProject();
-                        if (optProject.isPresent()) {
-                            project = optProject.get();
-                        }
-                    } else {
-                        final Resource resource = appContext.getResource();
-
-                        if (resource != null) {
-                            final Optional<Project> optProject = resource.getRelatedProject();
-                            if (optProject.isPresent()) {
-                                project = optProject.get();
-                            }
-                        }
-                    }
-
-                    if (project != null) {
-                        refactorService.reindexProject(project.getLocation().toString());
-                    }
-
-                    setEditorFocus();
-                } else {
-                    view.showErrorMessage(arg);
-                }
-
-                for (ChangeInfo change : arg.getChanges()) {
-                    final String path = change.getPath();
-                    final String oldPath = change.getOldPath();
-
-                    eventBus.fireEvent(newFileTrackingMoveEvent(path, oldPath));
-                }
-                eventBus.fireEvent(newFileTrackingResumeEvent());
-
+        refactorService.applyRefactoring(session).then(refactoringResult -> {
+            List<ChangeInfo> changes = refactoringResult.getChanges();
+            if (refactoringResult.getSeverity() == OK) {
+                view.hide();
+                updateAfterRefactoring(changes)
+                        .then(refactoringUpdater.handleMovingFiles(changes)
+                                                .then(clientServerEventService.sendFileTrackingResumeEvent()));
+            } else {
+                view.showErrorMessage(refactoringResult);
+                refactoringUpdater.handleMovingFiles(changes)
+                                  .then(clientServerEventService.sendFileTrackingResumeEvent());
             }
+        });
+    }
+
+    private Promise<Void> updateAfterRefactoring(List<ChangeInfo> changes) {
+        return refactoringUpdater.updateAfterRefactoring(changes).then(arg -> {
+            final Resource[] resources = refactorInfo != null ? refactorInfo.getResources() : null;
+            Project project = null;
+
+            final Resource resource = (resources != null && resources.length == 1) ? resources[0] : appContext.getResource();
+            if (resource != null) {
+                project = resource.getProject();
+            }
+
+            if (project != null) {
+                refactorService.reindexProject(project.getLocation().toString());
+            }
+
+            setEditorFocus();
         });
     }
 
@@ -471,5 +445,4 @@ public class RenamePresenter implements ActionDelegate {
 
         return dto;
     }
-
 }

@@ -195,6 +195,60 @@ public class JpaUserDao implements UserDao {
 
     @Override
     @Transactional
+    public Page<UserImpl> getByNamePart(String namePart, int maxItems, long skipCount) throws ServerException {
+        requireNonNull(namePart, "Required non-null name part");
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative");
+        checkArgument(skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
+                      "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
+        try {
+            final List<UserImpl> list = managerProvider.get()
+                                                       .createNamedQuery("User.getByNamePart", UserImpl.class)
+                                                       .setParameter("name", namePart.toLowerCase())
+                                                       .setMaxResults(maxItems)
+                                                       .setFirstResult((int)skipCount)
+                                                       .getResultList()
+                                                       .stream()
+                                                       .map(JpaUserDao::erasePassword)
+                                                       .collect(toList());
+            final long count = managerProvider.get()
+                                              .createNamedQuery("User.getByNamePartCount", Long.class)
+                                              .setParameter("name", namePart.toLowerCase())
+                                              .getSingleResult();
+            return new Page<>(list, skipCount, maxItems, count);
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
+    }
+
+    @Override
+    @Transactional
+    public Page<UserImpl> getByEmailPart(String emailPart, int maxItems, long skipCount) throws ServerException {
+        requireNonNull(emailPart, "Required non-null email part");
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative");
+        checkArgument(skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
+                      "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
+        try {
+            final List<UserImpl> list = managerProvider.get()
+                                                       .createNamedQuery("User.getByEmailPart", UserImpl.class)
+                                                       .setParameter("email", emailPart.toLowerCase())
+                                                       .setMaxResults(maxItems)
+                                                       .setFirstResult((int)skipCount)
+                                                       .getResultList()
+                                                       .stream()
+                                                       .map(JpaUserDao::erasePassword)
+                                                       .collect(toList());
+            final long count = managerProvider.get()
+                                              .createNamedQuery("User.getByEmailPartCount", Long.class)
+                                              .setParameter("email", emailPart.toLowerCase())
+                                              .getSingleResult();
+            return new Page<>(list, skipCount, maxItems, count);
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
+    }
+
+    @Override
+    @Transactional
     public long getTotalCount() throws ServerException {
         try {
             return managerProvider.get().createNamedQuery("User.getTotalCount", Long.class).getSingleResult();

@@ -19,6 +19,7 @@ import org.eclipse.che.api.promises.client.Operation;
  * GWT binding to term.js script
  *
  * @author Evgen Vidolob
+ * @author Alexander Andrienko
  */
 class TerminalJso extends JavaScriptObject {
     protected TerminalJso() {
@@ -30,6 +31,10 @@ class TerminalJso extends JavaScriptObject {
 
     public final native void open(Element element) /*-{
         this.open(element);
+    }-*/;
+
+    public final native void attachCustomKeyDownHandler(JavaScriptObject customKeyDownHandler) /*-{
+        this.attachCustomKeydownHandler(customKeyDownHandler);
     }-*/;
 
     public final native Element getElement() /*-{

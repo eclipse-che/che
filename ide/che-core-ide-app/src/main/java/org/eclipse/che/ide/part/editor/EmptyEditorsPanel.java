@@ -100,7 +100,7 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
 
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
-        final SVGResource logo = productInfoDataProvider.getLogo();
+        final SVGResource logo = productInfoDataProvider.getWaterMarkLogo();
         if (nonNull(logo)) {
             this.logo.appendChild(new SVGImage(logo).getSvgElement().getElement());
         }

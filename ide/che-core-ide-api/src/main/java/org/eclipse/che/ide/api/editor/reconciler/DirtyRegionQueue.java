@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Queue used by {@link ReconcilerWithAutoSave} to manage dirty regions. When a dirty region is inserted into the queue, the queue tries to fold it
+ * Queue used to manage dirty regions. When a dirty region is inserted into the queue, the queue tries to fold it
  * into the neighboring dirty region.
  */
-class DirtyRegionQueue {
+public class DirtyRegionQueue {
 
     /** The list of dirty regions. */
     private final List<DirtyRegion> fDirtyRegions = new ArrayList<>();

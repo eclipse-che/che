@@ -11,12 +11,16 @@
 package org.eclipse.che.ide.ext.java.client.refactoring.move;
 
 import com.google.common.base.Optional;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -28,6 +32,9 @@ import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.wizard.MovePresenter;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
+import org.eclipse.che.ide.util.loging.Log;
+
+import java.util.List;
 
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.ext.java.client.refactoring.move.MoveType.REFACTOR_MENU;
@@ -41,20 +48,28 @@ import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredIte
 @Singleton
 public class MoveAction extends AbstractPerspectiveAction {
 
-    private final MovePresenter    movePresenter;
-    private final AppContext       appContext;
-    private final FileTypeRegistry fileTypeRegistry;
+    private final JavaLocalizationConstant locale;
+    private final MovePresenter            movePresenter;
+    private final AppContext               appContext;
+    private final FileTypeRegistry         fileTypeRegistry;
+    private final DialogFactory            dialogFactory;
+    private       EditorAgent              editorAgent;
 
     @Inject
     public MoveAction(JavaLocalizationConstant locale,
                       MovePresenter movePresenter,
                       AppContext appContext,
-                      FileTypeRegistry fileTypeRegistry) {
+                      FileTypeRegistry fileTypeRegistry,
+                      DialogFactory dialogFactory,
+                      EditorAgent editorAgent) {
         super(null, locale.moveActionName(), locale.moveActionDescription());
+        this.locale = locale;
 
         this.movePresenter = movePresenter;
         this.appContext = appContext;
         this.fileTypeRegistry = fileTypeRegistry;
+        this.dialogFactory = dialogFactory;
+        this.editorAgent = editorAgent;
     }
 
     /** {@inheritDoc} */
@@ -81,7 +96,8 @@ public class MoveAction extends AbstractPerspectiveAction {
         final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
 
         if (resource.getResourceType() == FILE) {
-            event.getPresentation().setEnabled(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent() && isJavaFile((File)resource));
+            event.getPresentation()
+                 .setEnabled(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent() && isJavaFile((File)resource));
         } else if (resource instanceof Container) {
             event.getPresentation().setEnabled(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent());
         }
@@ -90,6 +106,32 @@ public class MoveAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
+        List<EditorPartPresenter> dirtyEditors = editorAgent.getDirtyEditors();
+        if (dirtyEditors.isEmpty()) {
+            performAction();
+            return;
+        }
+
+        AsyncCallback<Void> savingOperationCallback = new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Log.error(getClass(), caught);
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                performAction();
+            }
+        };
+
+        dialogFactory.createConfirmDialog(locale.unsavedDataDialogTitle(),
+                                          locale.unsavedDataDialogPromptSaveChanges(),
+                                          () -> editorAgent.saveAll(savingOperationCallback),
+                                          null)
+                     .show();
+    }
+
+    private void performAction() {
         final Resource[] resources = appContext.getResources();
 
         if (resources == null || resources.length > 1) {

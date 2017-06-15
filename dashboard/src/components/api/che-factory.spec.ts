@@ -9,6 +9,9 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheHttpBackend} from './test/che-http-backend';
+import {CheAPIBuilder} from './builder/che-api-builder.factory';
+import {CheFactory} from './che-factory.factory';
 
 /**
  * Test of the Codenvy Factory API
@@ -44,7 +47,7 @@ describe('CheFactory', () => {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject((cheFactory, cheAPIBuilder, cheHttpBackend) => {
+  beforeEach(inject((cheFactory: CheFactory, cheAPIBuilder: CheAPIBuilder, cheHttpBackend: CheHttpBackend) => {
 
     factory = cheFactory;
     apiBuilder = cheAPIBuilder;
@@ -88,7 +91,7 @@ describe('CheFactory', () => {
       cheBackend.factoriesBackendSetup();
 
       // fetch factory
-      factory.fetchFactories(maxItem, skipCount);
+      factory.fetchFactories(maxItem);
 
       // expecting GETs
       httpBackend.expectGET('/api/user');

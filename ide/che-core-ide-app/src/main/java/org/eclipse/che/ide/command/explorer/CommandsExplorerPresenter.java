@@ -78,6 +78,8 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     private final AppContext           appContext;
     private final EventBus             eventBus;
 
+    private boolean isFirstActivation;
+
     @Inject
     public CommandsExplorerPresenter(CommandsExplorerView view,
                                      CommandResources commandResources,
@@ -110,6 +112,17 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
+    public void onOpen() {
+        super.onOpen();
+
+        if (isFirstActivation) {
+            commandManager.fetchCommands();
+            refreshView();
+            isFirstActivation = false;
+        }
+    }
+
+    @Override
     public void start(Callback<WsAgentComponent, Exception> callback) {
         callback.onSuccess(this);
 
@@ -119,13 +132,14 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
         refreshView();
 
-        eventBus.addHandler(CommandAddedEvent.getType(), e -> refreshView());
+        eventBus.addHandler(CommandAddedEvent.getType(), e -> refreshViewAndSelectCommand(e.getCommand()));
         eventBus.addHandler(CommandRemovedEvent.getType(), e -> refreshView());
         eventBus.addHandler(CommandUpdatedEvent.getType(), e -> refreshView());
     }
 
     @Override
     public void go(AcceptsOneWidget container) {
+        isFirstActivation = true;
         refreshView();
 
         container.setWidget(getView());

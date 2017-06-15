@@ -40,7 +40,7 @@ export class LastFactoriesController {
     this.maxItems = 5;
 
     // todo add OrderBy to condition in fetch API
-    let promise = this.cheFactory.fetchFactories(this.maxItems, 0);
+    let promise = this.cheFactory.fetchFactories(this.maxItems);
 
     this.isLoading = true;
     promise.finally(() => {

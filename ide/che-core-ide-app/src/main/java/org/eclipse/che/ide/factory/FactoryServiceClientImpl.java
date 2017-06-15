@@ -82,15 +82,6 @@ public class FactoryServiceClientImpl implements FactoryServiceClient {
      * {@inheritDoc}
      */
     @Override
-    public void getFactorySnippet(String factoryId, String type, AsyncRequestCallback<String> callback) {
-        final String requestUrl = API_FACTORY_BASE_URL + factoryId + "/snippet?type=" + type;
-        asyncRequestFactory.createGetRequest(requestUrl).header(HTTPHeader.ACCEPT, MimeType.TEXT_PLAIN).send(callback);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void getFactoryJson(String workspaceId, String path, AsyncRequestCallback<FactoryDto> callback) {
         final StringBuilder url = new StringBuilder(API_FACTORY_BASE_URL + "workspace/").append(workspaceId);
         if (path != null) {

@@ -21,8 +21,6 @@ import (
 const threshold int64 = 60
 
 var (
-	// ActivityTrackingEnabled defines whether activity tracking should be used
-	ActivityTrackingEnabled = false
 	// Tracker provides workspace activity notification client
 	Tracker WorkspaceActivityTracker = &NoOpActivityTracker{}
 )

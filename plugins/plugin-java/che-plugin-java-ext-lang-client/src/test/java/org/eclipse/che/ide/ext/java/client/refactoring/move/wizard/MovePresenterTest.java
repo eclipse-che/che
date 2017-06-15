@@ -12,7 +12,6 @@ package org.eclipse.che.ide.ext.java.client.refactoring.move.wizard;
 
 import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
@@ -20,6 +19,8 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -35,6 +36,7 @@ import org.eclipse.che.ide.ext.java.client.refactoring.service.RefactoringServic
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeCreationResult;
+import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeInfo;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateMoveRefactoring;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ElementToMove;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.MoveSettings;
@@ -42,7 +44,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringSession;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ReorgDestination;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.resource.Path;
 import org.junit.Before;
 import org.junit.Test;
@@ -111,7 +112,7 @@ public class MovePresenterTest {
     @Mock
     private Container    srcFolder;
     @Mock
-    private Project relatedProject;
+    private Project      relatedProject;
 
     @Mock
     private RefactoringStatus             refactoringStatus;
@@ -142,9 +143,15 @@ public class MovePresenterTest {
     @Mock
     private Promise<RefactoringResult>    refactoringResultPromise;
     @Mock
+    private Promise<Void>                 updateAfterRefactoringPromise;
+    @Mock
+    private Promise<Void>                 fileTrackingSuspendEventPromise;
+    @Mock
+    private Promise<Void>                 handleMovingFilesPromise;
+    @Mock
     private PromiseError                  promiseError;
     @Mock
-    private EventBus                      eventBus;
+    private ClientServerEventService      clientServerEventService;
 
     @Captor
     private ArgumentCaptor<Operation<String>>                             sessionOperation;
@@ -160,6 +167,10 @@ public class MovePresenterTest {
     private ArgumentCaptor<Operation<RefactoringResult>>                  refResultOperation;
     @Captor
     private ArgumentCaptor<Operation<PromiseError>>                       promiseErrorCaptor;
+    @Captor
+    private ArgumentCaptor<Operation<Void>>                               clientServerSuspendOperation;
+    @Captor
+    private ArgumentCaptor<Operation<Void>>                               updateAfterRefactoringOperation;
 
     private MovePresenter presenter;
 
@@ -180,6 +191,12 @@ public class MovePresenterTest {
         when(dtoFactory.createDto(RefactoringSession.class)).thenReturn(session);
         when(changeCreationResult.getStatus()).thenReturn(refactoringStatus);
 
+        when(clientServerEventService.sendFileTrackingSuspendEvent()).thenReturn(fileTrackingSuspendEventPromise);
+        List<ChangeInfo> changes = new ArrayList<>();
+        when(refactoringResult.getChanges()).thenReturn(changes);
+        when(refactoringUpdater.handleMovingFiles(anyList())).thenReturn(handleMovingFilesPromise);
+        when(refactoringUpdater.updateAfterRefactoring(anyList())).thenReturn(updateAfterRefactoringPromise);
+
         when(refactorService.setMoveSettings(moveSettings)).thenReturn(moveSettingsPromise);
         when(moveSettingsPromise.thenPromise(Matchers.<Function<Void, Promise<ChangeCreationResult>>>anyObject()))
                 .thenReturn(changeCreationResultPromise);
@@ -195,7 +212,7 @@ public class MovePresenterTest {
                                       dtoFactory,
                                       locale,
                                       notificationManager,
-                                      eventBus);
+                                      clientServerEventService);
     }
 
     @Test
@@ -354,11 +371,17 @@ public class MovePresenterTest {
         verify(changeCreationResultPromise).then(changeResultOperation.capture());
         changeResultOperation.getValue().apply(changeCreationResult);
 
+        verify(fileTrackingSuspendEventPromise).then(clientServerSuspendOperation.capture());
+        clientServerSuspendOperation.getValue().apply(any());
+
         verify(refactoringResultPromise).then(refResultOperation.capture());
         refResultOperation.getValue().apply(refactoringResult);
         verify(moveView).hide();
-        verify(refactoringUpdater).updateAfterRefactoring(anyList());
 
+        verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
+        updateAfterRefactoringOperation.getValue().apply(null);
+        verify(refactoringUpdater).handleMovingFiles(anyList());
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
         verify(moveView, never()).showErrorMessage(refactoringResult);
     }
 
@@ -389,12 +412,17 @@ public class MovePresenterTest {
         verify(changeCreationResultPromise).then(changeResultOperation.capture());
         changeResultOperation.getValue().apply(changeCreationResult);
 
+        verify(fileTrackingSuspendEventPromise).then(clientServerSuspendOperation.capture());
+        clientServerSuspendOperation.getValue().apply(any());
+
         verify(refactoringResultPromise).then(refResultOperation.capture());
         refResultOperation.getValue().apply(refactoringResult);
         verify(moveView, never()).hide();
         verify(refactoringUpdater, never()).updateAfterRefactoring(anyList());
 
         verify(moveView).showErrorMessage(refactoringResult);
+        verify(refactoringUpdater).handleMovingFiles(anyList());
+        verify(clientServerEventService).sendFileTrackingResumeEvent();
     }
 
     @Test

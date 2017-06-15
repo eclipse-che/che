@@ -18,6 +18,7 @@
 export class CheFilterSelectorController {
 
   private valueModel: string;
+  private width: string;
   private onChange: Function;
 
   /**
@@ -25,7 +26,9 @@ export class CheFilterSelectorController {
    * @ngInject for Dependency injection
    */
   constructor() {
+    this.width = this.width || '150px';
   }
+
 
   /**
    * Performs value selection and calls value changed handler.

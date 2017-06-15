@@ -10,21 +10,28 @@
  *******************************************************************************/
 package org.eclipse.che.api.debug.shared.model.impl;
 
+import com.google.common.base.Objects;
+
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebugSession;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
+
+import java.util.List;
 
 /**
  * @author Anatoliy Bazko
  */
 public class DebugSessionImpl implements DebugSession {
-    private final DebuggerInfo debuggerInfo;
-    private final String id;
-    private final String type;
+    private final DebuggerInfo               debuggerInfo;
+    private final String                     id;
+    private final String                     type;
+    private final List<? extends Breakpoint> breakpoints;
 
-    public DebugSessionImpl(DebuggerInfo debuggerInfo, String id, String type) {
+    public DebugSessionImpl(DebuggerInfo debuggerInfo, String id, String type, List<? extends Breakpoint> breakpoints) {
         this.debuggerInfo = debuggerInfo;
         this.id = id;
         this.type = type;
+        this.breakpoints = breakpoints;
     }
 
     @Override
@@ -43,22 +50,23 @@ public class DebugSessionImpl implements DebugSession {
     }
 
     @Override
+    public List<? extends Breakpoint> getBreakpoints() {
+        return breakpoints;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DebugSessionImpl)) return false;
-
         DebugSessionImpl that = (DebugSessionImpl)o;
-
-        if (debuggerInfo != null ? !debuggerInfo.equals(that.debuggerInfo) : that.debuggerInfo != null) return false;
-        if (id != null ? !id.equals(that.id) : that.id != null) return false;
-        return !(type != null ? !type.equals(that.type) : that.type != null);
+        return Objects.equal(debuggerInfo, that.debuggerInfo) &&
+               Objects.equal(id, that.id) &&
+               Objects.equal(type, that.type) &&
+               Objects.equal(breakpoints, that.breakpoints);
     }
 
     @Override
     public int hashCode() {
-        int result = debuggerInfo != null ? debuggerInfo.hashCode() : 0;
-        result = 31 * result + (id != null ? id.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        return result;
+        return Objects.hashCode(debuggerInfo, id, type, breakpoints);
     }
 }

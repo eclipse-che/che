@@ -42,10 +42,6 @@
             float: left;
             width: literal("calc(100% - 27px)");
             padding-left: 5px;
-            color: inherit;
-            font-size: inherit;
-            overflow: hidden;
-            text-overflow: ellipsis;
             line-height: 21px;
         }
 
@@ -65,6 +61,6 @@
 
     <g:FlowPanel styleName="{style.widget}">
         <g:SimplePanel ui:field="selectedItemPanel" addStyleNames="{style.selectedItemPanel}"/>
-        <g:SimplePanel ui:field="dropButtonPanel" addStyleNames="{style.dropButton}"/>
+        <g:SimplePanel ui:field="dropdownMenuButton" addStyleNames="{style.dropButton}"/>
     </g:FlowPanel>
 </ui:UiBinder>

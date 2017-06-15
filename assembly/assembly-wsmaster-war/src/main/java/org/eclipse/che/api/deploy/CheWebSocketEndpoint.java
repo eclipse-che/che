@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.deploy;
 
-import org.eclipse.che.api.core.websocket.WebSocketMessageReceiver;
+import org.eclipse.che.api.core.websocket.commons.WebSocketMessageReceiver;
 import org.eclipse.che.api.core.websocket.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.api.core.websocket.impl.GuiceInjectorEndpointConfigurator;
 import org.eclipse.che.api.core.websocket.impl.MessagesReSender;
 import org.eclipse.che.api.core.websocket.impl.WebSocketSessionRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.websocket.server.ServerEndpoint;

@@ -477,7 +477,6 @@ public class Tooltip extends AutoHideComponent<AutoHideView<Void>, AutoHideCompo
                 content.appendChild(Elements.createTextNode(p));
                 if (i < tooltipText.length - 1) {
                     content.appendChild(Elements.createBRElement());
-                    content.appendChild(Elements.createBRElement());
                 }
                 i++;
             }

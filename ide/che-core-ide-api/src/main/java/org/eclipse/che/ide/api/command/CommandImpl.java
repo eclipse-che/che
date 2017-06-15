@@ -13,14 +13,15 @@ package org.eclipse.che.ide.api.command;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.commons.annotation.Nullable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
-import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableSet;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
 /** Data object for {@link Command}. */
 public class CommandImpl implements Command {
@@ -123,6 +124,18 @@ public class CommandImpl implements Command {
         getAttributes().put(COMMAND_GOAL_ATTRIBUTE_NAME, goalId);
     }
 
+
+    /** Returns command's preview URL or {@code null} if none. */
+    @Nullable
+    public String getPreviewURL() {
+        return getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
+    }
+
+    /** Sets command's preview URL. */
+    public void setPreviewURL(String previewURL) {
+        getAttributes().put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, previewURL);
+    }
+
     /** Returns command's applicable context. */
     public ApplicableContext getApplicableContext() {
         return context;
@@ -179,30 +192,30 @@ public class CommandImpl implements Command {
     /** Defines the context in which command is applicable. */
     public static class ApplicableContext {
 
-        private boolean      workspaceApplicable;
-        private List<String> projects;
+        private boolean     workspaceApplicable;
+        private Set<String> projects;
 
         /** Creates new {@link ApplicableContext} which is workspace applicable. */
         public ApplicableContext() {
             workspaceApplicable = true;
-            projects = new ArrayList<>();
+            projects = new HashSet<>();
         }
 
         /** Creates new {@link ApplicableContext} which is applicable to the single project only. */
         public ApplicableContext(String projectPath) {
-            projects = new ArrayList<>();
+            projects = new HashSet<>();
             projects.add(projectPath);
         }
 
         /** Creates new {@link ApplicableContext} based on the provided data. */
-        public ApplicableContext(boolean workspaceApplicable, List<String> projects) {
+        public ApplicableContext(boolean workspaceApplicable, Set<String> projects) {
             this.workspaceApplicable = workspaceApplicable;
             this.projects = projects;
         }
 
         /** Creates copy of the given {@code context}. */
         public ApplicableContext(ApplicableContext context) {
-            this(context.isWorkspaceApplicable(), new ArrayList<>(context.getApplicableProjects()));
+            this(context.isWorkspaceApplicable(), new HashSet<>(context.getApplicableProjects()));
         }
 
         /** Returns {@code true} if command is applicable to the workspace and {@code false} otherwise. */
@@ -216,8 +229,8 @@ public class CommandImpl implements Command {
         }
 
         /** Returns <b>immutable</b> list of the paths of the applicable projects. */
-        public List<String> getApplicableProjects() {
-            return unmodifiableList(projects);
+        public Set<String> getApplicableProjects() {
+            return unmodifiableSet(projects);
         }
 
         /** Adds applicable project's path. */

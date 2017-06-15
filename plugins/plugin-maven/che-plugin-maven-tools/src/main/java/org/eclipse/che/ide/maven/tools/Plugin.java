@@ -16,11 +16,11 @@ import org.eclipse.che.commons.xml.NewElement;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.commons.xml.NewElement.createElement;
 import static org.eclipse.che.commons.xml.XMLTreeLocation.after;
 import static org.eclipse.che.commons.xml.XMLTreeLocation.inTheBegin;
-import static java.util.Collections.emptyMap;
-import static java.util.Objects.requireNonNull;
 
 /**
  * Describes <i>/project/build/plugins/plugin</i>.
@@ -38,6 +38,7 @@ public class Plugin {
 
     private String              artifactId;
     private String              groupId;
+    private String              version;
     private Map<String, String> configuration;
 
     Element pluginElement;
@@ -52,6 +53,9 @@ public class Plugin {
         }
         if (element.hasSingleChild("groupId")) {
             groupId = element.getChildText("groupId");
+        }
+        if (element.hasSingleChild("version")) {
+            groupId = element.getChildText("version");
         }
         if (element.hasSingleChild("configuration")) {
             configuration = fetchConfiguration(element.getSingleChild("configuration"));
@@ -122,6 +126,26 @@ public class Plugin {
                 pluginElement.getSingleChild("artifactId").setText(artifactId);
             } else {
                 pluginElement.insertChild(createElement("artifactId", artifactId), after("groupId").or(inTheBegin()));
+            }
+        }
+        return this;
+    }
+
+    /** Returns plugin version. */
+    public String getVersion() {
+        return version;
+    }
+
+    /** Sets plugin version. */
+    public Plugin setVersion(String version) {
+        this.version = version;
+        if (!isNew()) {
+            if (version == null) {
+                pluginElement.removeChild("version");
+            } else if (pluginElement.hasSingleChild("version")) {
+                pluginElement.getSingleChild("version").setText(version);
+            } else {
+                pluginElement.insertChild(createElement("version", version), after("artifactId").or(inTheBegin()));
             }
         }
         return this;
@@ -296,6 +320,9 @@ public class Plugin {
         }
         if (artifactId != null) {
             xmlPlugin.appendChild(createElement("artifactId", artifactId));
+        }
+        if (version != null) {
+            xmlPlugin.appendChild(createElement("version", version));
         }
         if (configuration != null && !configuration.isEmpty()) {
             final NewElement configElement = createElement("configuration");

@@ -52,6 +52,7 @@ import org.eclipse.che.ide.api.editor.annotation.AnnotationModelHandler;
 import org.eclipse.che.ide.api.editor.annotation.ClearAnnotationModelEvent;
 import org.eclipse.che.ide.api.editor.annotation.ClearAnnotationModelHandler;
 import org.eclipse.che.ide.api.editor.annotation.HasAnnotationRendering;
+import org.eclipse.che.ide.api.editor.autosave.AutoSaveMode;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistantFactory;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionsSource;
@@ -81,8 +82,6 @@ import org.eclipse.che.ide.api.editor.position.PositionConverter;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistAssistant;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistantFactory;
-import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
-import org.eclipse.che.ide.api.editor.reconciler.ReconcilerWithAutoSave;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
@@ -102,6 +101,7 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditorOperations;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
+import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
 import org.eclipse.che.ide.api.hotkeys.HasHotKeyItems;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
@@ -132,7 +132,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.Boolean.parseBoolean;
-import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStartEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -175,16 +174,18 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     private final EditorMultiPartStackPresenter          editorMultiPartStackPresenter;
     private final EditorLocalizationConstants            constant;
     private final EditorWidgetFactory<OrionEditorWidget> editorWidgetFactory;
-    private final EditorInitializePromiseHolder editorModule;
-    private final TextEditorPartView            editorView;
-    private final EventBus                      generalEventBus;
-    private final FileTypeIdentifier            fileTypeIdentifier;
-    private final QuickAssistantFactory         quickAssistantFactory;
-    private final WorkspaceAgent                workspaceAgent;
-    private final NotificationManager           notificationManager;
-    private final AppContext                    appContext;
-    private final SignatureHelpView             signatureHelpView;
-    private final EditorContextMenu             contextMenu;
+    private final EditorInitializePromiseHolder          editorModule;
+    private final TextEditorPartView                     editorView;
+    private final EventBus                               generalEventBus;
+    private final FileTypeIdentifier                     fileTypeIdentifier;
+    private final QuickAssistantFactory                  quickAssistantFactory;
+    private final WorkspaceAgent                         workspaceAgent;
+    private final NotificationManager                    notificationManager;
+    private final AppContext                             appContext;
+    private final SignatureHelpView                      signatureHelpView;
+    private final EditorContextMenu                      contextMenu;
+    private final AutoSaveMode                           autoSaveMode;
+    private final ClientServerEventService               clientServerEventService;
 
     private final AnnotationRendering rendering = new AnnotationRendering();
     private HasKeyBindings           keyBindingsManager;
@@ -224,7 +225,9 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                                 final NotificationManager notificationManager,
                                 final AppContext appContext,
                                 final SignatureHelpView signatureHelpView,
-                                final EditorContextMenu contextMenu) {
+                                final EditorContextMenu contextMenu,
+                                final AutoSaveMode autoSaveMode,
+                                final ClientServerEventService clientServerEventService) {
         this.codeAssistantFactory = codeAssistantFactory;
         this.deletedFilesController = deletedFilesController;
         this.breakpointManager = breakpointManager;
@@ -245,6 +248,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         this.appContext = appContext;
         this.signatureHelpView = signatureHelpView;
         this.contextMenu = contextMenu;
+        this.autoSaveMode = autoSaveMode;
+        this.clientServerEventService = clientServerEventService;
 
         keyBindingsManager = new TemporaryKeyBindingsManager();
 
@@ -259,7 +264,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             quickAssistant.setQuickAssistProcessor(processor);
         }
 
-        editorInit = new OrionEditorInit(configuration,
+        editorInit = new OrionEditorInit(autoSaveMode,
+                                         configuration,
                                          this.codeAssistantFactory,
                                          this.quickAssistant,
                                          this);
@@ -362,23 +368,32 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             final Path relPath = document.getFile().getLocation().removeFirstSegments(movedFrom.segmentCount());
             final Path newPath = delta.getToPath().append(relPath);
 
-            appContext.getWorkspaceRoot().getFile(newPath).then(new Operation<Optional<File>>() {
-                @Override
-                public void apply(Optional<File> file) throws OperationException {
-                    if (file.isPresent()) {
-                        final Path location = document.getFile().getLocation();
-                        deletedFilesController.add(location.toString());
-                        generalEventBus.fireEvent(newFileTrackingStartEvent(file.get().getLocation().toString()));
+            appContext.getWorkspaceRoot().getFile(newPath).then(optional -> {
+                if (optional.isPresent()) {
+                    final Path location = document.getFile().getLocation();
+                    deletedFilesController.add(location.toString());
 
-                        document.setFile(file.get());
-                        input.setFile(file.get());
-                        updateTabReference(file.get(), location);
-
-                        updateContent();
-                    }
+                    File file = optional.get();
+                    clientServerEventService.sendFileTrackingStartEvent(file.getLocation().toString())
+                                            .then(aVoid -> {
+                                                document.setFile(file);
+                                                input.setFile(file);
+                                                updateTabReference(file, location);
+                                                updateContent();
+                                            });
                 }
             });
         }
+    }
+
+    @Override
+    protected void updateDirtyState(boolean dirty) {
+        if (isReadOnly()) {
+            dirtyState = false;
+            return;
+        }
+
+        super.updateDirtyState(dirty);
     }
 
     private void updateTabReference(File file, Path oldPath) {
@@ -462,6 +477,11 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
     @Override
     public void close(boolean save) {
+        if (resourceChangeHandler != null) {
+            resourceChangeHandler.removeHandler();
+            resourceChangeHandler = null;
+        }
+
         this.documentStorage.documentClosed(this.document);
         editorInit.uninstall();
         workspaceAgent.removePart(this);
@@ -493,7 +513,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     }
 
     @Override
-    public void onClose(@NotNull final AsyncCallback<Void> callback) {
+    public void onClosing(@NotNull final AsyncCallback<Void> callback) {
         if (isDirty()) {
             dialogFactory.createConfirmDialog(
                     constant.askWindowCloseTitle(),
@@ -502,30 +522,18 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                         @Override
                         public void accepted() {
                             doSave();
-                            handleClose();
                             callback.onSuccess(null);
                         }
                     },
                     new CancelCallback() {
                         @Override
                         public void cancelled() {
-                            handleClose();
                             callback.onSuccess(null);
                         }
                     }).show();
         } else {
-            handleClose();
             callback.onSuccess(null);
         }
-    }
-
-    @Override
-    protected void handleClose() {
-        if (resourceChangeHandler != null) {
-            resourceChangeHandler.removeHandler();
-            resourceChangeHandler = null;
-        }
-        super.handleClose();
     }
 
     @Override
@@ -536,8 +544,10 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     @Override
     public void activate() {
         if (editorWidget != null) {
-            editorWidget.refresh();
-            editorWidget.setFocus();
+            Scheduler.get().scheduleDeferred(() -> {
+                editorWidget.refresh();
+                editorWidget.setFocus();
+            });
             final String isLinkedWithEditor = preferencesManager.getValue(LinkWithEditorAction.LINK_WITH_EDITOR);
             if (!parseBoolean(isLinkedWithEditor)) {
                 setSelection(new Selection<>(input.getFile()));
@@ -585,9 +595,10 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     @Override
     public void doSave(final AsyncCallback<EditorInput> callback) {
         //If the workspace is stopped we shouldn't try to save a file
-        if (appContext.getDevMachine() == null) {
+        if (isReadOnly() || appContext.getDevMachine() == null) {
             return;
         }
+
         this.documentStorage.saveDocument(getEditorInput(), this.document, false, new AsyncCallback<EditorInput>() {
             @Override
             public void onSuccess(EditorInput editorInput) {
@@ -791,7 +802,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     public void editorLostFocus() {
         this.editorView.updateInfoPanelUnfocused(this.document.getLineCount());
         this.isFocused = false;
-        if (isDirty()) {
+        if (isDirty() && autoSaveMode.isActivated()) {
             doSave();
         }
     }
@@ -892,33 +903,17 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
     @Override
     public boolean isAutoSaveEnabled() {
-        ReconcilerWithAutoSave autoSave = getAutoSave();
-        return autoSave != null && autoSave.isAutoSaveEnabled();
-    }
-
-    private ReconcilerWithAutoSave getAutoSave() {
-        Reconciler reconciler = getConfiguration().getReconciler();
-
-        if (reconciler != null && reconciler instanceof ReconcilerWithAutoSave) {
-            return ((ReconcilerWithAutoSave)reconciler);
-        }
-        return null;
+        return autoSaveMode.isActivated();
     }
 
     @Override
     public void enableAutoSave() {
-        ReconcilerWithAutoSave autoSave = getAutoSave();
-        if (autoSave != null) {
-            autoSave.enableAutoSave();
-        }
+        autoSaveMode.resume();
     }
 
     @Override
     public void disableAutoSave() {
-        ReconcilerWithAutoSave autoSave = getAutoSave();
-        if (autoSave != null) {
-            autoSave.disableAutoSave();
-        }
+        autoSaveMode.suspend();
     }
 
     @Override

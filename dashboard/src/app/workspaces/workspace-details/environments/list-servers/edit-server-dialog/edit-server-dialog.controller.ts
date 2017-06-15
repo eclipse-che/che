@@ -33,7 +33,7 @@ export class EditServerDialogController {
   usedReferences: string[];
 
   port: number;
-  portMin: number = 1024;
+  portMin: number = 0;
   portMax: number = 65535;
   protocol: string;
   reference: string;

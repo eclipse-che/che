@@ -16,9 +16,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.ResizeLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import javax.validation.constraints.NotNull;
@@ -28,7 +27,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Dmitry Shnurenko
  */
-final class TerminalViewImpl extends Composite implements TerminalView, RequiresResize {
+final class TerminalViewImpl extends Composite implements TerminalView {
 
     interface TerminalViewImplUiBinder extends UiBinder<Widget, TerminalViewImpl> {
     }
@@ -36,15 +35,15 @@ final class TerminalViewImpl extends Composite implements TerminalView, Requires
     private final static TerminalViewImplUiBinder UI_BINDER = GWT.create(TerminalViewImplUiBinder.class);
 
     @UiField
-    FlowPanel terminalPanel;
+    ResizeLayoutPanel terminalPanel;
 
     @UiField
-    Label     unavailableLabel;
+    Label unavailableLabel;
 
     private ActionDelegate delegate;
 
     private TerminalJso terminal;
-    private Element terminalElement;
+    private Element     terminalElement;
 
     public TerminalViewImpl() {
         initWidget(UI_BINDER.createAndBindUi(this));
@@ -66,10 +65,18 @@ final class TerminalViewImpl extends Composite implements TerminalView, Requires
         terminalElement.getStyle().setProperty("opacity", "0");
 
         terminal.open(terminalPanel.getElement());
+        terminal.attachCustomKeyDownHandler(CustomKeyDownTerminalHandler.create());
+        resizeTerminal();
 
         terminalElement.getFirstChildElement().getStyle().clearProperty("backgroundColor");
         terminalElement.getFirstChildElement().getStyle().clearProperty("color");
         terminalElement.getStyle().clearProperty("opacity");
+
+        terminalPanel.addResizeHandler(resizeEvent -> {
+            if (terminalElement != null && isVisible()) {
+                resizeTimer.schedule(200);
+            }
+        });
     }
 
     /** {@inheritDoc} */
@@ -79,20 +86,6 @@ final class TerminalViewImpl extends Composite implements TerminalView, Requires
         unavailableLabel.setVisible(true);
 
         terminalPanel.setVisible(false);
-    }
-
-    /**
-     * Resize {@link TerminalJso} to current widget size.
-     * To improve performance we should resize only visible terminals,
-     * because "resize terminal" is quite expensive operation. When you
-     * click on the tab to activate hidden terminal this method will be
-     * executed too, so terminal will be resized anyway.
-     */
-    @Override
-    public void onResize() {
-        if (terminalElement != null && isVisible()) {
-            resizeTimer.schedule(200);
-        }
     }
 
     private Timer resizeTimer = new Timer() {

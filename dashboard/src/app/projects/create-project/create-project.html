@@ -24,7 +24,7 @@
 <md-content id="create-project-content-page"
             md-scroll-y flex
             class="projects-create-project">
-  <div ng-show="createProjectCtrl.isCreateProjectInProgress()">
+  <div ng-if="createProjectCtrl.isCreateProjectInProgress()">
     <div id="create-project-panel" class="create-project-progress-panel">
       <che-loader class="che-loader-panel" layout="column">
         <!--crane and terminals-->
@@ -51,39 +51,13 @@
           <div class="main-page" layout="row" layout-align="center stretch">
             <div flex="50" layout="column" layout-align="end start">
             </div>
-            <div flex="50" layout="column" layout-align="start end">
-              <div layout="row"
-                   ng-show="createProjectCtrl.getCurrentProgressStep() === (createProjectCtrl.getCreationSteps().length - 1)">
-                <div layout="column" flex layout-align="start start">
-                  <che-button-notice che-button-title="Add another project"
-                                     ng-click="createProjectCtrl.resetCreateNewProject()"></che-button-notice>
-                </div>
-                &nbsp;
-                <div layout="column" flex layout-align="start end">
-                  <che-button-primary ng-href="{{createProjectCtrl.getIDELink()}}"
-                                      ng-click="createProjectCtrl.resetCreateNewProject()"
-                                      class="che-hover create-project-details-arrow"
-                                      che-button-icon="fa fa-chevron-circle-right"
-                                      che-button-title="Open project in IDE"></che-button-primary>
-                </div>
-              </div>
-              <div layout="column" layout-align="end end"
-                   ng-show="createProjectCtrl.getCreationSteps()[createProjectCtrl.getCurrentProgressStep()].hasError">
-                <che-button-danger
-                        che-button-title="{{createProjectCtrl.isResourceProblem() ? 'Stop running workspaces' :  'Retry'}}"
-                        ng-click="createProjectCtrl.resetCreateProgress()"></che-button-danger>
-                <che-link class="create-project-download-logs-link"
-                          ng-click="createProjectCtrl.downloadLogs()"
-                          che-link-text="Problem? download logs"></che-link>
-              </div>
-            </div>
           </div>
         </div>
       </che-loader>
     </div>
   </div>
 
-  <div ng-hide="createProjectCtrl.isCreateProjectInProgress()">
+  <div ng-if="!createProjectCtrl.isCreateProjectInProgress()">
 
     <!-- Select source -->
     <che-label-container id="create-project-source-id"

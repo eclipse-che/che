@@ -37,15 +37,16 @@ export class FactoryFromTemplate {
     this.templateUrl = 'app/factories/create-factory/template-tab/factory-from-template.html';
     this.replace = false;
 
-    this.controller = 'FactoryFromTemplateCtrl';
-    this.controllerAs = 'factoryFromTemplateCtrl';
+    this.controller = 'FactoryFromTemplateController';
+    this.controllerAs = 'factoryFromTemplateController';
 
     this.bindToController = true;
 
     // scope values
     this.scope = {
-      factoryContent: '=cdvyFactoryContent',
-      isImporting: '=cdvyIsImporting'
+      factoryContent: '=',
+      isImporting: '=',
+      editorState: '=?'
     };
   }
 

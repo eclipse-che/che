@@ -26,25 +26,25 @@ export class ListStacksController {
   $log: ng.ILogService;
   $mdDialog: ng.material.IDialogService;
   $q: ng.IQService;
-  stackFilter: Object;
-  stackSelectionState: Object;
+  stackFilter: {
+    name: string
+  };
   stacks: Array<any>;
   stackOrderBy: string;
   userId: string;
   state: string;
-  isAllSelected: boolean;
-  isNoSelected: boolean;
   loading: boolean;
   profile: any;
   lodash: any;
 
   private confirmDialogService: ConfirmDialogService;
+  private cheListHelper: che.widget.ICheListHelper;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheStack: CheStack, cheProfile: CheProfile, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $rootScope: ng.IRootScopeService, lodash: _.LoDashStatic, $q: ng.IQService, confirmDialogService: ConfirmDialogService) {
+  constructor(cheStack: CheStack, cheProfile: CheProfile, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $rootScope: ng.IRootScopeService, lodash: any, $q: ng.IQService, confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.cheStack = cheStack;
     this.$log = $log;
     this.$mdDialog = $mdDialog;
@@ -58,9 +58,11 @@ export class ListStacksController {
     this.stackFilter = {name: ''};
     this.stackOrderBy = 'stack.name';
 
-    this.stackSelectionState = {};
-    this.isAllSelected = false;
-    this.isNoSelected = true;
+    const helperId = 'list-stacks';
+    this.cheListHelper = cheListHelperFactory.getHelper(helperId);
+    $scope.$on('$destroy', () => {
+      cheListHelperFactory.removeHelper(helperId);
+    });
 
     this.stacks = [];
 
@@ -79,25 +81,40 @@ export class ListStacksController {
   }
 
   /**
-   * Gets the list of stacks.
+   * Callback when name is changed.
+   *
+   * @param str {string} a string to filter stacks names.
    */
-  getStacks(): void {
+  onSearchChanged(str: string): void {
+    this.stackFilter.name = str;
+    this.cheListHelper.applyFilter('name', this.stackFilter);
+  }
+
+  /**
+   * Gets the list of stacks.
+   *
+   * @return {IPromise<any>}
+   */
+  getStacks(): ng.IPromise<any> {
     this.loading = true;
-    this.updateSelectionState();
 
     let promise = this.cheStack.fetchStacks();
-    promise.then(() => {
-        this.loading = false;
+    return promise.then(() => {
+      this.loading = false;
+      this.stacks = this.cheStack.getStacks();
+    }, (error: any) => {
+      if (error.status === 304) {
         this.stacks = this.cheStack.getStacks();
-      },
-      (error: any) => {
-        if (error.status === 304) {
-          this.stacks = this.cheStack.getStacks();
-        } else {
-          this.state = 'error';
-        }
-        this.loading = false;
-      });
+      } else {
+        this.state = 'error';
+      }
+      this.loading = false;
+    }).finally(() => {
+      const isStackSelectable = (stack: che.IStack) => {
+        return stack.creator === this.profile.userId;
+      };
+      this.cheListHelper.setList(this.stacks, 'id', isStackSelectable);
+    });
   }
 
   /**
@@ -128,13 +145,15 @@ export class ListStacksController {
     confirmationPromise.then(() => {
       this.loading = true;
       this.cheStack.deleteStack(stack.id).then(() => {
-        delete this.stackSelectionState[stack.id];
+        delete this.cheListHelper.itemsSelectionStatus[stack.id];
         this.cheNotification.showInfo('Stack ' + stack.name + ' has been successfully removed.');
-        this.getStacks();
+        return this.getStacks();
       }, (error: any) => {
         this.loading = false;
         let message = 'Failed to delete ' + stack.name + 'stack.' + (error && error.message) ? error.message : '';
         this.cheNotification.showError(message);
+      }).finally(() => {
+        this.cheListHelper.updateBulkSelectionStatus();
       });
     });
 
@@ -153,11 +172,13 @@ export class ListStacksController {
     newStack.name = this.generateStackName(stack.name + '-copy');
     this.loading = true;
     this.cheStack.createStack(newStack).then(() => {
-      this.getStacks();
+      return this.getStacks();
     }, (error: any) => {
       this.loading = false;
       let message = 'Failed to create ' + newStack.name + 'stack.' + (error && error.message) ? error.message : '';
       this.cheNotification.showError(message);
+    }).finally(() => {
+      this.cheListHelper.updateBulkSelectionStatus();
     });
   }
 
@@ -188,109 +209,34 @@ export class ListStacksController {
   }
 
   /**
-   * Returns whether all stacks are selected.
-   *
-   * @returns {boolean} <code>true</code> if all stacks are selected
-   */
-  isAllStacksSelected(): boolean {
-    return this.isAllSelected;
-  }
-
-  /**
-   * Returns whether there are no selected stacks.
-   *
-   * @returns {boolean} <code>true</code> if no stacks are selected
-   */
-  isNoStacksSelected(): boolean {
-    return this.isNoSelected;
-  }
-
-  /**
-   * Make all own stacks selected.
-   */
-  selectAllStacks(): void {
-    this.stackSelectionState = {};
-    this.stacks.forEach((stack: che.IStack) => {
-      if (stack.creator === this.userId) {
-        this.stackSelectionState[stack.id] = true;
-      }
-    });
-  }
-
-  /**
-   * Make all stacks deselected.
-   */
-  deselectAllStacks(): void {
-    this.stacks.forEach((stack: che.IStack) => {
-      if (this.stackSelectionState[stack.id]) {
-        this.stackSelectionState[stack.id] = false;
-      }
-    });
-  }
-
-  /**
-   * Change the state of the stacks selection,
-   */
-  changeSelectionState(): void {
-    if (this.isAllSelected) {
-      this.deselectAllStacks();
-    } else {
-      this.selectAllStacks();
-    }
-    this.updateSelectionState();
-  }
-
-  /**
-   * Update stack selection state.
-   */
-  updateSelectionState(): void {
-    this.isNoSelected = true;
-    let keys: Array<string> = Object.keys(this.stackSelectionState);
-    this.isAllSelected = keys.length > 0;
-    keys.forEach((key: string) => {
-      if (this.stackSelectionState[key]) {
-        this.isNoSelected = false;
-      } else {
-        this.isAllSelected = false;
-      }
-    });
-  }
-
-  /**
    * Delete all selected stacks.
    */
   deleteSelectedStacks(): void {
-    let selectedStackIds: Array<any> = [];
-
-
-    Object.keys(this.stackSelectionState).forEach((key: string) => {
-      if (this.stackSelectionState[key]) {
-        selectedStackIds.push(key);
-      }
-    });
+    const selectedStacks = this.cheListHelper.getSelectedItems(),
+          selectedStackIds = selectedStacks.map((stack: che.IStack) => {
+            return stack.id;
+          });
 
     if (!selectedStackIds.length) {
       this.cheNotification.showError('No selected stacks.');
       return;
     }
 
-    let confirmationPromise: ng.IPromise<any> = this.confirmStacksDeletion(selectedStackIds.length, '');
+    const confirmationPromise: ng.IPromise<any> = this.confirmStacksDeletion(selectedStackIds.length, '');
     confirmationPromise.then(() => {
-      let deleteStackPromises = [];
+      const deleteStackPromises = [];
 
       selectedStackIds.forEach((stackId: string) => {
-        this.stackSelectionState[stackId] = false;
+        this.cheListHelper.itemsSelectionStatus[stackId] = false;
         deleteStackPromises.push(this.cheStack.deleteStack(stackId));
       });
 
       this.$q.all(deleteStackPromises).then(() => {
         this.cheNotification.showInfo('Selected stacks have been successfully removed.');
-      })
-        .catch(() => {
-          this.cheNotification.showError('Failed to delete selected stack(s).');
-        })
-        .finally(() => {
-          this.getStacks();
+      }).catch(() => {
+        this.cheNotification.showError('Failed to delete selected stack(s).');
+      }).finally(() => {
+        this.getStacks();
       });
     });
   }

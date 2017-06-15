@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.shared.dto;
 
-
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;

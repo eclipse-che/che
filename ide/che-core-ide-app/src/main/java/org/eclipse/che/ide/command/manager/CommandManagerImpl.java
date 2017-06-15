@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
@@ -99,28 +100,43 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
             workspaceCommands.forEach(workspaceCommand -> commands.put(workspaceCommand.getName(),
                                                                        new CommandImpl(workspaceCommand, new ApplicableContext())));
 
-            // get all commands related to the projects
-            Arrays.stream(appContext.getProjects())
-                  .forEach(project -> projectCommandManager.getCommands(project).forEach(projectCommand -> {
-                      final CommandImpl existedCommand = commands.get(projectCommand.getName());
-
-                      if (existedCommand == null) {
-                          commands.put(projectCommand.getName(),
-                                       new CommandImpl(projectCommand, new ApplicableContext(project.getPath())));
-                      } else {
-                          if (projectCommand.equalsIgnoreContext(existedCommand)) {
-                              existedCommand.getApplicableContext().addProject(project.getPath());
-                          } else {
-                              // normally, should never happen
-                              Log.error(CommandManagerImpl.this.getClass(), "Different commands with the same names found");
-                          }
-                      }
-                  }));
+            addCommands();
 
             callback.onSuccess(this);
 
             notifyCommandsLoaded();
         });
+    }
+
+    public void fetchCommands() {
+        workspaceCommandManager.getCommands(appContext.getWorkspaceId()).then(workspaceCommands -> {
+            workspaceCommands.forEach(workspaceCommand -> commands.put(workspaceCommand.getName(),
+                    new CommandImpl(workspaceCommand, new ApplicableContext())));
+
+            addCommands();
+
+            notifyCommandsLoaded();
+        });
+    }
+
+    private void addCommands() {
+        // get all commands related to the projects
+        Arrays.stream(appContext.getProjects())
+                .forEach(project -> projectCommandManager.getCommands(project).forEach(projectCommand -> {
+                    final CommandImpl existedCommand = commands.get(projectCommand.getName());
+
+                    if (existedCommand == null) {
+                        commands.put(projectCommand.getName(),
+                                new CommandImpl(projectCommand, new ApplicableContext(project.getPath())));
+                    } else {
+                        if (projectCommand.equalsIgnoreContext(existedCommand)) {
+                            existedCommand.getApplicableContext().addProject(project.getPath());
+                        } else {
+                            // normally, should never happen
+                            Log.error(CommandManagerImpl.this.getClass(), "Different commands with the same names found");
+                        }
+                    }
+                }));
     }
 
     @Override
@@ -167,7 +183,7 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
 
     /** Checks whether the given command is applicable to the current project. */
     private boolean isCommandApplicableToCurrentProject(CommandImpl command) {
-        final List<String> applicableProjects = command.getApplicableContext().getApplicableProjects();
+        final Set<String> applicableProjects = command.getApplicableContext().getApplicableProjects();
 
         if (applicableProjects.isEmpty()) {
             return true;

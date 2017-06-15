@@ -68,12 +68,10 @@ pre_cmd_archetype() {
   fi
 
   ARCHETYPE_ACTION="all"
-  ARCHETYPE_ID="che-plugin-ide-menu-archetype"
-#  ARCHETYPE_VERSION=$(get_image_version)
+  ARCHETYPE_ID="plugin-menu-archetype"
 
 ##############################
-# REPLACE THIS WITH $(get_image_version) AFTER CI SYSTEMS GENERATING
-  ARCHETYPE_VERSION=5.6.0-SNAPSHOT
+  ARCHETYPE_VERSION=$(get_image_version)
   ASSEMBLY_VERSION=$ARCHETYPE_VERSION
   ASSEMBLY_GROUP="com.sample"
   ASSEMBLY_ID="assembly"

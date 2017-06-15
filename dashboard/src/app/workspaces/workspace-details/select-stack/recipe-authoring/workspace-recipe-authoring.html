@@ -10,14 +10,18 @@
                  che-name="recipe"
                  type="hidden"
                  ng-model="workspaceRecipeAuthoringController.recipeScriptCopy"
+                 custom-validator="workspaceRecipeAuthoringController.isRecipeValid()"
                  ng-required>
         <che-error-messages che-message-scope="workspace-details-environment"
                             che-message-name="Recipe content">
+<!--      TODO: remove this empty ng-message after investigating the first message crashing problem      -->
+          <div ng-message></div>
           <div ng-message="required">The recipe is required.</div>
+          <div ng-message="customValidator">{{workspaceRecipeAuthoringController.recipeValidationError}}</div>
         </che-error-messages>
       </che-input>
       <div class="recipe-docs-link">
-        <a href="https://www.eclipse.org/che/docs/workspace/stacks/index.html#stack-administration" target="_blank">Custom stack documentation</a>
+        <a ng-href="{{workspaceRecipeAuthoringController.stackDocsUrl}}" target="_blank">Custom stack documentation</a>
       </div>
     </div>
 

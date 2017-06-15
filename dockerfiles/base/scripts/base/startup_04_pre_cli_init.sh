@@ -287,8 +287,8 @@ compare_versions() {
     TAG=$(echo $VERSION_LIST_JSON | jq ".results[$COUNTER].name")
     TAG=${TAG//\"}
 
-    if [ "$TAG" != "nightly" ] && [ "$TAG" != "latest" ]; then
-      if less_than $BASE_VERSION $TAG; then
+    if [ "$TAG" != "nightly" ] && [ "$TAG" != "latest" ] && [ "$TAG" != "${BASE_VERSION}" ]; then
+      if version_lt $BASE_VERSION $TAG; then
         RETURN_VERSION=$TAG
         break;
       fi

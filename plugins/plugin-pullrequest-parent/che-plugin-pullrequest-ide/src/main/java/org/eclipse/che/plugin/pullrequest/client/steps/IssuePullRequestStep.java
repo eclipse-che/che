@@ -11,6 +11,11 @@
 package org.eclipse.che.plugin.pullrequest.client.steps;
 
 
+import com.google.inject.Singleton;
+
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.plugin.pullrequest.client.ContributeMessages;
 import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoCommitsInPullRequestException;
 import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoHistoryInCommonException;
@@ -20,11 +25,6 @@ import org.eclipse.che.plugin.pullrequest.client.workflow.Step;
 import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowExecutor;
 import org.eclipse.che.plugin.pullrequest.shared.dto.Configuration;
 import org.eclipse.che.plugin.pullrequest.shared.dto.PullRequest;
-import com.google.inject.Singleton;
-
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 
 import javax.inject.Inject;
 
@@ -46,8 +46,8 @@ public class IssuePullRequestStep implements Step {
     public void execute(final WorkflowExecutor executor, final Context context) {
         final Configuration configuration = context.getConfiguration();
         context.getVcsHostingService()
-               .createPullRequest(context.getUpstreamRepositoryOwner(),
-                                  context.getUpstreamRepositoryName(),
+               .createPullRequest(context.getOriginRepositoryOwner(),
+                                  context.getOriginRepositoryName(),
                                   context.getHostUserLogin(),
                                   context.getWorkBranchName(),
                                   context.getContributeToBranchName(),

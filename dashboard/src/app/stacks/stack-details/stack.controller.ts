@@ -50,6 +50,7 @@ export class StackController {
   stackId: string;
   tmpWorkspaceId: string;
   stackName: string;
+  stackDescription: string;
   stackJson: string;
   invalidStack: string;
   stackTags: Array<string>;
@@ -136,13 +137,20 @@ export class StackController {
    */
   updateData(): void {
     if (this.isCreation) {
-      this.stack = this.getNewStackTemplate();
-      this.stackTags = angular.copy(this.stack.tags);
-      this.stackName = angular.copy(this.stack.name);
+      let stack = this.isImport ? this.importStackService.getStack() : this.cheStack.getStackTemplate();
+      this._updateInputVariables(stack);
     } else {
       this.stackId = (this.$route as any).current.params.stackId;
       this.fetchStack();
     }
+  }
+
+  _updateInputVariables(stack: che.IStack) {
+    const {tags, name, description} = angular.copy(stack);
+    this.stackTags = tags ? tags : [];
+    this.stackName = name ? name : '';
+    this.stackDescription = description;
+    this.stack = stack;
   }
 
   /**
@@ -167,28 +175,8 @@ export class StackController {
     if (this.isCreation) {
       this.$location.path('/stacks');
     }
-    this.stack = angular.copy(this.copyStack);
-    this.stackName = angular.copy(this.stack.name);
-
-    if (this.stack.tags && this.stack.tags.isArray) {
-      this.stackTags = angular.copy(this.stack.tags);
-    } else {
-      this.stackTags = [];
-    }
-
-    this.stackTags = this.stack.tags ? angular.copy(this.stack.tags) : [];
+    this._updateInputVariables(this.copyStack);
     this.updateJsonFromStack();
-  }
-
-  /**
-   * Returns template for the new stack.
-   *
-   * @returns {che.IStack} new stack template
-   */
-  getNewStackTemplate(): che.IStack {
-    let stack: che.IStack = this.isImport ? this.importStackService.getStack() : this.cheStack.getStackTemplate();
-    this.stackName = stack.name;
-    return stack;
   }
 
   /**
@@ -247,14 +235,18 @@ export class StackController {
   }
 
   /**
-   * Updates stack name info.
-   * @param isFormValid {Boolean} true if form is valid
+   * Updates stack name.
    */
-  updateStackName(isFormValid: boolean): void {
-    if (isFormValid === false) {
-      return;
-    }
+  updateStackName(): void {
     this.stack.name = this.stackName;
+    this.updateJsonFromStack();
+  }
+
+  /**
+   * Updates stack description.
+   */
+  updateStackDescription(): void {
+    this.stack.description = this.stackDescription;
     this.updateJsonFromStack();
   }
 
@@ -262,9 +254,6 @@ export class StackController {
    * Updates stack tags info.
    */
   updateStackTags(): void {
-    if (!this.stack.tags) {
-      this.stack.tags = [];
-    }
     this.stack.tags = angular.copy(this.stackTags);
     this.updateJsonFromStack();
   }
@@ -281,7 +270,7 @@ export class StackController {
    * Update stack from stack's editor json.
    */
   updateStackFromJson(): void {
-    let stack: any;
+    let stack: che.IStack;
     try {
       stack = angular.fromJson(this.stackJson);
     } catch (e) {
@@ -290,9 +279,7 @@ export class StackController {
     }
     this.isStackChange = !angular.equals(stack, this.copyStack);
     if (this.isStackChange) {
-      this.stack = stack;
-      this.stackTags = !stack.tags ? [] : angular.copy(stack.tags);
-      this.stackName = !stack.name ? '' : angular.copy(stack.name);
+      this._updateInputVariables(stack);
     }
   }
 
@@ -300,13 +287,8 @@ export class StackController {
    * Prepare data to be displayed.
    */
   prepareStackData(): void {
-    if (!this.stack.tags) {
-      this.stack.tags = [];
-    }
-    this.stackTags = angular.copy(this.stack.tags);
-
     delete this.stack.links;
-    this.stackName = angular.copy(this.stack.name);
+    this._updateInputVariables(this.stack);
     this.copyStack = angular.copy(this.stack);
     this.updateJsonFromStack();
   }

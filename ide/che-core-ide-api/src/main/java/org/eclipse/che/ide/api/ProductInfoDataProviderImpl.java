@@ -43,6 +43,11 @@ public class ProductInfoDataProviderImpl implements ProductInfoDataProvider {
     }
 
     @Override
+    public SVGResource getWaterMarkLogo() {
+        return null;
+    }
+
+    @Override
     public String getSupportTitle() {
         return "";
     }

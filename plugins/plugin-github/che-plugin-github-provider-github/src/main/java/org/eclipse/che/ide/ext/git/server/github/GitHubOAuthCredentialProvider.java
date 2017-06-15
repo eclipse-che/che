@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.server.github;
 
-import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
+import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.ProviderInfo;

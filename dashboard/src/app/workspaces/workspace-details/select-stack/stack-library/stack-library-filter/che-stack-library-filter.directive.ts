@@ -12,7 +12,7 @@
 
 /**
  * @ngdoc directive
- * @name projects.create.directive:cheStackLibraryFilterCtrl
+ * @name projects.create.directive:cheStackLibraryFilter
  * @restrict E
  * @element
  *
@@ -21,33 +21,21 @@
  *
  * @author Oleksii Kurinnyi
  */
-export class CheStackLibraryFilter {
-
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-    this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/workspace-details/select-stack/stack-library/stack-library-filter/che-stack-library-filter.html';
-
-    this.controller = 'CheStackLibraryFilterController';
-    this.controllerAs = 'cheStackLibraryFilterCtrl';
-
-    // we require ngModel as we want to use it inside our directive
-    this.require = 'ngModel';
-
-    this.bindToController = true;
-
-    this.scope = {
-      ngModel: '='
-    };
-  }
+export class CheStackLibraryFilter implements ng.IDirective {
+  restrict = 'E';
+  templateUrl = 'app/workspaces/workspace-details/select-stack/stack-library/stack-library-filter/che-stack-library-filter.html';
+  controller = 'CheStackLibraryFilterController';
+  controllerAs = 'cheStackLibraryFilterCtrl';
+  bindToController = true;
+  scope = {
+    stackTags: '=',
+    onTagsChanges: '&'
+  };
 
 
-  link($scope, element) {
-    let ctrl = $scope.cheStackLibraryFilterCtrl;
-    let selectSuggestion = (element, index) => {
+  link($scope: ng.IScope, element: any) {
+    let ctrl = (<any>$scope).cheStackLibraryFilterCtrl;
+    ctrl.selectSuggestion = (index: number) => {
       let selectionClass = 'stack-library-filter-suggestion-selected',
         suggestionElements = element.find('.stack-library-filter-suggestions md-chip');
 
@@ -59,7 +47,7 @@ export class CheStackLibraryFilter {
     };
 
     // select suggestion by keys
-    element.bind('keypress keydown', (event) => {
+    element.bind('keypress keydown', (event: any) => {
       if (event.which === 38) {
         // on press 'up'
         // select prev suggestion
@@ -67,26 +55,20 @@ export class CheStackLibraryFilter {
 
         ctrl.selectedIndex--;
         if (ctrl.selectedIndex < 0) {
-          ctrl.selectedIndex = ctrl.suggestions.length-1;
+          ctrl.selectedIndex = ctrl.suggestions.length - 1;
         }
-        selectSuggestion(element, ctrl.selectedIndex);
-      }
-      else if (event.which === 9 || event.which === 40) {
+        ctrl.selectSuggestion(ctrl.selectedIndex);
+      } else if (event.which === 9 || event.which === 40) {
         // on press 'tab' or 'down'
         // select next suggestion
         event.preventDefault();
 
         ctrl.selectedIndex++;
-        if (ctrl.selectedIndex > ctrl.suggestions.length-1) {
+        if (ctrl.selectedIndex > ctrl.suggestions.length - 1) {
           ctrl.selectedIndex = 0;
         }
-        selectSuggestion(element, ctrl.selectedIndex);
+        ctrl.selectSuggestion(ctrl.selectedIndex);
       }
-    });
-
-    // set first suggestion selected
-    $scope.$on('selectSuggestion', () => {
-      selectSuggestion(element, 0);
     });
   }
 }

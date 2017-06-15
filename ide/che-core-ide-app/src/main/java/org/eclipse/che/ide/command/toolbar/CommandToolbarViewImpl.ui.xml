@@ -23,7 +23,7 @@
         }
 
         .processesListPanel {
-            width: literal("calc(100% - 285px)");
+            width: literal("calc(100% - 290px)");
             float: left;
             margin-left: 15px;
         }

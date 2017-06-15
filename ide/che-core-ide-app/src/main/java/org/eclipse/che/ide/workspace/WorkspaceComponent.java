@@ -14,6 +14,7 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -37,7 +38,6 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
@@ -215,13 +215,21 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         String workspaceIdPlusMachineName =
                 appContext.getWorkspaceId() + "::" + machine;
 
-        transmitter.transmitStringToNone(endpointId, subscribeByName,
-                                         workspaceIdPlusMachineName);
+        transmitter.newRequest()
+                   .endpointId(endpointId)
+                   .methodName(subscribeByName)
+                   .paramsAsString(workspaceIdPlusMachineName)
+                   .sendAndSkipResult();
+
     }
 
     private void subscribe(String it, String methodName, String id) {
         workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey())
-                              .then((Operation<WorkspaceDto>)skip -> transmitter.transmitStringToNone("ws-master", methodName, id))
+                              .then((Operation<WorkspaceDto>)skip -> transmitter.newRequest()
+                                                                                .endpointId("ws-master")
+                                                                                .methodName(methodName)
+                                                                                .paramsAsString(id)
+                                                                                .sendAndSkipResult())
                               .catchError((Operation<PromiseError>)error -> Log.error(getClass(), it + ": " + error.getMessage()));
     }
 

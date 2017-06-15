@@ -19,9 +19,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
 import org.eclipse.che.api.core.util.FileCleaner;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.TarUtils;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
 import org.eclipse.che.plugin.docker.client.connection.CloseConnectionInputStream;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnection;
@@ -66,12 +66,13 @@ import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
 import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
 import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
+import org.eclipse.che.plugin.docker.client.params.ListImagesParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.PushParams;
 import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
@@ -196,16 +197,34 @@ public class DockerConnector {
     }
 
     /**
-     * Lists docker images.
+     * Lists all final layer docker images.
      *
      * @return list of docker images
      * @throws IOException
      *          when a problem occurs with docker api calls
      */
     public List<Image> listImages() throws IOException {
+        return listImages(ListImagesParams.create());
+    }
+
+    /**
+     * Lists docker images.
+     *
+     * @return list of docker images
+     * @throws IOException
+     *          when a problem occurs with docker api calls
+     */
+    public List<Image> listImages(ListImagesParams params) throws IOException {
+        final Filters filters = params.getFilters();
+
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path(apiVersionPathPrefix + "/images/json")) {
+            addQueryParamIfNotNull(connection, "all", params.getAll());
+            addQueryParamIfNotNull(connection, "digests", params.getAll());
+            if (filters != null) {
+                connection.query("filters", urlPathSegmentEscaper().escape(toJson(filters.getFilters())));
+            }
             final DockerResponse response = connection.request();
             if (OK.getStatusCode() != response.getStatus()) {
                 throw getDockerException(response);
@@ -269,6 +288,8 @@ public class DockerConnector {
      * Gets detailed information about docker image.
      *
      * @return detailed information about {@code image}
+     * @throws ImageNotFoundException
+     *          when docker api return 404 status
      * @throws IOException
      *          when a problem occurs with docker api calls
      */
@@ -277,7 +298,11 @@ public class DockerConnector {
                                                             .method("GET")
                                                             .path(apiVersionPathPrefix + "/images/" + params.getImage() + "/json")) {
             final DockerResponse response = connection.request();
-            if (OK.getStatusCode() != response.getStatus()) {
+            final int status = response.getStatus();
+            if (status == NOT_FOUND.getStatusCode()) {
+                throw new ImageNotFoundException(readAndCloseQuietly(response.getInputStream()));
+            }
+            if (OK.getStatusCode() != status) {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ImageInfo.class);
@@ -404,6 +429,8 @@ public class DockerConnector {
      * Gets detailed information about docker container.
      *
      * @return detailed information about {@code container}
+     * @throws ContainerNotFoundException
+     *          when container not found by docker (docker api returns 404)
      * @throws IOException
      *          when a problem occurs with docker api calls
      */
@@ -414,7 +441,11 @@ public class DockerConnector {
                                                                   "/json")) {
             addQueryParamIfNotNull(connection, "size", params.isReturnContainerSize());
             final DockerResponse response = connection.request();
-            if (OK.getStatusCode() != response.getStatus()) {
+            final int status = response.getStatus();
+            if (status == NOT_FOUND.getStatusCode()) {
+                throw new ContainerNotFoundException(readAndCloseQuietly(response.getInputStream()));
+            }
+            if (OK.getStatusCode() != status) {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerInfo.class);
@@ -500,6 +531,7 @@ public class DockerConnector {
      */
     public Exec createExec(final CreateExecParams params) throws IOException {
         final ExecConfig execConfig = new ExecConfig().withCmd(params.getCmd())
+                                                      .withUser(params.getUser())
                                                       .withAttachStderr(params.isDetach() == Boolean.FALSE)
                                                       .withAttachStdout(params.isDetach() == Boolean.FALSE);
         byte[] entityBytesArray = toJson(execConfig).getBytes(StandardCharsets.UTF_8);

@@ -13,7 +13,6 @@ package org.eclipse.che.ide.command.toolbar;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.ui.menubutton.MenuButton;
 
 /** View for command toolbar. */
 public interface CommandToolbarView extends View<CommandToolbarView.ActionDelegate> {
@@ -24,7 +23,7 @@ public interface CommandToolbarView extends View<CommandToolbarView.ActionDelega
 
     AcceptsOneWidget getPreviewUrlsListContainer();
 
-    void addButton(MenuButton button);
+    void addButton(ToolbarButton button);
 
     interface ActionDelegate {
     }

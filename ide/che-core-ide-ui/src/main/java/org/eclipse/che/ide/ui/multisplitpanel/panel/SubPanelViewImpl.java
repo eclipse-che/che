@@ -113,12 +113,8 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
 
         tabsPanel.add(menu);
 
-        widgetsPanel.addDomHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onWidgetFocused(widgetsPanel.getVisibleWidget());
-            }
-        }, ClickEvent.getType());
+        widgetsPanel.ensureDebugId("process-output-panel-holder");
+        widgetsPanel.addDomHandler(event -> delegate.onWidgetFocused(widgetsPanel.getVisibleWidget()), ClickEvent.getType());
     }
 
     @Override

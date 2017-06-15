@@ -75,10 +75,6 @@ public interface MachineResources extends ClientBundle {
 
         String commandTreeNode();
 
-        String differentMachineLabel();
-
-        String dockerMachineLabel();
-
         String machineStatus();
 
         String machineStatusRunning();

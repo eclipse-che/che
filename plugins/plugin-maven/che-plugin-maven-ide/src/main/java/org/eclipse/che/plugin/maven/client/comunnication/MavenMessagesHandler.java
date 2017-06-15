@@ -10,24 +10,24 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.client.comunnication;
 
-import com.google.common.base.Optional;
+import elemental.json.Json;
+import elemental.json.JsonObject;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.collections.Jso;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
-import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.WebSocketException;
@@ -39,10 +39,10 @@ import org.eclipse.che.plugin.maven.shared.dto.NotificationMessage;
 import org.eclipse.che.plugin.maven.shared.dto.ProjectsUpdateMessage;
 import org.eclipse.che.plugin.maven.shared.dto.StartStopNotification;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_NAME;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_CHANEL_NAME;
 
@@ -61,7 +61,7 @@ public class MavenMessagesHandler {
     private final PomEditorReconciler       pomEditorReconciler;
     private final ProcessesPanelPresenter   processesPanelPresenter;
     private final CommandConsoleFactory     commandConsoleFactory;
-    private final AppContext appContext;
+    private final AppContext                appContext;
 
     @Inject
     public MavenMessagesHandler(EventBus eventBus,
@@ -81,10 +81,10 @@ public class MavenMessagesHandler {
         this.commandConsoleFactory = commandConsoleFactory;
         this.appContext = appContext;
 
-        handleOperations(factory, wsAgentStateController);
+        handleOperations(wsAgentStateController);
     }
 
-    private void handleOperations(final DtoFactory factory, final WsAgentStateController wsAgentStateController) {
+    private void handleOperations(final WsAgentStateController wsAgentStateController) {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
@@ -108,12 +108,7 @@ public class MavenMessagesHandler {
             }
         });
 
-        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, new WorkspaceStoppedEvent.Handler() {
-            @Override
-            public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-                dependencyResolver.hide();
-            }
-        });
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> dependencyResolver.hide());
     }
 
 
@@ -121,8 +116,8 @@ public class MavenMessagesHandler {
         messageBus.subscribe(MAVEN_CHANEL_NAME, new MessageHandler() {
             @Override
             public void onMessage(String message) {
-                Jso jso = Jso.deserialize(message);
-                int type = jso.getFieldCastedToInteger("$type");
+                final JsonObject jsonObject = Json.parse(message);
+                final int type = (int)jsonObject.getNumber("$type");
                 MessageType messageType = MessageType.valueOf(type);
                 switch (messageType) {
                     case NOTIFICATION:
@@ -145,7 +140,7 @@ public class MavenMessagesHandler {
         });
     }
 
-    private void handleMavenArchetype(final MessageBus messageBus)  {
+    private void handleMavenArchetype(final MessageBus messageBus) {
         final DefaultOutputConsole outputConsole = (DefaultOutputConsole)commandConsoleFactory.create("Maven Archetype");
 
         try {
@@ -158,16 +153,16 @@ public class MavenMessagesHandler {
                     switch (archetypeOutput.getState()) {
                         case START:
                             outputConsole.clearOutputsButtonClicked();
-                            outputConsole.printText(archetypeOutput.getOutput(),"green");
+                            outputConsole.printText(archetypeOutput.getOutput(), "green");
                             break;
                         case IN_PROGRESS:
                             outputConsole.printText(archetypeOutput.getOutput());
                             break;
                         case DONE:
-                            outputConsole.printText(archetypeOutput.getOutput(),"green");
+                            outputConsole.printText(archetypeOutput.getOutput(), "green");
                             break;
                         case ERROR:
-                            outputConsole.printText(archetypeOutput.getOutput(),"red");
+                            outputConsole.printText(archetypeOutput.getOutput(), "red");
                             break;
                         default:
                             break;
@@ -191,12 +186,9 @@ public class MavenMessagesHandler {
         List<String> updatedProjects = dto.getUpdatedProjects();
         Set<String> projectToRefresh = computeUniqueHiLevelProjects(updatedProjects);
         for (final String path : projectToRefresh) {
-            appContext.getWorkspaceRoot().getContainer(path).then(new Operation<Optional<Container>>() {
-                @Override
-                public void apply(Optional<Container> container) throws OperationException {
-                    if (container.isPresent()) {
-                        container.get().synchronize();
-                    }
+            appContext.getWorkspaceRoot().getContainer(path).then(container -> {
+                if (container.isPresent()) {
+                    container.get().synchronize();
                 }
             });
         }
@@ -205,16 +197,16 @@ public class MavenMessagesHandler {
     }
 
     private Set<String> computeUniqueHiLevelProjects(List<String> updatedProjects) {
-        Set<String> result = new HashSet<>();
-        for (String project : updatedProjects) {
-            Path path = new Path(project);
-            if (path.segmentCount() > 1) {
-                //TODO maven modules may exists in sub sub directory
-                path = path.removeLastSegments(1);
+        return updatedProjects.stream().filter(each -> shouldBeUpdated(updatedProjects, each)).collect(toSet());
+    }
+
+    private boolean shouldBeUpdated(List<String> updatedProjects, String project) {
+        for (String each : updatedProjects) {
+            if (!project.equals(each) && project.startsWith(each)){
+                return false;
             }
-            result.add(path.toString());
         }
-        return result;
+        return true;
     }
 
     private void handleNotification(NotificationMessage message) {

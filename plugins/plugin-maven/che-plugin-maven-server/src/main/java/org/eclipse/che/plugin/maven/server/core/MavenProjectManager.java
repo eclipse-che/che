@@ -360,6 +360,22 @@ public class MavenProjectManager {
         }
     }
 
+
+    public MavenProject getMavenProject(IProject iProject) {
+        readLock.lock();
+        try {
+            return projectToMavenProjectMap.get(iProject);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+
+    public MavenProject getMavenProject(String projectPath) {
+        final IProject project = workspaceProvider.get().getRoot().getProject(projectPath);
+        return getMavenProject(project);
+    }
+
     private void fillMavenKeyMap(MavenProject mavenProject) {
         MavenKey mavenKey = mavenProject.getMavenKey();
         mavenWorkspaceCache.put(mavenKey, mavenProject.getPomFile());

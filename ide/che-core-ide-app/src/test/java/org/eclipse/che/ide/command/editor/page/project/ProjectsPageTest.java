@@ -30,9 +30,9 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -148,7 +148,7 @@ public class ProjectsPageTest {
     }
 
     private void setUpApplicableProjectToContext() {
-        List<String> applicableProjects = new ArrayList<>();
+        Set<String> applicableProjects = new HashSet<>();
         applicableProjects.add(PROJECT_PATH);
         when(applicableContext.getApplicableProjects()).thenReturn(applicableProjects);
     }

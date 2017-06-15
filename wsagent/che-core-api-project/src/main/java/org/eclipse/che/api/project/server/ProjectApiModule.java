@@ -30,6 +30,7 @@ import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.EditorFileOperationHandler;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.EditorFileTracker;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeTracker;
 import org.eclipse.che.api.vfs.search.MediaTypeFilter;
@@ -94,6 +95,9 @@ public class ProjectApiModule extends AbstractModule {
 
         bind(FileWatcherNotificationHandler.class).to(DefaultFileWatcherNotificationHandler.class);
 
+        bind(EditorChangesTracker.class).asEagerSingleton();
+        bind(EditorWorkingCopyManager.class).asEagerSingleton();
+
         configureVfsFilters(excludeMatcher);
         configureVfsFilters(fileWatcherExcludes);
         configureVfsEvent();
@@ -149,6 +153,7 @@ public class ProjectApiModule extends AbstractModule {
 
     private void configureVfsEvent() {
         bind(EditorFileTracker.class).asEagerSingleton();
+        bind(EditorFileOperationHandler.class).asEagerSingleton();
         bind(ProjectTreeTracker.class).asEagerSingleton();
     }
 

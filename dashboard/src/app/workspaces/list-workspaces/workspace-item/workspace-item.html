@@ -30,7 +30,7 @@
          layout-align-xs="start start"
          class="che-list-item-details">
       <div flex-gt-xs="25"
-           class="che-list-item-name"
+           class="che-list-item-name workspace-item-name"
            ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Name</span>
         <workspace-status-indicator che-status="workspaceItemCtrl.getWorkspaceStatus()"></workspace-status-indicator>
@@ -39,25 +39,26 @@
         <i class="fa fa-clock-o workspace-item-temp" ng-if="workspaceItemCtrl.workspace.temporary"></i>
       </div>
       <div flex-gt-xs="15"
-           lass="che-list-item-name"
+           lass="che-list-item-name workspace-item-ram"
            ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>RAM</span>
         <span class="workspace-consumed-value">{{workspaceItemCtrl.getMemoryLimit(workspaceItemCtrl.workspace)}}</span>
       </div>
       <div flex-gt-xs="15"
-           class="che-list-item-name"
+           class="che-list-item-name workspace-item-projects"
            ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Projects</span>
         <span class="che-hover">{{workspaceItemCtrl.workspace.config.projects.length}}
           <span ng-if="workspaceItemCtrl.displayLabels"> project<span ng-if="workspaceItemCtrl.workspace.config.projects.length > 1">s</span></span></span>
       </div>
       <div flex-gt-xs="30"
-           class="che-list-item-name"
+           class="che-list-item-name workspace-item-stack"
            ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Stack</span>
         <span class="che-hover">{{workspaceItemCtrl.workspace.attributes.stackId}}</span>
       </div>
-      <div flex-gt-xs="15">
+      <div flex-gt-xs="15"
+           class="workspace-item-actions">
         <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
         <span class="che-list-actions">
           <che-workspace-status che-workspace-item="workspaceItemCtrl.workspace"></che-workspace-status>

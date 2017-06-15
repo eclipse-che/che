@@ -64,6 +64,7 @@ import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
@@ -92,7 +93,8 @@ public class EditorAgentImpl implements EditorAgent,
                                         ActivePartChangedHandler,
                                         SelectionChangedHandler,
                                         WindowActionHandler,
-                                        StateComponent {
+                                        StateComponent,
+                                        WorkspaceStoppedEvent.Handler {
 
     private final EventBus                 eventBus;
     private final WorkspaceAgent           workspaceAgent;
@@ -138,11 +140,22 @@ public class EditorAgentImpl implements EditorAgent,
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
         eventBus.addHandler(SelectionChangedEvent.TYPE, this);
         eventBus.addHandler(WindowActionEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
     @Override
     public void onClose(EditorPartPresenter editor) {
-        closeEditor(editor);
+        if (editor == null) {
+            return;
+        }
+
+        final EditorPartStack editorPartStack = editorMultiPartStack.getPartStackByPart(editor);
+        if (editorPartStack == null) {
+            return;
+        }
+
+        EditorTab editorTab = editorPartStack.getTabByPart(editor);
+        doCloseEditor(editorTab);
     }
 
     @Override
@@ -345,16 +358,16 @@ public class EditorAgentImpl implements EditorAgent,
 
     /** {@inheritDoc} */
     @Override
-    public void saveAll(final AsyncCallback callback) {
+    public void saveAll(final AsyncCallback<Void> callback) {
         dirtyEditors = getDirtyEditors();
         if (dirtyEditors.isEmpty()) {
-            callback.onSuccess("Success");
+            callback.onSuccess(null);
         } else {
             doSave(callback);
         }
     }
 
-    private void doSave(final AsyncCallback callback) {
+    private void doSave(final AsyncCallback<Void> callback) {
         final EditorPartPresenter partPresenter = dirtyEditors.get(0);
         partPresenter.doSave(new AsyncCallback<EditorInput>() {
             @Override
@@ -366,7 +379,7 @@ public class EditorAgentImpl implements EditorAgent,
             public void onSuccess(EditorInput result) {
                 dirtyEditors.remove(partPresenter);
                 if (dirtyEditors.isEmpty()) {
-                    callback.onSuccess("Success");
+                    callback.onSuccess(null);
                 } else {
                     doSave(callback);
                 }
@@ -619,6 +632,13 @@ public class EditorAgentImpl implements EditorAgent,
         PartPresenter partPresenter = activePartStack.getPartByPath(selectedResourceLocation);
         if (partPresenter != null) {
             workspaceAgent.setActivePart(partPresenter, EDITING);
+        }
+    }
+
+    @Override
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+        for (EditorPartPresenter editor : getOpenedEditors()) {
+            closeEditor(editor);
         }
     }
 

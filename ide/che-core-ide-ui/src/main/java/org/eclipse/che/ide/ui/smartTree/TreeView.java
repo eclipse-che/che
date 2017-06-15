@@ -222,7 +222,9 @@ public class TreeView {
     }
 
     public void onOverChange(NodeDescriptor node, boolean over) {
-        setClassName(getNodeContainer(node), tree.getTreeStyles().styles().hover(), over);
+        if (tree.focused) {
+            setClassName(getNodeContainer(node), tree.getTreeStyles().styles().hover(), over);
+        }
     }
 
     public void onSelectChange(Node node, boolean select) {
@@ -236,8 +238,20 @@ public class TreeView {
         if (nodeDescriptor != null) {
             Element e = getNodeContainer(nodeDescriptor);
             if (e != null) {
-                setClassName(e, tree.getTreeStyles().styles().selected(), select);
+                setClassName(e, tree.getTreeStyles().styles().hover(), false);
+                setClassName(e, tree.getTreeStyles().styles().selected(), false);
+
+                if (select) {
+                    setClassName(e, tree.focused ? tree.getTreeStyles().styles().selected() : tree.getTreeStyles().styles().hover(), true);
+                }
+
             }
+        }
+    }
+
+    public void onFocusUpdated() {
+        for (Node node : tree.getSelectionModel().getSelectedNodes()) {
+            onSelectChange(node, tree.getSelectionModel().isSelected(node));
         }
     }
 

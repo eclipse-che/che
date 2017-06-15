@@ -16,15 +16,12 @@ import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.factory.Ide;
 import org.eclipse.che.api.core.model.factory.Policies;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.factory.server.FactoryImage;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 
 import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -32,9 +29,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Data object for {@link Factory}.
@@ -85,10 +80,6 @@ public class FactoryImpl implements Factory {
     @Embedded
     private PoliciesImpl policies;
 
-    @ElementCollection
-    @CollectionTable(name = "che_factory_image", joinColumns = @JoinColumn(name = "factory_id"))
-    private Set<FactoryImage> images;
-
     public FactoryImpl() {}
 
     public FactoryImpl(String id,
@@ -98,8 +89,7 @@ public class FactoryImpl implements Factory {
                        Author creator,
                        Policies policies,
                        Ide ide,
-                       Button button,
-                       Set<FactoryImage> images) {
+                       Button button) {
         this.id = id;
         this.name = name;
         this.version = version;
@@ -118,12 +108,9 @@ public class FactoryImpl implements Factory {
         if (button != null) {
             this.button = new ButtonImpl(button);
         }
-        if (images != null) {
-            this.images = new HashSet<>(images);
-        }
     }
 
-    public FactoryImpl(Factory factory, Set<FactoryImage> images) {
+    public FactoryImpl(Factory factory) {
         this(factory.getId(),
              factory.getName(),
              factory.getV(),
@@ -131,12 +118,7 @@ public class FactoryImpl implements Factory {
              factory.getCreator(),
              factory.getPolicies(),
              factory.getIde(),
-             factory.getButton(),
-             images);
-    }
-
-    public FactoryImpl(FactoryImpl factory) {
-        this(factory, factory.images);
+             factory.getButton());
     }
 
     @Override
@@ -211,17 +193,6 @@ public class FactoryImpl implements Factory {
         this.ide = ide;
     }
 
-    public Set<FactoryImage> getImages() {
-        if (images == null) {
-            images = new HashSet<>();
-        }
-        return images;
-    }
-
-    public void setImages(Set<FactoryImage> images) {
-        this.images = images;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -234,8 +205,7 @@ public class FactoryImpl implements Factory {
                && Objects.equals(creator, other.creator)
                && Objects.equals(policies, other.policies)
                && Objects.equals(ide, other.ide)
-               && Objects.equals(button, other.button)
-               && getImages().equals(other.getImages());
+               && Objects.equals(button, other.button);
     }
 
     @Override
@@ -249,7 +219,6 @@ public class FactoryImpl implements Factory {
         hash = 31 * hash + Objects.hashCode(policies);
         hash = 31 * hash + Objects.hashCode(ide);
         hash = 31 * hash + Objects.hashCode(button);
-        hash = 31 * hash + getImages().hashCode();
         return hash;
     }
 
@@ -264,7 +233,6 @@ public class FactoryImpl implements Factory {
                ", policies=" + policies +
                ", ide=" + ide +
                ", button=" + button +
-               ", images=" + images +
                '}';
     }
 
@@ -281,12 +249,11 @@ public class FactoryImpl implements Factory {
         private Policies          policies;
         private Ide               ide;
         private Button            button;
-        private Set<FactoryImage> images;
 
         private FactoryImplBuilder() {}
 
         public FactoryImpl build() {
-            return new FactoryImpl(id, name, version, workspace, creator, policies, ide, button, images);
+            return new FactoryImpl(id, name, version, workspace, creator, policies, ide, button);
         }
 
         public FactoryImplBuilder from(FactoryImpl factory) {
@@ -298,7 +265,6 @@ public class FactoryImpl implements Factory {
             this.policies = factory.getPolicies();
             this.ide = factory.getIde();
             this.button = factory.getButton();
-            this.images = factory.getImages();
             return this;
         }
 
@@ -344,11 +310,6 @@ public class FactoryImpl implements Factory {
 
         public FactoryImplBuilder setButton(Button button) {
             this.button = button;
-            return this;
-        }
-
-        public FactoryImplBuilder setImages(Set<FactoryImage> images) {
-            this.images = images;
             return this;
         }
     }

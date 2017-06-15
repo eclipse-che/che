@@ -31,7 +31,7 @@ export class CheUser {
   private remoteUserAPI: IUsersResource<any>;
   private logoutAPI: ng.resource.IResourceClass<any>;
 
-  private useridMap: Map<string, che.IUser>;
+  private userIdMap: Map<string, che.IUser>;
   private userAliasMap: Map<string, che.IUser>;
   private userNameMap: Map<string, che.IUser>;
   private usersMap: Map<string, che.IUser>;
@@ -78,7 +78,7 @@ export class CheUser {
     this.logoutAPI = this.$resource('/api/auth/logout', {});
 
     // users by ID
-    this.useridMap = new Map();
+    this.userIdMap = new Map();
 
     // users by alias
     this.userAliasMap = new Map();
@@ -386,25 +386,24 @@ export class CheUser {
     let promise = this.remoteUserAPI.findByID({userId: userId}).$promise;
 
     return promise.then((user: che.IUser) => {
-      this.useridMap.set(userId, user);
+      this.userIdMap.set(userId, user);
       return user;
     }, (error: any) => {
       if (error && error.status === 304) {
-        return this.useridMap.get(userId);
+        return this.userIdMap.get(userId);
       }
       return this.$q.reject(error);
     });
   }
 
   getUserFromId(userId: string): any {
-    return this.useridMap.get(userId);
+    return this.userIdMap.get(userId);
   }
 
   fetchUserByAlias(alias: string): ng.IPromise<any> {
     let promise = this.remoteUserAPI.findByAlias({alias: alias}).$promise;
 
     return  promise.then((user: che.IUser) => {
-      this.useridMap.set(user.id, user);
       this.userAliasMap.set(alias, user);
       return user;
     }, (error: any) => {

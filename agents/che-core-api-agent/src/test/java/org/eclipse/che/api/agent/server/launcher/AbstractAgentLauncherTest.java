@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.api.machine.server.spi.InstanceNode;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
@@ -34,6 +35,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -69,6 +71,7 @@ public class AbstractAgentLauncherTest {
         when(agentChecker.isLaunched(any(Agent.class),
                                      any(InstanceProcess.class),
                                      any(Instance.class))).thenReturn(true);
+        when(machine.getNode()).thenReturn(mock(InstanceNode.class));
     }
 
     @Test

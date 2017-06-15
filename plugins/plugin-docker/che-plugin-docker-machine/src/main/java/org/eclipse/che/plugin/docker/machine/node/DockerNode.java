@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.docker.machine.node;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.machine.server.spi.InstanceNode;
 
 /**
@@ -22,10 +23,12 @@ public interface DockerNode extends InstanceNode {
     /**
      * Bind the whole workspace on the Node.
      *
+     * @throws EnvironmentException
+     *         if environment in abnormal state because of problem with machines
      * @throws ServerException
-     *         if error occurs on binding
+     *         if other error occurs on binding
      */
-    void bindWorkspace() throws ServerException;
+    void bindWorkspace() throws ServerException, EnvironmentException;
 
     /**
      * Unbind the workspace on Node.
