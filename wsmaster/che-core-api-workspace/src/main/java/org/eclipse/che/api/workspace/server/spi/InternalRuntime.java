@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
@@ -31,7 +32,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Implementation of concrete Runtime
- * Important to notice - no states in here, it is always RUNNING
  * @author gazarenkov
  */
 public abstract class InternalRuntime <T extends RuntimeContext> implements Runtime {
@@ -44,7 +44,7 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
 
     public InternalRuntime(T context, URLRewriter urlRewriter) {
         this.context = context;
-        this.urlRewriter = urlRewriter;
+        this.urlRewriter = urlRewriter != null ? urlRewriter : new NullUrlRewriter();
     }
 
     /**
@@ -184,5 +184,15 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
         }
 
         return outgoing;
+    }
+
+    /**
+     * No rewriting, just pass internal URL back
+     */
+    private class NullUrlRewriter implements URLRewriter {
+        @Override
+        public URL rewriteURL(RuntimeIdentity identity, String name, URL url) throws MalformedURLException {
+            return url;
+        }
     }
 }

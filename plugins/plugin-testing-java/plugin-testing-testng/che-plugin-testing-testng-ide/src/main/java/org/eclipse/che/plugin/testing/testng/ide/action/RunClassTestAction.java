@@ -15,14 +15,11 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
-import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
@@ -30,10 +27,10 @@ import org.eclipse.che.plugin.testing.testng.ide.TestNGLocalizationConstant;
 import org.eclipse.che.plugin.testing.testng.ide.TestNGResources;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -50,14 +47,12 @@ public class RunClassTestAction extends AbstractPerspectiveAction
 
     @Inject
     public RunClassTestAction(TestNGResources resources,
-                                     NotificationManager notificationManager,
-                                     EditorAgent editorAgent,
-                                     AppContext appContext,
-                                     TestResultPresenter presenter,
-                                     TestServiceClient service,
-                                     DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                                     TestNGLocalizationConstant localization) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.actionRunClassTitle(),
+                              NotificationManager notificationManager,
+                              AppContext appContext,
+                              TestResultPresenter presenter,
+                              TestServiceClient service,
+                              TestNGLocalizationConstant localization) {
+        super(singletonList(PROJECT_PERSPECTIVE_ID), localization.actionRunClassTitle(),
               localization.actionRunClassDescription(), null, resources.testIcon());
         this.notificationManager = notificationManager;
         this.presenter = presenter;
@@ -82,20 +77,15 @@ public class RunClassTestAction extends AbstractPerspectiveAction
     @Override
     public void updateInPerspective(@NotNull ActionEvent e) {
         Resource resource = appContext.getResource();
-        if (! (resource instanceof File)) {
+        if (!(resource instanceof File) || resource.getProject() == null) {
             e.getPresentation().setEnabledAndVisible(false);
             return;
         }
-        
-        Project project = resource.getProject();
-        if (project == null) {
-            e.getPresentation().setEnabledAndVisible(false);
-        }
-        
+
         e.getPresentation().setVisible(true);
 
-        String projectType = project.getType();
-        if (! "maven".equals(projectType)) {
+        String projectType = resource.getProject().getType();
+        if (!"maven".equals(projectType)) {
             e.getPresentation().setEnabled(false);
         }
 

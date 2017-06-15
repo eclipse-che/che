@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunTestActionDelegate;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
@@ -26,10 +25,10 @@ import org.eclipse.che.plugin.testing.junit.ide.JUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -43,24 +42,21 @@ public class RunAllTestAction extends AbstractPerspectiveAction
     private final TestResultPresenter   presenter;
     private final TestServiceClient     service;
     private final AppContext            appContext;
-    private final SelectionAgent        selectionAgent;
     private final RunTestActionDelegate delegate;
 
     @Inject
     public RunAllTestAction(JUnitTestResources resources,
-                                   NotificationManager notificationManager,
-                                   AppContext appContext,
-                                   TestResultPresenter presenter,
-                                   TestServiceClient service,
-                                   SelectionAgent selectionAgent,
-                                   JUnitTestLocalizationConstant localization) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.actionRunAllTitle(),
+                            NotificationManager notificationManager,
+                            AppContext appContext,
+                            TestResultPresenter presenter,
+                            TestServiceClient service,
+                            JUnitTestLocalizationConstant localization) {
+        super(singletonList(PROJECT_PERSPECTIVE_ID), localization.actionRunAllTitle(),
               localization.actionRunAllDescription(), null, resources.testAllIcon());
         this.notificationManager = notificationManager;
         this.presenter = presenter;
         this.service = service;
         this.appContext = appContext;
-        this.selectionAgent = selectionAgent;
         this.delegate = new RunTestActionDelegate(this);
     }
 
@@ -79,18 +75,14 @@ public class RunAllTestAction extends AbstractPerspectiveAction
     @Override
     public void updateInPerspective(@NotNull ActionEvent e) {
         Resource resource = appContext.getResource();
-        if (resource == null) {
+        if (resource == null || resource.getProject() == null) {
             e.getPresentation().setEnabledAndVisible(false);
+            return;
         }
-        
-        Project project = resource.getProject();
-        if (project == null) {
-            e.getPresentation().setEnabledAndVisible(false);
-        }
-        
+
         e.getPresentation().setVisible(true);
 
-        String projectType = project.getType();
+        String projectType = resource.getProject().getType();
         boolean enable = "maven".equals(projectType);
         e.getPresentation().setEnabled(enable);
     }

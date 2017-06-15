@@ -91,4 +91,11 @@ export class CheEditorController {
     };
   }
 
+  /**
+   * Returns validation state of the editor content.
+   * @returns {boolean}
+   */
+  isEditorValid(): boolean {
+    return this.editorState && this.editorState.isValid;
+  }
 }

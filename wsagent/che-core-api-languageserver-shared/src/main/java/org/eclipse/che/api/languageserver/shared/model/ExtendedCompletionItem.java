@@ -10,13 +10,13 @@ import org.eclipse.lsp4j.TextDocumentIdentifier;
  */
 public class ExtendedCompletionItem extends CompletionItem {
 
-    private TextDocumentIdentifier documentIdentifier;
+    private TextDocumentIdentifier textDocumentIdentifier;
 
     public TextDocumentIdentifier getTextDocumentIdentifier() {
-        return documentIdentifier;
+        return textDocumentIdentifier;
     }
 
     public void setTextDocumentIdentifier(TextDocumentIdentifier documentIdentifier) {
-        this.documentIdentifier = documentIdentifier;
+        this.textDocumentIdentifier = documentIdentifier;
     }
 }
