@@ -45,7 +45,10 @@ public abstract class ServerEvaluationStrategy {
     /**
      * @return true if <strong>external</strong> addresses need to be exposed against https, false otherwise
      */
-    protected abstract boolean useHttpsForExternalUrls();
+    protected boolean useHttpsForExternalUrls() {
+        return false;
+    }
+    
 
     /**
      * Gets a map of all <strong>internal</strong> addresses exposed by the container in the form of
@@ -240,17 +243,28 @@ public abstract class ServerEvaluationStrategy {
      *     "9090/udp" : "my-host.com:32722"
      * }
      * }</pre>
+     * 
      */
-    protected Map<String, String> getExposedPortsToAddressPorts(String address, Map<String, List<PortBinding>> ports) {
+    protected Map<String, String> getExposedPortsToAddressPorts(String address, Map<String, List<PortBinding>> ports, boolean useExposedPorts) {
         Map<String, String> addressesAndPorts = new HashMap<>();
         for (Map.Entry<String, List<PortBinding>> portEntry : ports.entrySet()) {
+            String exposedPort = portEntry.getKey().split("/")[0];
             // there is one value always
-            String port = portEntry.getValue().get(0).getHostPort();
-            addressesAndPorts.put(portEntry.getKey(), address + ":" + port);
+            String ephemeralPort = portEntry.getValue().get(0).getHostPort();
+            if (useExposedPorts) {
+                addressesAndPorts.put(portEntry.getKey(), address + ":" + exposedPort);
+            } else {
+                addressesAndPorts.put(portEntry.getKey(), address + ":" + ephemeralPort);
+            }
         }
         return addressesAndPorts;
     }
 
+    protected Map<String, String> getExposedPortsToAddressPorts(String address, Map<String, List<PortBinding>> ports) {
+        return getExposedPortsToAddressPorts(address, ports, false);
+    }
+
+    
     /**
      * @param protocolForInternalUrl
      * @return https, if {@link #useHttpsForExternalUrls()} method in sub-class returns true and protocol for internal Url is http
