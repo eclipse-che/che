@@ -58,6 +58,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -369,10 +371,10 @@ public class TextDocumentService {
                             .filter(s->truish(s.getInitializeResult().getCapabilities().getDocumentFormattingProvider()))
                             .findFirst().get();
             return server == null ? Collections.emptyList()
-                            : server.getServer().getTextDocumentService().formatting(documentFormattingParams).get().stream()
+                            : server.getServer().getTextDocumentService().formatting(documentFormattingParams).get(5000, TimeUnit.MILLISECONDS).stream()
                                             .map(TextEditDto::new).collect(Collectors.toList());
 
-        } catch (InterruptedException | ExecutionException | LanguageServerException e) {
+        } catch (InterruptedException | ExecutionException | LanguageServerException | TimeoutException e) {
             throw new JsonRpcException(-27000, e.getMessage());
         }
     }

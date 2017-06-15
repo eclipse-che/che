@@ -20,6 +20,8 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.lsp4j.ServerCapabilities;
 
+import java.util.concurrent.TimeoutException;
+
 @Singleton
 public class LanguageServerRegistryJsonRpcClient {
 
@@ -31,13 +33,25 @@ public class LanguageServerRegistryJsonRpcClient {
     }
 
     public Promise<ServerCapabilities> initializeServer(String path) {
-        return Promises.create((resolve, reject) -> requestTransmitter.newRequest()
-                        .endpointId("ws-agent")
-                        .methodName("languageServer/initialize")
-                        .paramsAsString(path)
-                        .sendAndReceiveResultAsDto(ServerCapabilities.class, 30000)
-                        .onSuccess(resolve::apply)
-                        .onFailure(error -> reject.apply(getPromiseError(error))));
+        return Promises.create((resolve, reject) -> requestTransmitter.newRequest().endpointId("ws-agent")
+                        .methodName("languageServer/initialize").paramsAsString(path)
+                        .sendAndReceiveResultAsDto(ServerCapabilities.class, 30000).onSuccess(resolve::apply)
+                        .onFailure(error -> reject.apply(getPromiseError(error)))
+                        .onTimeout(() -> {
+                            final TimeoutException e = new TimeoutException();
+                            reject.apply(new PromiseError() {
+
+                                @Override
+                                public String getMessage() {
+                                    return "Timeout initializing error";
+                                }
+
+                                @Override
+                                public Throwable getCause() {
+                                    return e;
+                                }
+                            });
+                        }));
     }
 
     private PromiseError getPromiseError(JsonRpcError jsonRpcError) {

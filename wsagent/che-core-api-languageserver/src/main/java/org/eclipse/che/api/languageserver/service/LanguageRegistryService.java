@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ServerCapabilitiesDto;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.ServerCapabilities;
 
@@ -47,8 +48,8 @@ public class LanguageRegistryService {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("initialize")
-    public ServerCapabilities initialize(@QueryParam("path") String path) throws LanguageServerException {
+    public ServerCapabilitiesDto initialize(@QueryParam("path") String path) throws LanguageServerException {
         //in most cases starts new LS if not already started
-        return registry.initialize(TextDocumentServiceUtils.prefixURI(path));
+        return new ServerCapabilitiesDto(registry.initialize(TextDocumentServiceUtils.prefixURI(path)));
     }
 }

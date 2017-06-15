@@ -245,7 +245,8 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                 list.add(server);
             }
         }
-        return result.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(entry -> entry.getValue()).collect(Collectors.toList());
+        // sort lists highest score first
+        return result.entrySet().stream().sorted((left, right)->right.getKey()-left.getKey()).map(entry -> entry.getValue()).collect(Collectors.toList());
     }
 
     public static <C, R> void doInParallel(Collection<C> collection, LSOperation<C, R> op, long timeoutMillis) {
@@ -291,7 +292,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
             Thread.currentThread().interrupt();
         }
         synchronized (lock) {
-            for (CompletableFuture<?> pending : pendingResponses) {
+            for (CompletableFuture<?> pending : new ArrayList<>(pendingResponses)) {
                 pending.cancel(true);
             }
             lock.notifyAll();
