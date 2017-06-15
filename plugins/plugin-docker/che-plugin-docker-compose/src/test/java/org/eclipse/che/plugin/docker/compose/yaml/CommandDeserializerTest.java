@@ -28,6 +28,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * Test deserialization field {@link ComposeServiceImpl#command}
@@ -177,17 +178,16 @@ public class CommandDeserializerTest {
         };
     }
 
-    @Test(expectedExceptions = ReaderException.class,
-          expectedExceptionsMessageRegExp = "special characters are not allowed",
-          dataProvider = "inValidSymbols")
-    public void symbolsShouldBeInvalidForYaml(String command) throws Exception {
-        String content = format(RECIPE_WITHOUT_COMMAND_VALUE, command);
-
+    @Test(dataProvider = "inValidSymbols")
+    public void symbolsShouldBeInvalidForYaml(InvalidSymbolCommand command) throws Exception {
+        String content = format(RECIPE_WITHOUT_COMMAND_VALUE, command.getCommand());
         try {
             composeEnvironmentParser.parse(content, "application/x-yaml");
-        } catch (Exception e) {
-            System.out.println(e.getLocalizedMessage());
-            throw e;
+            // it should fail.
+            fail("The command " + command.getCommand() + " has invalid symbol and it should fail");
+        } catch (ReaderException e) {
+            // we're checking the exception there without throwing it, else it will print to testng-results.xml file an invalid symbol, thus the xml will be invalid.
+            assertEquals(e.getMessage(), "special characters are not allowed");
         }
     }
 
@@ -198,19 +198,36 @@ public class CommandDeserializerTest {
     @DataProvider(name = "inValidSymbols")
     private Object[][] inValidSymbols() {
         return new Object[][] {
-            {"service mysql start\uFFFE"},
-            {"service mysql start\uDFFF"},
-            {"service mysql start\uD800"},
-            {"service mysql start\u009F"},
-            {"service mysql start\u0086"},
-            {"service mysql start\u0084"},
-            {"service mysql start\u0084"},
-            {"service mysql start\u007F"},
-            {"service mysql start\u001F"},
-            {"service mysql start\u000E"},
-            {"service mysql start\u000C"},
-            {"service mysql start\u000B"},
-            {"service mysql start\u0008"},
+            {new InvalidSymbolCommand("service mysql start\uFFFE")},
+            {new InvalidSymbolCommand("service mysql start\uDFFF")},
+            {new InvalidSymbolCommand("service mysql start\uD800")},
+            {new InvalidSymbolCommand("service mysql start\u009F")},
+            {new InvalidSymbolCommand("service mysql start\u0086")},
+            {new InvalidSymbolCommand("service mysql start\u0084")},
+            {new InvalidSymbolCommand("service mysql start\u0084")},
+            {new InvalidSymbolCommand("service mysql start\u007F")},
+            {new InvalidSymbolCommand("service mysql start\u001F")},
+            {new InvalidSymbolCommand("service mysql start\u000E")},
+            {new InvalidSymbolCommand("service mysql start\u000C")},
+            {new InvalidSymbolCommand("service mysql start\u000B")},
+            {new InvalidSymbolCommand("service mysql start\u0008")},
         };
+    }
+
+    /**
+     * Use of a custom class for the command, so the DataProvider is not printing the string containing invalid characters in the
+     * testng-results.xml file
+     */
+    private class InvalidSymbolCommand {
+
+        private final String command;
+
+        InvalidSymbolCommand(String command) {
+            this.command = command;
+        }
+
+        String getCommand() {
+            return this.command;
+        }
     }
 }
