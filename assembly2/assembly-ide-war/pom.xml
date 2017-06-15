@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>che-assembly2-parent</artifactId>
-        <groupId>org.eclipse.che.assembly2</groupId>
+        <groupId>org.eclipse.che</groupId>
         <version>5.13.0-SNAPSHOT</version>
     </parent>
     <artifactId>fabric8-ide-assembly-ide-war</artifactId>
