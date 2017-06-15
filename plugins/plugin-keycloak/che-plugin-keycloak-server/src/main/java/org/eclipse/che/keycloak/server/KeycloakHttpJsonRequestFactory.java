@@ -18,9 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 
-/**
- * 
- */
+
 @Singleton
 public class KeycloakHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
 

@@ -38,6 +38,13 @@ node default {
   $che_single_port = getValue("CHE_SINGLE_PORT","false")
 
 
+
+    ###############################
+    # Small group
+    #
+  $che_small_group = getValue("CHE_SMALL_GROUP","false")
+
+
   ################################
   # DNS resolver configuration
   $dns_resolvers = getValue("CHE_DNS_RESOLVERS","")

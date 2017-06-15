@@ -1081,6 +1081,11 @@
                 <version>${che.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-keycloak-token-provider</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.che.sample</groupId>
                 <artifactId>che-sample-plugin-actions-ide</artifactId>
                 <version>${che.version}</version>
