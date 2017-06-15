@@ -51,7 +51,7 @@ public class TestingRPCService {
                 .methodName(Constants.RUN_TESTS_METHOD)
                 .paramsAsDto(TestExecutionContext.class)
                 .resultAsBoolean()
-                .withFunction(this::runTests);
+                .withBiFunction(this::runTests);
     }
 
     @Inject
@@ -60,7 +60,7 @@ public class TestingRPCService {
                 .methodName(Constants.TESTING_RPC_TEST_DETECTION_NAME)
                 .paramsAsDto(TestDetectionContext.class)
                 .resultAsDto(TestDetectionResult.class)
-                .withFunction(this::handleTestDetection);
+                .withBiFunction(this::handleTestDetection);
     }
 
     private boolean runTests(String endpoint, TestExecutionContext context) {

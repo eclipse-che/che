@@ -10,22 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.action;
 
-import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
-import org.eclipse.che.api.testing.shared.TestExecutionContext;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+
+import java.util.Map;
+
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
-import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
-import org.eclipse.che.plugin.testing.ide.model.GeneralTestingEventsProcessor;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
-
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  * @author Mirage Abeysekara
@@ -42,43 +45,41 @@ public class RunTestActionDelegate {
         TestServiceClient getService();
 
         TestResultPresenter getPresenter();
-        
-        String getTestingFramework();
 
-        TestingHandler getTestingHandler();
+        String getTestingFramework();
     }
 
     public RunTestActionDelegate(Source source) {
         this.source = source;
     }
 
-    public void doRunTests(ActionEvent e, TestExecutionContext context) {
+    public void doRunTests(ActionEvent e, Map<String, String> parameters) {
         final StatusNotification notification = new StatusNotification("Running Tests...", PROGRESS, FLOAT_MODE);
         source.getNotificationManager().notify(notification);
         final Project project = source.getAppContext().getRootProject();
-        context.setProjectPath(project.getPath());
-        context.setFrameworkName(source.getTestingFramework());
-
-        GeneralTestingEventsProcessor eventsProcessor = new GeneralTestingEventsProcessor(source.getTestingFramework(), source.getPresenter().getRootState());
-        source.getTestingHandler().setProcessor(eventsProcessor);
-        eventsProcessor.addListener(source.getPresenter().getEventListener());
-
-        JsonRpcPromise<Boolean> testResultPromise = source.getService().runTests(context);
-        testResultPromise.onSuccess(result -> {
+        parameters.put("updateClasspath", "true");
+        Promise<TestResult> testResultPromise = source.getService().getTestResult(project.getPath(), source.getTestingFramework(), parameters, notification);
+        testResultPromise.then(new Operation<TestResult>() {
+            @Override
+            public void apply(TestResult result) throws OperationException {
                 notification.setStatus(SUCCESS);
-            if (result) {
-                notification.setTitle("Test runner executed successfully.");
-                source.getPresenter().handleResponse();
-            } else {
-                notification.setTitle("Test runner failed to execute.");
-//                    notification.setContent(result.getFailureCount() + " test(s) failed.\n");
+                if (result.isSuccess()) {
+                    notification.setTitle("Test runner executed successfully");
+                    notification.setContent("All tests are passed");
+                } else {
+                    notification.setTitle("Test runner executed successfully with test failures.");
+                    notification.setContent(result.getFailureCount() + " test(s) failed.\n");
+                }
+                source.getPresenter().handleResponse(result);
             }
-
-        }).onFailure(exception -> {
-            final String errorMessage = (exception.getMessage() != null) ? exception.getMessage()
-                    : "Failed to run test cases";
-            notification.setContent(errorMessage);
-            notification.setStatus(FAIL);
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError exception) throws OperationException {
+                final String errorMessage = (exception.getMessage() != null) ? exception.getMessage()
+                                                                             : "Failed to run test cases";
+                notification.setContent(errorMessage);
+                notification.setStatus(FAIL);
+            }
         });
     }
 }

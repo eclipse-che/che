@@ -32,7 +32,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 import org.eclipse.che.plugin.testing.ide.model.GeneralTestingEventsProcessor;
-import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
+import org.eclipse.che.plugin.testing.ide.view2.TestResultPresenter;
 
 import javax.inject.Inject;
 import java.util.List;

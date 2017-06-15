@@ -8,9 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.testing.ide.view.navigation.nodes;
+package org.eclipse.che.plugin.testing.ide.view2.navigation.nodes;
 
 import com.google.inject.assistedinject.Assisted;
+
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;

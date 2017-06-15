@@ -68,7 +68,7 @@ public class TestingHandler implements TestingMessageVisitor {
     }
 
 
-    private void handleTestingMessage(String endpointId, String jsonMessage) {
+    private void handleTestingMessage(String jsonMessage) {
         ClientTestingMessage message = ClientTestingMessage.parse(jsonMessage);
         if (message != null) {
             message.visit(this);

@@ -8,19 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.testing.ide.view;
+package org.eclipse.che.plugin.testing.ide.view2;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.plugin.testing.ide.TestLocalizationConstant;
 import org.eclipse.che.plugin.testing.ide.TestResources;
+import org.eclipse.che.plugin.testing.ide.model.TestRootState;
+import org.eclipse.che.plugin.testing.ide.model.TestStateEventsListener;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -30,10 +31,10 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 @Singleton
 public class TestResultPresenter extends BasePresenter implements TestResultView.ActionDelegate {
-    private final WorkspaceAgent workspaceAgent;
+    private final WorkspaceAgent           workspaceAgent;
     private final TestLocalizationConstant localizationConstant;
-    private final TestResources resources;
-    private final TestResultView view;
+    private final TestResources            resources;
+    private final TestResultView           view;
 
     @Inject
     public TestResultPresenter(WorkspaceAgent workspaceAgent,
@@ -74,13 +75,18 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
 
     /**
      * Activate Test results part and showing the test results.
-     *
-     * @param response
-     *            result of the test runner
      */
-    public void handleResponse(TestResult response) {
+    public void handleResponse() {
         workspaceAgent.openPart(this, PartStackType.INFORMATION);
         workspaceAgent.setActivePart(this);
-        view.showResults(response);
+
+    }
+
+    public TestRootState getRootState() {
+        return view.getRootState();
+    }
+
+    public TestStateEventsListener getEventListener() {
+        return view;
     }
 }
