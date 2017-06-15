@@ -13,8 +13,8 @@
                    required>
     </che-input-box>
 
-    <div layout="row" layout-align="left"
-         flex flex-offset="15">
+    <div layout="row" layout-align="left" class="skip-root-container">
+      <div flex="20"></div>
       <md-checkbox ng-model="importZipProjectController.skipFirstLevel"
                    ng-change="importZipProjectController.onCheckboxChanged()"
                    aria-label="Skip the root folder of the archive">

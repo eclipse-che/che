@@ -76,6 +76,8 @@ export class ImportGithubProjectService {
    */
   private selectedRepositories: Array<IGithubRepository>;
 
+  private repositoriesLoadedCallback: Function;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
@@ -122,6 +124,10 @@ export class ImportGithubProjectService {
     }
 
     return defer.promise;
+  }
+
+  getCurrentUserId(): string {
+    return this.currentUserId;
   }
 
   /**
@@ -234,12 +240,19 @@ export class ImportGithubProjectService {
           this.gitHubRepositories = this.$filter('filter')(repositories, (repository: IGithubRepository) => {
             return organizationNames.indexOf(repository.owner.login) >= 0;
           });
+          if (this.repositoriesLoadedCallback) {
+            this.repositoriesLoadedCallback();
+          }
           this.state = LoadingState.LOADED;
         });
       });
     }, function () {
       this.state = LoadingState.LOAD_ERROR;
     });
+  }
+
+  setRepositoriesLoadedCallback(callback: Function): void {
+    this.repositoriesLoadedCallback = callback;
   }
 
   /**

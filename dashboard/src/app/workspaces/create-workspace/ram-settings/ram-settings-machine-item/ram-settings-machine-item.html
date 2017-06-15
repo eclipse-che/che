@@ -15,9 +15,9 @@
         </div>
       </div>
 
-      <div flex layout="row">
+      <div flex layout="row" flex="auto">
         <!-- Name -->
-        <div flex layout="column" layout-align="center start">
+        <div flex="40" layout="column" layout-align="center start">
           <span class="che-list-item-name ram-settings-machine-item-item-name">{{ramSettingsMachineItemController.machineName}}</span>
         </div>
 
@@ -28,23 +28,25 @@
       </div>
 
       <!-- RAM limit -->
-      <div flex="30" layout="column" layout-align="center start">
+      <div flex="25" layout="column" layout-align="center start">
         <ng-form name="ramAmountForm">
           <che-number-spinner che-form="ramAmountForm"
-                              che-name="machineName"
+                              che-name="memory"
                               che-step="0.5"
                               che-tofixed="1"
-                              che-minvalue="1"
+                              che-minvalue="0.5"
                               che-maxvalue="100"
                               che-unit="GB"
+                              id="machine-{{ramSettingsMachineItemController.machineName}}-ram"
                               ng-model="ramSettingsMachineItemController.machineMemoryLimit"
                               ng-change="ramSettingsMachineItemController.onRamChanged(value)"
                               required>
           </che-number-spinner>
         </ng-form>
       </div>
-
+      <div style="width: 10px"></div>
     </div>
+
 
   </che-list-item>
 

@@ -41,10 +41,6 @@ export class ImportGithubProjectController implements IProjectSourceSelectorServ
    */
   private $browser: ng.IBrowserService;
   /**
-   * Modals service.
-   */
-  private $modal: any;
-  /**
    * GitHub authentication popup window.
    */
   private githubPopup: any;
@@ -72,10 +68,6 @@ export class ImportGithubProjectController implements IProjectSourceSelectorServ
    * Loading states enum.
    */
   private loadingState: Object;
-  /**
-   * Current user ID.
-   */
-  private currentUserId: string;
   /**
    * Import GitHub project service.
    */
@@ -126,12 +118,11 @@ export class ImportGithubProjectController implements IProjectSourceSelectorServ
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($q: ng.IQService, $mdDialog: ng.material.IDialogService, $location: ng.ILocationService, $browser: ng.IBrowserService, $modal: any, $scope: ng.IScope, githubPopup: any, cheBranding: CheBranding, githubOrganizationNameResolver: any, importGithubProjectService: ImportGithubProjectService, cheListHelperFactory: che.widget.ICheListHelperFactory, projectSourceSelectorService: ProjectSourceSelectorService) {
+  constructor ($q: ng.IQService, $mdDialog: ng.material.IDialogService, $location: ng.ILocationService, $browser: ng.IBrowserService, $scope: ng.IScope, githubPopup: any, cheBranding: CheBranding, githubOrganizationNameResolver: any, importGithubProjectService: ImportGithubProjectService, cheListHelperFactory: che.widget.ICheListHelperFactory, projectSourceSelectorService: ProjectSourceSelectorService) {
     this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.$location = $location;
     this.$browser = $browser;
-    this.$modal = $modal;
     this.githubPopup = githubPopup;
     this.cheBranding = cheBranding;
     this.githubOrganizationNameResolver = githubOrganizationNameResolver;
@@ -164,6 +155,12 @@ export class ImportGithubProjectController implements IProjectSourceSelectorServ
 
     this.selectedRepositories.forEach((repository: IGithubRepository) => {
       this.cheListHelper.itemsSelectionStatus[repository.clone_url] = true;
+    });
+
+    this.importGithubProjectService.setRepositoriesLoadedCallback(() => {
+      this.githubRepositoriesList = this.importGithubProjectService.getGithubRepositories();
+      this.organizationsList = this.importGithubProjectService.getOrganizations();
+      this.cheListHelper.setList(this.githubRepositoriesList, 'clone_url');
     });
   }
 
@@ -218,7 +215,7 @@ export class ImportGithubProjectController implements IProjectSourceSelectorServ
     this.githubPopup.open('/api/oauth/authenticate'
       + '?oauth_provider=github'
       + '&scope=' + ['user', 'repo', 'write:public_key'].join(',')
-      + '&userId=' + this.currentUserId
+      + '&userId=' + this.importGithubProjectService.getCurrentUserId()
       + '&redirect_after_login='
       + redirectUrl,
       {

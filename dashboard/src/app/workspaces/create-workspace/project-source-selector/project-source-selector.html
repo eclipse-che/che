@@ -5,7 +5,7 @@
     <toggle-single-button class="add-project"
                           che-title="Add or Import Project"
                           che-multiline-title
-                          che-font-icon="fa fa-plus"
+                          che-font-icon="material-design icon-ic_add_24px"
                           che-on-change="projectSourceSelectorController.updateData({buttonState: state, buttonType: projectSourceSelectorController.buttonType.ADD_PROJECT})"
                           ng-init="projectSourceSelectorController.selectedButtonType = projectSourceSelectorController.buttonType.ADD_PROJECT"
                           che-value="projectSourceSelectorController.buttonValues['ADD_PROJECT']"></toggle-single-button>
@@ -38,7 +38,7 @@
                                         che-value="projectSourceSelectorController.projectSource.BLANK"></che-toggle-joined-button>
               <che-toggle-joined-button che-title="Git"
                                         che-value="projectSourceSelectorController.projectSource.GIT"></che-toggle-joined-button>
-              <che-toggle-joined-button che-title="Github"
+              <che-toggle-joined-button che-title="GitHub"
                                         che-value="projectSourceSelectorController.projectSource.GITHUB"></che-toggle-joined-button>
               <che-toggle-joined-button che-title="Zip"
                                         che-value="projectSourceSelectorController.projectSource.ZIP"></che-toggle-joined-button>

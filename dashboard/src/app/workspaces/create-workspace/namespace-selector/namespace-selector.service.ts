@@ -68,8 +68,6 @@ export class NamespaceSelectorSvc {
     this.cheUser = cheUser;
 
     this.namespaceInfo = {};
-
-    this.fetchNamespaces();
   }
 
   /**
@@ -116,7 +114,10 @@ export class NamespaceSelectorSvc {
         this.namespaceId = user.name;
       });
     }).catch((error: any) => {
-      this.$log.error(`Cannot fetch namespaces: ${error}`);
+      // this.$log.error(`Cannot fetch namespaces: ${error}`);
+      return this.$q.reject(`Cannot fetch namespaces: ${error}`);
+    }).then(() => {
+      return this.$q.when(this.namespaceId);
     });
   }
 
