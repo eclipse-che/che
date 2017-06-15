@@ -632,7 +632,7 @@ export class CheWorkspace {
    * @returns {boolean} 'che.workspace.auto_snapshot' property value
    */
   getAutoSnapshotSettings(): boolean {
-    return this.workspaceSettings ? this.workspaceSettings['che.workspace.auto_snapshot'] : true;
+    return this.workspaceSettings ? this.workspaceSettings['che.workspace.auto_snapshot'] === 'true' : true;
   }
 
   private updateWorkspacesList(workspace: che.IWorkspace): void {

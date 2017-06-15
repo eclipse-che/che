@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.nodejsdbg.ide;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
@@ -48,7 +49,8 @@ public class NodeJsDebugger extends AbstractDebugger {
                           BasicActiveFileHandler activeFileHandler,
                           DebuggerManager debuggerManager,
                           NotificationManager notificationManager,
-                          BreakpointManager breakpointManager) {
+                          BreakpointManager breakpointManager,
+                          RequestHandlerManager requestHandlerManager) {
 
         super(service,
               transmitter,
@@ -60,7 +62,8 @@ public class NodeJsDebugger extends AbstractDebugger {
               debuggerManager,
               notificationManager,
               breakpointManager,
-              ID);
+              ID,
+              requestHandlerManager);
     }
 
     @Override

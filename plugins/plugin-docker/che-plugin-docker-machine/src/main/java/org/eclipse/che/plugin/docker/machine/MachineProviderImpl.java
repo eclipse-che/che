@@ -295,7 +295,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     }
 
     @Override
-    public Instance startService(String namespace,
+    public Instance startService(String ownerName,
                                  String workspaceId,
                                  String envName,
                                  String machineName,

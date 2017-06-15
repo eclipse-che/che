@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons;
 
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -27,13 +28,32 @@ import static com.google.common.base.Preconditions.checkState;
 public class JsonRpcPromise<R> {
     private BiConsumer<String, R>            successConsumer;
     private BiConsumer<String, JsonRpcError> failureConsumer;
+    private Runnable                         timeoutRunnable;
 
-    BiConsumer<String, R> getSuccessConsumer() {
-        return successConsumer;
+    Optional<BiConsumer<String, R>> getSuccessConsumer() {
+        return Optional.ofNullable(successConsumer);
     }
 
-    BiConsumer<String, JsonRpcError> getFailureConsumer() {
-        return failureConsumer;
+    Optional<BiConsumer<String, JsonRpcError>> getFailureConsumer() {
+        return Optional.ofNullable(failureConsumer);
+    }
+
+    Optional<Runnable> getTimeoutRunnable() {
+        return Optional.ofNullable(timeoutRunnable);
+    }
+
+    /**
+     * Set timeout runnable to be called on this promise timeout.
+     *
+     * @param runnable
+     *         timeout runnable
+     * @return the instance of this very promise
+     */
+    public JsonRpcPromise<R> onTimeout(Runnable runnable) {
+        checkNotNull(runnable, "JSON RPC timeout runnable argument must not be null");
+        checkState(this.timeoutRunnable == null, "JSON RPC timeout runnable field must not be set");
+        this.timeoutRunnable = runnable;
+        return this;
     }
 
     /**

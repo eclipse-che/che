@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.resources;
 
-import com.google.common.annotations.Beta;
-
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.resource.Path;
 

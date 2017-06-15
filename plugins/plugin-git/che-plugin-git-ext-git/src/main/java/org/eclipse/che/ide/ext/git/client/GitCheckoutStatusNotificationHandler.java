@@ -47,7 +47,7 @@ public class GitCheckoutStatusNotificationHandler {
                     .methodName("event:git-checkout")
                     .paramsAsDto(GitCheckoutEventDto.class)
                     .noResult()
-                    .withConsumer(this::apply);
+                    .withBiConsumer(this::apply);
     }
 
     public void apply(String endpointId, GitCheckoutEventDto dto) {

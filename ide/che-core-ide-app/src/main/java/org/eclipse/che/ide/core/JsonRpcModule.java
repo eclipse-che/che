@@ -12,14 +12,19 @@ package org.eclipse.che.ide.core;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
+
+import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessor;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcComposer;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcQualifier;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcUnmarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.TimeoutActionRunner;
 import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
 import org.eclipse.che.ide.api.jsonrpc.WorkspaceMasterJsonRpcInitializer;
+import org.eclipse.che.ide.jsonrpc.ClientSideRequestProcessor;
+import org.eclipse.che.ide.jsonrpc.ClientSideTimeoutActionRunner;
 import org.eclipse.che.ide.jsonrpc.ElementalJsonRpcComposer;
 import org.eclipse.che.ide.jsonrpc.ElementalJsonRpcMarshaller;
 import org.eclipse.che.ide.jsonrpc.ElementalJsonRpcQualifier;
@@ -48,5 +53,8 @@ public class JsonRpcModule extends AbstractGinModule {
         bind(JsonRpcUnmarshaller.class).to(ElementalJsonRpcUnmarshaller.class);
         bind(JsonRpcComposer.class).to(ElementalJsonRpcComposer.class);
         bind(JsonRpcQualifier.class).to(ElementalJsonRpcQualifier.class);
+
+        bind(RequestProcessor.class).to(ClientSideRequestProcessor.class);
+        bind(TimeoutActionRunner.class).to(ClientSideTimeoutActionRunner.class);
     }
 }

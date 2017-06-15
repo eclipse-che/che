@@ -12,11 +12,9 @@ package org.eclipse.che.api.languageserver.registry;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
-import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsMessenger;
-import org.eclipse.che.api.languageserver.messager.ShowMessageMessenger;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.InitializeParams;
@@ -50,7 +48,7 @@ public class ServerInitializerImpl implements ServerInitializer {
     private static final int    PROCESS_ID  = getProcessId();
     private static final String CLIENT_NAME = "EclipseChe";
 
-    private final List<ServerInitializerObserver> observers;
+    private final List<ServerInitializerObserver> observers = new ArrayList<>();
 
     private final ConcurrentHashMap<String, LanguageServer>                    languageIdToServers;
     private final ConcurrentHashMap<LanguageServer, LanguageServerDescription> serversToInitResult;
@@ -58,17 +56,15 @@ public class ServerInitializerImpl implements ServerInitializer {
     private LanguageClient languageClient;
 
     @Inject
-    public ServerInitializerImpl(final PublishDiagnosticsParamsMessenger publishDiagnosticsParamsMessenger,
-                                 final ShowMessageMessenger showMessageMessenger) {
-        this.observers = new ArrayList<>();
+    public ServerInitializerImpl(EventService eventService) {
         this.languageIdToServers = new ConcurrentHashMap<>();
         this.serversToInitResult = new ConcurrentHashMap<>();
+
         languageClient = new LanguageClient() {
 
             @Override
             public void telemetryEvent(Object object) {
                 // TODO Auto-generated method stub
-
             }
 
             @Override
@@ -78,12 +74,12 @@ public class ServerInitializerImpl implements ServerInitializer {
 
             @Override
             public void showMessage(MessageParams messageParams) {
-                showMessageMessenger.onEvent(messageParams);
+                eventService.publish(messageParams);
             }
 
             @Override
             public void publishDiagnostics(PublishDiagnosticsParams diagnostics) {
-                publishDiagnosticsParamsMessenger.onEvent(diagnostics);
+                eventService.publish(diagnostics);
             }
 
             @Override
@@ -152,7 +148,7 @@ public class ServerInitializerImpl implements ServerInitializer {
             throw new LanguageServerException(
                     "Can't initialize Language Server " + languageId + " on " + projectPath + ". " + e.getMessage(), e);
         }
-        registerCallbacks(server);
+        registerCallbacks(server, launcher);
 
         CompletableFuture<InitializeResult> completableFuture = server.initialize(initializeParams);
         try {
@@ -169,10 +165,14 @@ public class ServerInitializerImpl implements ServerInitializer {
         return server;
     }
 
-    protected void registerCallbacks(LanguageServer server) {
+    protected void registerCallbacks(LanguageServer server, LanguageServerLauncher launcher) {
 
         if (server instanceof ServerInitializerObserver) {
             addObserver((ServerInitializerObserver)server);
+        }
+
+        if (launcher instanceof ServerInitializerObserver) {
+            addObserver((ServerInitializerObserver) launcher);
         }
     }
 

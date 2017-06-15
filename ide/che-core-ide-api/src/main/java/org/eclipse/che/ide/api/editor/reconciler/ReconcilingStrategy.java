@@ -17,8 +17,7 @@ import org.eclipse.che.ide.api.editor.document.Document;
  * A reconciling strategy is used by an reconciler to reconcile a model
  * based on text of a particular content type.
  *
- * @author <a href="mailto:evidolob@exoplatform.com">Evgen Vidolob</a>
- * @version $Id:
+ * @author Evgen Vidolob
  */
 public interface ReconcilingStrategy {
     /**
@@ -38,7 +37,7 @@ public interface ReconcilingStrategy {
      * As a dirty region might span multiple content types, the segment of the
      * dirty region which should be investigated is also provided to this
      * reconciling strategy. The given regions refer to the document passed into
-     * the most recent call of {@link #setDocument(org.eclipse.che.ide.api.editor.document.Document)}.
+     * the most recent call of {@link #setDocument(Document)}.
      *
      * @param dirtyRegion
      *         the document region which has been changed
@@ -50,7 +49,7 @@ public interface ReconcilingStrategy {
     /**
      * Activates non-incremental reconciling. The reconciling strategy is just told
      * that there are changes and that it should reconcile the given partition of the
-     * document most recently passed into {@link #setDocument(org.eclipse.che.ide.api.editor.document.Document)}.
+     * document most recently passed into {@link #setDocument(Document)}.
      *
      * @param partition
      *         the document partition to be reconciled

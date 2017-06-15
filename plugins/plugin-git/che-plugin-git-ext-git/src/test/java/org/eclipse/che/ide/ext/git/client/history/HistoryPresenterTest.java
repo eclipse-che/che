@@ -24,7 +24,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
-import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -56,7 +56,7 @@ public class HistoryPresenterTest extends BaseTest {
     @Mock
     private ComparePresenter     comparePresenter;
     @Mock
-    private ChangedListPresenter changedListPresenter;
+    private ChangesListPresenter changesListPresenter;
     @InjectMocks
     private HistoryPresenter     presenter;
 
@@ -184,7 +184,7 @@ public class HistoryPresenterTest extends BaseTest {
         verify(stringPromise).then(stringCaptor.capture());
         stringCaptor.getValue().apply("M file1\nM file2");
 
-        verify(changedListPresenter).show(anyMap(), eq("commitB"), eq("commitA"), any(Project.class));
+        verify(changesListPresenter).show(anyMap(), eq("commitB"), eq("commitA"), any(Project.class));
     }
 
     @Test

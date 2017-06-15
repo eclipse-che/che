@@ -32,7 +32,7 @@ public class JsonRpcEndpointIdsHolder {
                     .methodName("event:ws-agent-output:subscribe")
                     .paramsAsString()
                     .noResult()
-                    .withConsumer((endpointId, workspaceId) -> {
+                    .withBiConsumer((endpointId, workspaceId) -> {
                         endpointIds.putIfAbsent(endpointId, newConcurrentHashSet());
                         endpointIds.get(endpointId).add(workspaceId);
                     });
@@ -43,7 +43,7 @@ public class JsonRpcEndpointIdsHolder {
                     .methodName("event:ws-agent-output:un-subscribe")
                     .paramsAsString()
                     .noResult()
-                    .withConsumer((endpointId, workspaceId) -> {
+                    .withBiConsumer((endpointId, workspaceId) -> {
                         endpointIds.getOrDefault(endpointId, emptySet()).remove(workspaceId);
                         endpointIds.entrySet().removeIf(entry -> entry.getValue().isEmpty());
                     });

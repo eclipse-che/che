@@ -226,13 +226,13 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
     }
 
     public static MavenModel interpolateModel(MavenModel model, File projectDir) throws RemoteException {
-        Model result = MavenModelUtil.convertToMavenModel(model);
+        Model result = MavenModelUtil.convertToMavenModel(model, projectDir);
         result = internalInterpolate(result, projectDir);
 
 //        PathTranslator pathTranslator = new DefaultPathTranslator();
 //        pathTranslator.alignToBaseDirectory(result, projectDir);
 
-        return MavenModelUtil.convertModel(result);
+        return MavenModelUtil.convertModel(result, projectDir);
     }
 
     /**
@@ -254,7 +254,7 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
                                                          File projectDir,
                                                          MavenExplicitProfiles explicitProfiles,
                                                          Collection<String> alwaysOnProfiles) throws RemoteException {
-        Model nativeModel = MavenModelUtil.convertToMavenModel(model);
+        Model nativeModel = MavenModelUtil.convertToMavenModel(model, projectDir);
 
         Collection<String> enabledProfiles = explicitProfiles.getEnabledProfiles();
         Collection<String> disabledProfiles = explicitProfiles.getDisabledProfiles();
@@ -315,7 +315,7 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
             new DefaultProfileInjector().injectProfile(nativeModel, each, null, null);
         }
 
-        return new ProfileApplicationResult(MavenModelUtil.convertModel(nativeModel),
+        return new ProfileApplicationResult(MavenModelUtil.convertModel(nativeModel, projectDir),
                                             new MavenExplicitProfiles(collectProfilesIds(activatedProfiles),
                                                                       collectProfilesIds(deactivatedProfiles))
         );

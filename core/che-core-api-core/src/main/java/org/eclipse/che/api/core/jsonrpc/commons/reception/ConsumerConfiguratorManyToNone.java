@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -42,12 +43,16 @@ public class ConsumerConfiguratorManyToNone<P> {
         this.pClass = pClass;
     }
 
-    public void withConsumer(BiConsumer<String, List<P>> biConsumer) {
+    public void withBiConsumer(BiConsumer<String, List<P>> biConsumer) {
         checkNotNull(biConsumer, "Notification consumer must not be null");
         LOGGER.debug("Configuring incoming request: " +
                      "binary consumer for method: " + method + ", " +
                      "params list items class: " + pClass);
 
         handlerManager.registerManyToNone(method, pClass, biConsumer);
+    }
+
+    public void withConsumer(Consumer<List<P>> consumer) {
+        withBiConsumer((endpointId, pValue) -> consumer.accept(pValue));
     }
 }

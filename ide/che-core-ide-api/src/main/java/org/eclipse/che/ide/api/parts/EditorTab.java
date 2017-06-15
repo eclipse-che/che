@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.parts;
 
-import com.google.gwt.event.dom.client.DoubleClickHandler;
-
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
@@ -53,6 +51,14 @@ public interface EditorTab extends View<EditorTab.ActionDelegate>, TabItem {
      * @return editor part which associated with given tab
      */
     EditorPartPresenter getRelativeEditorPart();
+
+    /**
+     * Set unsaved data mark to editor tab item.
+     *
+     * @param hasUnsavedData
+     *         true if tab should display 'unsaved data' mark, otherwise false
+     */
+    void setUnsavedDataMark(boolean hasUnsavedData);
 
     /**
      * Set pin mark to editor tab item.

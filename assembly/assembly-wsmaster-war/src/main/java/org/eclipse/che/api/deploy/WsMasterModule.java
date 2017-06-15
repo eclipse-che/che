@@ -13,6 +13,8 @@ package org.eclipse.che.api.deploy;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+
+import org.eclipse.che.api.agent.GitCredentialsAgent;
 import org.eclipse.che.api.agent.LSCSharpAgent;
 import org.eclipse.che.api.agent.LSJsonAgent;
 import org.eclipse.che.api.agent.LSPhpAgent;
@@ -149,6 +151,7 @@ public class WsMasterModule extends AbstractModule {
         agents.addBinding().to(LSJsonAgent.class);
         agents.addBinding().to(LSCSharpAgent.class);
         agents.addBinding().to(LSTypeScriptAgent.class);
+        agents.addBinding().to(GitCredentialsAgent.class);
 
         Multibinder<AgentLauncher> launchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
         launchers.addBinding().to(WsAgentLauncher.class);

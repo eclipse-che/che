@@ -14,6 +14,7 @@ import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.reception.ConsumerConfiguratorOneToNone;
 import org.eclipse.che.api.core.jsonrpc.commons.reception.ResultConfiguratorFromOne;
@@ -126,6 +127,8 @@ public class DebuggerTest extends BaseTest {
     private RequestTransmitter         transmitter;
     @Mock
     private RequestHandlerConfigurator configurator;
+    @Mock
+    private RequestHandlerManager      requestHandlerManager;
 
     @Mock
     private Promise<Void>         promiseVoid;
@@ -614,7 +617,8 @@ public class DebuggerTest extends BaseTest {
                   debuggerManager,
                   notificationManager,
                   breakpointManager,
-                  id);
+                  id,
+                  requestHandlerManager);
         }
 
         @Override

@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.util.storage;
 
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Dummy implementation of the {@link LocalStorage}.
- * 
+ *
  * @author Anatoliy Bazko
  */
 public class DummyLocalStorageImpl implements LocalStorage {
@@ -23,7 +24,7 @@ public class DummyLocalStorageImpl implements LocalStorage {
     private Map<String, String> m;
 
     public DummyLocalStorageImpl() {
-        m = new HashMap<String, String>();
+        m = new LinkedHashMap<>();
     }
 
     @Override
@@ -39,5 +40,25 @@ public class DummyLocalStorageImpl implements LocalStorage {
     @Override
     public void setItem(String key, String value) {
         m.put(key, value);
+    }
+
+    @Override
+    public String key(int index) {
+        String key = null;
+
+        Iterator<String> iter = m.keySet().iterator();
+        for (int i = 0; i <= index; i++) {
+            if (!iter.hasNext()) {
+                return null;
+            }
+            key = iter.next();
+        }
+
+        return key;
+    }
+
+    @Override
+    public int getLength() {
+        return m.size();
     }
 }

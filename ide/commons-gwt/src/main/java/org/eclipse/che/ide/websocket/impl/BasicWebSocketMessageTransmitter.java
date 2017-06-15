@@ -45,7 +45,7 @@ public class BasicWebSocketMessageTransmitter implements WebSocketMessageTransmi
 
         } else {
             Log.debug(getClass(), "Connection is closed, adding to pending: " + message);
-            reSender.add(url, message);
+            reSender.add(endpointId, message);
         }
     }
 }

@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
-import org.eclipse.che.ide.ext.git.client.compare.revisionsList.RevisionListPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.revisionslist.RevisionListPresenter;
 
 import javax.validation.constraints.NotNull;
 

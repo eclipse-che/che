@@ -13,8 +13,10 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
@@ -105,6 +107,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     private final DebuggerManager            debuggerManager;
     private final BreakpointManager          breakpointManager;
     private final String                     debuggerType;
+    private final RequestHandlerManager      requestHandlerManager;
 
     private DebugSessionDto debugSessionDto;
     private Location        currentLocation;
@@ -120,7 +123,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                             DebuggerManager debuggerManager,
                             NotificationManager notificationManager,
                             BreakpointManager breakpointManager,
-                            String type) {
+                            String type,
+                            RequestHandlerManager requestHandlerManager) {
         this.service = service;
         this.transmitter = transmitter;
         this.configurator = configurator;
@@ -133,6 +137,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         this.breakpointManager = breakpointManager;
         this.observers = new ArrayList<>();
         this.debuggerType = type;
+        this.requestHandlerManager = requestHandlerManager;
 
         restoreDebuggerState();
         addHandlers();
@@ -143,11 +148,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
-                transmitter.newRequest()
-                           .endpointId(WS_AGENT_ENDPOINT)
-                           .methodName(EVENT_DEBUGGER_SUBSCRIBE)
-                           .noParams()
-                           .sendAndSkipResult();
+                subscribeToDebuggerEvents();
 
                 if (!isConnected()) {
                     return;
@@ -251,35 +252,49 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     }
 
     private void startCheckingEvents() {
-        configurator.newConfiguration()
-                    .methodName(EVENT_DEBUGGER_MESSAGE_SUSPEND)
-                    .paramsAsDto(SuspendEventDto.class)
-                    .noResult()
-                    .withConsumer((endpointId, event) -> {
-                        Log.debug(getClass(), "Received suspend message from endpoint: " + endpointId);
-                        onEventListReceived(event);
-                    });
+        if (!requestHandlerManager.isRegistered(EVENT_DEBUGGER_MESSAGE_SUSPEND)) {
+            configurator.newConfiguration()
+                        .methodName(EVENT_DEBUGGER_MESSAGE_SUSPEND)
+                        .paramsAsDto(SuspendEventDto.class)
+                        .noResult()
+                        .withBiConsumer((endpointId, event) -> {
+                            Log.debug(getClass(), "Received suspend message from endpoint: " + endpointId);
+                            onEventListReceived(event);
+                        });
+        }
 
-        configurator.newConfiguration()
-                    .methodName(EVENT_DEBUGGER_MESSAGE_DISCONNECT)
-                    .paramsAsDto(DisconnectEventDto.class)
-                    .noResult()
-                    .withConsumer((endpointId, event) -> {
-                        Log.debug(getClass(), "Received disconnect message from endpoint: " + endpointId);
-                        onEventListReceived(event);
-                    });
+        if (!requestHandlerManager.isRegistered(EVENT_DEBUGGER_MESSAGE_DISCONNECT)) {
+            configurator.newConfiguration()
+                        .methodName(EVENT_DEBUGGER_MESSAGE_DISCONNECT)
+                        .paramsAsDto(DisconnectEventDto.class)
+                        .noResult()
+                        .withBiConsumer((endpointId, event) -> {
+                            Log.debug(getClass(), "Received disconnect message from endpoint: " + endpointId);
+                            onEventListReceived(event);
+                        });
+        }
 
-        configurator.newConfiguration()
-                    .methodName(EVENT_DEBUGGER_MESSAGE_BREAKPOINT)
-                    .paramsAsDto(BreakpointActivatedEventDto.class)
-                    .noResult()
-                    .withConsumer((endpointId, event) -> {
-                        Log.debug(getClass(), "Received breakpoint activated message from endpoint: " + endpointId);
-                        onEventListReceived(event);
-                    });
+        if (!requestHandlerManager.isRegistered(EVENT_DEBUGGER_MESSAGE_BREAKPOINT)) {
+            configurator.newConfiguration()
+                        .methodName(EVENT_DEBUGGER_MESSAGE_BREAKPOINT)
+                        .paramsAsDto(BreakpointActivatedEventDto.class)
+                        .noResult()
+                        .withBiConsumer((endpointId, event) -> {
+                            Log.debug(getClass(), "Received breakpoint activated message from endpoint: " + endpointId);
+                            onEventListReceived(event);
+                        });
+        }
     }
 
-    private void stopCheckingDebugEvents() {
+    private void subscribeToDebuggerEvents() {
+        transmitter.newRequest()
+                   .endpointId(WS_AGENT_ENDPOINT)
+                   .methodName(EVENT_DEBUGGER_SUBSCRIBE)
+                   .noParams()
+                   .sendAndSkipResult();
+    }
+
+    private void unsubscribeFromDebuggerEvents() {
         transmitter.newRequest()
                    .endpointId(WS_AGENT_ENDPOINT)
                    .methodName(EVENT_DEBUGGER_UN_SUBSCRIBE)
@@ -398,7 +413,10 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
             setDebugSession(debugSession);
             preserveDebuggerState();
+
+            subscribeToDebuggerEvents();
             startCheckingEvents();
+
             startDebugger(debugSession);
 
             return null;
@@ -443,7 +461,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
     @Override
     public void disconnect() {
-        stopCheckingDebugEvents();
+        unsubscribeFromDebuggerEvents();
 
         Promise<Void> disconnect;
         if (isConnected()) {

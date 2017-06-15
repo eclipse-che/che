@@ -32,7 +32,7 @@ public class JsonRpcEndpointToMachineNameHolder {
                     .methodName("event:environment-output:subscribe-by-machine-name")
                     .paramsAsString()
                     .noResult()
-                    .withConsumer((endpointId, workspaceIdPlusMachineName) -> {
+                    .withBiConsumer((endpointId, workspaceIdPlusMachineName) -> {
                         endpointIds.putIfAbsent(endpointId, newConcurrentHashSet());
                         endpointIds.get(endpointId).add(workspaceIdPlusMachineName);
                     });
@@ -43,7 +43,7 @@ public class JsonRpcEndpointToMachineNameHolder {
                     .methodName("event:environment-output:un-subscribe-by-machine-name")
                     .paramsAsString()
                     .noResult()
-                    .withConsumer((endpointId, workspaceIdPlusMachineName) -> {
+                    .withBiConsumer((endpointId, workspaceIdPlusMachineName) -> {
                         endpointIds.getOrDefault(endpointId, emptySet()).remove(workspaceIdPlusMachineName);
                         endpointIds.entrySet().removeIf(entry -> entry.getValue().isEmpty());
                     });

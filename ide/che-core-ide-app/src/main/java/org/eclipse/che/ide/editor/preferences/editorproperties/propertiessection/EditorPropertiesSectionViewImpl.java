@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesManager;
+import org.eclipse.che.ide.editor.preferences.EditorPreferencesManager;
 import org.eclipse.che.ide.editor.preferences.editorproperties.property.EditorPropertyWidget;
 import org.eclipse.che.ide.editor.preferences.editorproperties.property.EditorPropertyWidgetFactory;
 
@@ -44,15 +44,15 @@ public class EditorPropertiesSectionViewImpl extends Composite implements Editor
     Label     sectionTitle;
 
     private final EditorPropertyWidgetFactory editorPropertyWidgetFactory;
-    private final EditorPropertiesManager     editorPropertiesManager;
+    private final EditorPreferencesManager    editorPreferencesManager;
     private       ActionDelegate              delegate;
     private Map<String, EditorPropertyWidget> properties = new HashMap<>();
 
     @Inject
     public EditorPropertiesSectionViewImpl(EditorPropertyWidgetFactory editorPropertyWidgetFactory,
-                                           EditorPropertiesManager editorPropertiesManager) {
+                                           EditorPreferencesManager    editorPreferencesManager) {
         this.editorPropertyWidgetFactory = editorPropertyWidgetFactory;
-        this.editorPropertiesManager = editorPropertiesManager;
+        this.editorPreferencesManager = editorPreferencesManager;
 
         initWidget(UI_BINDER.createAndBindUi(this));
     }
@@ -91,7 +91,7 @@ public class EditorPropertiesSectionViewImpl extends Composite implements Editor
             return;
         }
 
-        String propertyName = editorPropertiesManager.getPropertyNameById(propertyId);
+        String propertyName = editorPreferencesManager.getPropertyNameById(propertyId);
         if (propertyName == null) {
             return;
         }

@@ -13,9 +13,10 @@ package exec
 
 import (
 	"errors"
+	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
+	"github.com/eclipse/che/agents/go-agents/core/process"
 	"strconv"
 	"strings"
-	"github.com/eclipse/che/agents/go-agents/core/process"
 )
 
 const (
@@ -32,7 +33,7 @@ func maskFromTypes(types string) uint64 {
 		case "stdout":
 			mask |= process.StdoutBit
 		case "process_status":
-			mask |= process.ProcessStatusBit
+			mask |= process.StatusBit
 		}
 	}
 	return mask
@@ -67,4 +68,12 @@ func checkCommand(command *process.Command) error {
 		return errors.New("Command line required")
 	}
 	return nil
+}
+
+type rpcProcessEventConsumer struct {
+	tunnel *jsonrpc.Tunnel
+}
+
+func (rpcConsumer *rpcProcessEventConsumer) Accept(e process.Event) {
+	rpcConsumer.tunnel.Notify(e.Type(), e)
 }

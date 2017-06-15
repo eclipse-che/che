@@ -1,5 +1,79 @@
 [
   {
+    "id": "java-centos-mysql",
+    "creator": "ide",
+    "name": "Java-MySQL CentOS",
+    "description": "Multi-machine environment with Java CentOS Stack and MySQL database",
+    "scope": "advanced",
+    "tags": [
+      "Java 1.8, Tomcat 8, MySQL 5.7"
+    ],
+    "components": [
+      {
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.2"
+      },
+      {
+        "name": "Tomcat",
+        "version": "8.0.24"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "eclipse/centos_jdk8"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {}
+            },
+            "db": {
+              "agents": [
+                "org.eclipse.che.terminal"
+              ],
+              "servers": {},
+              "attributes" : {}
+            }
+          },
+          "recipe": {
+            "content": "services:\n db:\n  image: centos/mysql-57-centos7\n  environment:\n   MYSQL_ROOT_PASSWORD: password\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 1073741824\n dev-machine:\n  image: eclipse/centos_jdk8\n  mem_limit: 2147483648\n  depends_on:\n    - db",
+            "contentType": "application/x-yaml",
+            "type": "compose"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mvn clean install -f ${current.project.path}",
+          "name": "build",
+          "type": "mvn"
+        },
+        {
+          "commandLine": "mysql -u $MYSQL_USER -p$MYSQL_PASSWORD -e 'show databases;'",
+          "name": "show databases",
+          "type": "custom"
+        }
+      ]
+    },
+    "stackIcon": {
+      "name": "type-java-mysql.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "java-mysql",
     "creator": "ide",
     "name": "Java-MySQL",
@@ -528,7 +602,7 @@
     "id": "node-default",
     "creator": "ide",
     "name": "Node",
-    "description": "Default Node Stack with Node 0.12.",
+    "description": "Default Node Stack with Node 7.",
     "scope": "general",
     "tags": [
       "Ubuntu",
@@ -545,27 +619,27 @@
     "components": [
       {
         "name": "Node.JS",
-        "version": "0.12.9"
+        "version": "7.7.3"
       },
       {
         "name": "NPM",
-        "version": "---"
+        "version": "4.4.1"
       },
       {
         "name": "Gulp",
-        "version": "---"
+        "version": "3.9.1"
       },
       {
         "name": "Bower",
-        "version": "---"
+        "version": "1.8.0"
       },
       {
         "name": "Grunt",
-        "version": "---"
+        "version": "1.2.0"
       },
       {
         "name": "Yeoman",
-        "version": "---"
+        "version": "1.8.5"
       }
     ],
     "source": {
@@ -867,7 +941,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
               ],
               "servers": {},
               "attributes" : {
@@ -1339,7 +1413,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
               ],
               "servers": {},
               "attributes" : {
@@ -1402,7 +1476,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
               ],
               "servers": {},
               "attributes" : {
@@ -2363,11 +2437,7 @@
         {
           "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
           "name": "build",
-          "type": "custom",
-          "attributes": {
-            "previewUrl": "",
-            "goal": "Build"
-          }
+          "type": "mvn"
         },
         {
           "commandLine": "java -jar ${current.project.path}/target/*.jar",

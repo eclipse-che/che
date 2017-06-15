@@ -10,37 +10,48 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.commit;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ErrorCodes;
-import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.git.GitServiceClient;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Iterables.getFirst;
+import static java.util.Arrays.stream;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.joining;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
+import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
@@ -54,6 +65,7 @@ import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 public class CommitPresenter implements CommitView.ActionDelegate {
     private static final String COMMIT_COMMAND_NAME = "Git commit";
 
+    private final ChangesPanelPresenter   changesPanelPresenter;
     private final DialogFactory           dialogFactory;
     private final AppContext              appContext;
     private final CommitView              view;
@@ -64,11 +76,14 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
     private final ProcessesPanelPresenter consolesPanelPresenter;
 
-    private Project project;
+    private Project      project;
+    private Set<String>  allFiles;
+    private List<String> filesToCommit;
 
     @Inject
     public CommitPresenter(CommitView view,
                            GitServiceClient service,
+                           ChangesPanelPresenter changesPanelPresenter,
                            GitLocalizationConstant constant,
                            NotificationManager notificationManager,
                            DialogFactory dialogFactory,
@@ -77,6 +92,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                            GitOutputConsoleFactory gitOutputConsoleFactory,
                            ProcessesPanelPresenter processesPanelPresenter) {
         this.view = view;
+        this.changesPanelPresenter = changesPanelPresenter;
         this.dialogFactory = dialogFactory;
         this.appContext = appContext;
         this.dateTimeFormatter = dateTimeFormatter;
@@ -86,81 +102,190 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         this.service = service;
         this.constant = constant;
         this.notificationManager = notificationManager;
+
+        this.filesToCommit = new ArrayList<>();
+        this.view.setChangesPanelView(changesPanelPresenter.getView());
     }
 
     public void showDialog(Project project) {
         this.project = project;
 
-        view.setAddAllExceptNew(false);
-        view.setAddSelectedFiles(false);
-        view.setCommitAllFiles(false);
-        view.setAmend(false);
-        view.setEnableCommitButton(!view.getMessage().isEmpty());
-        view.showDialog();
-        view.focusInMessageField();
+        view.setValueToAmendCheckBox(false);
+        view.setValueToPushAfterCommitCheckBox(false);
+        view.setEnableAmendCheckBox(true);
+        view.setEnablePushAfterCommitCheckBox(true);
+        view.setEnableRemoteBranchesDropDownLis(false);
+        service.diff(appContext.getDevMachine(), project.getLocation(), null, NAME_STATUS, false, 0, "HEAD", false)
+               .then(diff -> {
+                   service.log(appContext.getDevMachine(), project.getLocation(), null, -1, 1, false)
+                          .then(arg -> {
+                              if (diff.isEmpty()) {
+                                  showAskForAmendDialog();
+                              } else {
+                                  show(diff);
+                              }
+                          })
+                          .catchError(error -> {
+                              if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
+                                  service.getStatus(appContext.getDevMachine(), project.getLocation()).then(
+                                          status -> {
+                                              view.setEnableAmendCheckBox(false);
+                                              view.setEnablePushAfterCommitCheckBox(false);
+                                              List<String> newFiles = new ArrayList<>();
+                                              newFiles.addAll(status.getAdded());
+                                              newFiles.addAll(status.getUntracked());
+                                              show(newFiles.stream().collect(joining("\nA ", "A ", "")));
+                                          });
+                              }
+                          });
+               })
+               .catchError(arg -> {
+                   notificationManager.notify(constant.diffFailed(), FAIL, FLOAT_MODE);
+               });
+
+        service.branchList(appContext.getDevMachine(), project.getLocation(), LIST_REMOTE)
+               .then(view::setRemoteBranchesList)
+               .catchError(error -> {
+                   notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
+               });
     }
 
-    /** {@inheritDoc} */
+    private void showAskForAmendDialog() {
+        dialogFactory.createConfirmDialog(constant.commitTitle(),
+                                          constant.commitNothingToCommitMessageText(),
+                                          constant.buttonYes(),
+                                          constant.buttonNo(),
+                                          () -> {
+                                              view.setValueToAmendCheckBox(true);
+                                              view.setEnablePushAfterCommitCheckBox(false);
+                                              setAmendCommitMessage();
+                                              show(null);
+                                          },
+                                          null)
+                     .show();
+    }
+
+    private void show(@Nullable String diff) {
+        Map<String, Status> files = toFileStatusMap(diff);
+        filesToCommit.clear();
+        allFiles = files.keySet();
+
+        view.setEnableCommitButton(!view.getMessage().isEmpty());
+        view.focusInMessageField();
+        view.showDialog();
+        changesPanelPresenter.show(files);
+        view.setMarkedCheckBoxes(stream(appContext.getResources()).map(resource -> resource.getLocation().removeFirstSegments(1))
+                                                                  .collect(Collectors.toSet()));
+    }
+
+    private Map<String, Status> toFileStatusMap(@Nullable String diff) {
+        Map<String, Status> items = new HashMap<>();
+        if (!isNullOrEmpty(diff)) {
+            stream(diff.split("\n")).forEach(item -> items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1))));
+        }
+        return items;
+    }
+
     @Override
     public void onCommitClicked() {
-        final String message = view.getMessage();
-        final boolean addAll = view.isAddAllExceptNew();
-        final boolean addSelected = view.isAddSelectedFiles();
-        final boolean commitAll = view.isCommitAllFiles();
-        final boolean amend = view.isAmend();
+        DevMachine devMachine = appContext.getDevMachine();
+        Path location = project.getLocation();
+        Path[] filesToCommitArray = getFilesToCommitArray();
 
-        if (addSelected) {
-            addSelectedAndCommit(message, commitAll, amend);
-        } else {
-            doCommit(message, addAll, commitAll, amend);
-        }
-    }
-
-    private void addSelectedAndCommit(final String message, final boolean commitAll, final boolean amend) {
-        service.add(appContext.getDevMachine(), project.getLocation(), false, toRelativePaths(appContext.getResources()))
-               .then(new Operation<Void>() {
-                   @Override
-                   public void apply(Void ignored) throws OperationException {
-                       doCommit(message, false, commitAll, amend);
-                   }
-               });
-    }
-
-    private Path[] toRelativePaths(Resource[] resources) {
-        final Path[] paths = new Path[resources.length];
-
-        for (int i = 0; i < resources.length; i++) {
-            checkState(project.getLocation().isPrefixOf(resources[i].getLocation()));
-            paths[i] = resources[i].getLocation().removeFirstSegments(project.getLocation().segmentCount());
-        }
-
-        return paths;
-    }
-
-    @VisibleForTesting
-    void doCommit(final String message, final boolean addAll, final boolean commitAll, final boolean amend) {
-        final Resource[] resources = appContext.getResources();
-        checkState(resources != null);
-        service.commit(appContext.getDevMachine(),
-                       project.getLocation(),
-                       message,
-                       addAll,
-                       commitAll ? new Path[]{} : toRelativePaths(resources),
-                       amend)
-               .then(new Operation<Revision>() {
-                   @Override
-                   public void apply(Revision revision) throws OperationException {
-                       onCommitSuccess(revision);
-                       view.close();
-                   }
+        service.add(devMachine, location, false, filesToCommitArray)
+               .then(arg -> {
+                   service.commit(devMachine,
+                                  location,
+                                  view.getMessage(),
+                                  false,
+                                  filesToCommitArray,
+                                  view.isAmend())
+                          .then(revision -> {
+                              onCommitSuccess(revision);
+                              if (view.isPushAfterCommit()) {
+                                  push(devMachine, location);
+                              }
+                              view.close();
+                          })
+                          .catchError(error -> {
+                              handleError(error.getCause());
+                          });
                })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError error) throws OperationException {
-                       handleError(error.getCause());
-                       view.close();
+               .catchError(error -> {
+                   notificationManager.notify(constant.addFailed(), FAIL, FLOAT_MODE);
+               });
+    }
+
+    private Path[] getFilesToCommitArray() {
+        Path[] filesToCommitArray = new Path[filesToCommit.size()];
+        filesToCommit.forEach(file -> filesToCommitArray[filesToCommit.indexOf(file)] = Path.valueOf(file));
+
+        return filesToCommitArray;
+    }
+
+    private void push(DevMachine devMachine, Path location) {
+        String remoteBranch = view.getRemoteBranch();
+        String remote = remoteBranch.split("/")[0];
+        String branch = remoteBranch.split("/")[1];
+        service.push(devMachine,
+                     location,
+                     singletonList(branch),
+                     remote,
+                     false)
+               .then(result -> {
+                   notificationManager.notify(constant.pushSuccess(remote), SUCCESS, FLOAT_MODE);
+               })
+               .catchError(error -> {
+                   notificationManager.notify(constant.pushFail(), FAIL, FLOAT_MODE);
+               });
+    }
+
+    @Override
+    public void onCancelClicked() {
+        view.close();
+    }
+
+    @Override
+    public void onValueChanged() {
+        view.setEnableCommitButton(!view.getMessage().isEmpty() && (!filesToCommit.isEmpty() || view.isAmend()));
+    }
+
+    @Override
+    public void setAmendCommitMessage() {
+        service.log(appContext.getDevMachine(), project.getLocation(), null, -1, -1, false)
+               .then(log -> {
+                   String message = "";
+                   final Revision revision = getFirst(log.getCommits(), null);
+                   if (revision != null) {
+                       message = revision.getMessage();
+                   }
+                   CommitPresenter.this.view.setMessage(message);
+                   CommitPresenter.this.view.setEnableCommitButton(!message.isEmpty());
+               })
+               .catchError(error -> {
+                   if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
+                       dialogFactory.createMessageDialog(constant.commitTitle(),
+                                                         constant.initCommitWasNotPerformed(),
+                                                         null).show();
+                   } else {
+                       CommitPresenter.this.view.setMessage("");
+                       notificationManager.notify(constant.logFailed(), FAIL, NOT_EMERGE_MODE);
                    }
                });
+    }
+
+    @Override
+    public void onFileNodeCheckBoxValueChanged(Path path, boolean newCheckBoxValue) {
+        if (newCheckBoxValue) {
+            filesToCommit.add(path.toString());
+        } else {
+            filesToCommit.remove(path.toString());
+        }
+    }
+
+    @Override
+    public Set<String> getChangedFiles() {
+        return allFiles;
     }
 
     private void onCommitSuccess(@NotNull final Revision revision) {
@@ -190,52 +315,5 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         console.printError(errorMessage);
         consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
         notificationManager.notify(constant.commitFailed(), errorMessage, FAIL, FLOAT_MODE);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onCancelClicked() {
-        view.close();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onValueChanged() {
-        String message = view.getMessage();
-        view.setEnableCommitButton(!message.isEmpty());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setAmendCommitMessage() {
-        service.log(appContext.getDevMachine(), project.getLocation(), null, false)
-               .then(new Operation<LogResponse>() {
-                   @Override
-                   public void apply(LogResponse log) throws OperationException {
-                       final List<Revision> commits = log.getCommits();
-                       String message = "";
-                       if (commits != null && (!commits.isEmpty())) {
-                           final Revision tip = commits.get(0);
-                           if (tip != null) {
-                               message = tip.getMessage();
-                           }
-                       }
-                       CommitPresenter.this.view.setMessage(message);
-                       CommitPresenter.this.view.setEnableCommitButton(!message.isEmpty());
-                   }
-               })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError error) throws OperationException {
-                       if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
-                           dialogFactory.createMessageDialog(constant.commitTitle(),
-                                                             constant.initCommitWasNotPerformed(),
-                                                             null).show();
-                       } else {
-                           CommitPresenter.this.view.setMessage("");
-                           notificationManager.notify(constant.logFailed(), FAIL, NOT_EMERGE_MODE);
-                       }
-                   }
-               });
     }
 }

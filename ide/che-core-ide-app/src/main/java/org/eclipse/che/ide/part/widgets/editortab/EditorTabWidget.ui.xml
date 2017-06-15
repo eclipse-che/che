@@ -31,6 +31,7 @@
         @eval activeEditorReadonlyTabBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.activeEditorReadonlyTabBackgroundColor();
         @eval editorTabPinBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.editorTabPinBackgroundColor();
         @eval editorTabPinDropShadow org.eclipse.che.ide.api.theme.Style.theme.editorTabPinDropShadow();
+        @eval unsavedMarkColor org.eclipse.che.ide.api.theme.Style.getBadgeBackgroundColor();
 
         .mainPanel {
             -webkit-box-sizing: border-box;
@@ -61,6 +62,14 @@
             width: 26px;
             height: 22px;
             overflow: hidden;
+        }
+
+        .mainPanel[unsaved] .iconPanel::after {
+            color: unsavedMarkColor;
+            content: '*';
+            float: inherit;
+            margin-top: 9px;
+            margin-left: 19px;
         }
 
         .iconPanel svg {

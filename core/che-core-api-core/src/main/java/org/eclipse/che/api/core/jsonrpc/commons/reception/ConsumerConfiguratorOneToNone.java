@@ -13,7 +13,9 @@ package org.eclipse.che.api.core.jsonrpc.commons.reception;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.slf4j.Logger;
 
+import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -41,7 +43,7 @@ public class ConsumerConfiguratorOneToNone<P> {
         this.pClass = pClass;
     }
 
-    public void withConsumer(BiConsumer<String, P> biConsumer) {
+    public void withBiConsumer(BiConsumer<String, P> biConsumer) {
         checkNotNull(biConsumer, "Notification consumer must not be null");
 
         LOGGER.debug("Configuring incoming request binary: " +
@@ -49,5 +51,9 @@ public class ConsumerConfiguratorOneToNone<P> {
                      "params object class: " + pClass);
 
         handlerManager.registerOneToNone(method, pClass, biConsumer);
+    }
+
+    public void withConsumer(Consumer<P> consumer) {
+        withBiConsumer((endpointId, pValue) -> consumer.accept(pValue));
     }
 }

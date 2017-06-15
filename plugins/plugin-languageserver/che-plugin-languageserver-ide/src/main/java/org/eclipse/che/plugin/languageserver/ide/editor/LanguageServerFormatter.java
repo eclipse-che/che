@@ -28,8 +28,8 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.editor.preferences.EditorPreferencesManager;
 import org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties;
-import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesManager;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.DocumentFormattingParams;
@@ -54,7 +54,7 @@ public class LanguageServerFormatter implements ContentFormatter {
     private final DtoFactory                dtoFactory;
     private final NotificationManager       manager;
     private final ServerCapabilities        capabilities;
-    private final EditorPropertiesManager   editorPropertiesManager;
+    private final EditorPreferencesManager  editorPreferencesManager;
     private       TextEditor                editor;
 
     @Inject
@@ -62,12 +62,12 @@ public class LanguageServerFormatter implements ContentFormatter {
                                    DtoFactory dtoFactory,
                                    NotificationManager manager,
                                    @Assisted ServerCapabilities capabilities,
-                                   EditorPropertiesManager editorPropertiesManager) {
+                                   EditorPreferencesManager editorPreferencesManager) {
         this.client = client;
         this.dtoFactory = dtoFactory;
         this.manager = manager;
         this.capabilities = capabilities;
-        this.editorPropertiesManager = editorPropertiesManager;
+        this.editorPreferencesManager = editorPreferencesManager;
     }
 
     @Override
@@ -82,8 +82,6 @@ public class LanguageServerFormatter implements ContentFormatter {
             //full document formatting
             formatFullDocument(document);
         }
-
-
     }
 
     @Override
@@ -113,7 +111,6 @@ public class LanguageServerFormatter implements ContentFormatter {
 
                         Promise<List<TextEdit>> promise = client.onTypeFormatting(params);
                         handleFormatting(promise, document);
-
                     }
                 }
             });
@@ -181,7 +178,7 @@ public class LanguageServerFormatter implements ContentFormatter {
     }
 
     private String getEditorProperty(EditorProperties property) {
-        return editorPropertiesManager.getEditorProperties().get(property.toString()).toString();
+        return editorPreferencesManager.getEditorPreferences().get(property.toString()).toString();
     }
 
     private void formatRange(TextRange selectedRange, Document document) {

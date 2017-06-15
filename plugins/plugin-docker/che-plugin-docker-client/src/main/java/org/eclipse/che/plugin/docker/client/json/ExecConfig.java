@@ -21,6 +21,7 @@ public class ExecConfig {
     private boolean  attachStderr;
     private boolean  tty;
     private String[] cmd;
+    private String   user;
 
     public boolean isAttachStdin() {
         return attachStdin;
@@ -62,6 +63,14 @@ public class ExecConfig {
         this.cmd = cmd;
     }
 
+    public String getUser() {
+        return user;
+    }
+
+    public  void setUser(String user) {
+        this.user = user;
+    }
+
     @Override
     public String toString() {
         return "ExecConfig{" +
@@ -70,10 +79,9 @@ public class ExecConfig {
                ", attachStderr=" + attachStderr +
                ", tty=" + tty +
                ", cmd=" + Arrays.toString(cmd) +
+               ", user='" + user + '\'' +
                '}';
     }
-
-    // -------------------
 
     public ExecConfig withAttachStdin(boolean attachStdin) {
         this.attachStdin = attachStdin;
@@ -99,4 +107,10 @@ public class ExecConfig {
         this.cmd = cmd;
         return this;
     }
+
+    public ExecConfig withUser(String user) {
+        this.user = user;
+        return this;
+    }
+
 }

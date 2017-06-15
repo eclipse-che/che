@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
 
 /**
  * Stores client-side data into a storage.
- * 
+ *
  * @author Anatoliy Bazko
  */
 public interface LocalStorage {
@@ -27,8 +27,8 @@ public interface LocalStorage {
      */
     @Nullable
     String getItem(@Nonnull String key);
-    
-    
+
+
     /**
      * Removes value from the storage.
      */
@@ -38,4 +38,14 @@ public interface LocalStorage {
      * Puts value into the storage.
      */
     void setItem(@Nonnull String key, @Nonnull String value);
+
+    /**
+     * Returns the key at the specified index.
+     */
+    String key(int index);
+
+    /**
+     * Returns the size of the local storage.
+     */
+    int getLength();
 }

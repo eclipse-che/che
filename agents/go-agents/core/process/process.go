@@ -21,8 +21,6 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
-
-	"github.com/eclipse/che/agents/go-agents/core/rpc"
 )
 
 const (
@@ -30,10 +28,10 @@ const (
 	StdoutBit = 1 << iota
 	// StderrBit is set when subscriber is interested in stdout logs
 	StderrBit = 1 << iota
-	// ProcessStatusBit is set when subscriber is interested in a process events
-	ProcessStatusBit = 1 << iota
+	// StatusBit is set when subscriber is interested in a process events
+	StatusBit = 1 << iota
 	// DefaultMask is set by default and identifies receiving of both logs and events of a process
-	DefaultMask = StderrBit | StdoutBit | ProcessStatusBit
+	DefaultMask = StderrBit | StdoutBit | StatusBit
 
 	// DefaultShellInterpreter is default shell that executes commands
 	// unless another one is configured
@@ -81,97 +79,101 @@ func SetShellInterpreter(si string) {
 	}
 }
 
-// Command represents command that is used in command execution API
+// Command represents command that is used in command execution API.
 type Command struct {
 	Name        string `json:"name"`
 	CommandLine string `json:"commandLine"`
 	Type        string `json:"type"`
 }
 
-// MachineProcess defines machine process model
+// MachineProcess defines machine process model.
 type MachineProcess struct {
 	// The virtual id of the process, it is guaranteed that pid
-	// is always unique, while NativePid may occur twice or more(when including dead processes)
+	// is always unique, while NativePid may occur twice or more(when including dead processes).
 	Pid uint64 `json:"pid"`
 
 	// The name of the process, it is equal to the Command.Name which this process created from.
 	// It doesn't have to be unique, at least machine agent doesn't need such constraint,
-	// as pid is used for identifying process
+	// as pid is used for identifying process.
 	Name string `json:"name"`
 
 	// The command line executed by this process.
-	// It is equal to the Command.CommandLine which this process created from
+	// It is equal to the Command.CommandLine which this process created from.
 	CommandLine string `json:"commandLine"`
 
 	// The type of the command line, this field is rather useful meta
 	// information  than something used for functioning. It is equal
-	// to the Command.Type which this process created from
+	// to the Command.Type which this process created from.
 	Type string `json:"type"`
 
-	// Whether this process is alive or dead
+	// Whether this process is alive or dead.
 	Alive bool `json:"alive"`
 
 	// The native(OS) pid, it is unique per alive processes,
-	// but those which are not alive, may have the same NativePid
+	// but those which are not alive, may have the same NativePid.
 	NativePid int `json:"nativePid"`
 
-	// Process log filename
+	// The exit code of the process.
+	// The value is set after the process died, the value is -1 while the process is alive.
+	ExitCode int `json:"exitCode"`
+
+	// Process log filename.
 	logfileName string
 
 	// Command executed by this process.
-	// If process is not alive then the command value is set to nil
+	// If process is not alive then the command value is set to nil.
 	command *exec.Cmd
 
 	// Stdout/stderr pumper.
-	// If process is not alive then the pumper value is set to nil
+	// If process is not alive then the pumper value is set to nil.
 	pumper *LogsPumper
 
 	// Process subscribers, all the outgoing events are go through those subscribers.
-	// If process is not alive then the subscribers value is set to nil
+	// If process is not alive then the subscribers value is set to nil.
 	subs []*Subscriber
 
 	// Process file logger.
-	// The value is set only if process logs directory is configured
+	// The value is set only if process logs directory is configured.
 	fileLogger *FileLogger
 
 	// Process mutex should be used to sync process data
-	// or block on process related operations such as events publications
+	// or block on process related operations such as events publications.
 	mutex *sync.RWMutex
 
-	// The time when the process died
+	// The time when the process died.
 	deathTime time.Time
 
 	// Called once before any of process events is published
-	// and after process is started
+	// and after process is started.
 	beforeEventsHook func(process MachineProcess)
 }
 
-// Subscriber receives process logs
+// Subscriber receives process events.
 type Subscriber struct {
-	ID      string
-	Mask    uint64
-	Channel chan *rpc.Event
+	ID       string
+	Mask     uint64
+	Consumer EventConsumer
 }
 
-// NoProcessError is returned when requested process doesn't exist
+// NoProcessError is returned when requested process doesn't exist.
 type NoProcessError struct {
 	error
 	Pid uint64
 }
 
-// NotAliveError is returned when process that is target of an action is not alive anymore
+// NotAliveError is returned when process that is target of an action is not alive anymore.
 type NotAliveError struct {
 	error
 	Pid uint64
 }
 
-// Lockable map for storing processes
+// Lockable map for storing processes.
 type processesMap struct {
 	sync.RWMutex
 	items map[uint64]*MachineProcess
 }
 
-// Start starts MachineProcess
+// Start starts MachineProcess.
 func Start(newProcess MachineProcess) (MachineProcess, error) {
 	// wrap command to be able to kill child processes see https://github.com/golang/go/issues/8854
 	cmd := exec.Command("setsid", shellInterpreter, "-c", newProcess.CommandLine)
@@ -201,6 +203,7 @@ func Start(newProcess MachineProcess) (MachineProcess, error) {
 	newProcess.Pid = pid
 	newProcess.Alive = true
 	newProcess.NativePid = cmd.Process.Pid
+	newProcess.ExitCode = -1
 
 	// create an internal copy of the new process
 	internalProcess := newProcess
@@ -238,7 +241,7 @@ func Start(newProcess MachineProcess) (MachineProcess, error) {
 	// before pumping is started publish process_started event
 	startPublished := make(chan bool)
 	go func() {
-		internalProcess.notifySubs(newStartedEvent(newProcess), ProcessStatusBit)
+		internalProcess.notifySubs(newStartedEvent(newProcess), StatusBit)
 		startPublished <- true
 	}()
 
@@ -266,7 +269,7 @@ func Get(pid uint64) (MachineProcess, error) {
 
 // GetProcesses retrieves list of processes.
 // If parameter all is true then returns all processes,
-// otherwise returns only live processes
+// otherwise returns only live processes.
 func GetProcesses(all bool) []MachineProcess {
 	processes.RLock()
 	defer processes.RUnlock()
@@ -414,16 +417,16 @@ func RestoreSubscriber(pid uint64, subscriber Subscriber, after time.Time) error
 		message := logs[i]
 		if message.Time.After(after) {
 			if message.Kind == StdoutKind {
-				subscriber.Channel <- newStdoutEvent(p.Pid, message.Text, message.Time)
+				subscriber.Consumer.Accept(newStdoutEvent(p.Pid, message.Text, message.Time))
 			} else {
-				subscriber.Channel <- newStderrEvent(p.Pid, message.Text, message.Time)
+				subscriber.Consumer.Accept(newStderrEvent(p.Pid, message.Text, message.Time))
 			}
 		}
 	}
 
 	// Publish died event after logs are published and process is dead
 	if !p.Alive {
-		subscriber.Channel <- newDiedEvent(*p)
+		subscriber.Consumer.Accept(newDiedEvent(*p))
 	}
 
 	return nil
@@ -452,21 +455,25 @@ func UpdateSubscriber(pid uint64, id string, newMask uint64) error {
 	return fmt.Errorf("No subscriber with id '%s'", id)
 }
 
-// OnStdout notifies subscribers about new output in stdout
+// OnStdout notifies subscribers about new output in stdout.
 func (process *MachineProcess) OnStdout(line string, time time.Time) {
 	process.notifySubs(newStdoutEvent(process.Pid, line, time), StdoutBit)
 }
 
-// OnStderr notifies subscribers about new output in stderr
+// OnStderr notifies subscribers about new output in stderr.
 func (process *MachineProcess) OnStderr(line string, time time.Time) {
 	process.notifySubs(newStderrEvent(process.Pid, line, time), StderrBit)
 }
 
-// Close cleanups process resources and notifies subscribers about process death
+// Close cleanups process resources and notifies subscribers about process death.
 func (process *MachineProcess) Close() {
 	// Cleanup command resources
+	exitCode := 0
 	if err := process.command.Wait(); err != nil {
-		if _, ok := err.(*exec.ExitError); !ok {
+		if exiterr, ok := err.(*exec.ExitError); ok {
+			status := exiterr.Sys().(syscall.WaitStatus)
+			exitCode = status.ExitStatus()
+		} else {
 			log.Printf("Error occurs on process cleanup. %s", err)
 		}
 	}
@@ -477,21 +484,22 @@ func (process *MachineProcess) Close() {
 	process.command = nil
 	process.pumper = nil
 	process.fileLogger = nil
+	process.ExitCode = exitCode
 	process.mutex.Unlock()
 
-	process.notifySubs(newDiedEvent(*process), ProcessStatusBit)
+	process.notifySubs(newDiedEvent(*process), StatusBit)
 
 	process.mutex.Lock()
 	process.subs = nil
 	process.mutex.Unlock()
 }
 
-func (process *MachineProcess) notifySubs(event *rpc.Event, typeBit uint64) {
+func (process *MachineProcess) notifySubs(event Event, typeBit uint64) {
 	process.mutex.RLock()
 	subs := process.subs
 	for _, subscriber := range subs {
 		// Check whether subscriber needs such kind of event and then try to notify it
-		if subscriber.Mask&typeBit == typeBit && !tryWrite(subscriber.Channel, event) {
+		if subscriber.Mask&typeBit == typeBit && !tryAccept(subscriber.Consumer, event) {
 			// Impossible to write to the channel, remove the channel from the subscribers list.
 			// It may happen when writing to the closed channel
 			defer RemoveSubscriber(process.Pid, subscriber.ID)
@@ -501,14 +509,14 @@ func (process *MachineProcess) notifySubs(event *rpc.Event, typeBit uint64) {
 }
 
 // Writes to a channel and returns true if write is successful,
-// otherwise if write to the channel failed e.g. channel is closed then returns false
-func tryWrite(eventsChan chan *rpc.Event, event *rpc.Event) (ok bool) {
+// otherwise if write to the channel failed e.g. channel is closed then returns false.
+func tryAccept(consumer EventConsumer, event Event) (ok bool) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok = false
 		}
 	}()
-	eventsChan <- event
+	consumer.Accept(event)
 	return true
 }
 
@@ -551,7 +559,7 @@ func newFileLogger(pid uint64) (*FileLogger, error) {
 	return fileLogger, nil
 }
 
-// Returns an error indicating that process with given pid doesn't exist
+// Returns an error indicating that process with given pid doesn't exist.
 func noProcess(pid uint64) *NoProcessError {
 	return &NoProcessError{
 		error: fmt.Errorf("Process with id '%d' does not exist", pid),

@@ -22,10 +22,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
 	"github.com/eclipse/che/agents/go-agents/core/process"
 	"github.com/eclipse/che/agents/go-agents/core/rest"
 	"github.com/eclipse/che/agents/go-agents/core/rest/restutil"
-	"github.com/eclipse/che/agents/go-agents/core/rpc"
 )
 
 // HTTPRoutes provides all routes that should be handled by the process API
@@ -65,7 +65,7 @@ var HTTPRoutes = rest.RoutesGroup{
 	},
 }
 
-func startProcessHF(w http.ResponseWriter, r *http.Request, p rest.Params) error {
+func startProcessHF(w http.ResponseWriter, r *http.Request, _ rest.Params) error {
 	command := process.Command{}
 	if err := restutil.ReadJSON(r, &command); err != nil {
 		return err
@@ -74,27 +74,19 @@ func startProcessHF(w http.ResponseWriter, r *http.Request, p rest.Params) error
 		return rest.BadRequest(err)
 	}
 
-	// If channel is provided then check whether it is ready to be
-	// first process subscriber and use it if it is
-	var subscriber *process.Subscriber
-	channelID := r.URL.Query().Get("channel")
-	if channelID != "" {
-		channel, ok := rpc.GetChannel(channelID)
-		if !ok {
-			m := fmt.Sprintf("Channel with id '%s' doesn't exist. Process won't be started", channelID)
-			return rest.NotFound(errors.New(m))
-		}
-		subscriber = &process.Subscriber{
-			ID:      channelID,
-			Mask:    parseTypes(r.URL.Query().Get("types")),
-			Channel: channel.Events,
-		}
-	}
-
 	pb := process.NewBuilder().Cmd(command)
 
-	if subscriber != nil {
-		pb.FirstSubscriber(*subscriber)
+	// If channel is provided then check whether it is ready to be
+	// first process subscriber and use it if it is
+	channelID := r.URL.Query().Get("channel")
+	if channelID != "" {
+		channel, ok := jsonrpc.Get(channelID)
+		if !ok {
+			m := fmt.Sprintf("Tunnel with id '%s' doesn't exist. Process won't be started", channelID)
+			return rest.NotFound(errors.New(m))
+		}
+		eventsConsumer := &rpcProcessEventConsumer{channel}
+		pb.Subscribe(channelID, parseTypes(r.URL.Query().Get("types")), eventsConsumer)
 	}
 
 	proc, err := pb.Start()

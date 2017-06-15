@@ -32,7 +32,7 @@ public class ProcessStartedEventHandler extends AbstractExecAgentEventHandler<Pr
                     .methodName("process_started")
                     .paramsAsDto(ProcessStartedEventDto.class)
                     .noResult()
-                    .withConsumer(this);
+                    .withBiConsumer(this);
     }
 
     @Override

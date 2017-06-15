@@ -51,7 +51,7 @@ public class ProjectTreeStateNotificationOperation implements BiConsumer<String,
                     .methodName("event:project-tree-state-changed")
                     .paramsAsDto(ProjectTreeStateUpdateDto.class)
                     .noResult()
-                    .withConsumer(this);
+                    .withBiConsumer(this);
     }
 
     @Override

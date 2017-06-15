@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.websocket.impl;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,6 +29,10 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class BasicWebSocketMessageTransmitterTest {
+    private static final String ENDPOINT_ID = "endpointId";
+    private static final String URL         = "url";
+    private static final String MESSAGE     = "message";
+
     @Mock
     private WebSocketConnectionManager       connectionManager;
     @Mock
@@ -42,19 +44,20 @@ public class BasicWebSocketMessageTransmitterTest {
 
     @Before
     public void setUp() throws Exception {
-        when(urlResolver.getUrl("endpointId")).thenReturn("url");
+        when(urlResolver.getUrl(ENDPOINT_ID)).thenReturn(URL);
+        when(urlResolver.resolve(URL)).thenReturn(ENDPOINT_ID);
     }
 
     @Test
     public void shouldResolveUrlOnTransmit() {
-        transmitter.transmit("endpointId", "message");
+        transmitter.transmit(ENDPOINT_ID, MESSAGE);
 
-        verify(urlResolver).getUrl("endpointId");
+        verify(urlResolver).getUrl(ENDPOINT_ID);
     }
 
     @Test
     public void shouldCheckIfConnectionIsOpenOnTransmit() {
-        transmitter.transmit("endpointId", "message");
+        transmitter.transmit(ENDPOINT_ID, MESSAGE);
 
         verify(connectionManager).isConnectionOpen(anyString());
     }
@@ -63,19 +66,19 @@ public class BasicWebSocketMessageTransmitterTest {
     public void shouldSendMessageIfConnectionIsOpenOnTransmit() {
         when(connectionManager.isConnectionOpen(anyString())).thenReturn(true);
 
-        transmitter.transmit("endpointId", "message");
+        transmitter.transmit(ENDPOINT_ID, MESSAGE);
 
-        verify(connectionManager).sendMessage("url", "message");
-        verify(reSender, never()).add("url", "message");
+        verify(connectionManager).sendMessage(URL, MESSAGE);
+        verify(reSender, never()).add(URL, MESSAGE);
     }
 
     @Test
     public void shouldAddMessageToReSenderIfConnectionIsNotOpenOnTransmit() {
         when(connectionManager.isConnectionOpen(anyString())).thenReturn(false);
 
-        transmitter.transmit("endpointId", "message");
+        transmitter.transmit(ENDPOINT_ID, MESSAGE);
 
-        verify(connectionManager, never()).sendMessage("url", "message");
-        verify(reSender).add("url", "message");
+        verify(connectionManager, never()).sendMessage(URL, MESSAGE);
+        verify(reSender).add(ENDPOINT_ID, MESSAGE);
     }
 }

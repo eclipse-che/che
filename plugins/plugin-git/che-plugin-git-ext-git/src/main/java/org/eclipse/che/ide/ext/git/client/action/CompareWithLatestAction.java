@@ -27,7 +27,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
-import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 
 import java.util.HashMap;
@@ -49,7 +49,7 @@ import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus
 @Singleton
 public class CompareWithLatestAction extends GitAction {
     private final ComparePresenter        comparePresenter;
-    private final ChangedListPresenter    changedListPresenter;
+    private final ChangesListPresenter    changesListPresenter;
     private final DialogFactory           dialogFactory;
     private final NotificationManager     notificationManager;
     private final GitServiceClient        service;
@@ -59,7 +59,7 @@ public class CompareWithLatestAction extends GitAction {
 
     @Inject
     public CompareWithLatestAction(ComparePresenter presenter,
-                                   ChangedListPresenter changedListPresenter,
+                                   ChangesListPresenter changesListPresenter,
                                    AppContext appContext,
                                    DialogFactory dialogFactory,
                                    NotificationManager notificationManager,
@@ -67,7 +67,7 @@ public class CompareWithLatestAction extends GitAction {
                                    GitLocalizationConstant constant) {
         super(constant.compareWithLatestTitle(), constant.compareWithLatestTitle(), null, appContext);
         this.comparePresenter = presenter;
-        this.changedListPresenter = changedListPresenter;
+        this.changesListPresenter = changesListPresenter;
         this.dialogFactory = dialogFactory;
         this.notificationManager = notificationManager;
         this.service = service;
@@ -117,7 +117,7 @@ public class CompareWithLatestAction extends GitAction {
                                for (String item : changedFiles) {
                                    items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
                                }
-                               changedListPresenter.show(items, REVISION, null, project);
+                               changesListPresenter.show(items, REVISION, null, project);
                            }
                        }
                    }

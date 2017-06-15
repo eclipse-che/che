@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.websocket.impl;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -31,14 +32,22 @@ import static org.mockito.Mockito.when;
 public class MessagesReSenderTest {
     @Mock
     private WebSocketConnectionManager connectionManager;
+    @Mock
+    private UrlResolver                urlResolver;
     @InjectMocks
     private MessagesReSender           reSender;
 
+    @Before
+    public void setUp() throws Exception {
+        when(urlResolver.getUrl("endpointId")).thenReturn("url");
+        when(urlResolver.resolve("url")).thenReturn("endpointId");
+    }
+
     @Test
     public void shouldResendAllMessages() {
-        reSender.add("url", "1");
-        reSender.add("url", "2");
-        reSender.add("url", "3");
+        reSender.add("endpointId", "1");
+        reSender.add("endpointId", "2");
+        reSender.add("endpointId", "3");
 
         when(connectionManager.isConnectionOpen("url")).thenReturn(true);
 
@@ -48,9 +57,9 @@ public class MessagesReSenderTest {
 
     @Test
     public void shouldStopSendingIfSessionIsClosed() {
-        reSender.add("url", "1");
-        reSender.add("url", "2");
-        reSender.add("url", "3");
+        reSender.add("endpointId", "1");
+        reSender.add("endpointId", "2");
+        reSender.add("endpointId", "3");
 
         final int[] i = {0};
         when(connectionManager.isConnectionOpen("url")).thenAnswer(invocation -> (i[0]++ <= 1));

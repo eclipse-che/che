@@ -25,6 +25,10 @@
             line-height: 25px;
         }
 
+        .mainSection {
+            margin-bottom: 40px;
+        }
+
         .titleSection {
             background-color: editorPreferenceCategoryBackgroundColor;
             line-height: 25px;
@@ -40,7 +44,7 @@
         }
     </ui:style>
 
-    <g:FlowPanel>
+    <g:FlowPanel addStyleNames="{style.mainSection}">
         <g:FlowPanel addStyleNames="{style.titleSection}">
             <g:Label text="{constants.keysSectionLabel}" addStyleNames="{style.sectionLabel}"/>
         </g:FlowPanel>

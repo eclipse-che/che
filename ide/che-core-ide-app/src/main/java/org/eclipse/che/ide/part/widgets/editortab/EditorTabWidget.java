@@ -271,6 +271,15 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         return relatedEditorPart;
     }
 
+    @Override
+    public void setUnsavedDataMark(boolean hasUnsavedData) {
+        if (hasUnsavedData) {
+            getElement().setAttribute("unsaved", "");
+        } else {
+            getElement().removeAttribute("unsaved");
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public void setPinMark(boolean pinned) {
