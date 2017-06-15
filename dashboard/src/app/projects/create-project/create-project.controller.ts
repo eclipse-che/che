@@ -1084,7 +1084,9 @@ export class CreateProjectController {
       return;
     }
     this.workspaceConfig = config;
-    this.updateCurrentStack(stackId);
+    if (stackId !== this.stackId) {
+      this.updateCurrentStack(stackId);
+    }
   }
 
   /**
