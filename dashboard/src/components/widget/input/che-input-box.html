@@ -1,0 +1,25 @@
+<div class="che-input-box">
+  <div layout="column">
+    <div class="che-input-box-desktop" flex layout="raw" layout-align="start centre">
+      <label hide-xs hide-sm flex="20" class="che-input-box-desktop-label"
+             ng-if="labelName"><span>{{labelName}}</span></label>
+      <div layout="column" class="che-input-box-desktop-value-column" flex>
+        <label hide-md hide-lg hide-xl class="che-input-box-desktop-label"
+               ng-if="labelName"><span>{{labelName}}</span></label>
+        <div class="che-input-area">
+          <input ng-trim="false" name="{{inputName}}"
+                 ng-model-options="{allowInvalid: true}"
+                 ng-change="onChange({value: valueModel})"
+                 ng-model="valueModel">
+          <span class="che-input-asterisk fa" ng-show="valueModel"
+                ng-class="myForm[inputName] && myForm[inputName].$invalid ? 'fa-times' : 'fa-check'"></span>
+        </div>
+        <!-- display error messages for the form -->
+        <div ng-messages="myForm[inputName].$error" ng-transclude></div>
+      </div>
+    </div>
+    <div hide-xs hide-sm flex layout="raw">
+      <div flex="20" class="label-description" ng-if="labelDescription">{{labelDescription}}</div>
+    </div>
+  </div>
+</div>
