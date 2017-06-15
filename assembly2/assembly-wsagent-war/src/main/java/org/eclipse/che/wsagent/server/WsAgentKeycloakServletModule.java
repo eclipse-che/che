@@ -10,32 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.wsagent.server;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.servlet.ServletModule;
 
-import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.inject.DynaModule;
-import org.everrest.guice.servlet.GuiceEverrestServlet;
-import org.everrest.websockets.WSConnectionTracker;
 import org.eclipse.che.keycloak.server.KeycloakAuthenticationFilter;
+
 import javax.inject.Singleton;
 
 /** @author andrew00x */
 @DynaModule
-public class WsAgentServletModule extends ServletModule {
+public class WsAgentKeycloakServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
-        getServletContext().addListener(new WSConnectionTracker());
-        filter("/*").through(CheCorsFilter.class);
         bind(KeycloakAuthenticationFilter.class).in(Singleton.class);
         filter("/*").through(KeycloakAuthenticationFilter.class);
-
-        serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
-        bind(io.swagger.jaxrs.config.DefaultJaxrsConfig.class).asEagerSingleton();
-        serve("/swaggerinit").with(io.swagger.jaxrs.config.DefaultJaxrsConfig.class, ImmutableMap
-                .of("api.version", "1.0",
-                    "swagger.api.title", "Eclipse Che",
-                    "swagger.api.basepath", "/api"
-                   ));
     }
 }

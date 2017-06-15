@@ -18,7 +18,7 @@
         <groupId>org.eclipse.che.plugin</groupId>
         <version>5.13.0-SNAPSHOT</version>
     </parent>
-    <artifactId>che-keycloak-plugin-server</artifactId>
+    <artifactId>che-plugin-keycloak-server</artifactId>
     <packaging>jar</packaging>
     <name>Che Keycloak Server plugin</name>
     <dependencies>

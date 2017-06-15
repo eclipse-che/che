@@ -19,16 +19,16 @@
         <version>5.13.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>org.eclipse.che.assembly2</groupId>
+    <groupId>org.eclipse.che</groupId>
     <artifactId>che-assembly2-parent</artifactId>
     <version>5.13.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che IDE Assembly2:: Parent</name>
     <modules>
-        <!--module>dashboard</module>
+        <!--module>dashboard</module-->
         <module>assembly-wsagent-war</module>
         <module>assembly-wsagent-server</module>
-        <module>assembly-ide-war</module>
+        <!--module>assembly-ide-war</module>
         <module>assembly-wsmaster-war</module>
         <module>assembly-main</module-->
     </modules>
