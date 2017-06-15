@@ -42,6 +42,7 @@ import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -136,11 +137,27 @@ public final class DtoConverter {
     public static StackFrameDumpDto asDto(StackFrameDump stackFrameDump) {
         List<FieldDto> fieldsDto = stackFrameDump.getFields()
                                                  .stream()
-                                                 .map(DtoConverter::asDto)
+                                                 .map(f -> {
+                                                          try {
+                                                              return asDto(f);
+                                                          } catch (Exception e) {
+                                                              return null;
+                                                          }
+                                                      }
+                                                 )
+                                                 .filter(Objects::nonNull)
                                                  .collect(Collectors.toList());
 
         List<VariableDto> variablesDto = stackFrameDump.getVariables().stream()
-                                                       .map(DtoConverter::asDto)
+                                                       .map(v -> {
+                                                                try {
+                                                                    return asDto(v);
+                                                                } catch (Exception e) {
+                                                                    return null;
+                                                                }
+                                                            }
+                                                       )
+                                                       .filter(Objects::nonNull)
                                                        .collect(Collectors.toList());
 
         return newDto(StackFrameDumpDto.class).withVariables(variablesDto)

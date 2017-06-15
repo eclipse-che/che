@@ -380,16 +380,10 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
     @Override
     public List<ThreadDump> getThreadDumps() throws DebuggerException {
-        List<ThreadReference> threadRefs = vm.allThreads();
-        List<ThreadDump> threadDumps = new ArrayList<>(threadRefs.size());
+        List<ThreadDump> threadDumps = new LinkedList<>();
 
-        for (ThreadReference t : threadRefs) {
-            ThreadStatus status;
-            try {
-                status = ThreadStatus.valueOf(VM.toThreadState(t.status()).toString());
-            } catch (IllegalArgumentException e) {
-                status = ThreadStatus.UNKNOWN;
-            }
+        for (ThreadReference t : vm.allThreads()) {
+            ThreadStatus status = ThreadStatus.valueOf(VM.toThreadState(t.status()).toString());
 
             List<JdiStackFrame> frames = new LinkedList<>();
             try {
