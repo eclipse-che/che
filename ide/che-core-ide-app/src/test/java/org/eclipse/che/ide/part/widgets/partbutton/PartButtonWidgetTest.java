@@ -54,15 +54,8 @@ public class PartButtonWidgetTest {
 
     @Before
     public void setUp() {
-        partButton = new PartButtonWidget(resources, SOME_TEXT);
+        partButton = new PartButtonWidget(SOME_TEXT);
         partButton.setDelegate(delegate);
-    }
-
-    @Test
-    public void constructorShouldBeVerified() {
-//        verify(partButton).addDomHandler(any(), any());
-//        verify(partButton).addDomHandler(partButton, DoubleClickEvent.getType());
-//        verify(partButton).addDomHandler(partButton, ClickEvent.getType());
     }
 
     @Test

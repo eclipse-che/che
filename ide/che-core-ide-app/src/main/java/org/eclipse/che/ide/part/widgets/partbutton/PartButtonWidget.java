@@ -55,7 +55,7 @@ public class PartButtonWidget extends Composite implements PartButton {
     private SVGResource    tabIcon;
 
     @Inject
-    public PartButtonWidget(Resources resources, @Assisted String title) {
+    public PartButtonWidget(@Assisted String title) {
         initWidget(UI_BINDER.createAndBindUi(this));
         ensureDebugId("partButton-" + title);
 

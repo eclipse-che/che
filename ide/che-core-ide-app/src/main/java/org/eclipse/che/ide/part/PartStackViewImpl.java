@@ -98,7 +98,7 @@ public class PartStackViewImpl extends Composite implements RequiresResize, Part
 
         partStackContent.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 
-        this.tabs = new HashMap<>();
+        tabs = new HashMap<>();
 
         partViewContainer = new AcceptsOneWidget() {
             @Override

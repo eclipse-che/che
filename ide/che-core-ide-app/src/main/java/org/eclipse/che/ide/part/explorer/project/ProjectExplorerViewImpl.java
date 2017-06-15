@@ -75,9 +75,6 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
     private ToolButton goBackButton;
 
     private static final String GO_BACK_BUTTON_ID      = "goBackButton";
-    private static final String COLLAPSE_ALL_BUTTON_ID = "collapseAllButton";
-    private static final String REFRESH_BUTTON_ID      = "refreshSelectedPath";
-    private static final String LINK_WITH_EDITOR_ID    = "linkWithEditor";
     private static final String PROJECT_TREE_WIDGET_ID = "projectTree";
 
     @Inject
@@ -85,11 +82,6 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
                                    final CoreLocalizationConstant coreLocalizationConstant,
                                    final Set<NodeInterceptor> nodeInterceptorSet,
                                    final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor,
-                                   final LinkWithEditorAction linkWithEditorAction,
-                                   final RefreshPathAction refreshPathAction,
-                                   final PresentationFactory presentationFactory,
-                                   final Provider<PerspectiveManager> managerProvider,
-                                   final ActionManager actionManager,
                                    final EmptyTreePanel emptyTreePanel) {
         this.skipHiddenNodesInterceptor = skipHiddenNodesInterceptor;
 
@@ -130,56 +122,6 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
         tree.getNodeLoader().setUseCaching(false);
 
         setContentWidget(tree);
-
-//        ToolButton collapseAllButton = new ToolButton(FontAwesome.COMPRESS);
-//        collapseAllButton.addClickHandler(new ClickHandler() {
-//            @Override
-//            public void onClick(ClickEvent event) {
-//                if (tree.getGoInto().isActive()) {
-//                    Node lastNode = tree.getGoInto().getLastUsed();
-//                    tree.setExpanded(lastNode, false, true);
-//                    return;
-//                }
-//
-//                tree.collapseAll();
-//            }
-//        });
-//        Tooltip.create((elemental.dom.Element)collapseAllButton.getElement(), BOTTOM, MIDDLE, "Collapse All");
-//        collapseAllButton.ensureDebugId(COLLAPSE_ALL_BUTTON_ID);
-//        collapseAllButton.setVisible(true);
-//        addToolButton(collapseAllButton);
-
-//        ToolButton linkedEditorButton = new ToolButton(FontAwesome.EXCHANGE);
-//        linkedEditorButton.addClickHandler(new ClickHandler() {
-//            @Override
-//            public void onClick(ClickEvent event) {
-//                linkWithEditorAction.actionPerformed(null);
-//            }
-//        });
-//        Tooltip.create((elemental.dom.Element)linkedEditorButton.getElement(), BOTTOM, MIDDLE, "Link with editor");
-//        linkedEditorButton.ensureDebugId(LINK_WITH_EDITOR_ID);
-//        linkedEditorButton.setVisible(true);
-//        addToolButton(linkedEditorButton);
-
-//        ToolButton refreshPathButton = new ToolButton(FontAwesome.REFRESH);
-//        refreshPathButton.addClickHandler(new ClickHandler() {
-//            @Override
-//            public void onClick(ClickEvent event) {
-//                final Presentation presentation = presentationFactory.getPresentation(refreshPathAction);
-//                final ActionEvent actionEvent = new ActionEvent(presentation, actionManager, managerProvider.get(), null);
-//
-//                refreshPathAction.update(actionEvent);
-//
-//                if (presentation.isEnabled() && presentation.isVisible()) {
-//                    refreshPathAction.actionPerformed(actionEvent);
-//                }
-//            }
-//        });
-//
-//        Tooltip.create((elemental.dom.Element)refreshPathButton.getElement(), BOTTOM, MIDDLE, "Refresh selected path");
-//        refreshPathButton.ensureDebugId(REFRESH_BUTTON_ID);
-//        refreshPathButton.setVisible(true);
-//        addToolButton(refreshPathButton);
     }
 
     @Override
