@@ -37,6 +37,7 @@ import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
+import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryJsonRpcClient;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
 import org.eclipse.lsp4j.ServerCapabilities;
 
@@ -47,6 +48,7 @@ import java.util.Map;
 import static org.eclipse.che.api.languageserver.shared.ProjectExtensionKey.createProjectKey;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
 
 
 /**
@@ -54,22 +56,24 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 @Singleton
 public class LanguageServerRegistry {
-    private final EventBus                            eventBus;
-    private       LoaderFactory                       loaderFactory;
-    private       NotificationManager                 notificationManager;
-    private final LanguageServerRegistryServiceClient client;
-
+    private final EventBus                                                                eventBus;
+    private final LanguageServerRegistryJsonRpcClient                                     jsonRpcClient;
+    private final LanguageServerRegistryServiceClient                                     client;
     private final Map<ProjectExtensionKey, ExtendedInitializeResult>                      projectToInitResult;
     private final Map<ProjectExtensionKey, Callback<ExtendedInitializeResult, Throwable>> callbackMap;
+    private       LoaderFactory                                                           loaderFactory;
+    private       NotificationManager                                                     notificationManager;
 
     @Inject
     public LanguageServerRegistry(EventBus eventBus,
                                   LoaderFactory loaderFactory,
                                   NotificationManager notificationManager,
+                                  LanguageServerRegistryJsonRpcClient jsonRpcClient,
                                   LanguageServerRegistryServiceClient client) {
         this.eventBus = eventBus;
         this.loaderFactory = loaderFactory;
         this.notificationManager = notificationManager;
+        this.jsonRpcClient = jsonRpcClient;
         this.client = client;
         this.projectToInitResult = new HashMap<>();
         this.callbackMap = new HashMap<>();
@@ -99,12 +103,23 @@ public class LanguageServerRegistry {
             //call initialize service
             final MessageLoader loader = loaderFactory.newLoader("Initializing Language Server for " + ext);
             loader.show();
-            client.initializeServer(filePath).then(arg -> {
-                loader.hide();
-            }).catchError(arg -> {
-                notificationManager.notify("Initializing Language Server for " + ext, arg.getMessage(), FAIL, EMERGE_MODE);
-                loader.hide();
-            });
+
+            jsonRpcClient.initializeServer(filePath)
+                         .onSuccess(loader::hide)
+                         .onFailure((error) -> {
+                             notificationManager
+                                     .notify("Failed to initialize language server for " + ext + " : ", error.getMessage(), FAIL,
+                                             EMERGE_MODE);
+                             loader.hide();
+                         })
+                         .onTimeout(() -> {
+                             notificationManager
+                                     .notify("Possible problem starting a language server", "The server either hangs or starts long",
+                                             WARNING,
+                                             EMERGE_MODE);
+                             loader.hide();
+                         });
+
             //wait for response
             return CallbackPromiseHelper.createFromCallback(callback -> callbackMap.put(key, callback));
         }

@@ -69,7 +69,7 @@ public class ServerInitializerImplTest {
 
         when(launcher.getLanguageDescription()).thenReturn(languageDescription);
         when(launcher.launch(anyString(), any())).thenReturn(server);
-        doNothing().when(initializer).registerCallbacks(server);
+        doNothing().when(initializer).registerCallbacks(server, launcher);
 
         initializer.addObserver(observer);
         LanguageServer languageServer = initializer.initialize(launcher, "/path");

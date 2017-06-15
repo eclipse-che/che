@@ -80,12 +80,6 @@ public class GitHubClientServiceImpl implements GitHubClientService {
     }
 
     @Override
-    public void getRepository(@NotNull String user, @NotNull String repository, @NotNull AsyncRequestCallback<GitHubRepository> callback) {
-        String url = baseUrl() + REPOSITORIES + "/" + user + "/" + repository;
-        asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
-    }
-
-    @Override
     public Promise<GitHubRepository> getRepository(String user, String repository) {
         final String url = baseUrl() + REPOSITORIES + "/" + user + "/" + repository;
         return asyncRequestFactory.createGetRequest(url)
@@ -101,27 +95,11 @@ public class GitHubClientServiceImpl implements GitHubClientService {
                                   .send(dtoUnmarshallerFactory.newListUnmarshaller(GitHubRepository.class));
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void getForks(@NotNull String user,
-                         @NotNull String repository,
-                         @NotNull AsyncRequestCallback<GitHubRepositoryList> callback) {
-        String url = baseUrl() + FORKS + "/" + user + "/" + repository;
-        asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
-    }
-
     @Override
     public Promise<GitHubRepositoryList> getForks(String user, String repository) {
         return asyncRequestFactory.createGetRequest(baseUrl() + FORKS + '/' + user + '/' + repository)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(GitHubRepositoryList.class));
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void fork(@NotNull String user, @NotNull String repository, @NotNull AsyncRequestCallback<GitHubRepository> callback) {
-        String url = baseUrl() + CREATE_FORK + "/" + user + "/" + repository;
-        asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
     }
 
     @Override
@@ -136,13 +114,6 @@ public class GitHubClientServiceImpl implements GitHubClientService {
                              @NotNull GitHubIssueCommentInput input, @NotNull AsyncRequestCallback<GitHubIssueComment> callback) {
         String url = baseUrl() + ISSUE_COMMENTS + "/" + user + "/" + repository + "/" + issue;
         asyncRequestFactory.createPostRequest(url, input).loader(loader).send(callback);
-    }
-
-    @Override
-    public void getPullRequests(@NotNull String owner, @NotNull String repository,
-                                @NotNull AsyncRequestCallback<GitHubPullRequestList> callback) {
-        String url = baseUrl() + PULL_REQUESTS + "/" + owner + "/" + repository;
-        asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
     }
 
     @Override
@@ -166,14 +137,6 @@ public class GitHubClientServiceImpl implements GitHubClientService {
                                final AsyncRequestCallback<GitHubPullRequest> callback) {
         String url = baseUrl() + PULL_REQUESTS + "/" + owner + "/" + repository + "/" + pullRequestId;
         asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void createPullRequest(@NotNull String user, @NotNull String repository, @NotNull GitHubPullRequestCreationInput input,
-                                  @NotNull AsyncRequestCallback<GitHubPullRequest> callback) {
-        String url = baseUrl() + PULL_REQUEST + "/" + user + "/" + repository;
-        asyncRequestFactory.createPostRequest(url, input).loader(loader).send(callback);
     }
 
     @Override
@@ -203,24 +166,9 @@ public class GitHubClientServiceImpl implements GitHubClientService {
 
     /** {@inheritDoc} */
     @Override
-    public void getOrganizations(@NotNull AsyncRequestCallback<List<String>> callback) {
-        String url = baseUrl() + ORGANIZATIONS;
-        asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public Promise<List<GitHubUser>> getOrganizations() {
         String url = baseUrl() + ORGANIZATIONS;
         return asyncRequestFactory.createGetRequest(url).loader(loader).send(dtoUnmarshallerFactory.newListUnmarshaller(GitHubUser.class));
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public void getUserInfo(@NotNull AsyncRequestCallback<GitHubUser> callback) {
-        String url = baseUrl() + USER;
-        asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
     }
 
     /** {@inheritDoc} */
