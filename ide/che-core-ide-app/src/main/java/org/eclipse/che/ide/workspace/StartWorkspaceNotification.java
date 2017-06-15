@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.workspace.start;
+package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -21,7 +21,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.bootstrap.CurrentWorkspaceManager;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 
 /**

@@ -37,4 +37,12 @@ public class SubscriptionManagerClient {
                           .paramsAsDto(dtoFactory.createDto(EventSubscription.class).withMethod(method).withScope(scope))
                           .sendAndSkipResult();
     }
+
+    public void unSubscribe(String endpointId, String method, Map<String, String> scope) {
+        requestTransmitter.newRequest()
+                          .endpointId(endpointId)
+                          .methodName("unSubscribe")
+                          .paramsAsDto(dtoFactory.createDto(EventSubscription.class).withMethod(method).withScope(scope))
+                          .sendAndSkipResult();
+    }
 }

@@ -48,7 +48,7 @@ import org.eclipse.che.ide.actions.ShowPreferencesAction;
 import org.eclipse.che.ide.actions.ShowReferenceAction;
 import org.eclipse.che.ide.actions.SignatureHelpAction;
 import org.eclipse.che.ide.actions.SoftWrapAction;
-import org.eclipse.che.ide.actions.StopWorkspaceAction;
+import org.eclipse.che.ide.workspace.StopWorkspaceAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;

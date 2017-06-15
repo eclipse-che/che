@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.actions;
+package org.eclipse.che.ide.workspace;
 
 import com.google.inject.Inject;
 
@@ -16,7 +16,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.bootstrap.CurrentWorkspaceManager;
+import org.eclipse.che.ide.workspace.CurrentWorkspaceManager;
 
 import javax.validation.constraints.NotNull;
 

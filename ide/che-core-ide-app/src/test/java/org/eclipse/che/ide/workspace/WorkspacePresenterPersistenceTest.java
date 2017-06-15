@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.workspace.state;
+package org.eclipse.che.ide.workspace;
 
 import com.google.inject.Provider;
 import elemental.json.Json;

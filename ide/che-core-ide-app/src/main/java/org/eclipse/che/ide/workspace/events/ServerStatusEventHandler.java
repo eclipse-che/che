@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.machine;
+package org.eclipse.che.ide.workspace.events;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -32,7 +32,7 @@ import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.STOP
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 
 @Singleton
-public class ServerStatusEventHandler {
+class ServerStatusEventHandler {
 
     @Inject
     ServerStatusEventHandler(RequestHandlerConfigurator configurator,

@@ -12,16 +12,15 @@ package org.eclipse.che.ide.workspace.events;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 
-import org.eclipse.che.ide.machine.ServerStatusEventHandler;
-
 public class WorkspaceEventsModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        bind(EnvironmentOutputHandler.class).asEagerSingleton();
-        bind(MachineStatusEventHandler.class).asEagerSingleton();
-        bind(WorkspaceAgentOutputHandler.class).asEagerSingleton();
         bind(WorkspaceStatusEventHandler.class).asEagerSingleton();
+        bind(MachineStatusEventHandler.class).asEagerSingleton();
         bind(ServerStatusEventHandler.class).asEagerSingleton();
+
+        bind(EnvironmentOutputHandler.class).asEagerSingleton();
+        bind(WorkspaceAgentOutputHandler.class).asEagerSingleton();
     }
 }

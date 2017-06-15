@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.WorkspaceSnapshotNotifier;
@@ -22,6 +21,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.SubscriptionManagerClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
@@ -30,10 +30,11 @@ import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.workspace.start.StartWorkspaceNotification;
 
+import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
@@ -60,6 +61,7 @@ public class WorkspaceStatusHandler {
     private final WsAgentURLModifier         wsAgentURLModifier;
     private final EventBus                   eventBus;
     private final CoreLocalizationConstant   messages;
+    private       SubscriptionManagerClient  subscriptionManagerClient;
 
     @Inject
     WorkspaceStatusHandler(WorkspaceServiceClient workspaceServiceClient,
@@ -71,7 +73,8 @@ public class WorkspaceStatusHandler {
                            WsAgentStateController wsAgentStateController,
                            WsAgentURLModifier wsAgentURLModifier,
                            EventBus eventBus,
-                           CoreLocalizationConstant messages) {
+                           CoreLocalizationConstant messages,
+                           SubscriptionManagerClient subscriptionManagerClient) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.appContext = appContext;
         this.startWorkspaceNotificationProvider = startWorkspaceNotification;
@@ -82,6 +85,7 @@ public class WorkspaceStatusHandler {
         this.wsAgentURLModifier = wsAgentURLModifier;
         this.eventBus = eventBus;
         this.messages = messages;
+        this.subscriptionManagerClient = subscriptionManagerClient;
     }
 
     public void handleWorkspaceStatusChanged(WorkspaceStatusEvent serverEvent) {
@@ -92,10 +96,14 @@ public class WorkspaceStatusHandler {
             ((AppContextImpl)appContext).setWorkspace(workspace);
 
             if (workspace.getStatus() == RUNNING) {
-                handleWorkspaceRunning(workspace);
+                handleWorkspaceRunning();
+
+                eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
             } else if (workspace.getStatus() == STARTING) {
                 eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
             } else if (workspace.getStatus() == STOPPED) {
+                unsubscribeFromEvents();
+
                 eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
             }
 
@@ -103,7 +111,7 @@ public class WorkspaceStatusHandler {
         });
     }
 
-    public void handleWorkspaceRunning(Workspace workspace) {
+    void handleWorkspaceRunning() {
         // FIXME: spi ide
         // should be set on server `ws-agent` has been started
         ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf("/projects"));
@@ -115,8 +123,17 @@ public class WorkspaceStatusHandler {
             wsAgentStateController.initialize(machine);
             wsAgentURLModifier.initialize(machine);
         });
+    }
 
-        eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
+    private void unsubscribeFromEvents() {
+        unsubscribe("workspace/statusChanged");
+        unsubscribe("machine/statusChanged");
+        unsubscribe("server/statusChanged");
+    }
+
+    private void unsubscribe(String methodName) {
+        Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
+        subscriptionManagerClient.unSubscribe("ws-master", methodName, scope);
     }
 
     // TODO: move to the separate component that should listen appropriate events
