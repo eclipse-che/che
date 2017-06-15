@@ -383,7 +383,7 @@ public class CustomServerEvaluationStrategy extends ServerEvaluationStrategy {
             // add to this map only port without a known ref name
             Map<String, String> portsToUnkownRefName =
                     exposedPorts.stream().filter((port) -> !portsToKnownRefName.containsKey(port))
-                                .collect(Collectors.toMap(p -> p, p -> "Server-" + p.replace('/', '-')));
+                                .collect(Collectors.toMap(p -> p, p -> "server-" + p.replace('/', '-')));
 
             // list of all ports with refName (known/unknown)
             this.portsToRefName = new HashMap(portsToKnownRefName);
