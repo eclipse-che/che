@@ -96,7 +96,7 @@ public class TextDocumentService {
 
 
         dtoToDto("completionItem/resolve", ExtendedCompletionItemDto.class, CompletionItemDto.class, this::completionItemResolve);
-        dtoToDtoList("documentHighlight", TextDocumentPositionParams.class, DocumentHighlightDto.class, this::documentHighlight);
+        dtoToDto("documentHighlight", TextDocumentPositionParams.class, DocumentHighlightDto.class, this::documentHighlight);
         dtoToDto("completion", TextDocumentPositionParams.class, ExtendedCompletionListDto.class, this::completion);
         dtoToDto("hover", TextDocumentPositionParams.class, HoverDto.class, this::hover);
         dtoToDto("signatureHelp", TextDocumentPositionParams.class, SignatureHelpDto.class, this::signatureHelp);
@@ -462,7 +462,7 @@ public class TextDocumentService {
         }
     }
 
-    private List<DocumentHighlightDto> documentHighlight(TextDocumentPositionParams textDocumentPositionParams) {
+    private DocumentHighlightDto documentHighlight(TextDocumentPositionParams textDocumentPositionParams) {
         try {
             String uri = prefixURI(textDocumentPositionParams.getTextDocument().getUri());
             textDocumentPositionParams.getTextDocument().setUri(uri);
@@ -511,7 +511,10 @@ public class TextDocumentService {
             };
             LanguageServerRegistryImpl.doInSequence(languageServerRegistry.getApplicableLanguageServers(uri), op, 10000);
 
-            return result[0];
+            if (!result[0].isEmpty()) {
+                return result[0].get(0);
+            }
+            return null;
         } catch (LanguageServerException e) {
             throw new JsonRpcException(-27000, e.getMessage());
 
