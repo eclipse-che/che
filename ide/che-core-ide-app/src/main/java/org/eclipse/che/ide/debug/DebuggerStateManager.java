@@ -25,7 +25,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 
-import com.google.gwt.storage.client.Storage;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -131,7 +130,6 @@ public class DebuggerStateManager {
     }
 
     private void cleanup(WorkspaceServiceClient workspaceServiceClient) {
-        final Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage == null) {
             return;
         }

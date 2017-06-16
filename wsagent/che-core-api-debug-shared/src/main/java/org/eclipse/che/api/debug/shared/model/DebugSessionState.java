@@ -18,9 +18,9 @@ package org.eclipse.che.api.debug.shared.model;
 public interface DebugSessionState {
     
     /**
-     * Returns debug session state.
+     * Returns debugger type.
      * 
-     * @return debug session state
+     * @return debugger type
      */
     String getDebuggerType();
     
