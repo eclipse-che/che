@@ -18,12 +18,16 @@ import org.eclipse.che.ide.api.machine.MachineEntity;
 /**
  * Event that describes the fact that machine state has been changed.
  *
- * @deprecated use {@link MachineStartingEvent}, {@link MachineRunningEvent}
+ * @deprecated use {@link MachineStartingEvent}, {@link MachineRunningEvent}, {@link MachineStoppedEvent}, {@link MachineFailedEvent}
  */
 @Deprecated
 public class MachineStateEvent extends GwtEvent<MachineStateEvent.Handler> {
 
-    /** @deprecated use {@link MachineStartingEvent.Handler}, {@link MachineRunningEvent.Handler} */
+    /**
+     * @deprecated use {@link MachineStartingEvent.Handler}, {@link MachineRunningEvent.Handler}, {@link MachineStoppedEvent.Handler},
+     * {@link MachineFailedEvent.Handler}
+     */
+    @Deprecated
     public interface Handler extends EventHandler {
 
         /**
@@ -69,6 +73,7 @@ public class MachineStateEvent extends GwtEvent<MachineStateEvent.Handler> {
      * @param machineAction
      *         the type of action
      */
+    @Deprecated
     public MachineStateEvent(MachineEntity machine, MachineAction machineAction) {
         this.machine = machine;
         this.machineAction = machineAction;
@@ -79,10 +84,12 @@ public class MachineStateEvent extends GwtEvent<MachineStateEvent.Handler> {
         return TYPE;
     }
 
+    @Deprecated
     public MachineEntity getMachine() {
         return machine;
     }
 
+    @Deprecated
     public String getMachineId() {
         return machine.getId();
     }
@@ -105,6 +112,7 @@ public class MachineStateEvent extends GwtEvent<MachineStateEvent.Handler> {
     /**
      * Set of possible type of machine actions.
      */
+    @Deprecated
     public enum MachineAction {
         CREATING,
         RUNNING,

@@ -23,6 +23,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+// FIXME: spi ide
 @Singleton
 class WorkspaceAgentOutputHandler {
 

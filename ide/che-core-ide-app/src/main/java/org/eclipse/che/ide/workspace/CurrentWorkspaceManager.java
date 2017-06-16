@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.bootstrap;
+package org.eclipse.che.ide.workspace;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -21,8 +21,6 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.SubscriptionManagerClient;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
-import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.workspace.WorkspaceStatusHandler;
 
 import java.util.Map;
 
@@ -65,53 +63,65 @@ public class CurrentWorkspaceManager {
         this.subscriptionManagerClient = subscriptionManagerClient;
     }
 
-    // TODO: handle errors while workspace starting (show message dialog)
-    // to allow user to see the reason of failed start
-
-    /** Start the current workspace with the default environment. */
-    public void startWorkspace(boolean restoreFromSnapshot) {
-        subscribeToEvents();
-
-        wsStatusNotification.show(STARTING_WORKSPACE_RUNTIME);
-
+    /** Checks the current workspace's status and does an appropriate action. */
+    public void handleWorkspaceState() {
         final WorkspaceImpl workspace = appContext.getWorkspace();
         final WorkspaceStatus workspaceStatus = workspace.getStatus();
 
-        if (workspaceStatus == RUNNING) {
-            wsStatusHandler.handleWorkspaceRunning(workspace);
-        } else if (workspaceStatus == STOPPED || workspaceStatus == STOPPING) {
-            wsStatusNotification.show(STARTING_WORKSPACE_RUNTIME);
+        wsStatusNotification.show(STARTING_WORKSPACE_RUNTIME);
 
-            workspaceServiceClient.getSettings().then(settings -> {
-                if (Boolean.parseBoolean(settings.getOrDefault(CHE_WORKSPACE_AUTO_START, "true"))) {
-                    workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), restoreFromSnapshot)
-                                          .catchError(error -> {
-                                              notificationManagerProvider.get().notify(messages.startWsErrorTitle(),
-                                                                                       error.getMessage(),
-                                                                                       FAIL,
-                                                                                       FLOAT_MODE);
-                                              wsStatusNotification.setError(STARTING_WORKSPACE_RUNTIME);
-                                          });
-                } else {
-                    wsStatusNotification.show(WORKSPACE_STOPPED);
-                }
-            });
+        if (workspaceStatus == RUNNING) {
+            subscribeToEvents();
+            wsStatusHandler.handleWorkspaceRunning();
+        } else if (workspaceStatus == STOPPED || workspaceStatus == STOPPING) {
+            startWorkspace(false);
         }
     }
 
-    private void subscribeToEvents() {
-        subscribe("ws-master", "workspace/statusChanged");
-    }
+    // TODO: handle errors while workspace starting (show message dialog)
+    // to allow user to see the reason of failed start
 
-    private void subscribe(String endpointId, String methodName) {
-        Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
-        subscriptionManagerClient.subscribe(endpointId, methodName, scope);
+    /** Start the current workspace with a default environment. */
+    void startWorkspace(boolean restoreFromSnapshot) {
+        final WorkspaceImpl workspace = appContext.getWorkspace();
+        final WorkspaceStatus workspaceStatus = workspace.getStatus();
+
+        if (workspaceStatus != STOPPED && workspaceStatus != STOPPING) {
+            return;
+        }
+
+        wsStatusNotification.show(STARTING_WORKSPACE_RUNTIME);
+
+        workspaceServiceClient.getSettings().then(settings -> {
+            if (Boolean.parseBoolean(settings.getOrDefault(CHE_WORKSPACE_AUTO_START, "true"))) {
+                subscribeToEvents();
+
+                final String defEnvName = workspace.getConfig().getDefaultEnv();
+
+                workspaceServiceClient.startById(workspace.getId(), defEnvName, restoreFromSnapshot)
+                                      .catchError(error -> {
+                                          notificationManagerProvider.get().notify(messages.startWsErrorTitle(),
+                                                                                   error.getMessage(),
+                                                                                   FAIL,
+                                                                                   FLOAT_MODE);
+                                          wsStatusNotification.setError(STARTING_WORKSPACE_RUNTIME);
+                                      });
+            } else {
+                wsStatusNotification.show(WORKSPACE_STOPPED);
+            }
+        });
     }
 
     /** Stop the current workspace. */
-    public void stopWorkspace() {
+    void stopWorkspace() {
         workspaceServiceClient.stop(appContext.getWorkspaceId());
+    }
 
-        // TODO: unsubscribe from events
+    private void subscribeToEvents() {
+        Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
+
+        subscriptionManagerClient.subscribe("ws-master", "workspace/statusChanged", scope);
+        subscriptionManagerClient.subscribe("ws-master", "machine/statusChanged", scope);
+        subscriptionManagerClient.subscribe("ws-master", "server/statusChanged", scope);
     }
 }

@@ -8,29 +8,34 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.workspace.event;
+package org.eclipse.che.ide.api.machine.events;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
-/** Fired when some the current workspace goes into a starting state. */
-public class WorkspaceStartingEvent extends GwtEvent<WorkspaceStartingEvent.Handler> {
+/** Fired when some machine goes into a failed state. */
+public class MachineFailedEvent extends GwtEvent<MachineFailedEvent.Handler> {
 
-    public static final Type<WorkspaceStartingEvent.Handler> TYPE = new Type<>();
+    public static final Type<MachineFailedEvent.Handler> TYPE = new Type<>();
 
-    private final Workspace workspace;
+    private final MachineImpl machine;
+    private final String      error;
 
-    public WorkspaceStartingEvent(Workspace workspace) {
-        this.workspace = workspace;
+    public MachineFailedEvent(MachineImpl machine, String error) {
+        this.machine = machine;
+        this.error = error;
     }
 
-    /** @deprecated use {@link AppContext#getWorkspace()} */
-    @Deprecated
-    public Workspace getWorkspace() {
-        return workspace;
+    /** Returns the failed machine. */
+    public MachineImpl getMachine() {
+        return machine;
+    }
+
+    /** Returns the error message describes the reason of fail. */
+    public String getError() {
+        return error;
     }
 
     @Override
@@ -40,10 +45,10 @@ public class WorkspaceStartingEvent extends GwtEvent<WorkspaceStartingEvent.Hand
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onWorkspaceStarting(this);
+        handler.onMachineFailed(this);
     }
 
     public interface Handler extends EventHandler {
-        void onWorkspaceStarting(WorkspaceStartingEvent event);
+        void onMachineFailed(MachineFailedEvent event);
     }
 }

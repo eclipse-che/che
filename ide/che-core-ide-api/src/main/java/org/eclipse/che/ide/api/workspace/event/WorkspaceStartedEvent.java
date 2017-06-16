@@ -19,9 +19,12 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
  * The class contains information about started workspace and provides ability to handle events when workspace starts.
  *
  * @author Dmitry Shnurenko
+ * @deprecated use {@link WorkspaceRunningEvent}
  */
+@Deprecated
 public class WorkspaceStartedEvent extends GwtEvent<WorkspaceStartedEvent.Handler> {
 
+    @Deprecated
     public interface Handler extends EventHandler {
         /**
          * Performs some actions when workspace started.
@@ -36,11 +39,13 @@ public class WorkspaceStartedEvent extends GwtEvent<WorkspaceStartedEvent.Handle
 
     private final Workspace workspace;
 
+    @Deprecated
     public WorkspaceStartedEvent(Workspace workspace) {
         this.workspace = workspace;
     }
 
     /** Returns started workspace. */
+    @Deprecated
     public Workspace getWorkspace() {
         return workspace;
     }

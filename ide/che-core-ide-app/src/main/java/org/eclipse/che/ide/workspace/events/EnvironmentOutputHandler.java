@@ -19,6 +19,7 @@ import org.eclipse.che.api.machine.shared.dto.MachineLogMessageDto;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
+// FIXME: spi ide
 @Singleton
 class EnvironmentOutputHandler {
 

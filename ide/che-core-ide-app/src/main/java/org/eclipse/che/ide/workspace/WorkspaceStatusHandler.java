@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.WorkspaceSnapshotNotifier;
@@ -22,21 +21,24 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.workspace.start.StartWorkspaceNotification;
 
 import java.util.Optional;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT;
@@ -44,8 +46,8 @@ import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STARTING_WORK
 import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STOPPING_WORKSPACE;
 
 /**
- * Handles changes of the workspace status and fires
- * the corresponded events to notify all interested subscribers.
+ * Handles changes of the workspace status and fires the corresponded
+ * events to notify all interested subscribers (usually IDE extensions).
  */
 @Singleton
 public class WorkspaceStatusHandler {
@@ -88,13 +90,24 @@ public class WorkspaceStatusHandler {
 
         Log.info(WorkspaceStatusHandler.class, "Workspace from context:  " + appContext.getWorkspaceId());
 
+        // fire deprecated WorkspaceStatusChangedEvent for backward compatibility with IDE 5.x
+        eventBus.fireEvent(new WorkspaceStatusChangedEvent(serverEvent));
+
         workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
+            // Update workspace model returned by AppContext before firing an event.
+            // Because AppContext always must return an actual workspace model.
             ((AppContextImpl)appContext).setWorkspace(workspace);
 
-            if (workspace.getStatus() == RUNNING) {
-                handleWorkspaceRunning(workspace);
-            } else if (workspace.getStatus() == STARTING) {
+            if (workspace.getStatus() == STARTING) {
                 eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
+            } else if (workspace.getStatus() == RUNNING) {
+                handleWorkspaceRunning();
+
+                eventBus.fireEvent(new WorkspaceRunningEvent());
+                // fire deprecated WorkspaceStatusChangedEvent for backward compatibility with IDE 5.x
+                eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
+            } else if (workspace.getStatus() == STOPPING) {
+                eventBus.fireEvent(new WorkspaceStoppingEvent());
             } else if (workspace.getStatus() == STOPPED) {
                 eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
             }
@@ -103,9 +116,9 @@ public class WorkspaceStatusHandler {
         });
     }
 
-    public void handleWorkspaceRunning(Workspace workspace) {
-        // FIXME: spi ide
-        // should be set on server `ws-agent` has been started
+    // FIXME: spi ide
+    // should be bound to WsAgentServerRunningEvent
+    void handleWorkspaceRunning() {
         ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf("/projects"));
 
         wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
@@ -115,11 +128,10 @@ public class WorkspaceStatusHandler {
             wsAgentStateController.initialize(machine);
             wsAgentURLModifier.initialize(machine);
         });
-
-        eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
     }
 
-    // TODO: move to the separate component that should listen appropriate events
+    // FIXME: spi ide
+    // move to the separate component that should listen appropriate events
     private void notify(WorkspaceStatusEvent event) {
         switch (event.getEventType()) {
             case STARTING:

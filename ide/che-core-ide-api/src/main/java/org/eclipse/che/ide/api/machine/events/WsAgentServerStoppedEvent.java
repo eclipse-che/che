@@ -8,30 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.workspace.event;
+package org.eclipse.che.ide.api.machine.events;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.ide.api.app.AppContext;
+/**
+ * Fired when ws-agent server in some machine goes into a stopped state.
+ * Allows to avoid checking server's name unlike {@link ServerStoppedEvent}.
+ *
+ * @see ServerStoppedEvent
+ */
+public class WsAgentServerStoppedEvent extends GwtEvent<WsAgentServerStoppedEvent.Handler> {
 
-/** Fired when some the current workspace goes into a starting state. */
-public class WorkspaceStartingEvent extends GwtEvent<WorkspaceStartingEvent.Handler> {
-
-    public static final Type<WorkspaceStartingEvent.Handler> TYPE = new Type<>();
-
-    private final Workspace workspace;
-
-    public WorkspaceStartingEvent(Workspace workspace) {
-        this.workspace = workspace;
-    }
-
-    /** @deprecated use {@link AppContext#getWorkspace()} */
-    @Deprecated
-    public Workspace getWorkspace() {
-        return workspace;
-    }
+    public static final Type<WsAgentServerStoppedEvent.Handler> TYPE = new Type<>();
 
     @Override
     public Type<Handler> getAssociatedType() {
@@ -40,10 +30,10 @@ public class WorkspaceStartingEvent extends GwtEvent<WorkspaceStartingEvent.Hand
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onWorkspaceStarting(this);
+        handler.onWsAgentServerStopped(this);
     }
 
     public interface Handler extends EventHandler {
-        void onWorkspaceStarting(WorkspaceStartingEvent event);
+        void onWsAgentServerStopped(WsAgentServerStoppedEvent event);
     }
 }

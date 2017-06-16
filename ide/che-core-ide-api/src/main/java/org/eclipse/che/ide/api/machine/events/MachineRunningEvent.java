@@ -15,16 +15,18 @@ import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
+/** Fired when some machine goes into a running state. */
 public class MachineRunningEvent extends GwtEvent<MachineRunningEvent.Handler> {
 
     public static final Type<MachineRunningEvent.Handler> TYPE = new Type<>();
 
     private final MachineImpl machine;
 
-    public MachineRunningEvent(MachineImpl workspace) {
-        this.machine = workspace;
+    public MachineRunningEvent(MachineImpl machine) {
+        this.machine = machine;
     }
 
+    /** Returns the running machine. */
     public MachineImpl getMachine() {
         return machine;
     }

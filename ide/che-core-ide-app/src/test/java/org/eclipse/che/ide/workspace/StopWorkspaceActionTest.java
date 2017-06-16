@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.actions;
+package org.eclipse.che.ide.workspace;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
@@ -19,7 +19,8 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
-import org.eclipse.che.ide.bootstrap.CurrentWorkspaceManager;
+import org.eclipse.che.ide.workspace.CurrentWorkspaceManager;
+import org.eclipse.che.ide.workspace.StopWorkspaceAction;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;

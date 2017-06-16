@@ -16,9 +16,13 @@ public class WorkspaceEventsModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        bind(EnvironmentOutputHandler.class).asEagerSingleton();
-        bind(EnvironmentStatusEventHandler.class).asEagerSingleton();
-        bind(WorkspaceAgentOutputHandler.class).asEagerSingleton();
         bind(WorkspaceStatusEventHandler.class).asEagerSingleton();
+        bind(MachineStatusEventHandler.class).asEagerSingleton();
+        bind(ServerStatusEventHandler.class).asEagerSingleton();
+
+        bind(EnvironmentOutputHandler.class).asEagerSingleton();
+        bind(WorkspaceAgentOutputHandler.class).asEagerSingleton();
+
+        bind(WorkspaceEventsUnsubscriber.class).asEagerSingleton();
     }
 }

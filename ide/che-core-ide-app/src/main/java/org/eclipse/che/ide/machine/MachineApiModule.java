@@ -24,6 +24,9 @@ public class MachineApiModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
+        bind(MachineOutputSubscriber.class).asEagerSingleton();
+        bind(MachineFailNotifier.class).asEagerSingleton();
+
         bind(MachineChooserView.class).to(MachineChooserViewImpl.class);
         bind(ModuleHolder.class).in(Singleton.class);
         bindConstant().annotatedWith(Names.named("machine.extension.api_port")).to(Constants.WS_AGENT_PORT);

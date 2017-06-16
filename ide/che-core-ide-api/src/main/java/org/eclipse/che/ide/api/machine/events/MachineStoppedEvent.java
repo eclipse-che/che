@@ -8,29 +8,27 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.workspace.event;
+package org.eclipse.che.ide.api.machine.events;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
-/** Fired when some the current workspace goes into a starting state. */
-public class WorkspaceStartingEvent extends GwtEvent<WorkspaceStartingEvent.Handler> {
+/** Fired when some machine goes into a stopped state. */
+public class MachineStoppedEvent extends GwtEvent<MachineStoppedEvent.Handler> {
 
-    public static final Type<WorkspaceStartingEvent.Handler> TYPE = new Type<>();
+    public static final Type<MachineStoppedEvent.Handler> TYPE = new Type<>();
 
-    private final Workspace workspace;
+    private final MachineImpl machine;
 
-    public WorkspaceStartingEvent(Workspace workspace) {
-        this.workspace = workspace;
+    public MachineStoppedEvent(MachineImpl machine) {
+        this.machine = machine;
     }
 
-    /** @deprecated use {@link AppContext#getWorkspace()} */
-    @Deprecated
-    public Workspace getWorkspace() {
-        return workspace;
+    /** Returns the stopped machine. */
+    public MachineImpl getMachine() {
+        return machine;
     }
 
     @Override
@@ -40,10 +38,10 @@ public class WorkspaceStartingEvent extends GwtEvent<WorkspaceStartingEvent.Hand
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onWorkspaceStarting(this);
+        handler.onMachineStopped(this);
     }
 
     public interface Handler extends EventHandler {
-        void onWorkspaceStarting(WorkspaceStartingEvent event);
+        void onMachineStopped(MachineStoppedEvent event);
     }
 }

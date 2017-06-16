@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.workspace.CurrentWorkspaceManager;
 
 /** Performs initial startup of the CHE IDE application. */
 @Singleton
@@ -30,12 +31,12 @@ public class IdeBootstrap {
     }
 
     @Inject
-    void bootstrap(ExtensionInitializer extensionInitializer, CurrentWorkspaceManager wsStarter, IdeInitializer ideInitializer) {
+    void bootstrap(ExtensionInitializer extensionInitializer, CurrentWorkspaceManager wsManager, IdeInitializer ideInitializer) {
         ideInitializer.init()
                       .then(aVoid -> {
                           extensionInitializer.startExtensions();
                           Scheduler.get().scheduleDeferred(this::notifyShowIDE);
-                          wsStarter.startWorkspace(false);
+                          wsManager.handleWorkspaceState();
                       })
                       .catchError(handleError())
                       .catchError(handleErrorFallback());
@@ -51,7 +52,7 @@ public class IdeBootstrap {
         return err -> onInitializationFailed(err.getMessage());
     }
 
-    /** Informs parent window (e.g. Dashboard) that IDE application can be shown. */
+    /** Informs parent window (e.g. Dashboard) that IDE application is ready to be shown. */
     private native void notifyShowIDE() /*-{
         $wnd.parent.postMessage("show-ide", "*");
     }-*/;

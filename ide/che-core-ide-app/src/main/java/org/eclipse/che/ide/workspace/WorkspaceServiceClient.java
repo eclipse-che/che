@@ -32,6 +32,7 @@ import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
+/** Client for Workspace API. */
 public class WorkspaceServiceClient {
 
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;

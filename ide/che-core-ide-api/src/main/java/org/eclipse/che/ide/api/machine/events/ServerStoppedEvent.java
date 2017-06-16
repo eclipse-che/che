@@ -13,22 +13,31 @@ package org.eclipse.che.ide.api.machine.events;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+/**
+ * Fired when some server in some machine goes into a stopped state.
+ *
+ * @see WsAgentServerStoppedEvent
+ */
+public class ServerStoppedEvent extends GwtEvent<ServerStoppedEvent.Handler> {
 
-/** Fired when some machine goes into a starting state. */
-public class MachineStartingEvent extends GwtEvent<MachineStartingEvent.Handler> {
+    public static final Type<ServerStoppedEvent.Handler> TYPE = new Type<>();
 
-    public static final Type<MachineStartingEvent.Handler> TYPE = new Type<>();
+    private final String serverName;
+    private final String machineName;
 
-    private final MachineImpl machine;
-
-    public MachineStartingEvent(MachineImpl machine) {
-        this.machine = machine;
+    public ServerStoppedEvent(String serverName, String machineName) {
+        this.serverName = serverName;
+        this.machineName = machineName;
     }
 
-    /** Returns the starting machine. */
-    public MachineImpl getMachine() {
-        return machine;
+    /** Returns the running server's name. */
+    public String getServerName() {
+        return serverName;
+    }
+
+    /** Returns the related machine's name. */
+    public String getMachineName() {
+        return machineName;
     }
 
     @Override
@@ -38,10 +47,10 @@ public class MachineStartingEvent extends GwtEvent<MachineStartingEvent.Handler>
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onMachineStarting(this);
+        handler.onServerStopped(this);
     }
 
     public interface Handler extends EventHandler {
-        void onMachineStarting(MachineStartingEvent event);
+        void onServerStopped(ServerStoppedEvent event);
     }
 }

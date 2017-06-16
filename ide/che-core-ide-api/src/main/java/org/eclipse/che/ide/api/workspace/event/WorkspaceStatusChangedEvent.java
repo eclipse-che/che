@@ -16,9 +16,9 @@ import com.google.gwt.event.shared.GwtEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 
 /**
- * DTO event wrapper
+ * @deprecated use {@link WorkspaceStartingEvent}, {@link WorkspaceStartedEvent}, {@link WorkspaceStoppedEvent}
  */
-// TODO: remove
+@Deprecated
 public class WorkspaceStatusChangedEvent extends GwtEvent<WorkspaceStatusChangedEvent.Handler> {
 
     public static final Type<WorkspaceStatusChangedEvent.Handler> TYPE = new Type<>();
@@ -38,10 +38,12 @@ public class WorkspaceStatusChangedEvent extends GwtEvent<WorkspaceStatusChanged
         handler.onWorkspaceStatusChangedEvent(this);
     }
 
+    @Deprecated
     public WorkspaceStatusEvent getWorkspaceStatusEvent() {
         return workspaceStatusEvent;
     }
 
+    @Deprecated
     public interface Handler extends EventHandler {
         void onWorkspaceStatusChangedEvent(WorkspaceStatusChangedEvent event);
     }
