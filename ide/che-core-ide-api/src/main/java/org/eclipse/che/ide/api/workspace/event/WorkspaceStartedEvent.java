@@ -24,9 +24,22 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 @Deprecated
 public class WorkspaceStartedEvent extends GwtEvent<WorkspaceStartedEvent.Handler> {
 
+    @Deprecated
+    public interface Handler extends EventHandler {
+        /**
+         * Performs some actions when workspace started.
+         *
+         * @param event
+         *         contains information about started workspace
+         */
+        void onWorkspaceStarted(WorkspaceStartedEvent event);
+    }
+
     public static final Type<WorkspaceStartedEvent.Handler> TYPE = new Type<>();
+
     private final Workspace workspace;
 
+    @Deprecated
     public WorkspaceStartedEvent(Workspace workspace) {
         this.workspace = workspace;
     }
@@ -47,17 +60,6 @@ public class WorkspaceStartedEvent extends GwtEvent<WorkspaceStartedEvent.Handle
     @Override
     protected void dispatch(WorkspaceStartedEvent.Handler handler) {
         handler.onWorkspaceStarted(this);
-    }
-
-    @Deprecated
-    public interface Handler extends EventHandler {
-        /**
-         * Performs some actions when workspace started.
-         *
-         * @param event
-         *         contains information about started workspace
-         */
-        void onWorkspaceStarted(WorkspaceStartedEvent event);
     }
 
 }
