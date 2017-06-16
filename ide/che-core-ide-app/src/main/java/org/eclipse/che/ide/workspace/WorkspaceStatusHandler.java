@@ -87,6 +87,7 @@ public class WorkspaceStatusHandler {
 
         Log.info(WorkspaceStatusHandler.class, "Workspace from context:  " + appContext.getWorkspaceId());
 
+        // fire deprecated WorkspaceStatusChangedEvent for backward compatibility with IDE 5.x
         eventBus.fireEvent(new WorkspaceStatusChangedEvent(serverEvent));
 
         workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {

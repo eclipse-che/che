@@ -118,13 +118,10 @@ public class CurrentWorkspaceManager {
     }
 
     private void subscribeToEvents() {
-        subscribe("workspace/statusChanged");
-        subscribe("machine/statusChanged");
-        subscribe("server/statusChanged");
-    }
-
-    private void subscribe(String methodName) {
         Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
-        subscriptionManagerClient.subscribe("ws-master", methodName, scope);
+
+        subscriptionManagerClient.subscribe("ws-master", "workspace/statusChanged", scope);
+        subscriptionManagerClient.subscribe("ws-master", "machine/statusChanged", scope);
+        subscriptionManagerClient.subscribe("ws-master", "server/statusChanged", scope);
     }
 }
