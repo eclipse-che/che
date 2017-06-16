@@ -51,6 +51,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -60,6 +61,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     public final static String                 PROJECT_FOLDER_PATH = "file:///projects";
     private final List<LanguageDescription>    languages           = new ArrayList<>();
     private final List<LanguageServerLauncher> launchers           = new ArrayList<>();
+    private final AtomicInteger                serverId            = new AtomicInteger();
 
     /**
      * Started {@link LanguageServer} by project.
@@ -131,7 +133,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                                 initialized = new ArrayList<>();
                                 initializedServers.put(projectPath, initialized);
                             }
-                            initialized.add(new InitializedLanguageServer(pair.first, pair.second, launcher));
+                            initialized.add(new InitializedLanguageServer(String.valueOf(serverId.incrementAndGet()), pair.first, pair.second, launcher));
                             launchers.remove(launcher);
                             initializedServers.notifyAll();
                         }
@@ -246,7 +248,8 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
             }
         }
         // sort lists highest score first
-        return result.entrySet().stream().sorted((left, right)->right.getKey()-left.getKey()).map(entry -> entry.getValue()).collect(Collectors.toList());
+        return result.entrySet().stream().sorted((left, right) -> right.getKey() - left.getKey()).map(entry -> entry.getValue())
+                        .collect(Collectors.toList());
     }
 
     public static <C, R> void doInParallel(Collection<C> collection, LSOperation<C, R> op, long timeoutMillis) {

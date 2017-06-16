@@ -11,29 +11,32 @@
 package org.eclipse.che.api.languageserver.registry;
 
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.services.LanguageServer;
 
-
 /**
- * Simple container for {@link InitializeResult} and {@link LanguageDescription}
+ * Simple container for {@link LanguageServerLauncher}, {@link InitializeResult}
+ * and {@link LanguageServer}
  *
  * @author Evgen Vidolob
  */
 public class InitializedLanguageServer {
-    private final LanguageServer server;
-    private final InitializeResult    initializeResult;
+    private final String                 id;
+    private final LanguageServer         server;
+    private final InitializeResult       initializeResult;
     private final LanguageServerLauncher launcher;
 
-    public InitializedLanguageServer(LanguageServer server,
-                                     InitializeResult initializeResult,
-                                     LanguageServerLauncher launcher) {
-        this.server= server;
+    public InitializedLanguageServer(String id, LanguageServer server, InitializeResult initializeResult, LanguageServerLauncher launcher) {
+        this.id = id;
+        this.server = server;
         this.initializeResult = initializeResult;
-        this.launcher= launcher;
+        this.launcher = launcher;
     }
     
+    public String getId() {
+        return id;
+    }
+
     public LanguageServer getServer() {
         return server;
     }
