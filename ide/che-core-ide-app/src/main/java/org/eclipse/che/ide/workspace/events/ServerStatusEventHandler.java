@@ -43,6 +43,8 @@ class ServerStatusEventHandler {
             Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
             workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
+                // update workspace model stored in AppContext before firing an event
+                // because AppContext must always return actual workspace model
                 ((AppContextImpl)appContext).setWorkspace(workspace);
 
                 if (event.getStatus() == RUNNING) {

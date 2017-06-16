@@ -60,6 +60,8 @@ class MachineStatusEventHandler {
                     return;
                 }
 
+                // update workspace model stored in AppContext before firing an event
+                // because AppContext must always return actual workspace model
                 ((AppContextImpl)appContext).setWorkspace(workspace);
 
                 switch (event.getEventType()) {

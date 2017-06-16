@@ -93,6 +93,8 @@ public class WorkspaceStatusHandler {
         Log.info(WorkspaceStatusHandler.class, "Workspace from context:  " + appContext.getWorkspaceId());
 
         workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
+            // update workspace model stored in AppContext before firing an event
+            // because AppContext must always return actual workspace model
             ((AppContextImpl)appContext).setWorkspace(workspace);
 
             if (workspace.getStatus() == RUNNING) {
