@@ -25,10 +25,11 @@ public class OpenShiftRouteCreator {
     private static final String REDIRECT_INSECURE_EDGE_TERMINATION_POLICY = "Redirect";
 
     public static void createRoute (final String namespace,
-                                    final String workspaceName,
                                     final String openShiftNamespaceExternalAddress,
                                     final String serverRef,
                                     final String serviceName,
+                                    final String deploymentName,
+                                    final String routeId,
                                     final boolean enableTls) {
 
         if (openShiftNamespaceExternalAddress == null) {
@@ -36,7 +37,7 @@ public class OpenShiftRouteCreator {
         }
 
         try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
-            String routeName = generateRouteName(workspaceName, serverRef);
+            String routeName = generateRouteName(routeId, serverRef);
             String serviceHost = generateRouteHost(routeName, openShiftNamespaceExternalAddress);
     
                SpecNested<DoneableRoute> routeSpec = openShiftClient
@@ -45,7 +46,7 @@ public class OpenShiftRouteCreator {
                     .createNew()
                     .withNewMetadata()
                       .withName(routeName)
-                      .addToLabels(OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL, serviceName)
+                      .addToLabels(OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL, deploymentName)
                     .endMetadata()
                     .withNewSpec()
                       .withHost(serviceHost)
@@ -72,8 +73,8 @@ public class OpenShiftRouteCreator {
         }
     }
 
-    private static String generateRouteName(final String workspaceName, final String serverRef) {
-        return serverRef + "-" + workspaceName;
+    private static String generateRouteName(final String serviceName, final String serverRef) {
+        return serverRef + "-" + serviceName;
     }
 
     private static String generateRouteHost(final String routeName, final String openShiftNamespaceExternalAddress) {
