@@ -19,6 +19,6 @@ import org.eclipse.che.inject.DynaModule;
 public class KeycloakModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(org.eclipse.che.keycloak.token.provider.contoller.KeycloakTokenController.class);
+        bind(org.eclipse.che.keycloak.token.provider.contoller.TokenController.class);
     }
 }
