@@ -76,7 +76,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         TestPosition testPosition = testPositions.iterator().next();
         assertThat(testPosition.getFrameworkName()).isEqualTo("testng");
         assertThat(testPosition.getTestName()).isEqualTo("foo");
-        assertThat(testPosition.getTestStartOffset()).isEqualTo(buf.indexOf("foo("));
+        assertThat(testPosition.getTestNameStartOffset()).isEqualTo(buf.indexOf("foo("));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         TestPosition testPosition = testPositions.iterator().next();
         assertThat(testPosition.getFrameworkName()).isEqualTo("testng");
         assertThat(testPosition.getTestName()).isEqualTo("foo");
-        assertThat(testPosition.getTestStartOffset()).isEqualTo(buf.indexOf("foo("));
+        assertThat(testPosition.getTestNameStartOffset()).isEqualTo(buf.indexOf("foo("));
     }
 
     @Test
@@ -127,7 +127,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         TestPosition testPosition = testPositions.iterator().next();
         assertThat(testPosition.getFrameworkName()).isEqualTo("testng");
         assertThat(testPosition.getTestName()).isEqualTo("foo");
-        assertThat(testPosition.getTestStartOffset()).isEqualTo(buf.indexOf("foo("));
+        assertThat(testPosition.getTestNameStartOffset()).isEqualTo(buf.indexOf("foo("));
     }
 
     @Test
@@ -151,7 +151,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         TestPosition testPosition = testPositions.iterator().next();
         assertThat(testPosition.getFrameworkName()).isEqualTo("testng");
         assertThat(testPosition.getTestName()).isEqualTo("foo");
-        assertThat(testPosition.getTestStartOffset()).isEqualTo(buf.indexOf("foo("));
+        assertThat(testPosition.getTestNameStartOffset()).isEqualTo(buf.indexOf("foo("));
     }
 
     @Test

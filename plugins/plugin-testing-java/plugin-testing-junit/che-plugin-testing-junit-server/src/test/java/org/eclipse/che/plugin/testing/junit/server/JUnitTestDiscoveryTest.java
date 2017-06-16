@@ -75,7 +75,7 @@ public class JUnitTestDiscoveryTest extends BaseTest {
         TestPosition testPosition = testPositions.iterator().next();
         assertThat(testPosition.getFrameworkName()).isEqualTo("junit");
         assertThat(testPosition.getTestName()).isEqualTo("foo");
-        assertThat(testPosition.getTestStartOffset()).isEqualTo(buf.indexOf("foo("));
+        assertThat(testPosition.getTestNameStartOffset()).isEqualTo(buf.indexOf("foo("));
     }
 
     @Test
@@ -103,7 +103,7 @@ public class JUnitTestDiscoveryTest extends BaseTest {
         TestPosition testPosition = testPositions.iterator().next();
         assertThat(testPosition.getFrameworkName()).isEqualTo("junit");
         assertThat(testPosition.getTestName()).isEqualTo("bar");
-        assertThat(testPosition.getTestStartOffset()).isEqualTo(buf.indexOf("bar("));
+        assertThat(testPosition.getTestNameStartOffset()).isEqualTo(buf.indexOf("bar("));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class JUnitTestDiscoveryTest extends BaseTest {
         TestPosition testPosition = testPositions.iterator().next();
         assertThat(testPosition.getFrameworkName()).isEqualTo("junit");
         assertThat(testPosition.getTestName()).isEqualTo("foo");
-        assertThat(testPosition.getTestStartOffset()).isEqualTo(buf.indexOf("foo("));
+        assertThat(testPosition.getTestNameStartOffset()).isEqualTo(buf.indexOf("foo("));
     }
 
     @Test
@@ -150,7 +150,7 @@ public class JUnitTestDiscoveryTest extends BaseTest {
         TestPosition testPosition = testPositions.iterator().next();
         assertThat(testPosition.getFrameworkName()).isEqualTo("junit");
         assertThat(testPosition.getTestName()).isEqualTo("foo");
-        assertThat(testPosition.getTestStartOffset()).isEqualTo(buf.indexOf("foo("));
+        assertThat(testPosition.getTestNameStartOffset()).isEqualTo(buf.indexOf("foo("));
     }
 
     @Test

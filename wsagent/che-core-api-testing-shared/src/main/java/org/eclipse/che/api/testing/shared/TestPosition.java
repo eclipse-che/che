@@ -28,6 +28,8 @@ public interface TestPosition {
 
     void setFrameworkName(String name);
 
+    TestPosition withFrameworkName(String name);
+
     /**
      * @return the test name(it can be method, suite, or class name)
      */
@@ -36,19 +38,35 @@ public interface TestPosition {
 
     void setTestName(String testName);
 
-    /**
-     * @return the document offset where test begins
-     */
-    @NotNull
-    int getTestStartOffset();
-
-    void setTestStartOffset(int testStartOffset);
+    TestPosition withTestName(String name);
 
     /**
-     * @return the test length
+     * @return the document offset where test name begins
      */
     @NotNull
-    int getTestLength();
+    int getTestNameStartOffset();
 
-    void setTestLength(int length);
+    void setTestNameStartOffset(int testNameStartOffset);
+
+    TestPosition withTestNameStartOffset(int testNameStartOffset);
+
+    /**
+     * @return the test body length
+     */
+    @NotNull
+    int getTestBodyLength();
+
+    void setTestBodyLength(int length);
+
+    TestPosition withTestBodyLength(int length);
+
+    /**
+     * @return the test name length
+     */
+    @NotNull
+    int getTestNameLength();
+
+    void setTestNameLength(int length);
+
+    TestPosition withTestNameLength(int length);
 }

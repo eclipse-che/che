@@ -82,15 +82,14 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
     }
 
     private TestPosition createTestPosition(IMethod method) throws JavaModelException {
-        TestPosition testPosition = DtoFactory.newDto(TestPosition.class);
+        ISourceRange nameRange = method.getNameRange();
+        ISourceRange sourceRange = method.getSourceRange();
 
-        testPosition.setFrameworkName(getName());
-        testPosition.setTestName(method.getElementName());
-        ISourceRange sourceRange = method.getNameRange();
-        testPosition.setTestStartOffset(sourceRange.getOffset());
-        testPosition.setTestLength(sourceRange.getLength());
-
-        return testPosition;
+        return DtoFactory.newDto(TestPosition.class).withFrameworkName(getName())
+                         .withTestName(method.getElementName())
+                         .withTestNameStartOffset(nameRange.getOffset())
+                         .withTestNameLength(nameRange.getLength())
+                         .withTestBodyLength(sourceRange.getLength());
     }
 
     protected abstract boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit);

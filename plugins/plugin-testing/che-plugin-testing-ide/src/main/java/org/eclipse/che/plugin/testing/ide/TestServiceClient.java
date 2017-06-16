@@ -15,6 +15,7 @@ import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.machine.Machine;
@@ -66,18 +67,19 @@ import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL
 @Singleton
 public class TestServiceClient {
 
-    private final static RegExp           mavenCleanBuildPattern            =
-                                                                 RegExp.compile("(.*)mvn +clean +install +(\\-f +\\$\\{current\\.project\\.path\\}.*)");
+    private final static RegExp mavenCleanBuildPattern =
+            RegExp.compile("(.*)mvn +clean +install +(\\-f +\\$\\{current\\.project\\.path\\}.*)");
 
-    public static final String            PROJECT_BUILD_NOT_STARTED_MESSAGE = "The project build could not be started (see Build output). "
-                                                                              + "Test run is cancelled.\n"
-                                                                              + "You should probably check the settings of the 'test-compile' command.";
+    public static final String PROJECT_BUILD_NOT_STARTED_MESSAGE = "The project build could not be started (see Build output). "
+                                                                   + "Test run is cancelled.\n"
+                                                                   +
+                                                                   "You should probably check the settings of the 'test-compile' command.";
 
-    public static final String            PROJECT_BUILD_FAILED_MESSAGE      = "The project build failed (see Build output). "
-                                                                              + "Test run is cancelled.\n"
-                                                                              + "You might want to check the settings of the 'test-compile' command.";
+    public static final String PROJECT_BUILD_FAILED_MESSAGE = "The project build failed (see Build output). "
+                                                              + "Test run is cancelled.\n"
+                                                              + "You might want to check the settings of the 'test-compile' command.";
 
-    public static final String            EXECUTING_TESTS_MESSAGE           = "Executing test session.";
+    public static final String EXECUTING_TESTS_MESSAGE = "Executing test session.";
 
 
     private final AppContext              appContext;
@@ -90,7 +92,7 @@ public class TestServiceClient {
     private final CommandConsoleFactory   commandConsoleFactory;
     private final ProcessesPanelPresenter processesPanelPresenter;
     private final TestGoal                testGoal;
-    private final RequestTransmitter requestTransmitter;
+    private final RequestTransmitter      requestTransmitter;
 
 
     @Inject
@@ -134,7 +136,11 @@ public class TestServiceClient {
                 MatchResult result = mavenCleanBuildPattern.exec(commandLine);
                 if (result != null) {
                     String testCompileCommandLine = mavenCleanBuildPattern.replace(commandLine, "$1mvn test-compile $2");
-                    return commandManager.createCommand(testGoal.getId(), "mvn", "test-compile", testCompileCommandLine, new HashMap<String, String>());
+                    return commandManager.createCommand(testGoal.getId(),
+                                                        "mvn",
+                                                        "test-compile",
+                                                        testCompileCommandLine,
+                                                        new HashMap<>());
                 }
             }
         }
@@ -220,16 +226,16 @@ public class TestServiceClient {
                                     sendTests(projectPath,
                                               testFramework,
                                               parameters).then(new Operation<TestResult>() {
-                                                  @Override
-                                                  public void apply(TestResult result) throws OperationException {
-                                                      resolve.apply(result);
-                                                  }
-                                              }, new Operation<PromiseError>() {
-                                                  @Override
-                                                  public void apply(PromiseError error) throws OperationException {
-                                                      reject.apply(error);
-                                                  }
-                                              });
+                                        @Override
+                                        public void apply(TestResult result) throws OperationException {
+                                            resolve.apply(result);
+                                        }
+                                    }, new Operation<PromiseError>() {
+                                        @Override
+                                        public void apply(PromiseError error) throws OperationException {
+                                            reject.apply(error);
+                                        }
+                                    });
                                 } else {
                                     reject.apply(promiseFromThrowable(new Throwable(PROJECT_BUILD_FAILED_MESSAGE)));
                                 }
@@ -247,7 +253,7 @@ public class TestServiceClient {
                                              Map<String, String> parameters,
                                              StatusNotification statusNotification) {
         return runTestsAfterCompilation(projectPath, testFramework, parameters, statusNotification,
-                getOrCreateTestCompileCommand());
+                                        getOrCreateTestCompileCommand());
     }
 
     @Deprecated
@@ -262,25 +268,25 @@ public class TestServiceClient {
             }
         }
         String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/che/testing/run/?projectPath=" + projectPath
-                + "&testFramework=" + testFramework + "&" + sb.toString();
+                     + "&testFramework=" + testFramework + "&" + sb.toString();
         return asyncRequestFactory.createGetRequest(url).header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
-                .send(dtoUnmarshallerFactory.newUnmarshaller(TestResult.class));
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(TestResult.class));
     }
 
     public JsonRpcPromise<Boolean> runTests(TestExecutionContext context) {
         return requestTransmitter.newRequest()
-                .endpointId("ws-agent")
-                .methodName(Constants.RUN_TESTS_METHOD)
-                .paramsAsDto(context)
-                .sendAndReceiveResultAsBoolean();
+                                 .endpointId("ws-agent")
+                                 .methodName(Constants.RUN_TESTS_METHOD)
+                                 .paramsAsDto(context)
+                                 .sendAndReceiveResultAsBoolean();
     }
 
     public JsonRpcPromise<TestDetectionResult> detectTests(TestDetectionContext context) {
         return requestTransmitter.newRequest()
-                .endpointId("ws-agent")
-                .methodName(Constants.TESTING_RPC_TEST_DETECTION_NAME)
-                .paramsAsDto(context)
-                .sendAndReceiveResultAsDto(TestDetectionResult.class);
+                                 .endpointId("ws-agent")
+                                 .methodName(Constants.TESTING_RPC_TEST_DETECTION_NAME)
+                                 .paramsAsDto(context)
+                                 .sendAndReceiveResultAsDto(TestDetectionResult.class);
     }
 
 }

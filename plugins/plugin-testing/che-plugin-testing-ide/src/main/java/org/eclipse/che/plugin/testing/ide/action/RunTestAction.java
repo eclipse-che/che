@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.testing.ide.action;
 
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
@@ -50,16 +51,16 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  */
 @Singleton
 public class RunTestAction extends AbstractPerspectiveAction {
-    private final TestServiceClient client;
-    private final DtoFactory dtoFactory;
-    private final AppContext appContext;
+    private final TestServiceClient   client;
+    private final DtoFactory          dtoFactory;
+    private final AppContext          appContext;
     private final NotificationManager notificationManager;
-    private final TestingHandler testingHandler;
+    private final TestingHandler      testingHandler;
     private final TestResultPresenter testResultPresenter;
-    private boolean hasTests = false;
-    private TextEditor currentEditor;
-    private List<TestPosition> testPosition;
 
+    private TextEditor                    currentEditor;
+    private List<TestPosition>            testPosition;
+    private boolean                       hasTests;
     private TestExecutionContext.TestType testType;
 
     @Inject
@@ -78,12 +79,14 @@ public class RunTestAction extends AbstractPerspectiveAction {
         this.testingHandler = testingHandler;
         this.testResultPresenter = testResultPresenter;
 
+        hasTests = false;
+
         eventBus.addHandler(JavaReconsilerEvent.TYPE, event -> detectTests(event.getEditor()));
 
         eventBus.addHandler(ActivePartChangedEvent.TYPE, event -> {
             if (event.getActivePart() instanceof TextEditor) {
                 testType = CURSOR_POSITION;
-                TextEditor activeEditor = (TextEditor) event.getActivePart();
+                TextEditor activeEditor = (TextEditor)event.getActivePart();
                 if (activeEditor.getEditorInput().getFile().getName().endsWith(".java")) {
                     detectTests(activeEditor);
                 } else {
@@ -105,7 +108,7 @@ public class RunTestAction extends AbstractPerspectiveAction {
         }).onFailure(jsonRpcError -> {
             Log.error(getClass(), jsonRpcError);
             hasTests = false;
-            //TODO log error
+            notificationManager.notify("Can't detect test methods");
         });
     }
 
@@ -132,7 +135,8 @@ public class RunTestAction extends AbstractPerspectiveAction {
         }
         context.setFrameworkName(frameworkAndTestName.first);
 
-        GeneralTestingEventsProcessor eventsProcessor = new GeneralTestingEventsProcessor(frameworkAndTestName.first, testResultPresenter.getRootState());
+        GeneralTestingEventsProcessor eventsProcessor = new GeneralTestingEventsProcessor(frameworkAndTestName.first,
+                                                                                          testResultPresenter.getRootState());
         testingHandler.setProcessor(eventsProcessor);
         eventsProcessor.addListener(testResultPresenter.getEventListener());
 
@@ -144,12 +148,10 @@ public class RunTestAction extends AbstractPerspectiveAction {
                 testResultPresenter.handleResponse();
             } else {
                 notification.setTitle("Test runner failed to execute.");
-//                    notification.setContent(result.getFailureCount() + " test(s) failed.\n");
             }
-
         }).onFailure(exception -> {
             final String errorMessage = (exception.getMessage() != null) ? exception.getMessage()
-                    : "Failed to run test cases";
+                                                                         : "Failed to run test cases";
             notification.setContent(errorMessage);
             notification.setStatus(FAIL);
         });
@@ -157,11 +159,12 @@ public class RunTestAction extends AbstractPerspectiveAction {
 
     private Pair<String, String> getTestingFrameworkAndTestName(int cursorOffset) {
         for (TestPosition position : testPosition) {
-            if (position.getTestStartOffset() <= cursorOffset && position.getTestStartOffset() + position.getTestLength() >= cursorOffset) {
+            int testNameStartOffset = position.getTestNameStartOffset();
+            if (testNameStartOffset <= cursorOffset &&
+                testNameStartOffset + position.getTestBodyLength() >= cursorOffset) {
                 return Pair.of(position.getFrameworkName(), position.getTestName());
             }
         }
-
         return null;
     }
 }
