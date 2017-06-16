@@ -71,6 +71,15 @@
                             </includes>
                         </overlay>
                     </overlays>
+                    <webResources>
+                        <resource>
+                            <directory>${basedir}/src/main/webapp/WEB-INF</directory>
+                            <targetPath>WEB-INF</targetPath>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </resource>
+                    </webResources>
                 </configuration>
             </plugin>
         </plugins>
