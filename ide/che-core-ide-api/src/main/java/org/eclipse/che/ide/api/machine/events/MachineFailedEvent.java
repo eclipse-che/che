@@ -15,6 +15,7 @@ import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
+/** Fired when some machine goes into a failed state. */
 public class MachineFailedEvent extends GwtEvent<MachineFailedEvent.Handler> {
 
     public static final Type<MachineFailedEvent.Handler> TYPE = new Type<>();
@@ -27,10 +28,12 @@ public class MachineFailedEvent extends GwtEvent<MachineFailedEvent.Handler> {
         this.error = error;
     }
 
+    /** Returns the failed machine. */
     public MachineImpl getMachine() {
         return machine;
     }
 
+    /** Returns the error message describes the reason of fail. */
     public String getError() {
         return error;
     }

@@ -15,6 +15,7 @@ import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
+/** Fired when some machine goes into a starting state. */
 public class MachineStartingEvent extends GwtEvent<MachineStartingEvent.Handler> {
 
     public static final Type<MachineStartingEvent.Handler> TYPE = new Type<>();
@@ -25,6 +26,7 @@ public class MachineStartingEvent extends GwtEvent<MachineStartingEvent.Handler>
         this.machine = machine;
     }
 
+    /** Returns the starting machine. */
     public MachineImpl getMachine() {
         return machine;
     }

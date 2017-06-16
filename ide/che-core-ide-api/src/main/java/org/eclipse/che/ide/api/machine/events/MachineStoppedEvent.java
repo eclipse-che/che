@@ -15,6 +15,7 @@ import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
+/** Fired when some machine goes into a stopped state. */
 public class MachineStoppedEvent extends GwtEvent<MachineStoppedEvent.Handler> {
 
     public static final Type<MachineStoppedEvent.Handler> TYPE = new Type<>();
@@ -25,6 +26,7 @@ public class MachineStoppedEvent extends GwtEvent<MachineStoppedEvent.Handler> {
         this.machine = machine;
     }
 
+    /** Returns the stopped machine. */
     public MachineImpl getMachine() {
         return machine;
     }

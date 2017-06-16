@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.machine.events;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-/** Fired when a server in a machine is stopped. */
+/** Fired when some server in some machine goes into a stopped state. */
 public class ServerStoppedEvent extends GwtEvent<ServerStoppedEvent.Handler> {
 
     public static final Type<ServerStoppedEvent.Handler> TYPE = new Type<>();
@@ -26,10 +26,12 @@ public class ServerStoppedEvent extends GwtEvent<ServerStoppedEvent.Handler> {
         this.machineName = machineName;
     }
 
+    /** Returns the running server's name. */
     public String getServerName() {
         return serverName;
     }
 
+    /** Returns the related machine's name. */
     public String getMachineName() {
         return machineName;
     }
