@@ -13,7 +13,11 @@ package org.eclipse.che.ide.api.machine.events;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-/** Fired when some server in some machine goes into a running state. */
+/**
+ * Fired when some server in some machine goes into a running state.
+ *
+ * @see WsAgentServerRunningEvent
+ */
 public class ServerRunningEvent extends GwtEvent<ServerRunningEvent.Handler> {
 
     public static final Type<ServerRunningEvent.Handler> TYPE = new Type<>();

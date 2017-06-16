@@ -22,5 +22,7 @@ public class WorkspaceEventsModule extends AbstractGinModule {
 
         bind(EnvironmentOutputHandler.class).asEagerSingleton();
         bind(WorkspaceAgentOutputHandler.class).asEagerSingleton();
+
+        bind(WorkspaceEventsUnsubscriber.class).asEagerSingleton();
     }
 }

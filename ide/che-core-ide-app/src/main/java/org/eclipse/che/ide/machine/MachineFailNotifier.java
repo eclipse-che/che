@@ -22,12 +22,12 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
-/** Handles failing machines. */
+/** Notifies about failing of any machine. */
 @Singleton
-class MachineErrorHandler {
+class MachineFailNotifier {
 
     @Inject
-    MachineErrorHandler(EventBus eventBus, Provider<NotificationManager> notificationManagerProvider) {
+    MachineFailNotifier(EventBus eventBus, Provider<NotificationManager> notificationManagerProvider) {
         eventBus.addHandler(MachineFailedEvent.TYPE, event -> {
             if (!isNullOrEmpty(event.getError())) {
                 notificationManagerProvider.get().notify(event.getError(), FAIL, EMERGE_MODE);

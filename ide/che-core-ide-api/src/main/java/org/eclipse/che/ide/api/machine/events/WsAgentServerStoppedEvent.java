@@ -13,7 +13,12 @@ package org.eclipse.che.ide.api.machine.events;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-/** Fired when server ws-agent in a machine is stopped. */
+/**
+ * Fired when ws-agent server in some machine goes into a stopped state.
+ * Allows to avoid checking server's name unlike {@link ServerStoppedEvent}.
+ *
+ * @see ServerStoppedEvent
+ */
 public class WsAgentServerStoppedEvent extends GwtEvent<WsAgentServerStoppedEvent.Handler> {
 
     public static final Type<WsAgentServerStoppedEvent.Handler> TYPE = new Type<>();

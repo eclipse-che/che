@@ -31,6 +31,10 @@ import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNN
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.STOPPED;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 
+/**
+ * Handles changes of the servers statuses and fires the corresponded
+ * events to notify all interested subscribers (usually IDE extensions).
+ */
 @Singleton
 class ServerStatusEventHandler {
 
@@ -43,8 +47,8 @@ class ServerStatusEventHandler {
             Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
             workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
-                // update workspace model stored in AppContext before firing an event
-                // because AppContext must always return actual workspace model
+                // Update workspace model returned by AppContext before firing an event.
+                // Because AppContext always must return an actual workspace model.
                 ((AppContextImpl)appContext).setWorkspace(workspace);
 
                 if (event.getStatus() == RUNNING) {

@@ -18,9 +18,11 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.MachineEntityImpl;
 import org.eclipse.che.ide.api.machine.events.MachineFailedEvent;
 import org.eclipse.che.ide.api.machine.events.MachineRunningEvent;
 import org.eclipse.che.ide.api.machine.events.MachineStartingEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.machine.events.MachineStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
@@ -32,9 +34,13 @@ import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
+import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.CREATING;
+import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.DESTROYED;
+import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.RUNNING;
+
 /**
- * Handles changes of the machine status and fires
- * the corresponded events to notify all interested subscribers.
+ * Handles changes of the machines statuses and fires the corresponded
+ * events to notify all interested subscribers (usually IDE extensions).
  */
 @Singleton
 class MachineStatusEventHandler {
@@ -42,10 +48,10 @@ class MachineStatusEventHandler {
     private AppContext appContext;
 
     @Inject
-    void configureMachineStatusHandler(RequestHandlerConfigurator configurator,
-                                       EventBus eventBus,
-                                       AppContext appContext,
-                                       WorkspaceServiceClient workspaceServiceClient) {
+    MachineStatusEventHandler(RequestHandlerConfigurator configurator,
+                              EventBus eventBus,
+                              AppContext appContext,
+                              WorkspaceServiceClient workspaceServiceClient) {
         this.appContext = appContext;
 
         BiConsumer<String, MachineStatusEvent> operation = (String endpointId, MachineStatusEvent event) -> {
@@ -60,22 +66,42 @@ class MachineStatusEventHandler {
                     return;
                 }
 
-                // update workspace model stored in AppContext before firing an event
-                // because AppContext must always return actual workspace model
+                // Update workspace model returned by AppContext before firing an event.
+                // Because AppContext always must return an actual workspace model.
                 ((AppContextImpl)appContext).setWorkspace(workspace);
 
                 switch (event.getEventType()) {
                     case STARTING:
-                        getMachineByName(machineName).ifPresent(m -> eventBus.fireEvent(new MachineStartingEvent(m)));
+                        getMachineByName(machineName).ifPresent(m -> {
+                            eventBus.fireEvent(new MachineStartingEvent(m));
+
+                            // fire deprecated MachineStateEvent for backward compatibility with IDE 5.x
+                            eventBus.fireEvent(new MachineStateEvent(new MachineEntityImpl(machineName, m), CREATING));
+                        });
                         break;
                     case RUNNING:
-                        getMachineByName(machineName).ifPresent(m -> eventBus.fireEvent(new MachineRunningEvent(m)));
+                        getMachineByName(machineName).ifPresent(m -> {
+                            eventBus.fireEvent(new MachineRunningEvent(m));
+
+                            // fire deprecated MachineStateEvent for backward compatibility with IDE 5.x
+                            eventBus.fireEvent(new MachineStateEvent(new MachineEntityImpl(machineName, m), RUNNING));
+                        });
                         break;
                     case STOPPED:
-                        getMachineByName(machineName).ifPresent(m -> eventBus.fireEvent(new MachineStoppedEvent(m)));
+                        getMachineByName(machineName).ifPresent(m -> {
+                            eventBus.fireEvent(new MachineStoppedEvent(m));
+
+                            // fire deprecated MachineStateEvent for backward compatibility with IDE 5.x
+                            eventBus.fireEvent(new MachineStateEvent(new MachineEntityImpl(machineName, m), DESTROYED));
+                        });
                         break;
                     case FAILED:
-                        getMachineByName(machineName).ifPresent(m -> eventBus.fireEvent(new MachineFailedEvent(m, event.getError())));
+                        getMachineByName(machineName).ifPresent(m -> {
+                            eventBus.fireEvent(new MachineFailedEvent(m, event.getError()));
+
+                            // fire deprecated MachineStateEvent for backward compatibility with IDE 5.x
+                            eventBus.fireEvent(new MachineStateEvent(new MachineEntityImpl(machineName, m), DESTROYED));
+                        });
                         break;
                 }
             });

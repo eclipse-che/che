@@ -42,6 +42,7 @@ import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOp
 /**
  * @author Dmitry Kuleshov
  */
+// FIXME: spi ide
 @Singleton
 public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
     private final JsonRpcInitializer      initializer;

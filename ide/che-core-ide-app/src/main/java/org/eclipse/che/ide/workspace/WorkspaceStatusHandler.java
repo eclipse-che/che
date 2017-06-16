@@ -45,8 +45,8 @@ import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STARTING_WORK
 import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STOPPING_WORKSPACE;
 
 /**
- * Handles changes of the workspace status and fires
- * the corresponded events to notify all interested subscribers.
+ * Handles changes of the workspace status and fires the corresponded
+ * events to notify all interested subscribers (usually IDE extensions).
  */
 @Singleton
 public class WorkspaceStatusHandler {
@@ -61,7 +61,6 @@ public class WorkspaceStatusHandler {
     private final WsAgentURLModifier         wsAgentURLModifier;
     private final EventBus                   eventBus;
     private final CoreLocalizationConstant   messages;
-    private       SubscriptionManagerClient  subscriptionManagerClient;
 
     @Inject
     WorkspaceStatusHandler(WorkspaceServiceClient workspaceServiceClient,
@@ -73,8 +72,7 @@ public class WorkspaceStatusHandler {
                            WsAgentStateController wsAgentStateController,
                            WsAgentURLModifier wsAgentURLModifier,
                            EventBus eventBus,
-                           CoreLocalizationConstant messages,
-                           SubscriptionManagerClient subscriptionManagerClient) {
+                           CoreLocalizationConstant messages) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.appContext = appContext;
         this.startWorkspaceNotificationProvider = startWorkspaceNotification;
@@ -85,7 +83,6 @@ public class WorkspaceStatusHandler {
         this.wsAgentURLModifier = wsAgentURLModifier;
         this.eventBus = eventBus;
         this.messages = messages;
-        this.subscriptionManagerClient = subscriptionManagerClient;
     }
 
     public void handleWorkspaceStatusChanged(WorkspaceStatusEvent serverEvent) {
@@ -93,8 +90,8 @@ public class WorkspaceStatusHandler {
         Log.info(WorkspaceStatusHandler.class, "Workspace from context:  " + appContext.getWorkspaceId());
 
         workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
-            // update workspace model stored in AppContext before firing an event
-            // because AppContext must always return actual workspace model
+            // Update workspace model returned by AppContext before firing an event.
+            // Because AppContext always must return an actual workspace model.
             ((AppContextImpl)appContext).setWorkspace(workspace);
 
             if (workspace.getStatus() == RUNNING) {
@@ -104,8 +101,6 @@ public class WorkspaceStatusHandler {
             } else if (workspace.getStatus() == STARTING) {
                 eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
             } else if (workspace.getStatus() == STOPPED) {
-                unsubscribeFromEvents();
-
                 eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
             }
 
@@ -113,9 +108,9 @@ public class WorkspaceStatusHandler {
         });
     }
 
+    // FIXME: spi ide
+    // should be bound to WsAgentServerRunningEvent
     void handleWorkspaceRunning() {
-        // FIXME: spi ide
-        // should be set on server `ws-agent` has been started
         ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf("/projects"));
 
         wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
@@ -127,18 +122,8 @@ public class WorkspaceStatusHandler {
         });
     }
 
-    private void unsubscribeFromEvents() {
-        unsubscribe("workspace/statusChanged");
-        unsubscribe("machine/statusChanged");
-        unsubscribe("server/statusChanged");
-    }
-
-    private void unsubscribe(String methodName) {
-        Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
-        subscriptionManagerClient.unSubscribe("ws-master", methodName, scope);
-    }
-
-    // TODO: move to the separate component that should listen appropriate events
+    // FIXME: spi ide
+    // move to the separate component that should listen appropriate events
     private void notify(WorkspaceStatusEvent event) {
         switch (event.getEventType()) {
             case STARTING:
