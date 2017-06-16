@@ -8,11 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server.jdi;
+package org.eclipse.che.plugin.jdb.server.model;
 
 /** @author andrew00x */
-public class JdiType {
-    private JdiType() {
+public class JdbType {
+    private JdbType() {
     }
 
     /**

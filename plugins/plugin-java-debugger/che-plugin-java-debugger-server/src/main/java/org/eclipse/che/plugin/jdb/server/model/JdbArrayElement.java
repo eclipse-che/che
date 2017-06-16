@@ -8,49 +8,51 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server.jdi;
+package org.eclipse.che.plugin.jdb.server.model;
 
-import com.sun.jdi.LocalVariable;
-import com.sun.jdi.StackFrame;
+import com.sun.jdi.PrimitiveValue;
 import com.sun.jdi.Value;
 
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 
-/** @author andrew00x */
-public class JdiVariableImpl implements JdiVariable {
-    private final LocalVariable variable;
-    private final JdiValue      jdiValue;
+/**
+ * @author andrew00x
+ * @author Anatolii Bazko
+ */
+public class JdbArrayElement implements Variable {
+    private final Value       jdiValue;
+    private final SimpleValue value;
+    private final String      name;
+    private final String      type;
 
-    public JdiVariableImpl(StackFrame stackFrame, LocalVariable variable) {
-        Value value = stackFrame.getValue(variable);
-        this.variable = variable;
-        this.jdiValue = value == null ? new JdiNullValue() : new JdiValueImpl(value);
-    }
-
-    public JdiVariableImpl(LocalVariable variable) {
-        this.variable = variable;
-        this.jdiValue = null;
+    public JdbArrayElement(Value jdiValue, int index) {
+        this.jdiValue = jdiValue;
+        this.name = "[" + index + "]";
+        this.value = jdiValue == null ? new JdbNullValue() : new JdbValue(jdiValue);
+        this.type = jdiValue == null ? "null" : jdiValue.type().name();
     }
 
     @Override
     public String getName() {
-        return variable.name();
+        return name;
     }
 
     @Override
     public boolean isPrimitive() {
-        return JdiType.isPrimitive(variable.signature());
+        return jdiValue instanceof PrimitiveValue;
     }
 
     @Override
-    public JdiValue getValue() {
-        return jdiValue;
+    public SimpleValue getValue() {
+        return value;
     }
 
     @Override
     public String getType() {
-        return variable.typeName();
+        return type;
     }
 
     @Override

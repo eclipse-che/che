@@ -11,13 +11,11 @@
 package org.eclipse.che.plugin.jdb.server;
 
 import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
-import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Method;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadDump;
 import org.eclipse.che.api.debug.shared.model.ThreadStatus;
-import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
@@ -42,7 +40,6 @@ import static java.lang.Integer.parseInt;
 import static java.lang.System.getProperty;
 import static java.util.stream.Collectors.toList;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -82,12 +79,8 @@ public class ThreadDumpTest {
         assertEquals(frames.size(), 1);
 
         StackFrameDump stackFrameDump = frames.get(0);
-
-        List<? extends Variable> variables = stackFrameDump.getVariables();
-        assertFalse(variables.isEmpty());
-
-        List<? extends Field> fields = stackFrameDump.getFields();
-        assertTrue(fields.isEmpty());
+        assertTrue(stackFrameDump.getVariables().isEmpty());
+        assertTrue(stackFrameDump.getFields().isEmpty());
 
         Location location = stackFrameDump.getLocation();
         assertEquals(location.getLineNumber(), 26);
@@ -98,9 +91,7 @@ public class ThreadDumpTest {
 
         Method method = location.getMethod();
         assertEquals(method.getName(), "main");
-
-        List<? extends Variable> arguments = method.getArguments();
-        assertEquals(arguments.size(), 1);
+        assertTrue(method.getArguments().isEmpty());
     }
 
     private void initJavaDebugger() throws DebuggerException, InterruptedException {

@@ -8,22 +8,27 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server.jdi;
+package org.eclipse.che.plugin.jdb.server.model;
 
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.Variable;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Element of array in debuggee JVM.
- *
  * @author andrew00x
+ * @author Anatolii Bazko
  */
-public interface JdiArrayElement extends JdiVariable {
-    /**
-     * Get index of this element of array.
-     *
-     * @return index of this array element
-     * @throws DebuggerException
-     *         if an error occurs
-     */
-    int getIndex() throws DebuggerException;
+public final class JdbNullValue implements SimpleValue {
+    @Override
+    public String getString() {
+        return "null";
+    }
+
+    @Override
+    public List<Variable> getVariables() {
+        return Collections.emptyList();
+    }
+
 }

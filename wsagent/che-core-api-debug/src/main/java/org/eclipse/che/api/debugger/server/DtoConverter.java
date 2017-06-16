@@ -93,7 +93,7 @@ public final class DtoConverter {
                                         .withResourcePath(location.getResourcePath())
                                         .withResourceProjectPath(location.getResourceProjectPath())
                                         .withExternalResource(location.isExternalResource())
-                                        .withMethod(asDto(location.getMethod()));
+                                        .withMethod(location.getMethod() == null ? null : asDto(location.getMethod()));
     }
 
     public static SimpleValueDto asDto(SimpleValue value) {

@@ -8,17 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server.jdi;
+package org.eclipse.che.plugin.jdb.server.model;
+
+import org.eclipse.che.api.debug.shared.model.Field;
 
 import java.util.Comparator;
 
 /**
  * @author Anatolii Bazko
  */
-public class JdiFieldComparator implements Comparator<JdiField> {
+public class JdbFieldComparator implements Comparator<Field> {
 
     @Override
-    public int compare(JdiField o1, JdiField o2) {
+    public int compare(Field o1, Field o2) {
         final boolean thisStatic = o1.isIsStatic();
         final boolean thatStatic = o2.isIsStatic();
         if (thisStatic && !thatStatic) {

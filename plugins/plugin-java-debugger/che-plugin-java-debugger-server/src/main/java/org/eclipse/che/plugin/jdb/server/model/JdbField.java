@@ -8,78 +8,85 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server.jdi;
+package org.eclipse.che.plugin.jdb.server.model;
 
-import com.sun.jdi.Field;
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.Value;
 
+import org.eclipse.che.api.debug.shared.model.Field;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 
 import static java.util.Arrays.asList;
 
-/** @author andrew00x */
-public class JdiFieldImpl implements JdiField {
-    private final Field           field;
+/**
+ * Java debugger implementation of {@link Field}
+ *
+ * @author andrew00x
+ * @author Anatolii Bazko
+ */
+public class JdbField implements Field {
+    private final com.sun.jdi.Field jdiField;
+
     private final ReferenceType   type;
     private final ObjectReference object;
 
-    public JdiFieldImpl(Field field, ObjectReference object) {
-        this.field = field;
+    public JdbField(com.sun.jdi.Field jdiField, ObjectReference object) {
+        this.jdiField = jdiField;
         this.object = object;
         this.type = null;
     }
 
-    public JdiFieldImpl(Field field, ReferenceType type) {
-        this.field = field;
+    public JdbField(com.sun.jdi.Field jdiField, ReferenceType type) {
+        this.jdiField = jdiField;
         this.type = type;
         this.object = null;
     }
 
     @Override
     public String getName() {
-        return field.name();
+        return jdiField.name();
     }
 
     @Override
     public boolean isIsStatic() {
-        return field.isStatic();
+        return jdiField.isStatic();
     }
 
     @Override
     public boolean isIsTransient() {
-        return field.isTransient();
+        return jdiField.isTransient();
     }
 
     @Override
     public boolean isIsVolatile() {
-        return field.isVolatile();
+        return jdiField.isVolatile();
     }
 
     @Override
     public boolean isIsFinal() {
-        return field.isFinal();
+        return jdiField.isFinal();
     }
 
     @Override
     public boolean isPrimitive() {
-        return JdiType.isPrimitive(field.signature());
+        return JdbType.isPrimitive(jdiField.signature());
     }
 
     @Override
-    public JdiValue getValue() {
-        Value value = object == null ? type.getValue(field) : object.getValue(field);
+    public SimpleValue getValue() {
+        Value value = object == null ? type.getValue(jdiField) : object.getValue(jdiField);
         if (value == null) {
-            return new JdiNullValue();
+            return new JdbNullValue();
         }
-        return new JdiValueImpl(value);
+        return new JdbValue(value);
     }
 
     @Override
     public String getType() {
-        return field.typeName();
+        return jdiField.typeName();
     }
 
     @Override

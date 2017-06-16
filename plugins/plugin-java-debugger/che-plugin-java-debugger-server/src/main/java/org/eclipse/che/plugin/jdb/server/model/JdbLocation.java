@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server.jdi;
+package org.eclipse.che.plugin.jdb.server.model;
 
 import com.sun.jdi.StackFrame;
 
@@ -19,23 +19,26 @@ import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.plugin.jdb.server.utils.JavaDebuggerUtils;
 
 /**
+ * {@link org.eclipse.che.api.debug.shared.model.Location} implementation for Java debugger.
+ *
  * @author Anatolii Bazko
  */
-public class JdiLocationImpl implements JdiLocation {
+public class JdbLocation implements Location {
     private static final JavaDebuggerUtils debuggerUtil = new JavaDebuggerUtils();
 
     private final Method   method;
     private final Location location;
 
-    public JdiLocationImpl(StackFrame stackFrame) {
+    public JdbLocation(StackFrame stackFrame) {
         com.sun.jdi.Location jdiLocation = stackFrame.location();
         this.location = findLocation(jdiLocation);
-        this.method = new JdiMethodImpl(stackFrame, jdiLocation.method());
+        this.method = new JdbMethod(stackFrame);
     }
 
-    public JdiLocationImpl(com.sun.jdi.Location jdiLocation) {
+    public JdbLocation(StackFrame stackFrame, Method method) {
+        com.sun.jdi.Location jdiLocation = stackFrame.location();
         this.location = findLocation(jdiLocation);
-        this.method = new JdiMethodImpl(jdiLocation.method());
+        this.method = method;
     }
 
     @Override

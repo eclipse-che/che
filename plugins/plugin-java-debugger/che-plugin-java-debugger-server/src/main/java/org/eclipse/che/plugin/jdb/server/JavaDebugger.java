@@ -54,7 +54,6 @@ import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
 import org.eclipse.che.api.debug.shared.model.impl.FieldImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
-import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.ThreadDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
@@ -65,11 +64,10 @@ import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.plugin.jdb.server.expression.Evaluator;
 import org.eclipse.che.plugin.jdb.server.expression.ExpressionException;
 import org.eclipse.che.plugin.jdb.server.expression.ExpressionParser;
-import org.eclipse.che.plugin.jdb.server.jdi.JdiField;
-import org.eclipse.che.plugin.jdb.server.jdi.JdiLocationImpl;
-import org.eclipse.che.plugin.jdb.server.jdi.JdiStackFrame;
-import org.eclipse.che.plugin.jdb.server.jdi.JdiStackFrameImpl;
-import org.eclipse.che.plugin.jdb.server.jdi.JdiVariable;
+import org.eclipse.che.plugin.jdb.server.model.JdbField;
+import org.eclipse.che.plugin.jdb.server.model.JdbLocation;
+import org.eclipse.che.plugin.jdb.server.model.JdbMethod;
+import org.eclipse.che.plugin.jdb.server.model.JdbStackFrame;
 import org.eclipse.che.plugin.jdb.server.utils.JavaDebuggerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +80,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
@@ -122,7 +121,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
     /** Current thread. Not <code>null</code> is thread suspended, e.g breakpoint reached. */
     private ThreadReference thread;
     /** Current stack frame. Not <code>null</code> is thread suspended, e.g breakpoint reached. */
-    private JdiStackFrame   stackFrame;
+    private JdbStackFrame   stackFrame;
     /** Lock for synchronization debug processes. */
     private Lock lock = new ReentrantLock();
 
@@ -371,8 +370,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
     public StackFrameDump dumpStackFrame() throws DebuggerException {
         lock.lock();
         try {
-            final JdiStackFrame currentFrame = getCurrentFrame();
-            return new StackFrameDumpImpl(currentFrame.getFields(), currentFrame.getVariables());
+            return getCurrentFrame();
         } finally {
             lock.unlock();
         }
@@ -385,10 +383,13 @@ public class JavaDebugger implements EventsHandler, Debugger {
         for (ThreadReference t : vm.allThreads()) {
             ThreadStatus status = ThreadStatus.valueOf(VM.toThreadState(t.status()).toString());
 
-            List<JdiStackFrame> frames = new LinkedList<>();
+            List<JdbStackFrame> frames = new LinkedList<>();
             try {
                 for (StackFrame sf : t.frames()) {
-                    frames.add(new JdiStackFrameImpl(sf));
+                    frames.add(new JdbStackFrame(sf,
+                                                 Collections.emptyList(),
+                                                 Collections.emptyList(),
+                                                 new JdbLocation(sf, new JdbMethod(sf, Collections.emptyList()))));
                 }
             } catch (IncompatibleThreadStateException ignored) {
             }
@@ -452,36 +453,46 @@ public class JavaDebugger implements EventsHandler, Debugger {
         if (path.size() == 0) {
             throw new IllegalArgumentException("Path to value may not be empty. ");
         }
-        JdiVariable variable;
+        Optional<? extends Variable> variable;
         int offset;
         if ("this".equals(path.get(0)) || "static".equals(path.get(0))) {
             if (path.size() < 2) {
                 throw new IllegalArgumentException("Name of field required. ");
             }
-            variable = getCurrentFrame().getFieldByName(path.get(1));
+
+            variable = getCurrentFrame().getFields()
+                                        .stream()
+                                        .filter(f -> f.getName().equals(path.get(1)))
+                                        .findAny();
             offset = 2;
         } else {
-            variable = getCurrentFrame().getVariableByName(path.get(0));
-            if (variable == null) {
-                return null;
-            }
+            variable = getCurrentFrame().getVariables()
+                                        .stream()
+                                        .filter(v -> v.getName().equals(path.get(0)))
+                                        .findAny();
+
             offset = 1;
         }
 
-        for (int i = offset; variable != null && i < path.size(); i++) {
-            variable = variable.getValue().getVariableByName(path.get(i));
+        for (int i = offset; variable.isPresent() && i < path.size(); i++) {
+            final int index = i;
+            variable = variable.get().getValue()
+                               .getVariables()
+                               .stream()
+                               .filter(v -> v.getName().equals(path.get(index)))
+                               .findAny();
         }
 
-        if (variable == null) {
+        if (!variable.isPresent()) {
             return null;
         }
 
         List<Variable> variables = new ArrayList<>();
-        for (JdiVariable ch : variable.getValue().getVariables()) {
+        for (Variable ch : variable.get().getValue().getVariables()) {
             VariablePathDto chPath = newDto(VariablePathDto.class).withPath(new ArrayList<>(path));
             chPath.getPath().add(ch.getName());
-            if (ch instanceof JdiField) {
-                JdiField f = (JdiField)ch;
+            if (ch instanceof JdbField) {
+                JdbField f = (JdbField)ch;
                 variables.add(new FieldImpl(f.getName(),
                                             new SimpleValueImpl(f.getValue().getString()),
                                             f.getType(),
@@ -500,7 +511,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
                                                chPath));
             }
         }
-        return new SimpleValueImpl(variables, variable.getValue().getString());
+        return new SimpleValueImpl(variables, variable.get().getValue().getString());
     }
 
     @Override
@@ -570,15 +581,12 @@ public class JavaDebugger implements EventsHandler, Debugger {
         }
 
         if (hitBreakpoint) {
-            com.sun.jdi.Location jdiLocation = event.location();
-
-            Location location;
             try {
-                location = new JdiLocationImpl(event.thread().frame(0));
+                Location location = new JdbLocation(event.thread().frame(0));
+                debuggerCallback.onEvent(new SuspendEventImpl(location));
             } catch (IncompatibleThreadStateException e) {
-                location = new JdiLocationImpl(jdiLocation);
+                return true;
             }
-            debuggerCallback.onEvent(new SuspendEventImpl(location));
         }
 
         // Left target JVM in suspended state if result of evaluation of expression is boolean value and true
@@ -588,11 +596,16 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
     private boolean processStepEvent(com.sun.jdi.event.StepEvent event) throws DebuggerException {
         setCurrentThread(event.thread());
-        com.sun.jdi.Location jdiLocation = event.location();
 
-        Location location = debuggerUtil.getLocation(jdiLocation);
-        debuggerCallback.onEvent(new SuspendEventImpl(location));
-        return false;
+        try {
+            StackFrame jdiFrame = event.thread().frame(0);
+            JdbLocation jdbLocation = new JdbLocation(jdiFrame);
+            debuggerCallback.onEvent(new SuspendEventImpl(jdbLocation));
+            return false;
+        } catch (IncompatibleThreadStateException e) {
+            invalidateCurrentThread();
+            return true;
+        }
     }
 
     private boolean processDisconnectEvent() {
@@ -690,12 +703,12 @@ public class JavaDebugger implements EventsHandler, Debugger {
         return thread;
     }
 
-    private JdiStackFrame getCurrentFrame() throws DebuggerException {
+    private JdbStackFrame getCurrentFrame() throws DebuggerException {
         if (stackFrame != null) {
             return stackFrame;
         }
         try {
-            stackFrame = new JdiStackFrameImpl(getCurrentThread().frame(0));
+            stackFrame = new JdbStackFrame(getCurrentThread().frame(0));
         } catch (IncompatibleThreadStateException e) {
             throw new DebuggerException("Thread is not suspended. ", e);
         }
