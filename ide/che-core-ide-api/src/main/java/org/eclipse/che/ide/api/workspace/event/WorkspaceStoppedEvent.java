@@ -12,24 +12,12 @@ package org.eclipse.che.ide.api.workspace.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
+
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.ide.api.app.AppContext;
 
-/**
- * Event fired when workspace has been stopped.
- *
- * @author Vitaliy Guliy
- */
+/** Fired when the current workspace goes into a stopped state. */
 public class WorkspaceStoppedEvent extends GwtEvent<WorkspaceStoppedEvent.Handler> {
-
-    public interface Handler extends EventHandler {
-        /**
-         * Perform actions when workspace is stopped.
-         *
-         * @param event
-         *         workspace stopped event
-         */
-        void onWorkspaceStopped(WorkspaceStoppedEvent event);
-    }
 
     public static final Type<WorkspaceStoppedEvent.Handler> TYPE = new Type<>();
 
@@ -39,6 +27,8 @@ public class WorkspaceStoppedEvent extends GwtEvent<WorkspaceStoppedEvent.Handle
         this.workspace = workspace;
     }
 
+    /** @deprecated use {@link AppContext#getWorkspace()} */
+    @Deprecated
     public Workspace getWorkspace() {
         return workspace;
     }
@@ -53,4 +43,7 @@ public class WorkspaceStoppedEvent extends GwtEvent<WorkspaceStoppedEvent.Handle
         handler.onWorkspaceStopped(this);
     }
 
+    public interface Handler extends EventHandler {
+        void onWorkspaceStopped(WorkspaceStoppedEvent event);
+    }
 }

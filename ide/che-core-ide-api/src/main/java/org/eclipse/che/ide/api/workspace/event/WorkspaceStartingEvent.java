@@ -12,25 +12,14 @@ package org.eclipse.che.ide.api.workspace.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import org.eclipse.che.api.core.model.workspace.Workspace;
 
-/**
- * Event informing about starting a workspace.
- *
- * @author Vitaliy Guliy
- */
+import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.ide.api.app.AppContext;
+
+/** Fired when some the current workspace goes into a starting state. */
 public class WorkspaceStartingEvent extends GwtEvent<WorkspaceStartingEvent.Handler> {
 
-    /**
-     * Implement this handler to handle the event.
-     */
-    public interface Handler extends EventHandler {
-
-        void onWorkspaceStarting(WorkspaceStartingEvent event);
-
-    }
-
-    public static final GwtEvent.Type<WorkspaceStartingEvent.Handler> TYPE = new GwtEvent.Type<>();
+    public static final Type<WorkspaceStartingEvent.Handler> TYPE = new Type<>();
 
     private final Workspace workspace;
 
@@ -38,6 +27,8 @@ public class WorkspaceStartingEvent extends GwtEvent<WorkspaceStartingEvent.Hand
         this.workspace = workspace;
     }
 
+    /** @deprecated use {@link AppContext#getWorkspace()} */
+    @Deprecated
     public Workspace getWorkspace() {
         return workspace;
     }
@@ -52,4 +43,7 @@ public class WorkspaceStartingEvent extends GwtEvent<WorkspaceStartingEvent.Hand
         handler.onWorkspaceStarting(this);
     }
 
+    public interface Handler extends EventHandler {
+        void onWorkspaceStarting(WorkspaceStartingEvent event);
+    }
 }

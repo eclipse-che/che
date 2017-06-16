@@ -21,10 +21,12 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.resource.Path;
@@ -36,6 +38,7 @@ import java.util.Optional;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT;
@@ -95,12 +98,16 @@ public class WorkspaceStatusHandler {
             // Because AppContext always must return an actual workspace model.
             ((AppContextImpl)appContext).setWorkspace(workspace);
 
-            if (workspace.getStatus() == RUNNING) {
+            if (workspace.getStatus() == STARTING) {
+                eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
+            } else if (workspace.getStatus() == RUNNING) {
                 handleWorkspaceRunning();
 
+                eventBus.fireEvent(new WorkspaceRunningEvent());
+                // fire deprecated WorkspaceStatusChangedEvent for backward compatibility with IDE 5.x
                 eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
-            } else if (workspace.getStatus() == STARTING) {
-                eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
+            } else if (workspace.getStatus() == STOPPING) {
+                eventBus.fireEvent(new WorkspaceStoppingEvent());
             } else if (workspace.getStatus() == STOPPED) {
                 eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
             }
