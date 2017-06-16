@@ -55,8 +55,10 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
                 addAllTestsMethod(result, compilationUnit);
             } else {
                 IJavaElement element = compilationUnit.getElementAt(context.getOffset());
-                if (element.getElementType() == IJavaElement.METHOD) {
-                    result.add(createTestPosition((IMethod) element));
+                if ((element.getElementType() == IJavaElement.METHOD)) {
+                    if (isTestMethod((IMethod)element, compilationUnit)) {
+                        result.add(createTestPosition((IMethod)element));
+                    }
                 } else {
                     addAllTestsMethod(result, compilationUnit);
                 }
@@ -121,7 +123,7 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
             String pathToClass = filePath.substring(packagePath.length());
             IJavaElement element = javaProject.findElement(new Path(pathToClass));
             if (element != null && element.getElementType() == IJavaElement.COMPILATION_UNIT) {
-                return (ICompilationUnit) element;
+                return (ICompilationUnit)element;
             } else {
                 throw getRuntimeException(filePath);
             }

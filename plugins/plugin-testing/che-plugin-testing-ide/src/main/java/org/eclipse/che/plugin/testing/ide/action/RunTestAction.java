@@ -38,6 +38,7 @@ import javax.inject.Inject;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.testing.shared.TestExecutionContext.TestType.CURSOR_POSITION;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
@@ -49,8 +50,6 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  */
 @Singleton
 public class RunTestAction extends AbstractPerspectiveAction {
-
-
     private final TestServiceClient client;
     private final DtoFactory dtoFactory;
     private final AppContext appContext;
@@ -60,6 +59,8 @@ public class RunTestAction extends AbstractPerspectiveAction {
     private boolean hasTests = false;
     private TextEditor currentEditor;
     private List<TestPosition> testPosition;
+
+    private TestExecutionContext.TestType testType;
 
     @Inject
     public RunTestAction(EventBus eventBus,
@@ -81,6 +82,7 @@ public class RunTestAction extends AbstractPerspectiveAction {
 
         eventBus.addHandler(ActivePartChangedEvent.TYPE, event -> {
             if (event.getActivePart() instanceof TextEditor) {
+                testType = CURSOR_POSITION;
                 TextEditor activeEditor = (TextEditor) event.getActivePart();
                 if (activeEditor.getEditorInput().getFile().getName().endsWith(".java")) {
                     detectTests(activeEditor);
@@ -94,7 +96,7 @@ public class RunTestAction extends AbstractPerspectiveAction {
     private void detectTests(TextEditor editor) {
         this.currentEditor = editor;
         TestDetectionContext context = dtoFactory.createDto(TestDetectionContext.class);
-        context.setFilePath(currentEditor.getEditorInput().getFile().getContentUrl());
+        context.setFilePath(currentEditor.getEditorInput().getFile().getLocation().toString());
         context.setOffset(currentEditor.getCursorOffset());
         context.setProjectPath(appContext.getRootProject().getPath());
         client.detectTests(context).onSuccess(testDetectionResult -> {
@@ -121,6 +123,9 @@ public class RunTestAction extends AbstractPerspectiveAction {
         TestExecutionContext context = dtoFactory.createDto(TestExecutionContext.class);
 
         context.setProjectPath(project.getPath());
+        context.setTestType(testType);
+        context.setFilePath(currentEditor.getEditorInput().getFile().getLocation().toString());
+        context.setCursorOffset(currentEditor.getCursorOffset());
         Pair<String, String> frameworkAndTestName = getTestingFrameworkAndTestName(currentEditor.getCursorOffset());
         if (frameworkAndTestName == null) {
             frameworkAndTestName = Pair.of(testPosition.iterator().next().getFrameworkName(), null);

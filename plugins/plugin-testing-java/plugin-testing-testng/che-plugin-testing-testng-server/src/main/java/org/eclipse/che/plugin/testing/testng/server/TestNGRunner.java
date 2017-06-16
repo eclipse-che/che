@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.testing.testng.server;
 
 import com.beust.jcommander.JCommander;
+
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -24,6 +25,7 @@ import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -48,9 +50,9 @@ import java.util.Set;
 public class TestNGRunner extends AbstractJavaTestRunner {
 
     private static final String TEST_ANNOTATION_FQN = Test.class.getName();
-    private static final Logger LOG = LoggerFactory.getLogger(TestNGRunner.class);
+    private static final Logger LOG                 = LoggerFactory.getLogger(TestNGRunner.class);
     private final ProjectClasspathProvider classpathProvider;
-    private final TestNGSuiteUtil suiteUtil;
+    private final TestNGSuiteUtil          suiteUtil;
 
     @Inject
     public TestNGRunner(ProjectClasspathProvider classpathProvider, TestNGSuiteUtil suiteUtil) {
@@ -107,13 +109,11 @@ public class TestNGRunner extends AbstractJavaTestRunner {
     }
 
     private File createSuite(TestExecutionContext context, IJavaProject javaProject) {
-
         switch (context.getTestType()) {
             case FILE:
                 return createClassSuite(javaProject, context.getFilePath());
             case FOLDER:
                 return createPackageSuite(javaProject, context.getFilePath());
-
             case PROJECT:
                 return createProjectSuite(javaProject);
             case CURSOR_POSITION:
@@ -124,8 +124,21 @@ public class TestNGRunner extends AbstractJavaTestRunner {
     }
 
     private File createMethodSuite(IJavaProject javaProject, String filePath, int cursorOffset) {
-        //TODO
-        return null;
+        ICompilationUnit compilationUnit = findCompilationUnitByPath(javaProject, filePath);
+        IType primaryType = compilationUnit.findPrimaryType();
+        String qualifiedName = primaryType.getFullyQualifiedName();
+        List<String> methods = new ArrayList<>();
+        try {
+            IJavaElement element = compilationUnit.getElementAt(cursorOffset);
+            if (element instanceof  IMethod) {
+                IMethod method = (IMethod)element;
+                methods.add(method.getElementName());
+            }
+        } catch (JavaModelException e) {
+            LOG.debug("Can't read a method.", e);
+        }
+        Map<String, List<String>> classes = Collections.singletonMap(qualifiedName, methods);
+        return suiteUtil.writeSuite(System.getProperty("java.io.tmpdir"), javaProject.getElementName(), classes);
     }
 
     private File createProjectSuite(IJavaProject javaProject) {

@@ -103,9 +103,10 @@ public class JUnitTestRunner extends AbstractJavaTestRunner {
                 return false;
             }
             //TODO add check class hierarchy for JUnit3
+            //return method.getReturnType().equals("V"); // 'V' is void signature
 
-            return method.getReturnType().equals("V"); // 'V' is void signature
-
+            //until don't have check class hierarchy
+            return false;
         } catch (JavaModelException ignored) {
             return false;
         }
