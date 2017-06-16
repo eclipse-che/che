@@ -100,19 +100,6 @@ Add:
 
 You can insert the dependency anywhere in the list. After you have inserted it, run `mvn sortpom:sort` and maven will order the pom.xml for you.
 
-### 3- Register dependency to the GWT application
-
-Link the GUI extension into the GWT app. You will add an `<inherits>` tag to the module definition. The name of the GWT extension is derived from the direction + package structure given to the GWT module defined in our extension.
-
-In: `assembly-ide-war/src/main/resources/org/eclipse/che/ide/IDE.gwt.xml`
-
-Add:
-```XML
-...
-<inherits name='org.eclipse.che.plugin.sample.wizard.SampleWizard'/>
-...
-```
-
 ### 3- Rebuild Eclipse Che
 
 

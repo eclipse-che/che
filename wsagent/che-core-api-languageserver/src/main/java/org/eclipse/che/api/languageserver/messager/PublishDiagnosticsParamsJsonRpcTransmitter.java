@@ -31,7 +31,9 @@ public class PublishDiagnosticsParamsJsonRpcTransmitter {
     @Inject
     private void subscribe(EventService eventService, RequestTransmitter requestTransmitter) {
         eventService.subscribe(event -> {
-            event.setUri(event.getUri().substring(16));
+            if(event.getUri() != null) {
+                event.setUri(event.getUri().substring(16));
+            }
             endpointIds.forEach(endpointId -> requestTransmitter.newRequest()
                                                                 .endpointId(endpointId)
                                                                 .methodName("textDocument/publishDiagnostics")
