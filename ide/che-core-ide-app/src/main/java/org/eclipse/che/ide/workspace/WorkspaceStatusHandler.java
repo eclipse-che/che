@@ -21,9 +21,9 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.SubscriptionManagerClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
@@ -31,10 +31,8 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 
-import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
@@ -88,6 +86,8 @@ public class WorkspaceStatusHandler {
     public void handleWorkspaceStatusChanged(WorkspaceStatusEvent serverEvent) {
 
         Log.info(WorkspaceStatusHandler.class, "Workspace from context:  " + appContext.getWorkspaceId());
+
+        eventBus.fireEvent(new WorkspaceStatusChangedEvent(serverEvent));
 
         workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
             // Update workspace model returned by AppContext before firing an event.
