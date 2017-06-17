@@ -143,14 +143,17 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
       }
     });
 
-
-    $rootScope.$on('$routeChangeSuccess', (event, next) => {
-      if (next.$$route.title && angular.isFunction(next.$$route.title)) {
-        $rootScope.currentPage = next.$$route.title($routeParams);
+    $rootScope.$on('$routeChangeSuccess', (event: ng.IAngularEvent, next: ng.route.IRoute) => {
+      const route = (<any>next).$$route;
+      if (angular.isFunction(route.title)) {
+        $rootScope.currentPage = route.title($routeParams);
       } else {
-        $rootScope.currentPage = next.$$route.title || 'Dashboard';
+        $rootScope.currentPage = route.title || 'Dashboard';
       }
-
+      const originalPath: string = route.originalPath;
+      if (originalPath && originalPath.indexOf('/ide/') === -1) {
+        $rootScope.showIDE = false;
+      }
       // when a route is about to change, notify the routing redirect node
       if (next.resolve) {
         if (DEV) {

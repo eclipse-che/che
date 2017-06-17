@@ -11,7 +11,6 @@
 'use strict';
 
 
-import {AdministrationController} from './administration.controller';
 import {DockerRegistryList} from './docker-registry/docker-registry-list/docker-registry-list.directive';
 import {DockerRegistryListController} from './docker-registry/docker-registry-list/docker-registry-list.controller';
 import {EditRegistryController} from './docker-registry/docker-registry-list/edit-registry/edit-registry.controller';
@@ -19,21 +18,17 @@ import {EditRegistryController} from './docker-registry/docker-registry-list/edi
 
 export class AdministrationConfig {
 
-  constructor(register) {
-    register.controller('AdministrationController', AdministrationController);
-
+  constructor(register: che.IRegisterService) {
     register.directive('dockerRegistryList', DockerRegistryList);
     register.controller('DockerRegistryListController', DockerRegistryListController);
 
     register.controller('EditRegistryController', EditRegistryController);
 
     // config routes
-    register.app.config(($routeProvider) => {
+    register.app.config(($routeProvider: ng.route.IRouteProvider) => {
       $routeProvider.accessWhen('/administration', {
         title: 'Administration',
-        templateUrl: 'app/administration/administration.html',
-        controller: 'AdministrationController',
-        controllerAs: 'administrationController'
+        templateUrl: 'app/administration/administration.html'
       });
     });
 
