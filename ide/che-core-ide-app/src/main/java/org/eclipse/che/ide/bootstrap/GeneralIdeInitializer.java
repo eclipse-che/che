@@ -120,7 +120,10 @@ class GeneralIdeInitializer implements IdeInitializer {
                               })
                               .then(initUI())
                               .thenPromise(aVoid -> initAppContext())
-                              .then(showUI());
+                              .then(showUI())
+                              .then(arg -> {
+                                  eventBus.fireEvent(new BasicIDEInitializedEvent());
+                              });
     }
 
     private Operation<Void> initUI() {

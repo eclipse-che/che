@@ -18,9 +18,9 @@ import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
+import org.eclipse.che.ide.api.project.type.ProjectTypesLoadedEvent;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.loging.Log;
@@ -39,6 +39,7 @@ public class ProjectTypeRegistryImpl implements ProjectTypeRegistry {
     private final AsyncRequestFactory    asyncRequestFactory;
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
     private final AppContext             appContext;
+    private final EventBus               eventBus;
 
     private final Map<String, ProjectTypeDto> projectTypes;
 
@@ -50,19 +51,21 @@ public class ProjectTypeRegistryImpl implements ProjectTypeRegistry {
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.appContext = appContext;
+        this.eventBus = eventBus;
 
         projectTypes = new HashMap<>();
 
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
-                registerProjectTypes();
-            }
-
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-            }
-        });
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> registerProjectTypes());
+//        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
+//            @Override
+//            public void onWsAgentStarted(WsAgentStateEvent event) {
+//                registerProjectTypes();
+//            }
+//
+//            @Override
+//            public void onWsAgentStopped(WsAgentStateEvent event) {
+//            }
+//        });
     }
 
     @Override
@@ -79,6 +82,7 @@ public class ProjectTypeRegistryImpl implements ProjectTypeRegistry {
     private void registerProjectTypes() {
         fetchProjectTypes().then(typeDescriptors -> {
             typeDescriptors.forEach(projectTypeDto -> projectTypes.put(projectTypeDto.getId(), projectTypeDto));
+            eventBus.fireEvent(new ProjectTypesLoadedEvent());
         }).catchError(error -> {
             Log.error(ProjectTypeRegistryImpl.this.getClass(), "Can't load project types: " + error.getCause());
         });

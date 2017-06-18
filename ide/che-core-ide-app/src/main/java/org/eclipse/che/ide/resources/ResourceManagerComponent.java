@@ -16,6 +16,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.project.type.ProjectTypesLoadedEvent;
 
 /**
  * Resource management component. Initializes with workspace agent.
@@ -28,15 +29,16 @@ public class ResourceManagerComponent {
 
     @Inject
     public ResourceManagerComponent(ResourceManagerInitializer initializer, EventBus eventBus) {
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
-                initializer.initResourceManager();
-            }
-
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-            }
-        });
+        eventBus.addHandler(ProjectTypesLoadedEvent.TYPE, e -> initializer.initResourceManager());
+//        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
+//            @Override
+//            public void onWsAgentStarted(WsAgentStateEvent event) {
+//                initializer.initResourceManager();
+//            }
+//
+//            @Override
+//            public void onWsAgentStopped(WsAgentStateEvent event) {
+//            }
+//        });
     }
 }
