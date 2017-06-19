@@ -24,6 +24,7 @@
     <packaging>pom</packaging>
     <name>Che Agents Parent</name>
     <modules>
+        <module>bootstrapper</module>
         <module>go-agents</module>
         <module>exec</module>
         <module>terminal</module>
