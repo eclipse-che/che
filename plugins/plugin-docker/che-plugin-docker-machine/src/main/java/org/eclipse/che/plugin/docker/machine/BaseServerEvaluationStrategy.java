@@ -101,7 +101,7 @@ public abstract class BaseServerEvaluationStrategy extends ServerEvaluationStrat
     /**
      * Option to enable the use of the container address, when searching for addresses.
      */
-    private boolean useContainerAddress;
+    private boolean localDockerMode;
 
 
     /**
@@ -129,13 +129,13 @@ public abstract class BaseServerEvaluationStrategy extends ServerEvaluationStrat
                                         String cheDockerCustomExternalTemplate,
                                         String cheDockerCustomExternalProtocol,
                                         String chePort,
-                                        boolean useContainerAddress) {
+                                        boolean localDockerMode) {
         this.cheDockerIp = cheDockerIp;
         this.cheDockerIpExternal = cheDockerIpExternal;
         this.chePort = chePort;
         this.cheDockerCustomExternalTemplate = cheDockerCustomExternalTemplate;
         this.cheDockerCustomExternalProtocol = cheDockerCustomExternalProtocol;
-        this.useContainerAddress = useContainerAddress;
+        this.localDockerMode = localDockerMode;
     }
 
     @Override
@@ -144,7 +144,7 @@ public abstract class BaseServerEvaluationStrategy extends ServerEvaluationStrat
 
         final String internalAddress;
 
-        if (useContainerAddress) {
+        if (localDockerMode) {
             internalAddress = !isNullOrEmpty(internalAddressContainer) ?
                 internalAddressContainer :
                 internalHost;
@@ -155,7 +155,7 @@ public abstract class BaseServerEvaluationStrategy extends ServerEvaluationStrat
                 internalHost;
         }
 
-        boolean useExposedPorts = useContainerAddress && internalAddress != internalHost;
+        boolean useExposedPorts = localDockerMode && internalAddress != internalHost;
 
         return getExposedPortsToAddressPorts(internalAddress, containerInfo.getNetworkSettings().getPorts(), useExposedPorts);
     }
@@ -285,21 +285,22 @@ public abstract class BaseServerEvaluationStrategy extends ServerEvaluationStrat
 
         @Override
         public String getExternalAddress() {
-            if (useContainerAddress) {
+            if (localDockerMode) {
                 return cheDockerIpExternal != null ?
                     cheDockerIpExternal :
-                    cheDockerIp != null ?
-                    cheDockerIp :
                     !isNullOrEmpty(gatewayAddressContainer) ?
                     gatewayAddressContainer :
                     this.internalHost;
             }
 
             return cheDockerIpExternal != null ?
-                    cheDockerIpExternal :
-                    cheDockerIp != null ?
-                    cheDockerIp :
-                    this.internalHost;
+                cheDockerIpExternal :
+                cheDockerIp != null ?
+                cheDockerIp :
+                !isNullOrEmpty(gatewayAddressContainer) ?
+                gatewayAddressContainer :
+                this.internalHost;
+
         }
     }
 
