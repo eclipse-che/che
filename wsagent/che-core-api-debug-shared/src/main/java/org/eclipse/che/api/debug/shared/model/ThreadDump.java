@@ -25,6 +25,11 @@ public interface ThreadDump {
     String getName();
 
     /**
+     * Returns thread unique id.
+     */
+    long getId();
+
+    /**
      * Returns thread group name.
      */
     @Nullable

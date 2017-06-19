@@ -31,8 +31,8 @@ import org.eclipse.che.api.debug.shared.model.impl.action.StartActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepIntoActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOutActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOverActionImpl;
-import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -43,6 +43,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.plugin.jdb.server.JavaDebuggerUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -53,7 +54,7 @@ import static org.testng.Assert.assertTrue;
  */
 public class JavaDebuggerTest {
 
-    private Debugger                     debugger;
+    private JavaDebugger                 debugger;
     private BlockingQueue<DebuggerEvent> events;
 
     @BeforeClass
@@ -64,8 +65,15 @@ public class JavaDebuggerTest {
         Map<String, String> connectionProperties = ImmutableMap.of("host", "localhost",
                                                                    "port", System.getProperty("debug.port"));
         JavaDebuggerFactory factory = new JavaDebuggerFactory();
-        debugger = factory.create(connectionProperties, events::add);
+        debugger = (JavaDebugger)factory.create(connectionProperties, events::add);
     }
+
+
+    @AfterClass
+    public void tearDown() throws Exception {
+        terminateVirtualMachineQuietly(debugger);
+    }
+
 
     @Test(priority = 10)
     public void testGetInfo() throws Exception {

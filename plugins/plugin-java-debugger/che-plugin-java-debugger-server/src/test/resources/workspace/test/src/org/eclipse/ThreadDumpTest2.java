@@ -8,17 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.debug.shared.model;
+package org.eclipse;
 
-/**
- * @author Anatolii Bazko
- */
-public enum ThreadStatus {
-    ZOMBIE,
-    RUNNING,
-    SLEEPING,
-    MONITOR,
-    WAIT,
-    NOT_STARTED,
-    UNKNOWN
+public class ThreadDumpTest2 {
+
+    public static void main(String[] args) throws Exception {
+        for (; ; ) {
+
+        }
+    }
 }

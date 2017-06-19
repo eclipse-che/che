@@ -187,7 +187,8 @@ public final class DtoConverter {
                                                     .collect(toList());
 
 
-        return newDto(ThreadDumpDto.class).withName(threadDump.getName())
+        return newDto(ThreadDumpDto.class).withId(threadDump.getId())
+                                          .withName(threadDump.getName())
                                           .withGroupName(threadDump.getGroupName())
                                           .withSuspended(threadDump.isSuspended())
                                           .withStatus(threadDump.getStatus())

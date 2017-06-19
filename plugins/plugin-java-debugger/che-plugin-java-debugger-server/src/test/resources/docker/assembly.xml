@@ -14,7 +14,11 @@
 <assembly>
     <files>
         <file>
-            <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/ThreadDumpTest.java</source>
+            <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/ThreadDumpTest1.java</source>
+            <outputDirectory>./org/eclipse</outputDirectory>
+        </file>
+        <file>
+            <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/ThreadDumpTest2.java</source>
             <outputDirectory>./org/eclipse</outputDirectory>
         </file>
         <file>

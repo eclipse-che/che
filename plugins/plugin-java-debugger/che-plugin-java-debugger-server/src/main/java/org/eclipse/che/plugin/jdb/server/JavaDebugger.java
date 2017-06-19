@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.jdb.server;
 
-import sun.misc.VM;
-
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.Bootstrap;
 import com.sun.jdi.ClassNotPreparedException;
@@ -85,6 +83,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -153,7 +152,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
         AttachingConnector connector = connector(connectorName);
         if (connector == null) {
             throw new DebuggerException(
-                    String.format("Unable connect to target Java VM. Requested connector '%s' not found. ", connectorName));
+                    format("Unable connect to target Java VM. Requested connector '%s' not found. ", connectorName));
         }
         Map<String, Connector.Argument> arguments = connector.defaultArguments();
         arguments.get("hostname").setValue(host);
@@ -377,12 +376,30 @@ public class JavaDebugger implements EventsHandler, Debugger {
     }
 
     @Override
+    public StackFrameDump getStackFrameDump(long threadId, int frameIdx) throws DebuggerException {
+        lock.lock();
+        try {
+            for (ThreadReference t : vm.allThreads()) {
+                if (t.uniqueID() == threadId) {
+                    return new JdbStackFrame(t.frame(frameIdx));
+                }
+            }
+
+            throw new DebuggerException(format("Thread %d not found", threadId));
+        } catch (IncompatibleThreadStateException e) {
+            throw new DebuggerException("Thread is not suspended", e);
+        } catch (IndexOutOfBoundsException e) {
+            throw new DebuggerException(format("Frame %d in thread %d not found.", frameIdx, threadId));
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
     public List<ThreadDump> getThreadDumps() throws DebuggerException {
         List<ThreadDump> threadDumps = new LinkedList<>();
 
         for (ThreadReference t : vm.allThreads()) {
-            ThreadStatus status = ThreadStatus.valueOf(VM.toThreadState(t.status()).toString());
-
             List<JdbStackFrame> frames = new LinkedList<>();
             try {
                 for (StackFrame f : t.frames()) {
@@ -392,11 +409,13 @@ public class JavaDebugger implements EventsHandler, Debugger {
                                                  new JdbLocation(f, new JdbMethod(f, emptyList()))));
                 }
             } catch (IncompatibleThreadStateException ignored) {
+                // Thread isn't suspended. Information isn't available.
             }
 
-            threadDumps.add(new ThreadDumpImpl(t.name(),
+            threadDumps.add(new ThreadDumpImpl(t.uniqueID(),
+                                               t.name(),
                                                t.threadGroup().name(),
-                                               status,
+                                               toThreadStatus(t.status()),
                                                t.isSuspended(),
                                                frames));
         }
@@ -734,6 +753,28 @@ public class JavaDebugger implements EventsHandler, Debugger {
             return vm.eventRequestManager();
         } catch (VMCannotBeModifiedException e) {
             throw new DebuggerException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * @see ThreadReference#status()
+     */
+    private ThreadStatus toThreadStatus(int status) {
+        switch (status) {
+            case ThreadReference.THREAD_STATUS_ZOMBIE:
+                return ThreadStatus.ZOMBIE;
+            case ThreadReference.THREAD_STATUS_RUNNING:
+                return ThreadStatus.RUNNING;
+            case ThreadReference.THREAD_STATUS_SLEEPING:
+                return ThreadStatus.SLEEPING;
+            case ThreadReference.THREAD_STATUS_MONITOR:
+                return ThreadStatus.MONITOR;
+            case ThreadReference.THREAD_STATUS_WAIT:
+                return ThreadStatus.WAIT;
+            case ThreadReference.THREAD_STATUS_NOT_STARTED:
+                return ThreadStatus.NOT_STARTED;
+            default:
+                return ThreadStatus.UNKNOWN;
         }
     }
 }

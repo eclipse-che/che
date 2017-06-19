@@ -23,6 +23,13 @@ import java.util.List;
 public interface ThreadDumpDto extends ThreadDump {
 
     @Override
+    long getId();
+
+    void setId(long id);
+
+    ThreadDumpDto withId(long id);
+
+    @Override
     String getName();
 
     void setName(String name);

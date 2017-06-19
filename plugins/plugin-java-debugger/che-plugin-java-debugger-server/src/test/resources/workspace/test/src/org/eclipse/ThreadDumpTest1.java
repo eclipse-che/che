@@ -12,7 +12,7 @@ package org.eclipse;
 
 import java.util.concurrent.CountDownLatch;
 
-public class ThreadDumpTest {
+public class ThreadDumpTest1 {
 
     public static void main(String[] args) throws Exception {
         CountDownLatch latch = new CountDownLatch(1);

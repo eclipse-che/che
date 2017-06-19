@@ -198,11 +198,25 @@ public interface Debugger {
     /**
      * Dump values of local variables, fields and method arguments of the current frame.
      *
+     * @deprecated Use {@link #getStackFrameDump(long, int)}
+     *
      * @return {@link StackFrameDump}
      * @throws DebuggerException
      *      if any error occur
      */
+    @Deprecated
     StackFrameDump dumpStackFrame() throws DebuggerException;
+
+    /**
+     * Dump values of local variables, fields and method arguments of the current frame.
+     *
+     * @return {@link StackFrameDump}
+     * @throws DebuggerException
+     *      if any error occur
+     */
+    default StackFrameDump getStackFrameDump(long threadId, int frameIdx) throws DebuggerException {
+        throw new DebuggerException("Unsupported operation for current debugger implementation.");
+    }
 
     /**
      * Gets thread dumps.

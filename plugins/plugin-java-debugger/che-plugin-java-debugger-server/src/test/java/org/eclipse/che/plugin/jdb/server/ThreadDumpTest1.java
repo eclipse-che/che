@@ -21,12 +21,10 @@ import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
-import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StartActionImpl;
-import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.DtoConverter;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -39,14 +37,18 @@ import java.util.concurrent.BlockingQueue;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.getProperty;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.plugin.jdb.server.JavaDebuggerUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 /**
+ * Test ThreadDump when all threads are suspended.
+ *
  * @author Anatolii Bazko
  */
-public class ThreadDumpTest {
-    private Debugger debugger;
+public class ThreadDumpTest1 {
+    private JavaDebugger debugger;
     private BlockingQueue<DebuggerEvent> events = new ArrayBlockingQueue<>(10);
 
     @BeforeClass
@@ -54,18 +56,24 @@ public class ThreadDumpTest {
         ProjectApiUtils.ensure();
 
         initJavaDebugger();
-        endureSuspendAtDesiredLocation();
+        ensureSuspendAtDesiredLocation();
     }
 
-    @AfterMethod
+    @AfterClass
     public void tearDown() throws Exception {
-        debugger.resume(new ResumeActionImpl());
+        terminateVirtualMachineQuietly(debugger);
     }
 
     @Test
-    public void testGetThreadDumps() throws Exception {
+    public void shouldGetThreadDump() throws Exception {
         List<ThreadDumpDto> threads = debugger.getThreadDumps().stream().map(DtoConverter::asDto).collect(toList());
 
+        validateMainThreadDump(threads);
+        validateSomeThreadDump(threads);
+        validateFinalizerThreadDump(threads);
+    }
+
+    private void validateMainThreadDump(List<ThreadDumpDto> threads) {
         Optional<ThreadDumpDto> mainThread = threads.stream().filter(t -> t.getName().equals("main")).findAny();
         assertTrue(mainThread.isPresent());
 
@@ -73,7 +81,7 @@ public class ThreadDumpTest {
         assertEquals(threadDump.getName(), "main");
         assertEquals(threadDump.getGroupName(), "main");
         assertTrue(threadDump.isSuspended());
-        assertEquals(threadDump.getStatus(), ThreadStatus.RUNNABLE);
+        assertEquals(threadDump.getStatus(), ThreadStatus.RUNNING);
 
         List<? extends StackFrameDump> frames = threadDump.getFrames();
         assertEquals(frames.size(), 1);
@@ -84,24 +92,81 @@ public class ThreadDumpTest {
 
         Location location = stackFrameDump.getLocation();
         assertEquals(location.getLineNumber(), 26);
-        assertEquals(location.getTarget(), "org.eclipse.ThreadDumpTest");
+        assertEquals(location.getTarget(), "org.eclipse.ThreadDumpTest1");
         assertEquals(location.getExternalResourceId(), -1);
         assertEquals(location.getResourceProjectPath(), "/test");
-        assertEquals(location.getResourcePath(), "/test/src/org/eclipse/ThreadDumpTest.java");
+        assertEquals(location.getResourcePath(), "/test/src/org/eclipse/ThreadDumpTest1.java");
 
         Method method = location.getMethod();
         assertEquals(method.getName(), "main");
         assertTrue(method.getArguments().isEmpty());
     }
 
+    private void validateFinalizerThreadDump(List<ThreadDumpDto> threads) {
+        Optional<ThreadDumpDto> finalizerThread = threads.stream().filter(t -> t.getName().equals("Finalizer")).findAny();
+        assertTrue(finalizerThread.isPresent());
+
+        ThreadDump threadDump = finalizerThread.get();
+        assertEquals(threadDump.getName(), "Finalizer");
+        assertEquals(threadDump.getGroupName(), "system");
+        assertTrue(threadDump.isSuspended());
+        assertEquals(threadDump.getStatus(), ThreadStatus.WAIT);
+
+        List<? extends StackFrameDump> frames = threadDump.getFrames();
+        assertEquals(frames.size(), 4);
+
+        StackFrameDump stackFrameDump = frames.get(0);
+        assertTrue(stackFrameDump.getVariables().isEmpty());
+        assertTrue(stackFrameDump.getFields().isEmpty());
+
+        Location location = stackFrameDump.getLocation();
+        assertEquals(location.getLineNumber(), -1);
+        assertEquals(location.getTarget(), "java.lang.Object");
+        assertNull(location.getResourceProjectPath());
+        assertNull(location.getResourcePath());
+
+        Method method = location.getMethod();
+        assertEquals(method.getName(), "wait");
+        assertTrue(method.getArguments().isEmpty());
+    }
+
+    private void validateSomeThreadDump(List<ThreadDumpDto> threads) {
+        Optional<ThreadDumpDto> someThread = threads.stream().filter(t -> t.getName().equals("SomeThread")).findAny();
+        assertTrue(someThread.isPresent());
+
+        ThreadDump threadDump = someThread.get();
+        assertEquals(threadDump.getName(), "SomeThread");
+        assertEquals(threadDump.getGroupName(), "main");
+        assertTrue(threadDump.isSuspended());
+        assertEquals(threadDump.getStatus(), ThreadStatus.RUNNING);
+
+        List<? extends StackFrameDump> frames = threadDump.getFrames();
+        assertEquals(frames.size(), 1);
+
+        StackFrameDump stackFrameDump = frames.get(0);
+        assertTrue(stackFrameDump.getVariables().isEmpty());
+        assertTrue(stackFrameDump.getFields().isEmpty());
+
+        Location location = stackFrameDump.getLocation();
+        assertEquals(location.getLineNumber(), 41);
+        assertEquals(location.getTarget(), "org.eclipse.ThreadDumpTest1$SomeThread");
+        assertEquals(location.getExternalResourceId(), -1);
+        assertEquals(location.getResourceProjectPath(), "/test");
+        assertEquals(location.getResourcePath(), "/test/src/org/eclipse/ThreadDumpTest1.java");
+
+        Method method = location.getMethod();
+        assertEquals(method.getName(), "run");
+        assertTrue(method.getArguments().isEmpty());
+    }
+
     private void initJavaDebugger() throws DebuggerException, InterruptedException {
         debugger = new JavaDebugger("localhost", parseInt(getProperty("debug.port")), events::add);
 
-        BreakpointImpl breakpoint = new BreakpointImpl(new LocationImpl("org.eclipse.ThreadDumpTest", 26));
+        BreakpointImpl breakpoint = new BreakpointImpl(new LocationImpl("org.eclipse.ThreadDumpTest1", 26));
         debugger.start(new StartActionImpl(Collections.singletonList(breakpoint)));
     }
 
-    private void endureSuspendAtDesiredLocation() throws InterruptedException {
+    private void ensureSuspendAtDesiredLocation() throws InterruptedException {
         DebuggerEvent debuggerEvent = events.take();
         assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
 

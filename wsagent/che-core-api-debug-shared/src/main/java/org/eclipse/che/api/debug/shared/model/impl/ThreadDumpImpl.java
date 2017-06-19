@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.debug.shared.model.impl;
 
+import com.google.common.base.Objects;
+
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadDump;
 import org.eclipse.che.api.debug.shared.model.ThreadStatus;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author Anatolii Bazko
@@ -26,8 +27,10 @@ public class ThreadDumpImpl implements ThreadDump {
     private final ThreadStatus                   status;
     private final boolean                        isSuspended;
     private final List<? extends StackFrameDump> frames;
+    private final long                           id;
 
-    public ThreadDumpImpl(String name,
+    public ThreadDumpImpl(long id,
+                          String name,
                           String groupName,
                           ThreadStatus status,
                           boolean isSuspended,
@@ -37,6 +40,12 @@ public class ThreadDumpImpl implements ThreadDump {
         this.status = status;
         this.isSuspended = isSuspended;
         this.frames = frames;
+        this.id = id;
+    }
+
+    @Override
+    public long getId() {
+        return id;
     }
 
     @Override
@@ -65,30 +74,21 @@ public class ThreadDumpImpl implements ThreadDump {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof ThreadDumpImpl)) {
-            return false;
-        }
-        final ThreadDumpImpl that = (ThreadDumpImpl)obj;
-        return isSuspended == that.isSuspended
-               && Objects.equals(name, that.name)
-               && Objects.equals(groupName, that.groupName)
-               && Objects.equals(status, that.status)
-               && getFrames().equals(that.getFrames());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ThreadDumpImpl)) return false;
+        ThreadDumpImpl that = (ThreadDumpImpl)o;
+        return isSuspended == that.isSuspended &&
+               id == that.id &&
+               Objects.equal(name, that.name) &&
+               Objects.equal(groupName, that.groupName) &&
+               status == that.status &&
+               Objects.equal(frames, that.frames);
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Objects.hashCode(name);
-        hash = 31 * hash + Objects.hashCode(groupName);
-        hash = 31 * hash + Objects.hashCode(status);
-        hash = 31 * hash + Boolean.hashCode(isSuspended);
-        hash = 31 * hash + getFrames().hashCode();
-        return hash;
+        return Objects.hashCode(name, groupName, status, isSuspended, frames, id);
     }
 
     @Override
@@ -99,6 +99,7 @@ public class ThreadDumpImpl implements ThreadDump {
                ", status=" + status +
                ", isSuspended=" + isSuspended +
                ", frames=" + frames +
+               ", id=" + id +
                '}';
     }
 }
