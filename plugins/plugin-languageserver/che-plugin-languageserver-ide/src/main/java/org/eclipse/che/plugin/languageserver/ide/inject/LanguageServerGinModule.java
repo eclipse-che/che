@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.languageserver.ide.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
-import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerFileTypeRegister;
@@ -25,7 +24,6 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerReconcileS
 import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.LanguageServerQuickAssistProcessorFactory;
 import org.eclipse.che.plugin.languageserver.ide.editor.signature.LanguageServerSignatureHelpFactory;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
-import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
 import org.eclipse.che.plugin.languageserver.ide.service.PublishDiagnosticsReceiver;
 import org.eclipse.che.plugin.languageserver.ide.service.ShowMessageJsonRpcReceiver;
 
@@ -49,6 +47,9 @@ public class LanguageServerGinModule extends AbstractGinModule {
         GinMapBinder<String, WsAgentComponent> wsAgentComponentsBinder =
                 GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
         wsAgentComponentsBinder.addBinding("Load Language Server file types.").to(LanguageServerFileTypeRegister.class);
+
+        bind(PublishDiagnosticsReceiver.class).asEagerSingleton();
+        bind(ShowMessageJsonRpcReceiver.class).asEagerSingleton();
     }
 
 }
