@@ -134,7 +134,7 @@ public class RequestHandlerManager {
         return methodToCategory.containsKey(method);
     }
 
-    public boolean deregister(String method) {
+    public synchronized boolean deregister(String method) {
 
         oneToOneHandlers.remove(method);
         oneToManyHandlers.remove(method);
