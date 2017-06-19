@@ -26,26 +26,25 @@ import java.util.stream.Collectors;
  * @author Anatolii Bazko
  */
 public class JdbMethod implements Method {
-    private final com.sun.jdi.Method     method;
-    private final com.sun.jdi.StackFrame stackFrame;
+    private final com.sun.jdi.Method     jdiMethod;
+    private final com.sun.jdi.StackFrame jdiStackFrame;
 
     private final AtomicReference<List<Variable>> arguments;
 
-    public JdbMethod(com.sun.jdi.StackFrame stackFrame) {
-        this.stackFrame = stackFrame;
-        this.method = stackFrame.location().method();
+    public JdbMethod(com.sun.jdi.StackFrame jdiStackFrame) {
+        this.jdiStackFrame = jdiStackFrame;
+        this.jdiMethod = jdiStackFrame.location().method();
         this.arguments = new AtomicReference<>();
     }
 
-    public JdbMethod(com.sun.jdi.StackFrame stackFrame, List<Variable> arguments) {
-        this.stackFrame = stackFrame;
-        this.method = stackFrame.location().method();
-        this.arguments = new AtomicReference<>(arguments);
+    public JdbMethod(com.sun.jdi.StackFrame jdiStackFrame, List<Variable> arguments) {
+        this(jdiStackFrame);
+        this.arguments.set(arguments);
     }
 
     @Override
     public String getName() {
-        return method.name();
+        return jdiMethod.name();
     }
 
     @Override
@@ -54,10 +53,10 @@ public class JdbMethod implements Method {
             synchronized (arguments) {
                 if (arguments.get() == null) {
                     try {
-                        arguments.set(method.arguments()
-                                            .stream()
-                                            .map(v -> new JdbVariable(stackFrame, v))
-                                            .collect(Collectors.toList()));
+                        arguments.set(jdiMethod.arguments()
+                                               .stream()
+                                               .map(v -> new JdbVariable(jdiStackFrame, v))
+                                               .collect(Collectors.toList()));
                     } catch (AbsentInformationException e) {
                         arguments.set(Collections.emptyList());
                     }

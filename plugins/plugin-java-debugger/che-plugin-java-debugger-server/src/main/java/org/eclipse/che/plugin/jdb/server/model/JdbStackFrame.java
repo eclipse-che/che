@@ -25,6 +25,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
+ * /**
+ * {@link org.eclipse.che.api.debug.shared.model.StackFrameDump} implementation for Java Debugger.
+ *
  * @author andrew00x
  * @author Anatolii Bazko
  */

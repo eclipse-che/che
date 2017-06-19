@@ -30,14 +30,11 @@ public class JdbLocation implements Location {
     private final Location location;
 
     public JdbLocation(StackFrame stackFrame) {
-        com.sun.jdi.Location jdiLocation = stackFrame.location();
-        this.location = findLocation(jdiLocation);
-        this.method = new JdbMethod(stackFrame);
+        this(stackFrame, new JdbMethod(stackFrame));
     }
 
     public JdbLocation(StackFrame stackFrame, Method method) {
-        com.sun.jdi.Location jdiLocation = stackFrame.location();
-        this.location = findLocation(jdiLocation);
+        this.location = getLocation(stackFrame.location());
         this.method = method;
     }
 
@@ -76,13 +73,11 @@ public class JdbLocation implements Location {
         return method;
     }
 
-    private Location findLocation(com.sun.jdi.Location jdiLocation) {
-        Location location;
+    private Location getLocation(com.sun.jdi.Location jdiLocation) {
         try {
-            location = debuggerUtil.getLocation(jdiLocation);
+            return debuggerUtil.getLocation(jdiLocation);
         } catch (DebuggerException e) {
-            location = new LocationImpl(jdiLocation.declaringType().name(), jdiLocation.lineNumber());
+            return new LocationImpl(jdiLocation.declaringType().name(), jdiLocation.lineNumber());
         }
-        return location;
     }
 }

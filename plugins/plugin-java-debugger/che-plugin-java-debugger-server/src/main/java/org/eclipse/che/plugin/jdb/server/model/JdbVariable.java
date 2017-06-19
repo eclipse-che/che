@@ -19,35 +19,40 @@ import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 
-/** @author andrew00x */
+/**
+ * {@link org.eclipse.che.api.debug.shared.model.Variable} implementation for Java Debugger.
+ *
+ * @author Anatolii Bazko
+ */
 public class JdbVariable implements Variable {
-    private final LocalVariable variable;
-    private final SimpleValue   jdbValue;
+    private final LocalVariable jdiVariable;
+    private final SimpleValue   value;
 
-    public JdbVariable(StackFrame stackFrame, LocalVariable variable) {
-        Value value = stackFrame.getValue(variable);
-        this.variable = variable;
-        this.jdbValue = value == null ? new JdbNullValue() : new JdbValue(value);
+    public JdbVariable(StackFrame jdiStackFrame, LocalVariable jdiVariable) {
+        Value jdiValue = jdiStackFrame.getValue(jdiVariable);
+
+        this.jdiVariable = jdiVariable;
+        this.value = jdiValue == null ? new JdbNullValue() : new JdbValue(jdiValue);
     }
 
     @Override
     public String getName() {
-        return variable.name();
+        return jdiVariable.name();
     }
 
     @Override
     public boolean isPrimitive() {
-        return JdbType.isPrimitive(variable.signature());
+        return JdbType.isPrimitive(jdiVariable.signature());
     }
 
     @Override
     public SimpleValue getValue() {
-        return jdbValue;
+        return value;
     }
 
     @Override
     public String getType() {
-        return variable.typeName();
+        return jdiVariable.typeName();
     }
 
     @Override

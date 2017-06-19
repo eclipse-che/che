@@ -11,7 +11,6 @@
 package org.eclipse.che.plugin.jdb.server.model;
 
 import com.sun.jdi.ArrayReference;
-import com.sun.jdi.Field;
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.PrimitiveValue;
 import com.sun.jdi.Value;
@@ -22,58 +21,63 @@ import org.eclipse.che.api.debug.shared.model.Variable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-/** @author andrew00x */
+/**
+ * {@link org.eclipse.che.api.debug.shared.model.SimpleValue} implementation for Java Debugger.
+ *
+ * @author Anatolii Bazko
+ */
 public class JdbValue implements SimpleValue {
-    private final Value value;
+    private final Value                           jdiValue;
+    private final AtomicReference<List<Variable>> variables;
 
-    private List<Variable> variables;
-
-    public JdbValue(Value value) {
-        if (value == null) {
-            throw new IllegalArgumentException("Underlying value can not be null. ");
-        }
-        this.value = value;
+    public JdbValue(Value jdiValue) {
+        this.jdiValue = jdiValue;
+        this.variables = new AtomicReference<>();
     }
 
     @Override
     public String getString() {
-        return value.toString();
+        return jdiValue.toString();
     }
 
     @Override
     public List<Variable> getVariables() {
-        if (variables == null) {
-            if (isPrimitive()) {
-                variables = Collections.emptyList();
-            } else {
-                variables = new LinkedList<>();
-                if (isArray()) {
-                    ArrayReference array = (ArrayReference)value;
-                    for (int i = 0; i < array.length(); i++) {
-                        variables.add(new JdbArrayElement(array.getValue(i), i));
+        if (variables.get() == null) {
+            synchronized (variables) {
+                if (variables.get() == null) {
+                    if (isPrimitive()) {
+                        variables.set(Collections.emptyList());
+                    } else if (isArray()) {
+                        variables.set(new LinkedList<>());
+
+                        ArrayReference array = (ArrayReference)jdiValue;
+                        for (int i = 0; i < array.length(); i++) {
+                            variables.get().add(new JdbArrayElement(array.getValue(i), i));
+                        }
+                    } else {
+                        ObjectReference object = (ObjectReference)jdiValue;
+                        variables.set(object.referenceType()
+                                            .allFields()
+                                            .stream()
+                                            .map(f -> new JdbField(f, object))
+                                            .sorted(new JdbFieldComparator())
+                                            .collect(Collectors.toList()));
                     }
-                } else {
-                    ObjectReference object = (ObjectReference)value;
-                    for (Field f : object.referenceType().allFields()) {
-                        variables.add(new JdbField(f, object));
-                    }
-                    variables = variables.stream()
-                                         .map(v -> (org.eclipse.che.plugin.jdb.server.model.JdbField)v)
-                                         .sorted(new JdbFieldComparator())
-                                         .collect(Collectors.toList());
                 }
             }
         }
-        return variables;
+
+        return variables.get();
     }
 
-    public boolean isArray() {
-        return value instanceof ArrayReference;
+    private boolean isArray() {
+        return jdiValue instanceof ArrayReference;
     }
 
-    public boolean isPrimitive() {
-        return value instanceof PrimitiveValue;
+    private boolean isPrimitive() {
+        return jdiValue instanceof PrimitiveValue;
     }
 }

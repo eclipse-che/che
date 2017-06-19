@@ -75,7 +75,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -86,6 +85,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -314,7 +314,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
             Throwable cause = e.getCause();
             if (cause instanceof VMCannotBeModifiedException) {
                 // If target VM in read-only state then list of break point always empty.
-                return Collections.emptyList();
+                return emptyList();
             }
             throw e;
         }
@@ -385,11 +385,11 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
             List<JdbStackFrame> frames = new LinkedList<>();
             try {
-                for (StackFrame sf : t.frames()) {
-                    frames.add(new JdbStackFrame(sf,
-                                                 Collections.emptyList(),
-                                                 Collections.emptyList(),
-                                                 new JdbLocation(sf, new JdbMethod(sf, Collections.emptyList()))));
+                for (StackFrame f : t.frames()) {
+                    frames.add(new JdbStackFrame(f,
+                                                 emptyList(),
+                                                 emptyList(),
+                                                 new JdbLocation(f, new JdbMethod(f, emptyList()))));
                 }
             } catch (IncompatibleThreadStateException ignored) {
             }
