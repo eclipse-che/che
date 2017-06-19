@@ -113,8 +113,8 @@ services:
       - POSTGRES_PASSWORD=keycloak
     links:
       - postgres:postgres
-    volumes:
-      - '<%= scope.lookupvar('che::che_instance') -%>/data/keycloak/data:/opt/jboss/keycloak/standalone/data'
-      - '<%= scope.lookupvar('che::che_instance') -%>/data/keycloak/logs:/opt/jboss/keycloak/standalone/log'
+#    volumes:
+#      - '<%= scope.lookupvar('che::che_instance') -%>/data/keycloak/data:/opt/jboss/keycloak/standalone/data'
+#      - '<%= scope.lookupvar('che::che_instance') -%>/data/keycloak/logs:/opt/jboss/keycloak/standalone/log'
     restart: always
 <% end -%>

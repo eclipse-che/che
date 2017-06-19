@@ -1,7 +1,7 @@
 {
-  "realm" : "fabric8",
-  "resource" : "openshiftio-public",
-  "auth-server-url" : "https://sso.openshift.io/auth",
+  "realm" : "Che",
+  "resource" : "che-public",
+  "auth-server-url" : "http://172.19.20.18:5050/auth",
   "ssl-required" : "external",
   "enable-cors" : true,
   "bearer-only" : false,

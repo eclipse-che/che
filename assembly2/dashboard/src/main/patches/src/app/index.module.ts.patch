@@ -8,9 +8,9 @@
 +
 +
 +let keycloakConfig = {
-+  "url": "https://sso.openshift.io/auth",
-+  "realm": "fabric8",
-+  "clientId": "openshiftio-public",
++  "url": "http://172.19.20.18:5050/auth",
++  "realm": "Che",
++  "clientId": "che-public",
 +};
 
  // init module
