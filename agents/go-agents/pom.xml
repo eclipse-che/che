@@ -27,7 +27,8 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>**/**</include>
+                        <include>**/*.go</include>
+                        <include>pom.xml</include>
                     </includes>
                     <excludes>
                         <exclude>docs/**</exclude>
