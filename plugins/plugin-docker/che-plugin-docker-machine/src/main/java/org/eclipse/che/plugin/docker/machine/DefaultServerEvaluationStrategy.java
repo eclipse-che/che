@@ -31,7 +31,7 @@ import java.util.Map;
  * @author Alexander Garagatyi
  * @see ServerEvaluationStrategy
  */
-public class DefaultServerEvaluationStrategy extends CustomServerEvaluationStrategy {
+public class DefaultServerEvaluationStrategy extends BaseServerEvaluationStrategy {
 
     @Inject
     public DefaultServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String internalAddress,

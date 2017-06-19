@@ -33,7 +33,7 @@ import org.eclipse.che.commons.annotation.Nullable;
  * @author Mario Loriedo <mloriedo@redhat.com>
  * @see ServerEvaluationStrategy
  */
-public class LocalDockerSinglePortServerEvaluationStrategy extends CustomServerEvaluationStrategy {
+public class LocalDockerSinglePortServerEvaluationStrategy extends BaseServerEvaluationStrategy {
 
     @Inject
     public LocalDockerSinglePortServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String internalAddress,
