@@ -134,6 +134,21 @@ public class RequestHandlerManager {
         return methodToCategory.containsKey(method);
     }
 
+    public boolean deregister(String method) {
+
+        oneToOneHandlers.remove(method);
+        oneToManyHandlers.remove(method);
+        oneToNoneHandlers.remove(method);
+        manyToOneHandlers.remove(method);
+        manyToManyHandlers.remove(method);
+        manyToNoneHandlers.remove(method);
+        noneToOneHandlers.remove(method);
+        noneToManyHandlers.remove(method);
+        noneToNoneHandlers.remove(method);
+
+        return methodToCategory.remove(method) != null;
+    }
+
     public void handle(String endpointId, String requestId, String method, JsonRpcParams params) {
         mustBeRegistered(method);
 

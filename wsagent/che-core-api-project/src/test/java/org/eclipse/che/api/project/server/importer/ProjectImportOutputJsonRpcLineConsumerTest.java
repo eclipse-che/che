@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server.importer;
 
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
-import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.EndpointIdConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.MethodNameConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.ParamsConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.SendConfiguratorFromOne;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,8 +23,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Collections;
 
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,14 +54,22 @@ public class ProjectImportOutputJsonRpcLineConsumerTest {
         //given
         when(registrar.getRegisteredEndpoints()).thenReturn(Collections.singleton("endpointId"));
 
+        final EndpointIdConfigurator endpointIdConfigurator = mock(EndpointIdConfigurator.class);
+        when(requestTransmitter.newRequest()).thenReturn(endpointIdConfigurator);
+
+        final MethodNameConfigurator methodNameConfigurator = mock(MethodNameConfigurator.class);
+        when(endpointIdConfigurator.endpointId(anyString())).thenReturn(methodNameConfigurator);
+
+        final ParamsConfigurator paramsConfigurator = mock(ParamsConfigurator.class);
+        when(methodNameConfigurator.methodName(anyString())).thenReturn(paramsConfigurator);
+
+        final SendConfiguratorFromOne sendConfiguratorFromOne = mock(SendConfiguratorFromOne.class);
+        when(paramsConfigurator.paramsAsDto(any())).thenReturn(sendConfiguratorFromOne);
+
         //when
         consumer.sendOutputLine("message");
 
         //then
-        verify(requestTransmitter).transmitOneToNone(eq("endpointId"),
-                                                     eq("event:import-project:progress"),
-                                                     eq(newDto(ImportProgressRecordDto.class).withNum(1)
-                                                                                             .withLine("message")
-                                                                                             .withProjectName("project")));
+        verify(sendConfiguratorFromOne).sendAndSkipResult();
     }
 }

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server.importer;
 
-import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -37,18 +37,18 @@ public class ProjectImportOutputJsonRpcRegistrar {
     private void configureSubscribeHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
                     .methodName(EVENT_IMPORT_OUTPUT_SUBSCRIBE)
-                    .paramsAsEmpty()
+                    .noParams()
                     .noResult()
-                    .withConsumer((endpointId, aVoid) -> endpointIds.add(endpointId));
+                    .withConsumer(endpointId -> endpointIds.add(endpointId));
     }
 
     @Inject
     private void configureUnSubscribeHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
                     .methodName(EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE)
-                    .paramsAsEmpty()
+                    .noParams()
                     .noResult()
-                    .withConsumer((endpointId, aVoid) -> endpointIds.remove(endpointId));
+                    .withConsumer(endpointId -> endpointIds.remove(endpointId));
     }
 
     public Set<String> getRegisteredEndpoints() {

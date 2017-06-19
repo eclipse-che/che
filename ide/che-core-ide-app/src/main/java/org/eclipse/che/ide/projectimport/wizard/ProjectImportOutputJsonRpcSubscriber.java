@@ -13,11 +13,11 @@ package org.eclipse.che.ide.projectimport.wizard;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.ImportProgressRecord;
 import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerRegistry;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 
 import java.util.function.Consumer;
 
@@ -38,30 +38,30 @@ public class ProjectImportOutputJsonRpcSubscriber {
 
     private final RequestTransmitter         transmitter;
     private final RequestHandlerConfigurator configurator;
-    private final RequestHandlerRegistry     handlerRegistry;
+    private final RequestHandlerManager      requestHandlerManager;
 
     @Inject
     public ProjectImportOutputJsonRpcSubscriber(RequestTransmitter transmitter,
                                                 RequestHandlerConfigurator configurator,
-                                                RequestHandlerRegistry handlerRegistry) {
+                                                RequestHandlerManager requestHandlerManager) {
         this.transmitter = transmitter;
         this.configurator = configurator;
-        this.handlerRegistry = handlerRegistry;
+        this.requestHandlerManager = requestHandlerManager;
     }
 
     protected void subscribeForImportOutputEvents(Consumer<ImportProgressRecord> progressConsumer) {
-        transmitter.transmitNoneToNone(WS_AGENT_ENDPOINT, EVENT_IMPORT_OUTPUT_SUBSCRIBE);
+        transmitter.newRequest().endpointId(WS_AGENT_ENDPOINT).methodName(EVENT_IMPORT_OUTPUT_SUBSCRIBE).noParams().sendAndSkipResult();
 
         configurator.newConfiguration()
                     .methodName(EVENT_IMPORT_OUTPUT_PROGRESS)
                     .paramsAsDto(ImportProgressRecordDto.class)
                     .noResult()
-                    .withOperation((endpointId, progress) -> progressConsumer.accept(progress));
+                    .withConsumer(progress -> progressConsumer.accept(progress));
     }
 
     protected void unSubscribeForImportOutputEvents() {
-        transmitter.transmitNoneToNone(WS_AGENT_ENDPOINT, EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE);
+        transmitter.newRequest().endpointId(WS_AGENT_ENDPOINT).methodName(EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE).noParams().sendAndSkipResult();
 
-        handlerRegistry.unregisterNotificationHandler(EVENT_IMPORT_OUTPUT_PROGRESS);
+        requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS);
     }
 }

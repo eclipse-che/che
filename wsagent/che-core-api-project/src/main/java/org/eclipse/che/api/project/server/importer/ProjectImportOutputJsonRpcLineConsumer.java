@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server.importer;
 
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,6 +49,6 @@ public class ProjectImportOutputJsonRpcLineConsumer extends BaseProjectImportOut
                                                                                             .withProjectName(projectName);
 
         endpointIdRegistrar.getRegisteredEndpoints()
-                           .forEach(it -> transmitter.transmitOneToNone(it, EVENT_IMPORT_OUTPUT_PROGRESS, progressRecord));
+                           .forEach(it -> transmitter.newRequest().endpointId(it).methodName(EVENT_IMPORT_OUTPUT_PROGRESS).paramsAsDto(progressRecord).sendAndSkipResult());
     }
 }
