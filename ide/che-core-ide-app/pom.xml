@@ -335,6 +335,7 @@
                         <exclude>**/*.png</exclude>
                         <exclude>**/*.gif</exclude>
                         <exclude>**/*.jpg</exclude>
+                        <exclude>**/DebuggerStateManager.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
