@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server;
+package org.eclipse.che.plugin.jdb.server.util;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
@@ -53,7 +53,7 @@ public class ProjectApiUtils {
     /**
      * Ensures that project api has been initialized only once.
      */
-    static void ensure() throws Exception {
+    static public void ensure() throws Exception {
         if (!initialized.get()) {
             synchronized (initialized) {
                 if (!initialized.get()) {

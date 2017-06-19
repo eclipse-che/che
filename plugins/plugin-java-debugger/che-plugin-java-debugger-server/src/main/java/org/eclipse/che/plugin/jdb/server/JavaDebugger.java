@@ -376,12 +376,12 @@ public class JavaDebugger implements EventsHandler, Debugger {
     }
 
     @Override
-    public StackFrameDump getStackFrameDump(long threadId, int frameIdx) throws DebuggerException {
+    public StackFrameDump getStackFrameDump(long threadId, int frameIndex) throws DebuggerException {
         lock.lock();
         try {
             for (ThreadReference t : vm.allThreads()) {
                 if (t.uniqueID() == threadId) {
-                    return new JdbStackFrame(t.frame(frameIdx));
+                    return new JdbStackFrame(t.frame(frameIndex));
                 }
             }
 
@@ -389,7 +389,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
         } catch (IncompatibleThreadStateException e) {
             throw new DebuggerException("Thread is not suspended", e);
         } catch (IndexOutOfBoundsException e) {
-            throw new DebuggerException(format("Frame %d in thread %d not found.", frameIdx, threadId));
+            throw new DebuggerException(format("Frame %d in thread %d not found.", frameIndex, threadId));
         } finally {
             lock.unlock();
         }

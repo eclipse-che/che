@@ -32,6 +32,7 @@ import org.eclipse.che.api.debug.shared.model.impl.action.StepIntoActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOutActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOverActionImpl;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.eclipse.che.plugin.jdb.server.util.ProjectApiUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -43,7 +44,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.plugin.jdb.server.JavaDebuggerUtils.terminateVirtualMachineQuietly;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;

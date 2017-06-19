@@ -214,7 +214,7 @@ public interface Debugger {
      * @throws DebuggerException
      *      if any error occur
      */
-    default StackFrameDump getStackFrameDump(long threadId, int frameIdx) throws DebuggerException {
+    default StackFrameDump getStackFrameDump(long threadId, int frameIndex) throws DebuggerException {
         throw new DebuggerException("Unsupported operation for current debugger implementation.");
     }
 

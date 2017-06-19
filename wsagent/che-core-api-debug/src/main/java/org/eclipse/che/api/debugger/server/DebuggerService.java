@@ -171,7 +171,13 @@ public class DebuggerService {
     @GET
     @Path("{id}/dump")
     @Produces(MediaType.APPLICATION_JSON)
-    public StackFrameDumpDto getStackFrameDump(@PathParam("id") String sessionId) throws DebuggerException {
+    public StackFrameDumpDto getStackFrameDump(@PathParam("id") String sessionId,
+                                               @QueryParam("threadId") @DefaultValue("-1") long threadId,
+                                               @QueryParam("frameIndex") @DefaultValue("-1") int frameIndex) throws DebuggerException {
+        if (threadId != -1 || frameIndex != -1) {
+            return asDto(debuggerManager.getDebugger(sessionId).getStackFrameDump(threadId, frameIndex));
+        }
+
         return asDto(debuggerManager.getDebugger(sessionId).dumpStackFrame());
     }
 
