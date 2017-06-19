@@ -31,7 +31,7 @@ import java.util.Map;
  * @author Angel Misevski <amisevsk@redhat.com>
  * @see ServerEvaluationStrategy
  */
-public class LocalDockerServerEvaluationStrategy extends CustomServerEvaluationStrategy {
+public class LocalDockerServerEvaluationStrategy extends BaseServerEvaluationStrategy {
 
     @Inject
     public LocalDockerServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String internalAddress,
