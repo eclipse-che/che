@@ -15,9 +15,9 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
-import org.eclipse.che.api.languageserver.registry.LSOperation;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.CommandDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.CompletionItemDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.DocumentHighlightDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedCompletionItemDto;
@@ -28,6 +28,10 @@ import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SignatureHel
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SymbolInformationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.TextEditDto;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
+import org.eclipse.che.api.languageserver.util.LSOperation;
+import org.eclipse.che.api.languageserver.util.OperationUtil;
+import org.eclipse.lsp4j.CodeActionParams;
+import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
@@ -88,12 +92,12 @@ public class TextDocumentService {
     @PostConstruct
     public void configureMethods() {
         dtoToDtoList("definition", TextDocumentPositionParams.class, LocationDto.class, this::definition);
+        dtoToDtoList("codeAction", CodeActionParams.class, CommandDto.class, this::codeAction);
         dtoToDtoList("documentSymbol", DocumentSymbolParams.class, SymbolInformationDto.class, this::documentSymbol);
         dtoToDtoList("formatting", DocumentFormattingParams.class, TextEditDto.class, this::formatting);
         dtoToDtoList("rangeFormatting", DocumentRangeFormattingParams.class, TextEditDto.class, this::rangeFormatting);
         dtoToDtoList("references", ReferenceParams.class, LocationDto.class, this::references);
         dtoToDtoList("onTypeFormatting", DocumentOnTypeFormattingParams.class, TextEditDto.class, this::onTypeFormatting);
-
 
         dtoToDto("completionItem/resolve", ExtendedCompletionItemDto.class, CompletionItemDto.class, this::completionItemResolve);
         dtoToDto("documentHighlight", TextDocumentPositionParams.class, DocumentHighlightDto.class, this::documentHighlight);
@@ -105,6 +109,40 @@ public class TextDocumentService {
         dtoToNothing("didClose", DidCloseTextDocumentParams.class, this::didClose);
         dtoToNothing("didOpen", DidOpenTextDocumentParams.class, this::didOpen);
         dtoToNothing("didSave", DidSaveTextDocumentParams.class, this::didSave);
+    }
+
+    private List<CommandDto> codeAction(CodeActionParams params) {
+        TextDocumentIdentifier textDocument = params.getTextDocument();
+        String uri = prefixURI(textDocument.getUri());
+        textDocument.setUri(uri);
+        List<CommandDto> result = new ArrayList<>();
+        try {
+            List<InitializedLanguageServer> servers = languageServerRegistry.getApplicableLanguageServers(uri).stream()
+                            .flatMap(Collection::stream).collect(Collectors.toList());
+            LSOperation<InitializedLanguageServer, List<? extends Command>> op = new LSOperation<InitializedLanguageServer, List<? extends Command>>() {
+
+                @Override
+                public boolean canDo(InitializedLanguageServer server) {
+                    return truish(server.getInitializeResult().getCapabilities().getCodeActionProvider());
+                }
+
+                public CompletableFuture<List<? extends Command>> start(InitializedLanguageServer element) {
+                    return element.getServer().getTextDocumentService().codeAction(params);
+                };
+
+                @Override
+                public boolean handleResult(InitializedLanguageServer element, List<? extends Command> res) {
+                    for (Command cmd : res) {
+                        result.add(new CommandDto(cmd));
+                    }
+                    return false;
+                };
+            };
+            OperationUtil.doInParallel(servers, op, 10000);
+            return result;
+        } catch (LanguageServerException e) {
+            throw new JsonRpcException(-27000, e.getMessage());
+        }
     }
 
     private ExtendedCompletionListDto completion(TextDocumentPositionParams textDocumentPositionParams) {
@@ -152,7 +190,7 @@ public class TextDocumentService {
                                 return false;
                             }
                         };
-                        LanguageServerRegistryImpl.doInParallel(element, op2, 10000);
+                        OperationUtil.doInParallel(element, op2, 10000);
 
                         return res;
                     });
@@ -161,10 +199,10 @@ public class TextDocumentService {
                 @Override
                 public boolean handleResult(Collection<InitializedLanguageServer> element, ExtendedCompletionListDto list) {
                     result[0] = list;
-                    return list.getItems().isEmpty();
+                    return !list.getItems().isEmpty();
                 }
             };
-            LanguageServerRegistryImpl.doInSequence(languageServerRegistry.getApplicableLanguageServers(uri), op, 10000);
+            OperationUtil.doInSequence(languageServerRegistry.getApplicableLanguageServers(uri), op, 10000);
             return result[0];
         } catch (LanguageServerException e) {
             throw new JsonRpcException(-27000, e.getMessage());
@@ -172,34 +210,38 @@ public class TextDocumentService {
     }
 
     private List<SymbolInformationDto> documentSymbol(DocumentSymbolParams documentSymbolParams) {
-            String uri = prefixURI(documentSymbolParams.getTextDocument().getUri());
-            documentSymbolParams.getTextDocument().setUri(uri);
-            List<SymbolInformationDto> result = new ArrayList<>();
-            try {
-                List<InitializedLanguageServer> servers = languageServerRegistry.getApplicableLanguageServers(uri).stream()
-                                .flatMap(Collection::stream).collect(Collectors.toList());
-                LanguageServerRegistryImpl.doInParallel(servers, new LSOperation<InitializedLanguageServer, List<? extends SymbolInformation>>() {
+        String uri = prefixURI(documentSymbolParams.getTextDocument().getUri());
+        documentSymbolParams.getTextDocument().setUri(uri);
+        List<SymbolInformationDto> result = new ArrayList<>();
+        try {
+            List<InitializedLanguageServer> servers = languageServerRegistry.getApplicableLanguageServers(uri).stream()
+                            .flatMap(Collection::stream).collect(Collectors.toList());
+            OperationUtil.doInParallel(servers,
+                                                    new LSOperation<InitializedLanguageServer, List<? extends SymbolInformation>>() {
 
-                    @Override
-                    public boolean canDo(InitializedLanguageServer element) {
-                        return truish(element.getInitializeResult().getCapabilities().getDocumentSymbolProvider());
-                    }
+                                                        @Override
+                                                        public boolean canDo(InitializedLanguageServer element) {
+                                                            return truish(element.getInitializeResult().getCapabilities()
+                                                                            .getDocumentSymbolProvider());
+                                                        }
 
-                    @Override
-                    public CompletableFuture<List<? extends SymbolInformation>> start(InitializedLanguageServer element) {
-                        return element.getServer().getTextDocumentService().documentSymbol(documentSymbolParams);
-                    }
+                                                        @Override
+                                                        public CompletableFuture<List<? extends SymbolInformation>> start(InitializedLanguageServer element) {
+                                                            return element.getServer().getTextDocumentService()
+                                                                            .documentSymbol(documentSymbolParams);
+                                                        }
 
-                    @Override
-                    public boolean handleResult(InitializedLanguageServer element, List<? extends SymbolInformation> locations) {
-                        locations.forEach(o -> {
-                            o.getLocation().setUri(removePrefixUri(o.getLocation().getUri()));
-                            result.add(new SymbolInformationDto(o));
-                        });
-                        return true;
-                    }
-                }, 10000);
-                return result;
+                                                        @Override
+                                                        public boolean handleResult(InitializedLanguageServer element,
+                                                                                    List<? extends SymbolInformation> locations) {
+                                                            locations.forEach(o -> {
+                                                                o.getLocation().setUri(removePrefixUri(o.getLocation().getUri()));
+                                                                result.add(new SymbolInformationDto(o));
+                                                            });
+                                                            return true;
+                                                        }
+                                                    }, 10000);
+            return result;
 
         } catch (LanguageServerException e) {
             throw new JsonRpcException(-27000, e.getMessage());
@@ -214,7 +256,7 @@ public class TextDocumentService {
         try {
             List<InitializedLanguageServer> servers = languageServerRegistry.getApplicableLanguageServers(uri).stream()
                             .flatMap(Collection::stream).collect(Collectors.toList());
-            LanguageServerRegistryImpl.doInParallel(servers, new LSOperation<InitializedLanguageServer, List<? extends Location>>() {
+            OperationUtil.doInParallel(servers, new LSOperation<InitializedLanguageServer, List<? extends Location>>() {
 
                 @Override
                 public boolean canDo(InitializedLanguageServer element) {
@@ -248,7 +290,7 @@ public class TextDocumentService {
             List<InitializedLanguageServer> servers = languageServerRegistry.getApplicableLanguageServers(uri).stream()
                             .flatMap(Collection::stream).collect(Collectors.toList());
             List<LocationDto> result = new ArrayList<>();
-            LanguageServerRegistryImpl.doInParallel(servers, new LSOperation<InitializedLanguageServer, List<? extends Location>>() {
+            OperationUtil.doInParallel(servers, new LSOperation<InitializedLanguageServer, List<? extends Location>>() {
 
                 @Override
                 public boolean canDo(InitializedLanguageServer element) {
@@ -301,7 +343,7 @@ public class TextDocumentService {
 
             List<InitializedLanguageServer> servers = languageServerRegistry.getApplicableLanguageServers(uri).stream()
                             .flatMap(Collection::stream).collect(Collectors.toList());
-            LanguageServerRegistryImpl.doInParallel(servers, new LSOperation<InitializedLanguageServer, Hover>() {
+            OperationUtil.doInParallel(servers, new LSOperation<InitializedLanguageServer, Hover>() {
 
                 @Override
                 public boolean canDo(InitializedLanguageServer element) {
@@ -356,7 +398,7 @@ public class TextDocumentService {
                     return false;
                 }
             };
-            LanguageServerRegistryImpl.doInSequence(servers, op, 10000);
+            OperationUtil.doInSequence(servers, op, 10000);
             return result[0];
         } catch (LanguageServerException e) {
             throw new JsonRpcException(-27000, e.getMessage());
@@ -368,11 +410,11 @@ public class TextDocumentService {
             String uri = prefixURI(documentFormattingParams.getTextDocument().getUri());
             documentFormattingParams.getTextDocument().setUri(uri);
             InitializedLanguageServer server = languageServerRegistry.getApplicableLanguageServers(uri).stream().flatMap(Collection::stream)
-                            .filter(s->truish(s.getInitializeResult().getCapabilities().getDocumentFormattingProvider()))
-                            .findFirst().get();
+                            .filter(s -> truish(s.getInitializeResult().getCapabilities().getDocumentFormattingProvider())).findFirst()
+                            .get();
             return server == null ? Collections.emptyList()
-                            : server.getServer().getTextDocumentService().formatting(documentFormattingParams).get(5000, TimeUnit.MILLISECONDS).stream()
-                                            .map(TextEditDto::new).collect(Collectors.toList());
+                            : server.getServer().getTextDocumentService().formatting(documentFormattingParams)
+                                            .get(5000, TimeUnit.MILLISECONDS).stream().map(TextEditDto::new).collect(Collectors.toList());
 
         } catch (InterruptedException | ExecutionException | LanguageServerException | TimeoutException e) {
             throw new JsonRpcException(-27000, e.getMessage());
@@ -384,8 +426,8 @@ public class TextDocumentService {
             String uri = prefixURI(documentRangeFormattingParams.getTextDocument().getUri());
             documentRangeFormattingParams.getTextDocument().setUri(uri);
             InitializedLanguageServer server = languageServerRegistry.getApplicableLanguageServers(uri).stream().flatMap(Collection::stream)
-                            .filter(s->truish(s.getInitializeResult().getCapabilities().getDocumentRangeFormattingProvider()))
-                            .findFirst().get();
+                            .filter(s -> truish(s.getInitializeResult().getCapabilities().getDocumentRangeFormattingProvider())).findFirst()
+                            .get();
             return server == null ? Collections.emptyList()
                             : server.getServer().getTextDocumentService().rangeFormatting(documentRangeFormattingParams).get().stream()
                                             .map(TextEditDto::new).collect(Collectors.toList());
@@ -399,7 +441,7 @@ public class TextDocumentService {
             String uri = prefixURI(documentOnTypeFormattingParams.getTextDocument().getUri());
             documentOnTypeFormattingParams.getTextDocument().setUri(uri);
             InitializedLanguageServer server = languageServerRegistry.getApplicableLanguageServers(uri).stream().flatMap(Collection::stream)
-                            .filter(s->s.getInitializeResult().getCapabilities().getDocumentOnTypeFormattingProvider() != null)
+                            .filter(s -> s.getInitializeResult().getCapabilities().getDocumentOnTypeFormattingProvider() != null)
                             .findFirst().get();
             return server == null ? Collections.emptyList()
                             : server.getServer().getTextDocumentService().onTypeFormatting(documentOnTypeFormattingParams).get().stream()
@@ -497,7 +539,7 @@ public class TextDocumentService {
                                 return false;
                             }
                         };
-                        LanguageServerRegistryImpl.doInParallel(element, op2, 10000);
+                        OperationUtil.doInParallel(element, op2, 10000);
 
                         return res;
                     });
@@ -509,7 +551,7 @@ public class TextDocumentService {
                     return list.isEmpty();
                 }
             };
-            LanguageServerRegistryImpl.doInSequence(languageServerRegistry.getApplicableLanguageServers(uri), op, 10000);
+            OperationUtil.doInSequence(languageServerRegistry.getApplicableLanguageServers(uri), op, 10000);
 
             if (!result[0].isEmpty()) {
                 return result[0].get(0);

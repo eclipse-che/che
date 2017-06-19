@@ -47,10 +47,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -58,7 +54,7 @@ import java.util.stream.Collectors;
 @Singleton
 public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     private final static Logger                LOG                 = LoggerFactory.getLogger(LanguageServerRegistryImpl.class);
-    public final static String                 PROJECT_FOLDER_PATH = "file:///projects";
+    private final static String                PROJECT_FOLDER_PATH = "file:///projects";
     private final List<LanguageDescription>    languages           = new ArrayList<>();
     private final List<LanguageServerLauncher> launchers           = new ArrayList<>();
     private final AtomicInteger                serverId            = new AtomicInteger();
@@ -133,7 +129,8 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                                 initialized = new ArrayList<>();
                                 initializedServers.put(projectPath, initialized);
                             }
-                            initialized.add(new InitializedLanguageServer(String.valueOf(serverId.incrementAndGet()), pair.first, pair.second, launcher));
+                            initialized.add(new InitializedLanguageServer(String.valueOf(serverId.incrementAndGet()), pair.first,
+                                            pair.second, launcher));
                             launchers.remove(launcher);
                             initializedServers.notifyAll();
                         }
@@ -250,78 +247,6 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         // sort lists highest score first
         return result.entrySet().stream().sorted((left, right) -> right.getKey() - left.getKey()).map(entry -> entry.getValue())
                         .collect(Collectors.toList());
-    }
-
-    public static <C, R> void doInParallel(Collection<C> collection, LSOperation<C, R> op, long timeoutMillis) {
-        Object lock = new Object();
-        List<CompletableFuture<?>> pendingResponses = new ArrayList<>();
-
-        for (C element : collection) {
-            if (op.canDo(element)) {
-                CompletableFuture<R> future = op.start(element);
-                synchronized (lock) {
-                    pendingResponses.add(future);
-                    lock.notifyAll();
-                }
-                future.thenAccept(result -> {
-                    synchronized (lock) {
-                        if (!future.isCancelled()) {
-                            op.handleResult(element, result);
-                            pendingResponses.remove(future);
-                            lock.notifyAll();
-                        }
-                    }
-                }).exceptionally((t) -> {
-                    LOG.info("Exception occurred in request", t);
-                    synchronized (lock) {
-                        pendingResponses.remove(future);
-                        lock.notifyAll();
-                    }
-                    return null;
-                });
-            }
-        }
-
-        long endTime = System.currentTimeMillis() + 5000;
-
-        try {
-            synchronized (lock) {
-                while (System.currentTimeMillis() < endTime && pendingResponses.size() > 0) {
-                    lock.wait(endTime - System.currentTimeMillis());
-                }
-            }
-        } catch (InterruptedException e) {
-            LOG.info("Thread interrupted", e);
-            Thread.currentThread().interrupt();
-        }
-        synchronized (lock) {
-            for (CompletableFuture<?> pending : new ArrayList<>(pendingResponses)) {
-                pending.cancel(true);
-            }
-            lock.notifyAll();
-        }
-    }
-
-    public static <C, R> void doInSequence(Collection<C> collection, LSOperation<C, R> op, long timeoutMillis) {
-        long endTime = System.currentTimeMillis() + timeoutMillis;
-        for (C element : collection) {
-            if (op.canDo(element)) {
-                CompletableFuture<R> future = op.start(element);
-                try {
-                    R result = future.get(Math.max(endTime - timeoutMillis, 1), TimeUnit.MILLISECONDS);
-                    if (op.handleResult(element, result)) {
-                        return;
-                    }
-                } catch (InterruptedException e) {
-                    LOG.info("Thread interrupted", e);
-                    Thread.currentThread().interrupt();
-                } catch (ExecutionException e) {
-                    LOG.info("Exception occurred in op", e);
-                } catch (TimeoutException e) {
-                    future.cancel(true);
-                }
-            }
-        }
     }
 
     private int matchScore(LanguageServerDescription desc, String path, String languageId) {

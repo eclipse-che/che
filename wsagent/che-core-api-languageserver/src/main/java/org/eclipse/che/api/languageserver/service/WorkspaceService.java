@@ -14,11 +14,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
-import org.eclipse.che.api.languageserver.registry.LSOperation;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SymbolInformationDto;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceSymbolParams;
+import org.eclipse.che.api.languageserver.util.LSOperation;
+import org.eclipse.che.api.languageserver.util.OperationUtil;
 import org.eclipse.lsp4j.SymbolInformation;
 
 import javax.ws.rs.Consumes;
@@ -63,7 +64,7 @@ public class WorkspaceService {
         List<SymbolInformationDto> result = new ArrayList<>();
         List<InitializedLanguageServer> servers = registry.getApplicableLanguageServers(workspaceSymbolParams.getFileUri()).stream()
                         .flatMap(Collection::stream).collect(Collectors.toList());
-        LanguageServerRegistryImpl.doInParallel(servers, new LSOperation<InitializedLanguageServer, List<? extends SymbolInformation>>() {
+        OperationUtil.doInParallel(servers, new LSOperation<InitializedLanguageServer, List<? extends SymbolInformation>>() {
 
             @Override
             public boolean canDo(InitializedLanguageServer element) {

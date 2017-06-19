@@ -16,7 +16,6 @@ import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ServerCapabilitiesDto;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.eclipse.lsp4j.ServerCapabilities;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
