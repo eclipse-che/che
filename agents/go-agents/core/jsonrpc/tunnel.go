@@ -96,7 +96,7 @@ func NewTunnel(conn NativeConn, dispatcher ReqDispatcher) *Tunnel {
 		reqDispatcher: dispatcher,
 		q:             q,
 	}
-	tunnel.closer = &closer{tunnel: tunnel}
+	tunnel.closer = &closer{tunnel: tunnel, outClosed: make(chan bool, 1)}
 	return tunnel
 }
 
@@ -281,6 +281,7 @@ func (tun *Tunnel) mainWriteLoop() {
 			}
 		}
 	}
+	tun.closer.outClosed <- true
 }
 
 func (tun *Tunnel) mainReadLoop() {
@@ -413,8 +414,9 @@ type draft struct {
 }
 
 type closer struct {
-	once   sync.Once
-	tunnel *Tunnel
+	once      sync.Once
+	tunnel    *Tunnel
+	outClosed chan bool
 	// 0 - not closed, 1 - closed
 	closed int32
 }
@@ -422,7 +424,11 @@ type closer struct {
 func (closer *closer) closeOnce() {
 	closer.once.Do(func() {
 		atomic.StoreInt32(&closer.closed, 1)
+
 		close(closer.tunnel.jsonOut)
+		// wait write loop to complete
+		<- closer.outClosed
+
 		closer.tunnel.q.stopWatching()
 		if err := closer.tunnel.conn.Close(); err != nil {
 			log.Printf("Error while closing connection, %s", err.Error())
