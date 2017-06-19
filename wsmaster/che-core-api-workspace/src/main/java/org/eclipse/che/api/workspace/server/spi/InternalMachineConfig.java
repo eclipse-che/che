@@ -15,6 +15,7 @@ import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
+import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 
@@ -23,7 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static java.lang.String.format;
 
@@ -35,7 +35,7 @@ import static java.lang.String.format;
 public class InternalMachineConfig {
 
     // ordered agent scripts to launch on start
-    private final List<ResolvedAgent>       agents;
+    private final List<AgentImpl>           agents;
     // set of servers including ones configured by agents
     private final Map<String, ServerConfig> servers;
     private final Map<String, String>       attributes;
@@ -67,7 +67,7 @@ public class InternalMachineConfig {
     /**
      * @return agent scripts
      */
-    public List<ResolvedAgent> getAgents() {
+    public List<AgentImpl> getAgents() {
         return agents;
     }
 
@@ -88,10 +88,7 @@ public class InternalMachineConfig {
                 agentsConf.add(agentRegistry.getAgent(agentKey));
             }
             for (Agent agent : agentsConf) {
-                this.agents.add(new ResolvedAgent(agent.getId(),
-                                                  agent.getScript(),
-                                                  agent.getServers().keySet(),
-                                                  agent.getProperties()));
+                this.agents.add(new AgentImpl(agent));
                 for (Map.Entry<String, ? extends ServerConfig> serverEntry : agent.getServers().entrySet()) {
                     if (servers.putIfAbsent(serverEntry.getKey(), serverEntry.getValue()) != null &&
                         servers.get(serverEntry.getKey()).equals(serverEntry.getValue())) {
@@ -104,40 +101,6 @@ public class InternalMachineConfig {
         } catch (AgentException e) {
             // TODO agents has circular dependency or missing, what should we throw in that case?
             throw new InfrastructureException(e.getLocalizedMessage(), e);
-        }
-    }
-
-    public static class ResolvedAgent {
-        private String              id;
-        private String              script;
-        // needed to know which servers should be pinged on start of agent
-        private Set<String>         serversRefs;
-        private Map<String, String> properties;
-
-        public ResolvedAgent(String id,
-                             String script,
-                             Set<String> servers,
-                             Map<String, String> properties) {
-            this.id = id;
-            this.script = script;
-            this.serversRefs = servers;
-            this.properties = properties;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public String getScript() {
-            return script;
-        }
-
-        public Set<String> getServers() {
-            return serversRefs;
-        }
-
-        public Map<String, String> getProperties() {
-            return properties;
         }
     }
 }

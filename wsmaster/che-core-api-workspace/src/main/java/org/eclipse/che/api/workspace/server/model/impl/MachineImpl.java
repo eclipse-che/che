@@ -31,9 +31,9 @@ public class MachineImpl implements Machine {
         return new MachineRuntimeInfoImplBuilder();
     }
 
-//    public MachineImpl(Machine machineRuntime) {
-//        this(machineRuntime.getProperties(), machineRuntime.getServers());
-//    }
+    public MachineImpl(Machine machineRuntime) {
+        this(machineRuntime.getProperties(), machineRuntime.getServers());
+    }
 
     public MachineImpl(Map<String, String> properties,
                        Map<String, ? extends Server> servers) {
