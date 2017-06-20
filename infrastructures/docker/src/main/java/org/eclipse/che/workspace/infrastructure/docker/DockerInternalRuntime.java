@@ -294,9 +294,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                             .build()
                             .toURL();
         } catch (MalformedURLException e) {
-            // server URL is invalid, should not happen, skip server
-            LOG.error(e.getLocalizedMessage(), e);
-            return;
+            throw new InternalInfrastructureException("Server " + serverRef + " URL is invalid. Error: " + e.getLocalizedMessage(), e);
         }
         // max start time 180 seconds
         long readinessDeadLine = System.currentTimeMillis() + 3000 * 60;
