@@ -262,8 +262,6 @@ init() {
   sed -i "/che.workspace.storage=/c\che.workspace.storage=/data/workspaces" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.database=/c\che.database=/data/storage" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.template.storage=/c\che.template.storage=/data/templates" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.stacks.storage=/c\che.stacks.storage=/data/stacks/stacks.json" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.stacks.images=/c\che.stacks.images=/data/stacks/images" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.workspace.agent.dev=/c\che.workspace.agent.dev=${CHE_DATA_HOST}/lib/ws-agent.tar.gz" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.workspace.terminal_linux_amd64=/c\che.workspace.terminal_linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/terminal" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.workspace.terminal_linux_arm7=/c\che.workspace.terminal_linux_arm7=${CHE_DATA_HOST}/lib/linux_arm7/terminal" $CHE_LOCAL_CONF_DIR/che.properties
@@ -284,10 +282,9 @@ init() {
   mkdir -p ${CHE_DATA}/lib  
   cp -rf ${CHE_HOME}/lib/* "${CHE_DATA}"/lib
 
-  if [[ ! -f "${CHE_DATA}"/stacks/stacks.json ]];then
-    rm -rf "${CHE_DATA}"/stacks/*
-    mkdir -p "${CHE_DATA}"/stacks
-    cp -rf "${CHE_HOME}"/stacks/* "${CHE_DATA}"/stacks
+  # Cleanup no longer in use stacks folder, accordance to a new loading policy.
+  if [[ -d "${CHE_DATA}"/stacks ]];then
+    rm -rf "${CHE_DATA}"/stacks
   fi
 
   if [[ ! -f "${CHE_DATA}"/templates/samples.json ]];then
