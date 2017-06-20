@@ -221,8 +221,6 @@ export class CreateProjectController {
 
     cheAPI.getWorkspace().getWorkspaces();
 
-    $rootScope.showIDE = false;
-
     this.isHandleClose = true;
     this.connectionClosed = () => {
       if (!this.isHandleClose) {
