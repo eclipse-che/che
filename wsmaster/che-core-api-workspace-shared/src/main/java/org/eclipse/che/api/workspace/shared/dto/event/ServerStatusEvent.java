@@ -29,6 +29,9 @@ public interface ServerStatusEvent {
 
     ServerStatusEvent withServerName(String serverName);
 
+    String getServerUrl();
+
+    ServerStatusEvent withServerUrl(String serverUrl);
 
     String getMachineName();
 

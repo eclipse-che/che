@@ -8,26 +8,34 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.recipe.providers;
-
-import com.google.inject.Provider;
-
-import org.eclipse.che.commons.annotation.Nullable;
-
-import javax.inject.Inject;
-import javax.inject.Named;
+package org.eclipse.che.api.project.shared;
 
 /**
- * @author Anton Korneta
+ * Progress record that holds output information about the importing status.
+ *
+ * @author Vlad Zhukovskyi
+ * @since 5.9.0
  */
-public class RecipeProvider implements Provider<String> {
-    @Inject
-    @Nullable
-    @Named("local.recipe.path")
-    public String path;
+public interface ImportProgressRecord {
 
-    @Override
-    public String get() {
-        return path;
-    }
+    /**
+     * Record line number.
+     *
+     * @return record line number
+     */
+    int getNum();
+
+    /**
+     * Record line.
+     *
+     * @return record line
+     */
+    String getLine();
+
+    /**
+     * Return project name.
+     *
+     * @return project name
+     */
+    String getProjectName();
 }

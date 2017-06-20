@@ -106,7 +106,7 @@ public class DockerInfraModule extends AbstractModule {
         bind(DockerRegistryDynamicAuthResolver.class).to(NoOpDockerRegistryDynamicAuthResolverImpl.class);
 
         install(new FactoryModuleBuilder()
-                        .implement(DockerRuntimeContext.class, DockerRuntimeContext.class)
-                        .build(RuntimeFactory.class));
+                        .implement(DockerInternalRuntime.class, DockerInternalRuntime.class)
+                        .build(DockerRuntimeFactory.class));
     }
 }

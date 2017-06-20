@@ -13,7 +13,8 @@ package org.eclipse.che.workspace.infrastructure.docker;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
-import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
+import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -96,6 +97,8 @@ public class DockerMachine implements Machine {
     private final ContainerInfo                    info;
     private final ServerEvaluationStrategyProvider provider;
 
+    private Map<String, ServerImpl> servers;
+
     @Inject
     public DockerMachine(DockerConnector docker,
                          String registry,
@@ -126,9 +129,23 @@ public class DockerMachine implements Machine {
     }
 
     @Override
-    public Map<String, ? extends Server> getServers() {
-        ServerEvaluationStrategy strategy = provider.get();
-        return strategy.getServers(info, "localhost", Collections.emptyMap());
+    public Map<String, ServerImpl> getServers() {
+        if(servers == null) {
+            ServerEvaluationStrategy strategy = provider.get();
+            servers = strategy.getServers(info, "localhost", Collections.emptyMap());
+        }
+        return servers;
+    }
+
+    void setServerStatus(String serverRef, ServerStatus status) {
+        if (servers == null) {
+            throw new IllegalStateException("Servers are not initialized yet");
+        }
+        ServerImpl server = servers.get(serverRef);
+        if (server == null) {
+            throw new IllegalArgumentException("Server with provided reference " + serverRef + " missing");
+        }
+        server.setStatus(status);
     }
 
     public void exec(String script, MessageProcessor<LogMessage> messageProcessor) throws InfrastructureException {

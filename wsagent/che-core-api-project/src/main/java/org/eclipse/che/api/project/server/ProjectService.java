@@ -25,11 +25,15 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.project.type.Value;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
+import org.eclipse.che.api.core.util.CompositeLineConsumer;
+import org.eclipse.che.api.project.server.importer.ProjectImportOutputJsonRpcLineConsumer;
+import org.eclipse.che.api.project.server.importer.ProjectImportOutputJsonRpcRegistrar;
 import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
@@ -105,18 +109,24 @@ public class ProjectService extends Service {
     private static final Logger LOG  = LoggerFactory.getLogger(ProjectService.class);
     private static final Tika   TIKA = new Tika();
 
-    private final ProjectManager              projectManager;
-    private final EventService                eventService;
-    private final ProjectServiceLinksInjector projectServiceLinksInjector;
-    private final String                      workspace;
+    private final ProjectManager                      projectManager;
+    private final EventService                        eventService;
+    private final ProjectServiceLinksInjector         projectServiceLinksInjector;
+    private final RequestTransmitter                  transmitter;
+    private final ProjectImportOutputJsonRpcRegistrar projectImportHandlerRegistrar;
+    private final String                              workspace;
 
     @Inject
     public ProjectService(ProjectManager projectManager,
                           EventService eventService,
-                          ProjectServiceLinksInjector projectServiceLinksInjector) {
+                          ProjectServiceLinksInjector projectServiceLinksInjector,
+                          RequestTransmitter transmitter,
+                          ProjectImportOutputJsonRpcRegistrar projectImportHandlerRegistrar) {
         this.projectManager = projectManager;
         this.eventService = eventService;
         this.projectServiceLinksInjector = projectServiceLinksInjector;
+        this.transmitter = transmitter;
+        this.projectImportHandlerRegistrar = projectImportHandlerRegistrar;
         this.workspace = WorkspaceIdProvider.getWorkspaceId();
     }
 
@@ -351,8 +361,16 @@ public class ProjectService extends Service {
                                                                      ServerException,
                                                                      NotFoundException,
                                                                      BadRequestException {
-        projectManager.importProject(path, sourceStorage, force,
-                                     () -> new ProjectImportOutputWSLineConsumer(path, workspace, 300));
+
+        final int delayBetweenMessages = 300;
+
+        final ProjectImportOutputWSLineConsumer wsLineConsumer =
+                new ProjectImportOutputWSLineConsumer(path, delayBetweenMessages);
+
+        final ProjectImportOutputJsonRpcLineConsumer rpcLineConsumer =
+                new ProjectImportOutputJsonRpcLineConsumer(path, transmitter, projectImportHandlerRegistrar, delayBetweenMessages);
+
+        projectManager.importProject(path, sourceStorage, force, () -> new CompositeLineConsumer(wsLineConsumer, rpcLineConsumer));
     }
 
     @POST
