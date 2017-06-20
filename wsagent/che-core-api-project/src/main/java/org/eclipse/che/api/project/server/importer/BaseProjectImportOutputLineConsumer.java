@@ -14,6 +14,8 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -34,6 +36,8 @@ import java.util.concurrent.TimeUnit;
  * @since 5.9.0
  */
 public abstract class BaseProjectImportOutputLineConsumer implements LineConsumer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BaseProjectImportOutputLineConsumer.class);
 
     protected final String                   projectName;
     protected final BlockingQueue<String>    lineToSendQueue;
@@ -68,8 +72,8 @@ public abstract class BaseProjectImportOutputLineConsumer implements LineConsume
     public void writeLine(String line) throws IOException {
         try {
             lineToSendQueue.put(line);
-        } catch (InterruptedException ignored) {
-            // ignore if interrupted
+        } catch (InterruptedException exception) {
+            LOG.info(exception.getLocalizedMessage());
         }
     }
 
