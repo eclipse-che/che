@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.CurrentWorkspaceManager;
 
 /** Performs initial startup of the CHE IDE application. */
@@ -44,7 +45,10 @@ public class IdeBootstrap {
 
     /** Handle an error with IDE UI. */
     private Operation<PromiseError> handleError() {
-        return err -> dialogFactory.createMessageDialog("IDE initialization failed", err.getMessage(), null).show();
+        return err -> {
+            dialogFactory.createMessageDialog("IDE initialization failed", err.getMessage(), null).show();
+            Log.error(IdeBootstrap.class, err);
+        };
     }
 
     /** Handle an error without IDE UI, as a fallback (when DialogFactory can't be used). */
