@@ -1,7 +1,10 @@
 class che {
-
+  file { "/opt/che/config/che":
+    ensure => "directory",
+    mode   => "755",
+  } ->
   # creating che.env
-  file { "/opt/che/config/che.env":
+  file { "/opt/che/config/che/che.env":
     ensure  => "present",
     content => template("che/che.env.erb"),
     mode    => "644",
@@ -16,13 +19,13 @@ class che {
   }
 
   # JMX
-  file { "/opt/che/config/jmxremote.access":
+  file { "/opt/che/config/che/jmxremote.access":
     ensure  => "present",
     content => "$che_jmx_username readwrite",
     mode    => "644",
   }
 
-  file { "/opt/che/config/jmxremote.password":
+  file { "/opt/che/config/che/jmxremote.password":
     ensure  => "present",
     content => "$che_jmx_username $che_jmx_password",
     mode    => "644",

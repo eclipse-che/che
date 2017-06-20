@@ -3,8 +3,8 @@
 # PLEASE DON'T MODIFY BY HAND
 # ###################################
 
-<% if scope.lookupvar('che::che_small_group') == 'true' -%>
-version: '2'
+<% if scope.lookupvar('che::che_for_small_groups') == 'true' -%>
+version: '2.1'
 services:
 <% end -%>
 
@@ -15,7 +15,7 @@ services:
     image: <%= ENV["IMAGE_CHE"] %>
     env_file:
 <% if @compose_file_for_containers == true -%>
-      - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/che.env'
+      - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/che/che.env'
 <% else -%>
       - '<%= ENV["CHE_ENV_FILE"] %>'
 <% end -%>
@@ -23,7 +23,7 @@ services:
       - '/var/run/docker.sock:/var/run/docker.sock'
       - '<%= scope.lookupvar('che::che_instance') -%>/data:/data'
       - '<%= scope.lookupvar('che::che_instance') -%>/logs:/logs'
-      - '<%= scope.lookupvar('che::che_instance') -%>/config:/conf'
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/che:/conf'
 <% if scope.lookupvar('che::che_dev_env') == 'on' -%>
       - '<%= scope.lookupvar('che::che_assembly') -%>:/assembly'
 <% end -%>
@@ -78,10 +78,10 @@ services:
 <% end -%>
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - '<%= scope.lookupvar('che::che_instance') -%>/config/traefik.toml:/etc/traefik/traefik.toml'
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/traefik/traefik.toml:/etc/traefik/traefik.toml'
 <% end -%>
 
-<% if scope.lookupvar('che::che_small_group') == 'true' -%>
+<% if scope.lookupvar('che::che_for_small_groups') == 'true' -%>
   ########################
   # POSTGRES
   ########################
@@ -90,17 +90,27 @@ services:
     environment:
       - POSTGRES_USER=keycloak
       - POSTGRES_PASSWORD=keycloak
+      - POSTGRES_DB=keycloak
     volumes:
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/docker-healthcheck.sh:/docker-healthcheck.sh'
       - '<%= scope.lookupvar('che::che_instance') -%>/data/postgres:/var/lib/postgresql/data'
     ports:
       - '5432:5432'
     restart: always
+    healthcheck:
+        test: ["CMD", "/docker-healthcheck.sh"]
+        interval: 10s
+        timeout: 10s
+        retries: 10
 
   ########################
   # KEYCLOAK
   ########################
   keycloak:
     image: <%= ENV["IMAGE_KEYCLOACK"] %>
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - '5050:8080'
     environment:
