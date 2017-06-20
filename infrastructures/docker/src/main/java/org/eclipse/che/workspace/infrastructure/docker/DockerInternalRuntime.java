@@ -12,20 +12,19 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
@@ -246,6 +245,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             throw e;
         }
         startAgents(name, dockerMachine);
+        checkServersReadiness(name, dockerMachine);
     }
 
     // TODO rework to agent launchers
@@ -264,28 +264,16 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             });
             thread.setDaemon(true);
             thread.start();
-
-            checkAgent(machineName, dockerMachine, agent);
         }
     }
 
-    private void checkAgent(String machineName,
-                            DockerMachine dockerMachine,
-                            Agent agent)
+    private void checkServersReadiness(String machineName, DockerMachine dockerMachine)
             throws InternalInfrastructureException {
+        for (Map.Entry<String, ServerImpl> serverEntry : dockerMachine.getServers().entrySet()) {
+            String serverRef = serverEntry.getKey();
+            ServerImpl server = serverEntry.getValue();
 
-        // TODO do readiness check right after event from bootstrapper that agent started
-        // TODO do readiness check for servers not provided by agents
-        // check readiness of servers of agent
-        for (String serverRef : agent.getServers().keySet()) {
             LOG.info("Checking server {} of machine {}", serverRef, machineName);
-            Server server = dockerMachine.getServers().get(serverRef);
-            if (server == null) {
-                // should not happen, skip server
-                LOG.info("Check of agent {} of machine {} skipped due to server absence", agent.getId(), machineName);
-                continue;
-            }
-
             checkServerReadiness(machineName, serverRef, server.getUrl());
         }
     }
