@@ -28,8 +28,8 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
 @Singleton
 public class ProjectImportOutputJsonRpcRegistrar {
 
-    private static final String EVENT_IMPORT_OUTPUT_SUBSCRIBE    = "event:import-project:subscribe";
-    private static final String EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE = "event:import-project:un-subscribe";
+    private static final String EVENT_IMPORT_OUTPUT_SUBSCRIBE    = "importProject/subscribe";
+    private static final String EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE = "importProject/unSubscribe";
 
     private final Set<String> endpointIds = newConcurrentHashSet();
 

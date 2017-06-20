@@ -25,7 +25,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  */
 public class ProjectImportOutputJsonRpcLineConsumer extends BaseProjectImportOutputLineConsumer {
 
-    private static final String EVENT_IMPORT_OUTPUT_PROGRESS = "event:import-project:progress";
+    private static final String EVENT_IMPORT_OUTPUT_PROGRESS = "importProject/progress";
 
     private final AtomicInteger                       lineCounter;
     private final RequestTransmitter                  transmitter;

@@ -32,9 +32,9 @@ public class ProjectImportOutputJsonRpcSubscriber {
 
     public static final String WS_AGENT_ENDPOINT = "ws-agent";
 
-    private static final String EVENT_IMPORT_OUTPUT_SUBSCRIBE    = "event:import-project:subscribe";
-    private static final String EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE = "event:import-project:un-subscribe";
-    private static final String EVENT_IMPORT_OUTPUT_PROGRESS     = "event:import-project:progress";
+    private static final String EVENT_IMPORT_OUTPUT_SUBSCRIBE    = "importProject/subscribe";
+    private static final String EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE = "importProject/unSubscribe";
+    private static final String EVENT_IMPORT_OUTPUT_PROGRESS     = "importProject/progress";
 
     private final RequestTransmitter         transmitter;
     private final RequestHandlerConfigurator configurator;
