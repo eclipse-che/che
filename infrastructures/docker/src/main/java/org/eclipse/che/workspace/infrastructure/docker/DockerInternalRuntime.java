@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
@@ -68,12 +69,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
     private static final Logger LOG = getLogger(DockerInternalRuntime.class);
 
-    private static Map<String, String> livenessChecksPaths = new HashMap<>();
-
-    static {
-        livenessChecksPaths.put("wsagent", "/api/");
-        livenessChecksPaths.put("exec-agent", "/process");
-    }
+    private static Map<String, String> livenessChecksPaths = ImmutableMap.of("wsagent", "/api/",
+                                                                             "exec-agent", "/process");
 
     private final StartSynchronizer    startSynchronizer;
     private final Map<String, String>  properties;
@@ -268,7 +265,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     }
 
     private void checkServersReadiness(String machineName, DockerMachine dockerMachine)
-            throws InternalInfrastructureException {
+            throws InfrastructureException {
         for (Map.Entry<String, ServerImpl> serverEntry : dockerMachine.getServers().entrySet()) {
             String serverRef = serverEntry.getKey();
             ServerImpl server = serverEntry.getValue();
@@ -278,10 +275,11 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         }
     }
 
+    // TODO rework checks to ping servers concurrently and timeouts each ping in case of network/server hanging
     private void checkServerReadiness(String machineName,
                                       String serverRef,
                                       String serverUrl)
-            throws InternalInfrastructureException {
+            throws InfrastructureException {
 
         if (!livenessChecksPaths.containsKey(serverRef)) {
             return;
@@ -302,10 +300,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         while (System.currentTimeMillis() < readinessDeadLine) {
             LOG.info("Checking agent {} of machine {} at {}", serverRef, machineName,
                      System.currentTimeMillis());
-            if (Thread.currentThread().isInterrupted()) {
-                throw new InternalInfrastructureException("Interrupted");
-            }
-            if (checkServerConnection(url)) {
+            checkStartInterruption();
+            if (isHttpConnectionSucceed(url)) {
                 // TODO protect with lock, from null, from exceptions
                 DockerMachine machine = startSynchronizer.getMachines().get(machineName);
                 machine.setServerStatus(serverRef, ServerStatus.RUNNING);
@@ -315,7 +311,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                                .withServerName(serverRef)
                                                .withStatus(ServerStatus.RUNNING)
                                                .withServerUrl(serverUrl));
-                LOG.info("Agent {} of machine {} started", serverRef, machineName);
+                LOG.info("Server {} of machine {} started", serverRef, machineName);
                 return;
             }
 
@@ -327,16 +323,19 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         }
     }
 
-    private boolean checkServerConnection(URL serverUrl) {
+    private boolean isHttpConnectionSucceed(URL serverUrl) {
+        HttpURLConnection httpURLConnection = null;
         try {
-            HttpURLConnection httpURLConnection = (HttpURLConnection)serverUrl.openConnection();
+            httpURLConnection = (HttpURLConnection)serverUrl.openConnection();
             int responseCode = httpURLConnection.getResponseCode();
-            if (responseCode >= 200 && responseCode < 400) {
-                return true;
+            return responseCode >= 200 && responseCode < 400;
+        } catch (IOException e) {
+            return false;
+        } finally {
+            if (httpURLConnection != null) {
+                httpURLConnection.disconnect();
             }
-        } catch (IOException ignored) {
         }
-        return false;
     }
 
     private DockerContainerConfig normalizeSource(DockerContainerConfig containerConfig,
@@ -364,7 +363,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     }
 
     private void checkStartInterruption() throws InfrastructureException {
-        if (Thread.interrupted()) {
+        if (Thread.currentThread().isInterrupted()) {
             throw new InfrastructureException("Docker infrastructure runtime start was interrupted");
         }
     }
@@ -474,10 +473,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         }
 
         public synchronized Map<String, ? extends DockerMachine> getMachines() {
-            if (machines != null) {
-                return Collections.unmodifiableMap(machines);
-            }
-            return Collections.emptyMap();
+            return machines != null ? machines : Collections.emptyMap();
         }
 
         public synchronized void addMachine(String name, DockerMachine machine) throws InternalInfrastructureException {

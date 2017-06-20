@@ -92,22 +92,23 @@ public class DockerMachineStarter {
 
     public static final Pattern SNAPSHOT_LOCATION_PATTERN = Pattern.compile("(.+/)?" + MACHINE_SNAPSHOT_PREFIX + ".+");
 
-    static final   String            CONTAINER_EXITED_ERROR = "We detected that a machine exited unexpectedly. " +
-                                                 "This may be caused by a container in interactive mode " +
-                                                 "or a container that requires additional arguments to start. " +
-                                                 "Please check the container recipe.";
-    // CMDs and entrypoints that lead to exiting of container right after start
-    private static Set<List<String>> badCMDs                = ImmutableSet.of(singletonList("/bin/bash"),
-                                                                              singletonList("/bin/sh"),
-                                                                              singletonList("bash"),
-                                                                              singletonList("sh"),
-                                                                              Arrays.asList("/bin/sh", "-c", "/bin/sh"),
-                                                                              Arrays.asList("/bin/sh", "-c",
-                                                                                            "/bin/bash"),
-                                                                              Arrays.asList("/bin/sh", "-c", "bash"),
-                                                                              Arrays.asList("/bin/sh", "-c", "sh"));
+    private static final String CONTAINER_EXITED_ERROR = "We detected that a machine exited unexpectedly. " +
+                                                         "This may be caused by a container in interactive mode " +
+                                                         "or a container that requires additional arguments to start. " +
+                                                         "Please check the container recipe.";
 
-    private static Set<List<String>> badEntrypoints =
+    // CMDs and entrypoints that lead to exiting of container right after start
+    private static final Set<List<String>> badCMDs = ImmutableSet.of(singletonList("/bin/bash"),
+                                                                     singletonList("/bin/sh"),
+                                                                     singletonList("bash"),
+                                                                     singletonList("sh"),
+                                                                     Arrays.asList("/bin/sh", "-c", "/bin/sh"),
+                                                                     Arrays.asList("/bin/sh", "-c",
+                                                                                            "/bin/bash"),
+                                                                     Arrays.asList("/bin/sh", "-c", "bash"),
+                                                                     Arrays.asList("/bin/sh", "-c", "sh"));
+
+    private static final Set<List<String>> badEntrypoints =
             ImmutableSet.<List<String>>builder().addAll(badCMDs)
                                                 .add(Arrays.asList("/bin/sh", "-c"))
                                                 .add(Arrays.asList("/bin/bash", "-c"))

@@ -43,7 +43,7 @@ import java.util.List;
 // TODO if because of another reason stop environment
 public class DockerRuntimeContext extends RuntimeContext {
     private final DockerEnvironment    dockerEnvironment;
-    private final DockerRuntimeFactory dockerInfraFactory;
+    private final DockerRuntimeFactory dockerRuntimeFactory;
     private final List<String>         orderedServices;
     private final String               devMachineName;
 
@@ -55,13 +55,13 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 @Assisted List<String> orderedServices,
                                 AgentSorter agentSorter,
                                 AgentRegistry agentRegistry,
-                                DockerRuntimeFactory dockerInfraFactory)
+                                DockerRuntimeFactory dockerRuntimeFactory)
             throws ValidationException, InfrastructureException {
         super(environment, identity, infrastructure, agentSorter, agentRegistry);
         this.devMachineName = Utils.getDevMachineName(environment);
         this.orderedServices = orderedServices;
         this.dockerEnvironment = dockerEnvironment;
-        this.dockerInfraFactory = dockerInfraFactory;
+        this.dockerRuntimeFactory = dockerRuntimeFactory;
     }
 
     @Override
@@ -71,10 +71,10 @@ public class DockerRuntimeContext extends RuntimeContext {
 
     @Override
     public InternalRuntime getRuntime() {
-        return dockerInfraFactory.createRuntime(this,
-                                                devMachineName,
-                                                orderedServices,
-                                                dockerEnvironment,
-                                                identity);
+        return dockerRuntimeFactory.createRuntime(this,
+                                                  devMachineName,
+                                                  orderedServices,
+                                                  dockerEnvironment,
+                                                  identity);
     }
 }
