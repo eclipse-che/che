@@ -34,6 +34,7 @@ import org.eclipse.che.api.testing.shared.Constants;
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
 import org.eclipse.che.api.testing.shared.TestDetectionResult;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
+import org.eclipse.che.api.testing.shared.TestLaunchResult;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -273,12 +274,12 @@ public class TestServiceClient {
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(TestResult.class));
     }
 
-    public JsonRpcPromise<Boolean> runTests(TestExecutionContext context) {
+    public JsonRpcPromise<TestLaunchResult> runTests(TestExecutionContext context) {
         return requestTransmitter.newRequest()
                                  .endpointId("ws-agent")
                                  .methodName(Constants.RUN_TESTS_METHOD)
                                  .paramsAsDto(context)
-                                 .sendAndReceiveResultAsBoolean();
+                                 .sendAndReceiveResultAsDto(TestLaunchResult.class);
     }
 
     public JsonRpcPromise<TestDetectionResult> detectTests(TestDetectionContext context) {

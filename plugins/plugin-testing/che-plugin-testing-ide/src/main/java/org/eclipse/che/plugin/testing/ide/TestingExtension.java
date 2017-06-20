@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.extension.Extension;
+import org.eclipse.che.plugin.testing.ide.action.DebugTestAction;
 import org.eclipse.che.plugin.testing.ide.action.RunTestAction;
 
 import java.util.Set;
@@ -35,6 +36,7 @@ public class TestingExtension {
     public TestingExtension(ActionManager actionManager,
                             TestLocalizationConstant localization,
                             Set<TestAction> testActions,
+                            DebugTestAction debugTestAction,
                             RunTestAction runTestAction) {
 
         DefaultActionGroup runMenu = (DefaultActionGroup) actionManager.getAction(GROUP_RUN);
@@ -46,8 +48,10 @@ public class TestingExtension {
 //            testAction.addMainMenuItems(testMainMenu);
 //            testMainMenu.addSeparator();
 //        }
-        actionManager.registerAction("RunTestClassOrMethod", runTestAction);
+        actionManager.registerAction("RunTest", runTestAction);
+        actionManager.registerAction("DebugTest", debugTestAction);
         testMainMenu.add(runTestAction);
+        testMainMenu.add(debugTestAction);
         runMenu.addSeparator();
         runMenu.add(testMainMenu);
         DefaultActionGroup explorerMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
@@ -59,6 +63,7 @@ public class TestingExtension {
 //            testContextMenu.addSeparator();
 //        }
         testContextMenu.add(runTestAction);
+        testContextMenu.add(debugTestAction);
         explorerMenu.addSeparator();
         explorerMenu.add(testContextMenu);
         explorerMenu.addSeparator();

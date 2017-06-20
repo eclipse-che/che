@@ -131,6 +131,11 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
         }
     }
 
+    @Override
+    public int getDebugPort() {
+        return -1;
+    }
+
     private RuntimeException getRuntimeException(String filePath) {
         return new RuntimeException("Can't find IClasspathEntry for path " + filePath);
     }

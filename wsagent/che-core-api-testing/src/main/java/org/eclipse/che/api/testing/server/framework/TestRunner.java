@@ -36,12 +36,12 @@ public interface TestRunner {
      * tests.
      *
      * @param testParameters
-     *            Map of parameters for executing the test cases. Most of the
-     *            parameters are coming from the REST service request are passed
-     *            as a map.
+     *         Map of parameters for executing the test cases. Most of the
+     *         parameters are coming from the REST service request are passed
+     *         as a map.
      * @return the test results.
      * @throws Exception
-     *             when test runner execution fails.
+     *         when test runner execution fails.
      * @deprecated use {@link TestRunner#execute(TestExecutionContext)} instead
      */
     @Deprecated
@@ -59,10 +59,14 @@ public interface TestRunner {
      */
     String getName();
 
+    /** @return port for connecting to the debugger */
+    int getDebugPort();
+
     /**
      * Detect is any test present at given context
      *
-     * @param context the current context
+     * @param context
+     *         the current context
      * @return list of the test positions if any test present, empty list otherwise
      */
     @NotNull

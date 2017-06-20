@@ -12,39 +12,31 @@ package org.eclipse.che.api.testing.shared;
 
 import org.eclipse.che.dto.shared.DTO;
 
+import javax.validation.constraints.NotNull;
+
 /**
- *
+ * Describes test position in document
  */
 @DTO
-public interface TestExecutionContext {
+public interface TestLaunchResult {
 
-    String getFrameworkName();
+    /**
+     * @return {@code true} if tests were launched successfully otherwise returns false
+     */
+    @NotNull
+    boolean isSuccess();
 
-    void setFrameworkName(String name);
+    void setSuccess(boolean isSuccess);
 
-    String getProjectPath();
+    TestLaunchResult withSuccess(boolean isSuccess);
 
-    void setProjectPath(String projectPath);
+    /**
+     * @return port for connecting to the debugger if Debug Mode is on
+     */
+    @NotNull
+    int getDebugPort();
 
-    String getFilePath();
+    void setDebugPort(int port);
 
-    void setFilePath(String filePath);
-
-    TestType getTestType();
-
-    void setTestType(TestType testType);
-
-    int getCursorOffset();
-
-    void setCursorOffset(int offset);
-
-    void setDebugModeEnable(Boolean enable);
-
-    Boolean isDebugModeEnable();
-
-    TestExecutionContext withDebugModeEnable(Boolean enable);
-
-    enum TestType {
-        FILE, FOLDER, PROJECT, CURSOR_POSITION
-    }
+    TestLaunchResult withDebugPort(int port);
 }

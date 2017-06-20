@@ -11,6 +11,8 @@
 package org.eclipse.che.plugin.testing.ide.model;
 
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.debug.DebugConfiguration;
+import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.testing.ide.model.event.TestFailedEvent;
 import org.eclipse.che.plugin.testing.ide.model.event.TestFinishedEvent;
@@ -39,15 +41,17 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
 
 
     private final TestRootState testRootState;
-    private final TestSuiteStack testSuiteStack = new TestSuiteStack();
-    private final Set<TestState> currentChildren = new LinkedHashSet<>();
+    private final TestSuiteStack         testSuiteStack      = new TestSuiteStack();
+    private final Set<TestState>         currentChildren     = new LinkedHashSet<>();
     private final Map<String, TestState> testNameToTestState = new HashMap<>();
-    private final List<Runnable> buildTreeEvents = new ArrayList<>();
+    private final List<Runnable>         buildTreeEvents     = new ArrayList<>();
 
-    private boolean gettingChildren = true;
-    private boolean treeBuildBeforeStart = false;
+    private boolean     gettingChildren      = true;
+    private boolean     treeBuildBeforeStart = false;
+    private TestLocator testLocator          = null;
 
-    private TestLocator testLocator = null;
+    private DebugConfiguration         debugConfiguration;
+    private DebugConfigurationsManager debugConfigurationsManager;
 
     public GeneralTestingEventsProcessor(String testFrameworkName, TestRootState testRootState) {
         super(testFrameworkName);
@@ -234,6 +238,10 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
         callTestIgnored(testState);
     }
 
+    public void setDebuggerConfiguration(DebugConfiguration debugConfiguration, DebugConfigurationsManager debugConfigurationsManager) {
+        this.debugConfiguration = debugConfiguration;
+        this.debugConfigurationsManager = debugConfigurationsManager;
+    }
 
     @Override
     public void onSuiteTreeStarted(String suiteName, String location) {
@@ -331,12 +339,24 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
 
     @Override
     public void onFinishTesting() {
-
         //TODO check test tree finish state
 
         testSuiteStack.clear();
         testRootState.setFinished();
         callTestingFinished(testRootState);
+        removeDebugConfiguration();
+    }
+
+    private void removeDebugConfiguration() {
+        if (debugConfiguration == null || debugConfigurationsManager == null) {
+            return;
+        }
+        List<DebugConfiguration> configurations = debugConfigurationsManager.getConfigurations();
+        for (DebugConfiguration configuration : configurations) {
+            if (configuration.equals(debugConfiguration)) {
+                debugConfigurationsManager.removeConfiguration(configuration);
+            }
+        }
     }
 
 
@@ -383,9 +403,9 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
 
             if (!result.isEmpty()) {
                 return result.stream()
-                        .filter(testState -> testState.isSuite() == preferSuite)
-                        .findFirst()
-                        .orElse(result.iterator().next());
+                             .filter(testState -> testState.isSuite() == preferSuite)
+                             .findFirst()
+                             .orElse(result.iterator().next());
             }
         }
         return null;

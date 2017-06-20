@@ -23,6 +23,9 @@ public interface TestResources extends ClientBundle {
     @Source("org/eclipse/che/plugin/testing/ide/svg/test.svg")
     SVGResource testIcon();
 
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_all.svg")
+    SVGResource debugIcon();
+
     @Source("org/eclipse/che/plugin/testing/ide/svg/test_results_pass.svg")
     SVGResource testResultsPass();
 

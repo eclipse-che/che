@@ -19,6 +19,7 @@ import org.eclipse.che.api.testing.shared.Constants;
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
 import org.eclipse.che.api.testing.shared.TestDetectionResult;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
+import org.eclipse.che.api.testing.shared.TestLaunchResult;
 import org.eclipse.che.api.testing.shared.TestPosition;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -34,10 +35,11 @@ import java.util.List;
 @Singleton
 public class TestingRPCService {
 
-    private final RequestTransmitter requestTransmitter;
-    private final TestFrameworkRegistry frameworkRegistry;
-    private String endpoint;
-    private TestMessagesOutputTransmitter outputTransmitter;
+    private final RequestTransmitter            requestTransmitter;
+    private final TestFrameworkRegistry         frameworkRegistry;
+
+    private       String                        endpoint;
+    private       TestMessagesOutputTransmitter outputTransmitter;
 
     @Inject
     public TestingRPCService(RequestTransmitter requestTransmitter, TestFrameworkRegistry frameworkRegistry) {
@@ -48,22 +50,23 @@ public class TestingRPCService {
     @Inject
     private void configureRunTestHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
-                .methodName(Constants.RUN_TESTS_METHOD)
-                .paramsAsDto(TestExecutionContext.class)
-                .resultAsBoolean()
-                .withBiFunction(this::runTests);
+                    .methodName(Constants.RUN_TESTS_METHOD)
+                    .paramsAsDto(TestExecutionContext.class)
+                    .resultAsDto(TestLaunchResult.class)
+                    .withBiFunction(this::runTests);
     }
 
     @Inject
     private void configureTestDetectionHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
-                .methodName(Constants.TESTING_RPC_TEST_DETECTION_NAME)
-                .paramsAsDto(TestDetectionContext.class)
-                .resultAsDto(TestDetectionResult.class)
-                .withBiFunction(this::handleTestDetection);
+                    .methodName(Constants.TESTING_RPC_TEST_DETECTION_NAME)
+                    .paramsAsDto(TestDetectionContext.class)
+                    .resultAsDto(TestDetectionResult.class)
+                    .withBiFunction(this::handleTestDetection);
     }
 
-    private boolean runTests(String endpoint, TestExecutionContext context) {
+    private TestLaunchResult runTests(String endpoint, TestExecutionContext context) {
+        TestLaunchResult testLaunchResult = DtoFactory.newDto(TestLaunchResult.class);
         this.endpoint = endpoint;
         TestRunner testRunner = frameworkRegistry.getTestRunner(context.getFrameworkName());
 
@@ -73,10 +76,13 @@ public class TestingRPCService {
             }
             ProcessHandler processHandler = testRunner.execute(context);
             outputTransmitter = new TestMessagesOutputTransmitter(processHandler, requestTransmitter, endpoint);
-            return true;
+            if (context.isDebugModeEnable()) {
+                testLaunchResult.withDebugPort(testRunner.getDebugPort());
+            }
+            return testLaunchResult.withSuccess(true);
         } else {
             //TODO add logging and send info message about failure
-            return false;
+            return testLaunchResult.withSuccess(false);
         }
     }
 

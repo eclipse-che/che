@@ -36,10 +36,13 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -53,6 +56,8 @@ public class TestNGRunner extends AbstractJavaTestRunner {
     private static final Logger LOG                 = LoggerFactory.getLogger(TestNGRunner.class);
     private final ProjectClasspathProvider classpathProvider;
     private final TestNGSuiteUtil          suiteUtil;
+
+    private int debugPort;
 
     @Inject
     public TestNGRunner(ProjectClasspathProvider classpathProvider, TestNGSuiteUtil suiteUtil) {
@@ -80,6 +85,11 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         return null;
     }
 
+    @Override
+    public int getDebugPort() {
+        return debugPort;
+    }
+
     private ProcessHandler startTestProcess(IJavaProject javaProject, TestExecutionContext context) {
         File suiteFile = createSuite(context, javaProject);
         if (suiteFile == null) {
@@ -98,6 +108,11 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         parameters.getClassPath().addAll(classPath);
 
         parameters.getParametersList().add("-suiteFile", suiteFile.getAbsolutePath());
+        if (context.isDebugModeEnable()) {
+            debugPort = generateDebuggerPort();
+            parameters.getVmParameters().add("-Xdebug");
+            parameters.getVmParameters().add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=" + debugPort);
+        }
         CommandLine command = parameters.createCommand();
         try {
             return new ProcessHandler(command.createProcess());
@@ -106,6 +121,20 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         }
 
         return null;
+    }
+
+    private int generateDebuggerPort() {
+        Random random = new Random();
+        int port = random.nextInt(65535);
+        return isPortAvailable(port) ? port : generateDebuggerPort();
+    }
+
+    private static boolean isPortAvailable(int port) {
+        try (Socket ignored = new Socket("localhost", port)) {
+            return false;
+        } catch (IOException ignored) {
+            return true;
+        }
     }
 
     private File createSuite(TestExecutionContext context, IJavaProject javaProject) {
@@ -130,7 +159,7 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         List<String> methods = new ArrayList<>();
         try {
             IJavaElement element = compilationUnit.getElementAt(cursorOffset);
-            if (element instanceof  IMethod) {
+            if (element instanceof IMethod) {
                 IMethod method = (IMethod)element;
                 methods.add(method.getElementName());
             }
