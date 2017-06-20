@@ -70,7 +70,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     private static final Logger LOG = getLogger(DockerInternalRuntime.class);
 
     private static Map<String, String> livenessChecksPaths = ImmutableMap.of("wsagent", "/api/",
-                                                                             "exec-agent", "/process");
+                                                                             "exec-agent", "/process",
+                                                                             "terminal", "/");
 
     private final StartSynchronizer    startSynchronizer;
     private final Map<String, String>  properties;
@@ -285,6 +286,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             return;
         }
         String livenessCheckPath = livenessChecksPaths.get(serverRef);
+        HttpConnectionChecker checker = "terminal".equals(serverRef) ? new TerminalHttpConnectionChecker()
+                                                                     : new HttpConnectionChecker();
         URL url;
         try {
             url = UriBuilder.fromUri(serverUrl)
@@ -298,13 +301,14 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         // max start time 180 seconds
         long readinessDeadLine = System.currentTimeMillis() + 3000 * 60;
         while (System.currentTimeMillis() < readinessDeadLine) {
-            LOG.info("Checking agent {} of machine {} at {}", serverRef, machineName,
+            LOG.info("Checking server {} of machine {} at {}", serverRef, machineName,
                      System.currentTimeMillis());
             checkStartInterruption();
-            if (isHttpConnectionSucceed(url)) {
+            if (isHttpConnectionSucceed(url, checker)) {
                 // TODO protect with lock, from null, from exceptions
                 DockerMachine machine = startSynchronizer.getMachines().get(machineName);
                 machine.setServerStatus(serverRef, ServerStatus.RUNNING);
+
                 eventService.publish(DtoFactory.newDto(ServerStatusEvent.class)
                                                .withIdentity(DtoConverter.asDto(identity))
                                                .withMachineName(machineName)
@@ -321,19 +325,43 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                 throw new InternalInfrastructureException("Interrupted");
             }
         }
+
+        throw new InfrastructureException("Server " + serverRef + " in machine " + machineName + " not available.");
     }
 
-    private boolean isHttpConnectionSucceed(URL serverUrl) {
+    private boolean isHttpConnectionSucceed(URL serverUrl, HttpConnectionChecker connectionChecker) {
         HttpURLConnection httpURLConnection = null;
         try {
             httpURLConnection = (HttpURLConnection)serverUrl.openConnection();
-            int responseCode = httpURLConnection.getResponseCode();
-            return responseCode >= 200 && responseCode < 400;
+            return connectionChecker.isConnectionSucceed(httpURLConnection);
         } catch (IOException e) {
             return false;
         } finally {
             if (httpURLConnection != null) {
                 httpURLConnection.disconnect();
+            }
+        }
+    }
+
+    private static class HttpConnectionChecker {
+        boolean isConnectionSucceed(HttpURLConnection conn) {
+            try {
+                int responseCode = conn.getResponseCode();
+                return responseCode >= 200 && responseCode < 400;
+            } catch (IOException e) {
+                return false;
+            }
+        }
+    }
+
+    private static class TerminalHttpConnectionChecker extends HttpConnectionChecker {
+        @Override
+        boolean isConnectionSucceed(HttpURLConnection conn) {
+            try {
+                int responseCode = conn.getResponseCode();
+                return responseCode == 404;
+            } catch (IOException e) {
+                return false;
             }
         }
     }
