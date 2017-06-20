@@ -298,7 +298,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             LOG.error(e.getLocalizedMessage(), e);
             return;
         }
-        // max start time 60 seconds
+        // max start time 180 seconds
         long readinessDeadLine = System.currentTimeMillis() + 3000 * 60;
         while (System.currentTimeMillis() < readinessDeadLine) {
             LOG.info("Checking agent {} of machine {} at {}", serverRef, machineName,
