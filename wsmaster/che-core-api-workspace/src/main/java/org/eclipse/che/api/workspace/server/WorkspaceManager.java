@@ -591,6 +591,7 @@ public class WorkspaceManager {
                 try {
                     workspace.setRuntime(runtimes.get(workspace.getId()));
                 } catch (NotFoundException e) {
+                    // TODO fix in case of starting ws logs error
                     LOG.error("Workspace " + workspace.getId() + " has RUNNING state but no runtime!");
                 }
             }

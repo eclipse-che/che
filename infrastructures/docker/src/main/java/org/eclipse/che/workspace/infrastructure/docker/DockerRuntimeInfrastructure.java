@@ -12,6 +12,8 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.agent.server.AgentRegistry;
+import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -41,7 +43,9 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     private final ServicesStartStrategy     startStrategy;
     private final InfrastructureProvisioner infrastructureProvisioner;
     private final EnvironmentNormalizer     environmentNormalizer;
-    private final RuntimeFactory            runtimeFactory;
+    private final DockerRuntimeFactory      runtimeFactory;
+    private final AgentSorter               agentSorter;
+    private final AgentRegistry             agentRegistry;
 
     @Inject
     public DockerRuntimeInfrastructure(EnvironmentParser dockerEnvironmentParser,
@@ -50,7 +54,9 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                        InfrastructureProvisioner infrastructureProvisioner,
                                        EnvironmentNormalizer environmentNormalizer,
                                        Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers,
-                                       RuntimeFactory runtimeFactory,
+                                       DockerRuntimeFactory runtimeFactory,
+                                       AgentSorter agentSorter,
+                                       AgentRegistry agentRegistry,
                                        EventService eventService) {
         super("docker", environmentParsers.keySet(), eventService);
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
@@ -59,6 +65,8 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         this.infrastructureProvisioner = infrastructureProvisioner;
         this.environmentNormalizer = environmentNormalizer;
         this.runtimeFactory = runtimeFactory;
+        this.agentSorter = agentSorter;
+        this.agentRegistry = agentRegistry;
     }
 
     @Override
@@ -92,10 +100,13 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         // normalize env to provide environment description with absolutely everything expected in
         environmentNormalizer.normalize(environment, dockerEnvironment, identity);
 
-        return runtimeFactory.createContext(this,
-                                            identity,
-                                            environment,
-                                            dockerEnvironment,
-                                            orderedServices);
+        return new DockerRuntimeContext(this,
+                                        identity,
+                                        environment,
+                                        dockerEnvironment,
+                                        orderedServices,
+                                        agentSorter,
+                                        agentRegistry,
+                                        runtimeFactory);
     }
 }

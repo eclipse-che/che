@@ -29,6 +29,5 @@ public enum ServerStatus {
     /**
      * unknown
      */
-    UNKNOWN;
-
+    UNKNOWN
 }

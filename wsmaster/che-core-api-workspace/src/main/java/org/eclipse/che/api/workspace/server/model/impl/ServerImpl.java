@@ -36,8 +36,16 @@ public class ServerImpl implements Server {
         return url;
     }
 
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     @Override
     public ServerStatus getStatus() {
         return this.status;
+    }
+
+    public void setStatus(ServerStatus status) {
+        this.status = status;
     }
 }
