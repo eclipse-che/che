@@ -28,7 +28,6 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -335,7 +334,7 @@ public class WorkspaceManager {
         //final boolean autoRestore = restoreAttr == null ? defaultAutoRestore : parseBoolean(restoreAttr);
         //startAsync(workspace, envName, firstNonNull(restore, autoRestore));
         //&& !getSnapshot(workspaceId).isEmpty());
-        startAsync(workspace, envName, options).complete(null);
+        startAsync(workspace, envName, options);
         return normalizeState(workspace, true);
     }
 
@@ -485,7 +484,7 @@ public class WorkspaceManager {
 
         states.put(workspace.getId(), WorkspaceStatus.STARTING);
         return runtimes.startAsync(workspace, env, firstNonNull(options, Collections.emptyMap()))
-                       .thenRunAsync(ThreadLocalPropagateContext.wrap(() -> {
+                       .thenRun(() -> {
                            states.put(workspace.getId(), WorkspaceStatus.RUNNING);
 
                            LOG.info("Workspace '{}:{}' with id '{}' started by user '{}'",
@@ -493,22 +492,21 @@ public class WorkspaceManager {
                                     workspace.getConfig().getName(),
                                     workspace.getId(),
                                     sessionUserNameOr("undefined"));
-                       }))
+                       })
                        .exceptionally(ex -> {
                            if (workspace.isTemporary()) {
                                removeWorkspaceQuietly(workspace);
                            }
+                           states.remove(workspace.getId());
                            for (Throwable cause : getCausalChain(ex)) {
                                // TODO spi
-//                    if (cause instanceof SourceNotFoundException) {
-//                        return;
-//                    }
+//                             if (cause instanceof SourceNotFoundException) {
+//                                 return;
+//                             }
                            }
                            LOG.error(ex.getLocalizedMessage(), ex);
                            return null;
                        });
-
-
     }
 
 

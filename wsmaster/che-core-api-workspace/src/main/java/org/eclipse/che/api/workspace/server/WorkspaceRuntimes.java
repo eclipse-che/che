@@ -231,6 +231,13 @@ public class WorkspaceRuntimes {
                                                    .withEventType(EventType.RUNNING)
                                                    .withPrevStatus(WorkspaceStatus.STARTING));
                 } catch (InfrastructureException e) {
+                    runtimes.remove(workspaceId);
+                    eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                                   .withWorkspaceId(workspaceId)
+                                                   .withStatus(WorkspaceStatus.STOPPED)
+                                                   .withPrevStatus(WorkspaceStatus.STARTING)
+                                                   .withEventType(EventType.ERROR)
+                                                   .withError(e.getMessage()));
                     LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
                     throw new RuntimeException(e);
                 }
