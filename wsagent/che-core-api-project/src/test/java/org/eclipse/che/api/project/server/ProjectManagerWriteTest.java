@@ -838,7 +838,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         SourceStorage sourceConfig = DtoFactory.newDto(SourceStorageDto.class).withType(importType);
 
-        pm.importProject("/testImportProject", sourceConfig, false, () -> new ProjectImportOutputWSLineConsumer("BATCH", "ws", 300));
+        pm.importProject("/testImportProject", sourceConfig, false, () -> new ProjectImportOutputWSLineConsumer("BATCH", 300));
 
         RegisteredProject project = projectRegistry.getProject("/testImportProject");
 
@@ -860,7 +860,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         SourceStorage sourceConfig = DtoFactory.newDto(SourceStorageDto.class).withType(importType);
         try {
-            pm.importProject(projectPath, sourceConfig, false, () -> new ProjectImportOutputWSLineConsumer("testImportProject", "ws", 300));
+            pm.importProject(projectPath, sourceConfig, false, () -> new ProjectImportOutputWSLineConsumer("testImportProject", 300));
         } catch (Exception e) {
         }
 
@@ -873,7 +873,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         SourceStorage sourceConfig = DtoFactory.newDto(SourceStorageDto.class).withType("nothing");
 
         try {
-            pm.importProject("/testImportProject", sourceConfig, false, () -> new ProjectImportOutputWSLineConsumer("testImportProject", "ws", 300));
+            pm.importProject("/testImportProject", sourceConfig, false, () -> new ProjectImportOutputWSLineConsumer("testImportProject", 300));
             fail("NotFoundException: Unable import sources project from 'null'. Sources type 'nothing' is not supported.");
         } catch (NotFoundException e) {
         }

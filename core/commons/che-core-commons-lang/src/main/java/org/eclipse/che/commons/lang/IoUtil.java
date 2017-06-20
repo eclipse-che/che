@@ -121,13 +121,15 @@ public class IoUtil {
      *         - path to resource
      * @return - InputStream of resource
      * @throws IOException
+     *         when resource is not a file or resource not found
      */
     public static InputStream getResource(String resource) throws IOException {
         File resourceFile = new File(resource);
         if (resourceFile.exists() && !resourceFile.isFile()) {
             throw new IOException(String.format("%s is not a file. ", resourceFile.getAbsolutePath()));
         }
-        InputStream is = resourceFile.exists() ? new FileInputStream(resourceFile) : IoUtil.class.getResourceAsStream(resource);
+        InputStream is = resourceFile.exists() ? new FileInputStream(resourceFile)
+                                               : Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
         if (is == null) {
             throw new IOException(String.format("Not found resource: %s", resource));
         }

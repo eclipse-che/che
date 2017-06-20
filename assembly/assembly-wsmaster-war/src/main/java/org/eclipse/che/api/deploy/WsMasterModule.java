@@ -11,6 +11,7 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
@@ -43,6 +44,7 @@ import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.spi.dummy.DummyInfrastructureModule;
+import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
@@ -106,7 +108,12 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.user.server.UserService.class);
         bind(org.eclipse.che.api.user.server.ProfileService.class);
         bind(org.eclipse.che.api.user.server.PreferencesService.class);
+
         bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
+        MapBinder<String, String> stacks = MapBinder.newMapBinder(binder(), String.class, String.class,
+                                                                  Names.named(StackLoader.CHE_PREDEFINED_STACKS));
+        stacks.addBinding("stacks.json").toInstance("stacks-images");
+        stacks.addBinding("che-in-che.json").toInstance("");
         bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
         bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
         bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
@@ -144,10 +151,9 @@ public class WsMasterModule extends AbstractModule {
 //        bind(org.eclipse.che.api.agent.server.WsAgentHealthChecker.class)
 //                .to(org.eclipse.che.api.agent.server.WsAgentHealthCheckerImpl.class);
 
-        bind(RecipeLoader.class);
-        Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"))
-                   .addBinding()
-                   .toInstance("predefined-recipes.json");
+        bind(org.eclipse.che.api.recipe.RecipeLoader.class);
+        Multibinder.newSetBinder(binder(), String.class, Names.named(RecipeLoader.CHE_PREDEFINED_RECIPES))
+                   .addBinding().toInstance("predefined-recipes.json");
 
 // FIXME: spi
 //        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();

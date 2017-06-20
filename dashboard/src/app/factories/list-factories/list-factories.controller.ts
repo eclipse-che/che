@@ -40,7 +40,7 @@ export class ListFactoriesController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $log: ng.ILogService, cheAPI: CheAPI, cheNotification: CheNotification, $rootScope: che.IRootScopeService,
+  constructor($q: ng.IQService, $log: ng.ILogService, cheAPI: CheAPI, cheNotification: CheNotification,
               confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.$q = $q;
     this.$log = $log;
@@ -72,8 +72,6 @@ export class ListFactoriesController {
     });
 
     this.pagesInfo = cheAPI.getFactory().getPagesInfo();
-
-    $rootScope.showIDE = false;
   }
 
   /**

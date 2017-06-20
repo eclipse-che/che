@@ -40,7 +40,9 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
  * It can be produced by {@code ImportProjectNotificationSubscriberFactory}
  *
  * @author Anton Korneta
+ * @deprecated this class is going to be removed soon
  */
+@Deprecated
 @Singleton
 public class ProjectNotificationSubscriberImpl implements ProjectNotificationSubscriber {
 
