@@ -21,6 +21,10 @@ import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
 
 import java.util.function.Consumer;
 
+import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_PROGRESS;
+import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_SUBSCRIBE;
+import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE;
+
 /**
  * Json RPC subscriber for listening to the project import events. Register itself for the listening events from the server side.
  *
@@ -31,10 +35,6 @@ import java.util.function.Consumer;
 public class ProjectImportOutputJsonRpcSubscriber {
 
     public static final String WS_AGENT_ENDPOINT = "ws-agent";
-
-    private static final String EVENT_IMPORT_OUTPUT_SUBSCRIBE    = "importProject/subscribe";
-    private static final String EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE = "importProject/unSubscribe";
-    private static final String EVENT_IMPORT_OUTPUT_PROGRESS     = "importProject/progress";
 
     private final RequestTransmitter         transmitter;
     private final RequestHandlerConfigurator configurator;

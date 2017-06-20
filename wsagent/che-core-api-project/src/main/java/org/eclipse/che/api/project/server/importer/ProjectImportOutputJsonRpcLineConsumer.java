@@ -15,6 +15,7 @@ import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_PROGRESS;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -24,8 +25,6 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * @since 5.9.0
  */
 public class ProjectImportOutputJsonRpcLineConsumer extends BaseProjectImportOutputLineConsumer {
-
-    private static final String EVENT_IMPORT_OUTPUT_PROGRESS = "importProject/progress";
 
     private final AtomicInteger                       lineCounter;
     private final RequestTransmitter                  transmitter;

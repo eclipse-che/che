@@ -18,6 +18,8 @@ import javax.inject.Singleton;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_SUBSCRIBE;
+import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE;
 
 /**
  * Endpoint registry for broadcasting project import events. Holds registered client's endpoint ids.
@@ -27,9 +29,6 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
  */
 @Singleton
 public class ProjectImportOutputJsonRpcRegistrar {
-
-    private static final String EVENT_IMPORT_OUTPUT_SUBSCRIBE    = "importProject/subscribe";
-    private static final String EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE = "importProject/unSubscribe";
 
     private final Set<String> endpointIds = newConcurrentHashSet();
 
