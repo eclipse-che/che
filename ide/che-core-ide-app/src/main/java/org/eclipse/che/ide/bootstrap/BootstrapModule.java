@@ -19,6 +19,6 @@ public class BootstrapModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        bind(IdeInitializer.class).toProvider(IdeInitializerProvider.class);
+        bind(IdeInitializationStrategy.class).toProvider(IdeInitializationStrategyProvider.class);
     }
 }

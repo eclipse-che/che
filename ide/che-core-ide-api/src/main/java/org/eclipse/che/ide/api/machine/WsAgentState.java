@@ -15,6 +15,7 @@ package org.eclipse.che.ide.api.machine;
  *
  * @author Roman Nikitenko.
  */
+@Deprecated
 public enum WsAgentState {
     STARTED, STOPPED
 }

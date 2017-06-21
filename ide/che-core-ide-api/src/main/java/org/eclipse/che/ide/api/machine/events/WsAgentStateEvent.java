@@ -19,6 +19,7 @@ import org.eclipse.che.ide.api.machine.WsAgentState;
  *
  * @author Roman Nikitenko
  */
+@Deprecated
 public class WsAgentStateEvent extends GwtEvent<WsAgentStateHandler> {
 
     /** Type class used to register this event. */
@@ -31,6 +32,7 @@ public class WsAgentStateEvent extends GwtEvent<WsAgentStateHandler> {
      * @param state
      *         the type of action
      */
+    @Deprecated
     protected WsAgentStateEvent(WsAgentState state) {
         this.wsAgentState = state;
     }
@@ -38,6 +40,7 @@ public class WsAgentStateEvent extends GwtEvent<WsAgentStateHandler> {
     /**
      * Creates a ws-agent started event.
      */
+    @Deprecated
     public static WsAgentStateEvent createWsAgentStartedEvent() {
         return new WsAgentStateEvent(WsAgentState.STARTED);
     }
@@ -45,6 +48,7 @@ public class WsAgentStateEvent extends GwtEvent<WsAgentStateHandler> {
     /**
      * Creates a ws-agent stopped event.
      */
+    @Deprecated
     public static WsAgentStateEvent createWsAgentStoppedEvent() {
         return new WsAgentStateEvent(WsAgentState.STOPPED);
     }
@@ -55,6 +59,7 @@ public class WsAgentStateEvent extends GwtEvent<WsAgentStateHandler> {
     }
 
     /** @return the state of ws-agent */
+    @Deprecated
     public WsAgentState getWsAgentState() {
         return wsAgentState;
     }

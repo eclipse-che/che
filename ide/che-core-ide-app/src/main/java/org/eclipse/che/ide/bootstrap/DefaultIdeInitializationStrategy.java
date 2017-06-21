@@ -47,7 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Performs essential initialization routines of the IDE application, such as:
+ * Represents the default strategy for initializing Basic IDE.
+ * Performs the minimum required initialization steps, such as:
  * <ul>
  * <li>initializing {@link CurrentUser} (loading profile, preferences);</li>
  * <li>initializing UI (setting theme, injecting CSS styles);</li>
@@ -55,9 +56,9 @@ import org.slf4j.LoggerFactory;
  * </ul>
  */
 @Singleton
-class GeneralIdeInitializer implements IdeInitializer {
+class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GeneralIdeInitializer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultIdeInitializationStrategy.class);
 
     protected final WorkspaceServiceClient                 workspaceServiceClient;
     protected final AppContext                             appContext;
@@ -73,18 +74,18 @@ class GeneralIdeInitializer implements IdeInitializer {
     protected final DialogFactory                          dialogFactory;
 
     @Inject
-    GeneralIdeInitializer(WorkspaceServiceClient workspaceServiceClient,
-                          AppContext appContext,
-                          BrowserAddress browserAddress,
-                          CurrentUserInitializer userInitializer,
-                          ThemeAgent themeAgent,
-                          StyleInjector styleInjector,
-                          Provider<StandardComponentInitializer> standardComponentsInitializerProvider,
-                          AppStateManager appStateManager,
-                          Provider<WorkspacePresenter> workspacePresenterProvider,
-                          EventBus eventBus,
-                          Provider<CreateWorkspacePresenter> createWsPresenter,
-                          DialogFactory dialogFactory) {
+    DefaultIdeInitializationStrategy(WorkspaceServiceClient workspaceServiceClient,
+                                     AppContext appContext,
+                                     BrowserAddress browserAddress,
+                                     CurrentUserInitializer userInitializer,
+                                     ThemeAgent themeAgent,
+                                     StyleInjector styleInjector,
+                                     Provider<StandardComponentInitializer> standardComponentsInitializerProvider,
+                                     AppStateManager appStateManager,
+                                     Provider<WorkspacePresenter> workspacePresenterProvider,
+                                     EventBus eventBus,
+                                     Provider<CreateWorkspacePresenter> createWsPresenter,
+                                     DialogFactory dialogFactory) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.appContext = appContext;
         this.browserAddress = browserAddress;
@@ -97,14 +98,6 @@ class GeneralIdeInitializer implements IdeInitializer {
         this.eventBus = eventBus;
         this.createWsPresenter = createWsPresenter;
         this.dialogFactory = dialogFactory;
-    }
-
-    @Override
-    public Promise<WorkspaceDto> getWorkspaceToStart() {
-        final String workspaceKey = browserAddress.getWorkspaceKey();
-        Promise<WorkspaceDto> ws = workspaceServiceClient.getWorkspace(workspaceKey);
-        LOG.debug("Got workspace: " + workspaceKey);
-        return ws;
     }
 
     @Override
@@ -126,6 +119,14 @@ class GeneralIdeInitializer implements IdeInitializer {
                               });
     }
 
+    @Override
+    public Promise<WorkspaceDto> getWorkspaceToStart() {
+        final String workspaceKey = browserAddress.getWorkspaceKey();
+        Promise<WorkspaceDto> ws = workspaceServiceClient.getWorkspace(workspaceKey);
+        LOG.debug("Got workspace: " + workspaceKey);
+        return ws;
+    }
+
     private Operation<Void> initUI() {
         return aVoid -> {
             ((ThemeAgentImpl)themeAgent).applyUserTheme();
@@ -138,7 +139,7 @@ class GeneralIdeInitializer implements IdeInitializer {
         return getWorkspaceToStart()
                 .then((Function<WorkspaceDto, Void>)workspace -> {
 
-                    Log.info(GeneralIdeInitializer.class, "Workspace -> " + workspace);
+                    Log.info(DefaultIdeInitializationStrategy.class, "Workspace -> " + workspace);
 
                     ((AppContextImpl)appContext).setWorkspace(workspace);
                     ((AppContextImpl)appContext).setStartAppActions(StartUpActionsParser.getStartUpActions());
@@ -170,7 +171,7 @@ class GeneralIdeInitializer implements IdeInitializer {
         workspacePresenterProvider.get().go(mainPanel);
     }
 
-    // TODO: remove when dashboard will work
+    // TODO: remove after fix dashboard
     private void createWs() {
         createWsPresenter.get().show(new Callback<Workspace, Exception>() {
             @Override

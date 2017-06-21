@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.factory.FactoryServiceClient;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
-import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.context.QueryParameters;
@@ -34,6 +33,7 @@ import org.eclipse.che.ide.core.StandardComponentInitializer;
 import org.eclipse.che.ide.preferences.StyleInjector;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
+import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 
 import java.util.HashMap;
@@ -41,28 +41,31 @@ import java.util.Map;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
-/** Performs initialization of the CHE IDE application in case of loading a Factory. */
+/**
+ * Represents IDE initialization strategy in case of loading from a Factory.
+ * Inherits initialization steps from {@link DefaultIdeInitializationStrategy} and adds.
+ */
 @Singleton
-class FactoryIdeInitializer extends GeneralIdeInitializer {
+class FactoryIdeInitializationStrategy extends DefaultIdeInitializationStrategy {
 
     private final QueryParameters      queryParameters;
     private final FactoryServiceClient factoryServiceClient;
 
     @Inject
-    FactoryIdeInitializer(WorkspaceServiceClient workspaceServiceClient,
-                          AppContext appContext,
-                          BrowserAddress browserAddress,
-                          CurrentUserInitializer currentUserInitializer,
-                          ThemeAgent themeAgent,
-                          StyleInjector styleInjector,
-                          Provider<StandardComponentInitializer> standardComponentsInitializerProvider,
-                          AppStateManager appStateManager,
-                          Provider<WorkspacePresenter> workspacePresenterProvider,
-                          EventBus eventBus,
-                          QueryParameters queryParameters,
-                          Provider<CreateWorkspacePresenter> createWsPresenter,
-                          DialogFactory dialogFactory,
-                          FactoryServiceClient factoryServiceClient) {
+    FactoryIdeInitializationStrategy(WorkspaceServiceClient workspaceServiceClient,
+                                     AppContext appContext,
+                                     BrowserAddress browserAddress,
+                                     CurrentUserInitializer currentUserInitializer,
+                                     ThemeAgent themeAgent,
+                                     StyleInjector styleInjector,
+                                     Provider<StandardComponentInitializer> standardComponentsInitializerProvider,
+                                     AppStateManager appStateManager,
+                                     Provider<WorkspacePresenter> workspacePresenterProvider,
+                                     EventBus eventBus,
+                                     QueryParameters queryParameters,
+                                     Provider<CreateWorkspacePresenter> createWsPresenter,
+                                     DialogFactory dialogFactory,
+                                     FactoryServiceClient factoryServiceClient) {
         super(workspaceServiceClient,
               appContext,
               browserAddress,
@@ -81,13 +84,6 @@ class FactoryIdeInitializer extends GeneralIdeInitializer {
     }
 
     @Override
-    public Promise<WorkspaceDto> getWorkspaceToStart() {
-        final String workspaceId = queryParameters.getByName("workspaceId");
-
-        return workspaceServiceClient.getWorkspace(workspaceId);
-    }
-
-    @Override
     protected Promise<Void> initAppContext() {
         return super.initAppContext()
                     .thenPromise(aVoid -> getFactory()
@@ -102,6 +98,13 @@ class FactoryIdeInitializer extends GeneralIdeInitializer {
                                     throw new OperationException("Can't load Factory. Workspace is not running.");
                                 }
                             }));
+    }
+
+    @Override
+    public Promise<WorkspaceDto> getWorkspaceToStart() {
+        final String workspaceId = queryParameters.getByName("workspaceId");
+
+        return workspaceServiceClient.getWorkspace(workspaceId);
     }
 
     private Promise<FactoryDto> getFactory() {

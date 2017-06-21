@@ -26,6 +26,7 @@ import java.util.Map;
 
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
@@ -70,7 +71,9 @@ public class CurrentWorkspaceManager {
 
         wsStatusNotification.show(STARTING_WORKSPACE_RUNTIME);
 
-        if (workspaceStatus == RUNNING) {
+        if (workspaceStatus == STARTING) {
+            subscribeToEvents();
+        } else if (workspaceStatus == RUNNING) {
             subscribeToEvents();
             wsStatusHandler.handleWorkspaceRunning();
         } else if (workspaceStatus == STOPPED || workspaceStatus == STOPPING) {

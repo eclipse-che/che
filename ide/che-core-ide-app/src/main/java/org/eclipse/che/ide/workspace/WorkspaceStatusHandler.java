@@ -125,7 +125,7 @@ public class WorkspaceStatusHandler {
 
         final Optional<MachineImpl> devMachine = appContext.getWorkspace().getDevMachine();
         devMachine.ifPresent(machine -> {
-            wsAgentStateController.initialize(machine);
+//            wsAgentStateController.initialize(machine);
             wsAgentURLModifier.initialize(machine);
         });
     }

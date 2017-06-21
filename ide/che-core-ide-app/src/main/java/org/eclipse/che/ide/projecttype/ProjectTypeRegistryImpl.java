@@ -18,6 +18,8 @@ import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.events.WsAgentServerRunningEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypesLoadedEvent;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
@@ -30,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 
@@ -55,17 +58,14 @@ public class ProjectTypeRegistryImpl implements ProjectTypeRegistry {
 
         projectTypes = new HashMap<>();
 
-        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> registerProjectTypes());
-//        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-//            @Override
-//            public void onWsAgentStarted(WsAgentStateEvent event) {
-//                registerProjectTypes();
-//            }
-//
-//            @Override
-//            public void onWsAgentStopped(WsAgentStateEvent event) {
-//            }
-//        });
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> {
+            if (RUNNING == appContext.getWorkspace().getStatus()) {
+                registerProjectTypes();
+            }
+        });
+
+        eventBus.addHandler(WsAgentServerRunningEvent.TYPE, e -> registerProjectTypes());
+        eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, e -> projectTypes.clear());
     }
 
     @Override

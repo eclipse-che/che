@@ -15,12 +15,15 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.events.ServerRunningEvent;
 import org.eclipse.che.ide.api.machine.events.ServerStoppedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentServerStoppedEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
@@ -30,6 +33,7 @@ import java.util.function.BiConsumer;
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.STOPPED;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.ide.api.machine.events.WsAgentStateEvent.createWsAgentStartedEvent;
 
 /**
  * Handles changes of the servers statuses and fires the corresponded
@@ -56,6 +60,9 @@ class ServerStatusEventHandler {
 
                     if (WSAGENT_REFERENCE.equals(event.getServerName())) {
                         eventBus.fireEvent(new WsAgentServerRunningEvent());
+
+                        // fire deprecated WsAgentStateEvent for backward compatibility with IDE 5.x
+                        eventBus.fireEvent(createWsAgentStartedEvent());
                     }
                 } else if (event.getStatus() == STOPPED) {
                     eventBus.fireEvent(new ServerStoppedEvent(event.getServerName(), event.getMachineName()));
@@ -72,5 +79,12 @@ class ServerStatusEventHandler {
                     .paramsAsDto(ServerStatusEvent.class)
                     .noResult()
                     .withBiConsumer(operation);
+
+        // fire deprecated WsAgentStateEvent for backward compatibility with IDE 5.x
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> {
+            if (appContext.getWorkspace().getStatus() == WorkspaceStatus.RUNNING) {
+                eventBus.fireEvent(WsAgentStateEvent.createWsAgentStartedEvent());
+            }
+        });
     }
 }

@@ -17,6 +17,7 @@ import com.google.gwt.event.shared.EventHandler;
  *
  * @author Roman Nikitenko
  */
+@Deprecated
 public interface WsAgentStateHandler extends EventHandler {
 
     /**
@@ -25,6 +26,7 @@ public interface WsAgentStateHandler extends EventHandler {
      * @param event
      *         the fired {@link WsAgentStateEvent}
      */
+    @Deprecated
     void onWsAgentStarted(WsAgentStateEvent event);
 
     /**
@@ -33,5 +35,6 @@ public interface WsAgentStateHandler extends EventHandler {
      * @param event
      *         the fired {@link WsAgentStateEvent}
      */
+    @Deprecated
     void onWsAgentStopped(WsAgentStateEvent event);
 }
