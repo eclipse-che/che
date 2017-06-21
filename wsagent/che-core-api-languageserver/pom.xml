@@ -141,6 +141,7 @@
                        	<exclude>**/DocumentFilter.java</exclude>
                        	<exclude>**/LanguageServerDescription.java</exclude>
                        	<exclude>**/LSOperation.java</exclude>
+                       	<exclude>**/OperationUtil.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
