@@ -147,7 +147,6 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
                 proposals.add(new CompletionItemBasedCompletionProposal(item,
                                                                         currentWord,
                                                                         documentServiceClient,
-                                                                        latestCompletionResult.getDocumentId(),
                                                                         resources,
                                                                         imageProvider.getIcon(item.getItem().getKind()),
                                                                         serverCapabilities,

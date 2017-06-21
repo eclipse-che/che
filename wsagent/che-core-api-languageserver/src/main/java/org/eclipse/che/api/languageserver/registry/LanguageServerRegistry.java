@@ -41,4 +41,6 @@ public interface LanguageServerRegistry {
     ServerCapabilities initialize(String fileUri) throws LanguageServerException;
 
     ServerCapabilities getCapabilities(String fileUri) throws LanguageServerException;
+    
+    InitializedLanguageServer getServer(String id);
 }

@@ -99,7 +99,7 @@ public class TextDocumentService {
         dtoToDtoList("references", ReferenceParams.class, LocationDto.class, this::references);
         dtoToDtoList("onTypeFormatting", DocumentOnTypeFormattingParams.class, TextEditDto.class, this::onTypeFormatting);
 
-        dtoToDto("completionItem/resolve", ExtendedCompletionItemDto.class, CompletionItemDto.class, this::completionItemResolve);
+        dtoToDto("completionItem/resolve", ExtendedCompletionItem.class, ExtendedCompletionItemDto.class, this::completionItemResolve);
         dtoToDto("documentHighlight", TextDocumentPositionParams.class, DocumentHighlightDto.class, this::documentHighlight);
         dtoToDto("completion", TextDocumentPositionParams.class, ExtendedCompletionListDto.class, this::completion);
         dtoToDto("hover", TextDocumentPositionParams.class, HoverDto.class, this::hover);
@@ -184,13 +184,13 @@ public class TextDocumentService {
                                 for (CompletionItem item : result.getItems()) {
                                     ExtendedCompletionItemDto exItem = new ExtendedCompletionItemDto();
                                     exItem.setItem(new CompletionItemDto(item));
-                                    exItem.setTextDocumentIdentifier(textDocument);
+                                    exItem.setLanguageServerId(element.getId());
                                     items.add(exItem);
                                 }
                                 return false;
                             }
                         };
-                        OperationUtil.doInParallel(element, op2, 10000);
+                        OperationUtil.doInParallel(element, op2, 30000);
 
                         return res;
                     });
@@ -276,7 +276,7 @@ public class TextDocumentService {
                     });
                     return true;
                 }
-            }, 10000);
+            }, 30000);
             return result;
         } catch (LanguageServerException e) {
             throw new JsonRpcException(-27000, e.getMessage());
@@ -310,27 +310,27 @@ public class TextDocumentService {
                     });
                     return true;
                 }
-            }, 10000);
+            }, 30000);
             return result;
         } catch (LanguageServerException e) {
             throw new JsonRpcException(-27000, e.getMessage());
         }
     }
 
-    private CompletionItemDto completionItemResolve(ExtendedCompletionItemDto unresolved) {
-        // try {
-        // LanguageServer server =
-        // getServer(prefixURI(unresolved.getTextDocumentIdentifier().getUri()));
-        //
-        // return server != null ? new
-        // CompletionItemDto(server.getTextDocumentService().resolveCompletionItem(unresolved).get())
-        // : new CompletionItemDto(unresolved);
-        // } catch (InterruptedException | ExecutionException |
-        // LanguageServerException e) {
-        // throw new JsonRpcException(-27000, e.getMessage());
-        // }
-        // TODO: implement
-        return null;
+    private ExtendedCompletionItemDto completionItemResolve(ExtendedCompletionItem unresolved) {
+        try {
+            InitializedLanguageServer server = languageServerRegistry.getServer(unresolved.getLanguageServerId());
+
+            if (server != null) { 
+                ExtendedCompletionItem res = new ExtendedCompletionItem();
+                res.setItem(server.getServer().getTextDocumentService().resolveCompletionItem(unresolved.getItem()).get());
+                res.setLanguageServerId(unresolved.getLanguageServerId());
+                return new ExtendedCompletionItemDto(res);
+            }
+            return new ExtendedCompletionItemDto(unresolved);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new JsonRpcException(-27000, e.getMessage());
+        }
     }
 
     private HoverDto hover(TextDocumentPositionParams positionParams) {

@@ -1,15 +1,14 @@
 package org.eclipse.che.api.languageserver.shared.model;
 
 import org.eclipse.lsp4j.CompletionItem;
-import org.eclipse.lsp4j.TextDocumentIdentifier;
 
 /**
  * Extended version of lsp4j {@link CompletionItem} for communication with the IDE.
  *
  * @author Thomas Mäder
  */
-public class ExtendedCompletionItem extends CompletionItem {
-    private TextDocumentIdentifier textDocumentIdentifier;
+public class ExtendedCompletionItem {
+    private String languageServerId;
     private CompletionItem item;
 
     public CompletionItem getItem() {
@@ -20,11 +19,11 @@ public class ExtendedCompletionItem extends CompletionItem {
         this.item = item;
     }
     
-    public TextDocumentIdentifier getTextDocumentIdentifier() {
-        return textDocumentIdentifier;
+    public String getLanguageServerId() {
+        return languageServerId;
     }
-
-    public void setTextDocumentIdentifier(TextDocumentIdentifier documentIdentifier) {
-        this.textDocumentIdentifier = documentIdentifier;
+    
+    public void setLanguageServerId(String languageServerId) {
+        this.languageServerId = languageServerId;
     }
 }

@@ -317,4 +317,15 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         }
     }
 
+    @Override
+    public InitializedLanguageServer getServer(String id) {
+        for (List<InitializedLanguageServer> list : initializedServers.values()) {
+            for (InitializedLanguageServer initializedLanguageServer : list) {
+                if (initializedLanguageServer.getId().equals(id)) {
+                    return initializedLanguageServer;
+                }
+            }
+        }
+        return null;
+    }
 }
