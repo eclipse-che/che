@@ -1,0 +1,43 @@
+.che-workspace-button
+  position relative
+
+  che-button-default button, .fa-caret-down
+    background-color #6a6a6a !important
+    margin 0 !important
+    min-height 36px
+    float left
+
+  che-button-default.run-btton
+    button.md-accent.md-raised.md-hue-2.md-button.md-chedefault-theme
+      border-top-right-radius 0 !important
+      border-bottom-right-radius 0 !important
+
+  che-button-default.drop-down
+    button
+      padding 0
+      min-width 36px
+      border-left 1px solid $white-color
+      &.md-accent.md-raised.md-hue-2.md-button.md-chedefault-theme
+        padding 0
+        min-width 36px
+        border-left 1px solid $white-color
+        border-top-left-radius 0 !important
+        border-bottom-left-radius 0 !important
+      md-icon
+        width 100%
+        &::before
+          color $white-color
+          font-size 15px
+
+      .fa-caret-down::before
+        position relative
+        top 2px
+
+  .area-drop-down
+    position absolute
+    top 35px
+    left 0
+    right 0
+    min-height 5px
+    border 1px solid $label-secondary-color
+    background-color $table-header-color

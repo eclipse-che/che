@@ -107,10 +107,11 @@ import {EditCommandDialogController} from  './workspace-details/list-commands/ed
 import {ListAgentsController} from  './workspace-details/environments/list-agents/list-agents.controller';
 import {AddMachineDialogController} from  './workspace-details/environments/add-machine-dialog/add-machine-dialog.controller';
 import {ListAgents} from  './workspace-details/environments/list-agents/list-agents.directive';
+
 import {StackSelectorScopeFilter} from './create-workspace/stack-selector/stack-selector-scope.filter';
 import {StackSelectorSearchFilter} from './create-workspace/stack-selector/stack-selector-search.filter';
 import {StackSelectorTagsFilter} from './create-workspace/stack-selector/stack-selector-tags.filter';
-
+import {CheWorkspaceStatusButton} from './workspace-buttons/workspace-status-button.directive';
 import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
 import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
 
@@ -244,6 +245,8 @@ export class WorkspacesConfig {
     register.controller('AddMachineDialogController', AddMachineDialogController);
     register.controller('ListAgentsController', ListAgentsController);
     register.directive('listAgents', ListAgents);
+
+    register.directive('workspaceStatusButton', CheWorkspaceStatusButton);
 
     register.controller('CreateWorkspaceController', CreateWorkspaceController);
     register.service('createWorkspaceSvc', CreateWorkspaceSvc);

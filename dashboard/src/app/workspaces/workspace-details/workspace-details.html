@@ -1,16 +1,20 @@
-<che-toolbar che-title="{{workspaceDetailsController.isCreationFlow ? 'New Workspace' : workspaceDetailsController.workspaceName}}"
-             che-title-icons-controller="workspaceDetailsController"
-             che-breadcrumb-title="All workspaces"
-             che-breadcrumb-href="#/workspaces">
-  <che-button-default ng-if="workspaceDetailsController.editMode === false"
-                      che-button-title="Open"
-                      href="#/ide/{{workspaceDetailsController.namespaceId}}/{{workspaceDetailsController.workspaceName}}"></che-button-default>
-  <workspace-edit-mode-toolbar-button ng-if="workspaceDetailsController.editMode"
-                                      workspace-edit-mode-message="{{workspaceDetailsController.isSaveButtonDisabled() ? '' : 'Changes will be applied and workspace restarted'}}"
-                                      workspace-edit-mode-show-message="workspaceDetailsController.showApplyMessage"
-                                      workspace-edit-disable-save-button="workspaceDetailsController.isSaveButtonDisabled()"
-                                      workspace-edit-mode-on-save="workspaceDetailsController.saveWorkspace()"></workspace-edit-mode-toolbar-button>
-</che-toolbar>
+<che-row-toolbar
+  title="{{workspaceDetailsController.isCreationFlow ? 'New Workspace' : workspaceDetailsController.workspaceName}}"
+  link-href="#/workspaces" link-title="Workspaces" class="workspace-details-toolbar">
+  <div layout="row" layout-align="start center" class="toolbar-info">
+    <workspace-status che-status="workspaceDetailsController.getWorkspaceStatus()"></workspace-status>
+  </div>
+  <div flex layout="row" layout-align="end center">
+    <workspace-status-button is-creation-flow="workspaceDetailsController.isCreationFlow"
+                             is-auto-snapshot="workspaceDetailsController.getAutoSnapshot()"
+                             workspace-status="workspaceDetailsController.getWorkspaceStatus()"
+                             run-workspace="workspaceDetailsController.runWorkspace()"
+                             stop-workspace="workspaceDetailsController.stopWorkspace()"></workspace-status-button>
+    <che-button-default ng-if="workspaceDetailsController.editMode === false"
+                        che-button-title="Open"
+                        href="#/ide/{{workspaceDetailsController.namespaceId}}/{{workspaceDetailsController.workspaceName}}"></che-button-default>
+  </div>
+</che-row-toolbar>
 
 <md-progress-linear md-mode="indeterminate" ng-show="workspaceDetailsController.loading"></md-progress-linear>
 

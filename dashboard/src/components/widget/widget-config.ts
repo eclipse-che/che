@@ -81,6 +81,7 @@ import {CheToggleButtonPopover} from './popover/che-toggle-button-popover.direct
 import {CheEditor} from './editor/che-editor.directive';
 import {CheEditorController} from './editor/che-editor.controller';
 import {PagingButtons} from './paging-button/paging-button.directive';
+import {CheRowToolbar} from './toolbar/che-row-toolbar.directive';
 
 export class WidgetConfig {
 
@@ -181,6 +182,8 @@ export class WidgetConfig {
       // editor
       .controller('CheEditorController', CheEditorController)
       .directive('cheEditor', CheEditor)
+      // row toolbar
+      .directive('cheRowToolbar', CheRowToolbar)
       // popover
       .directive('toggleButtonPopover', CheToggleButtonPopover);
   }
