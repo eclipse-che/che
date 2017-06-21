@@ -35,6 +35,11 @@ public class JdbVariable implements Variable {
         this.value = jdiValue == null ? new JdbNullValue() : new JdbValue(jdiValue);
     }
 
+    public JdbVariable(SimpleValue value, LocalVariable jdiVariable) {
+        this.jdiVariable = jdiVariable;
+        this.value = value;
+    }
+
     @Override
     public String getName() {
         return jdiVariable.name();

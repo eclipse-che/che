@@ -11,7 +11,7 @@
 package org.eclipse;
 
 public class StackFrameDumpTest1 {
-
+    private static String v = "something";
     public static void main(String[] args) throws Exception {
         do1(1);
     }

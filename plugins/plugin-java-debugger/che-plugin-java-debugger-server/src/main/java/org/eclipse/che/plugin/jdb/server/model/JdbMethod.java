@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.jdb.server.model;
 import com.sun.jdi.AbsentInformationException;
 
 import org.eclipse.che.api.debug.shared.model.Method;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.Variable;
 
 import java.util.Collections;
@@ -53,9 +54,10 @@ public class JdbMethod implements Method {
             synchronized (arguments) {
                 if (arguments.get() == null) {
                     try {
+                        // to reduce unnecessary requests. Value can be retrieved on demand throw Debugger.getValue() method
                         arguments.set(jdiMethod.arguments()
                                                .stream()
-                                               .map(v -> new JdbVariable(jdiStackFrame, v))
+                                               .map(v -> new JdbVariable((SimpleValue)null, v))
                                                .collect(Collectors.toList()));
                     } catch (AbsentInformationException e) {
                         arguments.set(Collections.emptyList());

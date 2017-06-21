@@ -126,7 +126,7 @@ public final class DtoConverter {
         return newDto(VariableDto.class).withType(variable.getType())
                                         .withName(variable.getName())
                                         .withPrimitive(variable.isPrimitive())
-                                        .withValue(asSimplifiedDto(variable.getValue()))
+                                        .withValue(variable.getValue() == null ? null : asSimplifiedDto(variable.getValue()))
                                         .withVariablePath(asDto(variable.getVariablePath()));
     }
 

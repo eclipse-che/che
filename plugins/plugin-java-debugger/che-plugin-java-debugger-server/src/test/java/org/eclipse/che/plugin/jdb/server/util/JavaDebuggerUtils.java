@@ -45,6 +45,7 @@ public class JavaDebuggerUtils {
 
         try {
             vm.exit(0);
+            vm.process().waitFor();
         } catch (Exception ignored) {
         }
     }
