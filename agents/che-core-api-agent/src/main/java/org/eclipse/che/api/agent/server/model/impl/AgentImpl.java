@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.shared.model.impl;
+package org.eclipse.che.api.agent.server.model.impl;
 
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -19,18 +19,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static java.util.stream.Collectors.toMap;
+
 /**
  * @author Anatoliy Bazko
  */
 public class AgentImpl implements Agent {
-    private String                              id;
-    private String                              name;
-    private String                              version;
-    private String                              description;
-    private List<String>                        dependencies;
-    private Map<String, String>                 properties;
-    private String                              script;
-    private Map<String, ? extends ServerConfig> servers;
+    private String                    id;
+    private String                    name;
+    private String                    version;
+    private String                    description;
+    private List<String>              dependencies;
+    private Map<String, String>       properties;
+    private String                    script;
+    private Map<String, ServerConfig> servers;
 
     public AgentImpl(String id,
                      String name,
@@ -47,7 +49,11 @@ public class AgentImpl implements Agent {
         this.dependencies = dependencies;
         this.properties = properties;
         this.script = script;
-        this.servers = servers;
+        if (servers != null) {
+            this.servers = servers.entrySet()
+                                  .stream()
+                                  .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }
     }
 
     public AgentImpl(Agent agent) {

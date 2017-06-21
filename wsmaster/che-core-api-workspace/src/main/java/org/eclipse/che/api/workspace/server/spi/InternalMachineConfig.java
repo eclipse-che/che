@@ -15,7 +15,7 @@ import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
-import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
+import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 

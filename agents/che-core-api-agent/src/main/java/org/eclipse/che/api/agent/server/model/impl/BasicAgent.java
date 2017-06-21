@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.shared.model.impl;
+package org.eclipse.che.api.agent.server.model.impl;
 
 import org.eclipse.che.api.agent.shared.dto.AgentDto;
 import org.eclipse.che.api.agent.shared.model.Agent;
