@@ -8,8 +8,8 @@
 +
 +
 +let keycloakConfig = {
-+  "url": "http://172.19.20.18:5050/auth",
-+  "realm": "Che",
++  "url": "http://172.17.0.1:5050/auth",
++  "realm": "che",
 +  "clientId": "che-public",
 +};
 

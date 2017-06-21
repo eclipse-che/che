@@ -1,7 +1,7 @@
 {
-  "realm" : "Che",
+  "realm" : "che",
   "resource" : "che-public",
-  "auth-server-url" : "http://172.19.20.18:5050/auth",
+  "auth-server-url" : "http://172.17.0.1:5050/auth",
   "ssl-required" : "external",
   "enable-cors" : true,
   "bearer-only" : false,

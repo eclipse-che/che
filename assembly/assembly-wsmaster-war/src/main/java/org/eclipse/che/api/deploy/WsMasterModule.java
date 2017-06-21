@@ -35,7 +35,6 @@ import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.machine.shared.Constants;
-import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.WorkspaceMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.stack.StackMessageBodyAdapter;
@@ -85,8 +84,6 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.plugin.docker.compose.ComposeModule());
 
         bind(org.eclipse.che.api.user.server.CheUserCreator.class);
-
-        bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
 
         bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
         bind(org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader.class).asEagerSingleton();

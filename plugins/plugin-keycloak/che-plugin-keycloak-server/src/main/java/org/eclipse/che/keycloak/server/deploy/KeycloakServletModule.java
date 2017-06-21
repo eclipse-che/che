@@ -14,6 +14,7 @@ import com.google.inject.servlet.ServletModule;
 
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.keycloak.server.KeycloakAuthenticationFilter;
+import org.eclipse.che.keycloak.server.KeycloakEnvironmentInitalizationFilter;
 
 import javax.inject.Singleton;
 
@@ -24,5 +25,6 @@ public class KeycloakServletModule extends ServletModule {
     protected void configureServlets() {
         bind(KeycloakAuthenticationFilter.class).in(Singleton.class);
         filter("/*").through(KeycloakAuthenticationFilter.class);
+        filter("/*").through(KeycloakEnvironmentInitalizationFilter.class);
     }
 }

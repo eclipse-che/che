@@ -1,9 +1,9 @@
 {
-  "realm": "Che",
-  "auth-server-url": "http://172.19.20.18:5050/auth",
+  "realm": "che",
+  "auth-server-url": "http://172.17.0.1:5050/auth",
   "ssl-required": "external",
   "resource": "che",
   "credentials": {
-    "secret": "f5967907-9a29-4713-971a-9776b830caa2"
+    "secret": "7be16729-d151-46d4-97cd-5e6d5205b567"
   }
 }

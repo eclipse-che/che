@@ -7,8 +7,8 @@
 +  <script type="text/javascript" language="javascript" src="/_app/keycloak/keycloak.js"></script>
 +  <script>
 +    window.keycloak = Keycloak({
-+      url: 'http://172.19.20.18:5050/auth',
-+      realm: 'Che',
++      url: 'http://172.17.0.1:5050/auth',
++      realm: 'che',
 +      clientId: 'che-public',
 +    });
 +    window.keycloak.init({ onLoad: 'check-sso', checkLoginIframe: false, }).success(function(authenticated) {

@@ -8,21 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.keycloak.server.deploy;
+package org.eclipse.che.api.local;
 
 import com.google.inject.AbstractModule;
 
-import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.keycloak.server.KeycloakTokenValidator;
 
-
+/**
+ * @author Max Shaposhnik (mshaposhnik@redhat.com)
+ */
 @DynaModule
-public class KeycloakModule extends AbstractModule {
+public class LocalModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(HttpJsonRequestFactory.class).to(org.eclipse.che.keycloak.server.KeycloakHttpJsonRequestFactory.class);
-        bind(TokenValidator.class).to(KeycloakTokenValidator.class);
+        bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
     }
 }

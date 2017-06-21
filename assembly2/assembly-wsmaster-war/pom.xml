@@ -80,6 +80,9 @@
                             </includes>
                         </resource>
                     </webResources>
+                    <packagingExcludes>
+                        WEB-INF/lib/wsmaster-local*.jar,
+                    </packagingExcludes>
                 </configuration>
             </plugin>
         </plugins>
