@@ -1059,6 +1059,11 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                     contextMenu.show(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
                 }
             }, ContextMenuEvent.getType());
+
+            getUndoRedo().addUndoRedoOperationsListener(() -> Scheduler.get().scheduleDeferred(() -> {
+                editorWidget.markDirty();
+                updateDirtyState(true);
+            }));
         }
     }
 

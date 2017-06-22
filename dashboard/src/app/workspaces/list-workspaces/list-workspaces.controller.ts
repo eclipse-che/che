@@ -56,7 +56,7 @@ export class ListWorkspacesCtrl {
    * @ngInject for Dependency injection
    */
   constructor($log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService, lodash: any,
-              $rootScope: che.IRootScopeService, cheAPI: CheAPI, cheNotification: CheNotification, cheBranding: CheBranding,
+              cheAPI: CheAPI, cheNotification: CheNotification, cheBranding: CheBranding,
               cheWorkspace: CheWorkspace, cheNamespaceRegistry: CheNamespaceRegistry,
               confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactor) {
     this.cheAPI = cheAPI;
@@ -89,8 +89,6 @@ export class ListWorkspacesCtrl {
     this.workspaceUsedResources = new Map();
 
     this.getUserWorkspaces();
-
-    $rootScope.showIDE = false;
 
     this.cheNamespaceRegistry.fetchNamespaces().then(() => {
       this.namespaceLabels = this.getNamespaceLabelsList();

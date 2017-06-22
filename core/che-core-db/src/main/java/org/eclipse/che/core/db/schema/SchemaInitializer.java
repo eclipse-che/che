@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.core.db.schema;
 
+import java.util.Map;
+
 /**
  * Initializes database schema or migrates an old version of it to a new one.
  *
@@ -20,8 +22,9 @@ public interface SchemaInitializer {
     /**
      * Initializes database schema or migrates an old schema to a new one.
      *
+     * @return initialization properties
      * @throws SchemaInitializationException
      *         thrown when any error occurs during schema initialization/migration
      */
-    void init() throws SchemaInitializationException;
+    Map<String, String> init() throws SchemaInitializationException;
 }

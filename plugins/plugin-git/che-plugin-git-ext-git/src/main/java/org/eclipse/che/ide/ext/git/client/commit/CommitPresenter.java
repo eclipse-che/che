@@ -115,7 +115,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         view.setEnableAmendCheckBox(true);
         view.setEnablePushAfterCommitCheckBox(true);
         view.setEnableRemoteBranchesDropDownLis(false);
-        service.diff(appContext.getDevMachine(), project.getLocation(), null, NAME_STATUS, false, 0, "HEAD", false)
+        service.diff(appContext.getDevMachine(), project.getLocation(), null, NAME_STATUS, true, 0, "HEAD", false)
                .then(diff -> {
                    service.log(appContext.getDevMachine(), project.getLocation(), null, -1, 1, false)
                           .then(arg -> {
