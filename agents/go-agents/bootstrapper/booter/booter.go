@@ -243,7 +243,7 @@ func waitStartedProcessesDie() error {
 	now := time.Now()
 	for _, p := range processes {
 		subscriber := process.Subscriber{
-			ID:   p.Name, // <- installer id
+			ID:   "wait-" + p.Name,
 			Mask: process.StatusBit,
 			Consumer: process.EventConsumerFunc(func(e process.Event) {
 				if e.Type() == process.DiedEventType {

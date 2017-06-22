@@ -35,7 +35,7 @@ type scriptInst struct {
 }
 
 func (sci *scriptInst) execute() error {
-	_, diedC, err := executeScript(sci.installer)
+	diedC, err := executeScript(sci.installer)
 	if err != nil {
 		fmt.Errorf("Scrip execution failed. Error: %s", err)
 	}
@@ -63,14 +63,13 @@ type serverInst struct {
 }
 
 func (svi *serverInst) execute() error {
-	pid, diedC, err := executeScript(svi.installer)
+	diedC, err := executeScript(svi.installer)
 	if err != nil {
 		fmt.Errorf("Scrip execution failed Error: %s", err)
 	}
 	checker := &dialChecker{svi.period, make(chan bool, 1)}
 	select {
 	case <-checker.availableC(svi.installer.Servers):
-		process.RemoveSubscriber(pid, svi.installer.ID)
 		return nil
 	case <-time.After(svi.timeout):
 		checker.stop()
@@ -87,7 +86,7 @@ func (svi *serverInst) execute() error {
 	}
 }
 
-func executeScript(installer Installer) (uint64, chan *process.DiedEvent, error) {
+func executeScript(installer Installer) (chan *process.DiedEvent, error) {
 	diedC := make(chan *process.DiedEvent, 1)
 	subscriber := func(event process.Event) {
 		broadcastLogs(installer.ID, event)
@@ -100,11 +99,10 @@ func executeScript(installer Installer) (uint64, chan *process.DiedEvent, error)
 	pb.CmdLine(installer.Script)
 	pb.CmdType(installerCmdType)
 	pb.SubscribeDefault(installer.ID, process.EventConsumerFunc(subscriber))
-	p, err := pb.Start()
-	if err != nil {
-		return 0, nil, err
+	if _, err := pb.Start(); err != nil {
+		return nil, err
 	}
-	return p.Pid, diedC, nil
+	return diedC, nil
 }
 
 // dialChecker performs a servers availability check
