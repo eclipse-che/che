@@ -480,14 +480,12 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         State prevState = state;
         state = State.NORMAL;
 
-        if (!parts.isEmpty()) {
-            if (currentSize < MIN_PART_SIZE) {
-                currentSize = DEFAULT_PART_SIZE;
-            }
-
-            workBenchPartController.setSize(currentSize);
-            workBenchPartController.setHidden(false);
+        if (currentSize < MIN_PART_SIZE) {
+            currentSize = DEFAULT_PART_SIZE;
         }
+
+        workBenchPartController.setSize(currentSize);
+        workBenchPartController.setHidden(false);
 
         // Ask the delegate to restore part stacks if this part stack was maximized.
         if (prevState == State.MAXIMIZED) {
