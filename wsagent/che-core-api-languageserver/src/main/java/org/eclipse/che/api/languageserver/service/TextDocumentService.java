@@ -216,31 +216,27 @@ public class TextDocumentService {
         try {
             List<InitializedLanguageServer> servers = languageServerRegistry.getApplicableLanguageServers(uri).stream()
                             .flatMap(Collection::stream).collect(Collectors.toList());
-            OperationUtil.doInParallel(servers,
-                                                    new LSOperation<InitializedLanguageServer, List<? extends SymbolInformation>>() {
+            OperationUtil.doInParallel(servers, new LSOperation<InitializedLanguageServer, List<? extends SymbolInformation>>() {
 
-                                                        @Override
-                                                        public boolean canDo(InitializedLanguageServer element) {
-                                                            return truish(element.getInitializeResult().getCapabilities()
-                                                                            .getDocumentSymbolProvider());
-                                                        }
+                @Override
+                public boolean canDo(InitializedLanguageServer element) {
+                    return truish(element.getInitializeResult().getCapabilities().getDocumentSymbolProvider());
+                }
 
-                                                        @Override
-                                                        public CompletableFuture<List<? extends SymbolInformation>> start(InitializedLanguageServer element) {
-                                                            return element.getServer().getTextDocumentService()
-                                                                            .documentSymbol(documentSymbolParams);
-                                                        }
+                @Override
+                public CompletableFuture<List<? extends SymbolInformation>> start(InitializedLanguageServer element) {
+                    return element.getServer().getTextDocumentService().documentSymbol(documentSymbolParams);
+                }
 
-                                                        @Override
-                                                        public boolean handleResult(InitializedLanguageServer element,
-                                                                                    List<? extends SymbolInformation> locations) {
-                                                            locations.forEach(o -> {
-                                                                o.getLocation().setUri(removePrefixUri(o.getLocation().getUri()));
-                                                                result.add(new SymbolInformationDto(o));
-                                                            });
-                                                            return true;
-                                                        }
-                                                    }, 10000);
+                @Override
+                public boolean handleResult(InitializedLanguageServer element, List<? extends SymbolInformation> locations) {
+                    locations.forEach(o -> {
+                        o.getLocation().setUri(removePrefixUri(o.getLocation().getUri()));
+                        result.add(new SymbolInformationDto(o));
+                    });
+                    return true;
+                }
+            }, 10000);
             return result;
 
         } catch (LanguageServerException e) {
@@ -391,7 +387,7 @@ public class TextDocumentService {
 
                 @Override
                 public boolean handleResult(InitializedLanguageServer element, SignatureHelp res) {
-                    if (res != null) {
+                    if (res != null && !res.getSignatures().isEmpty()) {
                         result[0] = new SignatureHelpDto(res);
                         return true;
                     }
@@ -548,7 +544,7 @@ public class TextDocumentService {
                 @Override
                 public boolean handleResult(Collection<InitializedLanguageServer> element, List<DocumentHighlightDto> list) {
                     result[0] = list;
-                    return list.isEmpty();
+                    return !list.isEmpty();
                 }
             };
             OperationUtil.doInSequence(languageServerRegistry.getApplicableLanguageServers(uri), op, 10000);
