@@ -302,6 +302,11 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
         this.editorOverlay.setDirty(false);
     }
 
+    @Override
+    public void markDirty() {
+        this.editorOverlay.setDirty(true);
+    }
+
     private void selectKeyMode(Keymap keymap) {
         resetKeyModes();
         Keymap usedKeymap = keymap;

@@ -108,6 +108,9 @@ public interface EditorWidget extends IsWidget,
     /** Marks the editor as clean i.e change the dirty state to false. */
     void markClean();
 
+    /** Marks the editor as dirty i.e change the dirty state to true. */
+    void markDirty();
+
     /**
      * Returns the tab size (equivalent number of spaces).
      *

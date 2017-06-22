@@ -44,7 +44,8 @@ cmd_agenerate() {
              "plugin-wizard-archetype        - Assembly with custom C project type extension" \
              "plugin-serverservice-archetype - Assembly with simple IDE extesion and a server service" \
              "plugin-embedjs-archetype       - Assembly with simple IDE extesion for using native javascript in widgets" \
-             "plugin-json-archetype          - Assembly with sample JSON project type, editor codeassistant, and workspace services")
+             "plugin-json-archetype          - Assembly with sample JSON project type, editor codeassistant, and workspace services" \
+             "stacks-archetype               - Assembly with sample stack packaging module, for using custom stacks in assemblies")
     select opt in "${options[@]}"
     do
       case $opt in
@@ -70,6 +71,10 @@ cmd_agenerate() {
           ;;
         "plugin-json-archetype          - Assembly with sample JSON project type, editor codeassistant, and workspace services")
           ARCHETYPE_ID="plugin-json-archetype"
+          break
+          ;;
+        "stacks-archetype               - Assembly with sample stack packaging module, for using custom stacks in assemblies")
+          ARCHETYPE_ID="stacks-archetype"
           break
           ;;
         *) echo invalid option;;

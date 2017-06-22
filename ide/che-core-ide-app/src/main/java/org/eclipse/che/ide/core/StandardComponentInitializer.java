@@ -167,6 +167,8 @@ public class StandardComponentInitializer {
     public static final String COPY                  = "copy";
     public static final String CUT                   = "cut";
     public static final String PASTE                 = "paste";
+    public static final String UNDO                  = "undo";
+    public static final String REDO                  = "redo";
     public static final String SWITCH_LEFT_TAB       = "switchLeftTab";
     public static final String SWITCH_RIGHT_TAB      = "switchRightTab";
     public static final String OPEN_RECENT_FILES     = "openRecentFiles";
@@ -628,10 +630,10 @@ public class StandardComponentInitializer {
 
         editGroup.add(saveAction);
 
-        actionManager.registerAction("undo", undoAction);
+        actionManager.registerAction(UNDO, undoAction);
         editGroup.add(undoAction);
 
-        actionManager.registerAction("redo", redoAction);
+        actionManager.registerAction(REDO, redoAction);
         editGroup.add(redoAction);
 
         actionManager.registerAction(SOFT_WRAP, softWrapAction);
@@ -842,6 +844,9 @@ public class StandardComponentInitializer {
         keyBinding.getGlobal().addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F10).build(), SHOW_COMMANDS_PALETTE);
 
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('s').build(), SAVE);
+
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('z').build(), UNDO);
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('y').build(), REDO);
 
         if (UserAgent.isMac()) {
             keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('w').build(), CLOSE_ACTIVE_EDITOR);
