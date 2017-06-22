@@ -10,88 +10,60 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server.importer;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Send project import output to WS by skipping output messages written below the delay specified.
+ * Importer output line consumer that perform broadcasting consumed output through the json rpc protocol to the specific method.
+ *
+ * @author Vlad Zhukovskyi
+ * @since 5.9.0
  */
-public class ProjectImportOutputWSLineConsumer implements LineConsumer {
+public class ProjectImportOutputWSLineConsumer extends BaseProjectImportOutputLineConsumer {
+
+    public static final String IMPORT_OUTPUT_CHANNEL = "importProject:output";
+
     private static final Logger LOG = LoggerFactory.getLogger(ProjectImportOutputWSLineConsumer.class);
 
-    protected final AtomicInteger            lineCounter;
-    protected final String                   projectName;
-    protected final String                   workspaceId;
-    protected final BlockingQueue<String>    lineToSendQueue;
-    protected final ScheduledExecutorService executor;
+    private final AtomicInteger lineCounter;
 
-    public ProjectImportOutputWSLineConsumer(String projectName, String workspaceId, int delayBetweenMessages) {
-        this.projectName = projectName;
-        this.workspaceId = workspaceId;
-        lineToSendQueue = new ArrayBlockingQueue<>(1024);
-        executor = Executors.newSingleThreadScheduledExecutor(
-                new ThreadFactoryBuilder().setNameFormat(ProjectImportOutputWSLineConsumer.class.getSimpleName() + "-%d")
-                                          .setDaemon(true)
-                                          .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-                                          .build());
-        executor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                String lineToSend = null;
-                while (!lineToSendQueue.isEmpty()) {
-                    lineToSend = lineToSendQueue.poll();
-                }
-                if (lineToSend == null) {
-                    return;
-                }
-                sendMessage(lineToSend);
-            }
-        }, 0, delayBetweenMessages, TimeUnit.MILLISECONDS);
+    public ProjectImportOutputWSLineConsumer(String projectName, int delayBetweenMessages) {
+        super(projectName, delayBetweenMessages);
+
         lineCounter = new AtomicInteger(1);
     }
 
     @Override
-    public void close() throws IOException {
-        executor.shutdown();
+    protected void sendOutputLine(String outputLine) {
+        sendMessage(outputLine);
     }
 
-    @Override
-    public void writeLine(String line) throws IOException {
+    protected void sendMessage(String outputLine) {
+        doSendMessage(IMPORT_OUTPUT_CHANNEL, createMessageObject(outputLine));
+    }
+
+    protected JsonObject createMessageObject(String message) {
+        JsonObject jso = new JsonObject();
+        jso.addProperty("num", lineCounter.getAndIncrement());
+        jso.addProperty("line", message);
+        jso.addProperty("project", projectName);
+
+        return jso;
+    }
+
+    protected void doSendMessage(String channelId, JsonElement messageBody) {
         try {
-            lineToSendQueue.put(line);
-        } catch (InterruptedException ignored) {
-            // ignore if interrupted
-        }
-    }
+            final ChannelBroadcastMessage bm = new ChannelBroadcastMessage();
+            bm.setChannel(channelId);
+            bm.setBody(messageBody.toString());
 
-    protected void sendMessage(String line) {
-        final ChannelBroadcastMessage bm = new ChannelBroadcastMessage();
-        bm.setChannel("importProject:output");
-        JsonObject json = new JsonObject();
-        json.addProperty("num", lineCounter.getAndIncrement());
-        json.addProperty("line", line);
-        json.addProperty("project", projectName);
-        bm.setBody(json.toString());
-        sendMessageToWS(bm);
-    }
-
-    protected void sendMessageToWS(final ChannelBroadcastMessage bm) {
-        try {
             WSConnectionContext.sendMessage(bm);
         } catch (Exception e) {
             LOG.error("A problem occurred while sending websocket message", e);

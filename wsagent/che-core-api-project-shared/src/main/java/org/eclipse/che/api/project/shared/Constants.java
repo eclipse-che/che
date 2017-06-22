@@ -37,6 +37,10 @@ public class Constants {
     public static final String COMMANDS_ATTRIBUTE_NAME        = "commands";
     public static final String COMMANDS_ATTRIBUTE_DESCRIPTION = "Project-related commands";
 
+    public static final String EVENT_IMPORT_OUTPUT_SUBSCRIBE    = "importProject/subscribe";
+    public static final String EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE = "importProject/unSubscribe";
+    public static final String EVENT_IMPORT_OUTPUT_PROGRESS     = "importProject/progress";
+
     private Constants() {
     }
 }
