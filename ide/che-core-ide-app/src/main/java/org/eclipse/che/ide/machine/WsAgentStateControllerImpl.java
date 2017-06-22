@@ -115,12 +115,12 @@ public class WsAgentStateControllerImpl implements WsAgentStateController,
         });
     }
 
+    /** Establishes EverREST WebSocket connection. */
     private void establishConnection() {
         final String wsAgentRestEndpointURL = appContext.getDevAgentEndpoint().replaceFirst("http", "ws") + "/ws";
 
         messageBus = messageBusProvider.createMachineMessageBus(wsAgentRestEndpointURL);
 
-        // TODO: need to remove all handlers when ws-agent stopped
         messageBus.addOnOpenHandler(this);
         messageBus.addOnErrorHandler(this);
     }

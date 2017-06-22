@@ -33,8 +33,6 @@ import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.selection.Selection;
@@ -89,17 +87,9 @@ public class CommandManagerImpl implements CommandManager {
 
         commands = new HashMap<>();
 
+        // FIXME: spi
+        // Temporary solution while a better mechanism of obtaining appContext.getProjects() with Promises is being considered...
         eventBus.addHandler(WorkspaceReadyEvent.getType(), e -> fetchCommands());
-//        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-//            @Override
-//            public void onWsAgentStarted(WsAgentStateEvent event) {
-//                fetchCommands();
-//            }
-//
-//            @Override
-//            public void onWsAgentStopped(WsAgentStateEvent event) {
-//            }
-//        });
     }
 
     private void fetchCommands() {

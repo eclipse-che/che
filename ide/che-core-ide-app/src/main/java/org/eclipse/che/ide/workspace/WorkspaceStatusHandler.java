@@ -27,13 +27,10 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
-import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-
-import java.util.Optional;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
@@ -123,11 +120,7 @@ public class WorkspaceStatusHandler {
 
         wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
 
-        final Optional<MachineImpl> devMachine = appContext.getWorkspace().getDevMachine();
-        devMachine.ifPresent(machine -> {
-//            wsAgentStateController.initialize(machine);
-            wsAgentURLModifier.initialize(machine);
-        });
+        appContext.getWorkspace().getDevMachine().ifPresent(wsAgentURLModifier::initialize);
     }
 
     // FIXME: spi ide

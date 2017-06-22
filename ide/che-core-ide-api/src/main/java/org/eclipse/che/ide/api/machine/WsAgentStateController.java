@@ -14,6 +14,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.websocket.MessageBus;
 
 @Singleton
@@ -23,9 +24,11 @@ public interface WsAgentStateController {
     @Deprecated
     void initialize(MachineImpl devMachine);
 
+    /** @deprecated use {@link ServerImpl#getStatus()} */
     @Deprecated
     WsAgentState getState();
 
+    /** Use JSON-RPC communication instead. */
     @Deprecated
     Promise<MessageBus> getMessageBus();
 }

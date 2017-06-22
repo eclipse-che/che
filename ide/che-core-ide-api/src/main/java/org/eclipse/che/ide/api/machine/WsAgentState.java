@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine;
 
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
+
 /**
  * Describes state of a ws-agent.
  *
  * @author Roman Nikitenko.
+ * @deprecated use {@link ServerImpl#getStatus()}
  */
 @Deprecated
 public enum WsAgentState {
