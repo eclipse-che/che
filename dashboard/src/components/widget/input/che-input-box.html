@@ -10,6 +10,7 @@
           <input ng-trim="false" name="{{inputName}}"
                  ng-model-options="{allowInvalid: true}"
                  ng-change="onChange({$value: valueModel})"
+                 ng-readonly="isReadonly"
                  ng-model="valueModel">
           <span class="che-input-asterisk fa" ng-show="valueModel"
                 ng-class="myForm[inputName] && myForm[inputName].$invalid ? 'fa-times' : 'fa-check'"></span>

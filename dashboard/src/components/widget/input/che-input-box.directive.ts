@@ -19,6 +19,7 @@ interface IInputBoxScope extends ng.IScope {
   pattern?: string;
   myForm: ng.IFormController;
   onChange?: Function;
+  isReadonly?: boolean;
 }
 
 /**
@@ -44,7 +45,8 @@ export class CheInputBox {
     labelDescription: '@?cheLabelDescription',
     placeHolder: '@?chePlaceHolder',
     myForm: '=cheForm',
-    onChange: '&?cheOnChange'
+    onChange: '&?cheOnChange',
+    isReadonly: '=?cheReadonly'
   };
 
 
