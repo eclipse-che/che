@@ -22,6 +22,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
@@ -34,7 +35,7 @@ import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
  * If Link wih Editor is enabled - the current file open in the Editor will be highlighted in Project Explorer.
  */
 @Singleton
-public class LinkWithEditorAction extends ToggleAction implements ActivePartChangedEvent.Handler {
+public class LinkWithEditorAction extends ToggleAction implements ActivePartChangedHandler {
 
     public static final String LINK_WITH_EDITOR = "linkWithEditor";
 

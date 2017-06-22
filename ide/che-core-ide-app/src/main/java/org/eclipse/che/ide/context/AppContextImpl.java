@@ -25,7 +25,9 @@ import org.eclipse.che.ide.api.data.HasDataObject;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
+import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
+import org.eclipse.che.ide.api.event.WindowActionHandler;
 import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
@@ -71,9 +73,9 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
  */
 @Singleton
 public class AppContextImpl implements AppContext,
-                                       SelectionChangedEvent.Handler,
+                                       SelectionChangedHandler,
                                        ResourceChangedHandler,
-                                       WindowActionEvent.Handler,
+                                       WindowActionHandler,
                                        WorkspaceStartedEvent.Handler,
                                        WorkspaceStoppedEvent.Handler,
                                        ResourceManagerInitializer {

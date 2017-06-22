@@ -33,6 +33,7 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.resource.Path;
@@ -152,7 +153,7 @@ public class OpenFileAction extends Action implements PromisableAction {
             @Override
             public void makeCall(final Callback<Void, Throwable> callback) {
                 actionCompletedCallback = callback;
-                handlerRegistration = eventBus.addHandler(ActivePartChangedEvent.TYPE, new ActivePartChangedEvent.Handler() {
+                handlerRegistration = eventBus.addHandler(ActivePartChangedEvent.TYPE, new ActivePartChangedHandler() {
                     @Override
                     public void onActivePartChanged(ActivePartChangedEvent event) {
                         if (event.getActivePart() instanceof EditorPartPresenter) {

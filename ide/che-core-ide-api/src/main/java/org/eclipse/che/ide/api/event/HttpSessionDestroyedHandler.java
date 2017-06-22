@@ -10,23 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event;
 
-import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.EventHandler;
 
 /**
- * Fired when websocket closed with message from server that current http session was destroyed.
- *
  * @author Evgen Vidolob
  */
-public class HttpSessionDestroyedEvent extends GwtEvent<HttpSessionDestroyedHandler> {
-    public static Type<HttpSessionDestroyedHandler> TYPE = new Type<HttpSessionDestroyedHandler>();
-
-    @Override
-    public Type<HttpSessionDestroyedHandler> getAssociatedType() {
-        return TYPE;
-    }
-
-    @Override
-    protected void dispatch(HttpSessionDestroyedHandler handler) {
-        handler.onHttpSessionDestroyed(this);
-    }
+public interface HttpSessionDestroyedHandler extends EventHandler {
+    void onHttpSessionDestroyed(HttpSessionDestroyedEvent event);
 }

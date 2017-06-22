@@ -139,5 +139,4 @@ public class FileEvent extends GwtEvent<FileEvent.FileEventHandler> {
     public interface FileEventHandler extends EventHandler {
         void onFileOperation(FileEvent event);
     }
-
 }

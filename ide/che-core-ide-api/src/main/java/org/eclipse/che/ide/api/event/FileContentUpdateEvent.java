@@ -10,26 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event;
 
-import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
  * Event that notifies of file content changes.
  */
-public class FileContentUpdateEvent extends GwtEvent<FileContentUpdateEvent.Handler> {
-
-    public interface Handler extends EventHandler {
-        /**
-         * The file content has changed/
-         *
-         * @param event the event
-         */
-        void onFileContentUpdate(FileContentUpdateEvent event);
-
-    }
-
+public class FileContentUpdateEvent extends GwtEvent<FileContentUpdateHandler> {
     /** The event type. */
-    public static Type<Handler> TYPE = new Type<>();
+    public static Type<FileContentUpdateHandler> TYPE = new Type<>();
 
     /**
      * The path to the file that is updated.
@@ -56,12 +44,12 @@ public class FileContentUpdateEvent extends GwtEvent<FileContentUpdateEvent.Hand
     }
 
     @Override
-    public Type<Handler> getAssociatedType() {
+    public Type<FileContentUpdateHandler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
-    protected void dispatch(Handler handler) {
+    protected void dispatch(FileContentUpdateHandler handler) {
         handler.onFileContentUpdate(this);
     }
 
@@ -82,5 +70,4 @@ public class FileContentUpdateEvent extends GwtEvent<FileContentUpdateEvent.Hand
     public String getModificationStamp() {
         return modificationStamp;
     }
-
 }

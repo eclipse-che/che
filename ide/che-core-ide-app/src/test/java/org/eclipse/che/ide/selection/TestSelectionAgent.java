@@ -18,6 +18,7 @@ import com.google.web.bindery.event.shared.SimpleEventBus;
 
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
+import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.parts.AbstractPartPresenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.selection.Selection;
@@ -80,7 +81,7 @@ public class TestSelectionAgent {
     @Test
     public void shouldFireEventWhenPartChanged() {
         when(part.getSelection()).thenReturn(selection);
-        SelectionChangedEvent.Handler handler = mock(SelectionChangedEvent.Handler.class);
+        SelectionChangedHandler handler = mock(SelectionChangedHandler.class);
         eventBus.addHandler(SelectionChangedEvent.TYPE, handler);
 
         // fire event, for agent to get information about active part
@@ -124,7 +125,7 @@ public class TestSelectionAgent {
 
         // fire event, for agent to get information about active part
         eventBus.fireEvent(new ActivePartChangedEvent(part));
-        SelectionChangedEvent.Handler handler = mock(SelectionChangedEvent.Handler.class);
+        SelectionChangedHandler handler = mock(SelectionChangedHandler.class);
         eventBus.addHandler(SelectionChangedEvent.TYPE, handler);
 
         part.setSelection(mock(Selection.class));
@@ -170,7 +171,7 @@ public class TestSelectionAgent {
         // change part
         eventBus.fireEvent(new ActivePartChangedEvent(mock(PartPresenter.class)));
 
-        SelectionChangedEvent.Handler handler = mock(SelectionChangedEvent.Handler.class);
+        SelectionChangedHandler handler = mock(SelectionChangedHandler.class);
         eventBus.addHandler(SelectionChangedEvent.TYPE, handler);
 
         // call setSelection on the first Part.

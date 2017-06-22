@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event;
 
-import com.google.gwt.event.shared.EventHandler;
 import org.eclipse.che.ide.api.selection.Selection;
 import com.google.gwt.event.shared.GwtEvent;
 
@@ -19,19 +18,8 @@ import com.google.gwt.event.shared.GwtEvent;
  *
  * @author Nikolay Zamosenchuk
  */
-public class SelectionChangedEvent extends GwtEvent<SelectionChangedEvent.Handler> {
-
-    public interface Handler extends EventHandler {
-        /**
-         * Selection Changed
-         *
-         * @param event
-         */
-        void onSelectionChanged(SelectionChangedEvent event);
-
-    }
-
-    public static Type<Handler> TYPE = new Type<>();
+public class SelectionChangedEvent extends GwtEvent<SelectionChangedHandler> {
+    public static Type<SelectionChangedHandler> TYPE = new Type<>();
 
     private final Selection<?> selection;
 
@@ -44,7 +32,7 @@ public class SelectionChangedEvent extends GwtEvent<SelectionChangedEvent.Handle
     }
 
     @Override
-    public Type<Handler> getAssociatedType() {
+    public Type<SelectionChangedHandler> getAssociatedType() {
         return TYPE;
     }
 
@@ -54,8 +42,7 @@ public class SelectionChangedEvent extends GwtEvent<SelectionChangedEvent.Handle
     }
 
     @Override
-    protected void dispatch(Handler handler) {
+    protected void dispatch(SelectionChangedHandler handler) {
         handler.onSelectionChanged(this);
     }
-
 }

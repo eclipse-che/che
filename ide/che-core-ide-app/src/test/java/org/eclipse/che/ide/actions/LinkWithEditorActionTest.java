@@ -16,8 +16,6 @@ import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -77,7 +75,7 @@ public class LinkWithEditorActionTest {
     public void actionShouldBePerformed() throws Exception {
         when(preferencesManager.getValue(eq(LINK_WITH_EDITOR))).thenReturn(null);
 
-        action.actionPerformed(new ActionEvent(new Presentation(), null, null));
+        action.actionPerformed(null);
 
         verify(preferencesManager).setValue("linkWithEditor", Boolean.toString(true));
         verify(eventBus).fireEvent((Event<?>)anyObject());
@@ -88,7 +86,7 @@ public class LinkWithEditorActionTest {
         when(preferencesManager.getValue(eq(LINK_WITH_EDITOR))).thenReturn(null);
         when(editorAgent.getActiveEditor()).thenReturn(null);
 
-        action.actionPerformed(new ActionEvent(new Presentation(), null, null));
+        action.actionPerformed(null);
 
         verify(eventBus, never()).fireEvent((Event<?>)anyObject());
     }
@@ -98,7 +96,7 @@ public class LinkWithEditorActionTest {
         when(preferencesManager.getValue(eq(LINK_WITH_EDITOR))).thenReturn(null);
         when(editorPartPresenter.getEditorInput()).thenReturn(null);
 
-        action.actionPerformed(new ActionEvent(new Presentation(), null, null));
+        action.actionPerformed(null);
 
         verify(eventBus, never()).fireEvent((Event<?>)anyObject());
     }
@@ -107,7 +105,7 @@ public class LinkWithEditorActionTest {
     public void revealEventShouldNotBeFiredIfPreferenceValueIsFalse() throws Exception {
         when(preferencesManager.getValue(eq(LINK_WITH_EDITOR))).thenReturn(Boolean.toString(true));
 
-        action.actionPerformed(new ActionEvent(new Presentation(), null, null));
+        action.actionPerformed(null);
 
         verify(eventBus, never()).fireEvent((Event<?>)anyObject());
     }
@@ -116,7 +114,7 @@ public class LinkWithEditorActionTest {
     public void revealEventShouldBeFiredIfPreferenceValueIsTrue() throws Exception {
         when(preferencesManager.getValue(eq(LINK_WITH_EDITOR))).thenReturn(Boolean.toString(false));
 
-        action.actionPerformed(new ActionEvent(new Presentation(), null, null));
+        action.actionPerformed(null);
 
         verify(eventBus).fireEvent((Event<?>)anyObject());
     }

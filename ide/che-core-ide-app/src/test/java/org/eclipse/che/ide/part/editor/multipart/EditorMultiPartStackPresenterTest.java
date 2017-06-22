@@ -54,7 +54,7 @@ public class EditorMultiPartStackPresenterTest {
     @Mock
     private EventBus                  eventBus;
     @Mock
-    private Provider<EditorPartStack> editorPartStackProvider;
+    private Provider<EditorPartStack> editorPartStackFactory;
 
     //additional mocks
     @Mock
@@ -72,11 +72,11 @@ public class EditorMultiPartStackPresenterTest {
 
     @Before
     public void setUp() {
-        when(editorPartStackProvider.get()).thenReturn(editorPartStack);
+        when(editorPartStackFactory.get()).thenReturn(editorPartStack);
         when(editorPartStack.containsPart(partPresenter1)).thenReturn(true);
         when(eventBus.addHandler((Event.Type<Object>)anyObject(), anyObject())).thenReturn(handlerRegistration);
 
-        presenter = new EditorMultiPartStackPresenter(eventBus, view, editorPartStackProvider);
+        presenter = new EditorMultiPartStackPresenter(eventBus, view, editorPartStackFactory);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class EditorMultiPartStackPresenterTest {
     public void shouldOpenPartInNewEditorPartStack() {
         presenter.addPart(partPresenter1, null);
 
-        verify(editorPartStackProvider).get();
+        verify(editorPartStackFactory).get();
         verify(editorPartStack).addPart(partPresenter1);
         verify(view).addPartStack(eq(editorPartStack), isNull(EditorPartStack.class), isNull(Constraints.class), eq(-1.0));
     }
@@ -98,11 +98,11 @@ public class EditorMultiPartStackPresenterTest {
         presenter.addPart(partPresenter1);
         presenter.setActivePart(partPresenter1);
         reset(view);
-        reset(editorPartStackProvider);
+        reset(editorPartStackFactory);
 
         presenter.addPart(partPresenter2, null);
 
-        verify(editorPartStackProvider, never()).get();
+        verify(editorPartStackFactory, never()).get();
         verify(editorPartStack).addPart(partPresenter2);
         verify(view, never()).addPartStack((EditorPartStack)anyObject(), (EditorPartStack)anyObject(), (Constraints)anyObject(), eq(-1.0));
     }
@@ -110,13 +110,13 @@ public class EditorMultiPartStackPresenterTest {
     @Test
     public void shouldSplitEditorPartStackAndOpenPart() {
         presenter.addPart(partPresenter1);
-        reset(editorPartStackProvider);
-        when(editorPartStackProvider.get()).thenReturn(editorPartStack);
+        reset(editorPartStackFactory);
+        when(editorPartStackFactory.get()).thenReturn(editorPartStack);
         when(editorPartStack.getPartByTabId(RELATIVE_PART_ID)).thenReturn(partPresenter1);
 
         presenter.addPart(partPresenter2, constraints);
 
-        verify(editorPartStackProvider).get();
+        verify(editorPartStackFactory).get();
         verify(editorPartStack).addPart(partPresenter2);
         verify(view).addPartStack(editorPartStack, editorPartStack, constraints, -1);
     }

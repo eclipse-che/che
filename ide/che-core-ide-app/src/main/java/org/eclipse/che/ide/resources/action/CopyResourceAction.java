@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
 import org.eclipse.che.ide.api.selection.Selection;
@@ -61,7 +62,7 @@ public class CopyResourceAction extends AbstractPerspectiveAction {
         this.clipboardManager = clipboardManager;
         this.appContext = appContext;
 
-        eventBus.addHandler(ActivePartChangedEvent.TYPE, new ActivePartChangedEvent.Handler() {
+        eventBus.addHandler(ActivePartChangedEvent.TYPE, new ActivePartChangedHandler() {
             @Override
             public void onActivePartChanged(ActivePartChangedEvent event) {
                 partPresenter = event.getActivePart();

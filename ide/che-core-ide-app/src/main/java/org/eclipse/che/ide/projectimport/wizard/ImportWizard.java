@@ -39,5 +39,4 @@ public class ImportWizard extends AbstractWizard<MutableProjectConfig> {
     public void complete(@NotNull CompleteCallback callback) {
         projectImporter.importProject(callback, dataObject);
     }
-
 }

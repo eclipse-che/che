@@ -19,6 +19,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -65,7 +66,7 @@ public class FileWatcher {
             }
         });
 
-        eventBus.addHandler(ActivePartChangedEvent.TYPE, new ActivePartChangedEvent.Handler() {
+        eventBus.addHandler(ActivePartChangedEvent.TYPE, new ActivePartChangedHandler() {
             @Override
             public void onActivePartChanged(ActivePartChangedEvent event) {
                 if (event.getActivePart() instanceof TextEditor) {

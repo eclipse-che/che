@@ -10,29 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event;
 
-import com.google.gwt.event.shared.EventHandler;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
  * Fires by editor when change dirty state(content modified or saved)
  *
- * @author Evgen Vidolob
+ * @author <a href="mailto:evidolob@exoplatform.com">Evgen Vidolob</a>
+ * @version $Id:
  */
-public class EditorDirtyStateChangedEvent extends GwtEvent<EditorDirtyStateChangedEvent.Handler> {
+public class EditorDirtyStateChangedEvent extends GwtEvent<EditorDirtyStateChangedHandler> {
 
-    public interface Handler extends EventHandler {
-
-        /**
-         * Editor became dirty, containing unsaved changes, or got saved
-         *
-         * @param event
-         */
-        void onEditorDirtyStateChanged(EditorDirtyStateChangedEvent event);
-
-    }
-
-    public static final GwtEvent.Type<Handler> TYPE = new Type<>();
+    public static final GwtEvent.Type<EditorDirtyStateChangedHandler> TYPE = new Type<EditorDirtyStateChangedHandler>();
 
     private EditorPartPresenter editor;
 
@@ -44,13 +33,13 @@ public class EditorDirtyStateChangedEvent extends GwtEvent<EditorDirtyStateChang
 
     /** {@inheritDoc} */
     @Override
-    public com.google.gwt.event.shared.GwtEvent.Type<Handler> getAssociatedType() {
+    public com.google.gwt.event.shared.GwtEvent.Type<EditorDirtyStateChangedHandler> getAssociatedType() {
         return TYPE;
     }
 
     /** {@inheritDoc} */
     @Override
-    protected void dispatch(Handler handler) {
+    protected void dispatch(EditorDirtyStateChangedHandler handler) {
         handler.onEditorDirtyStateChanged(this);
     }
 
@@ -58,5 +47,4 @@ public class EditorDirtyStateChangedEvent extends GwtEvent<EditorDirtyStateChang
     public EditorPartPresenter getEditor() {
         return editor;
     }
-
 }

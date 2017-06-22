@@ -18,6 +18,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
@@ -44,7 +45,7 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
  * @author Roman Nikitenko
  */
 @Singleton
-public class EditorContentSynchronizerImpl implements EditorContentSynchronizer, ActivePartChangedEvent.Handler,
+public class EditorContentSynchronizerImpl implements EditorContentSynchronizer, ActivePartChangedHandler,
                                                       ResourceChangedHandler {
     final Map<Path, EditorGroupSynchronization> editorGroups;
     final Provider<EditorGroupSynchronization>  editorGroupSyncProvider;

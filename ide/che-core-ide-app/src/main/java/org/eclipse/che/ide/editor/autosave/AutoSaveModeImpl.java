@@ -25,7 +25,9 @@ import org.eclipse.che.ide.api.editor.reconciler.DirtyRegion;
 import org.eclipse.che.ide.api.editor.reconciler.DirtyRegionQueue;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent;
+import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent.EditorSettingsChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -46,7 +48,7 @@ import static org.eclipse.che.ide.api.editor.autosave.AutoSaveMode.Mode.SUSPENDE
  *
  * @author Roman Nikitenko
  */
-public class AutoSaveModeImpl implements AutoSaveMode, EditorSettingsChangedEvent.Handler, ActivePartChangedEvent.Handler, EditorOpenedEventHandler {
+public class AutoSaveModeImpl implements AutoSaveMode, EditorSettingsChangedHandler, ActivePartChangedHandler, EditorOpenedEventHandler {
     private static final int DELAY = 1000;
 
     private EventBus                      eventBus;

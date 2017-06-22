@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent;
+import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent.EditorSettingsChangedHandler;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorViewOverlay;
 import org.eclipse.che.ide.editor.preferences.EditorPreferencesManager;
 import org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties;
@@ -45,7 +46,7 @@ import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProp
  *
  * @author Roman Nikitenko
  */
-public class OrionSettingsController implements EditorSettingsChangedEvent.Handler {
+public class OrionSettingsController implements EditorSettingsChangedHandler {
 
     private OrionEditorViewOverlay editorViewOverlay;
     private final EnumSet<EditorProperties> orionPropertiesSet = EnumSet.noneOf(EditorProperties.class);
@@ -97,5 +98,4 @@ public class OrionSettingsController implements EditorSettingsChangedEvent.Handl
         orionPropertiesSet.add(SHOW_OCCURRENCES);
         orionPropertiesSet.add(SHOW_CONTENT_ASSIST_AUTOMATICALLY);
     }
-
 }

@@ -17,6 +17,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartStack;
 
 /**
@@ -25,7 +26,7 @@ import org.eclipse.che.ide.api.parts.PartStack;
  * @author Vitaliy Guliy
  */
 @Singleton
-public class MaximizePartAction extends Action implements ActivePartChangedEvent.Handler {
+public class MaximizePartAction extends Action implements ActivePartChangedHandler {
 
     private PartStack activePartStack;
 

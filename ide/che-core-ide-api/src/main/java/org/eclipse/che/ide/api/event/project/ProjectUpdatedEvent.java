@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.event;
+package org.eclipse.che.ide.api.event.project;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
@@ -20,17 +20,14 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
  *
  * @author Vlad Zhukovskiy
  */
-public class ProjectUpdatedEvent extends GwtEvent<ProjectUpdatedEvent.Handler> {
-
-    public interface Handler extends EventHandler {
-
+public class ProjectUpdatedEvent extends GwtEvent<ProjectUpdatedEvent.ProjectUpdatedHandler> {
+    public interface ProjectUpdatedHandler extends EventHandler {
         void onProjectUpdated(ProjectUpdatedEvent event);
-
     }
 
-    private static Type<Handler> TYPE;
+    private static Type<ProjectUpdatedHandler> TYPE;
 
-    public static Type<Handler> getType() {
+    public static Type<ProjectUpdatedHandler> getType() {
         if (TYPE == null) {
             TYPE = new Type<>();
         }
@@ -55,13 +52,12 @@ public class ProjectUpdatedEvent extends GwtEvent<ProjectUpdatedEvent.Handler> {
 
     /** {@inheritDoc} */
     @Override
-    public Type<Handler> getAssociatedType() {
+    public Type<ProjectUpdatedHandler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
-    protected void dispatch(Handler handler) {
+    protected void dispatch(ProjectUpdatedHandler handler) {
         handler.onProjectUpdated(this);
     }
-
 }

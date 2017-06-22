@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event;
 
-import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.user.client.Window;
 
@@ -19,28 +18,10 @@ import com.google.gwt.user.client.Window;
  *
  * @author Artem Zatsarynnyi
  */
-public class WindowActionEvent extends GwtEvent<WindowActionEvent.Handler> {
-
-    public interface Handler extends EventHandler {
-        /**
-         * Fired just before the Codenvy browser's tab closes or navigates to a different site.
-         *
-         * @param event
-         *         {@link WindowActionEvent}
-         */
-        void onWindowClosing(WindowActionEvent event);
-
-        /**
-         * Fired after the Codenvy browser's tab closed or navigated to a different site.
-         *
-         * @param event
-         *         {@link WindowActionEvent}
-         */
-        void onWindowClosed(WindowActionEvent event);
-    }
+public class WindowActionEvent extends GwtEvent<WindowActionHandler> {
 
     /** Type class used to register this event. */
-    public static Type<Handler> TYPE = new Type<>();
+    public static Type<WindowActionHandler> TYPE = new Type<>();
 
     /** Set of possible Window Actions. */
     public enum WindowAction {
@@ -66,7 +47,7 @@ public class WindowActionEvent extends GwtEvent<WindowActionEvent.Handler> {
     }
 
     @Override
-    public Type<Handler> getAssociatedType() {
+    public Type<WindowActionHandler> getAssociatedType() {
         return TYPE;
     }
 
@@ -80,7 +61,7 @@ public class WindowActionEvent extends GwtEvent<WindowActionEvent.Handler> {
     }
 
     @Override
-    protected void dispatch(Handler handler) {
+    protected void dispatch(WindowActionHandler handler) {
         switch (windowAction) {
             case CLOSING:
                 handler.onWindowClosing(this);
@@ -92,5 +73,4 @@ public class WindowActionEvent extends GwtEvent<WindowActionEvent.Handler> {
                 break;
         }
     }
-
 }

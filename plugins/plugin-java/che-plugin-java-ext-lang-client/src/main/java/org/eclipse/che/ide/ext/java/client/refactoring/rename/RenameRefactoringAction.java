@@ -24,6 +24,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -52,7 +53,7 @@ import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredIte
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class RenameRefactoringAction extends AbstractPerspectiveAction implements ActivePartChangedEvent.Handler {
+public class RenameRefactoringAction extends AbstractPerspectiveAction implements ActivePartChangedHandler {
 
     private final EditorAgent              editorAgent;
     private final RenamePresenter          renamePresenter;

@@ -8,37 +8,39 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.event;
+package org.eclipse.che.ide.api.event.project;
 
 import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
 /**
- * An event that should be fired in order to configure the currently opened project.
+ * The class store information about created project. This event should be fired when we create project.
  *
- * @author Artem Zatsarynnyi
+ * @author Dmitry Shnurenko
  */
-public class ConfigureProjectEvent extends GwtEvent<ConfigureProjectHandler> {
-    public static Type<ConfigureProjectHandler> TYPE = new Type<>();
+public class CreateProjectEvent extends GwtEvent<CreateProjectHandler> {
+
+    public static Type<CreateProjectHandler> TYPE = new Type<>();
 
     private final ProjectConfigDto projectConfig;
 
-    public ConfigureProjectEvent(ProjectConfigDto projectConfig) {
+    public CreateProjectEvent(ProjectConfigDto projectConfig) {
         this.projectConfig = projectConfig;
     }
 
+    /** Returns project descriptor. It contains information about project. */
+    public ProjectConfigDto getProjectConfig() {
+        return projectConfig;
+    }
+
     @Override
-    public Type<ConfigureProjectHandler> getAssociatedType() {
+    public Type<CreateProjectHandler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
-    protected void dispatch(ConfigureProjectHandler handler) {
-        handler.onConfigureProject(this);
-    }
-
-    public ProjectConfigDto getProject() {
-        return projectConfig;
+    protected void dispatch(CreateProjectHandler handler) {
+        handler.onProjectCreated(this);
     }
 }

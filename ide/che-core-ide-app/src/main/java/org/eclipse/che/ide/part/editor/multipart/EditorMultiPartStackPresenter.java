@@ -20,6 +20,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStackState;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
@@ -37,8 +38,8 @@ import java.util.List;
  */
 @Singleton
 public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
-                                                      ActivePartChangedEvent.Handler {
-    private final Provider<EditorPartStack>   editorPartStackProvider;
+                                                      ActivePartChangedHandler {
+    private final Provider<EditorPartStack>   editorPartStackFactory;
     private final EditorMultiPartStackView    view;
     private final LinkedList<EditorPartStack> partStackPresenters;
     private       PartPresenter               activeEditor;
@@ -49,9 +50,9 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
     @Inject
     public EditorMultiPartStackPresenter(EventBus eventBus,
                                          EditorMultiPartStackView view,
-                                         Provider<EditorPartStack> editorPartStackProvider) {
+                                         Provider<EditorPartStack> editorPartStackFactory) {
         this.view = view;
-        this.editorPartStackProvider = editorPartStackProvider;
+        this.editorPartStackFactory = editorPartStackFactory;
         this.partStackPresenters = new LinkedList<>();
 
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
@@ -106,7 +107,7 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
 
     private EditorPartStack addEditorPartStack(final PartPresenter part, final EditorPartStack relativePartStack,
                                                final Constraints constraints, double size) {
-        final EditorPartStack editorPartStack = editorPartStackProvider.get();
+        final EditorPartStack editorPartStack = editorPartStackFactory.get();
         partStackPresenters.add(editorPartStack);
 
         view.addPartStack(editorPartStack, relativePartStack, constraints, size);
