@@ -112,9 +112,14 @@ services:
         condition: service_healthy
     ports:
       - '5050:8080'
+    entrypoint:
+      - /opt/jboss/keycloak/bin/standalone.sh
+      - -Dkeycloak.migration.action=import
+      - -Dkeycloak.migration.provider=dir
+      - -Dkeycloak.migration.strategy=IGNORE_EXISTING
+      - -Dkeycloak.migration.dir=/export
+      - -Djboss.bind.address=0.0.0.0
     environment:
-      - KEYCLOAK_USER=admin
-      - KEYCLOAK_PASSWORD=admin
       - POSTGRES_PORT_5432_TCP_ADDR=postgres
       - POSTGRES_PORT_5432_TCP_PORT=5432
       - POSTGRES_DATABASE=keycloak
@@ -122,7 +127,8 @@ services:
       - POSTGRES_PASSWORD=keycloak
     links:
       - postgres:postgres
-#    volumes:
+    volumes:
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/keycloak/:/export'
 #      - '<%= scope.lookupvar('che::che_instance') -%>/data/keycloak/data:/opt/jboss/keycloak/standalone/data'
 #      - '<%= scope.lookupvar('che::che_instance') -%>/data/keycloak/logs:/opt/jboss/keycloak/standalone/log'
     restart: always

@@ -42,7 +42,7 @@ node default {
     ###############################
     # Small group
     #
-  $che_for_small_groups = getValue("CHE_FOR_SMALL_GROUPS","true")
+  $che_for_small_groups = getValue("CHE_FOR_SMALL_GROUPS","false")
 
 
   ################################
