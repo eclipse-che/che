@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.testng.ide.action;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,12 +49,12 @@ public class RunTestXMLAction extends AbstractPerspectiveAction
 
     @Inject
     public RunTestXMLAction(TestNGResources resources,
-                                   NotificationManager notificationManager,
-                                   AppContext appContext,
-                                   TestResultPresenter presenter,
-                                   TestServiceClient service,
-                                   TestNGLocalizationConstant localization) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.actionRunXMLTitle(),
+                            NotificationManager notificationManager,
+                            AppContext appContext,
+                            TestResultPresenter presenter,
+                            TestServiceClient service,
+                            TestNGLocalizationConstant localization) {
+        super(singletonList(PROJECT_PERSPECTIVE_ID), localization.actionRunXMLTitle(),
               localization.actionRunXMLDescription(), null, resources.testAllIcon());
         this.notificationManager = notificationManager;
         this.presenter = presenter;
@@ -80,32 +80,27 @@ public class RunTestXMLAction extends AbstractPerspectiveAction
     @Override
     public void updateInPerspective(@NotNull ActionEvent e) {
         Resource resource = appContext.getResource();
-        if (resource == null) {
+        if (resource == null || resource.getProject() == null) {
             e.getPresentation().setEnabledAndVisible(false);
             return;
         }
-        
-        Project project = resource.getProject();
-        if (project == null) {
-            e.getPresentation().setEnabledAndVisible(false);
-        }
-        
+
         e.getPresentation().setVisible(true);
 
-        String projectType = project.getType();
-        if (! "maven".equals(projectType)) {
+        String projectType = resource.getProject().getType();
+        if (!"maven".equals(projectType)) {
             e.getPresentation().setEnabled(false);
         }
 
-        String expectedXmlFile = MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER + "/testng.xml";
         if (resource instanceof File) {
             File file = (File)resource;
+            String expectedXmlFile = MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER + "/testng.xml";
             e.getPresentation().setEnabled(file.getLocation().toString().endsWith(expectedXmlFile));
         } else {
             e.getPresentation().setEnabled(true);
         }
     }
-    
+
     @Override
     public NotificationManager getNotificationManager() {
         return notificationManager;

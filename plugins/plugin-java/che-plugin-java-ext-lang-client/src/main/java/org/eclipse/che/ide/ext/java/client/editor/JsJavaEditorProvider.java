@@ -11,17 +11,12 @@
 package org.eclipse.che.ide.ext.java.client.editor;
 
 import org.eclipse.che.ide.api.editor.defaulteditor.AbstractTextEditorProvider;
-import org.eclipse.che.ide.api.editor.editorconfig.EditorUpdateAction;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
-import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
-import org.eclipse.che.ide.api.editor.reconciler.ReconcilingStrategy;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
 
 import javax.inject.Inject;
 import java.util.logging.Logger;
-
-import static org.eclipse.che.ide.api.editor.partition.DocumentPartitioner.DEFAULT_CONTENT_TYPE;
 
 /** EditorProvider that provides a text editor configured for java source files. */
 public class JsJavaEditorProvider extends AbstractTextEditorProvider {
@@ -57,18 +52,6 @@ public class JsJavaEditorProvider extends AbstractTextEditorProvider {
             final OrionEditorPresenter editor = (OrionEditorPresenter)textEditor;
             final TextEditorConfiguration configuration = configurationFactory.create(editor);
             editor.initialize(configuration);
-            editor.addEditorUpdateAction(new EditorUpdateAction() {
-                @Override
-                public void doRefresh() {
-                    final Reconciler reconciler = configuration.getReconciler();
-                    if (reconciler != null) {
-                        final ReconcilingStrategy strategy = reconciler.getReconcilingStrategy(DEFAULT_CONTENT_TYPE);
-                        if (strategy instanceof JavaReconcilerStrategy) {
-                            ((JavaReconcilerStrategy)strategy).parse();
-                        }
-                    }
-                }
-            });
         }
 
         watcher.editorOpened(textEditor);

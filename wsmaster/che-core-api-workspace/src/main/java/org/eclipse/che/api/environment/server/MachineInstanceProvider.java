@@ -24,8 +24,8 @@ public interface MachineInstanceProvider {
     /**
      * Create docker container from compose service definition.
      *
-     * @param namespace
-     *         namespace of workspace that owns provided service
+     * @param ownerName
+     *         name of user who starts provided service
      * @param workspaceId
      *         ID of workspace that owns provided service
      * @param envName
@@ -44,7 +44,7 @@ public interface MachineInstanceProvider {
      * @throws ServerException
      *         if any error occurs
      */
-    Instance startService(String namespace,
+    Instance startService(String ownerName,
                           String workspaceId,
                           String envName,
                           String machineName,

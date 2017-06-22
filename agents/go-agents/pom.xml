@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.12.0-SNAPSHOT</version>
+        <version>5.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>go-agents</artifactId>
     <name>Agent :: Golang agents</name>
@@ -26,11 +26,17 @@
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
+                    <includes>
+                        <include>**/**</include>
+                    </includes>
                     <excludes>
-                        <exclude>/docs/**</exclude>
+                        <exclude>docs/**</exclude>
                         <exclude>terminal-agent/term/server.go</exclude>
                         <exclude>vendor/**</exclude>
                         <exclude>Godeps/**</exclude>
+                        <exclude>target/**</exclude>
+                        <exclude>README.md</exclude>
+                        <exclude>.gitignore</exclude>
                     </excludes>
                 </configuration>
             </plugin>

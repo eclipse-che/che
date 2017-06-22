@@ -16,46 +16,22 @@
     <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
     <ui:with field='res' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
     <ui:style>
-        .spacing {
-            margin-bottom: 5px;
-        }
-
-        .mainPanel {
-            min-width: 350px;
-            min-height: 220px;
-        }
-
         .emptyBorder {
-            margin: 1px;
-        }
-
-        .checkBoxesSection {
-            display: -webkit-flex;
-            display: flex;
-            -webkit-flex-direction: column;
-            flex-direction: column;
-            align-items: flex-start;
-            -webkit-align-items: flex-start;
+            margin: 6px;
         }
     </ui:style>
 
-    <g:HTMLPanel addStyleNames="{style.emptyBorder} {style.mainPanel}" debugId="git-commit-mainForm">
-        <div class="{style.checkBoxesSection} {style.spacing}"><!-- Late 'git add' section -->
-            <g:CheckBox ui:field="addAll" HTML="{locale.commitAddAllFieldTitle}"
-                        addStyleNames="{res.gitCSS.textFont} {style.emptyBorder}"
-                        debugId="git-commit-addAll"/>
-            <g:CheckBox ui:field="addSelection" HTML="{locale.commitSelectionFieldTitle}"
-                        addStyleNames="{res.gitCSS.textFont} {style.emptyBorder}"
-                        debugId="git-commit-addSelection"/>
-            <g:CheckBox ui:field="commitAllSelection" HTML="{locale.commitAllFieldTitle}"
-                        addStyleNames="{res.gitCSS.textFont} {style.emptyBorder}"
-                        debugId="git-commit-onlySelection"/>
-            <g:CheckBox ui:field="amend" HTML="{locale.commitAmendFieldTitle}"
-                        addStyleNames="{res.gitCSS.textFont} {style.emptyBorder}" debugId="git-commit-amend"/>
-        </div>
-        <g:TextArea ui:field="message" width="338px" height="140px"
-                    addStyleNames="{res.gitCSS.textFont} {style.emptyBorder}"
-                    debugId="git-commit-message"/>
-    </g:HTMLPanel>
+    <g:DockLayoutPanel unit="PX" width="600px" height="500px">
+        <g:north size="350" addStyleNames="{style.emptyBorder}">
+            <g:FlowPanel ui:field="changesPanel"/>
+        </g:north>
+        <g:center size="50" addStyleNames="{style.emptyBorder}">
+            <g:CheckBox ui:field="amend" HTML="{locale.commitAmendFieldTitle}" debugId="git-commit-amend"/>
+        </g:center>
+        <g:south size="130" addStyleNames="{style.emptyBorder}">
+            <g:TextArea ui:field="message" width="588px" height="118px" addStyleNames="{res.gitCSS.textFont}" debugId="git-commit-message"/>
+        </g:south>
+
+    </g:DockLayoutPanel>
 
 </ui:UiBinder>

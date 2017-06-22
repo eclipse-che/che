@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcQualifier;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcUnmarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.TimeoutActionRunner;
 
 import javax.inject.Singleton;
 
@@ -37,6 +38,7 @@ public class JsonRpcModule extends AbstractModule {
         bind(JsonRpcComposer.class).to(GsonJsonRpcComposer.class);
 
         bind(RequestProcessor.class).to(ServerSideRequestProcessor.class);
+        bind(TimeoutActionRunner.class).to(ServerSideTimeoutActionRunner.class);
     }
 
     @Provides

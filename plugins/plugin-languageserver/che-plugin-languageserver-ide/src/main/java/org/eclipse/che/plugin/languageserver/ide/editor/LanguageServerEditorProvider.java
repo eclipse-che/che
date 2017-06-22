@@ -20,7 +20,7 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorProvider;
 import org.eclipse.che.ide.api.editor.defaulteditor.AbstractTextEditorProvider;
 import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
-import org.eclipse.che.ide.api.editor.editorconfig.AutoSaveTextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -68,7 +68,7 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
         }
 
         final TextEditor editor = editorBuilder.buildEditor();
-        editor.initialize(new AutoSaveTextEditorConfiguration());
+        editor.initialize(new DefaultTextEditorConfiguration());
         return editor;
 
     }

@@ -14,9 +14,12 @@ import com.google.gwt.storage.client.Storage;
 
 import org.eclipse.che.commons.annotation.Nullable;
 
+import javax.inject.Singleton;
+
 /**
  * Browser based {@link LocalStorageProvider}
  */
+@Singleton
 public class BrowserLocalStorageProviderImpl implements LocalStorageProvider {
 
     @Override

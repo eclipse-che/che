@@ -19,6 +19,7 @@ import com.google.inject.name.Names;
 
 import org.eclipse.che.api.project.server.handlers.CreateBaseProjectTypeHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
+import org.eclipse.che.api.project.server.importer.ProjectImportOutputJsonRpcRegistrar;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.importer.ProjectImportersService;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
@@ -75,6 +76,7 @@ public class ProjectApiModule extends AbstractModule {
         bind(ProjectService.class);
         bind(ProjectTypeService.class);
         bind(ProjectImportersService.class);
+        bind(ProjectImportOutputJsonRpcRegistrar.class);
 
         bind(WorkspaceProjectsSyncer.class).to(WorkspaceHolder.class);
 
@@ -92,6 +94,9 @@ public class ProjectApiModule extends AbstractModule {
         bind(VirtualFileSystemProvider.class).to(LocalVirtualFileSystemProvider.class);
 
         bind(FileWatcherNotificationHandler.class).to(DefaultFileWatcherNotificationHandler.class);
+
+        bind(EditorChangesTracker.class).asEagerSingleton();
+        bind(EditorWorkingCopyManager.class).asEagerSingleton();
 
         configureVfsFilters(excludeMatcher);
         configureVfsFilters(fileWatcherExcludes);

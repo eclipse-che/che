@@ -78,6 +78,7 @@ export class CreateProjectController {
 
   private stackId: string;
   private stacks: Array<che.IStack>;
+  private recipeContentCopy: string;
 
   /**
    * Default constructor that is using resource
@@ -220,8 +221,6 @@ export class CreateProjectController {
 
     cheAPI.getWorkspace().getWorkspaces();
 
-    $rootScope.showIDE = false;
-
     this.isHandleClose = true;
     this.connectionClosed = () => {
       if (!this.isHandleClose) {
@@ -315,8 +314,6 @@ export class CreateProjectController {
           return workspace.id === preselectWorkspaceId;
         });
       }
-      // generate project name
-      this.generateProjectName(true);
     }
   }
 
@@ -963,30 +960,6 @@ export class CreateProjectController {
   }
 
   /**
-   * Generates a default project name only if user has not entered any data
-   * @param firstInit on first init, user do not have yet initialized something
-   */
-  generateProjectName(firstInit: boolean): void {
-    // name has not been modified by the user
-    if (firstInit || (this.projectInformationForm.deskname.$pristine && this.projectInformationForm.name.$pristine)) {
-      // generate a name
-
-      // starts with project
-      let name = 'project';
-
-      // type selected
-      if (this.importProjectData.project.type) {
-        name = this.importProjectData.project.type.replace(/\s/g, '_');
-      }
-
-      name = name + '-' + this.generateRandomStr();
-
-      this.setProjectName(name);
-    }
-
-  }
-
-  /**
    * Generates a default workspace name
    */
   generateWorkspaceName(): void {
@@ -1020,12 +993,6 @@ export class CreateProjectController {
       this.$location.path('/workspaces');
     }
     this.createProjectSvc.resetCreateProgress();
-  }
-
-  resetCreateNewProject(): void {
-    this.resetCreateProgress();
-    this.generateWorkspaceName();
-    this.generateProjectName(true);
   }
 
   showIDE(): void {
@@ -1115,7 +1082,9 @@ export class CreateProjectController {
       return;
     }
     this.workspaceConfig = config;
-    this.updateCurrentStack(stackId);
+    if (stackId !== this.stackId) {
+      this.updateCurrentStack(stackId);
+    }
   }
 
   /**
@@ -1209,7 +1178,7 @@ export class CreateProjectController {
     }
 
     this.templatesChoice = 'templates-samples';
-    this.generateProjectName(true);
+
     // enable wizard only if
     // - ready-to-go-stack with PT
     // - custom stack
@@ -1300,7 +1269,9 @@ export class CreateProjectController {
   getStackMachines(environment: any): any {
     let recipeType = environment.recipe.type;
     let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
-
+    if (this.recipeContentCopy && angular.equals(this.recipeContentCopy, environment.recipe.content)) {
+      return this.stackMachines[this.stackId];
+    }
     if (!this.stackMachines[this.stackId] || !this.stackMachines[this.stackId].length) {
       let machines = environmentManager.getMachines(environment);
       machines.forEach((machine: IEnvironmentManagerMachine) => {
@@ -1309,6 +1280,7 @@ export class CreateProjectController {
             environmentManager.setMemoryLimit(machine, this.workspaceRam);
           }
       });
+      this.recipeContentCopy = angular.copy(environment.recipe.content);
       this.stackMachines[this.stackId] = machines;
     }
 

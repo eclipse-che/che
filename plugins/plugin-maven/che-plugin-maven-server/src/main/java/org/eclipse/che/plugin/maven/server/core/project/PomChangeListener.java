@@ -16,6 +16,8 @@ import com.google.inject.name.Named;
 
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.project.server.EditorWorkingCopy;
+import org.eclipse.che.api.project.server.EditorWorkingCopyManager;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.shared.dto.event.PomModifiedEventDto;
 import org.eclipse.che.commons.schedule.executor.ThreadPullLauncher;
@@ -43,6 +45,7 @@ public class PomChangeListener {
 
     private final MavenWorkspace           mavenWorkspace;
     private final EclipseWorkspaceProvider eclipseWorkspaceProvider;
+    private final EditorWorkingCopyManager editorWorkingCopyManager;
     private final String                   workspacePath;
     private CopyOnWriteArraySet<String> projectToUpdate = new CopyOnWriteArraySet<>();
 
@@ -50,10 +53,12 @@ public class PomChangeListener {
     public PomChangeListener(EventService eventService,
                              MavenWorkspace mavenWorkspace,
                              EclipseWorkspaceProvider eclipseWorkspaceProvider,
+                             EditorWorkingCopyManager editorWorkingCopyManager,
                              ThreadPullLauncher launcher,
                              @Named("che.user.workspaces.storage") String workspacePath) {
         this.mavenWorkspace = mavenWorkspace;
         this.eclipseWorkspaceProvider = eclipseWorkspaceProvider;
+        this.editorWorkingCopyManager = editorWorkingCopyManager;
         this.workspacePath = workspacePath;
 
         launcher.scheduleWithFixedDelay(this::updateProms, 20, 3, TimeUnit.SECONDS);
@@ -86,7 +91,12 @@ public class PomChangeListener {
 
     private boolean pomIsValid(String path) {
         try {
-            Model.readFrom(new File(workspacePath, path));
+            EditorWorkingCopy workingCopy = editorWorkingCopyManager.getWorkingCopy(path);
+            if (workingCopy != null) {
+                Model.readFrom(workingCopy.getContent());
+            } else {
+                Model.readFrom(new File(workspacePath, path));
+            }
         } catch (Exception e) {
             JavaPlugin.log(e);
             return false;

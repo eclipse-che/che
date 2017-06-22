@@ -114,7 +114,7 @@ Possible values are: `stderr`, `stdout`, `process_status`
   "jsonrpc": "2.0",
   "id": "id1234567",
   "error": {
-    "code": -32000,
+    "code": 101,
     "message": "Process with id '2' does not exist"
   }
 }
@@ -127,7 +127,7 @@ Possible values are: `stderr`, `stdout`, `process_status`
   "jsonrpc": "2.0",
   "id": "id1234567",
   "error": {
-    "code": -32001,
+    "code": 102,
     "message": "Process with id '2' is not alive"
   }
 }
@@ -219,7 +219,7 @@ be republished to the channel. This parameter may be useful when reconnecting to
   "jsonrpc": "2.0",
   "id": "0x12345",
   "error": {
-    "code": -32000,
+    "code": 101,
     "message": "Process with id '2' does not exist"
   }
 }
@@ -232,7 +232,7 @@ be republished to the channel. This parameter may be useful when reconnecting to
   "jsonrpc": "2.0",
   "id": "0x12345",
   "error": {
-    "code": -32001,
+    "code": 102,
     "message": "Process with id '2' is not alive"
   }
 }
@@ -278,7 +278,7 @@ be republished to the channel. This parameter may be useful when reconnecting to
   "jsonrpc": "2.0",
   "id": "0x12345",
   "error": {
-    "code": -32000,
+    "code": 101,
     "message": "Process with id '2' does not exist"
   }
 }
@@ -291,7 +291,7 @@ be republished to the channel. This parameter may be useful when reconnecting to
   "jsonrpc": "2.0",
   "id": "0x12345",
   "error": {
-    "code": -32001,
+    "code": 102,
     "message": "Process with id '2' is not alive"
   }
 }
@@ -342,7 +342,7 @@ Possible values are: `stdout`, `stderr`, `process_status`.
   "jsonrpc": "2.0",
   "id": "0x12345",
   "error": {
-    "code": -32000,
+    "code": 101,
     "message": "Process with id '2' does not exist"
   }
 }
@@ -355,7 +355,7 @@ Possible values are: `stdout`, `stderr`, `process_status`.
   "jsonrpc": "2.0",
   "id": "0x12345",
   "error": {
-    "code": -32001,
+    "code": 102,
     "message": "Process with id '2' is not alive"
   }
 }
@@ -368,8 +368,8 @@ Possible values are: `stdout`, `stderr`, `process_status`.
   "jsonrpc": "2.0",
   "id": "0x12345",
   "error": {
-    "code": -32603,
-    "message": "No subscriber with id 'channel-1'"
+    "code": 100,
+    "message": "No subscriber with id 'tunnel-1'"
   }
 }
 ```
@@ -446,7 +446,7 @@ For the command `printf "1\n2\n3\n4\n5\n6\n7\n8\n9\n10`, the result will look li
   "jsonrpc": "2.0",
   "id": "0x12345",
   "error": {
-    "code": -32000,
+    "code": 101,
     "message": "Process with id '2' does not exist"
   }
 }
@@ -513,7 +513,7 @@ When everything is okay
   "jsonrpc": "2.0",
   "id": "0x12345",
   "error": {
-    "code": -32000,
+    "code": 101,
     "message": "Process with id '2' does not exist"
   }
 }

@@ -18,7 +18,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
-import org.eclipse.che.ide.ext.git.client.compare.branchList.BranchListPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.branchlist.BranchListPresenter;
 
 import static com.google.common.base.Preconditions.checkState;
 

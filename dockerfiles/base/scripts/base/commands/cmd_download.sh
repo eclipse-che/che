@@ -33,9 +33,12 @@ post_cmd_download() {
 
 cmd_download() {
   FORCE_UPDATE=${1:-"--no-force"}
+  local IMAGES=${IMAGE_LIST}
+  IMAGES+=$'\n'${BOOTSTRAP_IMAGE_LIST}
+  IMAGES+=$'\n'${UTILITY_IMAGE_LIST}
 
   IFS=$'\n'
-  for SINGLE_IMAGE in $IMAGE_LIST; do
+  for SINGLE_IMAGE in $IMAGES; do
     VALUE_IMAGE=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
     if [[ $FORCE_UPDATE == "--force" ]] ||
        [[ $FORCE_UPDATE == "--pull" ]]; then

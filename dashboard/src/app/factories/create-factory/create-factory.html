@@ -25,28 +25,20 @@
   <div class="create-factory" ng-hide="createFactoryCtrl.isLoading">
     <ng-form name="factoryNameForm">
       <!-- Name -->
-      <che-label-container che-label-name="Name">
-        <div layout="column" class="create-factory-input"
-             ng-init="createFactoryCtrl.setForm(factoryNameForm)">
-          <che-input-box che-form="factoryNameForm"
-                         che-name="name"
-                         che-place-holder="Name of the factory"
-                         aria-label="Name of the factory"
-                         ng-model="createFactoryCtrl.name"
-                         ng-trim
-                         ng-minlength="3"
-                         ng-maxlength="20"
-                         ng-pattern="/^[ A-Za-z0-9_\-\.]+$/">
-            <div ng-message="required">A name is required.</div>
-            <div ng-message="pattern">Factory name may contain digits, latin letters, spaces, _ , . , - and should start
-              only
-              with digits, latin letters or underscores
-            </div>
-            <div ng-message="minlength">The name has to be more than 3 characters long.</div>
-            <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
-          </che-input-box>
-        </div>
-      </che-label-container>
+      <che-input-box che-label-name="Name"
+                     che-form="factoryNameForm"
+                     che-name="name"
+                     che-place-holder="Name of the factory"
+                     aria-label="Name of the factory"
+                     ng-model="createFactoryCtrl.name"
+                     ng-trim
+                     ng-minlength="3"
+                     ng-maxlength="20"
+                     ng-pattern="/^[ A-Za-z0-9_\-\.]+$/">
+        <div ng-message="pattern">Factory name may contain digits, latin letters, spaces, _ , . , - and should start only with digits, latin letters or underscores</div>
+        <div ng-message="minlength">The name has to be more than 3 characters long.</div>
+        <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+      </che-input-box>
     </ng-form>
       <!--Factory source-->
       <che-label-container che-label-name="Source"

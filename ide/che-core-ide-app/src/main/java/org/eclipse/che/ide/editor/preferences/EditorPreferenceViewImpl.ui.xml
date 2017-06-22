@@ -19,8 +19,7 @@
     </ui:style>
     <g:ScrollPanel width="100%" height="100%" styleName="{style.scrollPanel}">
         <g:HTMLPanel height="100%">
-            <g:SimplePanel ui:field="keymapsSection" height="46px" debugId="editorKeymapsSection"/>
-            <g:SimplePanel ui:field="editorPropertiesSection" debugId="editorPropertiesSection"/>
+            <g:FlowPanel width="100%" height="100%" ui:field="editorPreferencesContainer" debugId="editorPreferencesContainer"/>
         </g:HTMLPanel>
     </g:ScrollPanel>
 </ui:UiBinder>

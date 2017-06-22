@@ -91,7 +91,6 @@ export class CreateProjectSamplesController {
 
     // set selected item
     this.selectedTemplateName = template.name;
-
     this.projectSampleOnSelect({template: template});
   }
 

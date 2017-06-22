@@ -55,3 +55,8 @@
     display: inline;
     float: left;
 }
+
+.spacing {
+    margin-top: 6px;
+    margin-right: 5px;
+}

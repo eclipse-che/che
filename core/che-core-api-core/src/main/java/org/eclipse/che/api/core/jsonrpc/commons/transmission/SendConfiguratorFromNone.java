@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.commons.transmission;
 
-import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcErrorTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcRequest;
@@ -58,6 +57,10 @@ public class SendConfiguratorFromNone {
     }
 
     public <R> JsonRpcPromise<R> sendAndReceiveResultAsDto(final Class<R> rClass) {
+        return sendAndReceiveResultAsDto(rClass, 0);
+    }
+
+    public <R> JsonRpcPromise<R> sendAndReceiveResultAsDto(final Class<R> rClass, int timeInMillis) {
         checkNotNull(rClass, "Result class value must not be null");
 
         final String requestId = transmitRequest();
@@ -68,11 +71,14 @@ public class SendConfiguratorFromNone {
                      "method: " + method + ", " +
                      "result object class: " + rClass);
 
-        return dispatcher.registerPromiseOfOne(endpointId, requestId, rClass);
+        return dispatcher.registerPromiseForSingleObject(endpointId, requestId, rClass, timeInMillis);
     }
 
-
     public JsonRpcPromise<String> sendAndReceiveResultAsString() {
+        return sendAndReceiveResultAsString(0);
+    }
+
+    public JsonRpcPromise<String> sendAndReceiveResultAsString(int timeInMillis) {
         final String requestId = transmitRequest();
 
         LOGGER.debug("Transmitting request: " +
@@ -81,11 +87,14 @@ public class SendConfiguratorFromNone {
                      "method: " + method + ", " +
                      "result object class: " + String.class);
 
-        return dispatcher.registerPromiseOfOne(endpointId, requestId, String.class);
-
+        return dispatcher.registerPromiseForSingleObject(endpointId, requestId, String.class, timeInMillis);
     }
 
     public JsonRpcPromise<Double> sendAndReceiveResultAsDouble() {
+        return sendAndReceiveResultAsDouble(0);
+    }
+
+    public JsonRpcPromise<Double> sendAndReceiveResultAsDouble(int timeInMillis) {
         final String requestId = transmitRequest();
 
         LOGGER.debug("Transmitting request: " +
@@ -94,11 +103,14 @@ public class SendConfiguratorFromNone {
                      "method: " + method + ", " +
                      "result object class: " + Double.class);
 
-        return dispatcher.registerPromiseOfOne(endpointId, requestId, Double.class);
-
+        return dispatcher.registerPromiseForSingleObject(endpointId, requestId, Double.class, timeInMillis);
     }
 
     public JsonRpcPromise<Boolean> sendAndReceiveResultAsBoolean() {
+        return sendAndReceiveResultAsBoolean(0);
+    }
+
+    public JsonRpcPromise<Boolean> sendAndReceiveResultAsBoolean(int timeInMillis) {
         final String requestId = transmitRequest();
 
         LOGGER.debug("Transmitting request: " +
@@ -107,10 +119,14 @@ public class SendConfiguratorFromNone {
                      "method: " + method + ", " +
                      "result object class: " + Boolean.class);
 
-        return dispatcher.registerPromiseOfOne(endpointId, requestId, Boolean.class);
+        return dispatcher.registerPromiseForSingleObject(endpointId, requestId, Boolean.class, timeInMillis);
     }
 
     public <R> JsonRpcPromise<List<R>> sendAndReceiveResultAsListOfDto(final Class<R> rClass) {
+        return sendAndReceiveResultAsListOfDto(rClass, 0);
+    }
+
+    public <R> JsonRpcPromise<List<R>> sendAndReceiveResultAsListOfDto(final Class<R> rClass, int timeInMillis) {
         checkNotNull(rClass, "Result class value must not be null");
 
         final String requestId = transmitRequest();
@@ -121,11 +137,14 @@ public class SendConfiguratorFromNone {
                      "method: " + method + ", " +
                      "result list items class: " + rClass);
 
-        return dispatcher.registerPromiseOfMany(endpointId, requestId, rClass);
-
+        return dispatcher.registerPromiseForListOfObjects(endpointId, requestId, rClass, timeInMillis);
     }
 
     public JsonRpcPromise<List<String>> sendAndReceiveResultAsListOfString() {
+        return sendAndReceiveResultAsListOfString(0);
+    }
+
+    public JsonRpcPromise<List<String>> sendAndReceiveResultAsListOfString(int timeInMillis) {
         final String requestId = transmitRequest();
 
         LOGGER.debug("Transmitting request: " +
@@ -134,10 +153,14 @@ public class SendConfiguratorFromNone {
                      "method: " + method + ", " +
                      "result list items class: " + String.class);
 
-        return dispatcher.registerPromiseOfMany(endpointId, requestId, String.class);
+        return dispatcher.registerPromiseForListOfObjects(endpointId, requestId, String.class, timeInMillis);
     }
 
     public JsonRpcPromise<List<Boolean>> sendAndReceiveResultAsListOfBoolean() {
+        return sendAndReceiveResultAsListOfBoolean(0);
+    }
+
+    public JsonRpcPromise<List<Boolean>> sendAndReceiveResultAsListOfBoolean(int timeInMillis) {
         final String requestId = transmitRequest();
 
         LOGGER.debug("Transmitting request: " +
@@ -146,10 +169,14 @@ public class SendConfiguratorFromNone {
                      "method: " + method + ", " +
                      "result list items class: " + Boolean.class);
 
-        return dispatcher.registerPromiseOfMany(endpointId, requestId, Boolean.class);
+        return dispatcher.registerPromiseForListOfObjects(endpointId, requestId, Boolean.class, timeInMillis);
     }
 
     public JsonRpcPromise<Void> sendAndReceiveResultAsEmpty() {
+        return sendAndReceiveResultAsEmpty(0);
+    }
+
+    public JsonRpcPromise<Void> sendAndReceiveResultAsEmpty(int timeInMillis) {
         final String requestId = transmitRequest();
 
         LOGGER.debug("Transmitting request: " +
@@ -158,7 +185,7 @@ public class SendConfiguratorFromNone {
                      "method: " + method + ", " +
                      "result list items class: " + Void.class);
 
-        return dispatcher.registerPromiseOfOne(endpointId, requestId, Void.class);
+        return dispatcher.registerPromiseForSingleObject(endpointId, requestId, Void.class, timeInMillis);
     }
 
     private void transmitNotification() {
