@@ -104,11 +104,14 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
     public Promise<Void> init() {
         return userInitializer.init()
                               .catchError((Operation<PromiseError>)err -> {
-                                  // Error occurred before UI initialization.
-                                  // As a fallback, let's try to inject CSS styles at least
-                                  // in order to be able to use DialogFactory
-                                  // for showing an error information to the user.
+                                  // Fail to initialize the current user.
+                                  // Since we can't get theme ID from the user's preferences
+                                  // try to inject CSS styles with a default theme at least
+                                  // in order to be able to use a minimal UI (dialogs)
+                                  // for displaying an error information to the user.
                                   styleInjector.inject();
+
+                                  // Prevent further initialization steps.
                                   throw new OperationException(err.getMessage(), err.getCause());
                               })
                               .then(initUI())
