@@ -22,13 +22,11 @@
             class="workspace-details-content" md-theme="default">
   <md-tabs md-dynamic-height md-stretch-tabs="auto"
            md-selected="workspaceDetailsController.selectedTabIndex"
-           md-no-ink-bar="true"
-           md-center-tabs="">
+           md-no-ink-bar>
 
     <!-- Settings Tab -->
     <md-tab>
       <md-tab-label>
-        <md-icon md-font-icon="material-design icon-ic_settings_24px" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Settings</span>
       </md-tab-label>
       <md-tab-body>
@@ -145,11 +143,10 @@
     <!-- Config tab -->
     <md-tab>
       <md-tab-label>
-        <md-icon md-font-icon="fa-file-text-o" class="fa che-tab-label-icon"></md-icon>
-        <span class="che-tab-label-title">Workspace Config</span>
+        <span class="che-tab-label-title">Config</span>
       </md-tab-label>
       <md-tab-body>
-        <che-label-container che-label-name="Workspace config">
+        <che-label-container che-label-name="Workspace">
           <ng-form name="workspaceConfigForm">
             <che-workspace-config-import
               ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Config, workspaceConfigForm)"
@@ -163,7 +160,6 @@
     <!-- Runtime Tab -->
     <md-tab>
       <md-tab-label>
-        <md-icon md-font-icon="fa-wrench" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Runtime</span>
       </md-tab-label>
       <md-tab-body>
@@ -187,7 +183,6 @@
     <md-tab ng-if="workspaceDetailsController.isCreationFlow === false"
             ng-repeat="section in workspaceDetailsController.getPages()">
       <md-tab-label>
-        <md-icon md-font-icon="material-design {{section.icon}}" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">{{section.title}}</span>
       </md-tab-label>
       <md-tab-body>
