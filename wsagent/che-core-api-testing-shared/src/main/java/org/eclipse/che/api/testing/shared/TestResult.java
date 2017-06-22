@@ -20,6 +20,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Mirage Abeysekara
  */
 @DTO
+@Deprecated
 public interface TestResult {
 
     /**
