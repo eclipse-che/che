@@ -33,7 +33,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
-public class LocalDockerSinglePortServerEvaluationStrategyTest {
+public class LocalDockerCustomServerEvaluationStrategyTest {
 
     private static final String CHE_DOCKER_IP_EXTERNAL   = "container-host-ext.com";
     private static final String ALL_IP_ADDRESS           = "0.0.0.0";
@@ -48,6 +48,8 @@ public class LocalDockerSinglePortServerEvaluationStrategyTest {
 
     private static final String IS_DEV_MACHINE_VALUE    = "true";
     private static final String IS_DEV_MACHINE_PROPERTY = "CHE_IS_DEV_MACHINE=" + IS_DEV_MACHINE_VALUE;
+    
+    private static final String CHE_DOCKER_SERVER_EVALUATION_STRATEGY_CUSTOM_TEMPLATE = "<serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<externalAddress>";
     
     @Mock
     private ContainerInfo   containerInfo;
@@ -108,7 +110,7 @@ public class LocalDockerSinglePortServerEvaluationStrategyTest {
     @Test
     public void shouldUseServerRefToBuildAddressWhenAvailable() throws Exception {
         // given
-        strategy = new LocalDockerSinglePortServerEvaluationStrategy(null, null, false).withThrowOnUnknownHost(false);
+        strategy = new LocalDockerCustomServerEvaluationStrategy(null, null, CHE_DOCKER_SERVER_EVALUATION_STRATEGY_CUSTOM_TEMPLATE, "http", null).withThrowOnUnknownHost(false);
 
         final Map<String, ServerImpl> expectedServers = getExpectedServers(CHE_DOCKER_IP_EXTERNAL,
                                                                            CONTAINERCONFIG_HOSTNAME,

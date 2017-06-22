@@ -23,9 +23,8 @@ import org.eclipse.che.commons.annotation.Nullable;
  * containers are running on the same Docker network and are exposed through the same single port.
  *
  * This server evaluation strategy will return a completed {@link ServerImpl} with internal addresses set
- * as {@link LocalDockerServerEvaluationStrategy} does. Contrary external addresses will have the following format:
- *
- *       serverName-workspaceID-cheExternalAddress (e.g. terminal-79rfwhqaztq2ru2k-che.local)
+ * as {@link LocalDockerServerEvaluationStrategy} does. Contrary external addresses will be managed by the
+ * `custom` evaluation strategy,and its template property `che.docker.server_evaluation_strategy.custom.template`
  *
  * <p>cheExternalAddress can be set using property {@code che.docker.ip.external}.
  * This strategy is useful when Che and the workspace servers need to be exposed on the same single TCP port
@@ -33,13 +32,14 @@ import org.eclipse.che.commons.annotation.Nullable;
  * @author Mario Loriedo <mloriedo@redhat.com>
  * @see ServerEvaluationStrategy
  */
-public class LocalDockerSinglePortServerEvaluationStrategy extends BaseServerEvaluationStrategy {
+public class LocalDockerCustomServerEvaluationStrategy extends BaseServerEvaluationStrategy {
 
     @Inject
-    public LocalDockerSinglePortServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String internalAddress,
+    public LocalDockerCustomServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String internalAddress,
                                                          @Nullable @Named("che.docker.ip.external") String externalAddress,
-                                                         @Named("che.docker.server_evaluation_strategy.secure.external.urls") boolean secureExternalUrls
-                                                         ) {
-        super(internalAddress, externalAddress, "<serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<externalAddress>", secureExternalUrls ? "https" : "http", null, true);
+                                                         @Nullable @Named("che.docker.server_evaluation_strategy.custom.template") String cheDockerCustomExternalTemplate,
+                                                         @Nullable @Named("che.docker.server_evaluation_strategy.custom.external.protocol") String cheDockerCustomExternalProtocol,
+                                                         @Named("che.port") String chePort) {
+        super(internalAddress, externalAddress, cheDockerCustomExternalTemplate, cheDockerCustomExternalProtocol, chePort, true);
     }
 }
