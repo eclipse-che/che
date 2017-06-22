@@ -8,7 +8,6 @@
                ng-if="labelName"><span>{{labelName}}</span></label>
         <div class="che-input-area">
           <input ng-trim="false" name="{{inputName}}"
-                 ng-model-options="{allowInvalid: true}"
                  ng-change="onChange({$value: valueModel})"
                  ng-readonly="isReadonly"
                  ng-model="valueModel">

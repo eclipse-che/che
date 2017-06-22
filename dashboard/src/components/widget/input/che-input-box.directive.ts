@@ -51,36 +51,35 @@ export class CheInputBox {
 
 
   compile(element: ng.IRootElementService, attrs: ng.IAttributes) {
-    const keys = Object.keys(attrs);
+    const avoidAttrs = ['ng-model'];
+    const avoidStartWithAttrs: Array<string> = ['$', 'che-'];
+
+    const keys = Object.keys(attrs.$attr);
     // search the input field
     const inputJqEl = element.find('input');
     let tabIndex;
     keys.forEach((key: string) => {
-      // don't reapply internal properties
-      if (key.indexOf('$') === 0) {
+      const attr = attrs.$attr[key];
+      if (!attr) {
         return;
       }
-      // don't reapply internal element properties
-      if (key.indexOf('che') === 0) {
+      if (avoidStartWithAttrs.find((avoidStartWithAttr: string) => {
+          return attr.indexOf(avoidStartWithAttr) === 0;
+        })) {
         return;
       }
-      // avoid model
-      if ('ngModel' === key) {
+      if (avoidAttrs.indexOf(attr) !== -1) {
         return;
       }
       let value = attrs[key];
       // remember tabindex
-      if (key === 'tabindex') {
+      if (attr === 'tabindex') {
         tabIndex = value;
       }
-      // handle empty values as boolean
-      if (value === '') {
-        value = 'true';
-      }
       // set the value of the attribute
-      inputJqEl.attr(attrs.$attr[key], value);
+      inputJqEl.attr(attr, value);
       // add also the material version of max length (only one the first input which is the md-input)
-      element.removeAttr(attrs.$attr[key]);
+      element.removeAttr(attr);
     });
     // the focusable element is the input, remove tabIndex from top-level element
     element.attr('tabindex', -1);
