@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.workspace;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -18,7 +19,6 @@ import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.WorkspaceSnapshotNotifier;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
@@ -27,13 +27,10 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
-import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-
-import java.util.Optional;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
@@ -47,40 +44,37 @@ import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STOPPING_WORK
 
 /**
  * Handles changes of the workspace status and fires the corresponded
- * events to notify all interested subscribers (usually IDE extensions).
+ * events to notify all interested subscribers (IDE extensions).
  */
 @Singleton
 public class WorkspaceStatusHandler {
 
-    private final WorkspaceServiceClient     workspaceServiceClient;
-    private final AppContext                 appContext;
-    private final StartWorkspaceNotification startWorkspaceNotificationProvider;
-    private final NotificationManager        notificationManagerProvider;
-    private final WorkspaceSnapshotNotifier  snapshotNotifierProvider;
-    private final LoaderPresenter            wsStatusNotification;
-    private final WsAgentStateController     wsAgentStateController;
-    private final WsAgentURLModifier         wsAgentURLModifier;
-    private final EventBus                   eventBus;
-    private final CoreLocalizationConstant   messages;
+    private final WorkspaceServiceClient        workspaceServiceClient;
+    private final AppContext                    appContext;
+    private final StartWorkspaceNotification    startWorkspaceNotificationProvider;
+    private final Provider<NotificationManager> notificationManagerProvider;
+    private final WorkspaceSnapshotNotifier     snapshotNotifierProvider;
+    private final LoaderPresenter               wsStatusNotification;
+    private final WsAgentURLModifier            wsAgentURLModifier;
+    private final EventBus                      eventBus;
+    private final CoreLocalizationConstant      messages;
 
     @Inject
     WorkspaceStatusHandler(WorkspaceServiceClient workspaceServiceClient,
                            AppContext appContext,
                            StartWorkspaceNotification startWorkspaceNotification,
-                           NotificationManager notificationManager,
+                           Provider<NotificationManager> notificationManagerProvider,
                            WorkspaceSnapshotNotifier snapshotNotifier,
                            LoaderPresenter wsStatusNotification,
-                           WsAgentStateController wsAgentStateController,
                            WsAgentURLModifier wsAgentURLModifier,
                            EventBus eventBus,
                            CoreLocalizationConstant messages) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.appContext = appContext;
         this.startWorkspaceNotificationProvider = startWorkspaceNotification;
-        this.notificationManagerProvider = notificationManager;
+        this.notificationManagerProvider = notificationManagerProvider;
         this.snapshotNotifierProvider = snapshotNotifier;
         this.wsStatusNotification = wsStatusNotification;
-        this.wsAgentStateController = wsAgentStateController;
         this.wsAgentURLModifier = wsAgentURLModifier;
         this.eventBus = eventBus;
         this.messages = messages;
@@ -94,7 +88,7 @@ public class WorkspaceStatusHandler {
         eventBus.fireEvent(new WorkspaceStatusChangedEvent(serverEvent));
 
         workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
-            // Update workspace model returned by AppContext before firing an event.
+            // Update workspace model in AppContext before firing an event.
             // Because AppContext always must return an actual workspace model.
             ((AppContextImpl)appContext).setWorkspace(workspace);
 
@@ -123,11 +117,7 @@ public class WorkspaceStatusHandler {
 
         wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
 
-        final Optional<MachineImpl> devMachine = appContext.getWorkspace().getDevMachine();
-        devMachine.ifPresent(machine -> {
-            wsAgentStateController.initialize(machine);
-            wsAgentURLModifier.initialize(machine);
-        });
+        appContext.getWorkspace().getDevMachine().ifPresent(wsAgentURLModifier::initialize);
     }
 
     // FIXME: spi ide
@@ -149,7 +139,7 @@ public class WorkspaceStatusHandler {
                 startWorkspaceNotificationProvider.show();
                 break;
             case ERROR:
-                notificationManagerProvider.notify(messages.workspaceStartFailed(), FAIL, FLOAT_MODE);
+                notificationManagerProvider.get().notify(messages.workspaceStartFailed(), FAIL, FLOAT_MODE);
                 startWorkspaceNotificationProvider.show();
                 break;
             case SNAPSHOT_CREATING:

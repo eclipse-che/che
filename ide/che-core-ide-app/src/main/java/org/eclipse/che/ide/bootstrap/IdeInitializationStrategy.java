@@ -13,10 +13,17 @@ package org.eclipse.che.ide.bootstrap;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 
-/** Performs essential initialization routines of the IDE application. */
-interface IdeInitializer {
+/**
+ * Represents strategy for initializing IDE application.
+ *
+ * @see DefaultIdeInitializationStrategy
+ * @see FactoryIdeInitializationStrategy
+ */
+interface IdeInitializationStrategy {
 
-    Promise<WorkspaceDto> getWorkspaceToStart();
-
+    /** Performs the essential initialization routines of IDE application. */
     Promise<Void> init();
+
+    /** Returns the opening workspace. */
+    Promise<WorkspaceDto> getWorkspaceToStart();
 }

@@ -56,8 +56,7 @@ public class TerminalInitializer {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
                 restoreTerminal();
-                // FIXME: spi ide
-//                machinePortProvider.get();
+                machinePortProvider.get();
             }
 
             @Override

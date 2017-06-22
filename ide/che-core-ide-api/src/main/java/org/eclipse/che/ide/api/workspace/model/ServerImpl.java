@@ -13,6 +13,8 @@ package org.eclipse.che.ide.api.workspace.model;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 
+import static com.google.common.base.Strings.nullToEmpty;
+
 public class ServerImpl implements Server {
 
     private String       name;
@@ -25,7 +27,7 @@ public class ServerImpl implements Server {
 
     public ServerImpl(String name, String url, ServerStatus status) {
         this.name = name;
-        this.url = url;
+        this.url = nullToEmpty(url); // some servers doesn't have URL
         this.status = status;
     }
 

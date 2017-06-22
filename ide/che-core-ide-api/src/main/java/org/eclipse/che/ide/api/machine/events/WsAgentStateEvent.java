@@ -13,12 +13,15 @@ package org.eclipse.che.ide.api.machine.events;
 import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.ide.api.machine.WsAgentState;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 
 /**
  * Event that describes the fact that ws-agent state has been changed.
  *
  * @author Roman Nikitenko
+ * @deprecated use {@link WsAgentServerRunningEvent}, {@link WsAgentServerStoppedEvent}
  */
+@Deprecated
 public class WsAgentStateEvent extends GwtEvent<WsAgentStateHandler> {
 
     /** Type class used to register this event. */
@@ -31,20 +34,27 @@ public class WsAgentStateEvent extends GwtEvent<WsAgentStateHandler> {
      * @param state
      *         the type of action
      */
+    @Deprecated
     protected WsAgentStateEvent(WsAgentState state) {
         this.wsAgentState = state;
     }
 
     /**
      * Creates a ws-agent started event.
+     *
+     * @deprecated use {@link WsAgentServerRunningEvent}
      */
+    @Deprecated
     public static WsAgentStateEvent createWsAgentStartedEvent() {
         return new WsAgentStateEvent(WsAgentState.STARTED);
     }
 
     /**
      * Creates a ws-agent stopped event.
+     *
+     * @deprecated use {@link WsAgentServerStoppedEvent}
      */
+    @Deprecated
     public static WsAgentStateEvent createWsAgentStoppedEvent() {
         return new WsAgentStateEvent(WsAgentState.STOPPED);
     }
@@ -54,7 +64,11 @@ public class WsAgentStateEvent extends GwtEvent<WsAgentStateHandler> {
         return TYPE;
     }
 
-    /** @return the state of ws-agent */
+    /**
+     * @return the state of ws-agent
+     * @deprecated use {@link ServerImpl#getStatus()}
+     */
+    @Deprecated
     public WsAgentState getWsAgentState() {
         return wsAgentState;
     }

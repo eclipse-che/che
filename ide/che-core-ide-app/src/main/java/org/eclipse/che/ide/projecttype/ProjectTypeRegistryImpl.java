@@ -18,9 +18,11 @@ import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.machine.events.WsAgentServerRunningEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
+import org.eclipse.che.ide.api.project.type.ProjectTypesLoadedEvent;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.loging.Log;
@@ -30,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 
@@ -39,6 +42,7 @@ public class ProjectTypeRegistryImpl implements ProjectTypeRegistry {
     private final AsyncRequestFactory    asyncRequestFactory;
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
     private final AppContext             appContext;
+    private final EventBus               eventBus;
 
     private final Map<String, ProjectTypeDto> projectTypes;
 
@@ -50,19 +54,18 @@ public class ProjectTypeRegistryImpl implements ProjectTypeRegistry {
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.appContext = appContext;
+        this.eventBus = eventBus;
 
         projectTypes = new HashMap<>();
 
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> {
+            if (RUNNING == appContext.getWorkspace().getStatus()) {
                 registerProjectTypes();
             }
-
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-            }
         });
+
+        eventBus.addHandler(WsAgentServerRunningEvent.TYPE, e -> registerProjectTypes());
+        eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, e -> projectTypes.clear());
     }
 
     @Override
@@ -79,6 +82,10 @@ public class ProjectTypeRegistryImpl implements ProjectTypeRegistry {
     private void registerProjectTypes() {
         fetchProjectTypes().then(typeDescriptors -> {
             typeDescriptors.forEach(projectTypeDto -> projectTypes.put(projectTypeDto.getId(), projectTypeDto));
+
+            // FIXME: spi ide
+            // Temporary solution while a better mechanism of obtaining ProjectTypeRegistry instance with Promises is being considered...
+            eventBus.fireEvent(new ProjectTypesLoadedEvent());
         }).catchError(error -> {
             Log.error(ProjectTypeRegistryImpl.this.getClass(), "Can't load project types: " + error.getCause());
         });

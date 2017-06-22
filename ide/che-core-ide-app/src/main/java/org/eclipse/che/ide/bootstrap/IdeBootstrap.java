@@ -18,7 +18,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.workspace.CurrentWorkspaceManager;
 
 /** Performs initial startup of the CHE IDE application. */
 @Singleton
@@ -32,15 +31,21 @@ public class IdeBootstrap {
     }
 
     @Inject
-    void bootstrap(ExtensionInitializer extensionInitializer, CurrentWorkspaceManager wsManager, IdeInitializer ideInitializer) {
-        ideInitializer.init()
-                      .then(aVoid -> {
-                          extensionInitializer.startExtensions();
-                          Scheduler.get().scheduleDeferred(this::notifyShowIDE);
-                          wsManager.handleWorkspaceState();
-                      })
-                      .catchError(handleError())
-                      .catchError(handleErrorFallback());
+    void bootstrap(ExtensionInitializer extensionInitializer, IdeInitializationStrategyProvider initializationStrategyProvider) {
+        try {
+            IdeInitializationStrategy strategy = initializationStrategyProvider.get();
+
+            strategy.init()
+                    .then(aVoid -> {
+                        extensionInitializer.startExtensions();
+
+                        Scheduler.get().scheduleDeferred(this::notifyShowIDE);
+                    })
+                    .catchError(handleError())
+                    .catchError(handleErrorFallback());
+        } catch (Exception e) {
+            onInitializationFailed("IDE initialization failed. " + e.getMessage());
+        }
     }
 
     /** Handle an error with IDE UI. */

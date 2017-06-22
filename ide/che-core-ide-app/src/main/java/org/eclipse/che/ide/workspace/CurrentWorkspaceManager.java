@@ -13,6 +13,7 @@ package org.eclipse.che.ide.workspace;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -20,12 +21,14 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.SubscriptionManagerClient;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
@@ -53,7 +56,8 @@ public class CurrentWorkspaceManager {
                             CoreLocalizationConstant messages,
                             WorkspaceStatusHandler wsStatusHandler,
                             AppContext appContext,
-                            SubscriptionManagerClient subscriptionManagerClient) {
+                            SubscriptionManagerClient subscriptionManagerClient,
+                            EventBus eventBus) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.wsStatusNotification = loader;
         this.notificationManagerProvider = notificationManagerProvider;
@@ -61,16 +65,20 @@ public class CurrentWorkspaceManager {
         this.wsStatusHandler = wsStatusHandler;
         this.appContext = appContext;
         this.subscriptionManagerClient = subscriptionManagerClient;
+
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> handleWorkspaceState());
     }
 
-    /** Checks the current workspace's status and does an appropriate action. */
-    public void handleWorkspaceState() {
+    /** Checks the current workspace status and does an appropriate action. */
+    private void handleWorkspaceState() {
         final WorkspaceImpl workspace = appContext.getWorkspace();
         final WorkspaceStatus workspaceStatus = workspace.getStatus();
 
         wsStatusNotification.show(STARTING_WORKSPACE_RUNTIME);
 
-        if (workspaceStatus == RUNNING) {
+        if (workspaceStatus == STARTING) {
+            subscribeToEvents();
+        } else if (workspaceStatus == RUNNING) {
             subscribeToEvents();
             wsStatusHandler.handleWorkspaceRunning();
         } else if (workspaceStatus == STOPPED || workspaceStatus == STOPPING) {

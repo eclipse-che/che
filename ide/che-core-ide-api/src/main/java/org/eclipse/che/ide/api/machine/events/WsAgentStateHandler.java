@@ -16,7 +16,9 @@ import com.google.gwt.event.shared.EventHandler;
  * A handler for handling {@link WsAgentStateEvent}.
  *
  * @author Roman Nikitenko
+ * @deprecated use {@link WsAgentServerRunningEvent.Handler}, {@link WsAgentServerStoppedEvent.Handler}
  */
+@Deprecated
 public interface WsAgentStateHandler extends EventHandler {
 
     /**
@@ -24,7 +26,9 @@ public interface WsAgentStateHandler extends EventHandler {
      *
      * @param event
      *         the fired {@link WsAgentStateEvent}
+     * @deprecated use {@link WsAgentServerRunningEvent.Handler}
      */
+    @Deprecated
     void onWsAgentStarted(WsAgentStateEvent event);
 
     /**
@@ -32,6 +36,8 @@ public interface WsAgentStateHandler extends EventHandler {
      *
      * @param event
      *         the fired {@link WsAgentStateEvent}
+     * @deprecated use {@link WsAgentServerStoppedEvent.Handler}
      */
+    @Deprecated
     void onWsAgentStopped(WsAgentStateEvent event);
 }

@@ -14,8 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.project.type.ProjectTypesLoadedEvent;
 
 /**
  * Resource management component. Initializes with workspace agent.
@@ -28,15 +27,8 @@ public class ResourceManagerComponent {
 
     @Inject
     public ResourceManagerComponent(ResourceManagerInitializer initializer, EventBus eventBus) {
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
-                initializer.initResourceManager();
-            }
-
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-            }
-        });
+        // FIXME: spi ide
+        // Temporary solution while a better mechanism of obtaining ProjectTypeRegistry instance with Promises is being considered...
+        eventBus.addHandler(ProjectTypesLoadedEvent.TYPE, e -> initializer.initResourceManager());
     }
 }

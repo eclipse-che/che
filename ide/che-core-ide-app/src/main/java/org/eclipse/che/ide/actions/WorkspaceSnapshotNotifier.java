@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -32,14 +33,14 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 @Singleton
 public class WorkspaceSnapshotNotifier {
 
-    private final NotificationManager      notificationManager;
-    private final CoreLocalizationConstant locale;
+    private final Provider<NotificationManager> notificationManagerProvider;
+    private final CoreLocalizationConstant      locale;
 
     private StatusNotification notification;
 
     @Inject
-    public WorkspaceSnapshotNotifier(NotificationManager notificationManager, CoreLocalizationConstant locale) {
-        this.notificationManager = notificationManager;
+    public WorkspaceSnapshotNotifier(Provider<NotificationManager> notificationManagerProvider, CoreLocalizationConstant locale) {
+        this.notificationManagerProvider = notificationManagerProvider;
         this.locale = locale;
     }
 
@@ -49,7 +50,7 @@ public class WorkspaceSnapshotNotifier {
      * or {@link #successfullyCreated()} is called.
      */
     public void creationStarted() {
-        notification = notificationManager.notify(locale.createSnapshotProgress(), PROGRESS, FLOAT_MODE);
+        notification = notificationManagerProvider.get().notify(locale.createSnapshotProgress(), PROGRESS, FLOAT_MODE);
     }
 
     /**
