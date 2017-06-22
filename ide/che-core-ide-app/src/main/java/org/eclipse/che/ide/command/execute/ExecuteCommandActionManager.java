@@ -44,13 +44,11 @@ public class ExecuteCommandActionManager {
     private static final String COMMAND_ACTION_ID_PREFIX        = "command_";
     private static final String GOAL_ACTION_GROUP_ID_PREFIX     = "goal_";
 
-    private final CommandManager              commandManager;
     private final ActionManager               actionManager;
     private final CommandsActionGroup         commandsActionGroup;
     private final GoalPopUpGroupFactory       goalPopUpGroupFactory;
     private final ExecuteCommandActionFactory commandActionFactory;
     private final CommandGoalRegistry         goalRegistry;
-    private final EventBus                    eventBus;
 
     /** Map of command's name to an appropriate {@link ExecuteCommandAction}. */
     private final Map<String, Action>             commandActions;
@@ -65,36 +63,33 @@ public class ExecuteCommandActionManager {
                                        ExecuteCommandActionFactory commandActionFactory,
                                        CommandGoalRegistry goalRegistry,
                                        EventBus eventBus) {
-        this.commandManager = commandManager;
         this.actionManager = actionManager;
         this.commandsActionGroup = commandsActionGroup;
         this.goalPopUpGroupFactory = goalPopUpGroupFactory;
         this.commandActionFactory = commandActionFactory;
         this.goalRegistry = goalRegistry;
-        this.eventBus = eventBus;
 
         commandActions = new HashMap<>();
         goalPopUpGroups = new HashMap<>();
 
-        eventBus.addHandler(CommandsLoadedEvent.getType(), event -> start());
-    }
+        initialize();
 
-    private void start() {
+        eventBus.addHandler(CommandsLoadedEvent.getType(), event -> commandManager.getCommands().forEach(this::addAction));
         eventBus.addHandler(CommandAddedEvent.getType(), e -> addAction(e.getCommand()));
         eventBus.addHandler(CommandRemovedEvent.getType(), e -> removeAction(e.getCommand()));
         eventBus.addHandler(CommandUpdatedEvent.getType(), e -> {
             removeAction(e.getInitialCommand());
             addAction(e.getUpdatedCommand());
         });
+    }
 
+    private void initialize() {
         actionManager.registerAction(COMMANDS_ACTION_GROUP_ID_PREFIX, commandsActionGroup);
 
         // inject 'Commands' menu into context menus
         ((DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU)).add(commandsActionGroup);
         ((DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU)).add(commandsActionGroup);
         ((DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU)).add(commandsActionGroup);
-
-        commandManager.getCommands().forEach(this::addAction);
     }
 
     /**

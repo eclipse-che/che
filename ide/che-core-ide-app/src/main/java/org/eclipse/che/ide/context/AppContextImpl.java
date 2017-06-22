@@ -401,7 +401,7 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-        appStateManager.get().persistWorkspaceState(getWorkspaceId()).then(ignored -> {
+        appStateManager.get().persistWorkspaceState().then(ignored -> {
             for (Project project : rootProjects) {
                 eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
             }

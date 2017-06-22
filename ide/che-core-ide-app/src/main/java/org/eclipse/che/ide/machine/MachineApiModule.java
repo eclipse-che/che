@@ -34,5 +34,7 @@ public class MachineApiModule extends AbstractGinModule {
 
         bind(WsAgentStateController.class).to(WsAgentStateControllerImpl.class).in(Singleton.class);
         bind(WsAgentStateControllerImpl.class).asEagerSingleton();
+
+        bind(WsAgentURLModifierInitializer.class).asEagerSingleton();
     }
 }

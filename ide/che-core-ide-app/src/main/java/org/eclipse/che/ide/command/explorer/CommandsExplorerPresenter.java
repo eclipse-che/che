@@ -205,7 +205,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         };
     }
 
-    /** Refresh view and preserve current selection. */
+    /** Refresh view with preserving the current selection. */
     private void refreshView() {
         refreshViewAndSelectCommand(null);
     }

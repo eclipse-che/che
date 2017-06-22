@@ -86,7 +86,7 @@ public class AppStateManager {
             public void onWindowClosing(WindowActionEvent event) {
                 final Workspace workspace = appContext.getWorkspace();
                 if (workspace != null) {
-                    persistWorkspaceState(workspace.getId());
+                    persistWorkspaceState();
                 }
             }
 
@@ -135,7 +135,8 @@ public class AppStateManager {
         }
     }
 
-    public Promise<Void> persistWorkspaceState(String wsId) {
+    public Promise<Void> persistWorkspaceState() {
+        final String wsId = appContext.getWorkspace().getId();
         final JsonObject settings = Json.createObject();
         JsonObject workspace = Json.createObject();
         settings.put(WORKSPACE, workspace);

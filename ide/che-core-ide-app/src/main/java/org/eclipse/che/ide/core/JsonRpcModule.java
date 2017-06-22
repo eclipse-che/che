@@ -13,13 +13,13 @@ package org.eclipse.che.ide.core;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 
-import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessor;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcComposer;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcQualifier;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcUnmarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessor;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.TimeoutActionRunner;
 import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
 import org.eclipse.che.ide.api.jsonrpc.WorkspaceMasterJsonRpcInitializer;
@@ -32,11 +32,7 @@ import org.eclipse.che.ide.jsonrpc.ElementalJsonRpcUnmarshaller;
 import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
 import org.eclipse.che.ide.jsonrpc.WebSocketJsonRpcInitializer;
 
-/**
- * GIN module for configuring Json RPC protocol implementation components.
- *
- * @author Artem Zatsarynnyi
- */
+/** GIN module for configuring Json RPC protocol implementation components. */
 public class JsonRpcModule extends AbstractGinModule {
 
     @Override

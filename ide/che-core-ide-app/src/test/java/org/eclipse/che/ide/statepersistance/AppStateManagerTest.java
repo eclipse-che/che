@@ -22,6 +22,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -36,6 +37,7 @@ import java.util.Map;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -85,7 +87,9 @@ public class AppStateManagerTest {
 
     @Before
     public void setUp() {
-        when(appContext.getWorkspaceId()).thenReturn(WS_ID);
+        WorkspaceImpl workspace = mock(WorkspaceImpl.class);
+        when(workspace.getId()).thenReturn(WS_ID);
+        when(appContext.getWorkspace()).thenReturn(workspace);
 
         Map<String, Provider<StateComponent>> components = new HashMap<>();
         components.put("component1", component1Provider);
@@ -102,20 +106,20 @@ public class AppStateManagerTest {
 
     @Test
     public void shouldStoreStateInPreferences() throws Exception {
-        appStateManager.persistWorkspaceState(WS_ID);
+        appStateManager.persistWorkspaceState();
         verify(preferencesManager).flushPreferences();
     }
 
     @Test
     public void shouldCallGetStateOnStateComponent() throws Exception {
-        appStateManager.persistWorkspaceState(WS_ID);
+        appStateManager.persistWorkspaceState();
         verify(component1, atLeastOnce()).getState();
         verify(component2, atLeastOnce()).getState();
     }
 
     @Test
     public void shouldStoreStateByWsId() throws Exception {
-        appStateManager.persistWorkspaceState(WS_ID);
+        appStateManager.persistWorkspaceState();
         verify(preferencesManager).setValue(preferenceArgumentCaptor.capture(), jsonArgumentCaptor.capture());
         assertThat(preferenceArgumentCaptor.getValue()).isNotNull();
         assertThat(preferenceArgumentCaptor.getValue()).isNotNull();
@@ -129,7 +133,7 @@ public class AppStateManagerTest {
         object.put("key1", "value1");
         when(component1.getState()).thenReturn(object);
 
-        appStateManager.persistWorkspaceState(WS_ID);
+        appStateManager.persistWorkspaceState();
 
         verify(component1).getState();
         verify(preferencesManager).setValue(anyString(), jsonArgumentCaptor.capture());

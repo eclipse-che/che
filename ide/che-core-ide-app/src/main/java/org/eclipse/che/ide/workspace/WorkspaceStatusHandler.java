@@ -19,7 +19,6 @@ import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.WorkspaceSnapshotNotifier;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
@@ -55,7 +54,6 @@ public class WorkspaceStatusHandler {
     private final Provider<NotificationManager> notificationManagerProvider;
     private final WorkspaceSnapshotNotifier     snapshotNotifierProvider;
     private final LoaderPresenter               wsStatusNotification;
-    private final WsAgentURLModifier            wsAgentURLModifier;
     private final EventBus                      eventBus;
     private final CoreLocalizationConstant      messages;
 
@@ -66,7 +64,6 @@ public class WorkspaceStatusHandler {
                            Provider<NotificationManager> notificationManagerProvider,
                            WorkspaceSnapshotNotifier snapshotNotifier,
                            LoaderPresenter wsStatusNotification,
-                           WsAgentURLModifier wsAgentURLModifier,
                            EventBus eventBus,
                            CoreLocalizationConstant messages) {
         this.workspaceServiceClient = workspaceServiceClient;
@@ -75,7 +72,6 @@ public class WorkspaceStatusHandler {
         this.notificationManagerProvider = notificationManagerProvider;
         this.snapshotNotifierProvider = snapshotNotifier;
         this.wsStatusNotification = wsStatusNotification;
-        this.wsAgentURLModifier = wsAgentURLModifier;
         this.eventBus = eventBus;
         this.messages = messages;
     }
@@ -116,8 +112,6 @@ public class WorkspaceStatusHandler {
         ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf("/projects"));
 
         wsStatusNotification.setSuccess(STARTING_WORKSPACE_RUNTIME);
-
-        appContext.getWorkspace().getDevMachine().ifPresent(wsAgentURLModifier::initialize);
     }
 
     // FIXME: spi ide
