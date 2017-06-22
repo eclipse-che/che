@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-debugger-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.13.0-SNAPSHOT</version>
+        <version>5.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-java-debugger-server</artifactId>
     <packaging>jar</packaging>
@@ -28,10 +28,6 @@
         <run.cmd>java -Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=y -Xmx128m com.HelloWorld</run.cmd>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
@@ -113,6 +109,11 @@
             <systemPath>${java.home}/../lib/tools.jar</systemPath>
         </dependency>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-model</artifactId>
             <scope>test</scope>
@@ -183,6 +184,21 @@
                         <exclude>**/*.class</exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <ignoredDependencies>
+                                <ignoredDependency>org.eclipse.che.core:che-core-api-core</ignoredDependency>
+                                <ignoredDependency>org.eclipse.che.plugin:org.eclipse.core.resources</ignoredDependency>
+                            </ignoredDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
