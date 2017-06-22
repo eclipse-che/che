@@ -96,7 +96,7 @@ func NewTunnel(conn NativeConn, dispatcher ReqDispatcher) *Tunnel {
 		reqDispatcher: dispatcher,
 		q:             q,
 	}
-	tunnel.closer = &closer{tunnel: tunnel}
+	tunnel.closer = &closer{tunnel: tunnel, outClosed: make(chan bool, 1)}
 	return tunnel
 }
 
@@ -171,56 +171,61 @@ func (tun *Tunnel) Go() {
 }
 
 // Notify sends notification(request without id) using given params as its body.
-func (tun *Tunnel) Notify(method string, params interface{}) {
-	if marshaledParams, err := json.Marshal(params); err != nil {
-		log.Printf("Could not unmarshal non-nil notification params, it won't be send. Error %s", err.Error())
-	} else {
-		tun.jsonOut <- &Request{
-			Version: DefaultVersion,
-			Method:  method,
-			Params:  marshaledParams,
-		}
+func (tun *Tunnel) Notify(method string, params interface{}) error {
+	marshaledParams, err := json.Marshal(params)
+	if err != nil {
+		return err
 	}
+	return tun.trySend(&Request{
+		Version: DefaultVersion,
+		Method:  method,
+		Params:  marshaledParams,
+	})
 }
 
 // NotifyBare sends notification like Notify does but
 // sends no request parameters in it.
-func (tun *Tunnel) NotifyBare(method string) {
-	tun.jsonOut <- &Request{Version: DefaultVersion, Method: method}
+func (tun *Tunnel) NotifyBare(method string) error {
+	return tun.trySend(&Request{Version: DefaultVersion, Method: method})
 }
 
 // Request sends request marshalling a given params as its body.
 // RespHandleFunc will be called as soon as the response arrives,
 // or response arrival timeout reached, in that case error of type
 // TimeoutError will be passed to the handler.
-func (tun *Tunnel) Request(method string, params interface{}, rhf RespHandleFunc) {
-	if marshaledParams, err := json.Marshal(params); err != nil {
-		log.Printf("Could not unmrashall non-nil request params, it won't be send. Error %s", err.Error())
-	} else {
-		id := atomic.AddInt64(&prevReqID, 1)
-		request := &Request{
-			ID:     id,
-			Method: method,
-			Params: marshaledParams,
-		}
-		tun.q.add(id, request, time.Now(), rhf)
-		tun.jsonOut <- request
+func (tun *Tunnel) Request(method string, params interface{}, rhf RespHandleFunc) error {
+	marshaledParams, err := json.Marshal(params)
+	if err != nil {
+		return err
 	}
+	id := atomic.AddInt64(&prevReqID, 1)
+	request := &Request{
+		ID:     id,
+		Method: method,
+		Params: marshaledParams,
+	}
+	tun.q.add(id, request, time.Now(), rhf)
+	return tun.trySend(request)
 }
 
 // RequestBare sends the request like Request func does
 // but sends no params in it.
-func (tun *Tunnel) RequestBare(method string, rhf RespHandleFunc) {
+func (tun *Tunnel) RequestBare(method string, rhf RespHandleFunc) error {
 	id := atomic.AddInt64(&prevReqID, 1)
 	request := &Request{ID: id, Method: method}
 	tun.q.add(id, request, time.Now(), rhf)
-	tun.jsonOut <- request
+	return tun.trySend(request)
 }
 
 // Close closes native connection and internal sources, so started
 // go routines should be eventually stopped.
 func (tun *Tunnel) Close() {
 	tun.closer.closeOnce()
+}
+
+// IsClosed returns true if this tunnel is closed and false otherwise.
+func (tun *Tunnel) IsClosed() bool {
+	return atomic.LoadInt32(&tun.closer.closed) != 0
 }
 
 // SayHello sends hello notification.
@@ -250,6 +255,22 @@ type TunnelNotification struct {
 	Text string `json:"text"`
 }
 
+func (tun *Tunnel) trySend(notMarshaled interface{}) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = NewCloseError(errors.New("Connection closed"))
+		}
+	}()
+	tun.jsonOut <- notMarshaled
+	return nil
+}
+
+func (tun *Tunnel) respond(r *Response) {
+	if err := tun.trySend(r); err != nil {
+		log.Printf("Trying to send response '%v' to the closed connection", r)
+	}
+}
+
 func (tun *Tunnel) mainWriteLoop() {
 	for message := range tun.jsonOut {
 		if bytes, err := json.Marshal(message); err != nil {
@@ -260,6 +281,7 @@ func (tun *Tunnel) mainWriteLoop() {
 			}
 		}
 	}
+	tun.closer.outClosed <- true
 }
 
 func (tun *Tunnel) mainReadLoop() {
@@ -304,11 +326,11 @@ func (tun *Tunnel) handleMessage(binMessage []byte) {
 
 	// parse error indicated
 	if err != nil {
-		tun.jsonOut <- &Response{
+		tun.respond(&Response{
 			Version: DefaultVersion,
 			ID:      nil,
 			Error:   NewError(ParseErrorCode, errors.New("Error while parsing request")),
-		}
+		})
 		return
 	}
 
@@ -317,11 +339,11 @@ func (tun *Tunnel) handleMessage(binMessage []byte) {
 		draft.Version = DefaultVersion
 	} else if draft.Version != DefaultVersion {
 		err := fmt.Errorf("Version %s is not supported, please use %s", draft.Version, DefaultVersion)
-		tun.jsonOut <- &Response{
+		tun.respond(&Response{
 			Version: DefaultVersion,
 			ID:      nil,
 			Error:   NewError(InvalidRequestErrorCode, err),
-		}
+		})
 		return
 	}
 
@@ -360,11 +382,11 @@ func (tun *Tunnel) handleRequest(r *Request) {
 	decodedParams, err := handler.Unmarshal(r.Params)
 	if err != nil {
 		if !r.IsNotification() {
-			tun.jsonOut <- &Response{
+			tun.respond(&Response{
 				ID:      r.ID,
 				Version: DefaultVersion,
 				Error:   NewError(ParseErrorCode, errors.New("Couldn't parse params")),
-			}
+			})
 		}
 		return
 	}
@@ -392,13 +414,21 @@ type draft struct {
 }
 
 type closer struct {
-	once   sync.Once
-	tunnel *Tunnel
+	once      sync.Once
+	tunnel    *Tunnel
+	outClosed chan bool
+	// 0 - not closed, 1 - closed
+	closed int32
 }
 
 func (closer *closer) closeOnce() {
 	closer.once.Do(func() {
+		atomic.StoreInt32(&closer.closed, 1)
+
 		close(closer.tunnel.jsonOut)
+		// wait write loop to complete
+		<- closer.outClosed
+
 		closer.tunnel.q.stopWatching()
 		if err := closer.tunnel.conn.Close(); err != nil {
 			log.Printf("Error while closing connection, %s", err.Error())
@@ -507,11 +537,11 @@ func (drt *respTransmitter) watch(timeout time.Duration) {
 func (drt *respTransmitter) Send(result interface{}) {
 	drt.release(func() {
 		marshaled, _ := json.Marshal(result)
-		drt.tunnel.jsonOut <- &Response{
+		drt.tunnel.respond(&Response{
 			Version: DefaultVersion,
 			ID:      drt.reqID,
 			Result:  marshaled,
-		}
+		})
 	})
 }
 
