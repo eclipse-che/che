@@ -12,31 +12,21 @@ package org.eclipse.che.ide.part.explorer.project;
 
 import com.google.common.base.Optional;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.actions.LinkWithEditorAction;
-import org.eclipse.che.ide.actions.RefreshPathAction;
-import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.HasAttributes;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.parts.base.BaseView;
-import org.eclipse.che.ide.api.parts.base.ToolButton;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.menu.ContextMenu;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.resources.tree.SkipHiddenNodesInterceptor;
-import org.eclipse.che.ide.FontAwesome;
-import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
@@ -44,11 +34,8 @@ import org.eclipse.che.ide.ui.smartTree.NodeStorage.StoreSortInfo;
 import org.eclipse.che.ide.ui.smartTree.SortDir;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
-import org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent;
-import org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent.GoIntoStateHandler;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
 import org.eclipse.che.ide.ui.status.StatusWidget;
-import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 
 import java.util.Comparator;
 import java.util.List;
@@ -56,10 +43,6 @@ import java.util.Set;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.project.node.SyntheticNode.CUSTOM_BACKGROUND_FILL;
-import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
-import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
-import static org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent.State.ACTIVATED;
-import static org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent.State.DEACTIVATED;
 
 /**
  * Implementation of the {@link ProjectExplorerView}.
@@ -67,14 +50,10 @@ import static org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent.State.DEAC
  * @author Vlad Zhukovskiy
  */
 @Singleton
-public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.ActionDelegate> implements ProjectExplorerView,
-                                                                                                     GoIntoStateHandler {
+public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.ActionDelegate> implements ProjectExplorerView {
     private final Tree                       tree;
     private final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor;
 
-    private ToolButton goBackButton;
-
-    private static final String GO_BACK_BUTTON_ID      = "goBackButton";
     private static final String PROJECT_TREE_WIDGET_ID = "projectTree";
 
     @Inject
@@ -111,10 +90,6 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
                 return 0;
             }
         }, SortDir.ASC));
-
-        if (tree.getGoInto() != null) {
-            tree.getGoInto().addGoIntoHandler(this);
-        }
 
         tree.setPresentationRenderer(new ProjectExplorerRenderer(tree.getTreeStyles()));
         tree.ensureDebugId(PROJECT_TREE_WIDGET_ID);
@@ -209,40 +184,15 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
         return tree.getGoInto().activate(node);
     }
 
+    @Override
+    public void setGoIntoModeOff() {
+        tree.getGoInto().reset();
+    }
+
     /** {@inheritDoc} */
     @Override
     public boolean isGoIntoActivated() {
         return tree.getGoInto().isActive();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onGoIntoStateChanged(GoIntoStateEvent event) {
-        if (event.getState() == ACTIVATED) {
-            //lazy button initializing
-            if (goBackButton == null) {
-                initGoIntoBackButton();
-                return;
-            }
-
-            goBackButton.setVisible(true);
-
-        } else if (event.getState() == DEACTIVATED) {
-            goBackButton.setVisible(false);
-        }
-    }
-
-    private void initGoIntoBackButton() {
-        goBackButton = new ToolButton(FontAwesome.ARROW_CIRCLE_O_LEFT);
-        goBackButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                tree.getGoInto().reset();
-            }
-        });
-        goBackButton.ensureDebugId(GO_BACK_BUTTON_ID);
-        Tooltip.create((elemental.dom.Element)goBackButton.getElement(), BOTTOM, MIDDLE, "Go Back");
-        addToolButton(goBackButton);
     }
 
     /** {@inheritDoc} */
@@ -290,4 +240,5 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
             return element;
         }
     }
+
 }

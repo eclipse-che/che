@@ -380,7 +380,7 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         previousActivePart = activePart;
 
         activeTab = null;
-        activeTab = null;
+        activePart = null;
 
         // Notify the part stack state has been changed.
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -457,8 +457,13 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
             }
         });
 
-        activePart.onOpen();
-        selectActiveTab(activeTab);
+        if (activePart != null) {
+            activePart.onOpen();
+        }
+
+        if (activeTab != null) {
+            selectActiveTab(activeTab);
+        }
     }
 
     @Override

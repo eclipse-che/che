@@ -57,6 +57,12 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.delete.description")
     String deleteItemActionDescription();
 
+    @Key("action.goInto.text")
+    String goIntoActionText();
+
+    @Key("action.goBack.text")
+    String goBackActionText();
+
     /* Cut */
     @Key("action.cut.text")
     String cutItemsActionText();

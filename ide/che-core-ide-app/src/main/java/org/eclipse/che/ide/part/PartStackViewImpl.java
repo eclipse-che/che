@@ -113,7 +113,7 @@ public class PartStackViewImpl extends Composite implements RequiresResize, Part
         setMaximized(false);
 
         addMaximizeButton();
-        addMimimizeButton();
+        addMinimizeButton();
         addMenuButton();
     }
 
@@ -142,7 +142,7 @@ public class PartStackViewImpl extends Composite implements RequiresResize, Part
     /**
      * Adds button to minimize part stack.
      */
-    private void addMimimizeButton() {
+    private void addMinimizeButton() {
         SVGImage minimize = new SVGImage(resources.collapseExpandIcon());
         minimize.getElement().setAttribute("name", "workBenchIconMinimize");
         ToolButton minimizeToolButton = new ToolButton(minimize);
@@ -170,7 +170,7 @@ public class PartStackViewImpl extends Composite implements RequiresResize, Part
         menuButton.add(menuToolButton);
         menuToolButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 Scheduler.get().scheduleDeferred(() -> {
                     int left = getAbsoluteLeft(menuToolButton.getElement());
                     int top = getAbsoluteTop(menuToolButton.getElement());

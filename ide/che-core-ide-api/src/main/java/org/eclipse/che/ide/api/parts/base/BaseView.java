@@ -17,7 +17,6 @@ import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.api.mvp.View;
@@ -61,17 +60,6 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         initWidget(container);
     }
 
-    /**
-     * Add a button on part toolbar,
-     *
-     * @param button button
-     */
-    public final void addToolButton(@NotNull IsWidget button) {
-        if (button != null) {
-//            toolbarHeader.addEast(button, 18);
-        }
-    }
-
     /** {@inheritDoc} */
     @Override
     public final void setDelegate(T delegate) {
@@ -101,7 +89,6 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
      */
     @Override
     public void setTitle(@NotNull String title) {
-//        titleLabel.setText(title);
     }
 
     /** {@inheritDoc} */
@@ -129,6 +116,9 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         getElement().focus();
     }
 
+    /**
+     * Handles loosing the focus.
+     */
     protected void blurView() {
         getElement().blur();
     }

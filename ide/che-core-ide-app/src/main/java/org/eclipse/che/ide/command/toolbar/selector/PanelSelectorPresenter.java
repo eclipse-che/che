@@ -20,6 +20,8 @@ import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 
+import static org.eclipse.che.ide.api.parts.PartStack.State.MINIMIZED;
+
 /**
  * Presenter to manage Panel selector widget and perspective layout.
  */
@@ -110,7 +112,7 @@ public class PanelSelectorPresenter implements Presenter, PanelSelectorView.Acti
         PartStack rightPartStack = perspective.getPartStack(PartStackType.TOOLING);
 
         if (left) {
-            if (PartStack.State.MINIMIZED == leftPartStack.getPartStackState()) {
+            if (MINIMIZED == leftPartStack.getPartStackState()) {
                 leftPartStack.unMinimize();
             } else {
                 leftPartStack.restore();
@@ -120,7 +122,7 @@ public class PanelSelectorPresenter implements Presenter, PanelSelectorView.Acti
         }
 
         if (bottom) {
-            if (PartStack.State.MINIMIZED == bottomPartStack.getPartStackState()) {
+            if (MINIMIZED == bottomPartStack.getPartStackState()) {
                 bottomPartStack.unMinimize();
             } else {
                 bottomPartStack.restore();
@@ -130,7 +132,7 @@ public class PanelSelectorPresenter implements Presenter, PanelSelectorView.Acti
         }
 
         if (right) {
-            if (PartStack.State.MINIMIZED == rightPartStack.getPartStackState()) {
+            if (MINIMIZED == rightPartStack.getPartStackState()) {
                 rightPartStack.unMinimize();
             } else {
                 rightPartStack.restore();
@@ -159,29 +161,29 @@ public class PanelSelectorPresenter implements Presenter, PanelSelectorView.Acti
             return;
         }
 
-        if (PartStack.State.MINIMIZED != leftPartStack.getPartStackState() &&
-                PartStack.State.MINIMIZED == bottomPartStack.getPartStackState() &&
-                PartStack.State.MINIMIZED == rightPartStack.getPartStackState()) {
+        if (MINIMIZED != leftPartStack.getPartStackState() &&
+                MINIMIZED == bottomPartStack.getPartStackState() &&
+                MINIMIZED == rightPartStack.getPartStackState()) {
             view.setState(PanelSelectorView.State.LEFT);
-        } else if (PartStack.State.MINIMIZED != leftPartStack.getPartStackState() &&
-                PartStack.State.MINIMIZED != bottomPartStack.getPartStackState() &&
-                PartStack.State.MINIMIZED == rightPartStack.getPartStackState()) {
+        } else if (MINIMIZED != leftPartStack.getPartStackState() &&
+                MINIMIZED != bottomPartStack.getPartStackState() &&
+                MINIMIZED == rightPartStack.getPartStackState()) {
             view.setState(PanelSelectorView.State.LEFT_BOTTOM);
-        } else if (PartStack.State.MINIMIZED == leftPartStack.getPartStackState() &&
-                PartStack.State.MINIMIZED == bottomPartStack.getPartStackState() &&
-                PartStack.State.MINIMIZED == rightPartStack.getPartStackState()) {
+        } else if (MINIMIZED == leftPartStack.getPartStackState() &&
+                MINIMIZED == bottomPartStack.getPartStackState() &&
+                MINIMIZED == rightPartStack.getPartStackState()) {
             view.setState(PanelSelectorView.State.FULL_EDITOR);
-        } else if (PartStack.State.MINIMIZED == leftPartStack.getPartStackState() &&
-                PartStack.State.MINIMIZED != bottomPartStack.getPartStackState() &&
-                PartStack.State.MINIMIZED == rightPartStack.getPartStackState()) {
+        } else if (MINIMIZED == leftPartStack.getPartStackState() &&
+                MINIMIZED != bottomPartStack.getPartStackState() &&
+                MINIMIZED == rightPartStack.getPartStackState()) {
             view.setState(PanelSelectorView.State.BOTTOM);
-        } else if (PartStack.State.MINIMIZED == leftPartStack.getPartStackState() &&
-                PartStack.State.MINIMIZED == bottomPartStack.getPartStackState() &&
-                PartStack.State.MINIMIZED != rightPartStack.getPartStackState()) {
+        } else if (MINIMIZED == leftPartStack.getPartStackState() &&
+                MINIMIZED == bottomPartStack.getPartStackState() &&
+                MINIMIZED != rightPartStack.getPartStackState()) {
             view.setState(PanelSelectorView.State.RIGHT);
-        } else if (PartStack.State.MINIMIZED != leftPartStack.getPartStackState() &&
-                PartStack.State.MINIMIZED != bottomPartStack.getPartStackState() &&
-                PartStack.State.MINIMIZED != rightPartStack.getPartStackState()) {
+        } else if (MINIMIZED != leftPartStack.getPartStackState() &&
+                MINIMIZED != bottomPartStack.getPartStackState() &&
+                MINIMIZED != rightPartStack.getPartStackState()) {
             view.setState(PanelSelectorView.State.LEFT_RIGHT_BOTTOM);
         }
     }
