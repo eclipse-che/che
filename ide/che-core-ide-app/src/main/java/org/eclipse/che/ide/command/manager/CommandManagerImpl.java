@@ -38,6 +38,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.Arrays;
@@ -90,6 +91,10 @@ public class CommandManagerImpl implements CommandManager {
         // FIXME: spi
         // Temporary solution while a better mechanism of obtaining appContext.getProjects() with Promises is being considered...
         eventBus.addHandler(WorkspaceReadyEvent.getType(), e -> fetchCommands());
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> {
+            commands.clear();
+            notifyCommandsLoaded();
+        });
     }
 
     private void fetchCommands() {

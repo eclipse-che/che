@@ -34,10 +34,9 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
+import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.command.CommandResources;
@@ -103,23 +102,14 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         eventBus.addHandler(CommandAddedEvent.getType(), e -> refreshViewAndSelectCommand(e.getCommand()));
         eventBus.addHandler(CommandRemovedEvent.getType(), e -> refreshView());
         eventBus.addHandler(CommandUpdatedEvent.getType(), e -> refreshView());
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
-                refreshView();
-            }
-
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-            }
-        });
+        eventBus.addHandler(CommandsLoadedEvent.getType(), e -> refreshView());
     }
 
     @Override
     public void go(AcceptsOneWidget container) {
-        refreshView();
-
         container.setWidget(getView());
+
+        refreshView();
     }
 
     @Override
