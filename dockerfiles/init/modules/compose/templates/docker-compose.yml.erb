@@ -92,13 +92,12 @@ services:
       - POSTGRES_PASSWORD=keycloak
       - POSTGRES_DB=keycloak
     volumes:
-      - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/docker-healthcheck.sh:/docker-healthcheck.sh'
       - '<%= scope.lookupvar('che::che_instance') -%>/data/postgres:/var/lib/postgresql/data'
     ports:
       - '5432:5432'
     restart: always
     healthcheck:
-        test: ["CMD", "/docker-healthcheck.sh"]
+        test: "pg_isready -h localhost -p 5432 -U postgres"
         interval: 10s
         timeout: 10s
         retries: 10
