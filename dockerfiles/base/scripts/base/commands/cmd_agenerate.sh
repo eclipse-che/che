@@ -44,6 +44,7 @@ cmd_agenerate() {
              "plugin-wizard-archetype        - Assembly with custom C project type extension" \
              "plugin-serverservice-archetype - Assembly with simple IDE extesion and a server service" \
              "plugin-embedjs-archetype       - Assembly with simple IDE extesion for using native javascript in widgets" \
+             "plugin-framedjs-archetype      - Assembly with simple IDE extesion for using iframe with native javascript in widgets" \
              "plugin-json-archetype          - Assembly with sample JSON project type, editor codeassistant, and workspace services")
     select opt in "${options[@]}"
     do
@@ -66,6 +67,10 @@ cmd_agenerate() {
           ;;
         "plugin-embedjs-archetype       - Assembly with simple IDE extesion for using native javascript in widgets")
           ARCHETYPE_ID="plugin-embedjs-archetype"
+          break
+          ;;
+        "plugin-framedjs-archetype       - Assembly with simple IDE extesion for using iframe with native javascript in widgets")
+          ARCHETYPE_ID="plugin-framedjs-archetype"
           break
           ;;
         "plugin-json-archetype          - Assembly with sample JSON project type, editor codeassistant, and workspace services")
