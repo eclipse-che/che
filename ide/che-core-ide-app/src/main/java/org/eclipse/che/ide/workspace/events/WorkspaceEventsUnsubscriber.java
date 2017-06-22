@@ -31,7 +31,7 @@ class WorkspaceEventsUnsubscriber {
 
     @Inject
     WorkspaceEventsUnsubscriber(EventBus eventBus, AppContext appContext, SubscriptionManagerClient subscriptionManagerClient) {
-        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> {
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> {
             final Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
 
             subscriptionManagerClient.unSubscribe("ws-master", "workspace/statusChanged", scope);

@@ -119,7 +119,6 @@ public class CoreGinModule extends AbstractGinModule {
         install(new OAuthApiModule());
         install(new WorkspaceEventsModule());
         install(new FactoryGinModule());
-        install(new WorkspaceEventsModule());
 
         // configure miscellaneous core components
         bind(StandardComponentInitializer.class).in(Singleton.class);

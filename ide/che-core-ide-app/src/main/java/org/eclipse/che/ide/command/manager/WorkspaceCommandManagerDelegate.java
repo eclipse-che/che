@@ -68,7 +68,7 @@ class WorkspaceCommandManagerDelegate {
 
         return workspaceServiceClient.addCommand(appContext.getWorkspaceId(), commandDto)
                                      .then((Function<WorkspaceDto, CommandImpl>)workspace -> {
-                                         // update workspace model returned by AppContext because
+                                         // update workspace model in AppContext because
                                          // AppContext always must return an actual workspace model
                                          ((AppContextImpl)appContext).setWorkspace(workspace);
                                          return command;
@@ -89,7 +89,7 @@ class WorkspaceCommandManagerDelegate {
 
         return workspaceServiceClient.updateCommand(appContext.getWorkspaceId(), command.getName(), commandDto)
                                      .then((Function<WorkspaceDto, CommandImpl>)workspace -> {
-                                         // update workspace model returned by AppContext because
+                                         // update workspace model in AppContext because
                                          // AppContext always must return an actual workspace model
                                          ((AppContextImpl)appContext).setWorkspace(workspace);
                                          return command;
@@ -100,7 +100,7 @@ class WorkspaceCommandManagerDelegate {
     Promise<Void> removeCommand(String commandName) {
         return workspaceServiceClient.deleteCommand(appContext.getWorkspaceId(), commandName)
                                      .then((Function<WorkspaceDto, Void>)workspace -> {
-                                         // update workspace model returned by AppContext because
+                                         // update workspace model in AppContext because
                                          // AppContext always must return an actual workspace model
                                          ((AppContextImpl)appContext).setWorkspace(workspace);
                                          return null;

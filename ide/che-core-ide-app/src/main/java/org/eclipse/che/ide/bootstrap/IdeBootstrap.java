@@ -44,7 +44,7 @@ public class IdeBootstrap {
 
                         Scheduler.get().scheduleDeferred(this::notifyShowIDE);
 
-                        wsManager.handleWorkspaceState();
+//                        wsManager.handleWorkspaceState();
                     })
                     .catchError(handleError())
                     .catchError(handleErrorFallback());

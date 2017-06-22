@@ -12,6 +12,8 @@ package org.eclipse.che.ide.workspace.events;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 
+import org.eclipse.che.ide.workspace.CurrentWorkspaceManager;
+
 public class WorkspaceEventsModule extends AbstractGinModule {
 
     @Override
@@ -24,5 +26,7 @@ public class WorkspaceEventsModule extends AbstractGinModule {
         bind(WorkspaceAgentOutputHandler.class).asEagerSingleton();
 
         bind(WorkspaceEventsUnsubscriber.class).asEagerSingleton();
+
+        bind(CurrentWorkspaceManager.class).asEagerSingleton();
     }
 }

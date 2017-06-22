@@ -37,7 +37,7 @@ import static org.eclipse.che.ide.api.machine.events.WsAgentStateEvent.createWsA
 
 /**
  * Handles changes of the servers statuses and fires the corresponded
- * events to notify all interested subscribers (usually IDE extensions).
+ * events to notify all interested subscribers (IDE extensions).
  */
 @Singleton
 class ServerStatusEventHandler {
@@ -51,7 +51,7 @@ class ServerStatusEventHandler {
             Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
             workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
-                // Update workspace model returned by AppContext before firing an event.
+                // Update workspace model in AppContext before firing an event.
                 // Because AppContext always must return an actual workspace model.
                 ((AppContextImpl)appContext).setWorkspace(workspace);
 
