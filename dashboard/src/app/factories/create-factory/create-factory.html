@@ -45,10 +45,10 @@
                            class="che-label-container-last">
         <md-tabs md-dynamic-height="true" md-stretch-tabs="auto" md-center-tabs="false" md-selected="selectedIndex"
                  md-border-bottom="true"
+                 md-no-ink-bar
                  class="factory-select-source-details">
           <md-tab md-on-select="createFactoryCtrl.clearFactoryContent()">
             <md-tab-label>
-              <md-icon md-font-icon="fa fa-server" class="che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">Workspace</span>
             </md-tab-label>
             <md-tab-body>
@@ -59,7 +59,6 @@
           </md-tab>
           <md-tab md-on-select="createFactoryCtrl.clearFactoryContent()">
             <md-tab-label>
-              <md-icon md-font-icon="fa-git" class="fa che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">Git</span>
             </md-tab-label>
             <md-tab-body>
@@ -71,7 +70,6 @@
           </md-tab>
           <md-tab md-on-select="createFactoryCtrl.clearFactoryContent()">
             <md-tab-label>
-              <md-icon md-font-icon="fa fa-download" class="che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">Config</span>
             </md-tab-label>
             <md-tab-body>
@@ -85,7 +83,6 @@
           <md-tab md-on-select="createFactoryCtrl.clearFactoryContent(); templateSelected = true;"
                   md-on-deselect="templateSelected = false;">
             <md-tab-label>
-              <md-icon md-font-icon="fa fa-magic" class="che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">Template</span>
             </md-tab-label>
             <md-tab-body>
