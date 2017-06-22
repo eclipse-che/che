@@ -8,6 +8,11 @@ class keycloak {
     content => template("keycloak/che-realm.json.erb"),
     mode    => "644",
   } ->
+  file { "/opt/che/config/keycloak/che-users-0.json":
+    ensure  => "present",
+    content => template("keycloak/che-users-0.json.erb"),
+    mode    => "644",
+  } ->
   file { "/opt/che/config/keycloak/master-realm.json":
     ensure  => "present",
     content => template("keycloak/master-realm.json.erb"),
