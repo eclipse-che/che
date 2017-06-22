@@ -14,5 +14,4 @@ class base {
   include che
   include compose
   include traefik
-  include postgres
 }
