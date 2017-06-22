@@ -18,7 +18,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.workspace.CurrentWorkspaceManager;
 
 /** Performs initial startup of the CHE IDE application. */
 @Singleton
@@ -32,9 +31,7 @@ public class IdeBootstrap {
     }
 
     @Inject
-    void bootstrap(ExtensionInitializer extensionInitializer,
-                   CurrentWorkspaceManager wsManager,
-                   IdeInitializationStrategyProvider initializationStrategyProvider) {
+    void bootstrap(ExtensionInitializer extensionInitializer, IdeInitializationStrategyProvider initializationStrategyProvider) {
         try {
             IdeInitializationStrategy strategy = initializationStrategyProvider.get();
 
@@ -43,8 +40,6 @@ public class IdeBootstrap {
                         extensionInitializer.startExtensions();
 
                         Scheduler.get().scheduleDeferred(this::notifyShowIDE);
-
-//                        wsManager.handleWorkspaceState();
                     })
                     .catchError(handleError())
                     .catchError(handleErrorFallback());
