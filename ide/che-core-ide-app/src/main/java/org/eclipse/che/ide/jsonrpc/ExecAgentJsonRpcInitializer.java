@@ -17,6 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.events.ServerRunningEvent;
 import org.eclipse.che.ide.api.machine.events.ServerStoppedEvent;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
@@ -62,8 +63,11 @@ public class ExecAgentJsonRpcInitializer {
                 final RuntimeImpl runtime = workspace.getRuntime();
 
                 if (runtime != null) {
-                    runtime.getMachines().values()
-                           .forEach(m -> initializeJsonRpcService(m.getName()));
+                    runtime.getMachines()
+                           .values()
+                           .stream()
+                           .map(MachineImpl::getName)
+                           .forEach(this::initializeJsonRpcService);
                 }
             }
         });
