@@ -37,11 +37,18 @@ run_test_in_docker_container() {
            $IMAGE_NAME bats ${BATS_OPTIONS} /dockerfiles/cli/tests/$1
 }
 
-
 echo "Running tests in container from image $IMAGE_NAME"
 echo "Running functional bats tests for CLI prompts and usage"
-#run_test_in_docker_container cli_prompts_usage_tests.bats
+run_test_in_docker_container cli_prompts_usage_tests.bats
+echo "Running functionals bats tests for config command"
+run_test_in_docker_container cmd_config_tests.bats
+echo "Running functionals bats tests for info command"
+run_test_in_docker_container cmd_info_tests.bats
 echo "Running functional bats tests for init and destroy commands"
-#run_test_in_docker_container cmd_init_destroy_tests.bats
-echo "Running functionals bats tests for start command"
-run_test_in_docker_container cmd_start_tests.bats --net=host
+run_test_in_docker_container cmd_init_destroy_tests.bats
+echo "Running functionals bats tests for start, stop, restart command"
+run_test_in_docker_container cmd_start_stop_restart_tests.bats --net=host
+echo "Running functionals bats tests for backup / restore commands"
+run_test_in_docker_container cmd_backup_restore_tests.bats
+echo "Running functionals bats tests for offline command"
+run_test_in_docker_container cmd_offline_tests.bats

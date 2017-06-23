@@ -154,4 +154,4 @@ curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
 
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
-echo "nodejs ${LS_DIR}/vscode-json-server/server.js" > ${LS_LAUNCHER}
+echo "nodejs ${LS_DIR}/vscode-json-server/out/jsonServerMain.js --stdio" > ${LS_LAUNCHER}

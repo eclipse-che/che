@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.texteditor;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Interface for an editor that allow undo/redo operations.
  */
@@ -48,4 +50,16 @@ public interface HandlesUndoRedo {
      * are considered to be individually undo-able.
      */
     void endCompoundChange();
+
+    /**
+     * Adds a listener for undo/redo operations. Has no effect if an identical listener is already registered.
+     *
+     * @param listener
+     *         undo/redo operations listener
+     */
+    void addUndoRedoOperationsListener(@NotNull UndoRedoOperationsListener listener);
+
+    interface UndoRedoOperationsListener {
+        void onOperationExecuted();
+    }
 }

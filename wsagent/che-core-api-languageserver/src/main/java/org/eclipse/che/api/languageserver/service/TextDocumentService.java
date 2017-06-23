@@ -11,14 +11,13 @@
 package org.eclipse.che.api.languageserver.service;
 
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.CompletionItemDto;
-import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedCompletionItemDto;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.CompletionListDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.HoverDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.LocationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SignatureHelpDto;
@@ -35,6 +34,7 @@ import org.eclipse.lsp4j.DocumentHighlight;
 import org.eclipse.lsp4j.DocumentOnTypeFormattingParams;
 import org.eclipse.lsp4j.DocumentRangeFormattingParams;
 import org.eclipse.lsp4j.DocumentSymbolParams;
+import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
@@ -84,7 +84,7 @@ public class TextDocumentService {
         dtoToDtoList("onTypeFormatting", DocumentOnTypeFormattingParams.class, TextEditDto.class, this::onTypeFormatting);
         dtoToDtoList("completion", TextDocumentPositionParams.class, CompletionItemDto.class, this::completion);
 
-        dtoToDto("completionItem/resolve", ExtendedCompletionItemDto.class, CompletionItemDto.class, this::completionItemResolve);
+        dtoToDto("completionItem/resolve", ExtendedCompletionItem.class, CompletionItemDto.class, this::completionItemResolve);
         dtoToDto("documentHighlight", TextDocumentPositionParams.class, DocumentHighlight.class, this::documentHighlight);
         dtoToDto("hover", TextDocumentPositionParams.class, HoverDto.class, this::hover);
         dtoToDto("signatureHelp", TextDocumentPositionParams.class, SignatureHelpDto.class, this::signatureHelp);
@@ -175,7 +175,7 @@ public class TextDocumentService {
         }
     }
 
-    private CompletionItemDto completionItemResolve(ExtendedCompletionItemDto unresolved) {
+    private CompletionItemDto completionItemResolve(ExtendedCompletionItem unresolved) {
         try {
             LanguageServer server = getServer(prefixURI(unresolved.getTextDocumentIdentifier().getUri()));
 
@@ -191,7 +191,13 @@ public class TextDocumentService {
             positionParams.getTextDocument().setUri(prefixURI(positionParams.getTextDocument().getUri()));
             positionParams.setUri(prefixURI(positionParams.getUri()));
             LanguageServer server = getServer(positionParams.getTextDocument().getUri());
-            return server != null ? new HoverDto(server.getTextDocumentService().hover(positionParams).get()) : null;
+            if(server != null) {
+                Hover hover = server.getTextDocumentService().hover(positionParams).get();
+                if (hover != null) {
+                    return new HoverDto(hover);
+                }
+            }
+            return null;
         } catch (InterruptedException | ExecutionException | LanguageServerException e) {
             throw new JsonRpcException(-27000, e.getMessage());
         }

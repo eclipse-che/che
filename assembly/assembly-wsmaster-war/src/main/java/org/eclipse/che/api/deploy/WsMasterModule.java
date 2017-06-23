@@ -11,9 +11,11 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.api.agent.GitCredentialsAgent;
 import org.eclipse.che.api.agent.LSCSharpAgent;
 import org.eclipse.che.api.agent.LSJsonAgent;
 import org.eclipse.che.api.agent.LSPhpAgent;
@@ -33,10 +35,12 @@ import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
+import org.eclipse.che.api.machine.server.recipe.RecipeLoader;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.WorkspaceMessageBodyAdapter;
+import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.api.workspace.server.stack.StackMessageBodyAdapter;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
@@ -96,7 +100,12 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.user.server.UserService.class);
         bind(org.eclipse.che.api.user.server.ProfileService.class);
         bind(org.eclipse.che.api.user.server.PreferencesService.class);
+
         bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
+        MapBinder<String, String> stacks = MapBinder.newMapBinder(binder(), String.class, String.class,
+                                                                  Names.named(StackLoader.CHE_PREDEFINED_STACKS));
+        stacks.addBinding("stacks.json").toInstance("stacks-images");
+        stacks.addBinding("che-in-che.json").toInstance("");
         bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
         bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
         bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
@@ -128,9 +137,8 @@ public class WsMasterModule extends AbstractModule {
                 .to(org.eclipse.che.api.agent.server.WsAgentHealthCheckerImpl.class);
 
         bind(org.eclipse.che.api.machine.server.recipe.RecipeLoader.class);
-        Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"))
-                   .addBinding()
-                   .toInstance("predefined-recipes.json");
+        Multibinder.newSetBinder(binder(), String.class, Names.named(RecipeLoader.CHE_PREDEFINED_RECIPES))
+                   .addBinding().toInstance("predefined-recipes.json");
 
         bind(org.eclipse.che.api.workspace.server.WorkspaceValidator.class)
                 .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
@@ -150,6 +158,7 @@ public class WsMasterModule extends AbstractModule {
         agents.addBinding().to(LSJsonAgent.class);
         agents.addBinding().to(LSCSharpAgent.class);
         agents.addBinding().to(LSTypeScriptAgent.class);
+        agents.addBinding().to(GitCredentialsAgent.class);
 
         Multibinder<AgentLauncher> launchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
         launchers.addBinding().to(WsAgentLauncher.class);

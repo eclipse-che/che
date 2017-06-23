@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.notification.EventService;
@@ -28,6 +29,7 @@ import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.core.util.ValueHolder;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
+import org.eclipse.che.api.project.server.importer.ProjectImportOutputJsonRpcRegistrar;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
@@ -280,6 +282,8 @@ public class ProjectServiceTest {
         dependencies.addInstance(ProjectHandlerRegistry.class, phRegistry);
         dependencies.addInstance(EventService.class, eventService);
         dependencies.addInstance(ProjectServiceLinksInjector.class, projectServiceLinksInjector);
+        dependencies.addInstance(RequestTransmitter.class, mock(RequestTransmitter.class));
+        dependencies.addInstance(ProjectImportOutputJsonRpcRegistrar.class, new ProjectImportOutputJsonRpcRegistrar());
 
         ResourceBinder resources = new ResourceBinderImpl();
         ProviderBinder providers = ProviderBinder.getInstance();

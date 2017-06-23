@@ -4,8 +4,7 @@ class base {
     "/opt/che/data",
     "/opt/che/config",
     "/opt/che/logs",
-    "/opt/che/templates",
-    "/opt/che/stacks" ]
+    "/opt/che/templates" ]
   file { $dirs:
     ensure  => "directory",
     mode    => "755",

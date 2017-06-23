@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.12.0-SNAPSHOT</version>
+        <version>5.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-workspace</artifactId>
     <packaging>jar</packaging>
@@ -40,6 +40,10 @@
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>

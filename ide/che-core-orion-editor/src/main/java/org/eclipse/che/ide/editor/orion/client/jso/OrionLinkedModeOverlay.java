@@ -106,7 +106,7 @@ public class OrionLinkedModeOverlay extends JavaScriptObject implements LinkedMo
         this.annotationListener = annotationListener;
         var func = function (param) {
             listener.@org.eclipse.che.ide.api.editor.link.LinkedMode.LinkedModeListener::onLinkedModeExited(*)(param.isSuccessful,
-                start, end);
+                start || -1, end || -1);
         };
         $wnd.che_handels[listener] = func;
         this.addEventListener("LinkedModeExit", func, true);
