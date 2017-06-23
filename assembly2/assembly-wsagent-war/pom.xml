@@ -21,7 +21,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che.assembly2</groupId>
-        <version>5.13.0-SNAPSHOT</version>
+        <version>5.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsagent-war</artifactId>
     <packaging>war</packaging>
