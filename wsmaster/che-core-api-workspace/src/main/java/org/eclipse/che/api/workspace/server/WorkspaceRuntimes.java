@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
@@ -238,7 +239,9 @@ public class WorkspaceRuntimes {
                                                    .withPrevStatus(WorkspaceStatus.STARTING)
                                                    .withEventType(EventType.ERROR)
                                                    .withError(e.getMessage()));
-                    LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
+                    if (e instanceof InternalInfrastructureException) {
+                        LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
+                    }
                     throw new RuntimeException(e);
                 }
             }), sharedPool.getExecutor());
