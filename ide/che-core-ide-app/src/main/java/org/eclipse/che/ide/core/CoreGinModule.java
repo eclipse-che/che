@@ -55,6 +55,7 @@ import org.eclipse.che.ide.editor.EditorApiModule;
 import org.eclipse.che.ide.editor.preferences.EditorPreferencesModule;
 import org.eclipse.che.ide.factory.FactoryGinModule;
 import org.eclipse.che.ide.filetypes.FileTypeApiModule;
+import org.eclipse.che.ide.jsonrpc.JsonRpcModule;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
 import org.eclipse.che.ide.machine.MachineApiModule;
 import org.eclipse.che.ide.macro.MacroApiModule;

@@ -8,13 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.jsonrpc;
+package org.eclipse.che.ide.jsonrpc;
 
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
 import org.eclipse.che.ide.rest.UrlBuilder;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -25,7 +24,7 @@ import static com.google.gwt.user.client.Window.Location.getProtocol;
 import static java.util.Collections.singletonMap;
 
 /**
- * Initializes json rpc connection to workspace master
+ * Initializes JSON-RPC connection to workspace master
  */
 @Singleton
 public class WorkspaceMasterJsonRpcInitializer {
@@ -36,6 +35,7 @@ public class WorkspaceMasterJsonRpcInitializer {
     public WorkspaceMasterJsonRpcInitializer(JsonRpcInitializer initializer, AppContext appContext) {
         this.initializer = initializer;
         this.appContext = appContext;
+
         internalInitialize();
     }
 

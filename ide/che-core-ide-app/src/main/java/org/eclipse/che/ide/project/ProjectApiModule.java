@@ -15,6 +15,7 @@ import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.event.ng.ProjectTreeStateNotificationOperation;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
@@ -36,11 +37,14 @@ public class ProjectApiModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        bind(ProjectTypeRegistry.class).to(ProjectTypeRegistryImpl.class).in(Singleton.class);
-        bind(ProjectTemplateRegistry.class).to(ProjectTemplateRegistryImpl.class).in(Singleton.class);
+        bind(ProjectTreeNotificationsSubscriber.class).asEagerSingleton();
+        bind(ProjectTreeStateNotificationOperation.class).asEagerSingleton();
 
-        bind(ProjectTemplateRegistryImpl.class).asEagerSingleton();
+        bind(ProjectTypeRegistry.class).to(ProjectTypeRegistryImpl.class).in(Singleton.class);
         bind(ProjectTypeRegistryImpl.class).asEagerSingleton();
+
+        bind(ProjectTemplateRegistry.class).to(ProjectTemplateRegistryImpl.class).in(Singleton.class);
+        bind(ProjectTemplateRegistryImpl.class).asEagerSingleton();
 
         // project wizard
         GinMultibinder.newSetBinder(binder(), ProjectWizardRegistrar.class).addBinding().to(BlankProjectWizardRegistrar.class);

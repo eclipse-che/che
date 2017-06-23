@@ -23,8 +23,8 @@ import java.util.Map;
 import static java.util.Collections.singletonMap;
 
 /**
- * Unsubscribes from receiving all messages about changing statuses
- * of the workspace/machines/servers when workspace is stopped.
+ * Unsubscribes from receiving notifications about changing statuses
+ * of the workspace, machines and servers when workspace is stopped.
  */
 @Singleton
 class WorkspaceEventsUnsubscriber {

@@ -36,8 +36,9 @@ import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.ide.api.machine.events.WsAgentStateEvent.createWsAgentStartedEvent;
 
 /**
- * Handles changes of the servers statuses and fires the corresponded
- * events to notify all interested subscribers (IDE extensions).
+ * Receives notifications about changing servers' statuses.
+ * After a notification is received it is processed and
+ * an appropriate event is fired on the {@link EventBus}.
  */
 @Singleton
 class ServerStatusEventHandler {
