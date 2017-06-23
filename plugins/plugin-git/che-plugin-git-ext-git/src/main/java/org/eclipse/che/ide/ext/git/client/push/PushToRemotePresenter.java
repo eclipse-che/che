@@ -16,7 +16,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.git.shared.BranchListMode;
-import org.eclipse.che.ide.api.git.GitServiceClient;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.git.shared.Remote;

@@ -28,8 +28,6 @@ import org.eclipse.che.ide.api.ProductInfoDataProviderImpl;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.extension.ExtensionRegistry;
-import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.ide.api.git.GitServiceClientImpl;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.machine.CheWsAgentLinksModifier;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
@@ -143,7 +141,6 @@ public class CoreGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(TerminalFactory.class));
 
         // clients for the REST services
-        bind(GitServiceClient.class).to(GitServiceClientImpl.class).in(Singleton.class);
         bind(SshServiceClient.class).to(SshServiceClientImpl.class).in(Singleton.class);
 
         // IDE agents
