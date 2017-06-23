@@ -13,6 +13,7 @@ package org.eclipse.che.keycloak.server;
 import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.commons.env.EnvironmentContext;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,14 +29,12 @@ public class KeycloakHttpJsonRequestFactory extends DefaultHttpJsonRequestFactor
 
     @Override
     public HttpJsonRequest fromUrl(@NotNull String url) {
-        System.out.println(" setAuthorizationHeader for " + url);
-        return super.fromUrl(url).setAuthorizationHeader("Internal");
+        return super.fromUrl(url).setAuthorizationHeader("bearer" + EnvironmentContext.getCurrent().getSubject().getToken());
     }
 
     @Override
     public HttpJsonRequest fromLink(@NotNull Link link) {
-        System.out.println(" setAuthorizationHeader for " + link);       
-        return super.fromLink(link).setAuthorizationHeader("Internal");
+        return super.fromLink(link).setAuthorizationHeader("bearer" + EnvironmentContext.getCurrent().getSubject().getToken());
     }
 
 }

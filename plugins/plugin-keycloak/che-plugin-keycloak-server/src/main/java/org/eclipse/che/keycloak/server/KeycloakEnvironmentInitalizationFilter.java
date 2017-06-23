@@ -20,6 +20,9 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.adapters.OidcKeycloakAccount;
+import org.keycloak.adapters.spi.KeycloakAccount;
+import org.keycloak.representations.IDToken;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -31,7 +34,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.Principal;
 
@@ -55,18 +57,25 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
             throws IOException, ServletException {
 
         final HttpServletRequest httpRequest = (HttpServletRequest)request;
-        final HttpSession session = httpRequest.getSession();
-        final KeycloakSecurityContext  context = (KeycloakSecurityContext)session.getAttribute(KeycloakSecurityContext.class.getName());
+        KeycloakSecurityContext  context = (KeycloakSecurityContext)httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
+        // In case of bearer token login, there is another object in session
+        if (context == null) {
+            context = ((OidcKeycloakAccount)httpRequest.getAttribute(KeycloakAccount.class.getName())).getKeycloakSecurityContext();
+        }
+        if (context == null) {
+            throw new ServletException("Unable to get security context.");
+        }
 
         User user;
 
+        final IDToken token = context.getIdToken() != null ? context.getIdToken() : context.getToken();
         try {
-            user = userManager.getById(context.getIdToken().getSubject());
+            user = userManager.getById(token.getSubject());
         } catch (NotFoundException ex) {
             try {
-                final UserImpl cheUser = new UserImpl(context.getIdToken().getSubject(),
-                                                      context.getIdToken().getEmail(),
-                                                      context.getIdToken().getPreferredUsername(),
+                final UserImpl cheUser = new UserImpl(token.getSubject(),
+                                                      token.getEmail(),
+                                                      token.getPreferredUsername(),
                                                       "secret",
                                                       emptyList());
                 user = userManager.create(cheUser, false);
@@ -78,11 +87,10 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
         }
         final Subject subject =
                 new SubjectImpl(user.getName(), user.getId(), context.getTokenString(), false);
-        session.setAttribute("codenvy_user", subject);
+        httpRequest.getSession().setAttribute("codenvy_user", subject);
 
-        final EnvironmentContext environmentContext = EnvironmentContext.getCurrent();
         try {
-            environmentContext.setSubject(subject);
+            EnvironmentContext.getCurrent().setSubject(subject);
             filterChain.doFilter(addUserInRequest(httpRequest, subject), response);
         } finally {
             EnvironmentContext.reset();
