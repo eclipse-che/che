@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.agent.shared.model.impl.BasicAgent;
+import org.eclipse.che.api.agent.server.model.impl.BasicAgent;
 
 import java.io.IOException;
 

@@ -18,9 +18,9 @@ package org.eclipse.che.api.core.model.workspace.runtime;
 public enum BootstrapperStatus {
 
     /**
-     * Bootstrapper is ready to work, start installers, push events, etc.
+     * Bootstrapping is in progress.
      */
-    AVAILABLE,
+    STARTING,
 
     /**
      * Bootstrapping done, everything is started ok.

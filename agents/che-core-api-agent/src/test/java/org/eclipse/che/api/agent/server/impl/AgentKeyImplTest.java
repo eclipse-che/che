@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.impl;
 
-import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertEquals;

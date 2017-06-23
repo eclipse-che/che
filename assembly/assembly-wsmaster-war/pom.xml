@@ -64,6 +64,12 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
+            <artifactId>bootstrapper</artifactId>
+            <type>tar.gz</type>
+            <classifier>linux_amd64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
             <artifactId>exec-agent</artifactId>
         </dependency>
         <dependency>
@@ -310,6 +316,25 @@
                         <id>analyze</id>
                         <configuration>
                             <skip>true</skip>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-bootstrapper</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.eclipse.che</groupId>
+                                    <artifactId>bootstrapper</artifactId>
+                                    <classifier>linux_amd64</classifier>
+                                    <type>tar.gz</type>
+                                    <destFileName>bootstrapper.tar.gz</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/classes</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

@@ -15,7 +15,7 @@ import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
-import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
+import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 
@@ -53,8 +53,8 @@ public class InternalMachineConfig {
         this.servers.putAll(originalConfig.getServers());
         this.attributes = new HashMap<>(originalConfig.getAttributes());
 
-        if(agentRegistry != null && agentSorter != null)
-           initAgents(originalConfig.getAgents());
+        if (agentRegistry != null && agentSorter != null)
+            initAgents(originalConfig.getAgents());
     }
 
     /**

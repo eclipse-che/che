@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.docker;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
@@ -33,7 +32,6 @@ import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
@@ -85,6 +83,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     private final DockerRegistryClient dockerRegistryClient;
     private final RuntimeIdentity      identity;
     private final EventService         eventService;
+    private final BootstrapperFactory  bootstrapperFactory;
 
     @Inject
     public DockerInternalRuntime(@Assisted DockerRuntimeContext context,
@@ -98,12 +97,14 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                  DockerMachineStarter serviceStarter,
                                  SnapshotDao snapshotDao,
                                  DockerRegistryClient dockerRegistryClient,
-                                 EventService eventService) {
+                                 EventService eventService,
+                                 BootstrapperFactory bootstrapperFactory) {
         super(context, urlRewriter);
         this.devMachineName = devMachineName;
         this.dockerEnvironment = dockerEnvironment;
         this.identity = identity;
         this.eventService = eventService;
+        this.bootstrapperFactory = bootstrapperFactory;
         this.properties = new HashMap<>();
         this.startSynchronizer = new StartSynchronizer();
         this.contextsStorage = contextsStorage;
@@ -235,33 +236,23 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                                         identity,
                                                         isDev);
         }
+
         try {
             checkStartInterruption();
             startSynchronizer.addMachine(name, dockerMachine);
+
+            InternalMachineConfig machineConfig = getContext().getMachineConfigs().get(name);
+            if (machineConfig == null) {
+                throw new InfrastructureException("Machine %s is not found in internal machines config of RuntimeContext");
+            }
+
+            bootstrapperFactory.create(name, identity, dockerMachine, machineConfig.getAgents())
+                               .bootstrap();
+
+            checkServersReadiness(name, dockerMachine);
         } catch (InfrastructureException e) {
             destroyMachineQuietly(name, dockerMachine);
             throw e;
-        }
-        startAgents(name, dockerMachine);
-        checkServersReadiness(name, dockerMachine);
-    }
-
-    // TODO rework to agent launchers
-    private void startAgents(String machineName, DockerMachine dockerMachine) throws InfrastructureException {
-        InternalMachineConfig machineConfig = getContext().getMachineConfigs().get(machineName);
-        if (machineConfig == null) {
-            throw new InfrastructureException("Machine %s is not found in internal machines config of RuntimeContext");
-        }
-        for (AgentImpl agent : machineConfig.getAgents()) {
-            Thread thread = new Thread(() -> {
-                try {
-                    dockerMachine.exec(agent.getScript(), MessageProcessor.getDevNull());
-                } catch (InfrastructureException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
-                }
-            });
-            thread.setDaemon(true);
-            thread.start();
         }
     }
 

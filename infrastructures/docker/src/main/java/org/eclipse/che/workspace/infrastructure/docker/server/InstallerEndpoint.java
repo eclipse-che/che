@@ -25,8 +25,10 @@ import javax.websocket.server.ServerEndpoint;
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */
 
-@ServerEndpoint(value = "/installer/websocket/{endpoint-id}", configurator = GuiceInjectorEndpointConfigurator.class)
+@ServerEndpoint(value = InstallerEndpoint.INSTALLER_WEBSOCKET_ENDPOINT_BASE + "{endpoint-id}", configurator = GuiceInjectorEndpointConfigurator.class)
 public class InstallerEndpoint extends BasicWebSocketEndpoint {
+
+    public static final String INSTALLER_WEBSOCKET_ENDPOINT_BASE = "/installer/websocket/";
 
     @Inject
     public InstallerEndpoint(WebSocketSessionRegistry registry,

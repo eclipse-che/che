@@ -108,6 +108,18 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
+                <artifactId>bootstrapper</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>bootstrapper</artifactId>
+                <version>${che.version}</version>
+                <type>tar.gz</type>
+                <classifier>linux_amd64</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
                 <artifactId>exec-agent</artifactId>
                 <version>${che.version}</version>
             </dependency>

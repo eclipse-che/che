@@ -13,7 +13,7 @@ package org.eclipse.che.api.agent.server.impl;
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
-import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.mockito.InjectMocks;

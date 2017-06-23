@@ -15,7 +15,7 @@ import com.google.common.collect.ImmutableSet;
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.shared.dto.AgentDto;
 import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;

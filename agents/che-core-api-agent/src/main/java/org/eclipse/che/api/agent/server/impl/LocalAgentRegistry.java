@@ -18,7 +18,7 @@ import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
-import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

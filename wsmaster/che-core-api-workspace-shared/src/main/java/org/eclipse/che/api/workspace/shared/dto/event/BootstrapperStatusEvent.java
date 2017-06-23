@@ -28,14 +28,6 @@ public interface BootstrapperStatusEvent {
 
     BootstrapperStatusEvent withStatus(BootstrapperStatus status);
 
-
-    String getInstaller();
-
-    void setInstaller(String installer);
-
-    BootstrapperStatusEvent withInstaller(String installer);
-
-
     String getMachineName();
 
     void setMachineName(String machineName);
