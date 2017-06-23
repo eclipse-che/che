@@ -8,8 +8,20 @@ class base {
   file { $dirs:
     ensure  => "directory",
     mode    => "755",
+  } ->
+  file { "/opt/che/logs/keycloak":
+    ensure  => "directory",
+    owner   => "1000",
+    group   => "1000",
+    mode    => "755",
+  } ->
+  file { "/opt/che/data/keycloak":
+    ensure  => "directory",
+    owner   => "1000",
+    group   => "1000",
+    mode    => "755",
   }
-  
+
   include che
   include compose
   include traefik
