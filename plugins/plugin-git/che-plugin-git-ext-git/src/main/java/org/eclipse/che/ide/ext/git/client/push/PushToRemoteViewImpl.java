@@ -23,6 +23,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -50,6 +51,8 @@ public class PushToRemoteViewImpl extends Window implements PushToRemoteView {
     ListBox localBranch;
     @UiField
     ListBox remoteBranch;
+    @UiField
+    CheckBox forcePush;
     Button btnPush;
     Button btnCancel;
     @UiField(provided = true)
@@ -175,6 +178,16 @@ public class PushToRemoteViewImpl extends Window implements PushToRemoteView {
                 btnPush.setFocus(enabled);
             }
         });
+    }
+
+    @Override
+    public void setSelectedForcePushCheckBox(boolean isSelected) {
+        forcePush.setValue(isSelected);
+    }
+
+    @Override
+    public boolean isForcePushSelected() {
+        return forcePush.getValue();
     }
 
     /** {@inheritDoc} */

@@ -113,6 +113,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                 updateLocalBranches();
                 view.setRepositories(remotes);
                 view.setEnablePushButton(!remotes.isEmpty());
+                view.setSelectedForcePushCheckBox(false);
                 view.showDialog();
             }
         }).catchError(new Operation<PromiseError>() {
@@ -285,25 +286,21 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
 
         final String repository = view.getRepository();
         final GitOutputConsole console = gitOutputConsoleFactory.create(PUSH_COMMAND_NAME);
-        service.push(appContext.getDevMachine(), project.getLocation(), getRefs(), repository, false).then(new Operation<PushResponse>() {
-            @Override
-            public void apply(PushResponse response) throws OperationException {
-                console.print(response.getCommandOutput());
-                processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notification.setStatus(SUCCESS);
-                if (response.getCommandOutput().contains("Everything up-to-date")) {
-                    notification.setTitle(constant.pushUpToDate());
-                } else {
-                    notification.setTitle(constant.pushSuccess(repository));
-                }
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                handleError(error.getCause(), notification, console);
-                processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-            }
-        });
+        service.push(appContext.getDevMachine(), project.getLocation(), getRefs(), repository, view.isForcePushSelected())
+               .then(response -> {
+                   console.print(response.getCommandOutput());
+                   processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   notification.setStatus(SUCCESS);
+                   if (response.getCommandOutput().contains("Everything up-to-date")) {
+                       notification.setTitle(constant.pushUpToDate());
+                   } else {
+                       notification.setTitle(constant.pushSuccess(repository));
+                   }
+               })
+               .catchError(error -> {
+                   handleError(error.getCause(), notification, console);
+                   processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+               });
         view.close();
     }
 
