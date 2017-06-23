@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.core;
+package org.eclipse.che.ide.jsonrpc;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
@@ -21,24 +21,15 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessor;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.TimeoutActionRunner;
-import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
-import org.eclipse.che.ide.api.jsonrpc.WorkspaceMasterJsonRpcInitializer;
-import org.eclipse.che.ide.jsonrpc.ClientSideRequestProcessor;
-import org.eclipse.che.ide.jsonrpc.ClientSideTimeoutActionRunner;
-import org.eclipse.che.ide.jsonrpc.ElementalJsonRpcComposer;
-import org.eclipse.che.ide.jsonrpc.ElementalJsonRpcMarshaller;
-import org.eclipse.che.ide.jsonrpc.ElementalJsonRpcQualifier;
-import org.eclipse.che.ide.jsonrpc.ElementalJsonRpcUnmarshaller;
-import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
-import org.eclipse.che.ide.jsonrpc.WebSocketJsonRpcInitializer;
 
-/** GIN module for configuring Json RPC protocol implementation components. */
+/** GIN module for configuring JSON-RPC protocol implementation components. */
 public class JsonRpcModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        bind(JsonRpcWebSocketAgentEventListener.class).asEagerSingleton();
         bind(WorkspaceMasterJsonRpcInitializer.class).asEagerSingleton();
+        bind(WsAgentJsonRpcInitializer.class).asEagerSingleton();
+        bind(ExecAgentJsonRpcInitializer.class).asEagerSingleton();
 
         bind(JsonRpcInitializer.class).to(WebSocketJsonRpcInitializer.class);
 

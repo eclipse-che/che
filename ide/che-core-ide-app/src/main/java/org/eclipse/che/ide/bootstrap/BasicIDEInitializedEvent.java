@@ -16,6 +16,8 @@ import com.google.gwt.event.shared.GwtEvent;
 /**
  * Fired when Basic IDE is initialized.
  * Intended to be used exclusively by Basic IDE's components to be able to start it's initialization.
+ * <p>
+ * Basically event is useful for components which depend on {@link org.eclipse.che.ide.api.app.AppContext}.
  */
 public class BasicIDEInitializedEvent extends GwtEvent<BasicIDEInitializedEvent.Handler> {
 

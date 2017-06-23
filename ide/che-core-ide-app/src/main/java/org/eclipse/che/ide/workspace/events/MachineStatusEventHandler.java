@@ -39,8 +39,9 @@ import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAc
 import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.RUNNING;
 
 /**
- * Handles changes of the machines statuses and fires the corresponded
- * events to notify all interested subscribers (IDE extensions).
+ * Receives notifications about changing machines' statuses.
+ * After a notification is received it is processed and
+ * an appropriate event is fired on the {@link EventBus}.
  */
 @Singleton
 class MachineStatusEventHandler {

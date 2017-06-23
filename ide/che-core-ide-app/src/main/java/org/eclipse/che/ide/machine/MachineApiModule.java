@@ -26,6 +26,7 @@ public class MachineApiModule extends AbstractGinModule {
     @Override
     protected void configure() {
         bind(MachineOutputSubscriber.class).asEagerSingleton();
+        bind(ProcessesOutputRestorer.class).asEagerSingleton();
         bind(MachineFailNotifier.class).asEagerSingleton();
 
         bind(MachineChooserView.class).to(MachineChooserViewImpl.class);
