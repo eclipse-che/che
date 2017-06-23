@@ -53,8 +53,8 @@ public class InternalMachineConfig {
         this.servers.putAll(originalConfig.getServers());
         this.attributes = new HashMap<>(originalConfig.getAttributes());
 
-        if(agentRegistry != null && agentSorter != null)
-           initAgents(originalConfig.getAgents());
+        if (agentRegistry != null && agentSorter != null)
+            initAgents(originalConfig.getAgents());
     }
 
     /**

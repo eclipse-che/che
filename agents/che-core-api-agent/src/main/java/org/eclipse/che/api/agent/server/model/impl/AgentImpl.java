@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static java.util.stream.Collectors.toMap;
-
 /**
  * @author Anatoliy Bazko
  */
@@ -50,9 +48,7 @@ public class AgentImpl implements Agent {
         this.properties = properties;
         this.script = script;
         if (servers != null) {
-            this.servers = servers.entrySet()
-                                  .stream()
-                                  .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+            this.servers = new HashMap<>(servers);
         }
     }
 
