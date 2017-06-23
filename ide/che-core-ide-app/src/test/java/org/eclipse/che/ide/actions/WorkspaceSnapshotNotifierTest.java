@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.actions;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.inject.Provider;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
@@ -44,7 +45,9 @@ import static org.mockito.Mockito.when;
 public class WorkspaceSnapshotNotifierTest {
 
     @Mock
-    private NotificationManager notificationManager;
+    private NotificationManager           notificationManager;
+    @Mock
+    private Provider<NotificationManager> notificationManagerProvider;
 
     @Mock
     private StatusNotification notification;
@@ -69,6 +72,7 @@ public class WorkspaceSnapshotNotifierTest {
 
     @Before
     public void setup () throws Exception {
+        when(notificationManagerProvider.get()).thenReturn(notificationManager);
         when(notificationManager.notify(anyString(), any(StatusNotification.Status.class), (DisplayMode)anyObject()))
                 .thenReturn(notification);
         when(notification.getStatus()).thenReturn(StatusNotification.Status.PROGRESS);
