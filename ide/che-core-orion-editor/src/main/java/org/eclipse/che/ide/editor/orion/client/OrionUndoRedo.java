@@ -23,6 +23,8 @@ class OrionUndoRedo implements HandlesUndoRedo {
     /** The document. */
     private final OrionUndoStackOverlay undoStack;
 
+    private UndoRedoOperationsListener undoRedoOperationsListener;
+
     public OrionUndoRedo(final OrionUndoStackOverlay undoStack) {
         this.undoStack = undoStack;
     }
@@ -40,11 +42,19 @@ class OrionUndoRedo implements HandlesUndoRedo {
     @Override
     public void redo() {
         this.undoStack.redo();
+
+        if (undoRedoOperationsListener != null) {
+            undoRedoOperationsListener.onOperationExecuted();
+        }
     }
 
     @Override
     public void undo() {
         this.undoStack.undo();
+
+        if (undoRedoOperationsListener != null) {
+            undoRedoOperationsListener.onOperationExecuted();
+        }
     }
 
     @Override
@@ -55,5 +65,10 @@ class OrionUndoRedo implements HandlesUndoRedo {
     @Override
     public void endCompoundChange() {
         this.undoStack.endCompoundChange();
+    }
+
+    @Override
+    public void addUndoRedoOperationsListener(UndoRedoOperationsListener listener) {
+        undoRedoOperationsListener = listener;
     }
 }
