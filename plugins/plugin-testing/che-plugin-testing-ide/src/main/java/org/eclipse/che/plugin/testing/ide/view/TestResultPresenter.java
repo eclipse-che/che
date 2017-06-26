@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.view;
 
 import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -36,10 +37,8 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
     private final TestResultView view;
 
     @Inject
-    public TestResultPresenter(WorkspaceAgent workspaceAgent, 
-                               TestLocalizationConstant localizationConstant,
-                               TestResources resources,
-                               TestResultView view) {
+    public TestResultPresenter(WorkspaceAgent workspaceAgent, TestLocalizationConstant localizationConstant,
+            TestResources resources, TestResultView view) {
         this.workspaceAgent = workspaceAgent;
         this.localizationConstant = localizationConstant;
         this.resources = resources;
@@ -78,9 +77,26 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
      * @param response
      *            result of the test runner
      */
+    @Deprecated
     public void handleResponse(TestResult response) {
         workspaceAgent.openPart(this, PartStackType.INFORMATION);
         workspaceAgent.setActivePart(this);
         view.showResults(response);
+    }
+
+    /**
+     * Activates test results part and shows the results.
+     *
+     * @param response
+     *            result root of the test runner
+     */
+    public void handleResponse(TestResultRootDto response) {
+        workspaceAgent.openPart(this, PartStackType.INFORMATION);
+        workspaceAgent.setActivePart(this);
+        view.showResults(response);
+    }
+    
+    public void clear() {
+        view.clear();
     }
 }
