@@ -385,6 +385,9 @@ public interface GitLocalizationConstant extends Messages {
     @Key("view.push.remote_branch.field")
     String pushViewRemoteBranchFieldTitle();
 
+    @Key("view.push.force.checkbox.title")
+    String pushForceCheckboxTitle();
+
     // Reset
     @Key("view.reset.files.title")
     String resetFilesViewTitle();

@@ -47,7 +47,7 @@
                          ng-if="workspaceMachineConfigController.machineConfig.source.image">
       <ng-form flex name="workspaceMachineConfigForm" class="config-machine-source">
         <che-input-box ng-model="workspaceMachineConfigController.newImage"
-                       ng-change="workspaceMachineConfigController.changeSource()"
+                       che-on-change="workspaceMachineConfigController.changeSource($value)"
                        che-name="source"
                        che-place-holder="Image"
                        che-form="workspaceMachineConfigForm"
