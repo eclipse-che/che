@@ -163,7 +163,8 @@ public class DefaultOutputCustomizer implements OutputCustomizer {
                         child -> child.isFile() && endsWith(child.asFile().getLocation(), relativeFilePath))
                         .map(Resource::asFile).collect(Collectors.toList());
             }
-        });    }
+        });
+    }
 
     /*
      * Checks if a path's last segments are equal to the provided relative path
