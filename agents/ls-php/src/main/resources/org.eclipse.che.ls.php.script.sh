@@ -94,6 +94,14 @@ elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
     test "${PACKAGES}" = "" || {
         ${SUDO} zypper install -y ${PACKAGES};
     }
+    
+# Alpine 3.3
+############
+elif echo ${LINUX_TYPE} | grep -qi "alpine"; then
+    test "${PACKAGES}" = "" || {
+        ${SUDO} apk update
+        ${SUDO} apk add ${PACKAGES};
+    }
 
 else
     >&2 echo "Unrecognized Linux Type"
