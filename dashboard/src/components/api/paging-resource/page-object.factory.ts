@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {PageObjectResource} from "./page-object-resource";
+import {PageObjectResource} from './page-object-resource';
 
 
 /**

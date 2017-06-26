@@ -10,12 +10,12 @@
  */
 'use strict';
 
-import {CheWorkspaceAgent} from "./che-workspace-agent";
-import {ComposeEnvironmentManager} from "./environment/compose-environment-manager";
-import {DockerFileEnvironmentManager} from "./environment/docker-file-environment-manager";
-import {DockerImageEnvironmentManager} from "./environment/docker-image-environment-manager";
-import {CheEnvironmentRegistry} from "./environment/che-environment-registry.factory";
-import {CheWebsocket} from "./che-websocket.factory";
+import {CheWorkspaceAgent} from './che-workspace-agent';
+import {ComposeEnvironmentManager} from './environment/compose-environment-manager';
+import {DockerFileEnvironmentManager} from './environment/docker-file-environment-manager';
+import {DockerImageEnvironmentManager} from './environment/docker-image-environment-manager';
+import {CheEnvironmentRegistry} from './environment/che-environment-registry.factory';
+import {CheWebsocket} from './che-websocket.factory';
 
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   create: any;
@@ -386,9 +386,9 @@ export class CheWorkspace {
       return item[0] + ':' + item[1];
     });
     let promise = namespace ? this.remoteWorkspaceAPI.createWithNamespace({
-      namespace: namespace,
-      attribute: attrs
-    }, data).$promise :
+        namespace: namespace,
+        attribute: attrs
+      }, data).$promise :
       this.remoteWorkspaceAPI.create({attribute: attrs}, data).$promise;
     return promise;
   }
@@ -398,9 +398,9 @@ export class CheWorkspace {
       return item[0] + ':' + item[1];
     });
     return namespace ? this.remoteWorkspaceAPI.createWithNamespace({
-      namespace: namespace,
-      attribute: attrs
-    }, workspaceConfig).$promise :
+        namespace: namespace,
+        attribute: attrs
+      }, workspaceConfig).$promise :
       this.remoteWorkspaceAPI.create({attribute: attrs}, workspaceConfig).$promise;
   }
 
