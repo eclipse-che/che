@@ -12,15 +12,15 @@ package org.eclipse.che.ide.console;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.nullToEmpty;
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.gwt.regexp.shared.RegExp.compile;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
-
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -159,20 +159,11 @@ public class DefaultOutputCustomizer implements OutputCustomizer {
         return root.getTree(-1).then(new Function<Resource[], List<File>>() {
             @Override
             public List<File> apply(Resource[] children) throws FunctionException {
-                final List<File> result = newArrayList();
-
-                for (Resource child : children) {
-                    if (child.isFile()) {
-                        File file = child.asFile();
-                        if (endsWith(file.getLocation(), relativeFilePath)) {
-                            result.add(file);
-                        }
-                    }
-                }
-                return result;
+                return Stream.of(children).filter(
+                        child -> child.isFile() && endsWith(child.asFile().getLocation(), relativeFilePath))
+                        .map(Resource::asFile).collect(Collectors.toList());
             }
-        });
-    }
+        });    }
 
     /*
      * Checks if a path's last segments are equal to the provided relative path
