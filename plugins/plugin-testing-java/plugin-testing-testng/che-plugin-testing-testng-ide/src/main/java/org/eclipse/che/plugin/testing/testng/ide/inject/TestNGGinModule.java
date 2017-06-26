@@ -22,6 +22,5 @@ import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 public class TestNGGinModule extends AbstractGinModule {
     @Override
     protected void configure() {
-        //GinMultibinder.newSetBinder(binder(), TestAction.class).addBinding().to(TestNGTestAction.class);
     }
 }
