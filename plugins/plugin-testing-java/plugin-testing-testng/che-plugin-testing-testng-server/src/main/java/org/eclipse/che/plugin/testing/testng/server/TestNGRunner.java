@@ -32,6 +32,8 @@ import org.eclipse.che.api.testing.server.listener.AbstractTestListener;
 import org.eclipse.che.api.testing.server.listener.OutputTestListener;
 import org.eclipse.che.api.testing.shared.TestCase;
 import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.che.api.testing.shared.dto.TestResultDto;
+import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.testing.classpath.server.TestClasspathProvider;
 import org.eclipse.che.plugin.testing.classpath.server.TestClasspathRegistry;
@@ -349,5 +351,17 @@ public class TestNGRunner implements TestRunner {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    @Override
+    public TestResultRootDto runTests(Map<String, String> testParameters) throws Exception {
+        // New API - Not supported yet
+        return null;
+    }
+
+    @Override
+    public List<TestResultDto> getTestResults(List<String> testResultsPath) {
+        // New API - Not supported yet
+        return null;
     }
 }
