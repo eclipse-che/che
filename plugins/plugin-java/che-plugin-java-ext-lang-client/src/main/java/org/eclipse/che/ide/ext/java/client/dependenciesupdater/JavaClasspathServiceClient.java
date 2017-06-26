@@ -18,6 +18,8 @@ import org.eclipse.che.ide.websocket.rest.RequestCallback;
  *
  * @author Artem Zatsarynnyi
  */
+@Deprecated
+/* Never used will be removed in next release */
 public interface JavaClasspathServiceClient {
 
     /**
