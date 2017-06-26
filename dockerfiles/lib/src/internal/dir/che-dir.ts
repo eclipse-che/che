@@ -69,6 +69,12 @@ export class CheDir {
   currentFolder: string = this.path.resolve('./');
   folderName: any;
   cheFile : any;
+
+  /**
+   * Alternate path to the Chefile file with .Chefile
+   */
+  dotCheFile: string;
+
   dotCheFolder : any;
   workspacesFolder : any;
   cliFolder : any;
@@ -100,6 +106,7 @@ export class CheDir {
     this.currentFolder = this.path.resolve(args[0]);
     this.folderName = this.path.basename(this.currentFolder);
     this.cheFile = this.path.resolve(this.currentFolder, 'Chefile');
+    this.dotCheFile = this.path.resolve(this.currentFolder, '.Chefile');
     this.dotCheFolder = this.path.resolve(this.currentFolder, '.che');
     this.dotCheIdFile = this.path.resolve(this.dotCheFolder, 'id');
     this.dotCheSshPrivateKeyFile = this.path.resolve(this.dotCheFolder, 'ssh-key.private');
@@ -201,8 +208,16 @@ export class CheDir {
       this.fs.statSync(this.cheFile);
       // we have a file
     } catch (e) {
-      Log.getLogger().debug('No chefile defined, use default settings');
-      return;
+
+      // if there is a .Chefile, use it, else return
+      try {
+        this.fs.statSync(this.dotCheFile);
+        Log.getLogger().debug('The alternate file .Chefile is present at ', this.dotCheFile);
+        this.cheFile = this.dotCheFile;
+      } catch (e) {
+        Log.getLogger().debug('No chefile defined, use default settings');
+        return;
+      }
     }
 
     // load the chefile script if defined
@@ -373,6 +388,7 @@ export class CheDir {
         Log.getLogger().warn('Che already initialized');
       } else {
         // needs to create folders
+        Log.getLogger().info('Adding', this.dotCheFolder, 'directory');
         this.initCheFolders();
 
         // write a default chefile if there is none
@@ -380,11 +396,17 @@ export class CheDir {
           this.fs.statSync(this.cheFile);
           Log.getLogger().debug('Chefile is present at ', this.cheFile);
         } catch (e) {
-          // write default
-          Log.getLogger().debug('Write a default Chefile at ', this.cheFile);
-          this.writeDefaultChefile();
+
+          try {
+            this.fs.statSync(this.dotCheFile);
+            Log.getLogger().debug('The alternate file .Chefile is present at ', this.dotCheFile);
+          } catch (e) {
+            // write default
+            Log.getLogger().debug('Write a default Chefile at ', this.cheFile);
+            this.writeDefaultChefile();
+          }
+
         }
-        Log.getLogger().info('Adding', this.dotCheFolder, 'directory');
         return true;
       }
 
