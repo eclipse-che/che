@@ -8,20 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.testing.testng.ide.inject;
+package org.eclipse.che.plugin.java.testing;
 
-import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.inject.AbstractModule;
 
-import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.inject.DynaModule;
+
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 /**
- *
  * @author Mirage Abeysekara
  */
-@ExtensionGinModule
-public class TestNGGinModule extends AbstractGinModule {
+@DynaModule
+@Deprecated
+public class TestClasspathGuiceModule extends AbstractModule {
     @Override
     protected void configure() {
-        //GinMultibinder.newSetBinder(binder(), TestAction.class).addBinding().to(TestNGTestAction.class);
+        newSetBinder(binder(), TestClasspathProvider.class);
+        newSetBinder(binder(), TestClasspathProvider.class).addBinding().to(MavenTestClasspathProvider.class);
     }
 }

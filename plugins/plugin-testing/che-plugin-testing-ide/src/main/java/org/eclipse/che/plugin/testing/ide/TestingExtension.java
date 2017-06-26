@@ -44,10 +44,10 @@ public class TestingExtension {
                 actionManager);
         actionManager.registerAction("TestingMainGroup", testMainMenu);
 
-//        for (TestAction testAction : testActions) {
-//            testAction.addMainMenuItems(testMainMenu);
-//            testMainMenu.addSeparator();
-//        }
+        for (TestAction testAction : testActions) {
+            testAction.addMainMenuItems(testMainMenu);
+            testMainMenu.addSeparator();
+        }
         actionManager.registerAction("RunTest", runTestAction);
         actionManager.registerAction("DebugTest", debugTestAction);
         testMainMenu.add(runTestAction);
@@ -58,10 +58,10 @@ public class TestingExtension {
         DefaultActionGroup testContextMenu = new DefaultActionGroup(localization.contextActionGroupMenuName(), true,
                 actionManager);
         actionManager.registerAction("TestingContextGroup", testContextMenu);
-//        for (TestAction testAction : testActions) {
-//            testAction.addContextMenuItems(testContextMenu);
-//            testContextMenu.addSeparator();
-//        }
+        for (TestAction testAction : testActions) {
+            testAction.addContextMenuItems(testContextMenu);
+            testContextMenu.addSeparator();
+        }
         testContextMenu.add(runTestAction);
         testContextMenu.add(debugTestAction);
         explorerMenu.addSeparator();
