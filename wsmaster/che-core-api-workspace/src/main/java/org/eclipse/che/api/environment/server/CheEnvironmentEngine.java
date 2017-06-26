@@ -940,8 +940,11 @@ public class CheEnvironmentEngine {
                         }
                     } catch (NotFoundException e) {
                         try {
-                            machineLogger.writeLine("Failed to boot machine from snapshot: snapshot not found. " +
-                                                    "Machine will be created from origin source.");
+                            machineLogger.writeLine(
+                                    format("Failed to boot machine %s of workspace %s, because snapshot not found. " +
+                                           "The machine will be created from origin source.",
+                                            machine.getConfig().getName(),
+                                            machine.getWorkspaceId()));
                         } catch (IOException ignore) { }
                     }
                 }
@@ -949,8 +952,10 @@ public class CheEnvironmentEngine {
                 instance = machineStarter.startMachine(machineLogger, machineSource);
             } catch (SourceNotFoundException e) {
                 if (recover) {
-                    LOG.error("Image of snapshot for machine " + machine.getConfig().getName() +
-                              " not found. " + "Machine will be created from origin source.");
+                    LOG.error(format("The snapshot of the image for the machine %s of the workspace %s not found. " +
+                                     "The machine will be created from origin source.",
+                                     machine.getConfig().getName(),
+                                     machine.getWorkspaceId()));
                     machine = originMachine;
                     instance = machineStarter.startMachine(machineLogger, null);
                 } else {
