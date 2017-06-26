@@ -23,6 +23,17 @@ public class WsAgentServerStoppedEvent extends GwtEvent<WsAgentServerStoppedEven
 
     public static final Type<WsAgentServerStoppedEvent.Handler> TYPE = new Type<>();
 
+    private final String machineName;
+
+    public WsAgentServerStoppedEvent(String machineName) {
+        this.machineName = machineName;
+    }
+
+    /** Returns the related machine's name. */
+    public String getMachineName() {
+        return machineName;
+    }
+
     @Override
     public Type<Handler> getAssociatedType() {
         return TYPE;

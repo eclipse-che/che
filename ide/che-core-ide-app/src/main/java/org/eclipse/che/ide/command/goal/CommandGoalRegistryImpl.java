@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.command.goal;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
@@ -31,25 +32,21 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toSet;
 
-/**
- * Implementation of {@link CommandGoalRegistry}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Implementation of {@link CommandGoalRegistry}. */
 @Singleton
 public class CommandGoalRegistryImpl implements CommandGoalRegistry {
 
     private final CommandGoal              defaultGoal;
-    private final CommandManager           commandManager;
+    private final Provider<CommandManager> commandManagerProvider;
     private final GoalMessages             messages;
     private final Map<String, CommandGoal> predefinedGoals;
 
     @Inject
     public CommandGoalRegistryImpl(@Named("default") CommandGoal defaultCommandGoal,
-                                   CommandManager commandManager,
+                                   Provider<CommandManager> commandManagerProvider,
                                    GoalMessages messages) {
         defaultGoal = defaultCommandGoal;
-        this.commandManager = commandManager;
+        this.commandManagerProvider = commandManagerProvider;
         this.messages = messages;
 
         predefinedGoals = new HashMap<>();
@@ -71,10 +68,10 @@ public class CommandGoalRegistryImpl implements CommandGoalRegistry {
     @Override
     public Set<CommandGoal> getAllGoals() {
         Set<CommandGoal> goals = getAllPredefinedGoals();
-        goals.addAll(commandManager.getCommands()
-                                   .stream()
-                                   .map(command -> getGoalForId(command.getGoal()))
-                                   .collect(toSet()));
+        goals.addAll(commandManagerProvider.get().getCommands()
+                                           .stream()
+                                           .map(command -> getGoalForId(command.getGoal()))
+                                           .collect(toSet()));
         return goals;
     }
 

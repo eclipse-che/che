@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.command.execute;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -56,7 +57,7 @@ public class ExecuteCommandActionManager {
     private final Map<String, DefaultActionGroup> goalPopUpGroups;
 
     @Inject
-    public ExecuteCommandActionManager(CommandManager commandManager,
+    public ExecuteCommandActionManager(Provider<CommandManager> commandManagerProvider,
                                        ActionManager actionManager,
                                        CommandsActionGroup commandsActionGroup,
                                        GoalPopUpGroupFactory goalPopUpGroupFactory,
@@ -74,7 +75,7 @@ public class ExecuteCommandActionManager {
 
         initialize();
 
-        eventBus.addHandler(CommandsLoadedEvent.getType(), event -> commandManager.getCommands().forEach(this::addAction));
+        eventBus.addHandler(CommandsLoadedEvent.getType(), event -> commandManagerProvider.get().getCommands().forEach(this::addAction));
         eventBus.addHandler(CommandAddedEvent.getType(), e -> addAction(e.getCommand()));
         eventBus.addHandler(CommandRemovedEvent.getType(), e -> removeAction(e.getCommand()));
         eventBus.addHandler(CommandUpdatedEvent.getType(), e -> {

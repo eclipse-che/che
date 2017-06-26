@@ -17,7 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.events.ServerRunningEvent;
+import org.eclipse.che.ide.api.machine.events.ExecAgentServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
@@ -26,7 +26,6 @@ import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import java.util.function.Consumer;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
 
 /** Restores outputs of running processes on loading IDE. */
 @Singleton
@@ -40,11 +39,7 @@ public class ProcessesOutputRestorer {
         this.eventBus = eventBus;
         this.execAgentCommandManager = execAgentCommandManager;
 
-        eventBus.addHandler(ServerRunningEvent.TYPE, event -> {
-            if (event.getServerName().equals(EXEC_AGENT_REFERENCE)) {
-                restoreLogs(event.getMachineName());
-            }
-        });
+        eventBus.addHandler(ExecAgentServerRunningEvent.TYPE, event -> restoreLogs(event.getMachineName()));
 
         // in case workspace is already running
         eventBus.addHandler(BasicIDEInitializedEvent.TYPE, event -> {

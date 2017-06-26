@@ -17,6 +17,7 @@ import com.google.gwt.event.shared.GwtEvent;
  * Fired when some server in some machine goes into a running state.
  *
  * @see WsAgentServerRunningEvent
+ * @see ExecAgentServerRunningEvent
  */
 public class ServerRunningEvent extends GwtEvent<ServerRunningEvent.Handler> {
 
