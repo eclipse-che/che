@@ -15,10 +15,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.api.git.shared.BranchListMode;
-import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.git.shared.PushResponse;
+import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -32,6 +30,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.BranchFilterByRemote;
 import org.eclipse.che.ide.ext.git.client.BranchSearcher;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
@@ -286,7 +285,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
 
         final String repository = view.getRepository();
         final GitOutputConsole console = gitOutputConsoleFactory.create(PUSH_COMMAND_NAME);
-        service.push(appContext.getDevMachine(), project.getLocation(), getRefs(), repository, view.isForcePushSelected())
+        service.push(project.getLocation(), getRefs(), repository, view.isForcePushSelected())
                .then(response -> {
                    console.print(response.getCommandOutput());
                    processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
