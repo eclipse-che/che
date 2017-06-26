@@ -214,9 +214,9 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
             classNodes.add(classNode);
         }
         root.setChildren(classNodes);
+        navigationPanel.add(resultTree);
         resultTree.getNodeStorage().add(root);
         resultTree.expandAll();
-        navigationPanel.add(resultTree);
     }
 
     private void fillNavigationPanel(TestResultRootDto result) {
