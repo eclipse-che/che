@@ -36,5 +36,6 @@ RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/reposit
 
 EXPOSE 8000 8080
 COPY entrypoint.sh /entrypoint.sh
+COPY open-jdk-source-file-location /open-jdk-source-file-location
 ENTRYPOINT ["/entrypoint.sh"]
 ADD eclipse-che.tar.gz /home/user/
