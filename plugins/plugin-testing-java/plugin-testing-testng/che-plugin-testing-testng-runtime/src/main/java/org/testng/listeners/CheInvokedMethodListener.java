@@ -16,7 +16,8 @@ import org.testng.IInvokedMethodListener;
 import org.testng.ITestResult;
 
 /**
- *
+ * Listener for invoking before and after method actions by TestNG.
+ * This listener will only be invoked for configuration and test methods.
  */
 public class CheInvokedMethodListener implements IInvokedMethodListener {
 

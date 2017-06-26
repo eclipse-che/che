@@ -19,54 +19,152 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 /**
- *
+ * Class which analyze output messages from test framework and prints their to the stream.
  */
 public class TestingMessageHelper {
 
     private static final char ESCAPE_SEPARATOR = '!';
 
+    /**
+     * Prints a message when the test reported was attached.
+     *
+     * @param str
+     *         output stream
+     */
     public static void reporterAttached(PrintStream str) {
         str.println(create("testReporterAttached", (List<Pair>)null));
     }
 
+    /**
+     * Prints the number of ran methods.
+     *
+     * @param out
+     *         output stream
+     * @param count
+     *         the number of test methods
+     */
     public static void methodCount(PrintStream out, int count) {
         out.println(create("testCount", new Pair("count", String.valueOf(count))));
     }
 
+    /**
+     * Prints information about the root test execution.
+     *
+     * @param out
+     *         output stream
+     * @param name
+     *         name of root element
+     * @param fileName
+     *         name of the file
+     */
     public static void rootPresentation(PrintStream out, String name, String fileName) {
         out.println(create("rootName", new Pair("name", name), new Pair("location", "file://" + fileName)));
     }
 
+    /**
+     * Message when the test is started.
+     *
+     * @param out
+     *         output stream
+     * @param name
+     *         name of the test method
+     */
     public static void testStarted(PrintStream out, String name) {
         out.println(create("testStarted", new Pair("name", escape(name))));
     }
 
+    /**
+     * Message when the test is started.
+     *
+     * @param out
+     *         output stream
+     * @param name
+     *         a name of the test method
+     * @param location
+     *         location of the test
+     * @param config
+     *         {@code true} if configuration is included
+     */
     public static void testStarted(PrintStream out, String name, String location, boolean config) {
         out.println(create("testStarted", new Pair("name", escape(name)),
-                new Pair("locationHint", "java:test://" + escape(location)),
-                new Pair("config", String.valueOf(config))));
+                           new Pair("locationHint", "java:test://" + escape(location)),
+                           new Pair("config", String.valueOf(config))));
     }
 
+    /**
+     * Message when the test method is ignored.
+     *
+     * @param out
+     *         output stream
+     * @param name
+     *         name of the test method
+     */
     public static void testIgnored(PrintStream out, String name) {
         out.println(create("testIgnored", new Pair("name", escape(name))));
     }
 
+    /**
+     * Message when the test method is finished.
+     *
+     * @param out
+     *         output stream
+     * @param name
+     *         name of the test method
+     */
     public static void testFinished(PrintStream out, String name) {
         out.println(create("testFinished", new Pair("name", escape(name))));
     }
 
+    /**
+     * Message when the test method is finished.
+     *
+     * @param out
+     *         output stream
+     * @param methodName
+     *         name of the test method
+     * @param duration
+     *         duration of the test employment
+     */
     public static void testFinished(PrintStream out, String methodName, long duration) {
         out.println(create("testFinished", new Pair("name", escape(methodName)), new Pair("duration", String.valueOf(duration))));
     }
 
+    /**
+     * Message when the test suite is finished.
+     *
+     * @param out
+     *         output stream
+     * @param name
+     *         name of the suite
+     */
     public static void testSuiteFinished(PrintStream out, String name) {
         out.println(create("testSuiteFinished", new Pair("name", escape(name))));
     }
 
+    /**
+     * Message when the test suite is started.
+     *
+     * @param out
+     *         output stream
+     * @param name
+     *         name of an output strean
+     * @param location
+     *         path to the suite
+     * @param provideLocation
+     *         {@code true} when the location is exist
+     */
     public static void testSuiteStarted(PrintStream out, String name, String location, boolean provideLocation) {
         out.println(create("testSuiteStarted", new Pair("name", escape(name)), new Pair("location", (provideLocation ? location : ""))));
     }
 
+    /**
+     * Message when the test is failed.
+     *
+     * @param out
+     *         output stream
+     * @param params
+     *         special parameters which can contain the name of failed test, error message
+     */
     public static void testFailed(PrintStream out, Map<String, String> params) {
 
         List<Pair> attributes = new ArrayList<>(params.size());

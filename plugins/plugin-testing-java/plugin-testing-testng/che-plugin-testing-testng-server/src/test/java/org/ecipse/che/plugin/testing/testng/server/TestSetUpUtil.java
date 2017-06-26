@@ -35,9 +35,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.testng.annotations.Test;
 
-/**
- *
- */
 public class TestSetUpUtil {
 
     private static final int MAX_RETRY = 5;

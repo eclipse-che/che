@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Class for running tests in the TestNG framework.
  */
 public class CheTestNG extends TestNG {
 
@@ -49,7 +49,7 @@ public class CheTestNG extends TestNG {
         addListener(new CheSuiteListener(listener));
         addListener(new CheTestListener(listener));
 
-        try{
+        try {
             Class<?> configurationListenerClass = Class.forName("org.testng.listeners.CheConfigurationListener");
             Object confListener = configurationListenerClass.getConstructor(CheTestNGListener.class).newInstance(listener);
             addListener(confListener);
@@ -59,7 +59,7 @@ public class CheTestNG extends TestNG {
             addListener(methodListener);
 
             configurationListenerClass.getMethod("setIgnoreStarted").invoke(confListener);
-        }catch (Throwable ignored){
+        } catch (Throwable ignored) {
         }
     }
 

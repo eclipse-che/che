@@ -16,7 +16,7 @@ import org.testng.ITestListener;
 import org.testng.ITestResult;
 
 /**
- *
+ * Listener for test running.
  */
 public class CheTestListener implements ITestListener {
 

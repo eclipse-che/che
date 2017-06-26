@@ -29,9 +29,6 @@ import static org.ecipse.che.plugin.testing.testng.server.TestSetUpUtil.createJa
 import static org.ecipse.che.plugin.testing.testng.server.TestSetUpUtil.getTestNgClassPath;
 import static org.fest.assertions.Assertions.assertThat;
 
-/**
- *
- */
 public class TestNGTestDiscoveryTest extends BaseTest {
 
     private IJavaProject javaProject;
@@ -192,7 +189,6 @@ public class TestNGTestDiscoveryTest extends BaseTest {
 
         @Override
         public void setProjectPath(String projectPath) {
-
         }
 
         @Override
@@ -202,7 +198,6 @@ public class TestNGTestDiscoveryTest extends BaseTest {
 
         @Override
         public void setFilePath(String filePath) {
-
         }
 
         @Override
@@ -212,7 +207,6 @@ public class TestNGTestDiscoveryTest extends BaseTest {
 
         @Override
         public void setOffset(int offset) {
-
         }
     }
 }

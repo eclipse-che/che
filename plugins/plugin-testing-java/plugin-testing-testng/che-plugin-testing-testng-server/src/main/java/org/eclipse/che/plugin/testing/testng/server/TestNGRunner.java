@@ -52,6 +52,7 @@ import java.util.Set;
  */
 public class TestNGRunner extends AbstractJavaTestRunner {
 
+    private static final String TESTNG_NAME         = "testng";
     private static final String TEST_ANNOTATION_FQN = Test.class.getName();
     private static final Logger LOG                 = LoggerFactory.getLogger(TestNGRunner.class);
     private final ProjectClasspathProvider classpathProvider;
@@ -171,12 +172,12 @@ public class TestNGRunner extends AbstractJavaTestRunner {
     }
 
     private File createProjectSuite(IJavaProject javaProject) {
-        //TODO
+        //TODO add suite to run all tests from project
         return null;
     }
 
     private File createPackageSuite(IJavaProject javaProject, String packagePath) {
-        //TODO
+        //TODO add suite to run all tests from package
         return null;
     }
 
@@ -193,7 +194,7 @@ public class TestNGRunner extends AbstractJavaTestRunner {
      */
     @Override
     public String getName() {
-        return "testng";
+        return TESTNG_NAME;
     }
 
     @Override

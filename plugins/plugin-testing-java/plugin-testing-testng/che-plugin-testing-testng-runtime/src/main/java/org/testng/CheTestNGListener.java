@@ -30,15 +30,14 @@ import static org.testng.TestingMessageHelper.testStarted;
 import static org.testng.TestingMessageHelper.testSuiteFinished;
 
 /**
- *
+ * Listener for whole life cycle of the TestNg test suite.
  */
 public class CheTestNGListener {
-
     private final PrintStream out;
-    private final List<String> currentSuites = new ArrayList<>();
-    private final Map<TestResultWrapper, TestResultWrapper> testResults = new HashMap<>();
-    private final Map<String, Integer> invocationCounts = new HashMap<>();
-    private final Map<TestResultWrapper, String> parametersMap = new HashMap<>();
+    private final List<String>                              currentSuites    = new ArrayList<>();
+    private final Map<TestResultWrapper, TestResultWrapper> testResults      = new HashMap<>();
+    private final Map<String, Integer>                      invocationCounts = new HashMap<>();
+    private final Map<TestResultWrapper, String>            parametersMap    = new HashMap<>();
 
     public CheTestNGListener(PrintStream printStream) {
         out = printStream;
@@ -49,6 +48,12 @@ public class CheTestNGListener {
         this(System.out);
     }
 
+    /**
+     * Counts a number of the methods and printed it to the output stream with the test suite name.
+     *
+     * @param suite
+     *         test suite
+     */
     public void onSuiteStart(ISuite suite) {
         if (suite != null) {
             try {
@@ -69,6 +74,12 @@ public class CheTestNGListener {
         }
     }
 
+    /**
+     * Analyses test methods which were ran.
+     *
+     * @param suite
+     *         test suite
+     */
     public void onSuiteFinish(ISuite suite) {
         try {
             if (suite != null && suite.getAllInvokedMethods().size() < suite.getAllMethods().size()) {
@@ -92,8 +103,6 @@ public class CheTestNGListener {
                     }
                 }
             }
-
-
         } catch (NoSuchMethodError ignored) {
         }
 
@@ -101,25 +110,34 @@ public class CheTestNGListener {
             internalSuiteFinish(currentSuites.get(i));
         }
         currentSuites.clear();
-
     }
 
+    /**
+     * Calls when test suit is finished.
+     *
+     * @param suite
+     *         name of the test suite
+     */
     public void internalSuiteFinish(String suite) {
-        TestingMessageHelper.testSuiteFinished(out, suite);
+        testSuiteFinished(out, suite);
     }
 
-    private String shortName(String name) {
-        int lastPoint = name.lastIndexOf('.');
-        if (lastPoint >= 0) {
-            return name.substring(lastPoint + 1);
-        }
-        return name;
-    }
-
+    /**
+     * Calls when test method is started.
+     *
+     * @param result
+     *         test method
+     */
     public void onTestStart(ITestResult result) {
         internalOnTestStart(createWrapper(result));
     }
 
+    /**
+     * Annalise method result when it was started.
+     *
+     * @param wrapper
+     *         wrapped method result
+     */
     public void internalOnTestStart(TestResultWrapper wrapper) {
         Object[] parameters = wrapper.getParameters();
         String fqn = wrapper.getClassName() + wrapper.getDisplayMethodName();
@@ -134,12 +152,224 @@ public class CheTestNGListener {
         invocationCounts.put(fqn, ++count);
     }
 
+    /**
+     * Annalise method result when it was started.
+     *
+     * @param wrapper
+     *         wrapped method result
+     * @param paramStr
+     *         method parameters
+     * @param count
+     *         number of the test method
+     * @param config
+     *         is configuration included
+     */
     public void internalOnTestStart(TestResultWrapper wrapper, String paramStr, Integer count, boolean config) {
         parametersMap.put(wrapper, paramStr);
         internalOnSuiteStart(wrapper, wrapper.getTestHierarchy(), true);
 
         String location = wrapper.getClassName() + "." + wrapper.getMethodName() + (count >= 0 ? "[" + count + "]" : "");
-        testStarted(out, shortName(wrapper.getClassName()) + "." + wrapper.getMethodName() + (paramStr != null ? paramStr : ""), location, config);
+        testStarted(out, shortName(wrapper.getClassName()) + "." + wrapper.getMethodName() + (paramStr != null ? paramStr : ""), location,
+                    config);
+    }
+
+    /**
+     * Calls when test is succeed.
+     *
+     * @param result
+     *         test result
+     */
+    public void onTestSuccess(ITestResult result) {
+        onTestFinished(createWrapper(result));
+    }
+
+    /**
+     * Calls when test is finished.
+     *
+     * @param wrapper
+     *         test result
+     */
+    public void onTestFinished(TestResultWrapper wrapper) {
+        long duration = wrapper.getDuration();
+        testFinished(out, getTestMethodName(wrapper), duration);
+    }
+
+    /**
+     * Calls when test is failed.
+     *
+     * @param result
+     *         test result
+     */
+    public void onTestFailure(ITestResult result) {
+        internalOnTestFailure(createWrapper(result));
+    }
+
+    /**
+     * Annalise method result when it was failed.
+     *
+     * @param wrapper
+     *         wrapped method result
+     */
+    public void internalOnTestFailure(TestResultWrapper wrapper) {
+        if (!parametersMap.containsKey(wrapper)) {
+            internalOnTestStart(wrapper);
+        }
+
+        Throwable throwable = wrapper.getThrowable();
+        String testMethodName = getTestMethodName(wrapper);
+        Map<String, String> params = new HashMap<>();
+        params.put("name", testMethodName);
+        if (throwable != null) {
+            String failMessage = throwable.getMessage();
+            //TODO add message replacement with 'Expected[] but Found[]'
+            String stackTrace = getStackTrace(throwable);
+            params.put("message", failMessage);
+            params.put("details", stackTrace);
+        } else {
+            params.put("message", "");
+        }
+
+        out.println();
+        testFailed(out, params);
+        onTestFinished(wrapper);
+    }
+
+    /**
+     * Calls when test is skipped.
+     *
+     * @param result
+     *         test result
+     */
+    public void onTestSkipped(ITestResult result) {
+        internalOnTestSkipped(createWrapper(result));
+    }
+
+    /**
+     * Calls when test is failed but has some success result.
+     *
+     * @param result
+     *         test result
+     */
+    public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
+        Throwable throwable = result.getThrowable();
+        if (throwable != null) {
+            throwable.printStackTrace(); //we catch all std.out in wsaget JVM and attach output to the output console
+        }
+        onTestSuccess(result);
+    }
+
+    /**
+     * Calls when configuration method is started.
+     *
+     * @param testResult
+     *         test method result
+     */
+    public void onConfigurationStart(ITestResult testResult) {
+        TestResultWrapper wrapper = createWrapper(testResult);
+        internalOnTestStart(wrapper, null, -1, true);
+    }
+
+    /**
+     * Calls when configuration method is success.
+     *
+     * @param result
+     *         method result
+     * @param start
+     *         is started
+     */
+    public void onConfigurationSuccess(ITestResult result, boolean start) {
+        TestResultWrapper wrapper = createWrapper(result);
+        if (start) {
+            internalOnConfigurationStart(wrapper);
+        }
+        internalOnConfigurationSuccess(wrapper);
+    }
+
+    /**
+     * Calls when configuration method is failed.
+     *
+     * @param result
+     *         method result
+     * @param start
+     *         is started
+     */
+    public void onConfigurationFailure(ITestResult result, boolean start) {
+        TestResultWrapper wrapper = createWrapper(result);
+        if (start) {
+            internalOnConfigurationStart(wrapper);
+        }
+        internalOnTestFailure(wrapper);
+    }
+
+    /**
+     * Calls when test suite is started.
+     *
+     * @param className
+     *         name of the test class
+     * @param provideLocation
+     *         is location included
+     */
+    public void onSuiteStart(String className, boolean provideLocation) {
+        internalOnSuiteStart(null, Collections.singletonList(className), provideLocation);
+    }
+
+    /**
+     * Calls when configuration method is finished with successfully result.
+     *
+     * @param wrapper
+     *         wrapped method result
+     */
+    public void internalOnConfigurationSuccess(TestResultWrapper wrapper) {
+        onTestFinished(wrapper);
+    }
+
+    private String getParametersStr(Object[] parameters, Integer count) {
+        String paramStr = "";
+        if (parameters.length > 0) {
+            StringJoiner joiner = new StringJoiner(", ");
+            for (Object parameter : parameters) {
+                joiner.add(parameter.toString());
+            }
+
+            paramStr = "[" + joiner.toString() + "]";
+        }
+        if (count > 0) {
+            paramStr += " (" + count + ")";
+        }
+
+        return paramStr.isEmpty() ? null : paramStr;
+    }
+
+    private TestResultWrapper createWrapper(ITestResult result) {
+        TestResultWrapper wrapper = new TestResultWrapper(result);
+        TestResultWrapper oldWrapper = testResults.get(wrapper);
+        if (oldWrapper != null) {
+            return oldWrapper;
+        }
+
+        testResults.put(wrapper, wrapper);
+        return wrapper;
+    }
+
+    private void internalOnConfigurationStart(TestResultWrapper wrapper) {
+        internalOnTestStart(wrapper, null, -1, true);
+    }
+
+    private String getTestMethodName(TestResultWrapper wrapper) {
+        String testMethodName = shortName(wrapper.getClassName()) + "." + wrapper.getDisplayMethodName();
+        String paramStr = parametersMap.get(wrapper);
+        if (paramStr != null) {
+            testMethodName += paramStr;
+        }
+        return testMethodName;
+    }
+
+    private String shortName(String name) {
+        int lastPoint = name.lastIndexOf('.');
+        if (lastPoint >= 0) {
+            return name.substring(lastPoint + 1);
+        }
+        return name;
     }
 
     private void internalOnSuiteStart(TestResultWrapper wrapper, List<String> testHierarchy, boolean provideLocation) {
@@ -176,80 +406,13 @@ public class CheTestNGListener {
             TestingMessageHelper.testSuiteStarted(out, currentClassName, location, provideLocation);
             currentSuites.add(currentClassName);
         }
-
     }
 
-    private String getParametersStr(Object[] parameters, Integer count) {
-        String paramStr = "";
-        if (parameters.length > 0) {
-            StringJoiner joiner = new StringJoiner(", ");
-            for (Object parameter : parameters) {
-                joiner.add(parameter.toString());
-            }
-
-            paramStr = "[" + joiner.toString() + "]";
-        }
-        if (count > 0) {
-            paramStr += " (" + count + ")";
-        }
-
-        return paramStr.isEmpty() ? null : paramStr;
-    }
-
-    private TestResultWrapper createWrapper(ITestResult result) {
-        TestResultWrapper wrapper = new TestResultWrapper(result);
-        TestResultWrapper oldWrapper = testResults.get(wrapper);
-        if (oldWrapper != null) {
-            return oldWrapper;
-        }
-
-        testResults.put(wrapper, wrapper);
-        return wrapper;
-    }
-
-    public void onTestSuccess(ITestResult result) {
-        onTestFinished(createWrapper(result));
-    }
-
-    public void onTestFinished(TestResultWrapper wrapper) {
-        long duration = wrapper.getDuration();
-        testFinished(out, getTestMethodName(wrapper), duration);
-    }
-
-    private String getTestMethodName(TestResultWrapper wrapper) {
-        String testMethodName = shortName(wrapper.getClassName()) + "." + wrapper.getDisplayMethodName();
-        String paramStr = parametersMap.get(wrapper);
-        if (paramStr != null) {
-            testMethodName += paramStr;
-        }
-        return testMethodName;
-    }
-
-    public void onTestFailure(ITestResult result) {
-        internalOnTestFailure(createWrapper(result));
-    }
-
-    public void internalOnTestFailure(TestResultWrapper wrapper) {
+    private void internalOnTestSkipped(TestResultWrapper wrapper) {
         if (!parametersMap.containsKey(wrapper)) {
             internalOnTestStart(wrapper);
         }
-
-        Throwable throwable = wrapper.getThrowable();
-        String testMethodName = getTestMethodName(wrapper);
-        Map<String, String> params = new HashMap<>();
-        params.put("name", testMethodName);
-        if (throwable != null) {
-            String failMessage = throwable.getMessage();
-            //TODO add message replacement with 'Expected[] but Found[]'
-            String stackTrace = getStackTrace(throwable);
-            params.put("message", failMessage);
-            params.put("details", stackTrace);
-        } else {
-            params.put("message", "");
-        }
-
-        out.println();
-        testFailed(out, params);
+        testIgnored(out, getTestMethodName(wrapper));
         onTestFinished(wrapper);
     }
 
@@ -260,57 +423,4 @@ public class CheTestNGListener {
         return writer.getBuffer().toString();
     }
 
-    public void onTestSkipped(ITestResult result) {
-        internalOnTestSkipped(createWrapper(result));
-    }
-
-    private void internalOnTestSkipped(TestResultWrapper wrapper) {
-        if (!parametersMap.containsKey(wrapper)) {
-            internalOnTestStart(wrapper);
-        }
-        testIgnored(out, getTestMethodName(wrapper));
-        onTestFinished(wrapper);
-
-    }
-
-    public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
-        Throwable throwable = result.getThrowable();
-        if (throwable != null) {
-            throwable.printStackTrace(); //we catch all std.out in wsaget JVM and attach output to the output console
-        }
-        onTestSuccess(result);
-    }
-
-    public void onConfigurationStart(ITestResult testResult) {
-        TestResultWrapper wrapper = createWrapper(testResult);
-        internalOnTestStart(wrapper, null, -1, true);
-    }
-
-    public void onConfigurationSuccess(ITestResult result, boolean start) {
-        TestResultWrapper wrapper = createWrapper(result);
-        if (start) {
-            internalOnConfigurationStart(wrapper);
-        }
-        internalOnConfigurationSuccess(wrapper);
-    }
-
-    public void internalOnConfigurationSuccess(TestResultWrapper wrapper) {
-        onTestFinished(wrapper);
-    }
-
-    private void internalOnConfigurationStart(TestResultWrapper wrapper) {
-        internalOnTestStart(wrapper, null, -1, true);
-    }
-
-    public void onConfigurationFailure(ITestResult result, boolean start) {
-        TestResultWrapper wrapper = createWrapper(result);
-        if (start) {
-            internalOnConfigurationStart(wrapper);
-        }
-        internalOnTestFailure(wrapper);
-    }
-
-    public void onSuiteStart(String className, boolean provideLocation) {
-        internalOnSuiteStart(null, Collections.singletonList(className), provideLocation);
-    }
 }

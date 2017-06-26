@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- *
+ * Main entry point which runs TestNG framework.
  */
 public class CheTestNGLauncher {
 
@@ -36,8 +36,6 @@ public class CheTestNGLauncher {
         }
 
         filteredArgs.add(args[i + 1]);
-
-
         CheTestNG cheTestNG = new CheTestNG();
         CommandLineArgs cla = new CommandLineArgs();
         new JCommander(Collections.singletonList(cla), filteredArgs.toArray(new String[filteredArgs.size()]));

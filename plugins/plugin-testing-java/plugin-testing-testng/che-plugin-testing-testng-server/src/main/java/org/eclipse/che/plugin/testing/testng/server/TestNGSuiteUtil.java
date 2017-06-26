@@ -25,13 +25,26 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * Utility class for creating TestNG suite.
+ * A suite is represented by one XML file. It can contain one or more tests.
  */
 @Singleton
 public class TestNGSuiteUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestNGSuiteUtil.class);
 
+    /**
+     * Creates the suite which is represented by one XML file with name che-testng-suite.xml.
+     * It can contain one or more tests.
+     *
+     * @param suitePath
+     *         path to the suite file
+     * @param suiteName
+     *         the name of the suite
+     * @param classesAndMethods
+     *         classes and methods which should be included to the suite.
+     * @return created file with suite
+     */
     public File writeSuite(String suitePath, String suiteName, Map<String, List<String>> classesAndMethods) {
         XmlSuite suite = new XmlSuite();
         XmlTest test = new XmlTest(suite);
@@ -55,11 +68,11 @@ public class TestNGSuiteUtil {
 
         test.setXmlClasses(xmlClasses);
 
-        File result = new File(suitePath,"che-testng-suite.xml");
+        File result = new File(suitePath, "che-testng-suite.xml");
         try {
             com.google.common.io.Files.write(suite.toXml().getBytes("UTF-8"), result);
         } catch (IOException e) {
-            LOG.error("Can't write TestNG suite xml file.",e);
+            LOG.error("Can't write TestNG suite xml file.", e);
         }
         return result;
     }

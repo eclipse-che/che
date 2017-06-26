@@ -15,7 +15,7 @@ import org.testng.IConfigurationListener;
 import org.testng.ITestResult;
 
 /**
- *
+ * Listener for events related to configuration methods.
  */
 public class CheConfigurationListener implements IConfigurationListener {
 
@@ -39,7 +39,7 @@ public class CheConfigurationListener implements IConfigurationListener {
 
     @Override
     public void onConfigurationSkip(ITestResult itr) {
-       //ignore
+        //ignore
     }
 
     public void setIgnoreStarted() {

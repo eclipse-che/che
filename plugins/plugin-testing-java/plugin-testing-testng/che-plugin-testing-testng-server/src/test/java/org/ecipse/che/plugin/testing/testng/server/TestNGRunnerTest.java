@@ -11,6 +11,10 @@
 package org.ecipse.che.plugin.testing.testng.server;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.EndpointIdConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.MethodNameConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.ParamsConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.SendConfiguratorFromOne;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectCreatedEvent;
 import org.eclipse.che.api.testing.server.dto.DtoServerImpls;
@@ -29,25 +33,34 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-/**
- *
- */
-public class TestNGRunnerTest extends BaseTest{
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+public class TestNGRunnerTest extends BaseTest {
+    private EndpointIdConfigurator  startEndpointIdConfigurator;
+    private MethodNameConfigurator  startMethodNameConfigurator;
+    private ParamsConfigurator      startParamsConfigurator;
+    private SendConfiguratorFromOne startSendConfiguratorFromOne;
+    private RequestTransmitter      transmitter;
 
     private TestNGRunner runner;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        runner = new TestNGRunner(new ProjectClasspathProvider(""), new TestNGSuiteUtil());
+        startEndpointIdConfigurator = mock(EndpointIdConfigurator.class);
+        startMethodNameConfigurator = mock(MethodNameConfigurator.class);
+        startParamsConfigurator = mock(ParamsConfigurator.class);
+        startSendConfiguratorFromOne = mock(SendConfiguratorFromOne.class);
+        transmitter = mock(RequestTransmitter.class);
 
+        runner = new TestNGRunner(new ProjectClasspathProvider(""), new TestNGSuiteUtil());
     }
 
-    @Test(enabled = false)
+    @Test
     public void testName() throws Exception {
         String name = "Test";
         FolderEntry folder = pm.getProjectsRoot().createFolder(name);
@@ -62,25 +75,40 @@ public class TestNGRunnerTest extends BaseTest{
                 new ResourceChangedEvent(root, new ProjectCreatedEvent("", "/Test")));
 
         IJavaProject javaProject = JavaModelManager.getJavaModelManager().getJavaModel().getJavaProject("/Test");
-        IClasspathEntry testNg = JavaCore.newLibraryEntry(new Path(ClasspathUtil.getJarPathForClass(Test.class)), null, null);
-        IClasspathEntry source = JavaCore.newSourceEntry(new Path("/Test/src"), null, new Path(ClasspathUtil.getJarPathForClass(TestNGRunnerTest.class)));
+        IClasspathEntry testNg = JavaCore.newLibraryEntry(new Path(ClasspathUtil.getJarPathForClass(Test.class)),
+                                                          null,
+                                                          null);
+        IClasspathEntry source = JavaCore.newSourceEntry(new Path("/Test/src"),
+                                                         null,
+                                                         new Path(ClasspathUtil.getJarPathForClass(TestNGRunnerTest.class)));
         IClasspathEntry jre = JavaCore.newContainerEntry(new Path(JREContainerInitializer.JRE_CONTAINER));
 
         javaProject.setRawClasspath(new IClasspathEntry[]{testNg, source, jre}, null);
 
         DtoServerImpls.TestExecutionContextImpl context = new DtoServerImpls.TestExecutionContextImpl();
+        context.setDebugModeEnable(false);
         context.setTestType(TestExecutionContext.TestType.FILE);
         context.setProjectPath("/Test");
         context.setFilePath("/Test/src/tests/TestNGTest.java");
         ProcessHandler processHandler = runner.execute(context);
 
-        RequestTransmitter transmitter = Mockito.mock(RequestTransmitter.class);
-        TestMessagesOutputTransmitter outputTransmitter = new TestMessagesOutputTransmitter(processHandler, transmitter, "test");
+        prepareTransmitting(transmitter);
+
+        new TestMessagesOutputTransmitter(processHandler, transmitter, "test");
+
         Thread.sleep(2000);
         ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
-//        Mockito.verify(transmitter,  times(25)).transmitStringToNone(eq("test"), eq(Constants.TESTING_RPC_METHOD_NAME), jsonCaptor.capture());
 
+        //TODO need to compile java resources for testing executing tests
+//        verify(startEndpointIdConfigurator, times(29)).endpointId(eq("test"));
+//        verify(startParamsConfigurator, times(29)).paramsAsString(jsonCaptor.capture());
 //        jsonCaptor.getAllValues().forEach(System.out::println);
+    }
 
+    private void prepareTransmitting(RequestTransmitter transmitter) {
+        when(transmitter.newRequest()).thenReturn(startEndpointIdConfigurator);
+        when(startEndpointIdConfigurator.endpointId(anyString())).thenReturn(startMethodNameConfigurator);
+        when(startMethodNameConfigurator.methodName(anyString())).thenReturn(startParamsConfigurator);
+        when(startParamsConfigurator.paramsAsString(anyString())).thenReturn(startSendConfiguratorFromOne);
     }
 }

@@ -66,7 +66,6 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
         hasTests = false;
 
         eventBus.addHandler(JavaReconsilerEvent.TYPE, event -> detectTests(event.getEditor()));
-
         eventBus.addHandler(ActivePartChangedEvent.TYPE, event -> {
             if (event.getActivePart() instanceof TextEditor) {
                 testType = CURSOR_POSITION;
@@ -105,6 +104,13 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
         });
     }
 
+    /**
+     * Creates test execution context which describes the configuration for the current test
+     *
+     * @param frameworkAndTestName
+     *         name of the test framework
+     * @return test execution context
+     */
     protected TestExecutionContext createTestExecutionContext(Pair<String, String> frameworkAndTestName) {
         final Project project = appContext.getRootProject();
         TestExecutionContext context = dtoFactory.createDto(TestExecutionContext.class);
@@ -118,6 +124,11 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
         return context;
     }
 
+    /**
+     * Method analyzes cursor position.
+     * The result is a pair which has framework name as a first parameter and method name as a second if cursor is in body of test method
+     * otherwise the second parameter is null.
+     */
     protected Pair<String, String> getTestingFrameworkAndTestName() {
         int cursorOffset = currentEditor.getCursorOffset();
         for (TestPosition position : testPosition) {

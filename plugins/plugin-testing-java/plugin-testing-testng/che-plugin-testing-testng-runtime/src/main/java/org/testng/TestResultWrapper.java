@@ -26,10 +26,17 @@ public class TestResultWrapper {
         this.testResult = testResult;
     }
 
+    /**
+     * Returns the throwable that was thrown while running the
+     * method, or null if no exception was thrown.
+     */
     public Throwable getThrowable() {
         return testResult.getThrowable();
     }
 
+    /**
+     * @return the fileName or null if the test tag this class was found in.
+     */
     public String getFileName() {
         XmlTest xmlTest = testResult.getTestClass().getXmlTest();
         if (xmlTest != null) {
@@ -38,6 +45,9 @@ public class TestResultWrapper {
         return null;
     }
 
+    /**
+     * @return Returns the name.
+     */
     public String getXmlTestName() {
         XmlTest xmlTest = testResult.getTestClass().getXmlTest();
         if (xmlTest != null) {
@@ -46,6 +56,9 @@ public class TestResultWrapper {
         return null;
     }
 
+    /**
+     * @return Returns the test hierarchy.
+     */
     public List<String> getTestHierarchy() {
         List<String> result;
         XmlTest xmlTest = testResult.getTestClass().getXmlTest();
@@ -57,14 +70,23 @@ public class TestResultWrapper {
         return result;
     }
 
+    /**
+     * @return Returns the name of test class.
+     */
     public String getClassName() {
         return testResult.getMethod().getTestClass().getName();
     }
 
+    /**
+     * @return Returns duration of the test running.
+     */
     public long getDuration() {
         return testResult.getEndMillis() - testResult.getStartMillis();
     }
 
+    /**
+     * @return Returns the display name of test method.
+     */
     public String getDisplayMethodName() {
         String testName = testResult.getTestName();
 
@@ -75,10 +97,19 @@ public class TestResultWrapper {
         }
     }
 
+    /**
+     * Returns the method name. This is needed for serialization because
+     * methods are not Serializable.
+     *
+     * @return the method name.
+     */
     public String getMethodName() {
         return testResult.getMethod().getMethodName();
     }
 
+    /**
+     * @return The parameters this method was invoked with.
+     */
     public Object[] getParameters() {
         return testResult.getParameters();
     }
@@ -93,7 +124,7 @@ public class TestResultWrapper {
             return false;
         }
 
-        TestResultWrapper wrapper = (TestResultWrapper) o;
+        TestResultWrapper wrapper = (TestResultWrapper)o;
 
         return testResult.equals(wrapper.testResult);
     }
