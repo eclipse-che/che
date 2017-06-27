@@ -20,8 +20,20 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
+
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.STARTING_WORKSPACE_RUNTIME;
+import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.WORKSPACE_STOPPED;
 
 /**
  * Toast notification appearing on the top of the IDE and containing a proposal message to start
@@ -32,9 +44,11 @@ import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 @Singleton
 public class StartWorkspaceNotification {
 
-    private final WorkspaceStarterUiBinder          uiBinder;
-    private final LoaderPresenter                   loader;
-    private final Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider;
+    private final StartWorkspaceNotificationUiBinder uiBinder;
+    private final WorkspaceStatusNotification        wsStatusNotification;
+    private final Provider<CurrentWorkspaceManager>  currentWorkspaceManagerProvider;
+    private final Provider<NotificationManager>      notificationManagerProvider;
+    private final CoreLocalizationConstant           messages;
 
     @UiField
     Button   button;
@@ -42,33 +56,59 @@ public class StartWorkspaceNotification {
     CheckBox restore;
 
     @Inject
-    public StartWorkspaceNotification(LoaderPresenter loader,
-                                      WorkspaceStarterUiBinder uiBinder,
-                                      Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider) {
-        this.loader = loader;
+    public StartWorkspaceNotification(WorkspaceStatusNotification wsStatusNotification,
+                                      StartWorkspaceNotificationUiBinder uiBinder,
+                                      Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider,
+                                      Provider<NotificationManager> notificationManagerProvider,
+                                      CoreLocalizationConstant messages,
+                                      EventBus eventBus,
+                                      AppContext appContext) {
+        this.wsStatusNotification = wsStatusNotification;
         this.uiBinder = uiBinder;
         this.currentWorkspaceManagerProvider = currentWorkspaceManagerProvider;
+        this.notificationManagerProvider = notificationManagerProvider;
+        this.messages = messages;
+
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> {
+            WorkspaceStatus status = appContext.getWorkspace().getStatus();
+
+            if (status == STOPPED) {
+                show();
+            }
+        });
+
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> show());
     }
 
-    /** Displays a notification with a proposal to start current workspace. */
+    /** Displays a notification with a proposal to start the current workspace. */
     public void show() {
         Widget widget = uiBinder.createAndBindUi(StartWorkspaceNotification.this);
-        loader.show(LoaderPresenter.Phase.WORKSPACE_STOPPED, widget);
+        wsStatusNotification.show(WORKSPACE_STOPPED, widget);
     }
 
     /**
      * Hides a notification.
      */
     public void hide() {
-        loader.setSuccess(LoaderPresenter.Phase.WORKSPACE_STOPPED);
+        wsStatusNotification.setSuccess(WORKSPACE_STOPPED);
     }
 
     @UiHandler("button")
     void startClicked(ClickEvent e) {
-        loader.setSuccess(LoaderPresenter.Phase.WORKSPACE_STOPPED);
-        currentWorkspaceManagerProvider.get().startWorkspace(restore.getValue());
+        hide();
+
+        currentWorkspaceManagerProvider.get()
+                                       .startWorkspace(restore.getValue())
+                                       .catchError(error -> {
+                                           notificationManagerProvider.get().notify(messages.startWsErrorTitle(),
+                                                                                    error.getMessage(),
+                                                                                    FAIL,
+                                                                                    FLOAT_MODE);
+                                           wsStatusNotification.setError(STARTING_WORKSPACE_RUNTIME);
+                                           wsStatusNotification.show(WORKSPACE_STOPPED);
+                                       });
     }
 
-    interface WorkspaceStarterUiBinder extends UiBinder<Widget, StartWorkspaceNotification> {
+    interface StartWorkspaceNotificationUiBinder extends UiBinder<Widget, StartWorkspaceNotification> {
     }
 }

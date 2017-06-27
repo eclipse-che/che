@@ -8,21 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.workspace.events;
+package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 
-public class WorkspaceEventsModule extends AbstractGinModule {
+public class WorkspaceApiModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        bind(WorkspaceStatusEventHandler.class).asEagerSingleton();
-        bind(MachineStatusEventHandler.class).asEagerSingleton();
-        bind(ServerStatusEventHandler.class).asEagerSingleton();
+        bind(WorkspaceStatusNotification.class).asEagerSingleton();
+        bind(StartWorkspaceNotification.class).asEagerSingleton();
 
-        bind(EnvironmentOutputHandler.class).asEagerSingleton();
-        bind(WorkspaceAgentOutputHandler.class).asEagerSingleton();
-
-        bind(WorkspaceEventsUnsubscriber.class).asEagerSingleton();
+        bind(CurrentWorkspaceManager.class).asEagerSingleton();
     }
 }

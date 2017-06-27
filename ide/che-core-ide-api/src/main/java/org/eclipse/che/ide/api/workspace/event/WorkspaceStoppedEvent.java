@@ -22,15 +22,27 @@ public class WorkspaceStoppedEvent extends GwtEvent<WorkspaceStoppedEvent.Handle
     public static final Type<WorkspaceStoppedEvent.Handler> TYPE = new Type<>();
 
     private final Workspace workspace;
+    private final String    errorMessage;
 
-    public WorkspaceStoppedEvent(Workspace workspace) {
+    public WorkspaceStoppedEvent(Workspace workspace, String errorMessage) {
         this.workspace = workspace;
+        this.errorMessage = errorMessage;
     }
 
     /** @deprecated use {@link AppContext#getWorkspace()} */
     @Deprecated
     public Workspace getWorkspace() {
         return workspace;
+    }
+
+    /**
+     * Returns an error message if workspace was stopped due to error.
+     *
+     * @return error message if workspace was stopped due to error
+     * or an empty string if workspace was stopped normally
+     */
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
     @Override

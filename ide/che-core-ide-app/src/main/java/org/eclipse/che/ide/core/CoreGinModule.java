@@ -73,6 +73,7 @@ import org.eclipse.che.ide.theme.ThemeApiModule;
 import org.eclipse.che.ide.ui.loaders.PopupLoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.user.AskCredentialsDialogImpl;
+import org.eclipse.che.ide.workspace.WorkspaceApiModule;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 import org.eclipse.che.ide.workspace.events.WorkspaceEventsModule;
 import org.eclipse.che.providers.DynaProvider;
@@ -117,6 +118,7 @@ public class CoreGinModule extends AbstractGinModule {
         install(new ProjectApiModule());
         install(new OAuthApiModule());
         install(new WorkspaceEventsModule());
+        install(new WorkspaceApiModule());
         install(new FactoryGinModule());
 
         // configure miscellaneous core components

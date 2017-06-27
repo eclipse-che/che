@@ -29,10 +29,9 @@ import org.eclipse.che.ide.api.machine.events.WsAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
-
-import java.util.function.BiConsumer;
 
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.STOPPED;
@@ -49,56 +48,69 @@ import static org.eclipse.che.ide.api.machine.events.WsAgentStateEvent.createWsA
 @Singleton
 class ServerStatusEventHandler {
 
+    private final WorkspaceServiceClient workspaceServiceClient;
+    private final AppContext             appContext;
+    private final EventBus               eventBus;
+
     @Inject
     ServerStatusEventHandler(RequestHandlerConfigurator configurator,
-                             EventBus eventBus,
+                             WorkspaceServiceClient workspaceServiceClient,
                              AppContext appContext,
-                             WorkspaceServiceClient workspaceServiceClient) {
-        BiConsumer<String, ServerStatusEvent> operation = (String endpointId, ServerStatusEvent event) -> {
-            Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
-
-            workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
-                // Update workspace model in AppContext before firing an event.
-                // Because AppContext always must return an actual workspace model.
-                ((AppContextImpl)appContext).setWorkspace(workspace);
-
-                if (event.getStatus() == RUNNING) {
-                    eventBus.fireEvent(new ServerRunningEvent(event.getServerName(), event.getMachineName()));
-
-                    if (WSAGENT_REFERENCE.equals(event.getServerName())) {
-                        eventBus.fireEvent(new WsAgentServerRunningEvent(event.getMachineName()));
-
-                        // fire deprecated WsAgentStateEvent for backward compatibility with IDE 5.x
-                        eventBus.fireEvent(createWsAgentStartedEvent());
-                    } else if (TERMINAL_REFERENCE.equals(event.getServerName())) {
-                        eventBus.fireEvent(new TerminalAgentServerRunningEvent(event.getMachineName()));
-                    } else if (EXEC_AGENT_REFERENCE.equals(event.getServerName())) {
-                        eventBus.fireEvent(new ExecAgentServerRunningEvent(event.getMachineName()));
-                    }
-                } else if (event.getStatus() == STOPPED) {
-                    eventBus.fireEvent(new ServerStoppedEvent(event.getServerName(), event.getMachineName()));
-
-                    if (WSAGENT_REFERENCE.equals(event.getServerName())) {
-                        eventBus.fireEvent(new WsAgentServerStoppedEvent(event.getMachineName()));
-                    } else if (TERMINAL_REFERENCE.equals(event.getServerName())) {
-                        eventBus.fireEvent(new TerminalAgentServerStoppedEvent(event.getMachineName()));
-                    } else if (EXEC_AGENT_REFERENCE.equals(event.getServerName())) {
-                        eventBus.fireEvent(new ExecAgentServerStoppedEvent(event.getMachineName()));
-                    }
-                }
-            });
-        };
+                             EventBus eventBus) {
+        this.workspaceServiceClient = workspaceServiceClient;
+        this.appContext = appContext;
+        this.eventBus = eventBus;
 
         configurator.newConfiguration()
                     .methodName("server/statusChanged")
                     .paramsAsDto(ServerStatusEvent.class)
                     .noResult()
-                    .withBiConsumer(operation);
+                    .withBiConsumer((endpointId, event) -> {
+                        Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
+
+                        processStatus(event);
+                    });
 
         // fire deprecated WsAgentStateEvent for backward compatibility with IDE 5.x
         eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> {
             if (appContext.getWorkspace().getStatus() == WorkspaceStatus.RUNNING) {
                 eventBus.fireEvent(WsAgentStateEvent.createWsAgentStartedEvent());
+            }
+        });
+    }
+
+    private void processStatus(ServerStatusEvent event) {
+        workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
+            // Update workspace model in AppContext before firing an event.
+            // Because AppContext always must return an actual workspace model.
+            ((AppContextImpl)appContext).setWorkspace(workspace);
+
+            if (event.getStatus() == RUNNING) {
+                eventBus.fireEvent(new ServerRunningEvent(event.getServerName(), event.getMachineName()));
+
+                if (WSAGENT_REFERENCE.equals(event.getServerName())) {
+                    eventBus.fireEvent(new WsAgentServerRunningEvent(event.getMachineName()));
+
+                    // FIXME: spi ide
+                    ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf("/projects"));
+
+                    // fire deprecated WsAgentStateEvent for backward compatibility with IDE 5.x
+                    eventBus.fireEvent(createWsAgentStartedEvent());
+                } else if (TERMINAL_REFERENCE.equals(event.getServerName())) {
+                    eventBus.fireEvent(new TerminalAgentServerRunningEvent(event.getMachineName()));
+                } else if (EXEC_AGENT_REFERENCE.equals(event.getServerName())) {
+                    eventBus.fireEvent(new ExecAgentServerRunningEvent(event.getMachineName()));
+                }
+            } else if (event.getStatus() == STOPPED) {
+                eventBus.fireEvent(new ServerStoppedEvent(event.getServerName(), event.getMachineName()));
+
+                if (WSAGENT_REFERENCE.equals(event.getServerName())) {
+                    eventBus.fireEvent(new WsAgentServerStoppedEvent(event.getMachineName()));
+                } else if (TERMINAL_REFERENCE.equals(event.getServerName())) {
+                    eventBus.fireEvent(new TerminalAgentServerStoppedEvent(event.getMachineName()));
+                } else if (EXEC_AGENT_REFERENCE.equals(event.getServerName())) {
+                    eventBus.fireEvent(new ExecAgentServerStoppedEvent(event.getMachineName()));
+                }
             }
         });
     }
