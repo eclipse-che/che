@@ -43,6 +43,7 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
  *
  * @author Mirage Abeysekara
  */
+@Deprecated
 public class TestResultGroupNode extends AbstractTreeNode implements HasPresentation {
 
     private NodePresentation    nodePresentation;

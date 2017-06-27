@@ -38,6 +38,8 @@ import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestPosition;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
+import org.eclipse.che.api.testing.shared.dto.TestResultDto;
+import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.java.testing.TestClasspathProvider;
 import org.eclipse.che.plugin.java.testing.TestClasspathRegistry;
@@ -486,16 +488,16 @@ public class JUnitTestRunner implements TestRunner {
             ClassLoader tccl = Thread.currentThread().getContextClassLoader();
             try {
                 Thread.currentThread().setContextClassLoader(projectClassLoader);
-                clsTestResult.getMethod("addListener", clsTestListener).invoke(
-                        testResult, testListener);
+                clsTestResult.getMethod("addListener", clsTestListener)
+                             .invoke(testResult, testListener);
                 for (Class< ? > testClass : classes) {
                     clsTestSuite.getMethod("addTestSuite", Class.class).invoke(testSuite, testClass);
                 }
                 clsTestSuite.getMethod("run", clsTestResult).invoke(testSuite, testResult);
             } finally {
                 Thread.currentThread().setContextClassLoader(tccl);
-                clsTestResult.getMethod("removeListener", clsTestListener).invoke(
-                        testResult, testListener);
+                clsTestResult.getMethod("removeListener", clsTestListener)
+                             .invoke(testResult, testListener);
             }
         }
 
@@ -563,5 +565,17 @@ public class JUnitTestRunner implements TestRunner {
         testList.addAll(testCases.values());
         dtoResult.setTestCases(testList);
         return dtoResult;
+    }
+
+    @Override
+    public TestResultRootDto runTests(Map<String, String> testParameters) throws Exception {
+        // New API - Not supported yet
+        return null;
+    }
+
+    @Override
+    public List<TestResultDto> getTestResults(List<String> testResultsPath) {
+        // New API - Not supported yet
+        return null;
     }
 }
