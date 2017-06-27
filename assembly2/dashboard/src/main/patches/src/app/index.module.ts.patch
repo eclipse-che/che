@@ -79,25 +79,21 @@
      workspaceDetailsService.addPage('Projects', '<workspace-details-projects></workspace-details-projects>', 'icon-ic_inbox_24px');
      workspaceDetailsService.addPage('SSH', '<workspace-details-ssh></workspace-details-ssh>', 'icon-ic_vpn_key_24px');
 
-@@ -166,6 +189,43 @@
+@@ -166,6 +189,38 @@
    }]);
 
 
 +initModule.factory('KeyCloakTokenInterceptor', ($q, keycloak) => {
 +  return {
 +    request: (config) => {
-+      console.log('keycloak token interceptor request for ' + config.url);
 +      if (config.url.indexOf(keycloakConfig.url) > -1) {
-+        console.log('skipped token injection for ' + config.url);
 +        return config;
 +      }
 +      if (keycloak && keycloak.token) {
-+        console.log('refreshing token : ' + config.url);
 +        let deferred = $q.defer();
 +        keycloak.updateToken(5).success(function () {
 +          config.headers = config.headers || {};
 +          config.headers.Authorization = 'Bearer ' + keycloak.token;
-+          console.log('injecting token : ' + config.url);
 +          deferred.resolve(config);
 +        }).error(function () {
 +          console.log('token refresh failed :' + config.url);
@@ -108,13 +104,12 @@
 +      return config || $q.when(config);
 +    },
 +    response: (response) => {
-+      console.log('RESPONSE '+response.config.url+ ' :' + JSON.stringify(response));
 +      return response || $q.when(response);
 +    },responseError: (rejection)=>{
-+        console.log('ERROR (response) : '+ JSON.stringify(rejection));
++        return $q.reject(rejection);
 +    },
 +    requestError: (rejection) =>{
-+       console.log('ERROR (request) : '+ JSON.stringify(rejection))
++       return $q.reject(rejection);
 +    }
 +
 +  }

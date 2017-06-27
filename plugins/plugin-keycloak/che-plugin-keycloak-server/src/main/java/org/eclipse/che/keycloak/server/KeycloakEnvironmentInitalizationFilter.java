@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.keycloak.server;
 
+import org.eclipse.che.account.api.AccountManager;
+import org.eclipse.che.account.shared.model.Account;
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -48,6 +51,9 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
     @Inject
     private UserManager userManager;
 
+    @Inject
+    private AccountManager accountManager;
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
@@ -65,26 +71,11 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
         if (context == null) {
             throw new ServletException("Unable to get security context.");
         }
-
-        User user;
-
         final IDToken token = context.getIdToken() != null ? context.getIdToken() : context.getToken();
-        try {
-            user = userManager.getById(token.getSubject());
-        } catch (NotFoundException ex) {
-            try {
-                final UserImpl cheUser = new UserImpl(token.getSubject(),
-                                                      token.getEmail(),
-                                                      token.getPreferredUsername(),
-                                                      "secret",
-                                                      emptyList());
-                user = userManager.create(cheUser, false);
-            } catch (ServerException | ConflictException e) {
-                throw new ServletException("Unable to create new user");
-            }
-        } catch (ServerException e) {
-            throw new ServletException("Unable to get user");
-        }
+
+        User user = getOrCreateUser(token.getSubject(), token.getEmail(), token.getPreferredUsername());
+        getOrCreateAccount(token.getPreferredUsername(), token.getPreferredUsername());
+
         final Subject subject =
                 new SubjectImpl(user.getName(), user.getId(), context.getTokenString(), false);
         httpRequest.getSession().setAttribute("codenvy_user", subject);
@@ -95,6 +86,43 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
         } finally {
             EnvironmentContext.reset();
         }
+    }
+
+    private User getOrCreateUser(String id, String email, String username) throws ServletException {
+        try {
+            return  userManager.getById(id);
+        } catch (NotFoundException ex) {
+            try {
+                final UserImpl cheUser = new UserImpl(id,
+                                                      email,
+                                                      username,
+                                                      "secret",
+                                                      emptyList());
+                return userManager.create(cheUser, false);
+            } catch (ServerException | ConflictException e) {
+                throw new ServletException("Unable to create new user");
+            }
+        } catch (ServerException e) {
+            throw new ServletException("Unable to get user");
+        }
+
+    }
+
+    private Account getOrCreateAccount(String id, String namespace) throws ServletException {
+        try {
+            return accountManager.getById(id);
+        } catch (NotFoundException e) {
+            try {
+                Account account = new AccountImpl(id, namespace, "personal");
+                accountManager.create(account);
+                return  account;
+            } catch (ServerException | ConflictException ex) {
+                throw new ServletException("Unable to create new account");
+            }
+        } catch (ServerException e) {
+            throw new ServletException("Unable to get account");
+        }
+
     }
 
     private HttpServletRequest addUserInRequest(final HttpServletRequest httpRequest, final Subject subject) {
