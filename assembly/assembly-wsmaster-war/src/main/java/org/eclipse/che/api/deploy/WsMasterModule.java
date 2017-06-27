@@ -26,7 +26,9 @@ import org.eclipse.che.api.installer.SshInstaller;
 import org.eclipse.che.api.installer.TerminalInstaller;
 import org.eclipse.che.api.installer.UnisonInstaller;
 import org.eclipse.che.api.installer.WsInstaller;
-import org.eclipse.che.api.installer.server.impl.LocalInstallerRegistry;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
+import org.eclipse.che.api.installer.server.InstallerRegistryProvider;
+import org.eclipse.che.api.installer.server.InstallerRegistryService;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
@@ -124,7 +126,9 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker.class);
         bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);
         bind(org.eclipse.che.everrest.ETagResponseFilter.class);
-        bind(org.eclipse.che.api.installer.server.InstallerRegistryService.class);
+
+        bind(InstallerRegistry.class).toProvider(InstallerRegistryProvider.class);
+        bind(InstallerRegistryService.class);
 
         // temporary solution
         bind(org.eclipse.che.api.workspace.server.event.RuntimeStatusJsonRpcMessenger.class).asEagerSingleton();
@@ -160,7 +164,6 @@ public class WsMasterModule extends AbstractModule {
 //        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
 
         // installers
-        bind(org.eclipse.che.api.installer.server.InstallerRegistry.class).to(LocalInstallerRegistry.class);
         Multibinder<Installer> installers = Multibinder.newSetBinder(binder(), Installer.class);
         installers.addBinding().to(SshInstaller.class);
         installers.addBinding().to(UnisonInstaller.class);

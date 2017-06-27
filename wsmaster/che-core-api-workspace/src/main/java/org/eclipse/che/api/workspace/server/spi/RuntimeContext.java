@@ -19,7 +19,6 @@ import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.rest.HttpRequestHelper;
-import org.eclipse.che.api.installer.server.impl.InstallerSorter;
 
 import javax.ws.rs.HttpMethod;
 import java.net.MalformedURLException;
@@ -43,7 +42,6 @@ public abstract class RuntimeContext {
     public RuntimeContext(Environment environment,
                           RuntimeIdentity identity,
                           RuntimeInfrastructure infrastructure,
-                          InstallerSorter installerSorter,
                           InstallerRegistry installerRegistry)
             throws ValidationException, InfrastructureException {
         this.environment = environment;
@@ -53,7 +51,7 @@ public abstract class RuntimeContext {
 
         Map<String, ? extends MachineConfig> effectiveMachines = environment.getMachines();
         for (Map.Entry<String, ? extends MachineConfig> entry : effectiveMachines.entrySet()) {
-            internalMachines.put(entry.getKey(), new InternalMachineConfig(entry.getValue(), installerRegistry, installerSorter));
+            internalMachines.put(entry.getKey(), new InternalMachineConfig(entry.getValue(), installerRegistry));
         }
 
     }

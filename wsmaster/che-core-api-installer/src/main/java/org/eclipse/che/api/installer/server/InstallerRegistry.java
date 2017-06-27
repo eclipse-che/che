@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.installer.server;
 
+import org.eclipse.che.api.installer.server.exception.IllegalInstallerKey;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.shared.model.Installer;
-import org.eclipse.che.api.installer.shared.model.InstallerKey;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,36 +21,37 @@ import java.util.List;
 /**
  * The registry for installers that might be injected into machine.
  *
- * @see  Installer
- * @see  InstallerKey
- *
  * @author Anatoliy Bazko
+ * @author Sergii Leshchenko
+ * @see Installer
  */
 public interface InstallerRegistry {
 
     /**
-     * Gets {@link Installer}.
+     * Gets {@link Installer} by key.
      *
      * @param installerKey
-     *      the installer key
+     *         the installer key
      * @return {@link Installer}
+     * @throws IllegalInstallerKey
+     *         if specified installer key has wrong format
      * @throws InstallerNotFoundException
-     *      if installer not found in the registry
+     *         if installer not found in the registry
      * @throws InstallerException
-     *      if unexpected error occurred
+     *         if unexpected error occurred
      */
-    Installer getInstaller(InstallerKey installerKey) throws InstallerException;
+    Installer getInstaller(String installerKey) throws InstallerException;
 
     /**
      * Returns a list of the available versions of the specific installer.
      *
      * @param id
-     *      the id of the installer
+     *         the id of the installer
      * @return list of versions
      * @throws InstallerNotFoundException
-     *      if installer not found in the registry
+     *         if installer not found in the registry
      * @throws InstallerException
-     *      if unexpected error occurred
+     *         if unexpected error occurred
      */
     List<String> getVersions(String id) throws InstallerException;
 
@@ -60,15 +61,23 @@ public interface InstallerRegistry {
      *
      * @return collection of installers
      * @throws InstallerException
-     *      if unexpected error occurred
+     *         if unexpected error occurred
      */
     Collection<Installer> getInstallers() throws InstallerException;
 
     /**
      * Traverses dependencies of all listed installers and
-     * returns properly ordered list of non-duplicated Installer descriptions
-     * @param keys keys of interesting installers
+     * returns properly ordered list of non-duplicated installer descriptions
+     *
+     * @param installers
+     *         installers to fetch dependencies and order
      * @return list of installers
+     * @throws IllegalInstallerKey
+     *         if specified installer key has wrong format
+     * @throws InstallerNotFoundException
+     *         if some of specified installer is not found in the registry
+     * @throws InstallerException
+     *         if unexpected error occurred
      */
-    List <Installer> getOrderedInstallers(List <InstallerKey> keys);
+    List<Installer> getOrderedInstallers(List<String> installers) throws InstallerException;
 }

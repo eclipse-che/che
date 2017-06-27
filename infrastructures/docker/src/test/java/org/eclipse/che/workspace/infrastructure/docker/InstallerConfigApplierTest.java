@@ -10,13 +10,27 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -25,39 +39,31 @@ import static org.testng.Assert.assertTrue;
  */
 @Listeners(value = {MockitoTestNGListener.class})
 public class InstallerConfigApplierTest {
+    @Mock
+    private InstallerImpl     installer1;
+    @Mock
+    private InstallerImpl     installer2;
+    @Mock
+    private InstallerImpl     installer3;
+    @Mock
+    private InstallerRegistry installerRegistry;
 
-//    @Mock
-//    private Instance             machine;
-    @Mock
-    private InstallerImpl   agent1;
-    @Mock
-    private InstallerImpl   agent2;
-    @Mock
-    private InstallerImpl   agent3;
-    /*
-    TODO Uncomment and fix
-    @Mock
-    private AgentLauncherFactory agentLauncher;
-    @Mock
-    private InstallerRegistry    installerRegistry;
-
-    private InstallerConfigApplier agentConfigApplier;
+    private InstallerConfigApplier installerConfigApplier;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        agentConfigApplier = new InstallerConfigApplier(sorter, installerRegistry);
-        when(installerRegistry.getInstaller(InstallerKeyImpl.parse("agent1"))).thenReturn(agent1);
-        when(installerRegistry.getInstaller(InstallerKeyImpl.parse("agent2"))).thenReturn(agent2);
-        when(installerRegistry.getInstaller(InstallerKeyImpl.parse("agent3"))).thenReturn(agent3);
+        installerConfigApplier = new InstallerConfigApplier(installerRegistry);
+        when(installerRegistry.getInstaller("installer1")).thenReturn(installer1);
+        when(installerRegistry.getInstaller("installer2")).thenReturn(installer2);
+        when(installerRegistry.getInstaller("installer3")).thenReturn(installer3);
 
-        when(agent1.getScript()).thenReturn("script1");
-        when(agent1.getDependencies()).thenReturn(singletonList("fqn3"));
+        when(installer1.getScript()).thenReturn("script1");
+        when(installer1.getDependencies()).thenReturn(singletonList("installer3"));
 
-        when(agent2.getScript()).thenReturn("script2");
-        when(agent2.getDependencies()).thenReturn(singletonList("fqn3"));
+        when(installer2.getScript()).thenReturn("script2");
+        when(installer2.getDependencies()).thenReturn(singletonList("installer2"));
 
-        when(agent3.getScript()).thenReturn("script3");
-
+        when(installer3.getScript()).thenReturn("script3");
     }
 
     @Test
@@ -67,14 +73,14 @@ public class InstallerConfigApplierTest {
         when(serverConf1.getProtocol()).thenReturn("http");
         when(serverConf1.getPath()).thenReturn("b");
 
-        when(sorter.sort(any())).thenReturn(singletonList(InstallerKeyImpl.parse("agent1")));
-        when(agent1.getServers()).thenAnswer(invocation -> singletonMap("a", serverConf1));
+        when(installerRegistry.getOrderedInstallers(any())).thenReturn(singletonList(installer1));
+        when(installer1.getServers()).thenAnswer(invocation -> singletonMap("a", serverConf1));
         DockerContainerConfig service = new DockerContainerConfig();
 
-        agentConfigApplier.apply(new MachineConfigImpl(singletonList("agent1"),
-                                                       emptyMap(),
-                                                       emptyMap()),
-                                 service);
+        installerConfigApplier.apply(new MachineConfigImpl(singletonList("installer1"),
+                                                           emptyMap(),
+                                                           emptyMap()),
+                                     service);
 
         Map<String, String> labels = service.getLabels();
         assertEquals(labels.size(), 3);
@@ -90,18 +96,16 @@ public class InstallerConfigApplierTest {
         when(serverConf1.getPort()).thenReturn("1111/udp");
         when(serverConfig.getPort()).thenReturn("2222/tcp");
 
-        when(sorter.sort(any())).thenReturn(asList(InstallerKeyImpl.parse("agent1"),
-                                                   InstallerKeyImpl.parse("agent2"),
-                                                   InstallerKeyImpl.parse("agent3")));
-        when(agent1.getServers()).thenAnswer(invocation -> singletonMap("a", serverConf1));
-        when(agent2.getServers()).thenAnswer(invocation -> singletonMap("b", serverConfig));
-        when(agent3.getServers()).thenReturn(emptyMap());
+        when(installerRegistry.getOrderedInstallers(any())).thenReturn(asList(installer1, installer2, installer3));
+        when(installer1.getServers()).thenAnswer(invocation -> singletonMap("a", serverConf1));
+        when(installer2.getServers()).thenAnswer(invocation -> singletonMap("b", serverConfig));
+        when(installer3.getServers()).thenReturn(emptyMap());
         DockerContainerConfig service = new DockerContainerConfig();
 
-        agentConfigApplier.apply(new MachineConfigImpl(asList("agent1", "agent2", "agent3"),
-                                                       emptyMap(),
-                                                       emptyMap()),
-                                 service);
+        installerConfigApplier.apply(new MachineConfigImpl(asList("installer1", "installer2", "installer3"),
+                                                           emptyMap(),
+                                                           emptyMap()),
+                                     service);
 
         List<String> exposedPorts = service.getExpose();
         assertTrue(exposedPorts.contains("1111/udp"));
@@ -110,15 +114,15 @@ public class InstallerConfigApplierTest {
 
     @Test
     public void shouldAddEnvVariables() throws Exception {
-        when(sorter.sort(any())).thenReturn(asList(InstallerKeyImpl.parse("agent1"), InstallerKeyImpl.parse("agent2")));
-        when(agent1.getProperties()).thenReturn(singletonMap("environment", "p1=v1,p2=v2"));
-        when(agent2.getProperties()).thenReturn(singletonMap("environment", "p3=v3"));
+        when(installerRegistry.getOrderedInstallers(any())).thenReturn(asList(installer1, installer2));
+        when(installer1.getProperties()).thenReturn(singletonMap("environment", "p1=v1,p2=v2"));
+        when(installer2.getProperties()).thenReturn(singletonMap("environment", "p3=v3"));
         DockerContainerConfig service = new DockerContainerConfig();
 
-        agentConfigApplier.apply(new MachineConfigImpl(asList("agent1", "agent2"),
-                                                       emptyMap(),
-                                                       emptyMap()),
-                                 service);
+        installerConfigApplier.apply(new MachineConfigImpl(asList("installer1", "installer2"),
+                                                           emptyMap(),
+                                                           emptyMap()),
+                                     service);
 
         Map<String, String> env = service.getEnvironment();
         assertEquals(env.size(), 3);
@@ -129,17 +133,16 @@ public class InstallerConfigApplierTest {
 
     @Test
     public void shouldIgnoreEnvironmentIfIllegalFormat() throws Exception {
-        when(sorter.sort(any())).thenReturn(singletonList(InstallerKeyImpl.parse("agent1")));
-        when(agent1.getProperties()).thenReturn(singletonMap("environment", "p1"));
+        when(installerRegistry.getOrderedInstallers(any())).thenReturn(singletonList(installer1));
+        when(installer1.getProperties()).thenReturn(singletonMap("environment", "p1"));
         DockerContainerConfig service = new DockerContainerConfig();
 
-        agentConfigApplier.apply(new MachineConfigImpl(singletonList("agent1"),
-                                                       emptyMap(),
-                                                       emptyMap()),
-                                 service);
+        installerConfigApplier.apply(new MachineConfigImpl(singletonList("installer1"),
+                                                           emptyMap(),
+                                                           emptyMap()),
+                                     service);
 
         Map<String, String> env = service.getEnvironment();
         assertEquals(env.size(), 0);
     }
-    */
 }

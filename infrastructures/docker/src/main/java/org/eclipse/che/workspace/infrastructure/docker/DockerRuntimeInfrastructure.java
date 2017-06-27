@@ -17,7 +17,6 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.installer.server.impl.InstallerSorter;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -44,7 +43,6 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     private final InfrastructureProvisioner infrastructureProvisioner;
     private final EnvironmentNormalizer     environmentNormalizer;
     private final DockerRuntimeFactory      runtimeFactory;
-    private final InstallerSorter           installerSorter;
     private final InstallerRegistry         installerRegistry;
 
     @Inject
@@ -55,7 +53,6 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                        EnvironmentNormalizer environmentNormalizer,
                                        Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers,
                                        DockerRuntimeFactory runtimeFactory,
-                                       InstallerSorter installerSorter,
                                        InstallerRegistry installerRegistry,
                                        EventService eventService) {
         super("docker", environmentParsers.keySet(), eventService);
@@ -66,7 +63,6 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         this.environmentNormalizer = environmentNormalizer;
         this.runtimeFactory = runtimeFactory;
         this.installerRegistry = installerRegistry;
-        this.installerSorter = installerSorter;
     }
 
     @Override
@@ -106,7 +102,6 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                         dockerEnvironment,
                                         orderedServices,
                                         installerRegistry,
-                                        installerSorter,
                                         runtimeFactory);
     }
 }

@@ -8,26 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.installer.shared.dto;
+package org.eclipse.che.api.installer.server.exception;
 
-import org.eclipse.che.api.installer.shared.model.InstallerKey;
-import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.api.core.BadRequestException;
 
 /**
- * @author Anatolii Bazko
+ * @author Sergii Leshchenko
  */
-@DTO
-public interface InstallerKeyDto extends InstallerKey {
+public class IllegalInstallerKey extends RuntimeException {
+    public IllegalInstallerKey(String message) {
+        super(message);
+    }
 
-    String getName();
-
-    void setName(String name);
-
-    InstallerKeyDto withName(String name);
-
-    String getVersion();
-
-    void setVersion(String version);
-
-    InstallerKeyDto withVersion(String version);
+    public IllegalInstallerKey(String message, BadRequestException cause) {
+        super(message, cause);
+    }
 }

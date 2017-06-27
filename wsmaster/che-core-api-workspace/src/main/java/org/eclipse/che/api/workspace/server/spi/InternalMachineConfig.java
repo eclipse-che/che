@@ -14,10 +14,8 @@ import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
-import org.eclipse.che.api.installer.server.impl.InstallerSorter;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.shared.model.Installer;
-import org.eclipse.che.api.installer.shared.model.InstallerKey;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,13 +39,10 @@ public class InternalMachineConfig {
     private final Map<String, String>       attributes;
 
     private final InstallerRegistry installerRegistry;
-    private final InstallerSorter   installerSorter;
 
     public InternalMachineConfig(MachineConfig originalConfig,
-                                 InstallerRegistry installerRegistry,
-                                 InstallerSorter installerSorter) throws InfrastructureException {
+                                 InstallerRegistry installerRegistry) throws InfrastructureException {
         this.installerRegistry = installerRegistry;
-        this.installerSorter = installerSorter;
         this.installers = new ArrayList<>();
         this.servers = new HashMap<>();
         this.servers.putAll(originalConfig.getServers());
@@ -81,12 +76,8 @@ public class InternalMachineConfig {
     private void initInstallers(List<String> installersKeys) throws InfrastructureException {
         try {
             // TODO ensure already contains dependencies
-            List<InstallerKey> sortedInstallers = installerSorter.sort(installersKeys);
-            List<Installer> installersConf = new ArrayList<>();
-            for (InstallerKey installerKey : sortedInstallers) {
-                installersConf.add(installerRegistry.getInstaller(installerKey));
-            }
-            for (Installer installer : installersConf) {
+            List<Installer> sortedInstallers = installerRegistry.getOrderedInstallers(installersKeys);
+            for (Installer installer : sortedInstallers) {
                 this.installers.add(new InstallerImpl(installer));
                 for (Map.Entry<String, ? extends ServerConfig> serverEntry : installer.getServers().entrySet()) {
                     if (servers.putIfAbsent(serverEntry.getKey(), serverEntry.getValue()) != null &&

@@ -15,9 +15,7 @@ import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
-import org.eclipse.che.api.installer.server.impl.InstallerSorter;
 import org.eclipse.che.api.installer.shared.model.Installer;
-import org.eclipse.che.api.installer.shared.model.InstallerKey;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
@@ -57,13 +55,10 @@ public class InstallerConfigApplier {
     private static final Logger LOG = getLogger(InstallerConfigApplier.class);
 
     private final InstallerRegistry installerRegistry;
-    private final InstallerSorter   sorter;
 
     @Inject
-    public InstallerConfigApplier(InstallerRegistry installerRegistry,
-                                  InstallerSorter sorter) {
+    public InstallerConfigApplier(InstallerRegistry installerRegistry) {
         this.installerRegistry = installerRegistry;
-        this.sorter = sorter;
     }
 
     /**
@@ -101,8 +96,7 @@ public class InstallerConfigApplier {
     public void apply(@Nullable MachineConfig machineConf,
                       DockerContainerConfig machine) throws InstallerException {
         if (machineConf != null) {
-            for (InstallerKey installerKey : sorter.sort(machineConf.getInstallers())) {
-                Installer installer = installerRegistry.getInstaller(installerKey);
+            for (Installer installer : installerRegistry.getOrderedInstallers(machineConf.getInstallers())) {
                 addEnv(machine, installer.getProperties());
                 addExposedPorts(machine, installer.getServers());
                 addLabels(machine, installer.getServers());

@@ -11,9 +11,7 @@
 package org.eclipse.che.api.installer.server;
 
 import org.eclipse.che.api.installer.shared.dto.InstallerDto;
-import org.eclipse.che.api.installer.shared.dto.InstallerKeyDto;
 import org.eclipse.che.api.installer.shared.model.Installer;
-import org.eclipse.che.api.installer.shared.model.InstallerKey;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -32,9 +30,5 @@ public class DtoConverter {
                                          .withDependencies(installer.getDependencies());
     }
 
-    public static InstallerKeyDto asDto(InstallerKey key) {
-        return newDto(InstallerKeyDto.class).withName(key.getId()).withVersion(key.getVersion());
-    }
-
-    private DtoConverter() { }
+    private DtoConverter() {}
 }
