@@ -25,7 +25,6 @@ import org.eclipse.che.api.agent.SshAgent;
 import org.eclipse.che.api.agent.UnisonAgent;
 import org.eclipse.che.api.agent.WsAgent;
 import org.eclipse.che.api.agent.server.impl.LocalAgentRegistry;
-import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
@@ -172,25 +171,6 @@ public class WsMasterModule extends AbstractModule {
         agents.addBinding().to(LSCSharpAgent.class);
         agents.addBinding().to(LSTypeScriptAgent.class);
         agents.addBinding().to(GitCredentialsAgent.class);
-
-        Multibinder<AgentLauncher> launchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
-// FIXME: spi
-//        launchers.addBinding().to(WsAgentLauncher.class);
-//        launchers.addBinding().to(org.eclipse.che.api.agent.ExecAgentLauncher.class);
-//        launchers.addBinding().to(org.eclipse.che.api.agent.TerminalAgentLauncher.class);
-//        launchers.addBinding().to(SshAgentLauncher.class);
-
-        bindConstant().annotatedWith(Names.named("machine.ws_agent.run_command"))
-                      .to("export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
-        bindConstant().annotatedWith(Names.named("machine.terminal_agent.run_command"))
-                      .to("$HOME/che/terminal/che-websocket-terminal " +
-                          "-addr :4411 " +
-                          "-cmd ${SHELL_INTERPRETER}");
-        bindConstant().annotatedWith(Names.named("machine.exec_agent.run_command"))
-                      .to("$HOME/che/exec-agent/che-exec-agent " +
-                          "-addr :4412 " +
-                          "-cmd ${SHELL_INTERPRETER} " +
-                          "-logs-dir $HOME/che/exec-agent/logs");
 
         bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
