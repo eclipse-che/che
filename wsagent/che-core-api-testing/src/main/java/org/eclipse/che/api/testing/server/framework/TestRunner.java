@@ -62,6 +62,7 @@ public interface TestRunner {
      * @throws Exception
      *             when test runner execution fails.
      */
+    @Deprecated
     TestResultRootDto runTests(Map<String, String> testParameters) throws Exception;
 
     /**
@@ -72,6 +73,7 @@ public interface TestRunner {
      * @param testResultsPath
      * @return child elements for test result under given path
      */
+    @Deprecated
     List<TestResultDto> getTestResults(List<String> testResultsPath);
 
 

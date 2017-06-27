@@ -113,11 +113,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-testing-testng-runtime</artifactId>
+            <artifactId>che-plugin-testing-phpunit-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-testing-phpunit-server</artifactId>
+            <artifactId>che-plugin-testing-testng-runtime</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

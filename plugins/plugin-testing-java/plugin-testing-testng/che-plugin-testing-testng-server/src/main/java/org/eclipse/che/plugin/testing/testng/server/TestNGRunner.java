@@ -14,6 +14,8 @@ import com.beust.jcommander.JCommander;
 
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.che.api.testing.shared.dto.TestResultDto;
+import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.execution.CommandLine;
 import org.eclipse.che.commons.lang.execution.ExecutionException;
@@ -72,6 +74,18 @@ public class TestNGRunner extends AbstractJavaTestRunner {
     @Override
     @Deprecated
     public TestResult execute(Map<String, String> testParameters) throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    @Deprecated
+    public TestResultRootDto runTests(Map<String, String> testParameters) throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    @Deprecated
+    public List<TestResultDto> getTestResults(List<String> testResultsPath) {
         throw new UnsupportedOperationException();
     }
 
