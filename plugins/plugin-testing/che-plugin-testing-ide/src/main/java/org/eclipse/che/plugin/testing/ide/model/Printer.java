@@ -11,14 +11,23 @@
 package org.eclipse.che.plugin.testing.ide.model;
 
 /**
- *
+ * Describes object which can prints some information to some output panel.
  */
 public interface Printer {
 
     String NEW_LINE = "\n";
 
+    /**
+     * Prints information to the output panel.
+     *
+     * @param text
+     *         text message
+     * @param type
+     *         type of message
+     */
     void print(String text, OutputType type);
 
+    /** Sets new printable object. */
     void onNewPrintable(Printable printable);
 
     enum OutputType {

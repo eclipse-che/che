@@ -16,7 +16,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 /**
- *
+ * Data stack of the test's suites.
  */
 public class TestSuiteStack {
 
