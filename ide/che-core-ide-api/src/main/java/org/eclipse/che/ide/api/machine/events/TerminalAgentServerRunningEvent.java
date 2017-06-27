@@ -14,27 +14,19 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
- * Fired when some server in some machine goes into a stopped state.
+ * Fired when terminal-agent server in some machine goes into a running state.
+ * Allows to avoid checking server's name unlike {@link ServerRunningEvent}.
  *
- * @see WsAgentServerStoppedEvent
- * @see TerminalAgentServerStoppedEvent
- * @see ExecAgentServerStoppedEvent
+ * @see ServerRunningEvent
  */
-public class ServerStoppedEvent extends GwtEvent<ServerStoppedEvent.Handler> {
+public class TerminalAgentServerRunningEvent extends GwtEvent<TerminalAgentServerRunningEvent.Handler> {
 
-    public static final Type<ServerStoppedEvent.Handler> TYPE = new Type<>();
+    public static final Type<TerminalAgentServerRunningEvent.Handler> TYPE = new Type<>();
 
-    private final String serverName;
     private final String machineName;
 
-    public ServerStoppedEvent(String serverName, String machineName) {
-        this.serverName = serverName;
+    public TerminalAgentServerRunningEvent(String machineName) {
         this.machineName = machineName;
-    }
-
-    /** Returns the running server's name. */
-    public String getServerName() {
-        return serverName;
     }
 
     /** Returns the related machine's name. */
@@ -49,10 +41,10 @@ public class ServerStoppedEvent extends GwtEvent<ServerStoppedEvent.Handler> {
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onServerStopped(this);
+        handler.onTerminalAgentServerRunning(this);
     }
 
     public interface Handler extends EventHandler {
-        void onServerStopped(ServerStoppedEvent event);
+        void onTerminalAgentServerRunning(TerminalAgentServerRunningEvent event);
     }
 }

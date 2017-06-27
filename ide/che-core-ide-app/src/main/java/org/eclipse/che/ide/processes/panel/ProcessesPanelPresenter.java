@@ -45,6 +45,7 @@ import org.eclipse.che.ide.api.machine.events.ActivateProcessOutputEvent;
 import org.eclipse.che.ide.api.machine.events.MachineRunningEvent;
 import org.eclipse.che.ide.api.machine.events.MachineStartingEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
+import org.eclipse.che.ide.api.machine.events.TerminalAgentServerRunningEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
@@ -110,6 +111,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                                       WorkspaceStoppedEvent.Handler,
                                                                       MachineStartingEvent.Handler,
                                                                       MachineRunningEvent.Handler,
+                                                                      TerminalAgentServerRunningEvent.Handler,
                                                                       WsAgentStateHandler,
                                                                       EnvironmentOutputEvent.Handler,
                                                                       DownloadWorkspaceOutputEvent.Handler,
@@ -193,6 +195,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
         eventBus.addHandler(MachineStartingEvent.TYPE, this);
         eventBus.addHandler(MachineRunningEvent.TYPE, this);
+        eventBus.addHandler(TerminalAgentServerRunningEvent.TYPE, this);
         eventBus.addHandler(EnvironmentOutputEvent.TYPE, this);
         eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
         eventBus.addHandler(PartStackStateChangedEvent.TYPE, this);
@@ -216,14 +219,14 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         for (MachineImpl machine : machines) {
             if (machine.getServerByName(WSAGENT_REFERENCE).isPresent()) {
-                provideMachineNode(machine, true);
+                provideMachineNode(machine.getName(), true);
                 machines.remove(machine);
                 break;
             }
         }
 
         for (MachineImpl machine : machines) {
-            provideMachineNode(machine, true);
+            provideMachineNode(machine.getName(), true);
         }
 
         ProcessTreeNode machineToSelect = machineNodes.entrySet().iterator().next().getValue();
@@ -278,13 +281,13 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onMachineStarting(MachineStartingEvent event) {
-        provideMachineNode(event.getMachine(), false);
+        provideMachineNode(event.getMachine().getName(), false);
     }
 
     @Override
     public void onMachineRunning(MachineRunningEvent event) {
         machines.put(event.getMachine().getName(), event.getMachine());
-        provideMachineNode(event.getMachine(), true);
+        provideMachineNode(event.getMachine().getName(), true);
     }
 
     @Override
@@ -390,7 +393,11 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             return;
         }
 
-        final ProcessTreeNode machineTreeNode = provideMachineNode(machine, false);
+        final ProcessTreeNode machineTreeNode = provideMachineNode(machine.getName(), false);
+        if (machineTreeNode == null) {
+            return;
+        }
+
         final TerminalPresenter newTerminal = terminalFactory.create(machine, source);
         final IsWidget terminalWidget = newTerminal.getView();
         final String terminalName = getUniqueTerminalName(machineTreeNode);
@@ -818,15 +825,15 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      * <li>creates new machine node when this one not exist or {@code replace} is {@code true}</li>
      * <li>returns old machine node when this one exist and {@code replace} is {@code false}</li>
      *
-     * @param machine
-     *         machine to creating node
+     * @param machineName
+     *         name of the machine to creating node
      * @param replace
      *         existed node will be replaced when {@code replace} is {@code true}
      * @return machine node
      */
-    private ProcessTreeNode provideMachineNode(MachineImpl machine, boolean replace) {
-        final String machineId = machine.getName();
-        final ProcessTreeNode existedMachineNode = findTreeNodeById(machineId);
+    @Nullable
+    private ProcessTreeNode provideMachineNode(String machineName, boolean replace) {
+        final ProcessTreeNode existedMachineNode = findTreeNodeById(machineName);
         if (!replace && existedMachineNode != null) {
             return existedMachineNode;
         }
@@ -836,7 +843,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         // remove existed node
         for (ProcessTreeNode node : rootNode.getChildren()) {
-            if (machine.getName().equals(node.getName())) {
+            if (machineName.equals(node.getName())) {
                 children.addAll(node.getChildren());
                 rootNode.getChildren().remove(node);
                 break;
@@ -844,15 +851,24 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         // create new node
-        final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, children);
+        RuntimeImpl runtime = appContext.getWorkspace().getRuntime();
+        if (runtime == null) {
+            return null;
+        }
+        Optional<MachineImpl> machineByName = runtime.getMachineByName(machineName);
+        if (!machineByName.isPresent()) {
+            return null;
+        }
+
+        final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machineByName.get(), null, children);
         newMachineNode.setRunning(/*RUNNING == machine.getStatus()*/true);
-        newMachineNode.setHasTerminalAgent(hasAgent(machine.getName(), TERMINAL_AGENT) || hasTerminal(machineId));
-        newMachineNode.setHasSSHAgent(hasAgent(machine.getName(), SSH_AGENT));
+        newMachineNode.setHasTerminalAgent(hasAgent(machineName, TERMINAL_AGENT) || hasTerminal(machineName));
+        newMachineNode.setHasSSHAgent(hasAgent(machineName, SSH_AGENT));
         for (ProcessTreeNode child : children) {
             child.setParent(newMachineNode);
         }
 
-        machineNodes.put(machineId, newMachineNode);
+        machineNodes.put(machineName, newMachineNode);
 
         // add to children
         rootNode.getChildren().add(newMachineNode);
@@ -861,9 +877,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         view.setProcessesData(rootNode);
 
         // add output for the machine if it is not exist
-        if (!consoles.containsKey(machine.getName())) {
-            OutputConsole outputConsole = commandConsoleFactory.create(machine.getName());
-            addOutputConsole(machine.getName(), newMachineNode, outputConsole, true);
+        if (!consoles.containsKey(machineName)) {
+            OutputConsole outputConsole = commandConsoleFactory.create(machineName);
+            addOutputConsole(machineName, newMachineNode, outputConsole, true);
         }
 
         return newMachineNode;
@@ -912,12 +928,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         ProcessTreeNode machineToSelect = null;
         if (devMachine != null) {
-            machineToSelect = provideMachineNode(devMachine, true);
+            machineToSelect = provideMachineNode(devMachine.getName(), true);
             wsMachines.remove(devMachine);
         }
 
         for (MachineImpl machine : wsMachines) {
-            provideMachineNode(machine, true);
+            provideMachineNode(machine.getName(), true);
         }
 
         if (machineToSelect != null) {
@@ -931,7 +947,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         for (MachineImpl machine : machines.values()) {
             if (/*RUNNING.equals(machine.getStatus()) && */!wsMachines.contains(machine)) {
-                provideMachineNode(machine, true);
+                provideMachineNode(machine.getName(), true);
             }
         }
     }
@@ -1143,7 +1159,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         // Create a temporary machine node to display outputs.
 
         if (!consoles.containsKey(machineName)) {
-            provideMachineNode(new MachineImpl(machineName, new HashMap<>(), new HashMap<>()), true);
+            provideMachineNode(machineName, true);
         }
 
         OutputConsole console = consoles.get(machineName);
@@ -1304,4 +1320,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         $doc.body.removeChild(element);
     }-*/;
 
+    @Override
+    public void onTerminalAgentServerRunning(TerminalAgentServerRunningEvent event) {
+        provideMachineNode(event.getMachineName(), true);
+    }
 }

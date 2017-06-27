@@ -22,6 +22,8 @@ import org.eclipse.che.ide.api.machine.events.ExecAgentServerRunningEvent;
 import org.eclipse.che.ide.api.machine.events.ExecAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.machine.events.ServerRunningEvent;
 import org.eclipse.che.ide.api.machine.events.ServerStoppedEvent;
+import org.eclipse.che.ide.api.machine.events.TerminalAgentServerRunningEvent;
+import org.eclipse.che.ide.api.machine.events.TerminalAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
@@ -35,6 +37,7 @@ import java.util.function.BiConsumer;
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.STOPPED;
 import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
+import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.ide.api.machine.events.WsAgentStateEvent.createWsAgentStartedEvent;
 
@@ -67,6 +70,8 @@ class ServerStatusEventHandler {
 
                         // fire deprecated WsAgentStateEvent for backward compatibility with IDE 5.x
                         eventBus.fireEvent(createWsAgentStartedEvent());
+                    } else if (TERMINAL_REFERENCE.equals(event.getServerName())) {
+                        eventBus.fireEvent(new TerminalAgentServerRunningEvent(event.getMachineName()));
                     } else if (EXEC_AGENT_REFERENCE.equals(event.getServerName())) {
                         eventBus.fireEvent(new ExecAgentServerRunningEvent(event.getMachineName()));
                     }
@@ -75,6 +80,8 @@ class ServerStatusEventHandler {
 
                     if (WSAGENT_REFERENCE.equals(event.getServerName())) {
                         eventBus.fireEvent(new WsAgentServerStoppedEvent(event.getMachineName()));
+                    } else if (TERMINAL_REFERENCE.equals(event.getServerName())) {
+                        eventBus.fireEvent(new TerminalAgentServerStoppedEvent(event.getMachineName()));
                     } else if (EXEC_AGENT_REFERENCE.equals(event.getServerName())) {
                         eventBus.fireEvent(new ExecAgentServerStoppedEvent(event.getMachineName()));
                     }
