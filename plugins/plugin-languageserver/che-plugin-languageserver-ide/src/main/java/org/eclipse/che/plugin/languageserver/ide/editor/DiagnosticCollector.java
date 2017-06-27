@@ -22,18 +22,18 @@ public interface DiagnosticCollector {
      * @param diagnostic
      *         Diagnostic - The discovered diagnostic.
      */
-    void acceptDiagnostic(Diagnostic diagnostic);
+    void acceptDiagnostic(String diagnosticsCollection, Diagnostic diagnostic);
 
     /**
      * Notification sent before starting the diagnostic process.
      * Typically, this would tell a diagnostic collector to clear previously recorded diagnostic.
      */
-    void beginReporting();
+    void beginReporting(String diagnosticsCollection);
 
     /**
      * Notification sent after having completed diagnostic process.
      * Typically, this would tell a diagnostic collector that no more diagnostics should be expected in this
      * iteration.
      */
-    void endReporting();
+    void endReporting(String diagnosticsCollection);
 }

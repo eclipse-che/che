@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
@@ -67,14 +68,16 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
     private final Provider<ProjectManager> projectManagerProvider;
     private final ServerInitializer        initializer;
+    private EventService eventService;
 
     @Inject
     public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerLaunchers, Set<LanguageDescription> languages,
-                                      Provider<ProjectManager> projectManagerProvider, ServerInitializer initializer) {
+                                      Provider<ProjectManager> projectManagerProvider, ServerInitializer initializer, EventService eventService) {
         this.languages.addAll(languages);
         this.launchers.addAll(languageServerLaunchers);
         this.projectManagerProvider = projectManagerProvider;
         this.initializer = initializer;
+        this.eventService= eventService;
         this.launchedServers = new HashMap<>();
         this.initializedServers = new HashMap<>();
     }
@@ -122,14 +125,15 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                 List<LanguageServerLauncher> servers2 = servers;
                 if (!servers2.contains(launcher)) {
                     servers2.add(launcher);
-                    initializer.initialize(launcher, projectPath).thenAccept(pair -> {
+                    String id = String.valueOf(serverId.incrementAndGet());
+                    initializer.initialize(launcher, new CheLanguageClient(eventService, id), projectPath).thenAccept(pair -> {
                         synchronized (initializedServers) {
                             List<InitializedLanguageServer> initialized = initializedServers.get(projectPath);
                             if (initialized == null) {
                                 initialized = new ArrayList<>();
                                 initializedServers.put(projectPath, initialized);
                             }
-                            initialized.add(new InitializedLanguageServer(String.valueOf(serverId.incrementAndGet()), pair.first,
+                            initialized.add(new InitializedLanguageServer(id, pair.first,
                                             pair.second, launcher));
                             launchers.remove(launcher);
                             initializedServers.notifyAll();

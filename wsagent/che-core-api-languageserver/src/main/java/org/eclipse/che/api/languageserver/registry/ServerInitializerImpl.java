@@ -45,40 +45,6 @@ public class ServerInitializerImpl implements ServerInitializer {
 
     private final List<ServerInitializerObserver> observers = new ArrayList<>();
 
-    private LanguageClient languageClient;
-
-    @Inject
-    public ServerInitializerImpl(EventService eventService) {
-
-        languageClient = new LanguageClient() {
-
-            @Override
-            public void telemetryEvent(Object object) {
-                // TODO Auto-generated method stub
-            }
-
-            @Override
-            public CompletableFuture<Void> showMessageRequest(ShowMessageRequestParams requestParams) {
-                return CompletableFuture.completedFuture(null);
-            }
-
-            @Override
-            public void showMessage(MessageParams messageParams) {
-                eventService.publish(messageParams);
-            }
-
-            @Override
-            public void publishDiagnostics(PublishDiagnosticsParams diagnostics) {
-                eventService.publish(diagnostics);
-            }
-
-            @Override
-            public void logMessage(MessageParams message) {
-                LOG.error(message.getType() + " " + message.getMessage());
-            }
-        };
-    }
-
     private static int getProcessId() {
         String name = ManagementFactory.getRuntimeMXBean().getName();
         int prefixEnd = name.indexOf('@');
@@ -105,7 +71,7 @@ public class ServerInitializerImpl implements ServerInitializer {
     }
 
     @Override
-    public CompletableFuture<Pair<LanguageServer, InitializeResult>> initialize(LanguageServerLauncher launcher, String projectPath)
+    public CompletableFuture<Pair<LanguageServer, InitializeResult>> initialize(LanguageServerLauncher launcher, LanguageClient client, String projectPath)
                     throws LanguageServerException {
         InitializeParams initializeParams = prepareInitializeParams(projectPath);
         String launcherId = launcher.getDescription().getId();
@@ -113,7 +79,7 @@ public class ServerInitializerImpl implements ServerInitializer {
 
         LanguageServer server;
         try {
-            server = launcher.launch(projectPath, languageClient);
+            server = launcher.launch(projectPath, client);
         } catch (LanguageServerException e) {
             result.completeExceptionally(new LanguageServerException(
                             "Can't initialize Language Server " + launcherId + " on " + projectPath + ". " + e.getMessage(), e));

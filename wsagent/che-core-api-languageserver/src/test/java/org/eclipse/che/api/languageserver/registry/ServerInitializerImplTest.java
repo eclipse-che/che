@@ -60,7 +60,7 @@ public class ServerInitializerImplTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        initializer = spy(new ServerInitializerImpl(eventService));
+        initializer = spy(new ServerInitializerImpl());
         completableFuture = CompletableFuture.completedFuture(new InitializeResult(new ServerCapabilities()));
     }
 
@@ -75,7 +75,7 @@ public class ServerInitializerImplTest {
         doNothing().when(initializer).registerCallbacks(any(), any());
 
         initializer.addObserver(observer);
-        Pair<LanguageServer, InitializeResult> initResult = initializer.initialize(launcher, "/path").get();
+        Pair<LanguageServer, InitializeResult> initResult = initializer.initialize(launcher, null, "/path").get();
 
         assertEquals(server, initResult.first);
         verify(observer, timeout(2000)).onServerInitialized(eq(launcher), eq(server), any(ServerCapabilities.class), eq("/path"));

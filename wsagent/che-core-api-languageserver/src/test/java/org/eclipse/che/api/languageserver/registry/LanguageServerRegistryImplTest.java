@@ -21,6 +21,7 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.mockito.Mock;
@@ -96,14 +97,14 @@ public class LanguageServerRegistryImplTest {
         when(pm.getProjectsRoot()).thenReturn(projectsRoot);
 
         registry = spy(new LanguageServerRegistryImpl(Collections.singleton(languageServerLauncher),
-                        Collections.singleton(languageDescription), pmp, initializer) {
+                        Collections.singleton(languageDescription), pmp, initializer, null) {
             @Override
             protected String extractProjectPath(String filePath) throws LanguageServerException {
                 return PROJECT_PATH;
             }
         });
 
-        when(initializer.initialize(any(LanguageServerLauncher.class), anyString())).thenAnswer(invocation -> {
+        when(initializer.initialize(any(LanguageServerLauncher.class), any(LanguageClient.class), anyString())).thenAnswer(invocation -> {
             return CompletableFuture.completedFuture(Pair.of(languageServer, initializeResult));
         });
     }
@@ -114,6 +115,6 @@ public class LanguageServerRegistryImplTest {
 
         assertNotNull(cap);
         assertEquals(cap, serverCapabilities);
-        verify(initializer).initialize(eq(languageServerLauncher), eq(PROJECT_PATH));
+        verify(initializer).initialize(eq(languageServerLauncher), any(LanguageClient.class), eq(PROJECT_PATH));
     }
 }

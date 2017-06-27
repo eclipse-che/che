@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,6 +71,7 @@ public class AnnotationModelImpl implements AnnotationModel {
         try {
             addPosition(position);
         } catch (BadLocationException ignore) {
+            Log.error(getClass(), "BadLocation for "+annotation);
             //ignore invalid location
         }
         getAnnotationModelEvent().annotationAdded(annotation);

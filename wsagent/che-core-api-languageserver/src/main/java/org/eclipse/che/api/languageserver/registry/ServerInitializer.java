@@ -14,6 +14,7 @@ import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 
 import java.util.concurrent.CompletableFuture;
@@ -28,6 +29,6 @@ public interface ServerInitializer extends ServerInitializerObservable {
      * Initialize new {@link LanguageServer} with given project path.
      * @return 
      */
-    CompletableFuture<Pair<LanguageServer, InitializeResult>> initialize(LanguageServerLauncher launcher, String projectPath) throws LanguageServerException;
+    CompletableFuture<Pair<LanguageServer, InitializeResult>> initialize(LanguageServerLauncher launcher, LanguageClient client, String projectPath) throws LanguageServerException;
 
 }
