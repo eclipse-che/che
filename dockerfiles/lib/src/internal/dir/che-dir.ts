@@ -204,9 +204,20 @@ export class CheDir {
 
   parse() {
 
+    let bothFileExists : boolean = false;
     try {
       this.fs.statSync(this.cheFile);
       // we have a file
+      Log.getLogger().debug('Found Chefile at ', this.cheFile);
+
+      try {
+        this.fs.statSync(this.dotCheFile);
+        // There is an error as we shouldn't have both .Chefile and Chefile
+        bothFileExists = true;
+      } catch (e) {
+        // this file is optional
+        Log.getLogger().debug('There is a Chefile but not .Chefile at ' + this.dotCheFile);
+      }
     } catch (e) {
 
       // if there is a .Chefile, use it, else return
@@ -219,6 +230,11 @@ export class CheDir {
         return;
       }
     }
+
+    if (bothFileExists) {
+      throw new Error('Error while parsing the Chefile as there is ' + this.cheFile + ' and ' + this.dotCheFile + '. Only one file at a time is allowed.');
+    }
+
 
     // load the chefile script if defined
     var script_code : string = this.fs.readFileSync(this.cheFile).toString();
