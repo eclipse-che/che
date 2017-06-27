@@ -30,8 +30,6 @@
         <module>terminal</module>
         <module>ssh</module>
         <module>unison</module>
-        <module>che-core-api-agent-shared</module>
-        <module>che-core-api-agent</module>
         <module>ls-json</module>
         <module>git-credentials</module>
         <module>ls-php</module>
