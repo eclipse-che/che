@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.machine.execagent;
 
 import com.google.inject.Inject;
+
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventDto;
 import org.eclipse.che.ide.util.loging.Log;

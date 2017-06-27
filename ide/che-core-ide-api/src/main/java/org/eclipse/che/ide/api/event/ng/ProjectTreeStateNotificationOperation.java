@@ -23,6 +23,7 @@ import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 import java.util.function.BiConsumer;
 
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;

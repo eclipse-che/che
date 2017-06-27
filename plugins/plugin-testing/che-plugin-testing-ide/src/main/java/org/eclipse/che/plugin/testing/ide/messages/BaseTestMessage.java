@@ -11,10 +11,11 @@
 package org.eclipse.che.plugin.testing.ide.messages;
 
 /**
- *
+ * Data class represents base testing messages.
  */
 public abstract class BaseTestMessage extends ClientTestingMessage {
 
+    /** returns test name */
     public String getTestName() {
         return getAttributeValue("name");
     }

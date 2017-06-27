@@ -14,9 +14,6 @@
 
 package org.eclipse.che.ide.util.dom;
 
-import com.google.common.base.Strings;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.UIObject;
 import elemental.dom.Element;
 import elemental.dom.Node;
 import elemental.events.Event;
@@ -25,6 +22,11 @@ import elemental.events.MouseEvent;
 import elemental.html.ClientRect;
 import elemental.html.DivElement;
 import elemental.js.dom.JsElement;
+
+import com.google.common.base.Strings;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.UIObject;
+
 import org.eclipse.che.ide.util.browser.UserAgent;
 
 

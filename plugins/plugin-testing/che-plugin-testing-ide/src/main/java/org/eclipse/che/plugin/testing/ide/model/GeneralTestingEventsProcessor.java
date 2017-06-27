@@ -35,11 +35,9 @@ import java.util.function.Function;
 import static org.eclipse.che.plugin.testing.ide.model.Printer.OutputType;
 
 /**
- *
+ * Event processor converts events form runner to internal form.
  */
 public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcessor {
-
-
     private final TestRootState testRootState;
     private final TestSuiteStack         testSuiteStack      = new TestSuiteStack();
     private final Set<TestState>         currentChildren     = new LinkedHashSet<>();
@@ -95,7 +93,6 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
         callSuiteStarted(newState);
     }
 
-
     @Override
     public void onTestSuiteFinished(TestSuiteFinishedEvent event) {
         TestState suite = testSuiteStack.pop(event.getName());
@@ -108,7 +105,6 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
             callSuiteFinished(suite);
         }
     }
-
 
     @Override
     public void onTestOutput(TestOutputEvent event) {
@@ -127,7 +123,6 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
             Log.error(getClass(), "Unexpected test output. Test not started: " + testName);
         }
     }
-
 
     @Override
     public void onTestStarted(TestStartedEvent event) {
@@ -277,7 +272,6 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
     @Override
     public void onSuiteTreeEnded(String suiteName) {
         buildTreeEvents.add(() -> testSuiteStack.pop(suiteName));
-
     }
 
     @Override
@@ -359,7 +353,6 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
         }
     }
 
-
     private TestState findCurrentSuiteOrTest() {
         TestState result;
         if (testNameToTestState.size() == 1) {
@@ -423,6 +416,4 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
     private TestState getStateByStateName(String testName) {
         return testNameToTestState.get(testName);
     }
-
-
 }

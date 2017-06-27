@@ -44,7 +44,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- *
+ * Test for checking output location for test sources.
  */
 public class OutputPathTest extends BaseTest {
     private   MavenProjectManager       mavenProjectManager;

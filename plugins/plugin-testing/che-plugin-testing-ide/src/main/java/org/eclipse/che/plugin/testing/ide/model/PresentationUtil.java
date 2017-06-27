@@ -13,12 +13,10 @@ package org.eclipse.che.plugin.testing.ide.model;
 import org.eclipse.che.ide.util.StringUtils;
 
 /**
- *
+ * The utility class which makes readable presentation of the test.
  */
 public class PresentationUtil {
-
     private static final String TEST_WITHOUT_NAME = "<No name>";
-
     public static String getPresentation(TestState testState) {
         TestState parent = testState.getParent();
         String name = testState.getName();

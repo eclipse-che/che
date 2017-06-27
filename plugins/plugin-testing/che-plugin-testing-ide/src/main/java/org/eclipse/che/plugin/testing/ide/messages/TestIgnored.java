@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.messages;
 
 /**
- *
+ * Data class represents test ignored message.
  */
 public class TestIgnored extends BaseTestMessage {
 

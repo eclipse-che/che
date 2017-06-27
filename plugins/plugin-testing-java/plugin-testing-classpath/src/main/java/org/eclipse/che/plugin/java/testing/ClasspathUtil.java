@@ -20,7 +20,6 @@ import java.security.CodeSource;
  * Class which helps to build classpath.
  */
 public class ClasspathUtil {
-
     /**
      * Finds jar which contains current class and returns its path.
      *
@@ -31,7 +30,6 @@ public class ClasspathUtil {
     public static String getJarPathForClass(Class<?> clazz) {
         try {
             CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
-
             File jarFile;
 
             if (codeSource.getLocation() != null) {

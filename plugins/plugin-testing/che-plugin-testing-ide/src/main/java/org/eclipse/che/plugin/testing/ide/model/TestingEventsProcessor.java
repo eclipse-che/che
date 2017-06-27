@@ -19,7 +19,7 @@ import org.eclipse.che.plugin.testing.ide.model.event.TestSuiteFinishedEvent;
 import org.eclipse.che.plugin.testing.ide.model.event.TestSuiteStartedEvent;
 
 /**
- * Describes test event processor.
+ * Describes test events processor.
  */
 public interface TestingEventsProcessor {
 

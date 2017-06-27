@@ -11,17 +11,19 @@
 package org.eclipse.che.plugin.testing.ide.messages;
 
 /**
- *
+ * Data class represents text messages.
  */
 public class Message extends ClientTestingMessage {
 
     Message() {
     }
 
+    /** @return text message */
     public String getText() {
         return getAttributeValue("text");
     }
 
+    /** @return error message */
     public String getErrorDetails() {
         return getAttributeValue("errorDetails");
     }

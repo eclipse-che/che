@@ -44,8 +44,6 @@ import org.eclipse.che.plugin.testing.ide.model.event.TestStartedEvent;
 import org.eclipse.che.plugin.testing.ide.model.event.TestSuiteFinishedEvent;
 import org.eclipse.che.plugin.testing.ide.model.event.TestSuiteStartedEvent;
 
-;
-
 /**
  * Handler which receives messages from the Testing tools.
  * Pass all messages to {@link TestingEventsProcessor}
@@ -59,7 +57,6 @@ public class TestingHandler implements TestingMessageVisitor {
 
     @Inject
     public TestingHandler(RequestHandlerConfigurator configurator) {
-
         configurator.newConfiguration()
                 .methodName(Constants.TESTING_RPC_METHOD_NAME)
                 .paramsAsString()
@@ -100,8 +97,6 @@ public class TestingHandler implements TestingMessageVisitor {
 
     @Override
     public void visitMessageWithStatus(Message message) {
-        Log.error(getClass(), "Unexpected test message: " + message.getName());
-        //TODO remove this message
     }
 
     @Override

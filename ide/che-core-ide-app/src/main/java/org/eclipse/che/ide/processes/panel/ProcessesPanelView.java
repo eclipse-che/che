@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.processes.panel;
 
 import com.google.gwt.user.client.ui.IsWidget;
+
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;

@@ -35,7 +35,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- *
+ * Abstract java test runner.
+ * Can recognize test methods, find java project and compilation unit by path.
  */
 public abstract class AbstractJavaTestRunner implements TestRunner {
 

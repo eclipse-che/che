@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.messages;
 
 /**
- *
+ * Data class represents test reporter message.
  */
 public class TestReporterAttached extends ClientTestingMessage {
 

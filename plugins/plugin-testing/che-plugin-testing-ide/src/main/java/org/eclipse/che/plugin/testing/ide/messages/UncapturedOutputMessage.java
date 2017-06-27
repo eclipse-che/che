@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.testing.ide.messages;
 import org.eclipse.che.plugin.testing.ide.model.Printer.OutputType;
 
 /**
- *
+ * Data class represents test uncaptured message.
  */
 public class UncapturedOutputMessage extends ClientTestingMessage {
 

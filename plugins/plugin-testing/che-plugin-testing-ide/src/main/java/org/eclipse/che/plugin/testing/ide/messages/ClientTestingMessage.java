@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- *
+ * Data class represents testing messages.
  */
 public class ClientTestingMessage implements TestingMessage {
 

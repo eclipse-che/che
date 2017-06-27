@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.messages;
 
 /**
- *
+ * Data class represents test suite tree node message.
  */
 public class SuiteTreeNode extends BaseTestSuiteMessage {
 
@@ -23,6 +23,7 @@ public class SuiteTreeNode extends BaseTestSuiteMessage {
         visitor.visitSuiteTreeNode(this);
     }
 
+    /** @return test suite location */
     public String getLocation() {
         return getAttributeValue("location");
     }

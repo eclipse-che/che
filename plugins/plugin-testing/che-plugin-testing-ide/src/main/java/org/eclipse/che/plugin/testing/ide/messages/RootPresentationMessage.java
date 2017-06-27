@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.messages;
 
 /**
- *
+ * Data class represents test root message.
  */
 public class RootPresentationMessage extends ClientTestingMessage {
 

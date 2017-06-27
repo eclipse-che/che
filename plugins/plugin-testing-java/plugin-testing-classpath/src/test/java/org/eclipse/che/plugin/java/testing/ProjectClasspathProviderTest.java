@@ -31,7 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- *
+ * Test for {@link ProjectClasspathProvider}
  */
 @Listeners(value = {MockitoTestNGListener.class})
 public class ProjectClasspathProviderTest {

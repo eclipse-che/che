@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.messages;
 
 /**
- *
+ * Data class represents testing tree messages.
  */
 public class BuildTreeEnded extends ClientTestingMessage {
 

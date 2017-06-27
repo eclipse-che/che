@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.messages;
 
 /**
- *
+ * Data class represents test out message.
  */
 public class TestStdOut extends BaseTestMessage {
 

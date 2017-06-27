@@ -17,8 +17,6 @@ import java.util.List;
  * Base event processor, converts events form runner to internal form
  */
 public abstract class AbstractTestingEventsProcessor implements TestingEventsProcessor {
-
-
     private final String testFrameworkName;
 
     protected final List<TestStateEventsListener> listeners = new ArrayList<>();

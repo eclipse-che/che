@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.testing.ide.messages;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
- *
+ * Data class represents test count.
  */
 public class TestCount extends ClientTestingMessage {
 
