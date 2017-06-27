@@ -15,6 +15,7 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -120,19 +121,23 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         startSynchronizer.setStartThread();
         try {
             contextsStorage.add((DockerRuntimeContext)getContext());
-            checkStartInterruption();
             dockerNetworkLifecycle.createNetwork(dockerEnvironment.getNetwork());
+
+            boolean restore = isRestoreEnabled(startOptions);
 
             String machineName = startQueue.peek();
             while (machineName != null) {
                 DockerContainerConfig service = dockerEnvironment.getServices().get(machineName);
-                checkStartInterruption();
                 eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
                                                .withIdentity(DtoConverter.asDto(identity))
                                                .withEventType(MachineStatus.STARTING)
                                                .withMachineName(machineName));
                 try {
-                    startMachine(machineName, service, startOptions, machineName.equals(devMachineName));
+                    if (restore) {
+                        restoreMachine(machineName, service);
+                    } else {
+                        startMachine(machineName, service);
+                    }
                     eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
                                                    .withIdentity(DtoConverter.asDto(identity))
                                                    .withEventType(MachineStatus.RUNNING)
@@ -194,66 +199,57 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         return Collections.unmodifiableMap(properties);
     }
 
-    private void startMachine(String name,
-                              DockerContainerConfig containerConfig,
-                              Map<String, String> startOptions,
-                              boolean isDev) throws InfrastructureException {
-        DockerMachine dockerMachine;
-        // TODO property name
-        final RuntimeIdentity identity = getContext().getIdentity();
-        if ("true".equals(startOptions.get("restore"))) {
-            MachineSourceImpl machineSource;
-            try {
-                SnapshotImpl snapshot = snapshotDao.getSnapshot(identity.getWorkspaceId(),
-                                                                identity.getEnvName(),
-                                                                name);
-                machineSource = snapshot.getMachineSource();
-                // Snapshot image location has SHA-256 digest which needs to be removed,
-                // otherwise it will be pulled without tag and cause problems
-                String imageName = machineSource.getLocation();
-                if (imageName.contains("@sha256:")) {
-                    machineSource.setLocation(imageName.substring(0, imageName.indexOf('@')));
-                }
+    private void restoreMachine(String name, DockerContainerConfig originalConfig) throws InfrastructureException {
+        try {
+            SnapshotImpl snapshot = snapshotDao.getSnapshot(identity.getWorkspaceId(), identity.getEnvName(), name);
+            startMachine(name, configForSnapshot(snapshot, originalConfig));
+        } catch (NotFoundException | SourceNotFoundException x) {
+            LOG.warn("Snapshot for machine '{}:{}:{}' is missing, machine will be started from source",
+                     identity.getWorkspaceId(),
+                     identity.getEnvName(),
+                     name);
+            startMachine(name, originalConfig);
+        } catch (SnapshotException x) {
+            throw new InternalInfrastructureException(x);
+        }
+    }
 
-                DockerContainerConfig imageContainerConfig = normalizeSource(containerConfig, machineSource);
-                dockerMachine = serviceStarter.startService(dockerEnvironment.getNetwork(),
-                                                            name,
-                                                            imageContainerConfig,
-                                                            identity,
-                                                            isDev);
-            } catch (NotFoundException | SnapshotException | SourceNotFoundException e) {
-                // slip to start without recovering
-                dockerMachine = serviceStarter.startService(dockerEnvironment.getNetwork(),
+    private void startMachine(String name, DockerContainerConfig containerConfig) throws InfrastructureException {
+        InternalMachineConfig machineCfg = getContext().getMachineConfigs().get(name);
+
+        Map<String, String> labels = new HashMap<>(containerConfig.getLabels());
+        labels.putAll(Labels.newSerializer()
+                            .machineName(name)
+                            .runtimeId(identity)
+                            .servers(machineCfg.getServers())
+                            .labels());
+        containerConfig.setLabels(labels);
+
+        DockerMachine machine = serviceStarter.startService(dockerEnvironment.getNetwork(),
                                                             name,
                                                             containerConfig,
                                                             identity,
-                                                            isDev);
-            }
-        } else {
-            dockerMachine = serviceStarter.startService(dockerEnvironment.getNetwork(),
-                                                        name,
-                                                        containerConfig,
-                                                        identity,
-                                                        isDev);
-        }
-
+                                                            devMachineName.equals(name));
         try {
-            checkStartInterruption();
-            startSynchronizer.addMachine(name, dockerMachine);
+            startSynchronizer.addMachine(name, machine);
 
-            InternalMachineConfig machineConfig = getContext().getMachineConfigs().get(name);
-            if (machineConfig == null) {
-                throw new InfrastructureException("Machine %s is not found in internal machines config of RuntimeContext");
-            }
+            bootstrapperFactory.create(name, identity, machine, machineCfg.getInstallers()).bootstrap();
 
-            bootstrapperFactory.create(name, identity, dockerMachine, machineConfig.getInstallers())
-                               .bootstrap();
-
-            checkServersReadiness(name, dockerMachine);
+            checkServersReadiness(name, machine);
         } catch (InfrastructureException e) {
-            destroyMachineQuietly(name, dockerMachine);
+            destroyMachineQuietly(name, machine);
             throw e;
         }
+    }
+
+    // TODO support configuration properties as well
+    private boolean isRestoreEnabled(Map<String, String> startOpts) {
+        return Boolean.parseBoolean(startOpts.get("restore"));
+    }
+
+    // TODO support configuration properties as well
+    private boolean isSnapshotEnabled(Map<String, String> stopOpts) {
+        return stopOpts != null && Boolean.parseBoolean(stopOpts.get("create-snapshot"));
     }
 
     private void checkServersReadiness(String machineName, DockerMachine dockerMachine)
@@ -294,7 +290,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         while (System.currentTimeMillis() < readinessDeadLine) {
             LOG.info("Checking server {} of machine {} at {}", serverRef, machineName,
                      System.currentTimeMillis());
-            checkStartInterruption();
             if (isHttpConnectionSucceed(url, checker)) {
                 // TODO protect with lock, from null, from exceptions
                 DockerMachine machine = startSynchronizer.getMachines().get(machineName);
@@ -357,6 +352,18 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         }
     }
 
+    private DockerContainerConfig configForSnapshot(SnapshotImpl snapshot, DockerContainerConfig originCfg)
+            throws NotFoundException, SnapshotException {
+        MachineSourceImpl machineSource = snapshot.getMachineSource();
+        // Snapshot image location has SHA-256 digest which needs to be removed,
+        // otherwise it will be pulled without tag and cause problems
+        String imageName = machineSource.getLocation();
+        if (imageName.contains("@sha256:")) {
+            machineSource.setLocation(imageName.substring(0, imageName.indexOf('@')));
+        }
+        return normalizeSource(originCfg, machineSource);
+    }
+
     private DockerContainerConfig normalizeSource(DockerContainerConfig containerConfig,
                                                   MachineSource machineSource) {
         DockerContainerConfig serviceWithNormalizedSource = new DockerContainerConfig(containerConfig);
@@ -381,18 +388,17 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         return serviceWithNormalizedSource;
     }
 
-    private void checkStartInterruption() throws InfrastructureException {
-        if (Thread.currentThread().isInterrupted()) {
-            throw new InfrastructureException("Docker infrastructure runtime start was interrupted");
-        }
-    }
-
     private void destroyRuntime(Map<String, String> stopOptions) throws InfrastructureException {
-        if (stopOptions != null && "true".equals(stopOptions.get("create-snapshot"))) {
-            snapshotMachines(startSynchronizer.removeMachines());
-        } else {
-            startSynchronizer.removeMachines()
-                             .forEach(this::destroyMachineQuietly);
+        Map<String, DockerMachine> machines = startSynchronizer.removeMachines();
+        if (isSnapshotEnabled(stopOptions)) {
+            snapshotMachines(machines);
+        }
+        for (Map.Entry<String, DockerMachine> entry : machines.entrySet()) {
+            destroyMachineQuietly(entry.getKey(), entry.getValue());
+            eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
+                                           .withEventType(MachineStatus.STOPPED)
+                                           .withIdentity(DtoConverter.asDto(identity))
+                                           .withMachineName(entry.getKey()));
         }
         // TODO what happens when context throws exception here
         dockerNetworkLifecycle.destroyNetwork(dockerEnvironment.getNetwork());
@@ -404,10 +410,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     private void destroyMachineQuietly(String machineName, DockerMachine machine) {
         try {
             machine.destroy();
-            eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
-                                           .withIdentity(DtoConverter.asDto(identity))
-                                           .withEventType(MachineStatus.STOPPED)
-                                           .withMachineName(machineName));
         } catch (InfrastructureException e) {
             LOG.error(format("Error occurs on destroying of docker machine '%s' in workspace '%s'. Container '%s'",
                              machineName,
