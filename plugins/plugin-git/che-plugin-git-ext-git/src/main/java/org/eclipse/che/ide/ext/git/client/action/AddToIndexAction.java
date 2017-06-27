@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -71,10 +70,9 @@ public class AddToIndexAction extends GitAction {
     public void actionPerformed(ActionEvent e) {
         final Resource[] resources = appContext.getResources();
         checkState(resources != null);
-        final DevMachine devMachine = appContext.getDevMachine();
         final GitOutputConsole console = gitOutputConsoleFactory.create(constant.addToIndexCommandName());
-        consolesPanelPresenter.addCommandOutput(devMachine.getId(), console);
-        service.getStatus(devMachine, appContext.getRootProject().getLocation())
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+        service.getStatus(appContext.getRootProject().getLocation())
                .then(status -> {
                    if (containsInSelected(status.getUntracked())) {
                        presenter.showDialog();
@@ -99,7 +97,7 @@ public class AddToIndexAction extends GitAction {
             Path path = resources[i].getLocation().removeFirstSegments(1);
             paths[i] = path.segmentCount() == 0 ? Path.EMPTY : path;
         }
-        service.add(appContext.getDevMachine(), appContext.getRootProject().getLocation(), false, paths)
+        service.add(appContext.getRootProject().getLocation(), false, paths)
                .then(voidArg -> {
                    console.print(constant.addSuccess());
                    notificationManager.notify(constant.addSuccess());
@@ -111,9 +109,8 @@ public class AddToIndexAction extends GitAction {
     }
 
     private boolean containsInSelected(List<String> items) {
-        Resource[] appContextResources = appContext.getResources();
         for (String item : items) {
-            for (Resource selectedItem : appContextResources) {
+            for (Resource selectedItem : appContext.getResources()) {
                 String selectedItemPath = selectedItem.getLocation()
                                                       .removeFirstSegments(1) // remove project name from path
                                                       .toString();

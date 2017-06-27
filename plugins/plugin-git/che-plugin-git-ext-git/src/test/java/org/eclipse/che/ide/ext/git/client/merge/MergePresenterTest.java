@@ -81,11 +81,11 @@ public class MergePresenterTest extends BaseTest {
         when(mergeResult.getMergeStatus()).thenReturn(ALREADY_UP_TO_DATE);
         when(selectedReference.getDisplayName()).thenReturn(DISPLAY_NAME);
 
-        when(service.branchList(anyObject(), any(Path.class), eq(LIST_LOCAL))).thenReturn(branchListPromise);
+        when(service.branchList(any(Path.class), eq(LIST_LOCAL))).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
 
-        when(service.branchList(anyObject(), any(Path.class), eq(LIST_REMOTE))).thenReturn(remoteListBranchPromise);
+        when(service.branchList(any(Path.class), eq(LIST_REMOTE))).thenReturn(remoteListBranchPromise);
         when(remoteListBranchPromise.then(any(Operation.class))).thenReturn(remoteListBranchPromise);
         when(remoteListBranchPromise.catchError(any(Operation.class))).thenReturn(remoteListBranchPromise);
     }
