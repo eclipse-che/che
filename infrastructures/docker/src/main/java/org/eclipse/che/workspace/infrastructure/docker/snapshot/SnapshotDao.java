@@ -21,8 +21,6 @@ import java.util.List;
  * @author andrew00x
  * @author Yevhenii Voevodin
  *
- * @deprecated  to remove to Docker specific
- *
  */
 public interface SnapshotDao {
 
