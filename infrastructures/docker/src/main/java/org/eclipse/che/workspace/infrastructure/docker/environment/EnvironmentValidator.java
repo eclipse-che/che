@@ -88,8 +88,8 @@ public class EnvironmentValidator {
         List<String> devMachines = env.getMachines()
                                       .entrySet()
                                       .stream()
-                                      .filter(entry -> entry.getValue().getAgents() != null &&
-                                                       entry.getValue().getAgents()
+                                      .filter(entry -> entry.getValue().getInstallers() != null &&
+                                                       entry.getValue().getInstallers()
                                                             .contains("org.eclipse.che.ws-agent"))
                                       .map(Map.Entry::getKey)
                                       .collect(toList());
@@ -219,8 +219,8 @@ public class EnvironmentValidator {
             }
         }
 
-        if (machineConfig.getAgents() != null) {
-            for (String agent : machineConfig.getAgents()) {
+        if (machineConfig.getInstallers() != null) {
+            for (String agent : machineConfig.getInstallers()) {
                 checkArgument(!isNullOrEmpty(agent),
                               "Machine '%s' in environment contains invalid agent '%s'",
                               machineName, agent);

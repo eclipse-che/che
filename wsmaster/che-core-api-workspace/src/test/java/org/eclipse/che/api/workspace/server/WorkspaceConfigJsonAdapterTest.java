@@ -82,7 +82,7 @@ public class WorkspaceConfigJsonAdapterTest {
         final JsonObject devMachineServerObj = devMachineServersObj.get("ref").getAsJsonObject();
         assertEquals(devMachineServerObj.get("port").getAsString(), "9090/udp");
         assertEquals(devMachineServerObj.get("protocol").getAsString(), "protocol");
-        assertTrue(devMachineObj.has("agents"), "dev machine has agents");
+        assertTrue(devMachineObj.has("installers"), "dev machine has installers");
         assertTrue(devMachineObj.has("attributes"), "dev machine has attributes");
         assertTrue(devMachineObj.get("attributes").isJsonObject(), "dev machine attributes is json object");
         final JsonObject attributes = devMachineObj.getAsJsonObject("attributes");

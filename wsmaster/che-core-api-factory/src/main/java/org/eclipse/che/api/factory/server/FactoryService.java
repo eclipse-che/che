@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiResponses;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.eclipse.che.api.agent.server.filters.AddExecAgentInEnvironmentUtil;
+import org.eclipse.che.api.agent.server.filters.AddExecInstallerInEnvironmentUtil;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -148,7 +148,7 @@ public class FactoryService extends Service {
         requiredNotNull(factory, "Factory configuration");
         factoryBuilder.checkValid(factory);
         processDefaults(factory);
-        AddExecAgentInEnvironmentUtil.addExecAgent(factory.getWorkspace());
+        AddExecInstallerInEnvironmentUtil.addExecInstaller(factory.getWorkspace());
         createValidator.validateOnCreate(factory);
         return injectLinks(asDto(factoryManager.saveFactory(factory)));
     }

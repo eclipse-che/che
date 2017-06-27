@@ -186,14 +186,14 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
                                      .withLocation("eclipse/ubuntu_jdk8");
 
 
-        List<String> agents = new ArrayList<>();
-        agents.add("org.eclipse.che.exec");
-        agents.add("org.eclipse.che.terminal");
-        agents.add("org.eclipse.che.ws-agent");
-        agents.add("org.eclipse.che.ssh");
+        List<String> installers = new ArrayList<>();
+        installers.add("org.eclipse.che.exec");
+        installers.add("org.eclipse.che.terminal");
+        installers.add("org.eclipse.che.ws-agent");
+        installers.add("org.eclipse.che.ssh");
 
         MachineConfigDto machine = dtoFactory.createDto(MachineConfigDto.class)
-                                             .withAgents(agents)
+                                             .withInstallers(installers)
                                              .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
         EnvironmentDto environment = dtoFactory.createDto(EnvironmentDto.class)

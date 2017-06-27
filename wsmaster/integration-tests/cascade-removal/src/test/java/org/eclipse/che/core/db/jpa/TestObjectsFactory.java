@@ -112,7 +112,7 @@ public final class TestObjectsFactory {
         final ServerConfigImpl serverConf1 = new ServerConfigImpl("2265", "http", "/path1");
         final ServerConfigImpl serverConf2 = new ServerConfigImpl("2266", "ftp", "/path2");
         newMachine.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
-        newMachine.setAgents(ImmutableList.of("agent5", "agent4"));
+        newMachine.setInstallers(ImmutableList.of("agent5", "agent4"));
         newMachine.setAttributes(singletonMap("att1", "val"));
 
         final EnvironmentImpl newEnv = new EnvironmentImpl();

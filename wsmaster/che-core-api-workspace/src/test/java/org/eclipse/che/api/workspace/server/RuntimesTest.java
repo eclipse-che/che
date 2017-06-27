@@ -49,11 +49,11 @@ public class RuntimesTest {
 //    @Mock
 //    private CheEnvironmentEngine envEngine;
 //    @Mock
-//    private AgentSorter          agentSorter;
+//    private InstallerSorter          agentSorter;
 //    @Mock
 //    private AgentLauncherFactory launcherFactory;
 //    @Mock
-//    private AgentRegistry        agentRegistry;
+//    private InstallerRegistry        agentRegistry;
 //
 //    @Mock
 //    private WorkspaceSharedPool  sharedPool;

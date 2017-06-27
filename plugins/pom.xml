@@ -57,7 +57,7 @@
         <module>plugin-zend-debugger</module>
         <module>plugin-testing</module>
         <module>plugin-testing-java</module>
-		<module>plugin-testing-php</module>
+        <module>plugin-testing-php</module>
         <module>plugin-pullrequest-parent</module>
         <module>plugin-traefik</module>
     </modules>

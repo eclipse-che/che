@@ -21,15 +21,15 @@ import java.util.stream.Collectors;
 
 public class MachineConfigImpl implements MachineConfig {
 
-    private List<String>                  agents;
+    private List<String>                  installers;
     private Map<String, String>           attributes;
     private Map<String, ServerConfigImpl> servers;
 
-    public MachineConfigImpl(List<String> agents,
+    public MachineConfigImpl(List<String> installers,
                              Map<String, ? extends ServerConfig> servers,
                              Map<String, String> attributes) {
-        if (agents != null) {
-            this.agents = new ArrayList<>(agents);
+        if (installers != null) {
+            this.installers = new ArrayList<>(installers);
         }
         if (servers != null) {
             this.servers = servers.entrySet()
@@ -43,15 +43,15 @@ public class MachineConfigImpl implements MachineConfig {
     }
 
     public MachineConfigImpl(MachineConfig machine) {
-        this(machine.getAgents(), machine.getServers(), machine.getAttributes());
+        this(machine.getInstallers(), machine.getServers(), machine.getAttributes());
     }
 
     @Override
-    public List<String> getAgents() {
-        if (agents == null) {
-            agents = new ArrayList<>();
+    public List<String> getInstallers() {
+        if (installers == null) {
+            installers = new ArrayList<>();
         }
-        return agents;
+        return installers;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class MachineConfigImpl implements MachineConfig {
             return false;
         }
         final MachineConfigImpl that = (MachineConfigImpl)obj;
-        return getAgents().equals(that.getAgents())
+        return getInstallers().equals(that.getInstallers())
                && getAttributes().equals(that.getAttributes())
                && getServers().equals(that.getServers());
     }
@@ -87,7 +87,7 @@ public class MachineConfigImpl implements MachineConfig {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 31 * hash + getAgents().hashCode();
+        hash = 31 * hash + getInstallers().hashCode();
         hash = 31 * hash + getAttributes().hashCode();
         hash = 31 * hash + getServers().hashCode();
         return hash;
@@ -96,7 +96,7 @@ public class MachineConfigImpl implements MachineConfig {
     @Override
     public String toString() {
         return "MachineConfigImpl{" +
-               "agents=" + agents +
+               "installers=" + installers +
                ", attributes=" + attributes +
                ", servers=" + servers +
                '}';

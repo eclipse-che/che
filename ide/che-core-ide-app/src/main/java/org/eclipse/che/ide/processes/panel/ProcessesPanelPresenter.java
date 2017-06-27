@@ -792,7 +792,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         for (Environment environment : environments.values()) {
             MachineConfig extendedMachine = environment.getMachines().get(machineName);
             if (extendedMachine != null) {
-                if (extendedMachine.getAgents() != null && extendedMachine.getAgents().contains(agent)) {
+                if (extendedMachine.getInstallers() != null && extendedMachine.getInstallers().contains(agent)) {
                     return true;
                 }
             }

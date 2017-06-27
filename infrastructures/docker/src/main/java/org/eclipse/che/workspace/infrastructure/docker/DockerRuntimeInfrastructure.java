@@ -12,12 +12,12 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.agent.server.AgentRegistry;
-import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
+import org.eclipse.che.api.installer.server.impl.InstallerSorter;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -44,8 +44,8 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     private final InfrastructureProvisioner infrastructureProvisioner;
     private final EnvironmentNormalizer     environmentNormalizer;
     private final DockerRuntimeFactory      runtimeFactory;
-    private final AgentSorter               agentSorter;
-    private final AgentRegistry             agentRegistry;
+    private final InstallerSorter           installerSorter;
+    private final InstallerRegistry         installerRegistry;
 
     @Inject
     public DockerRuntimeInfrastructure(EnvironmentParser dockerEnvironmentParser,
@@ -55,8 +55,8 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                        EnvironmentNormalizer environmentNormalizer,
                                        Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers,
                                        DockerRuntimeFactory runtimeFactory,
-                                       AgentSorter agentSorter,
-                                       AgentRegistry agentRegistry,
+                                       InstallerSorter installerSorter,
+                                       InstallerRegistry installerRegistry,
                                        EventService eventService) {
         super("docker", environmentParsers.keySet(), eventService);
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
@@ -65,8 +65,8 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         this.infrastructureProvisioner = infrastructureProvisioner;
         this.environmentNormalizer = environmentNormalizer;
         this.runtimeFactory = runtimeFactory;
-        this.agentSorter = agentSorter;
-        this.agentRegistry = agentRegistry;
+        this.installerRegistry = installerRegistry;
+        this.installerSorter = installerSorter;
     }
 
     @Override
@@ -105,8 +105,8 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                         environment,
                                         dockerEnvironment,
                                         orderedServices,
-                                        agentSorter,
-                                        agentRegistry,
+                                        installerRegistry,
+                                        installerSorter,
                                         runtimeFactory);
     }
 }

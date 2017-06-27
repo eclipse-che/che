@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker;
 import com.google.gson.Gson;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
+import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.core.model.workspace.runtime.BootstrapperStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
@@ -59,7 +59,7 @@ public class Bootstrapper {
     private final String                                     machineName;
     private final RuntimeIdentity                            runtimeIdentity;
     private final DockerMachine                              dockerMachine;
-    private final List<AgentImpl>                            agents;
+    private final List<InstallerImpl>                        agents;
     private final int                                        bootstrappingTimeoutMinutes;
     private final int                                        serverCheckPeriodSeconds;
     private final int                                        installerTimeoutSeconds;
@@ -72,7 +72,7 @@ public class Bootstrapper {
     public Bootstrapper(@Assisted String machineName,
                         @Assisted RuntimeIdentity runtimeIdentity,
                         @Assisted DockerMachine dockerMachine,
-                        @Assisted List<AgentImpl> agents,
+                        @Assisted List<InstallerImpl> agents,
                         @Named("che.workspace.che_server_websocket_endpoint_base") String websocketBaseEndpoint,
                         @Named("che.infra.docker.bootstrapper.timeout_min") int bootstrappingTimeoutMinutes,
                         @Named("che.infra.docker.bootstrapper.installer_timeout_sec") int installerTimeoutSeconds,

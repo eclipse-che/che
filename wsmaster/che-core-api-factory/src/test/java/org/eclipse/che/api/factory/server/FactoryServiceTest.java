@@ -520,41 +520,41 @@ public class FactoryServiceTest {
         EnvironmentDto environment = newDto(EnvironmentDto.class);
         MachineConfigDto machine = newDto(MachineConfigDto.class);
         factoryDto.getWorkspace().setEnvironments(ImmutableMap.of("e1", cloneDto(environment).withMachines(
-                ImmutableMap.of("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
-                                                                          "org.eclipse.che.ls.php",
-                                                                          "org.eclipse.che.ls.json")),
-                                "m2", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
-                                                                          "org.eclipse.che.terminal",
-                                                                          "org.eclipse.che.ls.json")),
-                                "m3", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
-                                                                          "org.eclipse.che.ls.json")))
+                ImmutableMap.of("m1", cloneDto(machine).withInstallers(asList("org.eclipse.che.terminal",
+                                                                              "org.eclipse.che.ls.php",
+                                                                              "org.eclipse.che.ls.json")),
+                                "m2", cloneDto(machine).withInstallers(asList("org.eclipse.che.ls.php",
+                                                                              "org.eclipse.che.terminal",
+                                                                              "org.eclipse.che.ls.json")),
+                                "m3", cloneDto(machine).withInstallers(asList("org.eclipse.che.ls.php",
+                                                                              "org.eclipse.che.ls.json")))
                                                                   ),
                                                                   "e2", cloneDto(environment).withMachines(
-                        ImmutableMap.of("m4", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
-                                                                                  "org.eclipse.che.ls.php",
-                                                                                  "org.eclipse.che.ls.json")),
-                                        "m5", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
-                                                                                  "org.eclipse.che.ls.json")))
+                        ImmutableMap.of("m4", cloneDto(machine).withInstallers(asList("org.eclipse.che.terminal",
+                                                                                      "org.eclipse.che.ls.php",
+                                                                                      "org.eclipse.che.ls.json")),
+                                        "m5", cloneDto(machine).withInstallers(asList("org.eclipse.che.ls.php",
+                                                                                      "org.eclipse.che.ls.json")))
                 )));
         Map<String, EnvironmentDto> expectedEnvs = ImmutableMap.of("e1", cloneDto(environment).withMachines(
-                ImmutableMap.of("m1", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
-                                                                          "org.eclipse.che.ls.php",
-                                                                          "org.eclipse.che.ls.json",
-                                                                          "org.eclipse.che.exec")),
-                                "m2", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
-                                                                          "org.eclipse.che.terminal",
-                                                                          "org.eclipse.che.ls.json",
-                                                                          "org.eclipse.che.exec")),
-                                "m3", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
-                                                                          "org.eclipse.che.ls.json")))
+                ImmutableMap.of("m1", cloneDto(machine).withInstallers(asList("org.eclipse.che.terminal",
+                                                                              "org.eclipse.che.ls.php",
+                                                                              "org.eclipse.che.ls.json",
+                                                                              "org.eclipse.che.exec")),
+                                "m2", cloneDto(machine).withInstallers(asList("org.eclipse.che.ls.php",
+                                                                              "org.eclipse.che.terminal",
+                                                                              "org.eclipse.che.ls.json",
+                                                                              "org.eclipse.che.exec")),
+                                "m3", cloneDto(machine).withInstallers(asList("org.eclipse.che.ls.php",
+                                                                              "org.eclipse.che.ls.json")))
                                                                    ),
                                                                    "e2", cloneDto(environment).withMachines(
-                        ImmutableMap.of("m4", cloneDto(machine).withAgents(asList("org.eclipse.che.terminal",
-                                                                                  "org.eclipse.che.ls.php",
-                                                                                  "org.eclipse.che.ls.json",
-                                                                                  "org.eclipse.che.exec")),
-                                        "m5", cloneDto(machine).withAgents(asList("org.eclipse.che.ls.php",
-                                                                                  "org.eclipse.che.ls.json")))
+                        ImmutableMap.of("m4", cloneDto(machine).withInstallers(asList("org.eclipse.che.terminal",
+                                                                                      "org.eclipse.che.ls.php",
+                                                                                      "org.eclipse.che.ls.json",
+                                                                                      "org.eclipse.che.exec")),
+                                        "m5", cloneDto(machine).withInstallers(asList("org.eclipse.che.ls.php",
+                                                                                      "org.eclipse.che.ls.json")))
                 ));
 
         when(factoryManager.saveFactory(any(FactoryDto.class)))
@@ -607,7 +607,7 @@ public class FactoryServiceTest {
         environmentRecipe.setLocation("location");
         final EnvironmentImpl env = new EnvironmentImpl();
         final MachineConfigImpl extendedMachine = new MachineConfigImpl();
-        extendedMachine.setAgents(singletonList("agent"));
+        extendedMachine.setInstallers(singletonList("agent"));
         extendedMachine.setAttributes(singletonMap("att1", "value"));
         extendedMachine.setServers(singletonMap("agent", new ServerConfigImpl("5555",
                                                                               "https",
