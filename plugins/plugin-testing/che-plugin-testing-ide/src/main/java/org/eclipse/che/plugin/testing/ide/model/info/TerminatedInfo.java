@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.model.info;
 
 /**
- *
+ * Describes information about terminated test.
  */
 public class TerminatedInfo extends AbstractTestStateInfo {
 

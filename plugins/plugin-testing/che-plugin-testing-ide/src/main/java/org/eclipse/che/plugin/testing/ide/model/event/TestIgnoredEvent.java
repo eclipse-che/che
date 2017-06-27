@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.testing.ide.model.event;
 import org.eclipse.che.plugin.testing.ide.messages.TestIgnored;
 
 /**
- *
+ * Event which informs about ignoring test.
  */
 public class TestIgnoredEvent extends TestNodeEvent {
 

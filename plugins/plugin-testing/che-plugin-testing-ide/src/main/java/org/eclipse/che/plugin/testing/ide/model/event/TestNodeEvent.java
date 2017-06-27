@@ -14,7 +14,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.testing.ide.messages.ClientTestingMessage;
 
 /**
- *
+ * Core event for the test events.
  */
 public abstract class TestNodeEvent {
     private String id;

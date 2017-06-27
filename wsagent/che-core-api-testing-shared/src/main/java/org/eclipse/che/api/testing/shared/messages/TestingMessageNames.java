@@ -11,7 +11,7 @@
 package org.eclipse.che.api.testing.shared.messages;
 
 /**
- *
+ * Describes types of test messages.
  */
 public final class TestingMessageNames {
 
@@ -34,7 +34,6 @@ public final class TestingMessageNames {
     public static final String TESTING_STARTED = "testingStarted";
     public static final String FINISH_TESTING = "finishTesting";
     public static final String UNCAPTURED_OUTPUT = "uncapturedOutput";
-
 
     TestingMessageNames() {
     }

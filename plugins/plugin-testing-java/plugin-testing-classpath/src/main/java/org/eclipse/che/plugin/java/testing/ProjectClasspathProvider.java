@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.java.testing;
 
 import com.google.inject.name.Named;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -27,7 +28,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
+ * Project classpath builder.
  */
 @Singleton
 public class ProjectClasspathProvider {
@@ -41,9 +42,15 @@ public class ProjectClasspathProvider {
         this.workspacePath = workspacePath;
     }
 
+    /**
+     * Builds classpath for the java project.
+     *
+     * @param javaProject
+     *         java project
+     * @return set of resources which are included to the classpath
+     */
     public Set<String> getProjectClassPath(IJavaProject javaProject) {
         try {
-
             IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(false);
             Set<String> result = new HashSet<>();
             for (IClasspathEntry classpathEntry : resolvedClasspath) {

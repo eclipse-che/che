@@ -14,7 +14,7 @@ import org.eclipse.che.ide.util.StringUtils;
 import org.eclipse.che.plugin.testing.ide.model.Printer;
 
 /**
- *
+ * Describes information about failed test.
  */
 public class TestComparisionFailedInfo extends TestFailedInfo {
 

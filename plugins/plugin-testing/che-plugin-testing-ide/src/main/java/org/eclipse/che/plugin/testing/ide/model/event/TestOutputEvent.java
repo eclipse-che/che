@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.testing.ide.model.event;
 import org.eclipse.che.plugin.testing.ide.messages.BaseTestMessage;
 
 /**
- *
+ * Event which informs about some output message from the test.
  */
 public class TestOutputEvent extends TestNodeEvent {
     private final String text;

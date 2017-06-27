@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.model.info;
 
 /**
- *
+ * Describes state of test.
  */
 public enum TestStateDescription {
     SKIPPED("Skiped"),

@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.model.info;
 
 /**
- *
+ * Describes information about test which is not ran.
  */
 public class NotRunInfo extends AbstractTestStateInfo {
 

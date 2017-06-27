@@ -17,10 +17,17 @@ import java.net.URLDecoder;
 import java.security.CodeSource;
 
 /**
- *
+ * Class which helps to build classpath.
  */
 public class ClasspathUtil {
 
+    /**
+     * Finds jar which contains current class and returns its path.
+     *
+     * @param clazz
+     *         container of this class should be found
+     * @return path to the jar
+     */
     public static String getJarPathForClass(Class<?> clazz) {
         try {
             CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();

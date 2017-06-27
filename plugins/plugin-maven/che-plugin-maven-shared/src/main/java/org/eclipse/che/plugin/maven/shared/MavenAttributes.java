@@ -36,7 +36,7 @@ public interface MavenAttributes {
     String PARENT_VERSION     = "maven.parent.version";
 
     String TEST_SOURCE_FOLDER = "maven.test.source.folder";
-    String RESOURCE_FOLDER = "maven.resource.folder";
+    String RESOURCE_FOLDER    = "maven.resource.folder";
 
     String DEFAULT_SOURCE_FOLDER         = "src/main/java";
     String DEFAULT_RESOURCES_FOLDER      = "src/main/resources";
@@ -46,13 +46,13 @@ public interface MavenAttributes {
     String DEFAULT_PACKAGING             = "jar";
     String DEFAULT_OUTPUT_FOLDER         = "target/classes";
 
-    String DEFAULT_OUTPUT_DIRECTORY = "target/classes";
+    String DEFAULT_OUTPUT_DIRECTORY      = "target/classes";
     String DEFAULT_TEST_OUTPUT_DIRECTORY = "target/test-classes";
 
     String POM_XML = "pom.xml";
 
     /** Name of WebSocket chanel */
-    String MAVEN_CHANEL_NAME = "maven:workspace";
+    String MAVEN_CHANEL_NAME           = "maven:workspace";
     /** Name of WebSocket chanel for Maven Archetype output */
     String MAVEN_ARCHETYPE_CHANEL_NAME = "maven:archetype:output";
 }

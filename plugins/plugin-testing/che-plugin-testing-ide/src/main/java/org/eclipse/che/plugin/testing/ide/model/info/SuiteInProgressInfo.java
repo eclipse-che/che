@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.testing.ide.model.info;
 import org.eclipse.che.plugin.testing.ide.model.TestState;
 
 /**
- *
+ * Describes information about suit which is in progress.
  */
 public class SuiteInProgressInfo extends TestInProgressInfo {
 

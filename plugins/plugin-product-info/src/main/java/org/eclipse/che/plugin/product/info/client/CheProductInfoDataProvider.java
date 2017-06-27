@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.product.info.client;
 
 import com.google.inject.Singleton;
+
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.ProductInfoDataProviderImpl;
 import org.eclipse.che.ide.ui.Resources;

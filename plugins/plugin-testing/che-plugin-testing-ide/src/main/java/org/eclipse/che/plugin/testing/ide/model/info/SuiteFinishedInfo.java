@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.testing.ide.model.info;
 import org.eclipse.che.plugin.testing.ide.model.Printer;
 
 /**
- *
+ * Describes information about suit which is finished.
  */
 public class SuiteFinishedInfo extends AbstractTestStateInfo {
 

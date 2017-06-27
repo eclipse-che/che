@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Test JSON RPC API.
  */
 @Singleton
 public class TestingRPCService {

@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * Simple test message which contains text and type.
  */
 public class UncapturedOutputMessage extends ServerTestingMessage {
     public UncapturedOutputMessage(String text, ProcessOutputType outputType) {
@@ -27,6 +27,4 @@ public class UncapturedOutputMessage extends ServerTestingMessage {
         attributes.put("outputType", outputType.toString());
         setAttributes(attributes);
     }
-
-
 }

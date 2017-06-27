@@ -18,12 +18,10 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
  * Event fired when java reconsiler finish work
  */
 public class JavaReconsilerEvent extends GwtEvent<JavaReconsilerEvent.JavaReconsilerHandler> {
-
     public static final Type<JavaReconsilerHandler> TYPE = new Type<>();
     private final TextEditor editor;
 
     public JavaReconsilerEvent(TextEditor editor) {
-
         this.editor = editor;
     }
 

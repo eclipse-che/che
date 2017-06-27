@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.model;
 
 /**
- *
+ * Describes test root state.
  */
 public class TestRootState extends TestState {
 

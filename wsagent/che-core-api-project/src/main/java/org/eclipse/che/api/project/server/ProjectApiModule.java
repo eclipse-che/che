@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+
 import org.eclipse.che.api.project.server.handlers.CreateBaseProjectTypeHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImportOutputJsonRpcRegistrar;

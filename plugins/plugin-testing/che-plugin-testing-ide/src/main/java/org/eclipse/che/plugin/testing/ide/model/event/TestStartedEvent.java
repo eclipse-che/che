@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.testing.ide.model.event;
 import org.eclipse.che.plugin.testing.ide.messages.TestStarted;
 
 /**
- *
+ * Event which informs about starting test.
  */
 public class TestStartedEvent extends BaseStartEvent {
 

@@ -12,6 +12,7 @@ package org.eclipse.che.wsagent.server;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.inject.DynaModule;

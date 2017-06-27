@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.testing.ide.model.event;
 import org.eclipse.che.plugin.testing.ide.messages.TestSuiteFinished;
 
 /**
- *
+ * Event which informs about finishing test suite.
  */
 public class TestSuiteFinishedEvent extends TestNodeEvent {
     public TestSuiteFinishedEvent(TestSuiteFinished message) {

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Describes information about test which is failed.
  */
 public class TestFailedInfo extends AbstractTestStateInfo {
 

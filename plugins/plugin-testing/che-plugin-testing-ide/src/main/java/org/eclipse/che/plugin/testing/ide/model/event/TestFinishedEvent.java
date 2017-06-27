@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.testing.ide.model.event;
 import org.eclipse.che.plugin.testing.ide.messages.TestFinished;
 
 /**
- *
+ * Event when test was finished.
  */
 public class TestFinishedEvent extends TestNodeEvent {
 

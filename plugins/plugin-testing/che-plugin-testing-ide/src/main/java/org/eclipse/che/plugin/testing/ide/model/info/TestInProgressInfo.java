@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.model.info;
 
 /**
- *
+ * Describes information about test which is in progress.
  */
 public class TestInProgressInfo extends AbstractTestStateInfo {
 

@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.languageserver.ide.navigation.symbol;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;

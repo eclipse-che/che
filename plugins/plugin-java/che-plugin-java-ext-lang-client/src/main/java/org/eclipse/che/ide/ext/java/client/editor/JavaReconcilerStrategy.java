@@ -52,7 +52,7 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
     private final SemanticHighlightRenderer           highlighter;
     private final ResolvingProjectStateHolderRegistry resolvingProjectStateHolderRegistry;
     private final JavaLocalizationConstant            localizationConstant;
-    private final EventBus eventBus;
+    private final EventBus                            eventBus;
     private final JavaReconcileClient                 client;
 
     private EditorWithErrors            editorWithErrors;

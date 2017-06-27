@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.model.info;
 
 /**
- *
+ * Describes error information about test.
  */
 public class TestErrorInfo extends TestFailedInfo {
     public TestErrorInfo(String message, String stackTrace) {

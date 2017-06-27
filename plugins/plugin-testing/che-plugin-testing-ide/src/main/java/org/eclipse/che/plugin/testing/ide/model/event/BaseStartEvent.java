@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.testing.ide.model.event;
 import org.eclipse.che.plugin.testing.ide.messages.ClientTestingMessage;
 
 /**
- *
+ * Base start event.
  */
 public class BaseStartEvent extends TestNodeEvent {
     private final String parentId;

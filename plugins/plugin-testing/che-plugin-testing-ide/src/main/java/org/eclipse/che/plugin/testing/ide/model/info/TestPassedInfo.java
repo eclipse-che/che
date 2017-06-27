@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide.model.info;
 
 /**
- *
+ * Describes information about passed test.
  */
 public class TestPassedInfo extends AbstractTestStateInfo {
 

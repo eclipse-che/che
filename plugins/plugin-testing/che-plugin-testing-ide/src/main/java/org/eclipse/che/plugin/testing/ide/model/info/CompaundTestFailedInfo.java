@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Describes information about failed tests.
  */
 public class CompaundTestFailedInfo extends TestFailedInfo {
 

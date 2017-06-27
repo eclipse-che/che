@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.testing.ide.model.event;
 import org.eclipse.che.plugin.testing.ide.messages.TestFailed;
 
 /**
- *
+ * Event when test was failed.
  */
 public class TestFailedEvent extends TestNodeEvent {
 
