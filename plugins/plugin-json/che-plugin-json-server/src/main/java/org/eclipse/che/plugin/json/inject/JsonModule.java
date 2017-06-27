@@ -10,16 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.json.inject;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.Multibinder;
-
-import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.json.languageserver.JsonLanguageServerLauncher;
-
 import static java.util.Arrays.asList;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.json.languageserver.JsonLanguageServerLauncher;
 
 /**
  * @author Anatolii Bazko

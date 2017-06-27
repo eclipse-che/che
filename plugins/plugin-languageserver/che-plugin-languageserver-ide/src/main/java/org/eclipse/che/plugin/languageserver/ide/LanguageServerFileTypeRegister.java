@@ -56,16 +56,16 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
     private final OccurrencesProvider                 occurrencesProvider;
 
     @Inject
-    public LanguageServerFileTypeRegister(LanguageServerRegistryServiceClient serverLanguageRegistry, 
+    public LanguageServerFileTypeRegister(LanguageServerRegistryServiceClient serverLanguageRegistry,
                                           LanguageServerRegistry lsRegistry,
-                                          LanguageServerResources resources, 
+                                          LanguageServerResources resources,
                                           EditorRegistry editorRegistry,
-                                          OrionContentTypeRegistrant contentTypeRegistrant, 
+                                          OrionContentTypeRegistrant contentTypeRegistrant,
                                           OrionHoverRegistrant orionHoverRegistrant,
                                           OrionOccurrencesRegistrant orionOccurrencesRegistrant,
-                                          LanguageServerEditorProvider editorProvider, 
+                                          LanguageServerEditorProvider editorProvider,
                                           HoverProvider hoverProvider,
-                                          OccurrencesProvider occurrencesProvider) { 
+                                          OccurrencesProvider occurrencesProvider) {
         this.serverLanguageRegistry = serverLanguageRegistry;
         this.lsRegistry = lsRegistry;
         this.resources = resources;
