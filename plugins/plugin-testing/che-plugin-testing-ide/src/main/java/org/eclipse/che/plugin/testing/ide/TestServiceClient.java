@@ -28,6 +28,8 @@ import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.api.promises.client.js.ResolveFunction;
 import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.che.api.testing.shared.dto.TestResultDto;
+import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
@@ -111,7 +113,6 @@ public class TestServiceClient {
         this.processesPanelPresenter = processesPanelPresenter;
         this.testGoal = testGoal;
     }
-
     public Promise<CommandImpl> getOrCreateTestCompileCommand() {
         List<CommandImpl> commands = commandManager.getCommands();
 
@@ -133,6 +134,7 @@ public class TestServiceClient {
         return promiseProvider.resolve(null);
     }
 
+    @Deprecated
     public Promise<TestResult> getTestResult(String projectPath, String testFramework, Map<String, String> parameters) {
         return getTestResult(projectPath, testFramework, parameters, null);
     }
@@ -251,6 +253,34 @@ public class TestServiceClient {
                      + "&testFramework=" + testFramework + "&" + sb.toString();
         return asyncRequestFactory.createGetRequest(url).header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(TestResult.class));
+    }
+
+    public Promise<TestResultRootDto> runTests(String testFramework, String projectPath, Map<String, String> parameters) {
+        StringBuilder sb = new StringBuilder();
+        if (parameters != null) {
+            for (Map.Entry<String, String> e : parameters.entrySet()) {
+                if (sb.length() > 0) {
+                    sb.append('&');
+                }
+                sb.append(URL.encode(e.getKey())).append('=').append(URL.encode(e.getValue()));
+            }
+        }
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/che/testing/runtests/?testFramework=" + testFramework
+                + "&projectPath=" + projectPath + "&" + sb.toString();
+        return asyncRequestFactory.createGetRequest(url).header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
+                .send(dtoUnmarshallerFactory.newUnmarshaller(TestResultRootDto.class));
+    }
+
+    public Promise<List<TestResultDto>> getTestResults(String testFramework, List<String> testResultsPath) {
+        StringBuilder params = new StringBuilder();
+        for (int i = 0; i < testResultsPath.size(); i++) {
+            params.append("&path" + i + '=');
+            params.append(testResultsPath.get(i));
+        }
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/che/testing/gettestresults/?testFramework="
+                + testFramework + params.toString();
+        return asyncRequestFactory.createGetRequest(url).header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
+                .send(dtoUnmarshallerFactory.newListUnmarshaller(TestResultDto.class));
     }
 
 }

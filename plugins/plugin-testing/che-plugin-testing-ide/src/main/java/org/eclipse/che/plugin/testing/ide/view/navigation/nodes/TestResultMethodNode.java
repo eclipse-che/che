@@ -33,6 +33,7 @@ import com.google.inject.assistedinject.Assisted;
  * 
  * @author Mirage Abeysekara
  */
+@Deprecated
 public class TestResultMethodNode extends AbstractTreeNode implements HasAction, HasPresentation {
 
     private String              methodName;

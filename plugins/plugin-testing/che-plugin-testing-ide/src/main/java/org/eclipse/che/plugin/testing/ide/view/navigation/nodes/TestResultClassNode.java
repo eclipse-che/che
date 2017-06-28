@@ -32,6 +32,7 @@ import com.google.inject.assistedinject.Assisted;
  * 
  * @author Mirage Abeysekara
  */
+@Deprecated
 public class TestResultClassNode extends AbstractTreeNode implements HasPresentation {
 
     private final String        className;

@@ -141,14 +141,7 @@
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                        <exclude>**/**/TestingHandler.java</exclude>
-                        <exclude>**/**/ExecutorPromiseMocker.java</exclude>
-                        <exclude>**/**/PromiseMocker.java</exclude>
-                        <exclude>**/**/FunctionAnswer.java</exclude>
-                        <exclude>**/**/MockitoPrinter.java</exclude>
-                        <exclude>**/**/TestServiceClientTest.java</exclude>
-                    </excludes>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
             <plugin>
