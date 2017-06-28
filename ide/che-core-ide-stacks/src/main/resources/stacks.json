@@ -1688,7 +1688,7 @@
     "id": "bitnami-express",
     "creator": "Bitnami",
     "name": "Bitnami Express",
-    "description": "Default Express stack with Node 7.0.0, Express 4.14.0, MongoDB 3.2.9.",
+    "description": "Default Express stack with Node 7.10.0, Express 4.15.3, MongoDB 3.4.5.",
     "scope": "advanced",
     "tags": [
       "Express"
@@ -1696,15 +1696,15 @@
     "components": [
       {
         "name": "Node.JS",
-        "version": "7.0.0"
+        "version": "7.10.0"
       },
       {
         "name": "Express",
-        "version": "4.14.0"
+        "version": "4.15.3"
       },
       {
         "name": "Bower",
-        "version": "1.7.9"
+        "version": "1.8.0"
       },
       {
         "name": "NPM",
@@ -1712,12 +1712,12 @@
       },
       {
         "name": "MongoDB",
-        "version": "3.2.9"
+        "version": "3.4.5"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-express:4.14.0-r18"
+      "origin": "bitnami/che-express:4.15.3-r2"
     },
     "workspaceConfig": {
       "environments": {
@@ -1734,7 +1734,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-express:4.14.0-r18",
+            "location": "bitnami/che-express:4.15.3-r2",
             "type": "dockerimage"
           }
         }
@@ -1753,7 +1753,7 @@
     "id": "bitnami-swift",
     "creator": "Bitnami",
     "name": "Bitnami Swift",
-    "description": "Default Swift stack with Swift 3.0.1",
+    "description": "Default Swift stack with Swift 3.1.1",
     "scope": "advanced",
     "tags": [
       "Swift"
@@ -1761,12 +1761,12 @@
     "components": [
       {
         "name": "Swift",
-        "version": "3.0.1"
+        "version": "3.1.1"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-swift:3.0.2-RELEASE-r3"
+      "origin": "bitnami/che-swift:3.1.1-r0"
     },
     "workspaceConfig": {
       "environments": {
@@ -1783,7 +1783,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-swift:3.0.2-RELEASE-r3",
+            "location": "bitnami/che-swift:3.1.1-r0",
             "type": "dockerimage"
           }
         }
@@ -1802,7 +1802,7 @@
     "id": "bitnami-laravel",
     "creator": "Bitnami",
     "name": "Bitnami Laravel",
-    "description": "Default Laravel stack with PHP 7.0.10, Laravel 5.2.31, MariaDB 10.1.19.",
+    "description": "Default Laravel stack with PHP 7.0.20, Laravel 5.4.23, MariaDB 10.1.24.",
     "scope": "advanced",
     "tags": [
       "Laravel"
@@ -1810,20 +1810,20 @@
     "components": [
       {
         "name": "PHP",
-        "version": "7.0.10"
+        "version": "7.0.20"
       },
       {
         "name": "Laravel",
-        "version": "5.2.31"
+        "version": "5.4.23"
       },
       {
         "name": "MariaDB",
-        "version": "10.1.14"
+        "version": "10.1.24"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-laravel:5.2.31-r14"
+      "origin": "bitnami/che-laravel:5.4.23-r1"
     },
     "workspaceConfig": {
       "environments": {
@@ -1840,7 +1840,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-laravel:5.2.31-r14",
+            "location": "bitnami/che-laravel:5.4.23-r1",
             "type": "dockerimage"
           }
         }
@@ -1859,7 +1859,7 @@
     "id": "bitnami-rails",
     "creator": "Bitnami",
     "name": "Bitnami Rails",
-    "description": "Bitnami Rails stack with Ruby 2.3.1, Rails 5.0.0.1, MariaDB 10.1.14.",
+    "description": "Bitnami Rails stack with Ruby 2.4.1, Rails 5.1.2, MariaDB 10.1.24.",
     "scope": "advanced",
     "tags": [
       "BitnamiRails"
@@ -1867,20 +1867,20 @@
     "components": [
       {
         "name": "Ruby",
-        "version": "2.3.1"
+        "version": "2.4.1"
       },
       {
         "name": "Rails",
-        "version": "5.0.0.1"
+        "version": "5.1.2"
       },
       {
         "name": "MariaDB",
-        "version": "10.1.14"
+        "version": "10.1.24"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-rails:5.0.0.1-r9"
+      "origin": "bitnami/che-rails:5.1.2-r0"
     },
     "workspaceConfig": {
       "environments": {
@@ -1897,7 +1897,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-rails:5.0.0.1-r9",
+            "location": "bitnami/che-rails:5.1.2-r0",
             "type": "dockerimage"
           }
         }
@@ -1916,7 +1916,7 @@
     "id": "bitnami-codeigniter",
     "creator": "Bitnami",
     "name": "Bitnami Codeigniter",
-    "description": "Default CodeIgniter stack with PHP 7.0.11, CodeIgniter 3.1.0, MariaDB 10.1.19.",
+    "description": "Default CodeIgniter stack with PHP 7.0.20, CodeIgniter 3.1.3, MariaDB 10.1.24.",
     "scope": "advanced",
     "tags": [
       "CodeIgniter"
@@ -1924,20 +1924,20 @@
     "components": [
       {
         "name": "PHP",
-        "version": "7.0.11"
+        "version": "7.0.20"
       },
       {
         "name": "Codeigniter",
-        "version": "3.1.0"
+        "version": "3.1.3"
       },
       {
         "name": "MariaDB",
-        "version": "10.1.19"
+        "version": "10.1.24"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-codeigniter:3.1.3-r2"
+      "origin": "bitnami/che-codeigniter:3.1.3-r6"
     },
     "workspaceConfig": {
       "environments": {
@@ -1954,7 +1954,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-codeigniter:3.1.3-r2",
+            "location": "bitnami/che-codeigniter:3.1.3-r6",
             "type": "dockerimage"
           }
         }
@@ -1973,7 +1973,7 @@
     "id": "bitnami-symfony",
     "creator": "Bitnami",
     "name": "Bitnami Symfony",
-    "description": "Default Symfony stack with PHP 7.0.11, Symfony 3.1.3, MariaDB 10.1.19.",
+    "description": "Default Symfony stack with PHP 7.0.20, Symfony 3.3.2, MariaDB 10.1.24.",
     "scope": "advanced",
     "tags": [
       "Symfony"
@@ -1981,20 +1981,20 @@
     "components": [
       {
         "name": "PHP",
-        "version": "7.0.11"
+        "version": "7.0.20"
       },
       {
         "name": "Symfony",
-        "version": "3.1.3"
+        "version": "3.3.2"
       },
       {
         "name": "MariaDB",
-        "version": "10.1.19"
+        "version": "10.1.24"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-symfony:3.1.3-r12"
+      "origin": "bitnami/che-symfony:3.3.2-r0"
     },
     "workspaceConfig": {
       "environments": {
@@ -2011,7 +2011,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-symfony:3.1.3-r12",
+            "location": "bitnami/che-symfony:3.3.2-r0",
             "type": "dockerimage"
           }
         }
@@ -2030,7 +2030,7 @@
     "id": "bitnami-java-play",
     "creator": "Bitnami",
     "name": "Bitnami Play for Java",
-    "description": "Default Play stack with OpenJDK 1.8.0 and Play 1.3.10.",
+    "description": "Default Play stack with OpenJDK 1.8.0 and Play 2.6.0.",
     "scope": "advanced",
     "tags": [
       "Play"
@@ -2042,16 +2042,16 @@
       },
       {
         "name": "Play",
-        "version": "2.55"
+        "version": "2.6.0"
       },
       {
         "name": "Activator",
-        "version": "1.13.10"
+        "version": "1.13.12"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-java-play:1.3.10-r10"
+      "origin": "bitnami/che-java-play:1.3.12-r3"
     },
     "workspaceConfig": {
       "environments": {
@@ -2068,7 +2068,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-java-play:1.3.10-r10",
+            "location": "bitnami/che-java-play:1.3.12-r3",
             "type": "dockerimage"
           }
         }
