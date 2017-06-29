@@ -75,13 +75,6 @@ public abstract class ServerChecker {
     }
 
     /**
-     * Forcefully stops server availability checking.
-     */
-    public void stop() {
-        timer.cancel();
-    }
-
-    /**
      * Shows whether the server is treated as available.
      *
      * @return true if server is available, false otherwise

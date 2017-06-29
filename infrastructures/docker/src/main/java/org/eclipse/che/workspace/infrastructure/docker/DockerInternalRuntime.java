@@ -247,7 +247,10 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         bootstrapperFactory.create(name, identity, dockerMachine, machineConfig.getAgents())
                            .bootstrap();
 
-        new ServersReadinessChecker().check(name, dockerMachine.getServers(), new ServerReadinessHandler(name));
+        ServersReadinessChecker readinessChecker =
+                new ServersReadinessChecker(name, dockerMachine.getServers(), new ServerReadinessHandler(name));
+        readinessChecker.startAsync();
+        readinessChecker.await();
     }
 
     private class ServerReadinessHandler implements Consumer<String> {

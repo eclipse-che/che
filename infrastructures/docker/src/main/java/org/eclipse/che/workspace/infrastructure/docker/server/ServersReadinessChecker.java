@@ -40,9 +40,14 @@ public class ServersReadinessChecker {
     private static Map<String, String> livenessChecksPaths = ImmutableMap.of("wsagent", "/api/",
                                                                              "exec-agent", "/process",
                                                                              "terminal", "/");
+    private final String                  machineName;
+    private final Map<String, ServerImpl> servers;
+    private final Consumer<String>        serverReadinessHandler;
+    private final Timer                   timer;
 
+    private CompletableFuture[] checkTasks;
     /**
-     * Checks readiness of servers of a machine.
+     * Creates instance of this class.
      *
      * @param machineName
      *         name of machine whose servers will be checked by this method
@@ -50,29 +55,50 @@ public class ServersReadinessChecker {
      *         map of servers in a machine
      * @param serverReadinessHandler
      *         consumer which will be called with server reference as the argument when server become available
+     */
+    public ServersReadinessChecker(String machineName,
+                                   Map<String, ServerImpl> servers,
+                                   Consumer<String> serverReadinessHandler) {
+        this.machineName = machineName;
+        this.servers = servers;
+        this.serverReadinessHandler = serverReadinessHandler;
+        this.timer = new Timer("ServerReadinessChecker", true);
+    }
+
+    /**
+     * Asynchronously starts checking readiness of servers of a machine.
+     *
      * @throws InternalInfrastructureException
      *         if check of a server failed due to an unexpected error
      * @throws InfrastructureException
-     *         if check of a server failed dut to interruption
-     * @throws InfrastructureException
-     *         if check of a server failed because it reached timeout
+     *         if check of a server failed due to an error
      */
-    public void check(String machineName,
-                      Map<String, ServerImpl> servers,
-                      Consumer<String> serverReadinessHandler)
-            throws InfrastructureException {
-
-        List<ServerChecker> serverCheckers = getServerCheckers(machineName, servers);
-
+    public void startAsync() throws InfrastructureException {
+        List<ServerChecker> serverCheckers = getServerCheckers();
         List<CompletableFuture<Void>> completableTasks = new ArrayList<>(serverCheckers.size());
         for (ServerChecker serverChecker : serverCheckers) {
             completableTasks.add(serverChecker.getReportCompFuture().thenAccept(serverReadinessHandler));
             serverChecker.start();
         }
+        checkTasks = completableTasks.toArray(new CompletableFuture[completableTasks.size()]);
+    }
+
+    /**
+     * Waits until servers are considered available or one of them is considered as unavailable.
+     *
+     * @throws InternalInfrastructureException
+     *         if check of a server failed due to an unexpected error
+     * @throws InfrastructureException
+     *         if check of a server failed due to interruption
+     * @throws InfrastructureException
+     *         if check of a server failed because it reached timeout
+     * @throws InfrastructureException
+     *         if check of a server failed due to an error
+     */
+    public void await() throws InfrastructureException {
         try {
             // TODO how much time should we check?
-            CompletableFuture.allOf(completableTasks.toArray(new CompletableFuture[completableTasks.size()]))
-                             .get(completableTasks.size() * 180, TimeUnit.SECONDS);
+            CompletableFuture.allOf(checkTasks).get(checkTasks.length * 180, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new InfrastructureException("Machine " + machineName + " start is interrupted");
@@ -89,16 +115,11 @@ public class ServersReadinessChecker {
             }
         } finally {
             // cleanup checkers tasks
-            for (ServerChecker serverChecker : serverCheckers) {
-                serverChecker.stop();
-            }
+            timer.cancel();
         }
     }
 
-    private List<ServerChecker> getServerCheckers(String machineName, Map<String, ServerImpl> servers)
-            throws InfrastructureException {
-
-        Timer timer = new Timer("ServerReadinessChecker", true);
+    private List<ServerChecker> getServerCheckers() throws InfrastructureException {
         ArrayList<ServerChecker> checkers = new ArrayList<>(servers.size());
         for (Map.Entry<String, ServerImpl> serverEntry : servers.entrySet()) {
             // TODO replace with correct behaviour
@@ -106,18 +127,13 @@ public class ServersReadinessChecker {
             if (!livenessChecksPaths.containsKey(serverEntry.getKey())) {
                 continue;
             }
-            checkers.add(getChecker(machineName,
-                                    serverEntry.getKey(),
-                                    serverEntry.getValue(),
-                                    timer));
+            checkers.add(getChecker(serverEntry.getKey(),
+                                    serverEntry.getValue()));
         }
         return checkers;
     }
 
-    private ServerChecker getChecker(String machineName,
-                                     String serverRef,
-                                     ServerImpl server,
-                                     Timer timer) throws InfrastructureException {
+    private ServerChecker getChecker(String serverRef, ServerImpl server) throws InfrastructureException {
         // TODO replace with correct behaviour
         // workaround needed because we don't have server readiness check in the model
         String livenessCheckPath = livenessChecksPaths.get(serverRef);
