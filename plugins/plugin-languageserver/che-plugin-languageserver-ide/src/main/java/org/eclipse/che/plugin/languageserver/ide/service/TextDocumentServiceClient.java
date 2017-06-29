@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcError;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -23,6 +24,7 @@ import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -60,8 +62,8 @@ public class TextDocumentServiceClient {
      * @param position
      * @return
      */
-    public Promise<List<ExtendedCompletionItem>> completion(TextDocumentPositionParams position) {
-        return transmitDtoAndReceiveDtoList(position, "textDocument/completion", ExtendedCompletionItem.class);
+    public Promise<CompletionList> completion(TextDocumentPositionParams position) {
+        return transmitDtoAndReceiveDto(position, "textDocument/completion", CompletionList.class);
     }
 
     /**

@@ -12,18 +12,42 @@ package org.eclipse.che.api.languageserver.registry;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.ClientCapabilities;
+import org.eclipse.lsp4j.CodeActionCapabilities;
+import org.eclipse.lsp4j.CodeLensCapabilities;
+import org.eclipse.lsp4j.CompletionCapabilities;
+import org.eclipse.lsp4j.CompletionItemCapabilities;
+import org.eclipse.lsp4j.DefinitionCapabilities;
+import org.eclipse.lsp4j.DidChangeConfigurationCapabilities;
+import org.eclipse.lsp4j.DidChangeWatchedFilesCapabilities;
+import org.eclipse.lsp4j.DocumentHighlightCapabilities;
+import org.eclipse.lsp4j.DocumentLinkCapabilities;
+import org.eclipse.lsp4j.DocumentSymbolCapabilities;
+import org.eclipse.lsp4j.ExecuteCommandCapabilities;
+import org.eclipse.lsp4j.FormattingCapabilities;
+import org.eclipse.lsp4j.HoverCapabilities;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.OnTypeFormattingCapabilities;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.RangeFormattingCapabilities;
+import org.eclipse.lsp4j.ReferencesCapabilities;
+import org.eclipse.lsp4j.RenameCapabilities;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
+import org.eclipse.lsp4j.SignatureHelpCapabilities;
+import org.eclipse.lsp4j.SymbolCapabilities;
+import org.eclipse.lsp4j.SynchronizationCapabilities;
+import org.eclipse.lsp4j.TextDocumentClientCapabilities;
+import org.eclipse.lsp4j.WorkspaceClientCapabilities;
+import org.eclipse.lsp4j.WorkspaceEditCapabilities;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
@@ -48,6 +72,8 @@ public class ServerInitializerImpl implements ServerInitializer {
 
     private static final int    PROCESS_ID  = getProcessId();
     private static final String CLIENT_NAME = "EclipseChe";
+
+    public static ClientCapabilities CLIENT_CAPABILITIES;
 
     private final List<ServerInitializerObserver> observers = new ArrayList<>();
 
@@ -173,7 +199,7 @@ public class ServerInitializerImpl implements ServerInitializer {
         }
 
         if (launcher instanceof ServerInitializerObserver) {
-            addObserver((ServerInitializerObserver) launcher);
+            addObserver((ServerInitializerObserver)launcher);
         }
     }
 
@@ -181,7 +207,37 @@ public class ServerInitializerImpl implements ServerInitializer {
         InitializeParams initializeParams = new InitializeParams();
         initializeParams.setProcessId(PROCESS_ID);
         initializeParams.setRootPath(projectPath);
-        initializeParams.setCapabilities(new ClientCapabilities());
+
+        if (CLIENT_CAPABILITIES == null) {
+            CLIENT_CAPABILITIES = new ClientCapabilities();
+            WorkspaceClientCapabilities workspace = new WorkspaceClientCapabilities();
+            workspace.setApplyEdit(false); //Change when support added
+            workspace.setDidChangeConfiguration(new DidChangeConfigurationCapabilities(false));
+            workspace.setDidChangeWatchedFiles(new DidChangeWatchedFilesCapabilities(false));
+            workspace.setExecuteCommand(new ExecuteCommandCapabilities(false));
+            workspace.setSymbol(new SymbolCapabilities(false));
+            workspace.setWorkspaceEdit(new WorkspaceEditCapabilities(false));
+            CLIENT_CAPABILITIES.setWorkspace(workspace);
+
+            TextDocumentClientCapabilities textDocument = new TextDocumentClientCapabilities();
+            textDocument.setCodeAction(new CodeActionCapabilities(false));
+            textDocument.setCodeLens(new CodeLensCapabilities(false));
+            textDocument.setCompletion(new CompletionCapabilities(new CompletionItemCapabilities(true)));
+            textDocument.setDefinition(new DefinitionCapabilities(false));
+            textDocument.setDocumentHighlight(new DocumentHighlightCapabilities(true));
+            textDocument.setDocumentLink(new DocumentLinkCapabilities());
+            textDocument.setDocumentSymbol(new DocumentSymbolCapabilities());
+            textDocument.setFormatting(new FormattingCapabilities());
+            textDocument.setHover(new HoverCapabilities());
+            textDocument.setOnTypeFormatting(new OnTypeFormattingCapabilities());
+            textDocument.setRangeFormatting(new RangeFormattingCapabilities());
+            textDocument.setReferences(new ReferencesCapabilities());
+            textDocument.setRename(new RenameCapabilities());
+            textDocument.setSignatureHelp(new SignatureHelpCapabilities());
+            textDocument.setSynchronization(new SynchronizationCapabilities(true, false, true));
+            CLIENT_CAPABILITIES.setTextDocument(textDocument);
+        }
+        initializeParams.setCapabilities(CLIENT_CAPABILITIES);
         initializeParams.setClientName(CLIENT_NAME);
         return initializeParams;
     }

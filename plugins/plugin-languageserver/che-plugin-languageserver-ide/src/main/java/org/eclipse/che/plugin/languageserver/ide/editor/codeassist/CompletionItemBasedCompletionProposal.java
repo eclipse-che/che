@@ -18,6 +18,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
+import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -56,10 +57,10 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     private final ServerCapabilities        serverCapabilities;
     private final List<Match>               highlights;
     private final int                       offset;
-    private       ExtendedCompletionItem    completionItem;
+    private       CompletionItem    completionItem;
     private       boolean                   resolved;
 
-    CompletionItemBasedCompletionProposal(ExtendedCompletionItem completionItem,
+    CompletionItemBasedCompletionProposal(CompletionItem completionItem,
                                           String currentWord,
                                           TextDocumentServiceClient documentServiceClient,
                                           TextDocumentIdentifier documentId,
@@ -188,8 +189,21 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     }
 
     private Promise<ExtendedCompletionItem> resolve() {
-        completionItem.setTextDocumentIdentifier(documentId);
-        return documentServiceClient.resolveCompletionItem(completionItem);
+        DtoClientImpls.ExtendedCompletionItemDto item = new DtoClientImpls.ExtendedCompletionItemDto();
+        item.setLabel(completionItem.getLabel());
+        item.setKind(completionItem.getKind());
+        item.setDetail(completionItem.getDetail());
+        item.setDocumentation(completionItem.getDocumentation());
+        item.setSortText(completionItem.getSortText());
+        item.setFilterText(completionItem.getFilterText());
+        item.setInsertText(completionItem.getInsertText());
+        item.setInsertTextFormat(completionItem.getInsertTextFormat());
+        item.setTextEdit(completionItem.getTextEdit());
+        item.setAdditionalTextEdits(completionItem.getAdditionalTextEdits());
+        item.setCommand(completionItem.getCommand());
+        item.setData(completionItem.getData());
+        item.setTextDocumentIdentifier(documentId);
+        return documentServiceClient.resolveCompletionItem(item);
     }
 
     private static class CompletionImpl implements Completion {

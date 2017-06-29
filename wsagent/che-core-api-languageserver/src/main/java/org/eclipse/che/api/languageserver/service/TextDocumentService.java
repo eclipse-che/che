@@ -23,6 +23,7 @@ import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.LocationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SignatureHelpDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SymbolInformationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.TextEditDto;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
@@ -82,8 +83,8 @@ public class TextDocumentService {
         dtoToDtoList("rangeFormatting", DocumentRangeFormattingParams.class, TextEditDto.class, this::rangeFormatting);
         dtoToDtoList("references", ReferenceParams.class, LocationDto.class, this::references);
         dtoToDtoList("onTypeFormatting", DocumentOnTypeFormattingParams.class, TextEditDto.class, this::onTypeFormatting);
-        dtoToDtoList("completion", TextDocumentPositionParams.class, CompletionItemDto.class, this::completion);
 
+        dtoToDto("completion", TextDocumentPositionParams.class, CompletionListDto.class, this::completion);
         dtoToDto("completionItem/resolve", ExtendedCompletionItem.class, CompletionItemDto.class, this::completionItemResolve);
         dtoToDto("documentHighlight", TextDocumentPositionParams.class, DocumentHighlight.class, this::documentHighlight);
         dtoToDto("hover", TextDocumentPositionParams.class, HoverDto.class, this::hover);
@@ -95,7 +96,7 @@ public class TextDocumentService {
         dtoToNothing("didSave", DidSaveTextDocumentParams.class, this::didSave);
     }
 
-    private List<CompletionItemDto> completion(TextDocumentPositionParams textDocumentPositionParams) {
+    private CompletionListDto completion(TextDocumentPositionParams textDocumentPositionParams) {
         try {
             TextDocumentIdentifier textDocument = textDocumentPositionParams.getTextDocument();
             textDocument.setUri(prefixURI(textDocument.getUri()));
@@ -109,17 +110,17 @@ public class TextDocumentService {
                                                                         .completion(textDocumentPositionParams)
                                                                         .get();
             if (either.getLeft() != null) {
-                return either.getLeft()
-                             .stream()
-                             .map(CompletionItemDto::new)
-                             .collect(toList());
+
+                CompletionListDto result = new CompletionListDto();
+                result.setItems(either.getLeft()
+                                      .stream()
+                                      .map(CompletionItemDto::new)
+                                      .collect(toList()));
+                result.setIsIncomplete(false);
+                return result;
             }
 
-            return either.getRight()
-                         .getItems()
-                         .stream()
-                         .map(CompletionItemDto::new)
-                         .collect(toList());
+            return new CompletionListDto(either.getRight());
         } catch (LanguageServerException | InterruptedException | ExecutionException e) {
             throw new JsonRpcException(-27000, e.getMessage());
         }
