@@ -27,6 +27,7 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentVa
 import org.eclipse.che.workspace.infrastructure.docker.environment.ServicesStartStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
+import javax.inject.Named;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +45,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     private final EnvironmentNormalizer     environmentNormalizer;
     private final DockerRuntimeFactory      runtimeFactory;
     private final InstallerRegistry         installerRegistry;
+    private final String                    apiEndpoint;
 
     @Inject
     public DockerRuntimeInfrastructure(EnvironmentParser dockerEnvironmentParser,
@@ -54,7 +56,8 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                        Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers,
                                        DockerRuntimeFactory runtimeFactory,
                                        InstallerRegistry installerRegistry,
-                                       EventService eventService) {
+                                       EventService eventService,
+                                       @Named("che.api") String apiEndpoint) {
         super("docker", environmentParsers.keySet(), eventService);
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
         this.dockerEnvironmentParser = dockerEnvironmentParser;
@@ -63,6 +66,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         this.environmentNormalizer = environmentNormalizer;
         this.runtimeFactory = runtimeFactory;
         this.installerRegistry = installerRegistry;
+        this.apiEndpoint = apiEndpoint;
     }
 
     @Override
@@ -102,6 +106,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                         dockerEnvironment,
                                         orderedServices,
                                         installerRegistry,
-                                        runtimeFactory);
+                                        runtimeFactory,
+                                        apiEndpoint);
     }
 }
