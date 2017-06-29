@@ -35,8 +35,7 @@ public abstract class ServerChecker {
     private final long                      period;
     private final long                      deadLine;
     private final CompletableFuture<String> reportFuture;
-
-    private Timer timer;
+    private final Timer                     timer;
 
     /**
      * Creates server checker instance.
@@ -57,9 +56,11 @@ public abstract class ServerChecker {
                             String serverRef,
                             long period,
                             long timeout,
-                            TimeUnit timeUnit) {
+                            TimeUnit timeUnit,
+                            Timer timer) {
         this.machineName = machineName;
         this.serverRef = serverRef;
+        this.timer = timer;
         this.period = TimeUnit.MILLISECONDS.convert(period, timeUnit);
         this.reportFuture = new CompletableFuture<>();
         this.deadLine = System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(timeout, timeUnit);
@@ -70,12 +71,6 @@ public abstract class ServerChecker {
      * checking times out.
      */
     public void start() {
-        if (timer != null) {
-            throw new IllegalStateException("ServerChecker is already started");
-        }
-        timer = new Timer("Server-" + serverRef +
-                          "-readiness-checker",
-                          true);
         timer.schedule(new ServerCheckingTask(), 0);
     }
 
@@ -83,9 +78,6 @@ public abstract class ServerChecker {
      * Forcefully stops server availability checking.
      */
     public void stop() {
-        if (timer == null) {
-            throw new IllegalStateException("ServerChecker is not started yet");
-        }
         timer.cancel();
     }
 

@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker.server;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,8 +31,9 @@ public class HttpConnectionServerChecker extends ServerChecker {
                                        String serverRef,
                                        long period,
                                        long timeout,
-                                       TimeUnit timeUnit) {
-        super(machineName, serverRef, period, timeout, timeUnit);
+                                       TimeUnit timeUnit,
+                                       Timer timer) {
+        super(machineName, serverRef, period, timeout, timeUnit, timer);
         this.url = url;
     }
 

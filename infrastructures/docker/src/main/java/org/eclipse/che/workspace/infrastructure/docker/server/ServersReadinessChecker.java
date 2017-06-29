@@ -22,6 +22,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -97,6 +98,7 @@ public class ServersReadinessChecker {
     private List<ServerChecker> getServerCheckers(String machineName, Map<String, ServerImpl> servers)
             throws InfrastructureException {
 
+        Timer timer = new Timer("ServerReadinessChecker", true);
         ArrayList<ServerChecker> checkers = new ArrayList<>(servers.size());
         for (Map.Entry<String, ServerImpl> serverEntry : servers.entrySet()) {
             // TODO replace with correct behaviour
@@ -106,14 +108,16 @@ public class ServersReadinessChecker {
             }
             checkers.add(getChecker(machineName,
                                     serverEntry.getKey(),
-                                    serverEntry.getValue()));
+                                    serverEntry.getValue(),
+                                    timer));
         }
         return checkers;
     }
 
     private ServerChecker getChecker(String machineName,
                                      String serverRef,
-                                     ServerImpl server) throws InfrastructureException {
+                                     ServerImpl server,
+                                     Timer timer) throws InfrastructureException {
         // TODO replace with correct behaviour
         // workaround needed because we don't have server readiness check in the model
         String livenessCheckPath = livenessChecksPaths.get(serverRef);
@@ -138,7 +142,8 @@ public class ServersReadinessChecker {
                                                                     serverRef,
                                                                     3,
                                                                     180,
-                                                                    TimeUnit.SECONDS);
+                                                                    TimeUnit.SECONDS,
+                                                                    timer);
         } else {
             // TODO do not hardcode timeouts, use server conf instead
             serverChecker = new HttpConnectionServerChecker(url,
@@ -146,7 +151,8 @@ public class ServersReadinessChecker {
                                                             serverRef,
                                                             3,
                                                             180,
-                                                            TimeUnit.SECONDS);
+                                                            TimeUnit.SECONDS,
+                                                            timer);
         }
         return serverChecker;
     }

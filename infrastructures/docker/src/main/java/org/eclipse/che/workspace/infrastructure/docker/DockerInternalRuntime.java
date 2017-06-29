@@ -240,7 +240,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
         InternalMachineConfig machineConfig = getContext().getMachineConfigs().get(name);
         if (machineConfig == null) {
-            throw new InfrastructureException("Machine %s is not found in internal machines config of RuntimeContext");
+            throw new InfrastructureException(
+                    "Machine " + name + " is not found in internal machines config of RuntimeContext");
         }
 
         bootstrapperFactory.create(name, identity, dockerMachine, machineConfig.getAgents())
