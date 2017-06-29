@@ -13,6 +13,8 @@ package org.eclipse.che.commons.lang.execution;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Collections.unmodifiableList;
+
 /**
  * Represent and configure program parameters
  */
@@ -25,6 +27,6 @@ public class ParametersList {
     }
 
     public List<String> getParameters() {
-        return new ArrayList<>(parameters);
+        return unmodifiableList(parameters);
     }
 }
