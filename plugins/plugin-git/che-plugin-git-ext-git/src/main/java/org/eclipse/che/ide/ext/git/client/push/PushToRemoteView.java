@@ -111,6 +111,16 @@ public interface PushToRemoteView extends View<PushToRemoteView.ActionDelegate> 
      */
     void setEnablePushButton(boolean enabled);
 
+    /**
+     * Set selected force push check-box.
+     */
+    void setSelectedForcePushCheckBox(boolean isSelected);
+
+    /**
+     * Returns {@code true} if force push check-box is selected, otherwise returns {@code false}.
+     */
+    boolean isForcePushSelected();
+
     /** Close dialog. */
     void close();
 

@@ -14,6 +14,7 @@ package org.eclipse.che.plugin.testing.ide.view.navigation;
  * Enables navigation to the failed test class.
  * @author Mirage Abeysekara
  */
+@Deprecated
 public interface TestClassNavigation {
 
     /**
@@ -22,5 +23,6 @@ public interface TestClassNavigation {
      * @param packagePath
      * @param line
      */
+    @Deprecated
     void gotoClass(String packagePath, String className, String methodName, int line);
 }

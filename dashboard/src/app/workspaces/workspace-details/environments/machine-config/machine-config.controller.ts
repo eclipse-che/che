@@ -252,9 +252,10 @@ export class WorkspaceMachineConfigController {
 
   /**
    * Change machine's source image
+   * @param {string} newImage
    */
-  changeSource(): void {
-    this.environmentManager.setSource(this.machine, this.newImage);
+  changeSource(newImage: string): void {
+    this.environmentManager.setSource(this.machine, newImage);
     this.doUpdateConfig();
   }
 
