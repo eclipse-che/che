@@ -15,8 +15,6 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.CommandDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
@@ -24,7 +22,6 @@ import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceConfigImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
 import java.util.List;
@@ -33,15 +30,11 @@ import java.util.List;
 @Singleton
 class WorkspaceCommandManagerDelegate {
 
-    private final DtoFactory             dtoFactory;
     private final WorkspaceServiceClient workspaceServiceClient;
     private final AppContext             appContext;
 
     @Inject
-    WorkspaceCommandManagerDelegate(DtoFactory dtoFactory,
-                                    WorkspaceServiceClient workspaceServiceClient,
-                                    AppContext appContext) {
-        this.dtoFactory = dtoFactory;
+    WorkspaceCommandManagerDelegate(WorkspaceServiceClient workspaceServiceClient, AppContext appContext) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.appContext = appContext;
     }
@@ -60,14 +53,8 @@ class WorkspaceCommandManagerDelegate {
      * and command line will be provided by an appropriate {@link CommandType}.
      */
     Promise<CommandImpl> createCommand(final CommandImpl command) {
-        final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
-                                                .withName(command.getName())
-                                                .withCommandLine(command.getCommandLine())
-                                                .withType(command.getType())
-                                                .withAttributes(command.getAttributes());
-
-        return workspaceServiceClient.addCommand(appContext.getWorkspaceId(), commandDto)
-                                     .then((Function<WorkspaceDto, CommandImpl>)workspace -> {
+        return workspaceServiceClient.addCommand(appContext.getWorkspaceId(), command)
+                                     .then((Function<WorkspaceImpl, CommandImpl>)workspace -> {
                                          // update workspace model in AppContext because
                                          // AppContext always must return an actual workspace model
                                          ((AppContextImpl)appContext).setWorkspace(workspace);
@@ -81,14 +68,8 @@ class WorkspaceCommandManagerDelegate {
      * in order to prevent name duplication.
      */
     Promise<CommandImpl> updateCommand(final CommandImpl command) {
-        final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
-                                                .withName(command.getName())
-                                                .withCommandLine(command.getCommandLine())
-                                                .withType(command.getType())
-                                                .withAttributes(command.getAttributes());
-
-        return workspaceServiceClient.updateCommand(appContext.getWorkspaceId(), command.getName(), commandDto)
-                                     .then((Function<WorkspaceDto, CommandImpl>)workspace -> {
+        return workspaceServiceClient.updateCommand(appContext.getWorkspaceId(), command.getName(), command)
+                                     .then((Function<WorkspaceImpl, CommandImpl>)workspace -> {
                                          // update workspace model in AppContext because
                                          // AppContext always must return an actual workspace model
                                          ((AppContextImpl)appContext).setWorkspace(workspace);
@@ -99,7 +80,7 @@ class WorkspaceCommandManagerDelegate {
     /** Removes the command with the specified {@code commandName}. */
     Promise<Void> removeCommand(String commandName) {
         return workspaceServiceClient.deleteCommand(appContext.getWorkspaceId(), commandName)
-                                     .then((Function<WorkspaceDto, Void>)workspace -> {
+                                     .then((Function<WorkspaceImpl, Void>)workspace -> {
                                          // update workspace model in AppContext because
                                          // AppContext always must return an actual workspace model
                                          ((AppContextImpl)appContext).setWorkspace(workspace);

@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.MachineEntityImpl;
@@ -62,7 +61,7 @@ class MachineStatusEventHandler {
             final String workspaceId = event.getIdentity().getWorkspaceId();
 
             workspaceServiceClient.getWorkspace(workspaceId).then(workspace -> {
-                RuntimeDto workspaceRuntime = workspace.getRuntime();
+                RuntimeImpl workspaceRuntime = workspace.getRuntime();
                 if (workspaceRuntime == null) {
                     return;
                 }
