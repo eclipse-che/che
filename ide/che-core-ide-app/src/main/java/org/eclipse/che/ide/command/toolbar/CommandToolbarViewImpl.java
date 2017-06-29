@@ -36,6 +36,8 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
     @UiField
     SimplePanel panelSelectorPanel;
     @UiField
+    SimplePanel toolbarControllerPanel;
+    @UiField
     SimplePanel buttonsPanel;
     @UiField
     SimplePanel previewUrlListPanel;
@@ -78,10 +80,16 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
     }
 
     @Override
+    public AcceptsOneWidget getToolbarControllerContainer() {
+        return toolbarControllerPanel;
+    }
+
+    @Override
     public void addButton(ToolbarButton button) {
         buttonsPanel.add(button);
     }
 
     interface CommandToolbarViewImplUiBinder extends UiBinder<Widget, CommandToolbarViewImpl> {
     }
+
 }

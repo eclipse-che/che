@@ -78,7 +78,7 @@ public class PartStackViewImpl extends Composite implements RequiresResize, Part
     FlowPanel                                 maximizeButton;
 
     @UiField
-    FlowPanel                                 minimizeButton;
+    FlowPanel                                 hideButton;
 
     @UiField
     FlowPanel                                 menuButton;
@@ -113,7 +113,7 @@ public class PartStackViewImpl extends Composite implements RequiresResize, Part
         setMaximized(false);
 
         addMaximizeButton();
-        addMinimizeButton();
+        addHideButton();
         addMenuButton();
     }
 
@@ -140,23 +140,23 @@ public class PartStackViewImpl extends Composite implements RequiresResize, Part
     }
 
     /**
-     * Adds button to minimize part stack.
+     * Adds button to hide part stack.
      */
-    private void addMinimizeButton() {
-        SVGImage minimize = new SVGImage(resources.collapseExpandIcon());
-        minimize.getElement().setAttribute("name", "workBenchIconMinimize");
-        ToolButton minimizeToolButton = new ToolButton(minimize);
-        minimizeButton.add(minimizeToolButton);
+    private void addHideButton() {
+        SVGImage hide = new SVGImage(resources.collapseExpandIcon());
+        hide.getElement().setAttribute("name", "workBenchIconMinimize");
+        ToolButton hideToolButton = new ToolButton(hide);
+        hideButton.add(hideToolButton);
 
-        minimizeToolButton.addClickHandler(new ClickHandler() {
+        hideToolButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                delegate.onMinimize();
+                delegate.onHide();
             }
         });
 
-        if (minimizeButton.getElement() instanceof elemental.dom.Element) {
-            Tooltip.create((elemental.dom.Element) minimizeButton.getElement(),
+        if (hideButton.getElement() instanceof elemental.dom.Element) {
+            Tooltip.create((elemental.dom.Element) hideButton.getElement(),
                     PositionController.VerticalAlign.BOTTOM, PositionController.HorizontalAlign.MIDDLE, localizationConstant.minimizePartStackTitle());
         }
     }

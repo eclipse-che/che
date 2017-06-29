@@ -183,7 +183,7 @@ public class AbstractPerspectiveTest {
 
         perspective.hidePart(partPresenter);
 
-        verify(partStackPresenter).minimize();
+        verify(partStackPresenter).hide();
     }
 
     @Test
@@ -194,10 +194,10 @@ public class AbstractPerspectiveTest {
     }
 
     @Test
-    public void partShouldBeCollapsed() {
+    public void partShouldBeMinimized() {
         perspective.onMaximize(extraPartStackPresenter);
 
-        verify(partStackPresenter, times(3)).collapse();
+        verify(partStackPresenter, times(3)).minimize();
         verify(extraPartStackPresenter).maximize();
     }
 

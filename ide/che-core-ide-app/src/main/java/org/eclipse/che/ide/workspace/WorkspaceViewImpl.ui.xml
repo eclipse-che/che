@@ -26,21 +26,6 @@
             background-color: tabBorderColor;
         }
 
-        .actionsPanel {
-            box-sizing: border-box;
-            background-color: conColor;
-            border-top: #2f2f2f 1px solid;
-            overflow: hidden;
-        }
-
-        .statusPanel {
-            box-sizing: border-box;
-            background-color: statusPanelColor;
-            border-top: #232323 1px solid;
-            overflow: hidden;
-            z-index: 1;
-        }
-
     </ui:style>
 
     <g:DockLayoutPanel unit="PX" width="100%" height="100%" debugId="ideMainDockPanel" ui:field="ideMainDockPanel">
@@ -60,11 +45,5 @@
         <g:center>
             <g:SimpleLayoutPanel ui:field="perspectivePanel" width="100%" height="100%" debugId="perspectivePanel"/>
         </g:center>
-        <g:south size="18">
-            <g:SimplePanel width="100%" ui:field="statusPanel" addStyleNames="{style.statusPanel}" debugId="statusPanel"/>
-        </g:south>
-        <g:south size="41">
-            <g:SimplePanel width="100%" ui:field="actionsPanel" addStyleNames="{style.actionsPanel}" debugId="actionPanel"/>
-        </g:south>
     </g:DockLayoutPanel>
 </ui:UiBinder>

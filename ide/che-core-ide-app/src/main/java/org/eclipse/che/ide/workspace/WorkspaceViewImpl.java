@@ -51,20 +51,28 @@ public class WorkspaceViewImpl extends LayoutPanel implements WorkspaceView {
     @UiField
     SimplePanel toolbarPanel, noToolbarPanel;
 
-    @UiField
-    SimplePanel actionsPanel, statusPanel;
-
     ActionDelegate delegate;
+
+    private boolean toolbar = true;
 
     /** Create view. */
     @Inject
     protected WorkspaceViewImpl() {
         add(uiBinder.createAndBindUi(this));
         getElement().setId("codenvyIdeWorkspaceViewImpl");
-        ideMainDockPanel.setWidgetHidden(toolbarPanel, true);
-        ideMainDockPanel.setWidgetHidden(noToolbarPanel, false);
-        ideMainDockPanel.setWidgetHidden(actionsPanel, true);
-        ideMainDockPanel.setWidgetHidden(statusPanel, true);
+    }
+
+    @Override
+    public void showToolbar(boolean show) {
+        toolbar = show;
+
+        ideMainDockPanel.setWidgetHidden(toolbarPanel, !show);
+        ideMainDockPanel.setWidgetHidden(noToolbarPanel, show);
+    }
+
+    @Override
+    public boolean isToolbarVisible() {
+        return toolbar;
     }
 
     /** {@inheritDoc} */
@@ -89,11 +97,6 @@ public class WorkspaceViewImpl extends LayoutPanel implements WorkspaceView {
     @Override
     public AcceptsOneWidget getToolbarPanel() {
         return toolbarPanel;
-    }
-
-    @Override
-    public AcceptsOneWidget getStatusPanel() {
-        return statusPanel;
     }
 
 }

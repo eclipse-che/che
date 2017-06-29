@@ -143,23 +143,23 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
     }
 
     @Override
+    public void show() {
+        state = State.NORMAL;
+    }
+
+    @Override
+    public void hide() {
+        state = State.HIDDEN;
+    }
+
+    @Override
     public void maximize() {
         state = State.MAXIMIZED;
     }
 
     @Override
-    public void collapse() {
-        state = State.COLLAPSED;
-    }
-
-    @Override
     public void minimize() {
         state = State.MINIMIZED;
-    }
-
-    @Override
-    public void unMinimize() {
-        state = State.NORMAL;
     }
 
     @Override

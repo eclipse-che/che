@@ -23,11 +23,6 @@ public interface BaseActionDelegate {
     void onToggleMaximize();
 
     /**
-     * Minimizes the part.
-     */
-    void onMinimize();
-
-    /**
      * Activate Part when clicking the mouse.
      * Is used when the Part contains frames and mouse events are blocked.
      */

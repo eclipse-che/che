@@ -85,8 +85,8 @@ public interface PartStackView extends View<PartStackView.ActionDelegate> {
         /** Toggle maximize Part Stack */
         void onToggleMaximize();
 
-        /** Minimize Part Stack  */
-        void onMinimize();
+        /** Hide Part Stack  */
+        void onHide();
 
         /** Display Part Stack menu */
         void onPartStackMenu(int mouseX, int mouseY);

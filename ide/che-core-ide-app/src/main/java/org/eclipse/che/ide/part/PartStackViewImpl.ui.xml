@@ -204,7 +204,7 @@
          *
          ******************************************************************************/
         .maximizeButton,
-        .minimizeButton,
+        .hideButton,
         .menuButton {
             position: absolute;
             width: 18px;
@@ -222,8 +222,8 @@
             right: 4px;
         }
 
-        div[id="gwt-debug-navPanel"] .minimizeButton,
-        div[id="gwt-debug-toolPanel"] .minimizeButton {
+        div[id="gwt-debug-navPanel"] .hideButton,
+        div[id="gwt-debug-toolPanel"] .hideButton {
             top: 0px;
             right: 23px;
         }
@@ -244,7 +244,7 @@
             top: 4px;
         }
 
-        div[id="gwt-debug-infoPanel"] .minimizeButton {
+        div[id="gwt-debug-infoPanel"] .hideButton {
             left: 0px;
             top: 23px;
         }
@@ -266,7 +266,7 @@
 
             <g:FlowPanel ui:field="partStackActions" debugId="partStackActions" styleName="{style.partStackActions}">
                 <g:FlowPanel ui:field="maximizeButton" debugId="maximizeButton" styleName="{style.maximizeButton}"></g:FlowPanel>
-                <g:FlowPanel ui:field="minimizeButton" debugId="minimizeButton" styleName="{style.minimizeButton}"></g:FlowPanel>
+                <g:FlowPanel ui:field="hideButton" debugId="hideButton" styleName="{style.hideButton}"></g:FlowPanel>
                 <g:FlowPanel ui:field="menuButton" debugId="menuButton" styleName="{style.menuButton}"></g:FlowPanel>
             </g:FlowPanel>
         </g:FlowPanel>

@@ -159,7 +159,7 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
     public void hidePart(@NotNull PartPresenter part) {
         PartStack destPartStack = findPartStackByPart(part);
         if (destPartStack != null) {
-            destPartStack.minimize();
+            destPartStack.hide();
         }
     }
 
@@ -215,7 +215,7 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
 
         for (PartStack ps : partStacks.values()) {
             if (!ps.equals(partStack)) {
-                ps.collapse();
+                ps.minimize();
             }
         }
 
@@ -441,7 +441,7 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
         }
 
         if (partStackState.hasKey("HIDDEN") && partStackState.getBoolean("HIDDEN")) {
-            partStack.minimize();
+            partStack.hide();
             return;
         }
 

@@ -773,7 +773,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getToolbarBackgroundColor() {
-        return "#292c2f";
+        return "#1d2231";
     }
 
     @Override
