@@ -12,11 +12,11 @@ package org.eclipse.che.ide.console;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.testng.Assert;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
@@ -40,13 +40,15 @@ public class DefaultOutputCustomizerTest {
     }
 
     private void testStackTraceLine(boolean shouldBeCustomizable, String line, String expectedCustomization) throws Exception {
-        Assert.assertEquals(outputCustomizer.canCustomize(line), shouldBeCustomizable, 
+        Assert.assertEquals( 
                 "Line [" + line + "] is " + (shouldBeCustomizable ? "" : "not ") +
                 "customizable while it should" +
-                (shouldBeCustomizable ? "n\'t " : " ") + "be: ");
+                (shouldBeCustomizable ? "n\'t " : " ") + "be: ",
+                Boolean.valueOf(outputCustomizer.canCustomize(line)), 
+                Boolean.valueOf(shouldBeCustomizable));
         if (shouldBeCustomizable) {
-            Assert.assertEquals(outputCustomizer.customize(line), expectedCustomization, 
-                    "Wrong customization result:");
+            Assert.assertEquals("Wrong customization result:",
+                    outputCustomizer.customize(line), expectedCustomization);
         }       
     }
 
