@@ -20,9 +20,13 @@ import java.util.Map;
  */
 public interface MachineConfig {
     /**
-     * Returns list of configured agents.
+     * Returns configured installers.
+     *
+     * <p>Values can be installer id with version separated with ':' symbol
+     * or just id then latest version will be used.
+     * Values examples: org.exec-agent:v1.0, org.exec-agent, org.exec-agent:latest.
      */
-    List<String> getAgents();
+    List<String> getInstallers();
 
     /**
      * Returns mapping of references to configurations of servers deployed into machine.

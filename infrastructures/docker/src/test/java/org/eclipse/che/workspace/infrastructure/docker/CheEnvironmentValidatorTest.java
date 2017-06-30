@@ -152,26 +152,26 @@ public class CheEnvironmentValidatorTest {
 
         env = createEnv();
         env.getMachines().put("missingInEnvMachine",
-                              newDto(MachineConfigDto.class).withAgents(singletonList("org.eclipse.che.ws-agent")));
+                              newDto(MachineConfigDto.class).withInstallers(singletonList("org.eclipse.che.ws-agent")));
         data.add(asList(env, "Environment 'env' contains machines that are missing in environment recipe: missingInEnvMachine"));
 
         env = createEnv();
-        env.getMachines().entrySet().forEach(entry -> entry.getValue().getAgents().add("org.eclipse.che.ws-agent"));
+        env.getMachines().entrySet().forEach(entry -> entry.getValue().getInstallers().add("org.eclipse.che.ws-agent"));
         data.add(asList(env, "Environment 'env' should contain exactly 1 machine with agent 'org.eclipse.che.ws-agent', but contains '" +
                              env.getMachines().size() + "'. " + "All machines with this agent: " +
                              Joiner.on(", ").join(env.getMachines().keySet())));
 
         env = createEnv();
-        env.getMachines().entrySet().forEach(entry -> entry.getValue().setAgents(null));
+        env.getMachines().entrySet().forEach(entry -> entry.getValue().setInstallers(null));
         data.add(asList(env,
                         "Environment 'env' should contain exactly 1 machine with agent 'org.eclipse.che.ws-agent', but contains '0'. All machines with this agent: "));
 
         env = createEnv();
-        env.getMachines().entrySet().forEach(entry -> entry.getValue().getAgents().add(null));
+        env.getMachines().entrySet().forEach(entry -> entry.getValue().getInstallers().add(null));
         data.add(asList(env, "OldMachine 'machine2' in environment 'env' contains invalid agent 'null'"));
 
         env = createEnv();
-        env.getMachines().entrySet().forEach(entry -> entry.getValue().getAgents().add(""));
+        env.getMachines().entrySet().forEach(entry -> entry.getValue().getInstallers().add(""));
         data.add(asList(env, "OldMachine 'machine2' in environment 'env' contains invalid agent ''"));
 
         env = createEnv();

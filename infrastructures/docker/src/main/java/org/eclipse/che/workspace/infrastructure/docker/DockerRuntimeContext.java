@@ -12,11 +12,10 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.agent.server.AgentRegistry;
-import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
@@ -53,11 +52,10 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 @Assisted Environment environment,
                                 @Assisted DockerEnvironment dockerEnvironment,
                                 @Assisted List<String> orderedServices,
-                                AgentSorter agentSorter,
-                                AgentRegistry agentRegistry,
+                                InstallerRegistry installerRegistry,
                                 DockerRuntimeFactory dockerRuntimeFactory)
             throws ValidationException, InfrastructureException {
-        super(environment, identity, infrastructure, agentSorter, agentRegistry);
+        super(environment, identity, infrastructure, installerRegistry);
         this.devMachineName = Utils.getDevMachineName(environment);
         this.orderedServices = orderedServices;
         this.dockerEnvironment = dockerEnvironment;

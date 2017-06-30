@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -25,11 +25,11 @@ import javax.inject.Inject;
  */
 // TODO think about passing here full Agents config
 public class DefaultInfrastructureProvisioner implements InfrastructureProvisioner {
-    private final AgentConfigApplier agentConfigApplier;
+    private final InstallerConfigApplier installerConfigApplier;
 
     @Inject
-    public DefaultInfrastructureProvisioner(AgentConfigApplier agentConfigApplier) {
-        this.agentConfigApplier = agentConfigApplier;
+    public DefaultInfrastructureProvisioner(InstallerConfigApplier installerConfigApplier) {
+        this.installerConfigApplier = installerConfigApplier;
     }
 
     @Override
@@ -37,8 +37,8 @@ public class DefaultInfrastructureProvisioner implements InfrastructureProvision
                           DockerEnvironment dockerEnvironment,
                           RuntimeIdentity runtimeIdentity) throws InfrastructureException {
         try {
-            agentConfigApplier.apply(envConfig, dockerEnvironment);
-        } catch (AgentException e) {
+            installerConfigApplier.apply(envConfig, dockerEnvironment);
+        } catch (InstallerException e) {
             throw new InfrastructureException(e.getLocalizedMessage(), e);
         }
     }

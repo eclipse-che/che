@@ -26,11 +26,11 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
 public interface MachineConfigDto extends MachineConfig {
     @Override
     @FactoryParameter(obligation = OPTIONAL)
-    List<String> getAgents();
+    List<String> getInstallers();
 
-    void setAgents(List<String> agents);
+    void setInstallers(List<String> installers);
 
-    MachineConfigDto withAgents(List<String> agents);
+    MachineConfigDto withInstallers(List<String> installers);
 
     @Override
     @FactoryParameter(obligation = OPTIONAL)

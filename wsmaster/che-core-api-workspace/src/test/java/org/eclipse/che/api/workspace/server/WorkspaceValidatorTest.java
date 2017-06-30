@@ -209,7 +209,7 @@ public class WorkspaceValidatorTest {
 //                                                                                      .withDefaultEnv("dev-env");
 //
 //        MachineConfigDto extendedMachine =
-//                newDto(MachineConfigDto.class).withAgents(singletonList("org.eclipse.che.ws-agent"))
+//                newDto(MachineConfigDto.class).withInstallers(singletonList("org.eclipse.che.ws-agent"))
 //                                              .withServers(singletonMap("ref1",
 //                                                                          newDto(ServerConfigDto.class).withPort("8080/tcp")
 //                                                                                                       .withProtocol("https")))

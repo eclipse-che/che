@@ -73,7 +73,7 @@ public class URLFactoryBuilderTest {
 
         RecipeDto recipeDto = newDto(RecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE)
                                                      .withType("dockerimage");
-        MachineConfigDto machine = newDto(MachineConfigDto.class).withAgents(singletonList("org.eclipse.che.ws-agent"))
+        MachineConfigDto machine = newDto(MachineConfigDto.class).withInstallers(singletonList("org.eclipse.che.ws-agent"))
                                                                  .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
         // setup environment
@@ -102,7 +102,7 @@ public class URLFactoryBuilderTest {
         RecipeDto recipeDto = newDto(RecipeDto.class).withLocation(myLocation)
                                                      .withType("dockerfile")
                                                      .withContentType("text/x-dockerfile");
-        MachineConfigDto machine = newDto(MachineConfigDto.class).withAgents(singletonList("org.eclipse.che.ws-agent"))
+        MachineConfigDto machine = newDto(MachineConfigDto.class).withInstallers(singletonList("org.eclipse.che.ws-agent"))
                                                                  .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
         // setup environment
@@ -131,7 +131,7 @@ public class URLFactoryBuilderTest {
         String myLocation = "http://foo-location";
         RecipeDto recipeDto = newDto(RecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE)
                                                      .withType("dockerimage");
-        MachineConfigDto machine = newDto(MachineConfigDto.class).withAgents(singletonList("org.eclipse.che.ws-agent"))
+        MachineConfigDto machine = newDto(MachineConfigDto.class).withInstallers(singletonList("org.eclipse.che.ws-agent"))
                                                                  .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
         // setup environment

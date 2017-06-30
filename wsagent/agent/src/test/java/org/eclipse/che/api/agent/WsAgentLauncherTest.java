@@ -48,7 +48,7 @@ public class WsAgentLauncherTest {
     @Mock
     private WsAgentPingRequestFactory wsAgentPingRequestFactory;
     @Mock
-    private Agent                     agent;
+    private Installer                     agent;
 
     private HttpJsonRequest pingRequest;
     private WsAgentLauncher wsAgentLauncher;
