@@ -201,9 +201,9 @@ public class LanguageServerRegistry {
     }
 
     /**
-     * Register file type for a language description
-     * @param type
-     * @param description
+     * Register a che file type and associate it with the given language
+     * @param type the che file type
+     * @param description the language description to associate with the file type
      */
     public void registerFileType(FileType type, LanguageDescription description) {
         fileTypeRegistry.registerFileType(type);
@@ -211,9 +211,11 @@ public class LanguageServerRegistry {
     }
 
     /**
-     * Get the language that is registered for this file. May return null if none is found.
-     * @param file
-     * @return
+     * Get the language that is registered for this file. May return null if
+     * none is found.
+     * 
+     * @param file the file in question
+     * @return the langauge that is associated with the given file or <code>null</code> if not found.
      */
     public LanguageDescription getLanguageDescription(VirtualFile file) {
         FileType fileType = fileTypeRegistry.getFileTypeByFile(file);

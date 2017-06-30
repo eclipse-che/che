@@ -41,13 +41,13 @@ import static org.eclipse.che.api.languageserver.shared.ProjectLangugageKey.crea
 @Singleton
 public class LanguageServerRegistryImpl implements LanguageServerRegistry, ServerInitializerObserver {
     public final static String                        PROJECT_FOLDER_PATH = "/projects";
-    private final List<LanguageDescription>           languages           = new ArrayList<>();
+    private final List<LanguageDescription>           languages;
     private final Map<String, LanguageServerLauncher> launchers           = new HashMap<>();
 
     /**
      * Started {@link LanguageServer} by project.
      */
-    private final ConcurrentHashMap<ProjectLangugageKey, LanguageServer> projectToServer;
+    private final ConcurrentHashMap<ProjectLangugageKey, LanguageServer> projectToServer= new ConcurrentHashMap<>();
 
     private final Provider<ProjectManager> projectManagerProvider;
     private final ServerInitializer        initializer;
@@ -55,12 +55,11 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     @Inject
     public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerLaunchers, Set<LanguageDescription> languages,
                                       Provider<ProjectManager> projectManagerProvider, ServerInitializer initializer) {
-        this.languages.addAll(languages);
+        this.languages= new ArrayList<>(languages);
         this.launchers.putAll(languageServerLaunchers.stream()
                         .collect(Collectors.toMap(LanguageServerLauncher::getLanguageId, launcher -> launcher)));
         this.projectManagerProvider = projectManagerProvider;
         this.initializer = initializer;
-        this.projectToServer = new ConcurrentHashMap<>();
         this.initializer.addObserver(this);
     }
 
