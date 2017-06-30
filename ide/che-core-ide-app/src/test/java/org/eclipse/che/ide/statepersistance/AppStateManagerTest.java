@@ -24,7 +24,6 @@ import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -47,8 +46,6 @@ import static org.mockito.Mockito.when;
  * @author Artem Zatsarynnyi
  * @author Dmitry Shnurenko
  */
-// FIXME: spi ide
-@Ignore
 @RunWith(GwtMockitoTestRunner.class)
 public class AppStateManagerTest {
 
@@ -102,6 +99,7 @@ public class AppStateManagerTest {
         when(preferencesManager.getValue(AppStateManager.PREFERENCE_PROPERTY_NAME)).thenReturn("");
         when(jsonFactory.parse(anyString())).thenReturn(pref = Json.createObject());
         appStateManager = new AppStateManager(components, preferencesManager, jsonFactory, eventBus, appContext);
+        appStateManager.readStateFromPreferences();
     }
 
     @Test

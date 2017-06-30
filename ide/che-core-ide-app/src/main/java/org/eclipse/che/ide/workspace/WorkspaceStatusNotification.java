@@ -12,37 +12,48 @@ package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.ui.loaders.DownloadWorkspaceOutputEvent;
 import org.eclipse.che.ide.ui.loaders.PopupLoader;
 import org.eclipse.che.ide.ui.loaders.PopupLoaderFactory;
 import org.eclipse.che.ide.ui.loaders.PopupLoaderMessages;
+import org.eclipse.che.ide.workspace.events.SnapshotCreatedEvent;
+import org.eclipse.che.ide.workspace.events.SnapshotCreatingEvent;
+import org.eclipse.che.ide.workspace.events.SnapshotCreationErrorEvent;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.CREATING_WORKSPACE_SNAPSHOT;
 import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.STARTING_WORKSPACE_RUNTIME;
 import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.STOPPING_WORKSPACE;
 import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.WORKSPACE_STOPPED;
 
 /**
- * Manages loaders for loading phases.
+ * Manages the notifications of workspace status.
  *
  * @author Vitaliy Guliy
  */
 @Singleton
-public class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
+class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
 
     private PopupLoaderFactory  popupLoaderFactory;
     private PopupLoaderMessages locale;
@@ -51,13 +62,18 @@ public class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
     private Map<Phase, PopupLoader> popups = new HashMap<>();
 
     @Inject
-    public WorkspaceStatusNotification(PopupLoaderFactory popupLoaderFactory,
-                                       PopupLoaderMessages locale,
-                                       EventBus eventBus,
-                                       AppContext appContext) {
+    WorkspaceStatusNotification(PopupLoaderFactory popupLoaderFactory, PopupLoaderMessages locale, EventBus eventBus) {
         this.popupLoaderFactory = popupLoaderFactory;
         this.locale = locale;
         this.eventBus = eventBus;
+    }
+
+    @Inject
+    private void registerEventHandlers(EventBus eventBus,
+                                       AppContext appContext,
+                                       CoreLocalizationConstant messages,
+                                       Provider<NotificationManager> notificationManagerProvider,
+                                       DialogFactory dialogFactory) {
 
         eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> {
             WorkspaceStatus status = appContext.getWorkspace().getStatus();
@@ -84,7 +100,25 @@ public class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> {
             setSuccess(STOPPING_WORKSPACE);
             setSuccess(STARTING_WORKSPACE_RUNTIME);
+
+            if (e.isError()) {
+                notificationManagerProvider.get().notify(messages.workspaceStartFailed(), FAIL, FLOAT_MODE);
+
+                String errorMessage = e.getErrorMessage();
+                if (!errorMessage.isEmpty()) {
+                    WorkspaceImpl currentWorkspace = appContext.getWorkspace();
+                    String workspaceName = currentWorkspace.getConfig().getName();
+
+                    dialogFactory.createMessageDialog(messages.startWsErrorTitle(),
+                                                      messages.startWsErrorContent(workspaceName, errorMessage),
+                                                      null).show();
+                }
+            }
         });
+
+        eventBus.addHandler(SnapshotCreatingEvent.TYPE, e -> show(CREATING_WORKSPACE_SNAPSHOT));
+        eventBus.addHandler(SnapshotCreatedEvent.TYPE, e -> setSuccess(CREATING_WORKSPACE_SNAPSHOT));
+        eventBus.addHandler(SnapshotCreationErrorEvent.TYPE, e -> setError(CREATING_WORKSPACE_SNAPSHOT));
     }
 
     /**
@@ -94,7 +128,7 @@ public class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
      *         corresponding phase
      * @return loader instance
      */
-    public PopupLoader show(Phase phase) {
+    PopupLoader show(Phase phase) {
         return show(phase, null);
     }
 
@@ -107,7 +141,7 @@ public class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
      *         additional widget to display
      * @return loader instance
      */
-    public PopupLoader show(Phase phase, Widget widget) {
+    PopupLoader show(Phase phase, Widget widget) {
         PopupLoader popup = popups.get(phase);
         if (popup != null) {
             return popup;
@@ -147,7 +181,7 @@ public class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
      * @param phase
      *         corresponding phase
      */
-    public void setSuccess(Phase phase) {
+    void setSuccess(Phase phase) {
         PopupLoader popup = popups.get(phase);
         if (popup != null) {
             // Hide the loader if status is SUCCESS
@@ -162,7 +196,7 @@ public class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
      * @param phase
      *         corresponding phase
      */
-    public void setError(Phase phase) {
+    void setError(Phase phase) {
         PopupLoader popup = popups.get(phase);
         if (popup != null) {
             // Don't hide the loader with status ERROR

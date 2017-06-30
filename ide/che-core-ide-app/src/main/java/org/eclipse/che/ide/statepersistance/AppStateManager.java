@@ -112,7 +112,7 @@ public class AppStateManager {
 
     @VisibleForTesting
     void restoreWorkspaceState() {
-        final String wsId = appContext.getWorkspaceId();
+        final String wsId = appContext.getWorkspace().getId();
 
         if (allWsState.hasKey(wsId)) {
             restoreState(allWsState.getObject(wsId));
