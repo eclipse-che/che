@@ -1348,7 +1348,8 @@ public class DockerConnector {
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             T objectFromJson = GSON.fromJson(reader, clazz);
             if (objectFromJson == null) {
-                throw new IOException("Docker responded with an empty stream.");
+                LOG.error("Docker response doesn't contain any data, though it was expected to contain some.");
+                throw new IOException("Internal server error. Unexpected response body received from Docker.");
             }
             return objectFromJson;
         } catch (JsonParseException e) {
@@ -1360,7 +1361,8 @@ public class DockerConnector {
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             T objectFromJson = GSON.fromJson(reader, tt.getType());
             if (objectFromJson == null) {
-                throw new IOException("Docker responded with an empty stream.");
+                LOG.error("Docker response doesn't contain any data, though it was expected to contain some.");
+                throw new IOException("Internal server error. Unexpected response body received from Docker.");
             }
             return objectFromJson;
         } catch (JsonParseException e) {
