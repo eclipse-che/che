@@ -31,9 +31,11 @@ import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointStorage;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
+import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -56,6 +58,7 @@ public class BreakpointStorageImpl implements BreakpointStorage {
     private final AppContext             appContext;
     private final DtoFactory             dtoFactory;
     private final LocalStorage           storage;
+    private final WorkspaceServiceClient workspaceServiceClient;
     private final JsPromiseProvider      promiseProvider;
     private final Promise<Void>          readAllBreakpointMarker;
     private final List<Breakpoint>       breakpoints;
@@ -65,11 +68,13 @@ public class BreakpointStorageImpl implements BreakpointStorage {
     @Inject
     public BreakpointStorageImpl(AppContext appContext,
                                  DtoFactory dtoFactory,
+                                 WorkspaceServiceClient workspaceServiceClient,
                                  JsPromiseProvider promiseProvider,
                                  LocalStorageProvider localStorageProvider,
                                  EventBus eventBus) {
         this.appContext = appContext;
         this.dtoFactory = dtoFactory;
+        this.workspaceServiceClient = workspaceServiceClient;
         this.promiseProvider = promiseProvider;
         this.eventBus = eventBus;
         this.storage = localStorageProvider.get();
@@ -226,11 +231,10 @@ public class BreakpointStorageImpl implements BreakpointStorage {
             if (key != null && key.startsWith(LOCAL_STORAGE_BREAKPOINTS_KEY_PREFIX)) {
                 String wsId = key.substring(LOCAL_STORAGE_BREAKPOINTS_KEY_PREFIX.length());
 
-                // FIXME: spi ide
-//                Promise<WorkspaceDto> workspace = workspaceServiceClient.getWorkspace(wsId);
-//                workspace.catchError(arg -> {
-//                    storage.removeItem(key);
-//                });
+                Promise<WorkspaceImpl> workspace = workspaceServiceClient.getWorkspace(wsId);
+                workspace.catchError(arg -> {
+                    storage.removeItem(key);
+                });
             }
         }
     }
