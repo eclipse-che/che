@@ -105,9 +105,8 @@ public abstract class ServerChecker {
         public void run() {
             LOG.info("Check server {} of machine {} at {}", serverRef, machineName, System.currentTimeMillis());
             if (isTimedOut()) {
-                reportFuture.completeExceptionally(
-                        new InfrastructureException("Server " + serverRef + " in machine " + machineName + "" +
-                                                    " not available."));
+                reportFuture.completeExceptionally(new InfrastructureException(
+                        "Server " + serverRef + " in machine " + machineName + " not available."));
             } else if (isAvailable()) {
                 LOG.info("Server {} of machine {} started", serverRef, machineName);
                 reportFuture.complete(serverRef);

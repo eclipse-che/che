@@ -34,6 +34,7 @@ import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundE
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.server.ServerCheckerFactory;
 import org.eclipse.che.workspace.infrastructure.docker.server.ServersReadinessChecker;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotException;
@@ -75,6 +76,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     private final RuntimeIdentity      identity;
     private final EventService         eventService;
     private final BootstrapperFactory  bootstrapperFactory;
+    private final ServerCheckerFactory serverCheckerFactory;
 
     @Inject
     public DockerInternalRuntime(@Assisted DockerRuntimeContext context,
@@ -89,13 +91,15 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                  SnapshotDao snapshotDao,
                                  DockerRegistryClient dockerRegistryClient,
                                  EventService eventService,
-                                 BootstrapperFactory bootstrapperFactory) {
+                                 BootstrapperFactory bootstrapperFactory,
+                                 ServerCheckerFactory serverCheckerFactory) {
         super(context, urlRewriter);
         this.devMachineName = devMachineName;
         this.dockerEnvironment = dockerEnvironment;
         this.identity = identity;
         this.eventService = eventService;
         this.bootstrapperFactory = bootstrapperFactory;
+        this.serverCheckerFactory = serverCheckerFactory;
         this.properties = new HashMap<>();
         this.startSynchronizer = new StartSynchronizer();
         this.contextsStorage = contextsStorage;
@@ -247,8 +251,10 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         bootstrapperFactory.create(name, identity, dockerMachine, machineConfig.getInstallers())
                            .bootstrap();
 
-        ServersReadinessChecker readinessChecker =
-                new ServersReadinessChecker(name, dockerMachine.getServers(), new ServerReadinessHandler(name));
+        ServersReadinessChecker readinessChecker = new ServersReadinessChecker(name,
+                                                                               dockerMachine.getServers(),
+                                                                               new ServerReadinessHandler(name),
+                                                                               serverCheckerFactory);
         readinessChecker.startAsync();
         readinessChecker.await();
     }

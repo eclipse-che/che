@@ -35,7 +35,7 @@ class TerminalHttpConnectionServerChecker extends HttpConnectionServerChecker {
     }
 
     @Override
-    public boolean isConnectionSuccessful(HttpURLConnection conn) {
+    boolean isConnectionSuccessful(HttpURLConnection conn) {
         try {
             int responseCode = conn.getResponseCode();
             return responseCode == 404;

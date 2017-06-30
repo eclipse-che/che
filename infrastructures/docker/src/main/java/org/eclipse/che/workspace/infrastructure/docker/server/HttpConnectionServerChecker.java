@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.server;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -41,7 +43,7 @@ public class HttpConnectionServerChecker extends ServerChecker {
     public boolean isAvailable() {
         HttpURLConnection httpURLConnection = null;
         try {
-            httpURLConnection = (HttpURLConnection)url.openConnection();
+            httpURLConnection = createConnection(url);
             // TODO consider how much time we should use as a limit
             httpURLConnection.setConnectTimeout((int)TimeUnit.SECONDS.toMillis(3));
             httpURLConnection.setReadTimeout((int)TimeUnit.SECONDS.toMillis(3));
@@ -62,5 +64,10 @@ public class HttpConnectionServerChecker extends ServerChecker {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    @VisibleForTesting
+    HttpURLConnection createConnection(URL url) throws IOException {
+        return (HttpURLConnection)url.openConnection();
     }
 }
