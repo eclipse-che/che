@@ -1346,7 +1346,11 @@ public class DockerConnector {
 
     protected <T> T parseResponseStreamAndClose(InputStream inputStream, Class<T> clazz) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
-            return GSON.fromJson(reader, clazz);
+            T objectFromJson = GSON.fromJson(reader, clazz);
+            if (objectFromJson == null) {
+                throw new IOException("Docker responded with an empty stream.");
+            }
+            return objectFromJson;
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }
@@ -1354,7 +1358,11 @@ public class DockerConnector {
 
     protected <T> T parseResponseStreamAndClose(InputStream inputStream, TypeToken<T> tt) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
-            return GSON.fromJson(reader, tt.getType());
+            T objectFromJson = GSON.fromJson(reader, tt.getType());
+            if (objectFromJson == null) {
+                throw new IOException("Docker responded with an empty stream.");
+            }
+            return objectFromJson;
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }
