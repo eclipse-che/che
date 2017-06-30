@@ -24,6 +24,7 @@ import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
@@ -336,16 +337,25 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
                     return " ";
                 }
 
+                String encoded = SafeHtmlUtils.htmlEscape(text);
+                if (delegate != null) {
+                	if (delegate.getCustomizer() != null) {
+                		if (delegate.getCustomizer().canCustomize(encoded)) {
+                			encoded = delegate.getCustomizer().customize(encoded);
+                		}
+                	}
+                }
+               
                 for (final Pair<RegExp, String> pair : output2Color) {
-                    final MatchResult matcher = pair.first.exec(text);
+                    final MatchResult matcher = pair.first.exec(encoded);
 
                     if (matcher != null) {
-                        return text.replaceAll(matcher.getGroup(1),
+                        return encoded.replaceAll(matcher.getGroup(1),
                                                "<span style=\"color: " + pair.second + "\">" + matcher.getGroup(1) + "</span>");
                     }
                 }
 
-                return text;
+                return encoded;
             }
         };
 

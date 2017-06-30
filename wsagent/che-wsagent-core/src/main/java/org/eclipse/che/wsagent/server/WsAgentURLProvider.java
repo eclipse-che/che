@@ -53,6 +53,7 @@ public class WsAgentURLProvider implements Provider<String> {
     public String get() {
         if (isNullOrEmpty(cachedAgentUrl)) {
             try {
+                LOG.warn("requesting:" + workspaceApiEndpoint + wsId);
                 final WorkspaceDto workspace = requestFactory.fromUrl(workspaceApiEndpoint + wsId)
                                                              .useGetMethod()
                                                              .request()

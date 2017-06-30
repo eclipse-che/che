@@ -63,6 +63,12 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
             throws IOException, ServletException {
 
         final HttpServletRequest httpRequest = (HttpServletRequest)request;
+        // TODO: use KeycloakOIDCFilter skip setting
+        if (httpRequest.getRequestURI().endsWith("/ws") || httpRequest.getRequestURI().endsWith("/eventbus")
+            || request.getScheme().equals("ws") || httpRequest.getScheme().equals("wss") || httpRequest.getRequestURI().contains("/websocket/")) {
+            filterChain.doFilter(request, response);
+        }
+
         KeycloakSecurityContext  context = (KeycloakSecurityContext)httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
         // In case of bearer token login, there is another object in session
         if (context == null) {
