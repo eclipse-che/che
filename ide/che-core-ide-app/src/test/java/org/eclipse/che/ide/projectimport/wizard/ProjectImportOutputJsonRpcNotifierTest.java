@@ -13,7 +13,13 @@ package org.eclipse.che.ide.projectimport.wizard;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.project.shared.ImportProgressRecord;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
+import org.eclipse.che.api.core.jsonrpc.commons.reception.ConsumerConfiguratorOneToNone;
+import org.eclipse.che.api.core.jsonrpc.commons.reception.MethodNameConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.reception.ParamsConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.reception.ResultConfiguratorFromOne;
+import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -45,52 +51,51 @@ import static org.mockito.Mockito.when;
 public class ProjectImportOutputJsonRpcNotifierTest {
 
     @Mock
-    NotificationManager                  notificationManager;
+    NotificationManager        notificationManager;
     @Mock
-    ProjectImportOutputJsonRpcSubscriber subscriber;
+    CoreLocalizationConstant   constant;
     @Mock
-    CoreLocalizationConstant             constant;
+    EventBus                   eventBus;
     @Mock
-    EventBus                             eventBus;
+    RequestHandlerConfigurator configurator;
+    @Mock
+    RequestHandlerManager      manager;
 
     private ProjectImportOutputJsonRpcNotifier notifier;
 
     @Before
     public void setUp() throws Exception {
-        notifier = new ProjectImportOutputJsonRpcNotifier(notificationManager, subscriber, constant, eventBus);
+        notifier = new ProjectImportOutputJsonRpcNotifier(notificationManager, constant, eventBus, configurator, manager);
     }
 
     @Test
     public void testShouldSubscribeForDisplayingNotification() throws Exception {
         //given
-        final ImportProgressRecord dto = new ImportProgressRecord() {
-            @Override
-            public int getNum() {
-                return 1;
-            }
-
-            @Override
-            public String getLine() {
-                return "message";
-            }
-
-            @Override
-            public String getProjectName() {
-                return "project";
-            }
-        };
+        final ImportProgressRecordDto dto = mock(ImportProgressRecordDto.class);
+        when(dto.getNum()).thenReturn(1);
+        when(dto.getLine()).thenReturn("message");
+        when(dto.getProjectName()).thenReturn("project");
 
         final ArgumentCaptor<Consumer> argumentCaptor = ArgumentCaptor.forClass(Consumer.class);
         final StatusNotification statusNotification = mock(StatusNotification.class);
         when(notificationManager.notify(anyString(), any(Status.class), any(DisplayMode.class))).thenReturn(statusNotification);
         when(constant.importingProject(anyString())).thenReturn("message");
+        final MethodNameConfigurator methodNameConfigurator = mock(MethodNameConfigurator.class);
+        when(configurator.newConfiguration()).thenReturn(methodNameConfigurator);
+        final ParamsConfigurator paramsConfigurator = mock(ParamsConfigurator.class);
+        when(methodNameConfigurator.methodName(anyString())).thenReturn(paramsConfigurator);
+        final ResultConfiguratorFromOne resultConfiguratorFromOne = mock(ResultConfiguratorFromOne.class);
+        when(paramsConfigurator.paramsAsDto(any())).thenReturn(resultConfiguratorFromOne);
+        final ConsumerConfiguratorOneToNone consumerConfiguratorOneToNone = mock(ConsumerConfiguratorOneToNone.class);
+        when(resultConfiguratorFromOne.noResult()).thenReturn(consumerConfiguratorOneToNone);
+
 
         //when
         notifier.subscribe("project");
 
         //then
         verify(constant).importingProject(eq("project"));
-        verify(subscriber).subscribeForImportOutputEvents(argumentCaptor.capture());
+        verify(consumerConfiguratorOneToNone).withConsumer(argumentCaptor.capture());
         argumentCaptor.getValue().accept(dto);
         verify(statusNotification).setTitle(eq("message"));
         verify(statusNotification).setContent(eq(dto.getLine()));
@@ -102,13 +107,20 @@ public class ProjectImportOutputJsonRpcNotifierTest {
         when(constant.importProjectMessageSuccess(anyString())).thenReturn("message");
         final StatusNotification statusNotification = mock(StatusNotification.class);
         when(notificationManager.notify(anyString(), any(Status.class), any(DisplayMode.class))).thenReturn(statusNotification);
+        final MethodNameConfigurator methodNameConfigurator = mock(MethodNameConfigurator.class);
+        when(configurator.newConfiguration()).thenReturn(methodNameConfigurator);
+        final ParamsConfigurator paramsConfigurator = mock(ParamsConfigurator.class);
+        when(methodNameConfigurator.methodName(anyString())).thenReturn(paramsConfigurator);
+        final ResultConfiguratorFromOne resultConfiguratorFromOne = mock(ResultConfiguratorFromOne.class);
+        when(paramsConfigurator.paramsAsDto(any())).thenReturn(resultConfiguratorFromOne);
+        final ConsumerConfiguratorOneToNone consumerConfiguratorOneToNone = mock(ConsumerConfiguratorOneToNone.class);
+        when(resultConfiguratorFromOne.noResult()).thenReturn(consumerConfiguratorOneToNone);
 
         //when
         notifier.subscribe("project");
         notifier.onSuccess();
 
         //then
-        verify(subscriber).unSubscribeForImportOutputEvents();
         verify(statusNotification).setStatus(eq(SUCCESS));
         verify(statusNotification).setTitle(eq("message"));
         verify(statusNotification).setContent(eq(""));
@@ -120,13 +132,20 @@ public class ProjectImportOutputJsonRpcNotifierTest {
         //given
         final StatusNotification statusNotification = mock(StatusNotification.class);
         when(notificationManager.notify(anyString(), any(Status.class), any(DisplayMode.class))).thenReturn(statusNotification);
+        final MethodNameConfigurator methodNameConfigurator = mock(MethodNameConfigurator.class);
+        when(configurator.newConfiguration()).thenReturn(methodNameConfigurator);
+        final ParamsConfigurator paramsConfigurator = mock(ParamsConfigurator.class);
+        when(methodNameConfigurator.methodName(anyString())).thenReturn(paramsConfigurator);
+        final ResultConfiguratorFromOne resultConfiguratorFromOne = mock(ResultConfiguratorFromOne.class);
+        when(paramsConfigurator.paramsAsDto(any())).thenReturn(resultConfiguratorFromOne);
+        final ConsumerConfiguratorOneToNone consumerConfiguratorOneToNone = mock(ConsumerConfiguratorOneToNone.class);
+        when(resultConfiguratorFromOne.noResult()).thenReturn(consumerConfiguratorOneToNone);
 
         //when
         notifier.subscribe("project");
         notifier.onFailure("message");
 
         //then
-        verify(subscriber).unSubscribeForImportOutputEvents();
         verify(statusNotification).setStatus(eq(FAIL));
         verify(statusNotification).setContent(eq("message"));
 
