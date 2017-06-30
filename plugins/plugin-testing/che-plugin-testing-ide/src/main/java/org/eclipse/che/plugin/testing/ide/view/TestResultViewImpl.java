@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.view;
 
+import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER;
 
 import java.util.ArrayList;
@@ -20,20 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.validation.constraints.NotNull;
-import com.google.common.base.Optional;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SplitLayoutPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -41,6 +28,9 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.testing.shared.TestCase;
 import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
+import org.eclipse.che.api.testing.shared.dto.TestResultTraceDto;
+import org.eclipse.che.api.testing.shared.dto.TestResultTraceFrameDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
@@ -62,12 +52,32 @@ import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.eclipse.che.plugin.testing.ide.view.navigation.TestClassNavigation;
 import org.eclipse.che.plugin.testing.ide.view.navigation.factory.TestResultNodeFactory;
+import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.AbstractTestResultTreeNode;
 import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultClassNode;
 import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultGroupNode;
 import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultMethodNode;
+import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultRootNode;
+import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultTraceFrameNode;
+
+import com.google.common.base.Optional;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 /**
  * Implementation for TestResult view. Uses tree for presenting test results.
@@ -76,46 +86,56 @@ import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultMethod
  */
 @Singleton
 public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
-                                implements TestResultView, TestClassNavigation {
+        implements TestResultView, TestClassNavigation {
 
     interface TestResultViewImplUiBinder extends UiBinder<Widget, TestResultViewImpl> {
     }
 
-    private static final TestResultViewImplUiBinder UI_BINDER        = GWT.create(TestResultViewImplUiBinder.class);
+    interface Styles extends CssResource {
 
-    private final JavaNavigationService             javaNavigationService;
-    private final AppContext                        appContext;
-    private final EditorAgent                       editorAgent;
-    private final TestResultNodeFactory             nodeFactory;
-    private TestResult                              lastTestResult;
-    private Tree                                    resultTree;
-    private int                                     lastWentLine     = 0;
-    private boolean                                 showFailuresOnly = false;
+        String traceOutputMessage();
+
+        String traceOutputStack();
+
+    }
+
+    private static final TestResultViewImplUiBinder UI_BINDER = GWT.create(TestResultViewImplUiBinder.class);
+
+    private final JavaNavigationService javaNavigationService;
+    private final AppContext appContext;
+    private final EditorAgent editorAgent;
+    private final EventBus eventBus;
+    private final TestResultNodeFactory nodeFactory;
+    private TestResult lastTestResult;
+    private int lastWentLine = 0;
+    private boolean showFailuresOnly = false;
 
     @UiField(provided = true)
-    SplitLayoutPanel                                splitLayoutPanel;
+    SplitLayoutPanel splitLayoutPanel;
 
     @UiField
-    Label                                           outputResult;
+    Styles style;
 
     @UiField
-    FlowPanel                                       navigationPanel;
+    DockLayoutPanel navigationPanel;
+
+    @UiField
+    FlowPanel traceOutputPanel;
 
     @Inject
-    public TestResultViewImpl(TestResources testResources,
-                              PartStackUIResources resources,
-                              JavaNavigationService javaNavigationService,
-                              EditorAgent editorAgent,
-                              AppContext appContext,
-                              TestResultNodeFactory nodeFactory) {
+    public TestResultViewImpl(PartStackUIResources resources, JavaNavigationService javaNavigationService,
+            EditorAgent editorAgent, AppContext appContext, EventBus eventBus, TestResultNodeFactory nodeFactory) {
         super(resources);
         this.javaNavigationService = javaNavigationService;
         this.editorAgent = editorAgent;
         this.appContext = appContext;
+        this.eventBus = eventBus;
         this.nodeFactory = nodeFactory;
         splitLayoutPanel = new SplitLayoutPanel(1);
         setContentWidget(UI_BINDER.createAndBindUi(this));
+    }
 
+    private Tree createTree() {
         NodeUniqueKeyProvider idProvider = new NodeUniqueKeyProvider() {
             @NotNull
             @Override
@@ -125,47 +145,53 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         };
         NodeStorage nodeStorage = new NodeStorage(idProvider);
         NodeLoader nodeLoader = new NodeLoader(Collections.<NodeInterceptor> emptySet());
-        resultTree = new Tree(nodeStorage, nodeLoader);
-        resultTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
-            @Override
-            public void onSelection(SelectionEvent<Node> event) {
-                Node methodNode = event.getSelectedItem();
-                if (methodNode instanceof TestResultMethodNode) {
-                    outputResult.setText(((TestResultMethodNode)methodNode).getStackTrace());
-                }
-            }
-        });
-        resultTree.getElement().getStyle().setWidth(100, Style.Unit.PCT);
-        resultTree.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-        navigationPanel.add(resultTree);
+        Tree tree = new Tree(nodeStorage, nodeLoader);
+        tree.getSelectionModel().setSelectionMode(SINGLE);
+        return tree;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void focusView() {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
+    @Deprecated
     public void showResults(TestResult result) {
-        this.lastTestResult = result;
+        clear();
+        lastTestResult = result;
         setTitle("Test Results (Framework: " + result.getTestFramework() + ")");
-        buildTree();
+        fillNavigationPanel(result);
         focusView();
     }
 
-    private void buildTree() {
-        resultTree.getNodeStorage().clear();
-        outputResult.setText("");
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void showResults(TestResultRootDto result) {
+        setTitle("Test Results (Framework: " + result.getTestFrameworkName() + ")");
+        fillNavigationPanel(result);
+        focusView();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void clear() {
+        setTitle("");
+        navigationPanel.clear();
+        traceOutputPanel.clear();
+    }
+
+    @Deprecated
+    private void fillNavigationPanel(final TestResult result) {
+        Tree resultTree = buildResultTree(result);
         TestResultGroupNode root = nodeFactory.getTestResultGroupNode(lastTestResult, showFailuresOnly, new Runnable() {
             @Override
             public void run() {
                 showFailuresOnly = !showFailuresOnly;
-                buildTree();
+                clear();
+                fillNavigationPanel(result);
             }
         });
         HashMap<String, List<Node>> classNodeHashMap = new LinkedHashMap<>();
@@ -178,8 +204,8 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
                 classNodeHashMap.put(testCase.getClassName(), methodNodes);
             }
             classNodeHashMap.get(testCase.getClassName())
-                            .add(nodeFactory.getTestResultMethodNodeNode(!testCase.isFailed(), testCase.getMethod(), testCase.getTrace(),
-                                                                         testCase.getMessage(), testCase.getFailingLine(), this));
+                    .add(nodeFactory.getTestResultMethodNodeNode(!testCase.isFailed(), testCase.getMethod(),
+                            testCase.getTrace(), testCase.getMessage(), testCase.getFailingLine(), this));
         }
         List<Node> classNodes = new ArrayList<>();
         for (Map.Entry<String, List<Node>> entry : classNodeHashMap.entrySet()) {
@@ -188,11 +214,84 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
             classNodes.add(classNode);
         }
         root.setChildren(classNodes);
+        navigationPanel.add(resultTree);
         resultTree.getNodeStorage().add(root);
         resultTree.expandAll();
     }
 
+    private void fillNavigationPanel(TestResultRootDto result) {
+        Tree resultTree = buildResultTree(result);
+        TestResultRootNode root = nodeFactory.createTestResultRootNode(result, result.getTestFrameworkName());
+        resultTree.getNodeStorage().add(root);
+        navigationPanel.add(resultTree);
+    }
+
+    @Deprecated
+    private Tree buildResultTree(TestResult result) {
+        Tree resultTree = createTree();
+        resultTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
+            @Override
+            public void onSelection(SelectionEvent<Node> event) {
+                Node selectedNode = event.getSelectedItem();
+                if (selectedNode instanceof TestResultMethodNode) {
+                    fillOutputPanel(((TestResultMethodNode) selectedNode).getStackTrace());
+                }
+            }
+        });
+        return resultTree;
+    }
+
+    private Tree buildResultTree(TestResultRootDto result) {
+        Tree resultTree = createTree();
+        resultTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
+            @Override
+            public void onSelection(SelectionEvent<Node> event) {
+                Node selectedNode = event.getSelectedItem();
+                if (selectedNode instanceof AbstractTestResultTreeNode) {
+                    fillOutputPanel((AbstractTestResultTreeNode) selectedNode);
+                }
+            }
+        });
+        return resultTree;
+    }
+
+    @Deprecated
+    private void fillOutputPanel(String text) {
+        traceOutputPanel.clear();
+        Label traceMessageLabel = new Label(text);
+        traceMessageLabel.setStyleName(style.traceOutputMessage());
+        traceOutputPanel.add(traceMessageLabel);
+    }
+
+    private void fillOutputPanel(AbstractTestResultTreeNode node) {
+        traceOutputPanel.clear();
+        TestResultTraceDto testTrace = node.getTestTrace();
+        if (testTrace == null)
+            return;
+        Label traceOutputMessage = new Label(testTrace.getMessage());
+        traceOutputMessage.setStyleName(style.traceOutputMessage());
+        traceOutputMessage.setWordWrap(true);
+        traceOutputPanel.add(traceOutputMessage);
+        Tree traceTree = buildTraceTree(testTrace);
+        DockLayoutPanel traceOutputStack = new DockLayoutPanel(Unit.PX);
+        traceOutputStack.setStyleName(style.traceOutputStack());
+        traceOutputStack.add(traceTree);
+        traceOutputPanel.add(traceOutputStack);
+    }
+
+    private Tree buildTraceTree(TestResultTraceDto trace) {
+        Tree traceTree = createTree();
+        List<Node> traceNodes = new ArrayList<>();
+        for (TestResultTraceFrameDto traceFrame : trace.getTraceFrames()) {
+            TestResultTraceFrameNode traceNode = nodeFactory.createTestResultTraceFrameNode(traceFrame);
+            traceNodes.add(traceNode);
+        }
+        traceTree.getNodeStorage().add(traceNodes);
+        return traceTree;
+    }
+
     @Override
+    @Deprecated
     public void gotoClass(final String packagePath, String className, String methodName, int line) {
         if (lastTestResult == null) {
             return;
@@ -214,13 +313,10 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
                         @Override
                         public void run() {
                             EditorPartPresenter editorPart = editorAgent.getActiveEditor();
-                            final Document doc = ((TextEditor)editorPart).getDocument();
-                            if (line == -1 &&
-                                className != null &&
-                                methodName != null) {
-                                Promise<CompilationUnit> cuPromise =
-                                                                   javaNavigationService.getCompilationUnit(file.getProject().getLocation(),
-                                                                                                            className, true);
+                            final Document doc = ((TextEditor) editorPart).getDocument();
+                            if (line == -1 && className != null && methodName != null) {
+                                Promise<CompilationUnit> cuPromise = javaNavigationService
+                                        .getCompilationUnit(file.getProject().getLocation(), className, true);
                                 cuPromise.then(new Operation<CompilationUnit>() {
                                     @Override
                                     public void apply(CompilationUnit cu) throws OperationException {
@@ -230,8 +326,10 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
                                                     if (methodName.equals(m.getElementName())) {
                                                         Region methodRegion = m.getFileRegion();
                                                         if (methodRegion != null) {
-                                                            lastWentLine = doc.getLineAtOffset(methodRegion.getOffset());
-                                                            doc.setCursorPosition(new TextPosition(lastWentLine - 1, 0));
+                                                            lastWentLine = doc
+                                                                    .getLineAtOffset(methodRegion.getOffset());
+                                                            doc.setCursorPosition(
+                                                                    new TextPosition(lastWentLine - 1, 0));
                                                         }
                                                     }
                                                 }

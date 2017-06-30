@@ -18,15 +18,16 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import org.eclipse.che.ide.api.macro.Macro;
+import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.reference.FqnProvider;
-import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.api.resources.RenamingSupport;
+import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.ext.java.client.CurrentClassFQN_Macro;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.action.OrganizeImportsAction;
@@ -36,8 +37,6 @@ import org.eclipse.che.ide.ext.java.client.command.valueproviders.ClasspathMacro
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.MainClassMacro;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.OutputDirMacro;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.SourcepathMacro;
-import org.eclipse.che.ide.ext.java.client.dependenciesupdater.JavaClasspathServiceClient;
-import org.eclipse.che.ide.ext.java.client.dependenciesupdater.JavaClasspathServiceClientImpl;
 import org.eclipse.che.ide.ext.java.client.documentation.QuickDocPresenter;
 import org.eclipse.che.ide.ext.java.client.documentation.QuickDocumentation;
 import org.eclipse.che.ide.ext.java.client.inject.factories.PropertyWidgetFactory;
@@ -45,14 +44,13 @@ import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationServ
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationServiceImpl;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileView;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileViewImpl;
-import org.eclipse.che.ide.ext.java.client.resource.ClassInterceptor;
-import org.eclipse.che.ide.ext.java.client.resource.JavaSourceRenameValidator;
-import org.eclipse.che.ide.ext.java.client.resource.SourceFolderInterceptor;
-import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.libraries.LibEntryPresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.sources.SourceEntryPresenter;
 import org.eclipse.che.ide.ext.java.client.reference.JavaFqnProvider;
+import org.eclipse.che.ide.ext.java.client.resource.ClassInterceptor;
+import org.eclipse.che.ide.ext.java.client.resource.JavaSourceRenameValidator;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderInterceptor;
 import org.eclipse.che.ide.ext.java.client.search.JavaSearchService;
 import org.eclipse.che.ide.ext.java.client.search.JavaSearchServiceWS;
 import org.eclipse.che.ide.ext.java.client.search.node.NodeFactory;
@@ -61,11 +59,11 @@ import org.eclipse.che.ide.ext.java.client.settings.compiler.JavaCompilerPrefere
 import org.eclipse.che.ide.ext.java.client.settings.compiler.JavaCompilerPreferencePresenter;
 import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidget;
 import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidgetImpl;
+import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
 import org.eclipse.che.ide.ext.java.client.tree.JavaPackageConnector;
 import org.eclipse.che.ide.ext.java.client.tree.LibraryNodeProvider;
 import org.eclipse.che.ide.ext.java.client.tree.SourceFolderDecorator;
 import org.eclipse.che.ide.ext.java.client.tree.TestFolderDecorator;
-import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
 
 import static org.eclipse.che.ide.ext.java.client.action.OrganizeImportsAction.JAVA_ORGANIZE_IMPORT_ID;
@@ -86,7 +84,6 @@ public class JavaGinModule extends AbstractGinModule {
         bind(NewJavaSourceFileView.class).to(NewJavaSourceFileViewImpl.class).in(Singleton.class);
         bind(QuickDocumentation.class).to(QuickDocPresenter.class).in(Singleton.class);
         bind(JavaNavigationService.class).to(JavaNavigationServiceImpl.class);
-        bind(JavaClasspathServiceClient.class).to(JavaClasspathServiceClientImpl.class);
         bind(JavaSearchService.class).to(JavaSearchServiceWS.class);
 
         GinMultibinder.newSetBinder(binder(), NodeInterceptor.class).addBinding().to(TestFolderDecorator.class);

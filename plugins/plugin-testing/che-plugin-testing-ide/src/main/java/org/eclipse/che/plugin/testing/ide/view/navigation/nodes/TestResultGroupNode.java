@@ -44,6 +44,7 @@ import elemental.html.SpanElement;
  * 
  * @author Mirage Abeysekara
  */
+@Deprecated
 public class TestResultGroupNode extends AbstractTreeNode implements HasPresentation {
 
     private NodePresentation    nodePresentation;

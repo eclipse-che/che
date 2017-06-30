@@ -40,7 +40,7 @@ import com.jayway.restassured.response.Response;
  * @author Mirage Abeysekara
  */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
-public class TestingServiceTest {
+public class TestServiceTest {
 
     private final String SERVICE_PATH = "/che/testing";
     private final String SERVICE_PATH_RUN_ACTION = SERVICE_PATH + "/run";

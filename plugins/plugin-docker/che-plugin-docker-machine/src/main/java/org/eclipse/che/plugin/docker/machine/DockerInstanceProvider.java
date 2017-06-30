@@ -200,7 +200,11 @@ public class DockerInstanceProvider implements InstanceProvider {
                 conn.disconnect();
             }
         } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error("Failed to remove {} snapshot from {}. Cause: {}",
+                      dockerMachineSource.getRepository(),
+                      dockerMachineSource.getRegistry(),
+                      e.getLocalizedMessage(),
+                      e);
         }
     }
 
@@ -239,7 +243,11 @@ public class DockerInstanceProvider implements InstanceProvider {
                 conn.disconnect();
             }
         } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error("Failed to remove {} snapshot from {}. Cause: {}",
+                    repository,
+                    DOCKER_HUB_BASE_URI,
+                    e.getLocalizedMessage(),
+                    e);
         }
     }
 
