@@ -65,7 +65,7 @@ public class WorkspaceRuntimeIntegrationTest {
 //        // given
 //        EnvironmentDto environment = newDto(EnvironmentDto.class);
 //        environment.withMachines(singletonMap("service1", newDto(ExtendedMachineDto.class)
-//                .withAgents(singletonList("org.eclipse.che.ws-agent"))));
+//                .withInstallers(singletonList("org.eclipse.che.ws-agent"))));
 //        WorkspaceConfigDto config = newDto(WorkspaceConfigDto.class)
 //                .withDefaultEnv(ENV_NAME)
 //                .withName("ws1")

@@ -45,10 +45,10 @@ public class MachineConfigImpl implements MachineConfig {
     private Long id;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "externalmachine_agents",
+    @CollectionTable(name = "externalmachine_installers",
                      joinColumns = @JoinColumn(name = "externalmachine_id"))
-    @Column(name = "agents")
-    private List<String> agents;
+    @Column(name = "installers")
+    private List<String> installers;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "externalmachine_attributes",
@@ -64,11 +64,11 @@ public class MachineConfigImpl implements MachineConfig {
 
     public MachineConfigImpl() {}
 
-    public MachineConfigImpl(List<String> agents,
+    public MachineConfigImpl(List<String> installers,
                              Map<String, ? extends ServerConfig> servers,
                              Map<String, String> attributes) {
-        if (agents != null) {
-            this.agents = new ArrayList<>(agents);
+        if (installers != null) {
+            this.installers = new ArrayList<>(installers);
         }
         if (servers != null) {
             this.servers = servers.entrySet()
@@ -82,23 +82,23 @@ public class MachineConfigImpl implements MachineConfig {
     }
 
     public MachineConfigImpl(MachineConfig machine) {
-        this(machine.getAgents(), machine.getServers(), machine.getAttributes());
+        this(machine.getInstallers(), machine.getServers(), machine.getAttributes());
     }
 
     @Override
-    public List<String> getAgents() {
-        if (agents == null) {
-            agents = new ArrayList<>();
+    public List<String> getInstallers() {
+        if (installers == null) {
+            installers = new ArrayList<>();
         }
-        return agents;
+        return installers;
     }
 
-    public void setAgents(List<String> agents) {
-        this.agents = agents;
+    public void setInstallers(List<String> installers) {
+        this.installers = installers;
     }
 
-    public MachineConfigImpl withAgents(List<String> agents) {
-        this.agents = agents;
+    public MachineConfigImpl withInstallers(List<String> installers) {
+        this.installers = installers;
         return this;
     }
 
@@ -146,7 +146,7 @@ public class MachineConfigImpl implements MachineConfig {
         }
         final MachineConfigImpl that = (MachineConfigImpl)obj;
         return Objects.equals(id, that.id)
-               && getAgents().equals(that.getAgents())
+               && getInstallers().equals(that.getInstallers())
                && getAttributes().equals(that.getAttributes())
                && getServers().equals(that.getServers());
     }
@@ -155,7 +155,7 @@ public class MachineConfigImpl implements MachineConfig {
     public int hashCode() {
         int hash = 7;
         hash = 31 * hash + Objects.hashCode(id);
-        hash = 31 * hash + getAgents().hashCode();
+        hash = 31 * hash + getInstallers().hashCode();
         hash = 31 * hash + getAttributes().hashCode();
         hash = 31 * hash + getServers().hashCode();
         return hash;
@@ -165,7 +165,7 @@ public class MachineConfigImpl implements MachineConfig {
     public String toString() {
         return "MachineConfigImpl{" +
                "id=" + id +
-               ", agents=" + agents +
+               ", installers=" + installers +
                ", attributes=" + attributes +
                ", servers=" + servers +
                '}';

@@ -244,7 +244,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                     "Machine " + name + " is not found in internal machines config of RuntimeContext");
         }
 
-        bootstrapperFactory.create(name, identity, dockerMachine, machineConfig.getAgents())
+        bootstrapperFactory.create(name, identity, dockerMachine, machineConfig.getInstallers())
                            .bootstrap();
 
         ServersReadinessChecker readinessChecker =

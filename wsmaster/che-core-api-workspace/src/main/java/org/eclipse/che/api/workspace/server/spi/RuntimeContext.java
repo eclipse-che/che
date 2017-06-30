@@ -12,15 +12,13 @@ package org.eclipse.che.api.workspace.server.spi;
 
 import com.google.common.collect.ImmutableMap;
 
-import org.eclipse.che.api.agent.server.AgentRegistry;
-import org.eclipse.che.api.agent.server.impl.AgentSorter;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.rest.HttpRequestHelper;
-import org.slf4j.Logger;
 
 import javax.ws.rs.HttpMethod;
 import java.net.MalformedURLException;
@@ -28,16 +26,12 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 /**
  * A Context for running Workspace's Runtime
  *
  * @author gazarenkov
  */
 public abstract class RuntimeContext {
-
-    private static final Logger LOG = getLogger(RuntimeContext.class);
 
     protected final Environment           environment;
     protected final RuntimeIdentity       identity;
@@ -48,8 +42,7 @@ public abstract class RuntimeContext {
     public RuntimeContext(Environment environment,
                           RuntimeIdentity identity,
                           RuntimeInfrastructure infrastructure,
-                          AgentSorter agentSorter,
-                          AgentRegistry agentRegistry)
+                          InstallerRegistry installerRegistry)
             throws ValidationException, InfrastructureException {
         this.environment = environment;
         this.identity = identity;
@@ -57,8 +50,8 @@ public abstract class RuntimeContext {
         this.recipe = resolveRecipe(environment.getRecipe());
 
         Map<String, ? extends MachineConfig> effectiveMachines = environment.getMachines();
-        for(Map.Entry<String, ? extends MachineConfig> entry : effectiveMachines.entrySet()) {
-            internalMachines.put(entry.getKey(), new InternalMachineConfig(entry.getValue(), agentRegistry, agentSorter));
+        for (Map.Entry<String, ? extends MachineConfig> entry : effectiveMachines.entrySet()) {
+            internalMachines.put(entry.getKey(), new InternalMachineConfig(entry.getValue(), installerRegistry));
         }
 
     }
@@ -75,7 +68,7 @@ public abstract class RuntimeContext {
      * Infrastructure should assign channel (usual WebSocket) to push long lived processes messages
      * Examples of such messages include:
      * - Start/Stop logs output
-     * - Agent installer output
+     * - Installers output
      * etc
      * It is expected that ones returning this URL implementation guarantees supporting and not changing
      * it during the whole life time of Runtime. Repeating calls of this method should return the same URL
@@ -94,10 +87,9 @@ public abstract class RuntimeContext {
                                                   UnsupportedOperationException;
 
 
-
 //    /**
 //     * Status Channel URL should be passed by Workspace API level. It is used for events about any kind of status changes, such as:
-//     * - Agent installing statuses
+//     * - Installer installing statuses
 //     * - Servers statuses
 //     * - Infrastructure specific events
 //     * Infrastructure MUST NOT use this channel for long-lived output (process stdout, logs etc)
@@ -137,15 +129,14 @@ public abstract class RuntimeContext {
     }
 
 
-
     private InternalRecipe resolveRecipe(Recipe recipe) throws InfrastructureException {
-        if(recipe.getContent() != null && !recipe.getContent().isEmpty()) {
+        if (recipe.getContent() != null && !recipe.getContent().isEmpty()) {
             return new InternalRecipe(recipe, recipe.getContent());
-        } else if(recipe.getLocation() != null && !recipe.getLocation().isEmpty()) {
+        } else if (recipe.getLocation() != null && !recipe.getLocation().isEmpty()) {
 
             try {
                 URL recipeUrl = new URL(recipe.getLocation());
-                if(recipeUrl.getProtocol().startsWith("http")) {
+                if (recipeUrl.getProtocol().startsWith("http")) {
                     String script = HttpRequestHelper.requestString(recipe.getLocation(), HttpMethod.GET, null, null);
                     return new InternalRecipe(recipe, script);
                 } else {

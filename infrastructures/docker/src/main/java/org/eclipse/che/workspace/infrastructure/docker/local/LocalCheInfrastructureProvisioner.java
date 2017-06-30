@@ -19,7 +19,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.inject.CheBootstrap;
-import org.eclipse.che.workspace.infrastructure.docker.AgentConfigApplier;
+import org.eclipse.che.workspace.infrastructure.docker.InstallerConfigApplier;
 import org.eclipse.che.workspace.infrastructure.docker.DefaultInfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.providers.DockerExtConfBindingProvider;
 import org.eclipse.che.workspace.infrastructure.docker.local.providers.ExecAgentVolumeProvider;
@@ -57,7 +57,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
     private final String                       projectsVolumeOptions;
 
     @Inject
-    public LocalCheInfrastructureProvisioner(AgentConfigApplier agentConfigApplier,
+    public LocalCheInfrastructureProvisioner(InstallerConfigApplier installerConfigApplier,
                                              WorkspaceFolderPathProvider workspaceFolderPathProvider,
                                              WindowsPathEscaper pathEscaper,
                                              @Named("che.workspace.projects.storage") String projectFolderPath,
@@ -66,7 +66,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
                                              DockerExtConfBindingProvider dockerExtConfBindingProvider,
                                              TerminalVolumeProvider terminalVolumeProvider,
                                              ExecAgentVolumeProvider execAgentVolumeProvider) {
-        super(agentConfigApplier);
+        super(installerConfigApplier);
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.pathEscaper = pathEscaper;
         this.projectFolderPath = projectFolderPath;
@@ -88,7 +88,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
             throws InfrastructureException {
         String devMachineName = getDevMachineName(envConfig);
         if (devMachineName == null) {
-            throw new InfrastructureException("ws-machine is not found on agents applying");
+            throw new InfrastructureException("ws-machine is not found on installers applying");
         }
 
         DockerContainerConfig devMachine = internalEnv.getServices().get(devMachineName);

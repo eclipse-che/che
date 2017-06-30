@@ -17,7 +17,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.SubscriptionManagerClient;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
@@ -79,7 +78,7 @@ public class CurrentWorkspaceManager {
         final String defEnvName = workspace.getConfig().getDefaultEnv();
 
         return workspaceServiceClient.startById(workspace.getId(), defEnvName, restoreFromSnapshot)
-                                     .then((Function<WorkspaceDto, Void>)arg -> null);
+                                     .then((Function<WorkspaceImpl, Void>)arg -> null);
     }
 
     /** Stop the current workspace. */

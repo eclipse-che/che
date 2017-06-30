@@ -24,8 +24,8 @@ import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
@@ -163,9 +163,9 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
     private void createWorkspace() {
         WorkspaceConfigDto workspaceConfig = getWorkspaceConfig();
 
-        workspaceClient.create(workspaceConfig, null).then(new Operation<WorkspaceDto>() {
+        workspaceClient.create(workspaceConfig, null).then(new Operation<WorkspaceImpl>() {
             @Override
-            public void apply(WorkspaceDto workspace) throws OperationException {
+            public void apply(WorkspaceImpl workspace) throws OperationException {
                 callback.onSuccess(workspace);
 //                DefaultWorkspaceComponent component = wsComponentProvider.get();
 //                component.startWorkspace(workspace, callback);
@@ -186,14 +186,14 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
                                      .withLocation("eclipse/ubuntu_jdk8");
 
 
-        List<String> agents = new ArrayList<>();
-        agents.add("org.eclipse.che.exec");
-        agents.add("org.eclipse.che.terminal");
-        agents.add("org.eclipse.che.ws-agent");
-        agents.add("org.eclipse.che.ssh");
+        List<String> installers = new ArrayList<>();
+        installers.add("org.eclipse.che.exec");
+        installers.add("org.eclipse.che.terminal");
+        installers.add("org.eclipse.che.ws-agent");
+        installers.add("org.eclipse.che.ssh");
 
         MachineConfigDto machine = dtoFactory.createDto(MachineConfigDto.class)
-                                             .withAgents(agents)
+                                             .withInstallers(installers)
                                              .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
         EnvironmentDto environment = dtoFactory.createDto(EnvironmentDto.class)

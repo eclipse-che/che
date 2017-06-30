@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Synchronizer for Project Configurations stored in Workspace Configuration with Agent's state
+ * Synchronizer for Project Configurations stored in Workspace Configuration with Installer's state
  *
  * @author gazarenkov
  */

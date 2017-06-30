@@ -15,18 +15,21 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.agent.GitCredentialsAgent;
-import org.eclipse.che.api.agent.LSCSharpAgent;
-import org.eclipse.che.api.agent.LSJsonAgent;
-import org.eclipse.che.api.agent.LSPhpAgent;
-import org.eclipse.che.api.agent.LSPythonAgent;
-import org.eclipse.che.api.agent.LSTypeScriptAgent;
-import org.eclipse.che.api.agent.SshAgent;
-import org.eclipse.che.api.agent.UnisonAgent;
-import org.eclipse.che.api.agent.WsAgent;
-import org.eclipse.che.api.agent.server.impl.LocalAgentRegistry;
-import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
-import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.installer.ExecInstaller;
+import org.eclipse.che.api.installer.GitCredentialsInstaller;
+import org.eclipse.che.api.installer.LSCSharpInstaller;
+import org.eclipse.che.api.installer.LSJsonInstaller;
+import org.eclipse.che.api.installer.LSPhpInstaller;
+import org.eclipse.che.api.installer.LSPythonInstaller;
+import org.eclipse.che.api.installer.LSTypeScriptInstaller;
+import org.eclipse.che.api.installer.SshInstaller;
+import org.eclipse.che.api.installer.TerminalInstaller;
+import org.eclipse.che.api.installer.UnisonInstaller;
+import org.eclipse.che.api.installer.WsInstaller;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
+import org.eclipse.che.api.installer.server.InstallerRegistryProvider;
+import org.eclipse.che.api.installer.server.InstallerRegistryService;
+import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
@@ -123,7 +126,9 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker.class);
         bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);
         bind(org.eclipse.che.everrest.ETagResponseFilter.class);
-        bind(org.eclipse.che.api.agent.server.AgentRegistryService.class);
+
+        bind(InstallerRegistry.class).toProvider(InstallerRegistryProvider.class);
+        bind(InstallerRegistryService.class);
 
         // temporary solution
         bind(org.eclipse.che.api.workspace.server.event.RuntimeStatusJsonRpcMessenger.class).asEagerSingleton();
@@ -158,39 +163,19 @@ public class WsMasterModule extends AbstractModule {
 // FIXME: spi
 //        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
 
-        // agents
-        bind(org.eclipse.che.api.agent.server.AgentRegistry.class).to(LocalAgentRegistry.class);
-        Multibinder<Agent> agents = Multibinder.newSetBinder(binder(), Agent.class);
-        agents.addBinding().to(SshAgent.class);
-        agents.addBinding().to(UnisonAgent.class);
-        agents.addBinding().to(org.eclipse.che.api.agent.ExecAgent.class);
-        agents.addBinding().to(org.eclipse.che.api.agent.TerminalAgent.class);
-        agents.addBinding().to(WsAgent.class);
-        agents.addBinding().to(LSPhpAgent.class);
-        agents.addBinding().to(LSPythonAgent.class);
-        agents.addBinding().to(LSJsonAgent.class);
-        agents.addBinding().to(LSCSharpAgent.class);
-        agents.addBinding().to(LSTypeScriptAgent.class);
-        agents.addBinding().to(GitCredentialsAgent.class);
-
-        Multibinder<AgentLauncher> launchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
-// FIXME: spi
-//        launchers.addBinding().to(WsAgentLauncher.class);
-//        launchers.addBinding().to(org.eclipse.che.api.agent.ExecAgentLauncher.class);
-//        launchers.addBinding().to(org.eclipse.che.api.agent.TerminalAgentLauncher.class);
-//        launchers.addBinding().to(SshAgentLauncher.class);
-
-        bindConstant().annotatedWith(Names.named("machine.ws_agent.run_command"))
-                      .to("export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
-        bindConstant().annotatedWith(Names.named("machine.terminal_agent.run_command"))
-                      .to("$HOME/che/terminal/che-websocket-terminal " +
-                          "-addr :4411 " +
-                          "-cmd ${SHELL_INTERPRETER}");
-        bindConstant().annotatedWith(Names.named("machine.exec_agent.run_command"))
-                      .to("$HOME/che/exec-agent/che-exec-agent " +
-                          "-addr :4412 " +
-                          "-cmd ${SHELL_INTERPRETER} " +
-                          "-logs-dir $HOME/che/exec-agent/logs");
+        // installers
+        Multibinder<Installer> installers = Multibinder.newSetBinder(binder(), Installer.class);
+        installers.addBinding().to(SshInstaller.class);
+        installers.addBinding().to(UnisonInstaller.class);
+        installers.addBinding().to(ExecInstaller.class);
+        installers.addBinding().to(TerminalInstaller.class);
+        installers.addBinding().to(WsInstaller.class);
+        installers.addBinding().to(LSPhpInstaller.class);
+        installers.addBinding().to(LSPythonInstaller.class);
+        installers.addBinding().to(LSJsonInstaller.class);
+        installers.addBinding().to(LSCSharpInstaller.class);
+        installers.addBinding().to(LSTypeScriptInstaller.class);
+        installers.addBinding().to(GitCredentialsInstaller.class);
 
         bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
@@ -237,8 +222,8 @@ public class WsMasterModule extends AbstractModule {
 //        install(new org.eclipse.che.workspace.infrastructure.docker.old.config.dns.DnsResolversModule());
 
 // FIXME: spi
-//        bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
-//        bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);
+//        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
+//        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
 
 // FIXME: spi
         install(new DummyInfrastructureModule());

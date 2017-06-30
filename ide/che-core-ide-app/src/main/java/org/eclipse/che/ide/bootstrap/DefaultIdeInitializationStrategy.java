@@ -26,13 +26,13 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.actions.StartUpActionsParser;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.core.StandardComponentInitializer;
@@ -123,9 +123,9 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
     }
 
     @Override
-    public Promise<WorkspaceDto> getWorkspaceToStart() {
+    public Promise<WorkspaceImpl> getWorkspaceToStart() {
         final String workspaceKey = browserAddress.getWorkspaceKey();
-        Promise<WorkspaceDto> ws = workspaceServiceClient.getWorkspace(workspaceKey);
+        Promise<WorkspaceImpl> ws = workspaceServiceClient.getWorkspace(workspaceKey);
         LOG.debug("Got workspace: " + workspaceKey);
         return ws;
     }
@@ -140,7 +140,7 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
     protected Promise<Void> initAppContext() {
 
         return getWorkspaceToStart()
-                .then((Function<WorkspaceDto, Void>)workspace -> {
+                .then((Function<WorkspaceImpl, Void>)workspace -> {
 
                     Log.info(DefaultIdeInitializationStrategy.class, "Workspace -> " + workspace);
 

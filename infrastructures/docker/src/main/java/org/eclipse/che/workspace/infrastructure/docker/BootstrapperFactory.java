@@ -12,7 +12,7 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
+import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 
 import java.util.List;
@@ -24,5 +24,5 @@ public interface BootstrapperFactory {
     Bootstrapper create(@Assisted String machineName,
                         @Assisted RuntimeIdentity runtimeIdentity,
                         @Assisted DockerMachine dockerMachine,
-                        @Assisted List<AgentImpl> agents);
+                        @Assisted List<InstallerImpl> agents);
 }

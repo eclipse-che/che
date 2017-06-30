@@ -41,9 +41,9 @@ public class CheEnvironmentEngineTest {
 //    @Mock
 //    private ContainerNameGenerator   containerNameGenerator;
 //    @Mock
-//    private AgentRegistry            agentRegistry;
+//    private InstallerRegistry            agentRegistry;
 //    @Mock
-//    private Agent                    agent;
+//    private Installer                    agent;
 //    @Mock
 //    private EnvironmentParser        environmentParser;
 //
@@ -67,7 +67,7 @@ public class CheEnvironmentEngineTest {
 //
 //        when(machineInstanceProviders.getProvider("docker")).thenReturn(instanceProvider);
 //        when(instanceProvider.getRecipeTypes()).thenReturn(Collections.singleton("dockerfile"));
-//        when(agentRegistry.getAgent(any(AgentKey.class))).thenReturn(agent);
+//        when(agentRegistry.getInstaller(any(InstallerFqn.class))).thenReturn(agent);
 //
 //        EnvironmentContext.getCurrent().setSubject(new SubjectImpl("name", "id", "token", false));
 //    }

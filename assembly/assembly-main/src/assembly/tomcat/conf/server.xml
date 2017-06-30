@@ -141,7 +141,7 @@
 
 
         <!-- Provide Che Agent binaries (like workspace agent, terminal) -->
-        <Context docBase="${che.home}/lib" path="/agent-binaries" />
+        <Context docBase="${che.home}/lib" path="/installer-binaries" />
 
         <!-- SingleSignOn valve, share authentication between web applications
              Documentation at: /docs/config/valve.html -->
