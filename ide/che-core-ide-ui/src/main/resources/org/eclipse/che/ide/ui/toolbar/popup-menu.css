@@ -15,7 +15,6 @@
     background-color: popupBkgColor;
     position: absolute;
     box-shadow: 0px 2px 2px 0px popupShadowColor;
-    border-radius: 0px 0px 3px 3px;
 }
 
 .popupMenuTable {
@@ -24,7 +23,6 @@
     table-layout: fixed;
     left: 0px;
     top: 0px;
-    border-radius: 0px 0px 3px 3px;
 }
 
 .popupMenuTable tbody,  .popupMenuTable tr, .popupMenuTable td, .popupMenuTable nobr {

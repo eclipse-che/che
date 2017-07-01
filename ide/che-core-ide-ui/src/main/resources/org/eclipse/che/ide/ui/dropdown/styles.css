@@ -12,7 +12,6 @@
     background-color: openedFilesDropdownListBackgroundColor;
     border: 1px solid openedFilesDropdownListBorderColor;
     box-shadow: 0 2px 2px 0 openedFilesDropdownListShadowColor;
-    border-radius: 0 0 3px 3px;
 }
 
 .listItem {

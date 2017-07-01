@@ -324,6 +324,21 @@ public interface Theme {
     String getMenuButtonBorder();
 
     /**
+     * Background color of Toolbar controller menu button.
+     */
+    String toolbarControllerBackground();
+
+    /**
+     * Left border color of Toolbar controller menu button.
+     */
+    String toolbarControllerLeftColor();
+
+    /**
+     * Top border color of Toolbar controller menu button.
+     */
+    String toolbarControllerTopColor();
+
+    /**
      * Background color of default button.
      *
      * @return the color

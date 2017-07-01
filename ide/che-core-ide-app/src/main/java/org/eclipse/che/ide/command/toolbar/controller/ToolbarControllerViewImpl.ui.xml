@@ -23,10 +23,10 @@
             position: relative;
             width: 21px;
             height: 34px;
-            background-color: #25283b;
+            background-color: toolbarControllerBackground;
             box-sizing: border-box;
-            border-top: #1f2132 1px solid;
-            border-left: #1a1b29 1px solid;
+            border-top: toolbarControllerTopColor 1px solid;
+            border-left: toolbarControllerLeftColor 1px solid;
             cursor: pointer;
         }
 
@@ -41,7 +41,7 @@
             width: 3px;
             height: 3px;
             background-color: #8e95a9;
-            left: 7px;
+            left: 9px;
         }
 
         .box1 {
@@ -55,7 +55,6 @@
         .box3 {
             top: 19px;
         }
-
 
     </ui:style>
 
