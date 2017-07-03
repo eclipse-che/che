@@ -2618,5 +2618,50 @@
       }
     ],
     "creator": "Dharmit Shah"
+  },
+  {
+    "id": "kotlin-default",
+    "creator": "ide",
+    "name": "Kotlin",
+    "description": "Ubuntu based stack with Kotlin",
+    "scope": "advanced",
+    "tags": [
+      "Kotlin",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [],
+    "source": {
+      "type": "image",
+      "origin": "eclipse/kotlin"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "eclipse/kotlin",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "stackIcon": {
+      "name": "type-blank.svg",
+      "mediaType": "image/svg+xml"
+    }
   }
 ]
