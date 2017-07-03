@@ -36,12 +36,14 @@ public class ProjectImportNotificationSubscriber {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
-                transmitter.newRequest().endpointId(WS_AGENT_ENDPOINT).methodName(EVENT_IMPORT_OUTPUT_SUBSCRIBE).noParams().sendAndSkipResult();
+                transmitter.newRequest().endpointId(WS_AGENT_ENDPOINT).methodName(EVENT_IMPORT_OUTPUT_SUBSCRIBE).noParams()
+                           .sendAndSkipResult();
             }
 
             @Override
             public void onWsAgentStopped(WsAgentStateEvent event) {
-                transmitter.newRequest().endpointId(WS_AGENT_ENDPOINT).methodName(EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE).noParams().sendAndSkipResult();
+                transmitter.newRequest().endpointId(WS_AGENT_ENDPOINT).methodName(EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE).noParams()
+                           .sendAndSkipResult();
             }
         });
     }
