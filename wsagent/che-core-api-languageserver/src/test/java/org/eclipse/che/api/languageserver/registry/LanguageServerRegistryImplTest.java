@@ -124,7 +124,7 @@ public class LanguageServerRegistryImplTest {
     void testFindByPattern() throws Exception {
         LanguageServerLauncher xmlLauncher = createLauncher("xml", null);
         LanguageServerLauncher pomLauncher = createLauncher("pom", null);
-        LanguageDescription xmlDesc = createDescription("xml", Arrays.asList("xml"), null);
+        LanguageDescription xmlDesc = createDescription("xml", Arrays.asList("xml"), Collections.emptyList());
         LanguageDescription pomDesc = createDescription("pom", Arrays.asList(), Arrays.asList("pom.xml"));
         LanguageServer xmlServer = mock(LanguageServer.class);
         LanguageServer pomServer = mock(LanguageServer.class);
