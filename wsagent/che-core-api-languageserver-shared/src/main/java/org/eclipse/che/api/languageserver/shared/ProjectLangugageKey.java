@@ -15,26 +15,22 @@ import java.util.Objects;
 /**
  * @author Anatoliy Bazko
  */
-public class ProjectExtensionKey {
+public class ProjectLangugageKey {
     public static final String ALL_PROJECT_MARKER = "*";
 
     private String project;
-    private String extension;
+    private String languageId;
 
-    private ProjectExtensionKey(String project, String extension) {
+    private ProjectLangugageKey(String project, String languageId) {
         this.project = project;
-        this.extension = extension;
+        this.languageId = languageId;
     }
 
-    public ProjectExtensionKey() {
+    public ProjectLangugageKey() {
     }
 
-    public static ProjectExtensionKey createProjectKey(String project, String extension) {
-        return new ProjectExtensionKey(project, extension);
-    }
-
-    public static ProjectExtensionKey createAllProjectKey(String extension) {
-        return new ProjectExtensionKey(ALL_PROJECT_MARKER, extension);
+    public static ProjectLangugageKey createProjectKey(String project, String languageId) {
+        return new ProjectLangugageKey(project, languageId);
     }
 
     public String getProject() {
@@ -45,26 +41,26 @@ public class ProjectExtensionKey {
         this.project = project;
     }
 
-    public String getExtension() {
-        return extension;
+    public String getLanguageId() {
+        return languageId;
     }
 
-    public void setExtension(String extension) {
-        this.extension = extension;
+    public void setLanguageId(String languageId) {
+        this.languageId = languageId;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (!(o instanceof ProjectExtensionKey))
+        if (!(o instanceof ProjectLangugageKey))
             return false;
-        ProjectExtensionKey that = (ProjectExtensionKey)o;
-        return Objects.equals(extension, that.extension) && Objects.equals(project, that.project);
+        ProjectLangugageKey that = (ProjectLangugageKey)o;
+        return Objects.equals(languageId, that.languageId) && Objects.equals(project, that.project);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(extension, project);
+        return Objects.hash(languageId, project);
     }
 }

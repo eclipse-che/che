@@ -19,7 +19,7 @@ import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedInitializeResultDto;
-import org.eclipse.che.api.languageserver.shared.ProjectExtensionKey;
+import org.eclipse.che.api.languageserver.shared.ProjectLangugageKey;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedInitializeResult;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 
@@ -60,7 +60,7 @@ public class LanguageRegistryService {
                        .entrySet()
                        .stream()
                        .map(entry -> {
-                           ProjectExtensionKey projectExtensionKey = entry.getKey();
+                           ProjectLangugageKey projectExtensionKey = entry.getKey();
                            LanguageServerDescription serverDescription = entry.getValue();
 
 
