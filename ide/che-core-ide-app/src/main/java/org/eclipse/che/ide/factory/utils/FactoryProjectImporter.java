@@ -47,14 +47,15 @@ import org.eclipse.che.ide.util.ExceptionUtils;
 import org.eclipse.che.ide.util.StringUtils;
 import org.eclipse.che.security.oauth.OAuthStatus;
 
+import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT;
@@ -74,6 +75,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
  * @author Valeriy Svydenko
  * @author Anton Korneta
  */
+@Singleton
 public class FactoryProjectImporter extends AbstractImporter {
     private final AskCredentialsDialog               askCredentialsDialog;
     private final CoreLocalizationConstant           locale;
@@ -84,7 +86,7 @@ public class FactoryProjectImporter extends AbstractImporter {
     private final RequestTransmitter                 requestTransmitter;
     private final ProjectImportOutputJsonRpcNotifier subscriber;
 
-    private final Map<String, CheckoutContext> checkoutContextRegistry = new ConcurrentHashMap<>();
+    private final Map<String, CheckoutContext> checkoutContextRegistry = new HashMap<>();
 
     private FactoryDto          factory;
     private AsyncCallback<Void> callback;
