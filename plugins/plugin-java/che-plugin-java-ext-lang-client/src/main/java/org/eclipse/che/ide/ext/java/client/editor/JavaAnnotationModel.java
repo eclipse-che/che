@@ -95,17 +95,15 @@ public class JavaAnnotationModel extends AnnotationModelImpl implements Annotati
             generatedAnnotations.clear();
         }
 
-        if (reportedProblems != null && !reportedProblems.isEmpty()) {
-
-            for (final Problem problem : reportedProblems) {
+        if (problems != null) {
+            temporaryProblemsChanged = true;
+            for (final Problem problem : problems) {
                 final Position position = createPositionFromProblem(problem);
 
                 if (position != null) {
                     final ProblemAnnotation annotation = new ProblemAnnotation(problem);
                     addAnnotation(annotation, position, false);
                     generatedAnnotations.add(annotation);
-
-                    temporaryProblemsChanged = true;
                 }
             }
         }
@@ -144,15 +142,15 @@ public class JavaAnnotationModel extends AnnotationModelImpl implements Annotati
     @Override
     public String getSeverity(String annotationType) {
         if (annotationType == null) {
-            return "error";
+            return "orion.annotation.error";
         }
         switch (annotationType) {
             case "org.eclipse.jdt.ui.error":
-                return "error";
+                return "orion.annotation.error";
             case "org.eclipse.jdt.ui.warning":
-                return "warning";
+                return "orion.annotation.warning";
             default:
-                return "task";
+                return "orion.annotation.task";
         }
     }
 }

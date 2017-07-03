@@ -98,7 +98,8 @@ public class LanguageServerAnnotationModel extends AnnotationModelImpl implement
             generatedAnnotations.clear();
         }
 
-        if (diagnostics != null && !diagnostics.isEmpty()) {
+        if (diagnostics != null) {
+            temporaryProblemsChanged = true;
 
             for (final Diagnostic diagnostic : diagnostics) {
                 final Position position = createPositionFromDiagnostic(diagnostic);
@@ -108,7 +109,6 @@ public class LanguageServerAnnotationModel extends AnnotationModelImpl implement
                     addAnnotation(annotation, position, false);
                     generatedAnnotations.add(annotation);
 
-                    temporaryProblemsChanged = true;
                 }
             }
         }
@@ -144,20 +144,20 @@ public class LanguageServerAnnotationModel extends AnnotationModelImpl implement
     public String getSeverity(String annotationType) {
 
         if (annotationType == null) {
-            return "error";
+            return "orion.annotation.error";
         }
         //TODO we need better integration with Orion annotation system
         switch (annotationType) {
             case DiagnosticAnnotation.WARNING_ANNOTATION_TYPE:
-                return "warning";
+                return "orion.annotation.warning";
 
             case DiagnosticAnnotation.HINT_ANNOTATION_TYPE:
             case DiagnosticAnnotation.INFO_ANNOTATION_TYPE:
-                return "task";
+                return "orion.annotation.info";
 
             case DiagnosticAnnotation.ERROR_ANNOTATION_TYPE:
             default:
-                return "error";
+                return "orion.annotation.error";
 
         }
     }
