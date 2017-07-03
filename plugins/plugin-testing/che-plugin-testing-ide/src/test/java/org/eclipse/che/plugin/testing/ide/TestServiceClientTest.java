@@ -334,6 +334,8 @@ public class TestServiceClientTest implements MockitoPrinter {
                                                                                           "mvn test-compile -f ${current.project.path}",
                                                                                           "mvn"));
 
+        when(workspace.getDevMachine()).thenReturn(Optional.empty());
+
         testServiceClient.runTestsAfterCompilation(projectPath, testFramework, parameters, statusNotification, compileCommandPromise);
 
         verify(statusNotification).setContent("Executing the tests without preliminary compilation.");

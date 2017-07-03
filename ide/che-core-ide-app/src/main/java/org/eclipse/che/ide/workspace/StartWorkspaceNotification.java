@@ -42,7 +42,7 @@ import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.WO
  * @author Vitaliy Guliy
  */
 @Singleton
-public class StartWorkspaceNotification {
+class StartWorkspaceNotification {
 
     private final StartWorkspaceNotificationUiBinder uiBinder;
     private final WorkspaceStatusNotification        wsStatusNotification;
@@ -56,13 +56,13 @@ public class StartWorkspaceNotification {
     CheckBox restore;
 
     @Inject
-    public StartWorkspaceNotification(WorkspaceStatusNotification wsStatusNotification,
-                                      StartWorkspaceNotificationUiBinder uiBinder,
-                                      Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider,
-                                      Provider<NotificationManager> notificationManagerProvider,
-                                      CoreLocalizationConstant messages,
-                                      EventBus eventBus,
-                                      AppContext appContext) {
+    StartWorkspaceNotification(WorkspaceStatusNotification wsStatusNotification,
+                               StartWorkspaceNotificationUiBinder uiBinder,
+                               Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider,
+                               Provider<NotificationManager> notificationManagerProvider,
+                               CoreLocalizationConstant messages,
+                               EventBus eventBus,
+                               AppContext appContext) {
         this.wsStatusNotification = wsStatusNotification;
         this.uiBinder = uiBinder;
         this.currentWorkspaceManagerProvider = currentWorkspaceManagerProvider;
@@ -81,7 +81,7 @@ public class StartWorkspaceNotification {
     }
 
     /** Displays a notification with a proposal to start the current workspace. */
-    public void show() {
+    private void show() {
         Widget widget = uiBinder.createAndBindUi(StartWorkspaceNotification.this);
         wsStatusNotification.show(WORKSPACE_STOPPED, widget);
     }
@@ -89,7 +89,7 @@ public class StartWorkspaceNotification {
     /**
      * Hides a notification.
      */
-    public void hide() {
+    private void hide() {
         wsStatusNotification.setSuccess(WORKSPACE_STOPPED);
     }
 

@@ -22,10 +22,12 @@ public class WorkspaceStoppedEvent extends GwtEvent<WorkspaceStoppedEvent.Handle
     public static final Type<WorkspaceStoppedEvent.Handler> TYPE = new Type<>();
 
     private final Workspace workspace;
+    private final boolean   error;
     private final String    errorMessage;
 
-    public WorkspaceStoppedEvent(Workspace workspace, String errorMessage) {
+    public WorkspaceStoppedEvent(Workspace workspace, boolean error, String errorMessage) {
         this.workspace = workspace;
+        this.error = error;
         this.errorMessage = errorMessage;
     }
 
@@ -33,6 +35,10 @@ public class WorkspaceStoppedEvent extends GwtEvent<WorkspaceStoppedEvent.Handle
     @Deprecated
     public Workspace getWorkspace() {
         return workspace;
+    }
+
+    public boolean isError() {
+        return error;
     }
 
     /**

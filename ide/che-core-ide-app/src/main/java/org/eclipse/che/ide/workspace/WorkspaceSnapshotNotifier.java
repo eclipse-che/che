@@ -8,15 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.actions;
+package org.eclipse.che.ide.workspace;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.workspace.events.SnapshotCreatedEvent;
+import org.eclipse.che.ide.workspace.events.SnapshotCreatingEvent;
+import org.eclipse.che.ide.workspace.events.SnapshotCreationErrorEvent;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -31,17 +36,24 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
  * @author Yevhenii Voevodin
  */
 @Singleton
-public class WorkspaceSnapshotNotifier {
+class WorkspaceSnapshotNotifier {
 
     private final Provider<NotificationManager> notificationManagerProvider;
-    private final CoreLocalizationConstant      locale;
+    private final CoreLocalizationConstant      messages;
 
     private StatusNotification notification;
 
     @Inject
-    public WorkspaceSnapshotNotifier(Provider<NotificationManager> notificationManagerProvider, CoreLocalizationConstant locale) {
+    WorkspaceSnapshotNotifier(Provider<NotificationManager> notificationManagerProvider, CoreLocalizationConstant messages) {
         this.notificationManagerProvider = notificationManagerProvider;
-        this.locale = locale;
+        this.messages = messages;
+    }
+
+    @Inject
+    private void registerEventHandlers(EventBus eventBus) {
+        eventBus.addHandler(SnapshotCreatingEvent.TYPE, e -> creationStarted());
+        eventBus.addHandler(SnapshotCreatedEvent.TYPE, e -> successfullyCreated());
+        eventBus.addHandler(SnapshotCreationErrorEvent.TYPE, e -> creationError("Snapshot creation error: " + e.getErrorMessage()));
     }
 
     /**
@@ -49,16 +61,18 @@ public class WorkspaceSnapshotNotifier {
      * The notification is shown until either {@link #creationError(String)}
      * or {@link #successfullyCreated()} is called.
      */
-    public void creationStarted() {
-        notification = notificationManagerProvider.get().notify(locale.createSnapshotProgress(), PROGRESS, FLOAT_MODE);
+    @VisibleForTesting
+    void creationStarted() {
+        notification = notificationManagerProvider.get().notify(messages.createSnapshotProgress(), PROGRESS, FLOAT_MODE);
     }
 
     /**
      * Changes notification state to finished with an error.
      */
-    public void creationError(String message) {
+    @VisibleForTesting
+    void creationError(String message) {
         if (notification != null) {
-            notification.setTitle(locale.createSnapshotFailed());
+            notification.setTitle(messages.createSnapshotFailed());
             notification.setContent(message);
             notification.setStatus(FAIL);
         }
@@ -67,10 +81,11 @@ public class WorkspaceSnapshotNotifier {
     /**
      * Changes notification state to successfully finished.
      */
-    public void successfullyCreated() {
+    @VisibleForTesting
+    void successfullyCreated() {
         if (notification != null) {
             notification.setStatus(SUCCESS);
-            notification.setTitle(locale.createSnapshotSuccess());
+            notification.setTitle(messages.createSnapshotSuccess());
         }
     }
 }

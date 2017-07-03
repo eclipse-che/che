@@ -153,8 +153,13 @@ public class TestServiceClient {
                                                  StatusNotification statusNotification,
                                                  Promise<CommandImpl> compileCommand) {
         return compileCommand.thenPromise(command -> {
-            final WorkspaceImpl workspace = appContext.getWorkspace();
-            final MachineImpl machine = workspace.getDevMachine().orElse(null);
+            final MachineImpl machine;
+            if (command == null) {
+                machine = null;
+            } else {
+                WorkspaceImpl workspace = appContext.getWorkspace();
+                machine = workspace.getDevMachine().orElse(null);
+            }
 
             if (machine == null) {
                 if (statusNotification != null) {
