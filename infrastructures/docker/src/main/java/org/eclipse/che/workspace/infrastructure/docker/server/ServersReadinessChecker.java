@@ -98,7 +98,10 @@ public class ServersReadinessChecker {
                                        }))
                 .toArray(CompletableFuture[]::new);
         resultTimeoutSeconds = checkTasks.length * 180;
-        result = CompletableFuture.anyOf(CompletableFuture.allOf(checkTasks), firstNonAvailable);
+        // should complete when all servers checks reported availability
+        CompletableFuture<Void> allAvailable = CompletableFuture.allOf(checkTasks);
+        // should complete when all servers are available or any server is unavailable
+        result = CompletableFuture.anyOf(allAvailable, firstNonAvailable);
         for (ServerChecker serverChecker : serverCheckers) {
             serverChecker.start();
         }
