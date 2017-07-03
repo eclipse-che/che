@@ -17,7 +17,7 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.keycloak.server.KeycloakHttpJsonRequestFactory;
 
 /**
- * @author Evgen Vidolob
+ *
  */
 @DynaModule
 public class WsAgentKeycloakModule extends AbstractModule {

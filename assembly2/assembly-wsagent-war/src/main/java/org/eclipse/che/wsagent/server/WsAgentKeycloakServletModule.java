@@ -17,7 +17,6 @@ import org.eclipse.che.keycloak.server.KeycloakAuthenticationFilter;
 
 import javax.inject.Singleton;
 
-/** @author andrew00x */
 @DynaModule
 public class WsAgentKeycloakServletModule extends ServletModule {
     @Override
