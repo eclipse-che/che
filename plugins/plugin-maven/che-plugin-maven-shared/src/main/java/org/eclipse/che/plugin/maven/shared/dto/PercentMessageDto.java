@@ -13,14 +13,14 @@ package org.eclipse.che.plugin.maven.shared.dto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Info massage that points to client that messaging started/stopped
- *
- * @author Evgen Vidolob
+ * Message for translating value of percent of resolving from <b>MavenServerNotifier</b>.
  */
 @DTO
-public interface StartStopNotification extends MavenOutputEventDto{
+public interface PercentMessageDto extends MavenOutputEventDto {
 
-    boolean isStart();
+    double getPercent();
 
-    void setStart(boolean start);
+    void setPercent(double percent);
+
+    PercentMessageDto withPercent(double percent);
 }

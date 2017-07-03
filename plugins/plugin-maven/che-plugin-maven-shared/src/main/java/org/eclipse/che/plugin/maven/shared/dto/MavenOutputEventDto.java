@@ -11,16 +11,18 @@
 package org.eclipse.che.plugin.maven.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.plugin.maven.shared.event.MavenOutputEvent;
 
 /**
- * Info massage that points to client that messaging started/stopped
- *
- * @author Evgen Vidolob
+ * DTO object which describes base maven output event.
  */
 @DTO
-public interface StartStopNotification extends MavenOutputEventDto{
+public interface MavenOutputEventDto extends MavenOutputEvent {
 
-    boolean isStart();
+    TYPE getType();
 
-    void setStart(boolean start);
+    /** Returns a type of the output event. */
+    void setType(TYPE type);
+
+    MavenOutputEventDto withType(TYPE type);
 }

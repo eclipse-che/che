@@ -13,14 +13,12 @@ package org.eclipse.che.plugin.maven.shared.dto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Info massage that points to client that messaging started/stopped
- *
- * @author Evgen Vidolob
+ * Message for translating value of percent undefined from <b>MavenServerNotifier</b>.
  */
 @DTO
-public interface StartStopNotification extends MavenOutputEventDto{
+public interface PercentUndefinedMessageDto extends MavenOutputEventDto {
 
-    boolean isStart();
+    boolean isPercentUndefined();
 
-    void setStart(boolean start);
+    void setPercentUndefined(boolean percentUndefined);
 }

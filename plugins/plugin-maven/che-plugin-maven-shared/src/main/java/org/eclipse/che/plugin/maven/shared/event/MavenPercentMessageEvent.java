@@ -8,19 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.shared.dto;
-
-import org.eclipse.che.dto.shared.DTO;
+package org.eclipse.che.plugin.maven.shared.event;
 
 /**
- * Info massage that points to client that messaging started/stopped
- *
- * @author Evgen Vidolob
+ * Event that describes Maven notification output.
  */
-@DTO
-public interface StartStopNotification extends MavenOutputEventDto{
-
-    boolean isStart();
-
-    void setStart(boolean start);
+public interface MavenPercentMessageEvent extends MavenOutputEvent {
+    /** Returns percent of the project resolving. */
+    double getPercent();
 }

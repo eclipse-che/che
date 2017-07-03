@@ -13,11 +13,13 @@ package org.eclipse.che.plugin.maven.server.core;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.plugin.maven.shared.MessageType;
-import org.eclipse.che.plugin.maven.shared.dto.NotificationMessage;
-import org.eclipse.che.plugin.maven.shared.dto.StartStopNotification;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.maven.server.MavenServerProgressNotifier;
+import org.eclipse.che.plugin.maven.shared.event.MavenOutputEvent;
+import org.eclipse.che.plugin.maven.shared.impl.MavenPercentEventImpl;
+import org.eclipse.che.plugin.maven.shared.impl.MavenPercentUndefinedEventImpl;
+import org.eclipse.che.plugin.maven.shared.impl.MavenStartStopEventImpl;
+import org.eclipse.che.plugin.maven.shared.impl.MavenTextMessageEventImpl;
 
 /**
  * Default implementation of {@link MavenServerProgressNotifier}
@@ -27,32 +29,26 @@ import org.eclipse.che.maven.server.MavenServerProgressNotifier;
 @Singleton
 public class MavenServerNotifier implements MavenProgressNotifier {
 
-    private final MavenCommunication communication;
+    private EventService eventService;
 
     @Inject
-    public MavenServerNotifier(MavenCommunication communication) {
-        this.communication = communication;
+    public MavenServerNotifier(EventService eventService) {
+        this.eventService = eventService;
     }
 
     @Override
     public void setText(String text) {
-        NotificationMessage dto = DtoFactory.newDto(NotificationMessage.class);
-        dto.setText(text);
-        communication.sendNotification(dto);
+        eventService.publish(new MavenTextMessageEventImpl(text, MavenOutputEvent.TYPE.TEXT));
     }
 
     @Override
     public void setPercent(double percent) {
-        NotificationMessage dto = DtoFactory.newDto(NotificationMessage.class);
-        dto.setPercent(percent);
-        communication.sendNotification(dto);
+        eventService.publish(new MavenPercentEventImpl(percent, MavenOutputEvent.TYPE.PERCENT));
     }
 
     @Override
     public void setPercentUndefined(boolean undefined) {
-        NotificationMessage dto = DtoFactory.newDto(NotificationMessage.class);
-        dto.setPercentUndefined(undefined);
-        communication.sendNotification(dto);
+        eventService.publish(new MavenPercentUndefinedEventImpl(undefined, MavenOutputEvent.TYPE.PERCENT_UNDEFINED));
     }
 
     @Override
@@ -66,9 +62,7 @@ public class MavenServerNotifier implements MavenProgressNotifier {
     }
 
     private void sendStartStop(boolean isStart) {
-        StartStopNotification dto = DtoFactory.newDto(StartStopNotification.class);
-        dto.setStart(isStart);
-        communication.send(DtoFactory.getInstance().toJsonElement(dto).getAsJsonObject(), MessageType.START_STOP);
+        eventService.publish(new MavenStartStopEventImpl(isStart, MavenOutputEvent.TYPE.START_STOP));
     }
 
     @Override
