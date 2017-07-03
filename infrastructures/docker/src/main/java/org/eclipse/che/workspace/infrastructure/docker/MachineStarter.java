@@ -511,7 +511,7 @@ public class MachineStarter {
                                                       .withFilters(new Filters().withFilter("reference", imageName)))
                           .isEmpty();
         } catch (IOException e) {
-            LOG.warn("Failed to check image {} availability. Cause: {}", imageName, e.getMessage(), e);
+            LOG.warn("Failed to check image {} availability. Cause: {}", imageName, e.getMessage());
             return false; // consider that image doesn't exist locally
         }
     }

@@ -24,8 +24,10 @@ import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEvent
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
@@ -55,13 +57,19 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     private final MachineImpl             machine;
     private final CommandExecutor         commandExecutor;
     private final ExecAgentCommandManager execAgentCommandManager;
-    private final List<ActionDelegate> actionDelegates = new ArrayList<>();
-    private int     pid;
-    private boolean finished;
+
+    private int            pid;
+    private boolean        finished;
+
     /** Wrap text or not */
-    private boolean wrapText     = false;
+    private boolean wrapText = false;
+
     /** Follow output when printing text */
     private boolean followOutput = true;
+
+    private final List<ActionDelegate> actionDelegates = new ArrayList<>();
+
+    private OutputCustomizer outputCustomizer = null;
 
     @Inject
     public CommandOutputConsolePresenter(final OutputConsoleView view,
@@ -71,7 +79,9 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                                          EventBus eventBus,
                                          ExecAgentCommandManager execAgentCommandManager,
                                          @Assisted CommandImpl command,
-                                         @Assisted MachineImpl machine) {
+                                         @Assisted MachineImpl machine,
+                                         AppContext appContext,
+                                         EditorAgent editorAgent) {
         this.view = view;
         this.resources = resources;
         this.execAgentCommandManager = execAgentCommandManager;
@@ -80,6 +90,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         this.eventBus = eventBus;
         this.commandExecutor = commandExecutor;
 
+        setCustomizer(new DefaultOutputCustomizer(appContext, editorAgent));
         view.setDelegate(this);
 
         final String previewUrl = command.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
@@ -264,10 +275,20 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     /**
      * Returns the console text.
      *
-     * @return console text
+     * @return
+     *          console text
      */
     public String getText() {
         return view.getText();
     }
 
+    @Override
+    public OutputCustomizer getCustomizer() {
+        return outputCustomizer;
+    }
+
+    /** Sets up the text output customizer */
+    public void setCustomizer(OutputCustomizer customizer) {
+        this.outputCustomizer = customizer;
+    }
 }
