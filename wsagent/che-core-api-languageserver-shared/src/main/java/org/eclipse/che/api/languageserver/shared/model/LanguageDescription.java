@@ -11,6 +11,8 @@
 package org.eclipse.che.api.languageserver.shared.model;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,12 +31,12 @@ public class LanguageDescription {
     /**
      * The fileExtension this language is associated with. 
      */
-    private List<String> fileExtensions;
+    private List<String> fileExtensions= Collections.emptyList();
     
     /**
      * The file names this language is associated with. 
      */
-    private List<String> fileNames;
+    private List<String> fileNames= Collections.emptyList();
 
     /**
      * The optional highlighting configuration to support client side syntax highlighting.
@@ -62,16 +64,22 @@ public class LanguageDescription {
         return this.fileExtensions;
     }
 
+    /**
+     * @param fileExtensions must not be null
+     */
     public void setFileExtensions(final List<String> fileExtensions) {
-        this.fileExtensions = fileExtensions;
+        this.fileExtensions = new ArrayList<>(fileExtensions);
     }
     
     public List<String> getFileNames() {
         return fileNames;
     }
     
+    /**
+     * @param fileNames must not be null
+     */
     public void setFileNames(List<String> fileNames) {
-        this.fileNames = fileNames;
+        this.fileNames = new ArrayList<>(fileNames);
     }
 
     public String getHighlightingConfiguration() {

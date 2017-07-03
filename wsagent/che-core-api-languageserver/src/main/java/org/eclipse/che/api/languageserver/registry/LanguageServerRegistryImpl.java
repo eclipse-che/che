@@ -82,25 +82,11 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     }
 
     private boolean matchesExtensions(LanguageDescription language, String path) {
-        if (language.getFileExtensions() != null) {
-            for (String extension : language.getFileExtensions()) {
-                if (path.endsWith(extension)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return language.getFileExtensions().stream().anyMatch(extension->path.endsWith(extension));
     }
 
     private boolean matchesFilenames(LanguageDescription language, String path) {
-        if (language.getFileNames() != null) {
-            for (String name : language.getFileNames()) {
-                if (name.equals(new File(path).getName())) {
-                    return true;
-                }
-            } 
-        }
-        return false;
+        return language.getFileNames().stream().anyMatch(name->path.endsWith(name));
     }
 
     @Nullable

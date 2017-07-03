@@ -88,25 +88,22 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                 if (!langs.isEmpty()) {
                     JsArrayString contentTypes = JsArrayString.createArray().cast();
                     for (LanguageDescription lang : langs) {
-                        if (lang.getFileExtensions() != null) {
-                            for (String ext : lang.getFileExtensions()) {
-                                final FileType fileType = new FileType(resources.file(), ext);
-                                lsRegistry.registerFileType(fileType, lang);
-                                editorRegistry.registerDefaultEditor(fileType, editorProvider);
-                            }
+                        for (String ext : lang.getFileExtensions()) {
+                            final FileType fileType = new FileType(resources.file(), ext);
+                            lsRegistry.registerFileType(fileType, lang);
+                            editorRegistry.registerDefaultEditor(fileType, editorProvider);
                         }
-                        if (lang.getFileNames() != null) {
-                            for (String fileName : lang.getFileNames()) {
-                                final FileType fileType = new FileType(resources.file(), null, RegExp.quote(fileName));
-                                lsRegistry.registerFileType(fileType, lang);
-                                editorRegistry.registerDefaultEditor(fileType, editorProvider);
-                            }
+                        for (String fileName : lang.getFileNames()) {
+                            final FileType fileType = new FileType(resources.file(), null, RegExp.quote(fileName));
+                            lsRegistry.registerFileType(fileType, lang);
+                            editorRegistry.registerDefaultEditor(fileType, editorProvider);
                         }
                         String mimeType = lang.getMimeType();
                         contentTypes.push(mimeType);
                         OrionContentTypeOverlay contentType = OrionContentTypeOverlay.create();
                         contentType.setId(mimeType);
                         contentType.setName(lang.getLanguageId());
+                        contentType.setFileName(lang.getFileNames().toArray(new String[lang.getFileNames().size()]));
                         contentType.setExtension(lang.getFileExtensions().toArray(new String[lang.getFileExtensions().size()]));
                         contentType.setExtends("text/plain");
 
