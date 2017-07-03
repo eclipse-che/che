@@ -50,8 +50,8 @@ public class ServersReadinessChecker {
     private final ServerCheckerFactory    serverCheckerFactory;
     private final Timer                   timer;
 
-    private long                    resultTimeoutSeconds;
-    private CompletableFuture<Void> result;
+    private long              resultTimeoutSeconds;
+    private CompletableFuture result;
 
     /**
      * Creates instance of this class.
@@ -84,24 +84,24 @@ public class ServersReadinessChecker {
      */
     public void startAsync() throws InfrastructureException {
         List<ServerChecker> serverCheckers = getServerCheckers();
-        List<CompletableFuture<Void>> completableTasks = new ArrayList<>(serverCheckers.size());
+        // should be completed with an exception if a server considered unavailable
+        CompletableFuture<Void> firstNonAvailable = new CompletableFuture<>();
+        CompletableFuture[] checkTasks = serverCheckers
+                .stream()
+                .map(ServerChecker::getReportCompFuture)
+                .map(compFut -> compFut.thenAccept(serverReadinessHandler)
+                                       .exceptionally(e -> {
+                                           // cleanup checkers tasks
+                                           timer.cancel();
+                                           firstNonAvailable.completeExceptionally(e);
+                                           return null;
+                                       }))
+                .toArray(CompletableFuture[]::new);
+        resultTimeoutSeconds = checkTasks.length * 180;
+        result = CompletableFuture.anyOf(CompletableFuture.allOf(checkTasks), firstNonAvailable);
         for (ServerChecker serverChecker : serverCheckers) {
-            completableTasks.add(serverChecker.getReportCompFuture()
-                                              .thenAccept(serverReadinessHandler));
             serverChecker.start();
         }
-        CompletableFuture[] checkTasks = completableTasks.toArray(new CompletableFuture[completableTasks.size()]);
-        resultTimeoutSeconds = checkTasks.length * 180;
-        result = CompletableFuture.allOf(checkTasks);
-        result.handle((aVoid, throwable) -> {
-            if (throwable != null) {
-                // cleanup checkers tasks
-                LOG.error(throwable.getLocalizedMessage(), throwable);
-                timer.cancel();
-                result.obtrudeException(throwable);
-            }
-            return null;
-        });
     }
 
     /**

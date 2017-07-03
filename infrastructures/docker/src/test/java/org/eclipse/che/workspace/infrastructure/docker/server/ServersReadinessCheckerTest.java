@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -112,9 +113,9 @@ public class ServersReadinessCheckerTest {
 
     @Test(timeOut = 1000)
     public void awaitShouldReturnOnFirstUnavailability() throws Exception {
-        CompletableFuture<String> future1 = new CompletableFuture<>();
-        CompletableFuture<String> future2 = new CompletableFuture<>();
-        CompletableFuture<String> future3 = new CompletableFuture<>();
+        CompletableFuture<String> future1 = spy(new CompletableFuture<>());
+        CompletableFuture<String> future2 = spy(new CompletableFuture<>());
+        CompletableFuture<String> future3 = spy(new CompletableFuture<>());
         when(connectionChecker.getReportCompFuture()).thenReturn(future1)
                                                      .thenReturn(future2)
                                                      .thenReturn(future3);
