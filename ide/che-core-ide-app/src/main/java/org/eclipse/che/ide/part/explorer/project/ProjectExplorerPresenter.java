@@ -30,7 +30,6 @@ import org.eclipse.che.ide.api.data.tree.TreeExpander;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 import org.eclipse.che.ide.api.extension.ExtensionsInitializedEvent;
-import org.eclipse.che.ide.api.extension.ExtensionsInitializedEvent.ExtensionsInitializedHandler;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackType;
@@ -54,12 +53,6 @@ import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.Tree;
-import org.eclipse.che.ide.ui.smartTree.event.BeforeExpandNodeEvent;
-import org.eclipse.che.ide.ui.smartTree.event.CollapseNodeEvent;
-import org.eclipse.che.ide.ui.smartTree.event.ExpandNodeEvent;
-import org.eclipse.che.ide.ui.smartTree.event.PostLoadEvent;
-import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
-import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -96,6 +89,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     private final CoreLocalizationConstant locale;
     private final Resources                resources;
     private final TreeExpander             treeExpander;
+    private final AppContext               appContext;
     private final RequestTransmitter       requestTransmitter;
     private final DtoFactory               dtoFactory;
     private UpdateTask updateTask  = new UpdateTask();
@@ -103,22 +97,23 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     private boolean hiddenFilesAreShown;
 
     @Inject
-    public ProjectExplorerPresenter(final ProjectExplorerView view,
-                                    final EventBus eventBus,
-                                    final CoreLocalizationConstant locale,
-                                    final Resources resources,
-                                    final ResourceNode.NodeFactory nodeFactory,
-                                    final SettingsProvider settingsProvider,
-                                    final AppContext appContext,
-                                    final Provider<WorkspaceAgent> workspaceAgentProvider,
-                                    final RequestTransmitter requestTransmitter,
-                                    final DtoFactory dtoFactory) {
+    public ProjectExplorerPresenter(ProjectExplorerView view,
+                                    EventBus eventBus,
+                                    CoreLocalizationConstant locale,
+                                    Resources resources,
+                                    ResourceNode.NodeFactory nodeFactory,
+                                    SettingsProvider settingsProvider,
+                                    AppContext appContext,
+                                    Provider<WorkspaceAgent> workspaceAgentProvider,
+                                    RequestTransmitter requestTransmitter,
+                                    DtoFactory dtoFactory) {
         this.view = view;
         this.eventBus = eventBus;
         this.nodeFactory = nodeFactory;
         this.settingsProvider = settingsProvider;
         this.locale = locale;
         this.resources = resources;
+        this.appContext = appContext;
         this.requestTransmitter = requestTransmitter;
         this.dtoFactory = dtoFactory;
         this.view.setDelegate(this);
@@ -126,40 +121,22 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
         eventBus.addHandler(MarkerChangedEvent.getType(), this);
         eventBus.addHandler(SyntheticNodeUpdateEvent.getType(), this);
-        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, new WorkspaceStoppedEvent.Handler() {
-            @Override
-            public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-                getTree().getNodeStorage().clear();
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> getTree().getNodeStorage().clear());
+
+        view.getTree().getSelectionModel().addSelectionChangedHandler(event -> setSelection(new Selection<>(event.getSelection())));
+
+        view.getTree().addBeforeExpandHandler(event -> {
+            NodeDescriptor nodeDescriptor = view.getTree().getNodeDescriptor(event.getNode());
+
+            if (event.getNode() instanceof SyntheticNode && nodeDescriptor != null && nodeDescriptor.isExpandDeep()) {
+                event.setCancelled(true);
             }
         });
 
-        view.getTree().getSelectionModel().addSelectionChangedHandler(new SelectionChangedHandler() {
-            @Override
-            public void onSelectionChanged(SelectionChangedEvent event) {
-                setSelection(new Selection<>(event.getSelection()));
-            }
-        });
-
-        view.getTree().addBeforeExpandHandler(new BeforeExpandNodeEvent.BeforeExpandNodeHandler() {
-            @Override
-            public void onBeforeExpand(BeforeExpandNodeEvent event) {
-                final NodeDescriptor nodeDescriptor = view.getTree().getNodeDescriptor(event.getNode());
-
-                if (event.getNode() instanceof SyntheticNode && nodeDescriptor != null && nodeDescriptor.isExpandDeep()) {
-                    event.setCancelled(true);
-                }
-            }
-        });
-
-        view.getTree().getNodeLoader().addPostLoadHandler(new PostLoadEvent.PostLoadHandler() {
-            @Override
-            public void onPostLoad(PostLoadEvent event) {
-                for (Node node : event.getReceivedNodes()) {
-
-                    if (node instanceof ResourceNode && expandQueue.remove(((ResourceNode)node).getData().getLocation())) {
-                        view.getTree().setExpanded(node, true);
-                    }
-
+        view.getTree().getNodeLoader().addPostLoadHandler(event -> {
+            for (Node node : event.getReceivedNodes()) {
+                if (node instanceof ResourceNode && expandQueue.remove(((ResourceNode)node).getData().getLocation())) {
+                    view.getTree().setExpanded(node, true);
                 }
             }
         });
@@ -169,21 +146,13 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         registerNative();
 
         // when ide has already initialized, then we force set focus to the current part
-        eventBus.addHandler(ExtensionsInitializedEvent.getType(), new ExtensionsInitializedHandler() {
-            @Override
-            public void onExtensionsInitialized(ExtensionsInitializedEvent event) {
-                partStack.setActivePart(ProjectExplorerPresenter.this);
-            }
-        });
+        eventBus.addHandler(ExtensionsInitializedEvent.getType(), event -> partStack.setActivePart(ProjectExplorerPresenter.this));
 
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                final PartStack partStack = checkNotNull(workspaceAgentProvider.get().getPartStack(PartStackType.NAVIGATION),
-                                                         "Navigation part stack should not be a null");
-                partStack.addPart(ProjectExplorerPresenter.this);
-                partStack.setActivePart(ProjectExplorerPresenter.this);
-            }
+        Scheduler.get().scheduleDeferred(() -> {
+            PartStack partStack = checkNotNull(workspaceAgentProvider.get().getPartStack(PartStackType.NAVIGATION),
+                                               "Navigation part stack should not be a null");
+            partStack.addPart(ProjectExplorerPresenter.this);
+            partStack.setActivePart(ProjectExplorerPresenter.this);
         });
     }
 
@@ -192,41 +161,35 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         final String endpointId = "ws-agent";
         final String method = "track:project-tree";
 
-        getTree().addExpandHandler(new ExpandNodeEvent.ExpandNodeHandler() {
-            @Override
-            public void onExpand(ExpandNodeEvent event) {
-                Node node = event.getNode();
+        getTree().addExpandHandler(event -> {
+            Node node = event.getNode();
 
-                if (node instanceof ResourceNode) {
-                    Resource data = ((ResourceNode)node).getData();
-                    requestTransmitter.newRequest()
-                                      .endpointId(endpointId)
-                                      .methodName(method)
-                                      .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
-                                                             .withPath(data.getLocation().toString())
-                                                             .withType(START))
-                                      .sendAndSkipResult();
+            if (node instanceof ResourceNode) {
+                Resource data = ((ResourceNode)node).getData();
+                requestTransmitter.newRequest()
+                                  .endpointId(endpointId)
+                                  .methodName(method)
+                                  .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
+                                                         .withPath(data.getLocation().toString())
+                                                         .withType(START))
+                                  .sendAndSkipResult();
 
-                }
             }
         });
 
-        getTree().addCollapseHandler(new CollapseNodeEvent.CollapseNodeHandler() {
-            @Override
-            public void onCollapse(CollapseNodeEvent event) {
-                Node node = event.getNode();
+        getTree().addCollapseHandler(event -> {
+            Node node = event.getNode();
 
-                if (node instanceof ResourceNode) {
-                    Resource data = ((ResourceNode)node).getData();
-                    requestTransmitter.newRequest()
-                                      .endpointId(endpointId)
-                                      .methodName(method)
-                                      .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
-                                                             .withPath(data.getLocation().toString())
-                                                             .withType(STOP))
-                                      .sendAndSkipResult();
+            if (node instanceof ResourceNode) {
+                Resource data = ((ResourceNode)node).getData();
+                requestTransmitter.newRequest()
+                                  .endpointId(endpointId)
+                                  .methodName(method)
+                                  .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
+                                                         .withPath(data.getLocation().toString())
+                                                         .withType(STOP))
+                                  .sendAndSkipResult();
 
-                }
             }
         });
     }
@@ -247,7 +210,11 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
         ProjectExplorer.reveal = $entry(function (path) {
             that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doReveal(*)(path);
-        })
+        });
+
+        ProjectExplorer.refresh = $entry(function () {
+            that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doRefresh()();
+        });
 
         $wnd.IDE.ProjectExplorer = ProjectExplorer;
     }-*/;
@@ -266,6 +233,10 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
     private void doReveal(String path) {
         eventBus.fireEvent(new RevealResourceEvent(Path.valueOf(path)));
+    }
+
+    private void doRefresh() {
+        appContext.getWorkspaceRoot().synchronize();
     }
 
     @Override
