@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.String.format;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
@@ -98,8 +99,8 @@ public class ServerCheckerTest {
             fail();
         } catch (ExecutionException e) {
             assertTrue(e.getCause() instanceof InfrastructureException);
-            assertEquals(e.getCause().getMessage(), "Server " + SERVER_REF +
-                                                    " in machine " + MACHINE_NAME + " not available.");
+            assertEquals(e.getCause().getMessage(),
+                         format("Server '%s' in machine '%s' not available.", SERVER_REF, MACHINE_NAME));
         }
     }
 
