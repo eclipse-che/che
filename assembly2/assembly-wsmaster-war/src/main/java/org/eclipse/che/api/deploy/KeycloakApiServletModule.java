@@ -8,20 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.wsagent.server;
+package org.eclipse.che.api.deploy;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.servlet.ServletModule;
 
-import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.keycloak.server.deploy.KeycloakServletModule;
 
 /**
- *
+ * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */
 @DynaModule
-public class WsAgentKeycloakModule extends AbstractModule {
+public class KeycloakApiServletModule extends ServletModule {
     @Override
-    protected void configure() {
-        bind(HttpJsonRequestFactory.class).to(AgentKeycloakHttpJsonRequestFactory.class);
+    protected void configureServlets() {
+        install(new KeycloakServletModule());
     }
 }

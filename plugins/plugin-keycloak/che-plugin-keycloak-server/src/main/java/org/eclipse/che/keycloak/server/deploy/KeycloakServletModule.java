@@ -12,14 +12,12 @@ package org.eclipse.che.keycloak.server.deploy;
 
 import com.google.inject.servlet.ServletModule;
 
-import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.keycloak.server.KeycloakAuthenticationFilter;
 import org.eclipse.che.keycloak.server.KeycloakEnvironmentInitalizationFilter;
 
 import javax.inject.Singleton;
 
 
-@DynaModule
 public class KeycloakServletModule extends ServletModule {
     @Override
     protected void configureServlets() {

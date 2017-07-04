@@ -14,11 +14,9 @@ import com.google.inject.AbstractModule;
 
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.user.server.TokenValidator;
-import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.keycloak.server.KeycloakTokenValidator;
 
 
-@DynaModule
 public class KeycloakModule extends AbstractModule {
     @Override
     protected void configure() {

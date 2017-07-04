@@ -72,7 +72,10 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
         KeycloakSecurityContext  context = (KeycloakSecurityContext)httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
         // In case of bearer token login, there is another object in session
         if (context == null) {
-            context = ((OidcKeycloakAccount)httpRequest.getAttribute(KeycloakAccount.class.getName())).getKeycloakSecurityContext();
+            OidcKeycloakAccount keycloakAccount = (OidcKeycloakAccount)httpRequest.getAttribute(KeycloakAccount.class.getName());
+            if (keycloakAccount != null) {
+                context = keycloakAccount.getKeycloakSecurityContext();
+            }
         }
         if (context == null) {
             throw new ServletException("Unable to get security context.");
@@ -106,10 +109,10 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
                                                       emptyList());
                 return userManager.create(cheUser, false);
             } catch (ServerException | ConflictException e) {
-                throw new ServletException("Unable to create new user");
+                throw new ServletException("Unable to create new user", e);
             }
         } catch (ServerException e) {
-            throw new ServletException("Unable to get user");
+            throw new ServletException("Unable to get user", e);
         }
 
     }
@@ -123,10 +126,10 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
                 accountManager.create(account);
                 return  account;
             } catch (ServerException | ConflictException ex) {
-                throw new ServletException("Unable to create new account");
+                throw new ServletException("Unable to create new account", e);
             }
         } catch (ServerException e) {
-            throw new ServletException("Unable to get account");
+            throw new ServletException("Unable to get account", e);
         }
 
     }
