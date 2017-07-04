@@ -116,7 +116,7 @@ public class TraefikCreateContainerInterceptorTest {
         when(imageInfoConfig.getExposedPorts()).thenReturn(imageExposedPorts);
 
 
-        envContainerConfig = new String[]{"CHE_WORKSPACE_ID=work123", "CHE_MACHINE_NAME=abcd"};
+        envContainerConfig = new String[]{"CHE_WORKSPACE_ID=work123", "CHE_MACHINE_NAME=abcd", "CHE_IS_DEV_MACHINE=true"};
         envImageConfig = new String[]{"HELLO"};
         when(containerConfig.getEnv()).thenReturn(envContainerConfig);
         when(imageInfoConfig.getEnv()).thenReturn(envImageConfig);

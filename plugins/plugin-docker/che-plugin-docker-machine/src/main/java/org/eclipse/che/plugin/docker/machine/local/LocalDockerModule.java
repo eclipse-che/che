@@ -23,6 +23,7 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.machine.DockerInstance;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 import org.eclipse.che.plugin.docker.machine.DockerProcess;
+import org.eclipse.che.plugin.docker.machine.LocalDockerCustomServerEvaluationStrategy;
 import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.eclipse.che.plugin.openshift.client.OpenShiftConnector;
@@ -56,6 +57,8 @@ public class LocalDockerModule extends AbstractModule {
                   .to(org.eclipse.che.plugin.docker.machine.DefaultServerEvaluationStrategy.class);
         strategies.addBinding("docker-local")
                   .to(org.eclipse.che.plugin.docker.machine.LocalDockerServerEvaluationStrategy.class);
+        strategies.addBinding("docker-local-custom")
+                  .to(LocalDockerCustomServerEvaluationStrategy.class);
         strategies.addBinding("custom")
                   .to(org.eclipse.che.plugin.docker.machine.CustomServerEvaluationStrategy.class);
 
