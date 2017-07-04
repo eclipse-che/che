@@ -24,6 +24,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.BootstrapperStatusEvent;
 import org.eclipse.che.commons.lang.TarUtils;
+import org.eclipse.che.workspace.infrastructure.docker.output.OutputEndpoint;
 import org.eclipse.che.workspace.infrastructure.docker.server.InstallerEndpoint;
 
 import javax.inject.Inject;
@@ -63,6 +64,7 @@ public class Bootstrapper {
     private final int                                        bootstrappingTimeoutMinutes;
     private final int                                        serverCheckPeriodSeconds;
     private final int                                        installerTimeoutSeconds;
+    private final String                                     outputEndpoint;
     private final String                                     installerEndpoint;
     private final EventService                               eventService;
     private final EventSubscriber<BootstrapperStatusEvent>   bootstrapperStatusListener;
@@ -83,6 +85,7 @@ public class Bootstrapper {
         this.dockerMachine = dockerMachine;
         this.agents = agents;
         this.installerEndpoint = websocketBaseEndpoint + InstallerEndpoint.INSTALLER_WEBSOCKET_ENDPOINT_BASE;
+        this.outputEndpoint = websocketBaseEndpoint + OutputEndpoint.OUTPUT_WEBSOCKET_ENDPOINT_BASE;
         this.bootstrappingTimeoutMinutes = bootstrappingTimeoutMinutes;
         this.serverCheckPeriodSeconds = serverCheckPeriodSeconds;
         this.installerTimeoutSeconds = installerTimeoutSeconds;
@@ -124,14 +127,13 @@ public class Bootstrapper {
 
         this.eventService.subscribe(bootstrapperStatusListener, BootstrapperStatusEvent.class);
         try {
-            String endpoint = installerEndpoint + ENDPOINT_IDS.getAndIncrement();
             dockerMachine.exec(BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE +
                                " -machine-name " + machineName +
                                " -runtime-id " + String.format("%s:%s:%s", runtimeIdentity.getWorkspaceId(),
                                                                runtimeIdentity.getEnvName(),
                                                                runtimeIdentity.getOwner()) +
-                               " -push-endpoint " + endpoint +
-                               " -push-logs-endpoint " + endpoint +
+                               " -push-endpoint " + installerEndpoint + ENDPOINT_IDS.getAndIncrement() +
+                               " -push-logs-endpoint " + outputEndpoint + ENDPOINT_IDS.getAndIncrement() +
                                " -server-check-period " + serverCheckPeriodSeconds +
                                " -installer-timeout " + installerTimeoutSeconds +
                                " -file " + BOOTSTRAPPER_DIR + CONFIG_FILE,

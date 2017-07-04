@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.docker.service;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.shared.dto.event.BootstrapperStatusEvent;
-import org.eclipse.che.api.workspace.shared.dto.event.InstallerLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.InstallerStatusEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,13 +54,6 @@ public class InstallerService {
                       .paramsAsDto(InstallerStatusEvent.class)
                       .noResult()
                       .withConsumer(this::handleInstallerStatus);
-
-        requestHandler.newConfiguration()
-                      .methodName("installer/log")
-                      .paramsAsDto(InstallerLogEvent.class)
-                      .noResult()
-                      .withConsumer(this::handleInstallerLog);
-
     }
 
     private void handleInstallerStatus(InstallerStatusEvent installerStatusEvent) {
@@ -74,8 +66,4 @@ public class InstallerService {
         eventService.publish(bootstrapperStatusEvent);
     }
 
-    private void handleInstallerLog(InstallerLogEvent installerLogEvent) {
-        //TODO: spi actions here
-        eventService.publish(installerLogEvent);
-    }
 }
