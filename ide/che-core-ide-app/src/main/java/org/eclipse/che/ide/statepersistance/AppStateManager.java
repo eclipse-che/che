@@ -16,7 +16,7 @@ import elemental.json.JsonFactory;
 import elemental.json.JsonObject;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -31,9 +31,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.event.WindowActionHandler;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.Map;
@@ -70,16 +69,8 @@ public class AppStateManager {
         this.jsonFactory = jsonFactory;
         this.appContext = appContext;
 
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
-                Scheduler.get().scheduleDeferred(AppStateManager.this::restoreWorkspaceState);
-            }
-
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-            }
-        });
+        // delay is required because we need to wait some time while different components initialized
+        eventBus.addHandler(WorkspaceReadyEvent.getType(), e -> restoreWorkspaceStateWithDelay());
 
         eventBus.addHandler(WindowActionEvent.TYPE, new WindowActionHandler() {
             @Override
@@ -117,6 +108,15 @@ public class AppStateManager {
         if (allWsState.hasKey(wsId)) {
             restoreState(allWsState.getObject(wsId));
         }
+    }
+
+    private void restoreWorkspaceStateWithDelay() {
+        new Timer() {
+            @Override
+            public void run() {
+                restoreWorkspaceState();
+            }
+        }.schedule(1000);
     }
 
     private void restoreState(JsonObject settings) {

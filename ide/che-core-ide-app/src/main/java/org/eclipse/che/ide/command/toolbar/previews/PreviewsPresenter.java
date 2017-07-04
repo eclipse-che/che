@@ -26,11 +26,11 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.mvp.Presenter;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 
 /** Drives the UI for displaying preview URLs of the running processes. */
@@ -64,20 +64,10 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
 
         view.setDelegate(this);
 
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
-                updateView();
-            }
-
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-                view.removeAllURLs();
-            }
-        });
-
         eventBus.addHandler(ProcessStartedEvent.TYPE, event -> updateView());
         eventBus.addHandler(ProcessFinishedEvent.TYPE, event -> updateView());
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> updateView());
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> updateView());
     }
 
     /** Updates view with the preview URLs of running processes. */

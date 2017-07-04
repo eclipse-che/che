@@ -257,7 +257,7 @@ public class CommandManagerImpl implements CommandManager {
 
         if (context.isWorkspaceApplicable()) {
             Promise<CommandImpl> p = workspaceCommandManager.createCommand(newCommand)
-                                                            .then((Function<CommandImpl, CommandImpl>)arg -> {
+                                                            .then((Function<Void, CommandImpl>)aVoid -> {
                                                                 newCommand.getApplicableContext().setWorkspaceApplicable(true);
                                                                 return newCommand;
                                                             });

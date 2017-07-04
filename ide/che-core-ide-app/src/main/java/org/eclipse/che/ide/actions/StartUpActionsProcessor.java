@@ -18,13 +18,13 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.StartUpAction;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.machine.events.WsAgentServerRunningEvent;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 
 import java.util.List;
 
 /**
- * Will process all start-up actions that comes from
+ * Will process all start-up actions which come from
  * {@link AppContext#getStartAppActions()} after starting ws-agent.
  *
  * @author Vitalii Parfonov
@@ -40,29 +40,25 @@ public class StartUpActionsProcessor {
         this.appContext = appContext;
         this.actionManager = actionManager;
 
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
-                new Timer() {
-                    @Override
-                    public void run() {
-                        processActions();
-                    }
-                }.schedule(1000);
-            }
-
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-            }
-        });
+        // delay is required because we need to wait some time while different components initialized
+        eventBus.addHandler(WsAgentServerRunningEvent.TYPE, e -> performActionsWithDelay());
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> performActionsWithDelay());
     }
 
-    private void processActions() {
-        final List<StartUpAction> startAppActions = appContext.getStartAppActions();
-        if (startAppActions != null && !startAppActions.isEmpty()) {
-            for (StartUpAction action : startAppActions) {
-                actionManager.performAction(action.getActionId(), action.getParameters());
+    private void performActionsWithDelay() {
+        new Timer() {
+            @Override
+            public void run() {
+                performActions();
             }
+        }.schedule(1000);
+    }
+
+    private void performActions() {
+        List<StartUpAction> startAppActions = appContext.getStartAppActions();
+
+        for (StartUpAction action : startAppActions) {
+            actionManager.performAction(action.getActionId(), action.getParameters());
         }
     }
 }

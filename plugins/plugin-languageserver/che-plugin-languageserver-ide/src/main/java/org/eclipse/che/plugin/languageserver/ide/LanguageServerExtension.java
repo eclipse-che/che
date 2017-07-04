@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -26,8 +25,7 @@ import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.machine.events.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.browser.UserAgent;
@@ -58,19 +56,9 @@ public class LanguageServerExtension {
     public LanguageServerExtension(LanguageServerFileTypeRegister languageServerFileTypeRegister,
                                    EventBus eventBus,
                                    AppContext appContext) {
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
-                languageServerFileTypeRegister.start();
-            }
+        eventBus.addHandler(WsAgentServerRunningEvent.TYPE, e -> languageServerFileTypeRegister.start());
 
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-            }
-        });
-
-        final Workspace workspace = appContext.getWorkspace();
-        if (workspace != null && workspace.getStatus() == RUNNING) {
+        if (appContext.getWorkspace().getStatus() == RUNNING) {
             languageServerFileTypeRegister.start();
         }
     }

@@ -229,15 +229,13 @@ public class WorkspaceServiceClient {
      *         workspace ID
      * @param commandName
      *         the name of the command to remove
-     * @return a promise that resolves to the {@link WorkspaceImpl}, or rejects with an error
+     * @return a promise that will resolve when the command has been stopped, or rejects with an error
      */
-    public Promise<WorkspaceImpl> deleteCommand(final String wsId, final String commandName) {
+    public Promise<Void> deleteCommand(final String wsId, final String commandName) {
         final String url = baseHttpUrl + '/' + wsId + "/command/" + URL.encodePathSegment(commandName);
         return asyncRequestFactory.createDeleteRequest(url)
-                                  .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Deleting command..."))
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class))
-                                  .then((Function<WorkspaceDto, WorkspaceImpl>)WorkspaceImpl::new);
+                                  .send();
     }
 
     /**
