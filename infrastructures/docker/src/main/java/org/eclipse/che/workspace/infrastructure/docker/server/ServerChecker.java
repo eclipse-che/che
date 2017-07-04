@@ -103,12 +103,10 @@ public abstract class ServerChecker {
     private class ServerCheckingTask extends TimerTask {
         @Override
         public void run() {
-            LOG.info("Check server {} of machine {} at {}", serverRef, machineName, System.currentTimeMillis());
             if (isTimedOut()) {
                 reportFuture.completeExceptionally(new InfrastructureException(
-                        "Server " + serverRef + " in machine " + machineName + " not available."));
+                        String.format("Server '%s' in machine '%s' not available.", serverRef, machineName)));
             } else if (isAvailable()) {
-                LOG.info("Server {} of machine {} started", serverRef, machineName);
                 reportFuture.complete(serverRef);
             } else {
                 timer.schedule(new ServerCheckingTask(), period);

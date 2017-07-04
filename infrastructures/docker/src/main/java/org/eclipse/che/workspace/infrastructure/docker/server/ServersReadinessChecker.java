@@ -15,7 +15,6 @@ import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.slf4j.Logger;
 
 import javax.ws.rs.core.UriBuilder;
 import java.net.MalformedURLException;
@@ -30,20 +29,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 /**
  * Checks readiness of servers of a machine.
  *
  * @author Alexander Garagatyi
  */
 public class ServersReadinessChecker {
-    private static final Logger              LOG                 = getLogger(ServersReadinessChecker.class);
     // workaround to set correct paths for servers readiness checks
     // TODO replace with checks set in server config
-    private static       Map<String, String> livenessChecksPaths = ImmutableMap.of("wsagent", "/api/",
-                                                                                   "exec-agent", "/process",
-                                                                                   "terminal", "/");
+    private final static Map<String, String> LIVENESS_CHECKS_PATHS = ImmutableMap.of("wsagent", "/api/",
+                                                                                     "exec-agent", "/process",
+                                                                                     "terminal", "/");
     private final String                  machineName;
     private final Map<String, ServerImpl> servers;
     private final Consumer<String>        serverReadinessHandler;
@@ -145,11 +141,10 @@ public class ServersReadinessChecker {
         for (Map.Entry<String, ServerImpl> serverEntry : servers.entrySet()) {
             // TODO replace with correct behaviour
             // workaround needed because we don't have server readiness check in the model
-            if (!livenessChecksPaths.containsKey(serverEntry.getKey())) {
-                continue;
+            if (LIVENESS_CHECKS_PATHS.containsKey(serverEntry.getKey())) {
+                checkers.add(getChecker(serverEntry.getKey(),
+                                        serverEntry.getValue()));
             }
-            checkers.add(getChecker(serverEntry.getKey(),
-                                    serverEntry.getValue()));
         }
         return checkers;
     }
@@ -157,7 +152,7 @@ public class ServersReadinessChecker {
     private ServerChecker getChecker(String serverRef, ServerImpl server) throws InfrastructureException {
         // TODO replace with correct behaviour
         // workaround needed because we don't have server readiness check in the model
-        String livenessCheckPath = livenessChecksPaths.get(serverRef);
+        String livenessCheckPath = LIVENESS_CHECKS_PATHS.get(serverRef);
         // Create server readiness endpoint URL
         URL url;
         try {
