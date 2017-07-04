@@ -147,9 +147,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                 startQueue.poll();
                 machineName = startQueue.peek();
             }
-
-        } catch (InfrastructureException | RuntimeException e) {
-            boolean interrupted = Thread.interrupted();
+        } catch (InfrastructureException | InterruptedException | RuntimeException e) {
+            boolean interrupted = e instanceof InterruptedException || Thread.interrupted();
             contextsStorage.remove((DockerRuntimeContext)getContext());
             boolean runtimeDestroyingNeeded = !startSynchronizer.isStopCalled();
             if (runtimeDestroyingNeeded) {
@@ -163,7 +162,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                 throw new InfrastructureException("Docker runtime start was interrupted");
             }
             if (e instanceof InfrastructureException) {
-                throw e;
+                throw (InfrastructureException)e;
             } else {
                 throw new InternalInfrastructureException(e.getLocalizedMessage(), e);
             }
@@ -193,7 +192,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         return Collections.unmodifiableMap(properties);
     }
 
-    private void restoreMachine(String name, DockerContainerConfig originalConfig) throws InfrastructureException {
+    private void restoreMachine(String name, DockerContainerConfig originalConfig)
+            throws InfrastructureException, InterruptedException {
         try {
             SnapshotImpl snapshot = snapshotDao.getSnapshot(identity.getWorkspaceId(), identity.getEnvName(), name);
             startMachine(name, configForSnapshot(snapshot, originalConfig));
@@ -208,7 +208,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         }
     }
 
-    private void startMachine(String name, DockerContainerConfig containerConfig) throws InfrastructureException {
+    private void startMachine(String name, DockerContainerConfig containerConfig)
+            throws InfrastructureException, InterruptedException {
         InternalMachineConfig machineCfg = getContext().getMachineConfigs().get(name);
 
         Map<String, String> labels = new HashMap<>(containerConfig.getLabels());
@@ -437,7 +438,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                 this.machines = null;
                 return machines;
             }
-            throw new InfrastructureException("");
+            throw new InfrastructureException("Runtime doesn't have machines to remove");
         }
 
         public synchronized void setStartThread() throws InternalInfrastructureException {

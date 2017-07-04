@@ -115,13 +115,10 @@ public class ServersReadinessChecker {
      * @throws InfrastructureException
      *         if check of a server failed due to an error
      */
-    public void await() throws InfrastructureException {
+    public void await() throws InfrastructureException, InterruptedException {
         try {
             // TODO how much time should we check?
             result.get(resultTimeoutSeconds, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new InfrastructureException("Machine " + machineName + " start is interrupted");
         } catch (TimeoutException e) {
             throw new InfrastructureException("Servers readiness check of machine " + machineName + " timed out");
         } catch (ExecutionException e) {
