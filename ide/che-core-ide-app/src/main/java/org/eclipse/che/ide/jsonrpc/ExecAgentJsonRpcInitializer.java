@@ -94,7 +94,8 @@ public class ExecAgentJsonRpcInitializer {
 
             execAgentServer.ifPresent(server -> {
                 String execAgentServerURL = server.getUrl();
-                execAgentServerURL = execAgentServerURL.replaceFirst("http", "ws") + "/connect"; // FIXME: spi ide
+                // TODO (spi ide): remove path when it comes with URL
+                execAgentServerURL = execAgentServerURL.replaceFirst("http", "ws") + "/connect";
 
                 initializer.initialize(machine.getName(), singletonMap("url", execAgentServerURL));
             });

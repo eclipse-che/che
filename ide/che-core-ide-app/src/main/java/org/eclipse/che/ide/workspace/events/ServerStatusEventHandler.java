@@ -29,7 +29,6 @@ import org.eclipse.che.ide.api.machine.events.WsAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
-import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
@@ -90,9 +89,6 @@ class ServerStatusEventHandler {
 
                 if (WSAGENT_REFERENCE.equals(event.getServerName())) {
                     eventBus.fireEvent(new WsAgentServerRunningEvent(event.getMachineName()));
-
-                    // FIXME: spi ide
-                    ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf("/projects"));
 
                     // fire deprecated WsAgentStateEvent for backward compatibility with IDE 5.x
                     eventBus.fireEvent(createWsAgentStartedEvent());

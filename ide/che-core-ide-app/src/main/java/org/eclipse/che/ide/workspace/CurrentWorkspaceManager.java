@@ -21,6 +21,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.SubscriptionManagerClient;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
+import org.eclipse.che.ide.context.AppContextImpl;
+import org.eclipse.che.ide.resource.Path;
 
 import java.util.Map;
 
@@ -50,6 +52,9 @@ public class CurrentWorkspaceManager {
         this.subscriptionManagerClient = subscriptionManagerClient;
 
         eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> handleWorkspaceState());
+
+        // TODO (spi ide): get from CHE_PROJECTS_ROOT environment variable
+        ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf("/projects"));
     }
 
     /** Does an appropriate action depending on the current workspace status. */

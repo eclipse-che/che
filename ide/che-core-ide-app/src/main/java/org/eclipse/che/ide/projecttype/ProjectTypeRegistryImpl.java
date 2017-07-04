@@ -83,8 +83,7 @@ public class ProjectTypeRegistryImpl implements ProjectTypeRegistry {
         fetchProjectTypes().then(typeDescriptors -> {
             typeDescriptors.forEach(projectTypeDto -> projectTypes.put(projectTypeDto.getId(), projectTypeDto));
 
-            // FIXME: spi ide
-            // Temporary solution while a better mechanism of obtaining ProjectTypeRegistry instance with Promises is being considered...
+            // TODO (spi ide): Temporary solution while a better mechanism of obtaining ProjectTypeRegistry instance with Promises is being considered...
             eventBus.fireEvent(new ProjectTypesLoadedEvent());
         }).catchError(error -> {
             Log.error(ProjectTypeRegistryImpl.this.getClass(), "Can't load project types: " + error.getCause());

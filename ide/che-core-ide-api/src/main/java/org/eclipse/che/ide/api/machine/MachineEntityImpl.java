@@ -80,7 +80,6 @@ public class MachineEntityImpl implements MachineEntity {
     @Deprecated
     @Override
     public String getTerminalUrl() {
-        // FIXME: spi ide
         final MachineServer server = getServer(Constants.TERMINAL_REFERENCE);
         if (server != null) {
             return server.getUrl().replaceFirst("http", "ws") + "/pty";
@@ -95,7 +94,6 @@ public class MachineEntityImpl implements MachineEntity {
     @Deprecated
     @Override
     public String getExecAgentUrl() {
-        // FIXME: spi ide
         final MachineServer server = getServer(Constants.EXEC_AGENT_REFERENCE);
         if (server != null) {
             return server.getUrl().replaceFirst("http", "ws") + "/connect";

@@ -23,7 +23,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-// FIXME: spi ide
+// TODO (spi ide): rework according to the new messages format
 @Singleton
 class WorkspaceAgentOutputHandler {
 
