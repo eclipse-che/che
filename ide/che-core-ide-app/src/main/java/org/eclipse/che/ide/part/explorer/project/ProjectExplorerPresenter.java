@@ -96,6 +96,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     private final CoreLocalizationConstant locale;
     private final Resources                resources;
     private final TreeExpander             treeExpander;
+    private final AppContext               appContext;
     private final RequestTransmitter       requestTransmitter;
     private final DtoFactory               dtoFactory;
     private UpdateTask updateTask  = new UpdateTask();
@@ -119,6 +120,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         this.settingsProvider = settingsProvider;
         this.locale = locale;
         this.resources = resources;
+        this.appContext = appContext;
         this.requestTransmitter = requestTransmitter;
         this.dtoFactory = dtoFactory;
         this.view.setDelegate(this);
@@ -247,7 +249,11 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
         ProjectExplorer.reveal = $entry(function (path) {
             that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doReveal(*)(path);
-        })
+        });
+
+        ProjectExplorer.refresh = $entry(function () {
+            that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doRefresh()();
+        });
 
         $wnd.IDE.ProjectExplorer = ProjectExplorer;
     }-*/;
@@ -266,6 +272,10 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
     private void doReveal(String path) {
         eventBus.fireEvent(new RevealResourceEvent(Path.valueOf(path)));
+    }
+
+    private void doRefresh() {
+        appContext.getWorkspaceRoot().synchronize();
     }
 
     @Override
