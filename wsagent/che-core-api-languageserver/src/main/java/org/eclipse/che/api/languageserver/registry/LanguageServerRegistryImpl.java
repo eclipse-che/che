@@ -10,6 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
+import static org.eclipse.che.api.languageserver.shared.ProjectLangugageKey.createProjectKey;
+
+import java.net.URI;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -25,24 +36,11 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageServer;
 
-import java.io.File;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
-import static org.eclipse.che.api.languageserver.shared.ProjectLangugageKey.createProjectKey;
-
 @Singleton
 public class LanguageServerRegistryImpl implements LanguageServerRegistry, ServerInitializerObserver {
     public final static String                        PROJECT_FOLDER_PATH = "/projects";
     private final List<LanguageDescription>           languages;
-    private final Map<String, LanguageServerLauncher> launchers           = new HashMap<>();
+    private final Map<String, LanguageServerLauncher> launchers;
 
     /**
      * Started {@link LanguageServer} by project.
@@ -55,9 +53,9 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     @Inject
     public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerLaunchers, Set<LanguageDescription> languages,
                                       Provider<ProjectManager> projectManagerProvider, ServerInitializer initializer) {
-        this.languages= new ArrayList<>(languages);
-        this.launchers.putAll(languageServerLaunchers.stream()
-                        .collect(Collectors.toMap(LanguageServerLauncher::getLanguageId, launcher -> launcher)));
+        this.launchers=languageServerLaunchers.stream().filter(LanguageServerLauncher::isAbleToLaunch)
+                        .collect(Collectors.toMap(LanguageServerLauncher::getLanguageId, launcher -> launcher));
+        this.languages= languages.stream().filter(l->launchers.containsKey(l.getLanguageId())).collect(Collectors.toList());
         this.projectManagerProvider = projectManagerProvider;
         this.initializer = initializer;
         this.initializer.addObserver(this);
