@@ -1,11 +1,11 @@
 ## Description
 
-The **JSON Example** is a providing a plugin sample which is use as a continuous example in the plugin documentation. You can learn more about it at: https://www.eclipse.org/che/docs/plugins/introduction/index.html#the-json-example
+The **JSON Example** is a providing a plugin sample which is use as a continuous example in the plugin documentation. You can learn more about it at: https://www.eclipse.org/che/docs/assemblies/intro/index.html
 
 This sample demonstrate how to extend the Eclipse Che in various ways:
-- How to register a new file type and add code completion (Read the tutorial at:https://www.eclipse.org/che/docs/plugins/code-editors/index.html#code-completion)  
+- How to register a new file type and add code completion (Read the tutorial at:https://www.eclipse.org/che/docs/assemblies/sdk-code-editors/index.html#code-completion)
 
-- How to define a custom project type with project creation wizard and register project-specific actions (Read the tutorial at: https://www.eclipse.org/che/docs/plugins/project-types/index.html)
+- How to define a custom project type with project creation wizard and register project-specific actions (Read the tutorial at: https://www.eclipse.org/che/docs/assemblies/sdk-project-types/index.html)
 
 
 ## How to build sample-plugin-json plugin
