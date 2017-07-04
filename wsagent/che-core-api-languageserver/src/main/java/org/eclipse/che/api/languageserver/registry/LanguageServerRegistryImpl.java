@@ -10,20 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import static org.eclipse.che.api.languageserver.shared.ProjectLangugageKey.createProjectKey;
-
-import java.net.URI;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
@@ -36,26 +26,43 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageServer;
 
+import java.net.URI;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.api.languageserver.shared.ProjectLangugageKey.createProjectKey;
+
 @Singleton
 public class LanguageServerRegistryImpl implements LanguageServerRegistry, ServerInitializerObserver {
-    public final static String                        PROJECT_FOLDER_PATH = "/projects";
+    public final static String PROJECT_FOLDER_PATH = "/projects";
     private final List<LanguageDescription>           languages;
     private final Map<String, LanguageServerLauncher> launchers;
 
     /**
      * Started {@link LanguageServer} by project.
      */
-    private final ConcurrentHashMap<ProjectLangugageKey, LanguageServer> projectToServer= new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<ProjectLangugageKey, LanguageServer> projectToServer = new ConcurrentHashMap<>();
 
     private final Provider<ProjectManager> projectManagerProvider;
     private final ServerInitializer        initializer;
 
     @Inject
-    public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerLaunchers, Set<LanguageDescription> languages,
-                                      Provider<ProjectManager> projectManagerProvider, ServerInitializer initializer) {
-        this.launchers=languageServerLaunchers.stream().filter(LanguageServerLauncher::isAbleToLaunch)
-                        .collect(Collectors.toMap(LanguageServerLauncher::getLanguageId, launcher -> launcher));
-        this.languages= languages.stream().filter(l->launchers.containsKey(l.getLanguageId())).collect(Collectors.toList());
+    public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerLaunchers,
+                                      Set<LanguageDescription> languages,
+                                      Provider<ProjectManager> projectManagerProvider,
+                                      ServerInitializer initializer) {
+        this.launchers = languageServerLaunchers.stream()
+                                                .filter(LanguageServerLauncher::isAbleToLaunch)
+                                                .collect(toMap(LanguageServerLauncher::getLanguageId, identity()));
+        this.languages = languages.stream()
+                                  .filter(language -> launchers.containsKey(language.getLanguageId()))
+                                  .collect(toList());
         this.projectManagerProvider = projectManagerProvider;
         this.initializer = initializer;
         this.initializer.addObserver(this);
@@ -80,11 +87,11 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     }
 
     private boolean matchesExtensions(LanguageDescription language, String path) {
-        return language.getFileExtensions().stream().anyMatch(extension->path.endsWith(extension));
+        return language.getFileExtensions().stream().anyMatch(extension -> path.endsWith(extension));
     }
 
     private boolean matchesFilenames(LanguageDescription language, String path) {
-        return language.getFileNames().stream().anyMatch(name->path.endsWith(name));
+        return language.getFileNames().stream().anyMatch(name -> path.endsWith(name));
     }
 
     @Nullable
@@ -118,7 +125,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     @Override
     public Map<ProjectLangugageKey, LanguageServerDescription> getInitializedLanguages() {
         Map<LanguageServer, LanguageServerDescription> initializedServers = initializer.getInitializedServers();
-        return projectToServer.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> initializedServers.get(e.getValue())));
+        return projectToServer.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> initializedServers.get(e.getValue())));
     }
 
     protected String extractProjectPath(String filePath) throws LanguageServerException {
