@@ -14,14 +14,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
 import javax.validation.constraints.NotNull;
 
@@ -69,18 +64,14 @@ public class AddRemoteRepositoryPresenter implements AddRemoteRepositoryView.Act
         final String url = view.getUrl().trim();
         final Project project = appContext.getRootProject();
 
-        service.remoteAdd(appContext.getDevMachine(), project.getLocation(), name, url).then(new Operation<Void>() {
-            @Override
-            public void apply(Void arg) throws OperationException {
-                callback.onSuccess(null);
-                view.close();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                callback.onFailure(error.getCause());
-            }
-        });
+        service.remoteAdd(project.getLocation(), name, url)
+               .then(arg -> {
+                   callback.onSuccess(null);
+                   view.close();
+               })
+               .catchError(error -> {
+                   callback.onFailure(error.getCause());
+               });
     }
 
     /** {@inheritDoc} */

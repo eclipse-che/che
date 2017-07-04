@@ -20,7 +20,6 @@ import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.GitUtil;
 import org.eclipse.che.ide.ext.git.client.init.InitRepositoryPresenter;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 
 import javax.validation.constraints.NotNull;
@@ -58,12 +57,7 @@ public class InitRepositoryAction extends GitAction {
 
         dialogFactory.createConfirmDialog(constant.createTitle(),
                                           constant.messagesInitRepoQuestion(project.getName()),
-                                          new ConfirmCallback() {
-                                              @Override
-                                              public void accepted() {
-                                                  presenter.initRepository(project);
-                                              }
-                                          }, null).show();
+                                          () -> presenter.initRepository(project), null).show();
     }
 
     @Override
