@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.actions;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -18,8 +17,8 @@ import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -46,7 +45,7 @@ public class RunCommandActionTest {
 
     //constructors mocks
     @Mock
-    CommandManager commandManager;
+    private CommandManager           commandManager;
     @Mock
     private CommandExecutor          commandExecutor;
     @Mock
@@ -75,15 +74,14 @@ public class RunCommandActionTest {
         verify(commandExecutor, never()).executeCommand(any(CommandImpl.class), any(MachineImpl.class));
     }
 
-    @Ignore
     @Test
     public void actionShouldBePerformed() {
-        // FIXME: spi ide
         when(event.getParameters()).thenReturn(Collections.singletonMap(NAME_PROPERTY, "MCI"));
-//        final DevMachine devMachine = mock(DevMachine.class);
-        final Machine machine = mock(Machine.class);
-//        when(devMachine.getDescriptor()).thenReturn(machine);
-//        when(appContext.getDevMachine()).thenReturn(devMachine);
+
+        WorkspaceImpl workspace = mock(WorkspaceImpl.class);
+        MachineImpl machine = mock(MachineImpl.class);
+        when(workspace.getDevMachine()).thenReturn(Optional.of(machine));
+        when(appContext.getWorkspace()).thenReturn(workspace);
 
         action.actionPerformed(event);
 

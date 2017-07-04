@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.rest.HttpRequestHelper;
 
 import javax.ws.rs.HttpMethod;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,20 +71,20 @@ public abstract class RuntimeContext {
      * - Start/Stop logs output
      * - Installers output
      * etc
-     * It is expected that ones returning this URL implementation guarantees supporting and not changing
-     * it during the whole life time of Runtime. Repeating calls of this method should return the same URL
+     * It is expected that ones returning this URI implementation guarantees supporting and not changing
+     * it during the whole life time of Runtime. Repeating calls of this method should return the same URI
      * If infrastructure implementation provides a channel it guarantees:
      * - this endpoint is open and ready to use
      * - this endpoint emits only messages of specified formats (TODO specify the formats)
      * - high loaded infrastructure provides scaling of "messaging server" to avoid overloading
      *
-     * @return URL of the channels endpoint
+     * @return URI of the channels endpoint
      * @throws UnsupportedOperationException
      *         if implementation does not provide channel
      * @throws InfrastructureException
      *         when any other error occurs
      */
-    public abstract URL getOutputChannel() throws InfrastructureException,
+    public abstract URI getOutputChannel() throws InfrastructureException,
                                                   UnsupportedOperationException;
 
 

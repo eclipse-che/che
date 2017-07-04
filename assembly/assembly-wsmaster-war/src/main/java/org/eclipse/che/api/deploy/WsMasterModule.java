@@ -134,6 +134,8 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.workspace.server.event.RuntimeStatusJsonRpcMessenger.class).asEagerSingleton();
         bind(org.eclipse.che.api.workspace.server.event.MachineStatusJsonRpcMessenger.class).asEagerSingleton();
         bind(org.eclipse.che.api.workspace.server.event.ServerStatusJsonRpcMessenger.class).asEagerSingleton();
+        bind(org.eclipse.che.api.workspace.server.event.InstallerLogJsonRpcMessenger.class).asEagerSingleton();
+        bind(org.eclipse.che.api.workspace.server.event.MachineLogJsonRpcMessenger.class).asEagerSingleton();
         //
 
         bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)

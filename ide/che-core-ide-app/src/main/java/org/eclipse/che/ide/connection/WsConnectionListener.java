@@ -45,7 +45,7 @@ public class WsConnectionListener implements ConnectionClosedHandler, Connection
             public void onWorkspaceStarted(WorkspaceStartedEvent workspace) {
                 messageBus = messageBusProvider.getMessageBus();
 
-                // FIXME: spi ide
+                // TODO (spi ide): consider avoid using messageBusProvider since it will be deprecated
 //                messageBus.addOnCloseHandler(WsConnectionListener.this);
             }
         });

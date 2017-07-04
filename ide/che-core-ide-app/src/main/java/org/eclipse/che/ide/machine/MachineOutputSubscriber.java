@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.events.MachineStartingEvent;
 
-// FIXME: spi ide
+// TODO (spi ide): rework according to the new messages format
 /** Subscribes to the output of each started machine. */
 @Singleton
 class MachineOutputSubscriber {

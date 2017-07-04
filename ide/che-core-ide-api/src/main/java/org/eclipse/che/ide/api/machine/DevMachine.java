@@ -31,20 +31,9 @@ public class DevMachine extends MachineEntityImpl {
         super(name, devMachineDescriptor);
     }
 
-    // FIXME: spi ide
     @Deprecated
     public String getWsAgentWebSocketUrl() {
         return getWsAgentBaseUrl().replaceFirst("http", "ws") + "/ws";
-//        for (Link link : machineLinks) {
-//            if (Constants.WSAGENT_WEBSOCKET_REFERENCE.equals(link.getRel())) {
-//                return link.getHref();
-//            }
-//        }
-
-        //should not be
-//        final String message = "Reference " + Constants.WSAGENT_WEBSOCKET_REFERENCE + " not found in DevMachine description";
-//        Log.error(getClass(), message);
-//        throw new RuntimeException(message);
     }
 
     /**
@@ -60,7 +49,7 @@ public class DevMachine extends MachineEntityImpl {
                 url = url.substring(0, url.length() - 1);
             }
 
-            // FIXME: spi ide
+            // TODO (spi ide): remove path when it comes with URL
             return url + "/api";
         }
 

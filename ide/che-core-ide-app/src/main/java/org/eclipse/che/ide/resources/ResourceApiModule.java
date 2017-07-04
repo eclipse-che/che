@@ -21,7 +21,6 @@ import org.eclipse.che.ide.api.data.tree.settings.impl.DummySettingsProvider;
 import org.eclipse.che.ide.api.resources.RenamingSupport;
 import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
-import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.part.explorer.project.DefaultNodeInterceptor;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
 import org.eclipse.che.ide.project.node.icon.DockerfileIconProvider;
@@ -54,9 +53,6 @@ public class ResourceApiModule extends AbstractGinModule {
         bind(TreeResourceRevealer.class);
 
         bind(ClipboardManager.class).to(ClipboardManagerImpl.class);
-
-        bind(ResourceManagerInitializer.class).to(AppContextImpl.class).in(Singleton.class);
-        bind(ResourceManagerComponent.class).asEagerSingleton();
 
         GinMultibinder.newSetBinder(binder(), RenamingSupport.class);
     }

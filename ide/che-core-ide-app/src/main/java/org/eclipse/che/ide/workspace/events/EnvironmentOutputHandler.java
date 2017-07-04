@@ -19,7 +19,7 @@ import org.eclipse.che.api.machine.shared.dto.MachineLogMessageDto;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
-// FIXME: spi ide
+// TODO (spi ide): rework according to the new messages format
 @Singleton
 class EnvironmentOutputHandler {
 

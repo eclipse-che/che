@@ -28,6 +28,7 @@ import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.factory.model.FactoryImpl;
 import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.project.type.ProjectTypesLoadedEvent;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -42,7 +43,6 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.resources.ResourceManagerInitializer;
 import org.eclipse.che.ide.resources.impl.ResourceDeltaImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
@@ -74,8 +74,7 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 public class AppContextImpl implements AppContext,
                                        SelectionChangedHandler,
                                        ResourceChangedHandler,
-                                       WorkspaceStoppedEvent.Handler,
-                                       ResourceManagerInitializer {
+                                       WorkspaceStoppedEvent.Handler {
     private static final String APP_ID = String.valueOf(nextInt(Integer.MAX_VALUE));
 
     private final QueryParameters                        queryParameters;
@@ -114,6 +113,8 @@ public class AppContextImpl implements AppContext,
         this.startAppActions = new ArrayList<>();
 
         projectsInImport = new ArrayList<>();
+
+        eventBus.addHandler(ProjectTypesLoadedEvent.TYPE, e -> initResourceManager());
 
         eventBus.addHandler(SelectionChangedEvent.TYPE, this);
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
@@ -206,8 +207,7 @@ public class AppContextImpl implements AppContext,
         return runtime.getDevMachine();
     }
 
-    @Override
-    public void initResourceManager() {
+    private void initResourceManager() {
         if (!rootProjects.isEmpty()) {
             for (Project project : rootProjects) {
                 eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));

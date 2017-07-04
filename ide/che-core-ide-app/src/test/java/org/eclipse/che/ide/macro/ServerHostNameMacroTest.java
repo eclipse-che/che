@@ -23,7 +23,6 @@ import org.eclipse.che.ide.api.macro.MacroRegistry;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -75,8 +74,6 @@ public class ServerHostNameMacroTest {
         registerProvider();
     }
 
-    // FIXME: spi ide
-    @Ignore
     @Test
     public void getMacros() throws Exception {
         final Set<Macro> macros = provider.getMacros(machine);
@@ -88,7 +85,7 @@ public class ServerHostNameMacroTest {
         final Macro provider1 = iterator.next();
 
         assertTrue(provider1 instanceof BaseMacro);
-        assertEquals(provider1.getName(), ServerHostNameMacro.KEY.replace("%", WS_AGENT_PORT));
+        assertEquals(ServerHostNameMacro.KEY.replace("%", WS_AGENT_PORT.substring(0, WS_AGENT_PORT.length() - 4)), provider1.getName());
 
         provider1.expand().then(new Operation<String>() {
             @Override
@@ -100,7 +97,7 @@ public class ServerHostNameMacroTest {
         final Macro provider2 = iterator.next();
 
         assertTrue(provider2 instanceof BaseMacro);
-        assertEquals(provider2.getName(), ServerHostNameMacro.KEY.replace("%", WS_AGENT_PORT.substring(0, WS_AGENT_PORT.length() - 4)));
+        assertEquals(ServerHostNameMacro.KEY.replace("%", WS_AGENT_PORT), provider2.getName());
 
         provider2.expand().then(new Operation<String>() {
             @Override
