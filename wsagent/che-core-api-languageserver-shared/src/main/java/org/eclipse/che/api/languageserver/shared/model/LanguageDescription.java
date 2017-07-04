@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.shared.model;
 
-
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,16 +26,22 @@ public class LanguageDescription {
     /**
      * The optional content types this language is associated with.
      */
-    private List<String> mimeTypes;
+    private String       mimeType;
     /**
-     * The fileExtension this language is associated with. At least one extension must be provided.
+     * The fileExtension this language is associated with.
      */
-    private List<String> fileExtensions;
+    private List<String> fileExtensions = Collections.emptyList();
+
     /**
-     * The optional highlighting configuration to support client side syntax highlighting.
-     * The format is client (editor) dependent.
+     * The file names this language is associated with.
      */
-    private String       highlightingConfiguration;
+    private List<String> fileNames = Collections.emptyList();
+
+    /**
+     * The optional highlighting configuration to support client side syntax
+     * highlighting. The format is client (editor) dependent.
+     */
+    private String highlightingConfiguration;
 
     public String getLanguageId() {
         return this.languageId;
@@ -44,20 +51,36 @@ public class LanguageDescription {
         this.languageId = languageId;
     }
 
-    public List<String> getMimeTypes() {
-        return this.mimeTypes;
+    public String getMimeType() {
+        return this.mimeType;
     }
 
-    public void setMimeTypes(final List<String> mimeTypes) {
-        this.mimeTypes = mimeTypes;
+    public void setMimeType(final String mimeType) {
+        this.mimeType = mimeType;
     }
 
     public List<String> getFileExtensions() {
         return this.fileExtensions;
     }
 
+    /**
+     * @param fileExtensions
+     *            must not be null
+     */
     public void setFileExtensions(final List<String> fileExtensions) {
-        this.fileExtensions = fileExtensions;
+        this.fileExtensions = new ArrayList<>(fileExtensions);
+    }
+
+    public List<String> getFileNames() {
+        return fileNames;
+    }
+
+    /**
+     * @param fileNames
+     *            must not be null
+     */
+    public void setFileNames(List<String> fileNames) {
+        this.fileNames = new ArrayList<>(fileNames);
     }
 
     public String getHighlightingConfiguration() {
@@ -70,27 +93,25 @@ public class LanguageDescription {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        LanguageDescription that = (LanguageDescription)o;
-        return Objects.equals(languageId, that.languageId) &&
-               Objects.equals(mimeTypes, that.mimeTypes) &&
-               Objects.equals(fileExtensions, that.fileExtensions) &&
-               Objects.equals(highlightingConfiguration, that.highlightingConfiguration);
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        LanguageDescription that = (LanguageDescription) o;
+        return Objects.equals(languageId, that.languageId) && Objects.equals(mimeType, that.mimeType)
+                        && Objects.equals(fileExtensions, that.fileExtensions) && Objects.equals(fileNames, that.fileNames)
+                        && Objects.equals(highlightingConfiguration, that.highlightingConfiguration);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(languageId, mimeTypes, fileExtensions, highlightingConfiguration);
+        return Objects.hash(languageId, mimeType, fileExtensions, fileNames, highlightingConfiguration);
     }
 
     @Override
     public String toString() {
-        return "LanguageDescriptionImpl{" +
-               "languageId='" + languageId + '\'' +
-               ", mimeTypes=" + mimeTypes +
-               ", fileExtensions=" + fileExtensions +
-               ", highlightingConfiguration='" + highlightingConfiguration + '\'' +
-               '}';
+        return "LanguageDescriptionImpl{" + "languageId='" + languageId + '\'' + ", mimeTypes=" + mimeType + ", fileExtensions="
+                        + fileExtensions + ", fileNames=" + fileNames + ", highlightingConfiguration='" + highlightingConfiguration + '\''
+                        + '}';
     }
 }
