@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import com.google.inject.ImplementedBy;
-
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 
 import java.net.MalformedURLException;
@@ -23,9 +21,7 @@ import java.net.URL;
  *
  * @author gazarenkov
  */
-@ImplementedBy(NoopUrlRewriter.class)
 public interface URLRewriter {
-
     /**
      * Rewrites URL according to Strategy rules. May depend on RuntimeIdentityImpl(workspace, owner,..) and name (some id)
      * of this particular URL
@@ -37,4 +33,13 @@ public interface URLRewriter {
      */
     URL rewriteURL(RuntimeIdentity identity, String name, URL url) throws MalformedURLException;
 
+    /**
+     * No rewriting, just pass internal URL back
+     */
+    class NoOpURLRewriter implements URLRewriter {
+        @Override
+        public URL rewriteURL(RuntimeIdentity identity, String name, URL url) throws MalformedURLException {
+            return url;
+        }
+    }
 }

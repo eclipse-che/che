@@ -15,6 +15,13 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.api.core.rest.CheJsonProvider;
+import org.eclipse.che.api.core.rest.MessageBodyAdapter;
+import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
+import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
+import org.eclipse.che.api.factory.server.FactoryCreateValidator;
+import org.eclipse.che.api.factory.server.FactoryEditValidator;
+import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.installer.ExecInstaller;
 import org.eclipse.che.api.installer.GitCredentialsInstaller;
 import org.eclipse.che.api.installer.LSCSharpInstaller;
@@ -30,23 +37,16 @@ import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.InstallerRegistryProvider;
 import org.eclipse.che.api.installer.server.InstallerRegistryService;
 import org.eclipse.che.api.installer.shared.model.Installer;
-import org.eclipse.che.api.core.rest.CheJsonProvider;
-import org.eclipse.che.api.core.rest.MessageBodyAdapter;
-import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
-import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
-import org.eclipse.che.api.factory.server.FactoryCreateValidator;
-import org.eclipse.che.api.factory.server.FactoryEditValidator;
-import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.recipe.JpaRecipeDao;
 import org.eclipse.che.api.recipe.RecipeDao;
 import org.eclipse.che.api.recipe.RecipeLoader;
 import org.eclipse.che.api.recipe.RecipeService;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.workspace.server.RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber;
+import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceMessageBodyAdapter;
-import org.eclipse.che.api.workspace.server.spi.dummy.DummyInfrastructureModule;
 import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
@@ -228,9 +228,9 @@ public class WsMasterModule extends AbstractModule {
 //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
 
 // FIXME: spi
-        install(new DummyInfrastructureModule());
         install(new DockerInfraModule());
         install(new LocalDockerModule());
         bind(RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class).asEagerSingleton();
+        bind(URLRewriter.class).to(URLRewriter.NoOpURLRewriter.class);
     }
 }
