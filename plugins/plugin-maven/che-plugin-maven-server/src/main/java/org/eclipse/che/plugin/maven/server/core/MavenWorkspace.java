@@ -33,6 +33,7 @@ import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 import org.eclipse.che.plugin.maven.shared.event.MavenOutputEvent;
 import org.eclipse.che.plugin.maven.shared.impl.MavenUpdateEventImpl;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
@@ -51,8 +52,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
 /**
@@ -111,11 +112,15 @@ public class MavenWorkspace {
                 needResolve.addAll(updated.keySet());
 
                 List<String> updatedPaths = updated.keySet().stream()
-                                                   .map(project -> project.getProject().getFullPath().toOSString())
-                                                   .collect(Collectors.toList());
+                                                   .map(MavenProject::getProject)
+                                                   .map(IResource::getFullPath)
+                                                   .map(IPath::toOSString)
+                                                   .collect(toList());
                 List<String> removedPaths = removed.stream()
-                                                   .map(project -> project.getProject().getFullPath().toOSString())
-                                                   .collect(Collectors.toList());
+                                                   .map(MavenProject::getProject)
+                                                   .map(IResource::getFullPath)
+                                                   .map(IPath::toOSString)
+                                                   .collect(toList());
 
                 addResolveProjects(needResolve);
 

@@ -15,8 +15,6 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
@@ -75,17 +73,6 @@ public class MavenMessagesHandler {
     }
 
     private void handleOperations() {
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
-            }
-
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-                dependencyResolver.hide();
-            }
-        });
-
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> dependencyResolver.hide());
     }
 

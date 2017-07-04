@@ -27,6 +27,7 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_OUTPUT;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_SUBSCRIBE;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_UNSUBSCRIBE;
 
 /**
  * Mechanism which sends events of maven archetype generation by using JSON RPC to the client.
@@ -54,20 +55,22 @@ public class MavenArchetypeJsonRpcMessenger implements EventSubscriber<Archetype
     }
 
     @Inject
-    private void configureSubscribeHandler(RequestHandlerConfigurator configurator) {
+    private void configureHandlers(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
                     .methodName(MAVEN_ARCHETYPE_CHANEL_SUBSCRIBE)
                     .noParams()
                     .noResult()
                     .withConsumer(endpointIds::add);
+
+        configurator.newConfiguration()
+                    .methodName(MAVEN_ARCHETYPE_CHANEL_UNSUBSCRIBE)
+                    .noParams()
+                    .noResult()
+                    .withConsumer(endpointIds::remove);
     }
 
     @Override
     public void onEvent(ArchetypeOutput event) {
-        sendArchetypeNotification(event);
-    }
-
-    private void sendArchetypeNotification(ArchetypeOutput event) {
         ArchetypeOutput archetypeOutput = DtoFactory.newDto(ArchetypeOutput.class);
         archetypeOutput.setOutput(event.getOutput());
         archetypeOutput.setState(event.getState());

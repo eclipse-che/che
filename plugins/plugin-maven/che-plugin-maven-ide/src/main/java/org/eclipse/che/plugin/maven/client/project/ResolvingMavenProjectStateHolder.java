@@ -15,8 +15,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.project.ResolvingProjectStateHolder;
 import org.eclipse.che.plugin.maven.client.MavenJsonRpcHandler;
 import org.eclipse.che.plugin.maven.shared.dto.StartStopNotification;
@@ -40,7 +38,7 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
  * @author Roman Nikitenko
  */
 @Singleton
-public class ResolvingMavenProjectStateHolder implements ResolvingProjectStateHolder, WsAgentStateHandler {
+public class ResolvingMavenProjectStateHolder implements ResolvingProjectStateHolder {
     private       ResolvingProjectState                  state;
     private       HashSet<ResolvingProjectStateListener> listeners;
 
@@ -49,7 +47,6 @@ public class ResolvingMavenProjectStateHolder implements ResolvingProjectStateHo
         this.state = NOT_RESOLVED;
         this.listeners = new HashSet<>();
 
-        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
         mavenJsonRpcHandler.addStartStopHandler(this::handleStartStop);
     }
 
@@ -71,14 +68,6 @@ public class ResolvingMavenProjectStateHolder implements ResolvingProjectStateHo
     @Override
     public void removeResolvingProjectStateListener(ResolvingProjectStateListener listener) {
         listeners.remove(listener);
-    }
-
-    @Override
-    public void onWsAgentStarted(WsAgentStateEvent event) {
-    }
-
-    @Override
-    public void onWsAgentStopped(WsAgentStateEvent event) {
     }
 
     private void handleStartStop(StartStopNotification startStopNotification) {
