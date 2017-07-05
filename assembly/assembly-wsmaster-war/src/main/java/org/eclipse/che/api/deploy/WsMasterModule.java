@@ -162,9 +162,6 @@ public class WsMasterModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), String.class, Names.named(RecipeLoader.CHE_PREDEFINED_RECIPES))
                    .addBinding().toInstance("predefined-recipes.json");
 
-// FIXME: spi
-//        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
-
         // installers
         Multibinder<Installer> installers = Multibinder.newSetBinder(binder(), Installer.class);
         installers.addBinding().to(SshInstaller.class);
