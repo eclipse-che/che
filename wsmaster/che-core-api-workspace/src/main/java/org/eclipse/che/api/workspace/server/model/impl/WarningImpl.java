@@ -29,6 +29,11 @@ public class WarningImpl implements Warning {
         this.message = message;
     }
 
+    public WarningImpl(Warning warning) {
+        this.code = warning.getCode();
+        this.message = warning.getMessage();
+    }
+
     @Override
     public int getCode() {
         return code;
