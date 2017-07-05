@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.event;
+package org.eclipse.che.api.workspace.server.event;
 /**
  * Event informing about idling the che server.
  */

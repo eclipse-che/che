@@ -24,11 +24,11 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.event.ServerIdleEvent;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
+import org.eclipse.che.api.workspace.server.event.ServerIdleEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
