@@ -16,11 +16,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.MergeResult;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -95,59 +91,49 @@ public class MergePresenter implements MergeView.ActionDelegate {
         selectedReference = null;
         view.setEnableMergeButton(false);
 
-        service.branchList(project.getLocation(), LIST_LOCAL).then(new Operation<List<Branch>>() {
-            @Override
-            public void apply(List<Branch> branches) throws OperationException {
-                List<Reference> references = new ArrayList<>();
-                for (Branch branch : branches) {
-                    if (!branch.isActive()) {
-                        Reference reference = new Reference(branch.getName(), branch.getDisplayName(), LOCAL_BRANCH);
-                        references.add(reference);
-                    }
-                }
-                view.setLocalBranches(references);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                console.printError(error.getMessage());
-                consolesPanelPresenter.addCommandOutput(console);
-                notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
-            }
-        });
+        service.branchList(project.getLocation(), LIST_LOCAL)
+               .then(branches -> {
+                   List<Reference> references = new ArrayList<>();
+                   for (Branch branch : branches) {
+                       if (!branch.isActive()) {
+                           Reference reference = new Reference(branch.getName(), branch.getDisplayName(), LOCAL_BRANCH);
+                           references.add(reference);
+                       }
+                   }
+                   view.setLocalBranches(references);
+               })
+               .catchError(error -> {
+                   console.printError(error.getMessage());
+                   consolesPanelPresenter.addCommandOutput(console);
+                   notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
+               });
 
-        service.branchList(project.getLocation(), LIST_REMOTE).then(new Operation<List<Branch>>() {
-            @Override
-            public void apply(List<Branch> branches) throws OperationException {
-                List<Reference> references = new ArrayList<>();
-                for (Branch branch : branches) {
-                    if (!branch.isActive()) {
-                        Reference reference =
-                                new Reference(branch.getName(), branch.getDisplayName(), REMOTE_BRANCH);
-                        references.add(reference);
-                    }
-                }
-                view.setRemoteBranches(references);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                console.printError(error.getMessage());
-                consolesPanelPresenter.addCommandOutput(console);
-                notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
-            }
-        });
+        service.branchList(project.getLocation(), LIST_REMOTE)
+               .then(branches -> {
+                   List<Reference> references = new ArrayList<>();
+                   for (Branch branch : branches) {
+                       if (!branch.isActive()) {
+                           Reference reference =
+                                   new Reference(branch.getName(), branch.getDisplayName(), REMOTE_BRANCH);
+                           references.add(reference);
+                       }
+                   }
+                   view.setRemoteBranches(references);
+               })
+               .catchError(error -> {
+                   console.printError(error.getMessage());
+                   consolesPanelPresenter.addCommandOutput(console);
+                   notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
+               });
 
         view.showDialog();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onCancelClicked() {
         view.close();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onMergeClicked() {
         view.close();
@@ -155,34 +141,26 @@ public class MergePresenter implements MergeView.ActionDelegate {
         final GitOutputConsole console = gitOutputConsoleFactory.create(MERGE_COMMAND_NAME);
 
         service.merge(project.getLocation(), selectedReference.getDisplayName())
-               .then(new Operation<MergeResult>() {
-                   @Override
-                   public void apply(MergeResult result) throws OperationException {
-                       console.print(formMergeMessage(result));
-                       consolesPanelPresenter.addCommandOutput(console);
-                       notificationManager.notify(formMergeMessage(result));
+               .then(result -> {
+                   console.print(formMergeMessage(result));
+                   consolesPanelPresenter.addCommandOutput(console);
+                   notificationManager.notify(formMergeMessage(result));
 
-                       project.synchronize();
+                   project.synchronize();
+               })
+               .catchError(error -> {
+                   if (error.getCause() instanceof ServerException &&
+                       ((ServerException)error.getCause()).getErrorCode() == ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED) {
+                       dialogFactory.createMessageDialog(constant.mergeTitle(), constant.committerIdentityInfoEmpty(),
+                                                         () -> {
+                                                             //do nothing
+                                                         }).show();
+                       return;
                    }
-               }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                if (error.getCause() instanceof ServerException &&
-                    ((ServerException)error.getCause()).getErrorCode() == ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED) {
-                    dialogFactory.createMessageDialog(constant.mergeTitle(), constant.committerIdentityInfoEmpty(),
-                                                      new ConfirmCallback() {
-                                                          @Override
-                                                          public void accepted() {
-                                                              //do nothing
-                                                          }
-                                                      }).show();
-                    return;
-                }
-                console.printError(error.getMessage());
-                consolesPanelPresenter.addCommandOutput(console);
-                notificationManager.notify(constant.mergeFailed(), FAIL, FLOAT_MODE);
-            }
-        });
+                   console.printError(error.getMessage());
+                   consolesPanelPresenter.addCommandOutput(console);
+                   notificationManager.notify(constant.mergeFailed(), FAIL, FLOAT_MODE);
+               });
     }
 
     /**

@@ -13,9 +13,6 @@ package org.eclipse.che.ide.ext.git.client.delete;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -36,7 +33,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 @Singleton
 public class DeleteRepositoryPresenter {
-    public static final String DELETE_REPO_COMMAND_NAME = "Git delete repository";
+    private static final String DELETE_REPO_COMMAND_NAME = "Git delete repository";
 
     private final GitServiceClient        service;
     private final GitLocalizationConstant constant;
@@ -61,25 +58,19 @@ public class DeleteRepositoryPresenter {
     }
 
     /** Delete Git repository. */
-    public void deleteRepository(final Project project) {
+    public void deleteRepository(Project project) {
         final GitOutputConsole console = gitOutputConsoleFactory.create(DELETE_REPO_COMMAND_NAME);
 
-        service.deleteRepository(project.getLocation()).then(new Operation<Void>() {
-            @Override
-            public void apply(Void ignored) throws OperationException {
-                console.print(constant.deleteGitRepositorySuccess());
-                consolesPanelPresenter.addCommandOutput(console);
-                notificationManager.notify(constant.deleteGitRepositorySuccess());
+        service.deleteRepository(project.getLocation()).then(ignored -> {
+            console.print(constant.deleteGitRepositorySuccess());
+            consolesPanelPresenter.addCommandOutput(console);
+            notificationManager.notify(constant.deleteGitRepositorySuccess());
 
-                project.synchronize();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                console.printError(error.getMessage());
-                consolesPanelPresenter.addCommandOutput(console);
-                notificationManager.notify(constant.failedToDeleteRepository(), FAIL, FLOAT_MODE);
-            }
+            appContext.getRootProject().synchronize();
+        }).catchError(error -> {
+            console.printError(error.getMessage());
+            consolesPanelPresenter.addCommandOutput(console);
+            notificationManager.notify(constant.failedToDeleteRepository(), FAIL, FLOAT_MODE);
         });
     }
 }

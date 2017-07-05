@@ -15,9 +15,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -29,7 +26,6 @@ import org.eclipse.che.ide.ext.git.client.remote.add.AddRemoteRepositoryPresente
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -89,22 +85,18 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
      * then get the list of branches (remote and local).
      */
     private void getRemotes() {
-        service.remoteList(project.getLocation(), null, true).then(new Operation<List<Remote>>() {
-            @Override
-            public void apply(List<Remote> remotes) throws OperationException {
-                view.setEnableDeleteButton(selectedRemote != null);
-                view.setRemotes(remotes);
-                if (!view.isShown()) {
-                    view.showDialog();
-                }
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                String errorMessage = error.getMessage() != null ? error.getMessage() : constant.remoteListFailed();
-                handleError(errorMessage);
-            }
-        });
+        service.remoteList(project.getLocation(), null, true)
+               .then(remotes -> {
+                   view.setEnableDeleteButton(selectedRemote != null);
+                   view.setRemotes(remotes);
+                   if (!view.isShown()) {
+                       view.showDialog();
+                   }
+               })
+               .catchError(error -> {
+                   String errorMessage = error.getMessage() != null ? error.getMessage() : constant.remoteListFailed();
+                   handleError(errorMessage);
+               });
     }
 
     /**
@@ -149,23 +141,19 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
             return;
         }
 
-        service.remoteDelete(project.getLocation(), selectedRemote.getName()).then(new Operation<Void>() {
-            @Override
-            public void apply(Void ignored) throws OperationException {
-                getRemotes();
+        service.remoteDelete(project.getLocation(), selectedRemote.getName())
+               .then(ignored -> {
+                   getRemotes();
 
-                project.synchronize();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                String errorMessage = error.getMessage() != null ? error.getMessage() : constant.remoteDeleteFailed();
-                GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
-                console.printError(errorMessage);
-                consolesPanelPresenter.addCommandOutput(console);
-                notificationManager.notify(constant.remoteDeleteFailed(), FAIL, FLOAT_MODE);
-            }
-        });
+                   project.synchronize();
+               })
+               .catchError(error -> {
+                   String errorMessage = error.getMessage() != null ? error.getMessage() : constant.remoteDeleteFailed();
+                   GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
+                   console.printError(errorMessage);
+                   consolesPanelPresenter.addCommandOutput(console);
+                   notificationManager.notify(constant.remoteDeleteFailed(), FAIL, FLOAT_MODE);
+               });
     }
 
     /**

@@ -71,6 +71,10 @@
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>ST4</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
         </dependency>
@@ -198,8 +202,11 @@
                         <exclude>**/DefaultServerEvaluationStrategyTest.java</exclude>
                         <exclude>**/LocalDockerServerEvaluationStrategy.java</exclude>
                         <exclude>**/LocalDockerServerEvaluationStrategyTest.java</exclude>
+                        <exclude>**/LocalDockerCustomServerEvaluationStrategy.java</exclude>
+                        <exclude>**/LocalDockerCustomServerEvaluationStrategyTest.java</exclude>
                         <exclude>**/DockerInstanceRuntimeInfo.java</exclude>
                         <exclude>**/DockerInstanceRuntimeInfoTest.java</exclude>
+                        <exclude>**/ServerIdleDetector.java</exclude>
                         <!-- End excluded files -->
                     </excludes>
                 </configuration>

@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.strategy;
 
-import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
-import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
-import org.eclipse.che.plugin.docker.client.json.PortBinding;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
+import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.PortBinding;
 
 /**
  * Represents a strategy for resolving Servers associated with workspace containers.
@@ -27,13 +27,25 @@ import java.util.Map;
  *
  * @author Angel Misevski <amisevsk@redhat.com>
  * @author Alexander Garagatyi
+ * @author Ilya Buziuk
  * @see ServerEvaluationStrategyProvider
  */
 public abstract class ServerEvaluationStrategy {
+    private static final String HTTP = "http";
+    private static final String HTTPS = "https";
 
     protected static final String SERVER_CONF_LABEL_REF_KEY      = "che:server:%s:ref";
     protected static final String SERVER_CONF_LABEL_PROTOCOL_KEY = "che:server:%s:protocol";
     protected static final String SERVER_CONF_LABEL_PATH_KEY     = "che:server:%s:path";
+
+
+    /**
+     * @return true if <strong>external</strong> addresses need to be exposed against https, false otherwise
+     */
+    protected boolean useHttpsForExternalUrls() {
+        return false;
+    }
+
 
     /**
      * Gets a map of all <strong>internal</strong> addresses exposed by the container in the form of
@@ -109,7 +121,11 @@ public abstract class ServerEvaluationStrategy {
             // Add protocol and path to internal/external address, if applicable
             String internalUrl = null;
             String externalUrl = null;
-            if (serverConf.getProtocol() != null) {
+
+            String internalProtocol = serverConf.getProtocol();
+            String externalProtocol = getProtocolForExternalUrl(internalProtocol);
+
+            if (internalProtocol != null) {
                 String pathSuffix = serverConf.getPath();
                 if (pathSuffix != null && !pathSuffix.isEmpty()) {
                     if (pathSuffix.charAt(0) != '/') {
@@ -118,8 +134,9 @@ public abstract class ServerEvaluationStrategy {
                 } else {
                     pathSuffix = "";
                 }
-                internalUrl = serverConf.getProtocol() + "://" + internalAddressAndPort + pathSuffix;
-                externalUrl = serverConf.getProtocol() + "://" + externalAddressAndPort + pathSuffix;
+
+                internalUrl = internalProtocol + "://" + internalAddressAndPort + pathSuffix;
+                externalUrl = externalProtocol + "://" + externalAddressAndPort + pathSuffix;
             }
 
             servers.put(serverConf.getRef(), new ServerImpl(externalUrl));
@@ -215,14 +232,37 @@ public abstract class ServerEvaluationStrategy {
      *     "9090/udp" : "my-host.com:32722"
      * }
      * }</pre>
+     *
      */
-    protected Map<String, String> getExposedPortsToAddressPorts(String address, Map<String, List<PortBinding>> ports) {
+    protected Map<String, String> getExposedPortsToAddressPorts(String address, Map<String, List<PortBinding>> ports, boolean useExposedPorts) {
         Map<String, String> addressesAndPorts = new HashMap<>();
         for (Map.Entry<String, List<PortBinding>> portEntry : ports.entrySet()) {
+            String exposedPort = portEntry.getKey().split("/")[0];
             // there is one value always
-            String port = portEntry.getValue().get(0).getHostPort();
-            addressesAndPorts.put(portEntry.getKey(), address + ":" + port);
+            String ephemeralPort = portEntry.getValue().get(0).getHostPort();
+            if (useExposedPorts) {
+                addressesAndPorts.put(portEntry.getKey(), address + ":" + exposedPort);
+            } else {
+                addressesAndPorts.put(portEntry.getKey(), address + ":" + ephemeralPort);
+            }
         }
         return addressesAndPorts;
     }
+
+    protected Map<String, String> getExposedPortsToAddressPorts(String address, Map<String, List<PortBinding>> ports) {
+        return getExposedPortsToAddressPorts(address, ports, false);
+    }
+
+
+    /**
+     * @param protocolForInternalUrl
+     * @return https, if {@link #useHttpsForExternalUrls()} method in sub-class returns true and protocol for internal Url is http
+     */
+    private String getProtocolForExternalUrl(final String protocolForInternalUrl) {
+        if (useHttpsForExternalUrls() && HTTP.equals(protocolForInternalUrl)) {
+            return HTTPS;
+        }
+        return protocolForInternalUrl;
+    }
+
 }

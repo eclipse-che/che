@@ -14,7 +14,6 @@ import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
@@ -68,8 +67,6 @@ public class BranchPresenterTest extends BaseTest {
     private BranchView                view;
     @Mock
     private Branch                    selectedBranch;
-    @Mock
-    private WorkspaceAgent            workspaceAgent;
     @Mock
     private DialogFactory             dialogFactory;
     @Mock
@@ -224,9 +221,9 @@ public class BranchPresenterTest extends BaseTest {
 
     @Test
     public void testOnCheckoutClickedWhenSelectedNotRemoteBranch() throws Exception {
-        when(service.checkout(any(Path.class), any(CheckoutRequest.class))).thenReturn(voidPromise);
-        when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
-        when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
+        when(service.checkout(any(Path.class), any(CheckoutRequest.class))).thenReturn(stringPromise);
+        when(stringPromise.then(any(Operation.class))).thenReturn(stringPromise);
+        when(stringPromise.catchError(any(Operation.class))).thenReturn(stringPromise);
 
         when(selectedBranch.isRemote()).thenReturn(false);
         when(dtoFactory.createDto(CheckoutRequest.class)).thenReturn(checkoutRequest);
@@ -234,8 +231,8 @@ public class BranchPresenterTest extends BaseTest {
         selectBranch();
         presenter.onCheckoutClicked();
 
-        verify(voidPromise).then(voidPromiseCaptor.capture());
-        voidPromiseCaptor.getValue().apply(null);
+        verify(stringPromise).then(stringCaptor.capture());
+        stringCaptor.getValue().apply(null);
 
         verify(checkoutRequest).setName(eq(BRANCH_NAME));
         verifyNoMoreInteractions(checkoutRequest);
@@ -243,17 +240,17 @@ public class BranchPresenterTest extends BaseTest {
 
     @Test
     public void testOnCheckoutClickedWhenSelectedRemoteBranch() throws Exception {
-        when(service.checkout(any(Path.class), any(CheckoutRequest.class))).thenReturn(voidPromise);
-        when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
-        when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
+        when(service.checkout(any(Path.class), any(CheckoutRequest.class))).thenReturn(stringPromise);
+        when(stringPromise.then(any(Operation.class))).thenReturn(stringPromise);
+        when(stringPromise.catchError(any(Operation.class))).thenReturn(stringPromise);
 
         when(dtoFactory.createDto(CheckoutRequest.class)).thenReturn(checkoutRequest);
 
         selectBranch();
         presenter.onCheckoutClicked();
 
-        verify(voidPromise).then(voidPromiseCaptor.capture());
-        voidPromiseCaptor.getValue().apply(null);
+        verify(stringPromise).then(stringCaptor.capture());
+        stringCaptor.getValue().apply(null);
 
         verify(checkoutRequest).setTrackBranch(eq(BRANCH_NAME));
         verifyNoMoreInteractions(checkoutRequest);

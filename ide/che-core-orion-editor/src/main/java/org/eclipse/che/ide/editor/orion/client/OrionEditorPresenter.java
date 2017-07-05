@@ -1015,7 +1015,13 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             editorView.setEditorWidget(editorWidget);
 
             document = editorWidget.getDocument();
-            document.setFile(input.getFile());
+            final VirtualFile file = input.getFile();
+            document.setFile(file);
+
+            if (file instanceof File) {
+                ((File)file).updateModificationStamp(content);
+            }
+
             cursorModel = new OrionCursorModel(document);
 
             editorWidget.setTabSize(configuration.getTabWidth());
@@ -1032,7 +1038,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             if (delayedFocus) {
                 editorWidget.refresh();
                 editorWidget.setFocus();
-                setSelection(new Selection<>(input.getFile()));
+                setSelection(new Selection<>(file));
                 delayedFocus = false;
             }
 

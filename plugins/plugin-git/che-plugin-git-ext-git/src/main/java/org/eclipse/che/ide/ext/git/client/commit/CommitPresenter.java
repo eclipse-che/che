@@ -25,9 +25,9 @@ import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
-import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 
@@ -194,9 +194,8 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                .then(arg -> {
                    service.commit(location,
                                   view.getMessage(),
-                                  false,
-                                  filesToCommitArray,
-                                  view.isAmend())
+                                  view.isAmend(),
+                                  filesToCommitArray)
                           .then(revision -> {
                               onCommitSuccess(revision);
                               if (view.isPushAfterCommit()) {

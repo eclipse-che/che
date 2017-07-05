@@ -16,6 +16,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
@@ -31,9 +32,17 @@ import org.testng.annotations.Test;
 public class OpenShiftConnectorTest {
     private static final String[] CONTAINER_ENV_VARIABLES = {"CHE_WORKSPACE_ID=abcd1234"};
     private static final String   CHE_DEFAULT_OPENSHIFT_PROJECT_NAME = "eclipse-che";
-    private static final String   CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT = "cheserviceaccount";
     private static final int      OPENSHIFT_LIVENESS_PROBE_DELAY = 300;
     private static final int      OPENSHIFT_LIVENESS_PROBE_TIMEOUT = 1;
+    private static final String   OPENSHIFT_DEFAULT_WORKSPACE_PERSISTENT_VOLUME_CLAIM = "che_claim_data";
+    private static final String   OPENSHIFT_DEFAULT_WORKSPACE_QUANTITY = "10Gi";
+    private static final String   OPENSHIFT_DEFAULT_WORKSPACE_STORAGE = "/data/workspaces";
+    private static final String   OPENSHIFT_DEFAULT_WORKSPACE_PROJECTS_STORAGE = "/projects";
+    private static final String   CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS = "che.openshift.mini";
+    private static final String   CHE_WORKSPACE_CPU_LIMIT = "1";
+    private static final boolean  SECURE_ROUTES = false;
+    private static final boolean  CREATE_WORKSPACE_DIRS = true;
+
 
     @Mock
     private DockerConnectorConfiguration       dockerConnectorConfiguration;
@@ -45,6 +54,10 @@ public class OpenShiftConnectorTest {
     private DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider;
     @Mock
     private CreateContainerParams              createContainerParams;
+    @Mock
+    private EventService                       eventService;
+    @Mock
+    private OpenShiftPvcHelper                 openShiftPvcHelper;
 
     private OpenShiftConnector                 openShiftConnector;
 
@@ -62,10 +75,20 @@ public class OpenShiftConnectorTest {
                                                     dockerConnectionFactory,
                                                     authManager,
                                                     dockerApiVersionPathPrefixProvider,
+                                                    openShiftPvcHelper,
+                                                    eventService,
+                                                    CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS,
                                                     CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
-                                                    CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT,
                                                     OPENSHIFT_LIVENESS_PROBE_DELAY,
-                                                    OPENSHIFT_LIVENESS_PROBE_TIMEOUT);
+                                                    OPENSHIFT_LIVENESS_PROBE_TIMEOUT,
+                                                    OPENSHIFT_DEFAULT_WORKSPACE_PERSISTENT_VOLUME_CLAIM,
+                                                    OPENSHIFT_DEFAULT_WORKSPACE_QUANTITY,
+                                                    OPENSHIFT_DEFAULT_WORKSPACE_STORAGE,
+                                                    OPENSHIFT_DEFAULT_WORKSPACE_PROJECTS_STORAGE,
+                                                    CHE_WORKSPACE_CPU_LIMIT,
+                                                    null,
+                                                    SECURE_ROUTES,
+                                                    CREATE_WORKSPACE_DIRS);
         String workspaceID = openShiftConnector.getCheWorkspaceId(createContainerParams);
 
         //Then

@@ -18,7 +18,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Evgen Vidolob
  */
 @DTO
-public interface StartStopNotification {
+public interface StartStopNotification extends MavenOutputEventDto{
 
     boolean isStart();
 

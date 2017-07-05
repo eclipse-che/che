@@ -14,10 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.git.shared.IndexFile;
-import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
@@ -90,58 +86,54 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
     public void showDialog(Project project) {
         this.project = project;
 
-        service.getStatus(project.getLocation()).then(new Operation<Status>() {
-            @Override
-            public void apply(Status status) throws OperationException {
-                if (status.isClean()) {
-                    dialogFactory.createMessageDialog(constant.messagesWarningTitle(), constant.indexIsEmpty(), null).show();
-                    return;
-                }
+        service.getStatus(project.getLocation())
+               .then(status -> {
+                   if (status.isClean()) {
+                       dialogFactory.createMessageDialog(constant.messagesWarningTitle(), constant.indexIsEmpty(), null).show();
+                       return;
+                   }
 
-                indexedFiles = new IndexFile[0];
+                   indexedFiles = new IndexFile[0];
 
-                for (String path : status.getAdded()) {
-                    indexedFiles = add(indexedFiles, wrap(path));
-                }
+                   for (String path : status.getAdded()) {
+                       indexedFiles = add(indexedFiles, wrap(path));
+                   }
 
-                for (String path : status.getChanged()) {
-                    indexedFiles = add(indexedFiles, wrap(path));
-                }
+                   for (String path : status.getChanged()) {
+                       indexedFiles = add(indexedFiles, wrap(path));
+                   }
 
-                for (String path : status.getRemoved()) {
-                    indexedFiles = add(indexedFiles, wrap(path));
-                }
+                   for (String path : status.getRemoved()) {
+                       indexedFiles = add(indexedFiles, wrap(path));
+                   }
 
-                if (indexedFiles.length == 0) {
-                    dialogFactory.createMessageDialog(constant.messagesWarningTitle(), constant.indexIsEmpty(), null).show();
-                    return;
-                }
+                   if (indexedFiles.length == 0) {
+                       dialogFactory.createMessageDialog(constant.messagesWarningTitle(), constant.indexIsEmpty(), null).show();
+                       return;
+                   }
 
-                //Mark selected items to reset from index
-                Resource[] resources = appContext.getResources();
-                if (resources != null) {
-                    for (Resource selectedItem : resources) {
-                        String selectedItemPath = selectedItem.getLocation().removeFirstSegments(1).toString();
-                        for (IndexFile file : indexedFiles)
-                            if (file.getPath().startsWith(selectedItemPath)) {
-                                file.setIndexed(false);
-                            }
-                    }
-                }
+                   //Mark selected items to reset from index
+                   Resource[] resources = appContext.getResources();
+                   if (resources != null) {
+                       for (Resource selectedItem : resources) {
+                           String selectedItemPath = selectedItem.getLocation().removeFirstSegments(1).toString();
+                           for (IndexFile file : indexedFiles)
+                               if (file.getPath().startsWith(selectedItemPath)) {
+                                   file.setIndexed(false);
+                               }
+                       }
+                   }
 
-                view.setIndexedFiles(indexedFiles);
-                view.showDialog();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                String errorMassage = error.getMessage() != null ? error.getMessage() : constant.statusFailed();
-                GitOutputConsole console = gitOutputConsoleFactory.create(STATUS_COMMAND_NAME);
-                console.printError(errorMassage);
-                consolesPanelPresenter.addCommandOutput(console);
-                notificationManager.notify(errorMassage);
-            }
-        });
+                   view.setIndexedFiles(indexedFiles);
+                   view.showDialog();
+               })
+               .catchError(error -> {
+                   String errorMassage = error.getMessage() != null ? error.getMessage() : constant.statusFailed();
+                   GitOutputConsole console = gitOutputConsoleFactory.create(STATUS_COMMAND_NAME);
+                   console.printError(errorMassage);
+                   consolesPanelPresenter.addCommandOutput(console);
+                   notificationManager.notify(errorMassage);
+               });
     }
 
     protected IndexFile wrap(String path) {
@@ -169,22 +161,18 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
         }
         view.close();
 
-        service.reset(project.getLocation(), "HEAD", ResetType.MIXED, paths).then(new Operation<Void>() {
-            @Override
-            public void apply(Void ignored) throws OperationException {
-                console.print(constant.resetFilesSuccessfully());
-                consolesPanelPresenter.addCommandOutput(console);
-                notificationManager.notify(constant.resetFilesSuccessfully());
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                String errorMassage = error.getMessage() != null ? error.getMessage() : constant.resetFilesFailed();
-                console.printError(errorMassage);
-                consolesPanelPresenter.addCommandOutput(console);
-                notificationManager.notify(errorMassage);
-            }
-        });
+        service.reset(project.getLocation(), "HEAD", ResetType.MIXED, paths)
+               .then(ignored -> {
+                   console.print(constant.resetFilesSuccessfully());
+                   consolesPanelPresenter.addCommandOutput(console);
+                   notificationManager.notify(constant.resetFilesSuccessfully());
+               })
+               .catchError(error -> {
+                   String errorMassage = error.getMessage() != null ? error.getMessage() : constant.resetFilesFailed();
+                   console.printError(errorMassage);
+                   consolesPanelPresenter.addCommandOutput(console);
+                   notificationManager.notify(errorMassage);
+               });
     }
 
     /** {@inheritDoc} */

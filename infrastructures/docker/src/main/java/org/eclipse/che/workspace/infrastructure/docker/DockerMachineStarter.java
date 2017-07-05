@@ -614,6 +614,12 @@ public class DockerMachineStarter {
             env = commonMachineEnvVariables;
             volumes = commonMachineSystemVolumes;
         }
+        // register workspace ID and Machine Name
+        env.put(CHE_WORKSPACE_ID, workspaceId);
+        // FIXME: spi
+//        env.put(DockerInstanceRuntimeInfo.CHE_MACHINE_NAME, machineName);
+//        env.put(DockerInstanceRuntimeInfo.CHE_IS_DEV_MACHINE, Boolean.toString(isDev));
+
         containerConfig.getExpose().addAll(portsToExpose);
         containerConfig.getEnvironment().putAll(env);
         containerConfig.getVolumes().addAll(volumes);

@@ -54,7 +54,7 @@ public class ComposerValueProviderFactory implements ValueProviderFactory {
                 JsonObject model = readModel(projectFolder);
                 String value = "";
 
-                if (attributeName.equals(PACKAGE)) {
+                if (attributeName.equals(PACKAGE) && model.has("name")) {
                     value = model.get("name").getAsString();
                 }
 

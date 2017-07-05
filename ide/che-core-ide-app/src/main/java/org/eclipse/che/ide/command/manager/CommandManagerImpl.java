@@ -87,9 +87,9 @@ public class CommandManagerImpl implements CommandManager {
         this.commandNameGenerator = commandNameGenerator;
 
         commands = new HashMap<>();
+        registerNative();
 
-        // FIXME: spi
-        // Temporary solution while a better mechanism of obtaining appContext.getProjects() with Promises is being considered...
+        // TODO (spi ide): Temporary solution while a better mechanism of obtaining appContext.getProjects() with Promises is being considered...
         eventBus.addHandler(WorkspaceReadyEvent.getType(), e -> fetchCommands());
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> {
             commands.clear();
@@ -380,4 +380,17 @@ public class CommandManagerImpl implements CommandManager {
     private void notifyCommandUpdated(CommandImpl prevCommand, CommandImpl command) {
         eventBus.fireEvent(new CommandUpdatedEvent(prevCommand, command));
     }
+
+    /* Expose Command Manager's internal API to the world, to allow selenium tests or clients that use IDE to refresh commands. */
+    private native void registerNative() /*-{
+        var that = this;
+
+        var CommandManager = {};
+
+        CommandManager.refresh = $entry(function () {
+            that.@org.eclipse.che.ide.command.manager.CommandManagerImpl::fetchCommands()();
+        });
+
+        $wnd.IDE.CommandManager = CommandManager;
+    }-*/;
 }

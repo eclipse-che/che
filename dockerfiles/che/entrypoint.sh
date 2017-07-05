@@ -51,7 +51,7 @@ Variables:
   export CHE_REGISTRY_HOST=${CHE_REGISTRY_HOST:-${DEFAULT_CHE_REGISTRY_HOST}}
 
   DEFAULT_CHE_PORT=8080
-  CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}
+  export CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}
 
   DEFAULT_CHE_IP=
   CHE_IP=${CHE_IP:-${DEFAULT_CHE_IP}}
@@ -246,18 +246,40 @@ init() {
   fi
   ### Are we going to use the embedded che.properties or one provided by user?`
   ### CHE_LOCAL_CONF_DIR is internal Che variable that sets where to load
-  export CHE_LOCAL_CONF_DIR="/conf"
-  if [ -f "/conf/che.properties" ]; then
-    echo "Found custom che.properties..."
-    if [ "$CHE_USER" != "root" ]; then
-      sudo chown -R ${CHE_USER} ${CHE_LOCAL_CONF_DIR}
+  # check if we have permissions to create /conf folder.
+  if [ -w / ]; then
+    export CHE_LOCAL_CONF_DIR="/conf"
+    if [ -f "/conf/che.properties" ]; then
+      echo "Found custom che.properties..."
+      if [ "$CHE_USER" != "root" ]; then
+        sudo chown -R ${CHE_USER} ${CHE_LOCAL_CONF_DIR}
+      fi
+    else
+      if [ ! -d ${CHE_LOCAL_CONF_DIR} ]; then
+          mkdir -p ${CHE_LOCAL_CONF_DIR}
+      fi
+      if [ -w ${CHE_LOCAL_CONF_DIR} ];then
+        echo "ERROR: user ${CHE_USER} does OK have write permissions to ${CHE_LOCAL_CONF_DIR}"
+        echo "Using embedded che.properties... Copying template to ${CHE_LOCAL_CONF_DIR}/che.properties"
+        cp -rf "${CHE_HOME}/conf/che.properties" ${CHE_LOCAL_CONF_DIR}/che.properties
+      else
+        echo "ERROR: user ${CHE_USER} does not have write permissions to ${CHE_LOCAL_CONF_DIR}"
+        exit 1
+      fi
     fi
   else
-    if [ ! -d /conf ]; then
-        mkdir -p /conf
+    echo "WARN: parent dir is not writeable, CHE_LOCAL_CONF_DIR will be set to ${CHE_DATA}/conf"
+    export CHE_LOCAL_CONF_DIR="${CHE_DATA}/conf"
+    if [ ! -d ${CHE_LOCAL_CONF_DIR} ]; then
+        mkdir -p ${CHE_LOCAL_CONF_DIR}
     fi
-    echo "Using embedded che.properties... Copying template to ${CHE_LOCAL_CONF_DIR}/che.properties"
-    cp -rf "${CHE_HOME}/conf/che.properties" ${CHE_LOCAL_CONF_DIR}/che.properties
+    if [ -w ${CHE_LOCAL_CONF_DIR} ];then
+      echo "Using embedded che.properties... Copying template to ${CHE_LOCAL_CONF_DIR}/che.properties"
+      cp -rf "${CHE_HOME}/conf/che.properties" ${CHE_LOCAL_CONF_DIR}/che.properties
+    else
+      echo "ERROR: user ${CHE_USER} does not have write permissions to ${CHE_LOCAL_CONF_DIR}"
+      exit 1
+    fi
   fi
 
   # Update the provided che.properties with the location of the /data mounts

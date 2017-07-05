@@ -98,8 +98,6 @@ public class CommitPresenterTest extends BaseTest {
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
         when(revisionPromise.then(any(Operation.class))).thenReturn(revisionPromise);
         when(revisionPromise.catchError(any(Operation.class))).thenReturn(revisionPromise);
-        when(service.add(any(Path.class), anyBoolean(), any(Path[].class))).thenReturn(voidPromise);
-        when(service.commit(any(Path.class), anyString(), anyBoolean(), any(Path[].class), anyBoolean())).thenReturn(revisionPromise);
         when(stringPromise.then(any(Operation.class))).thenReturn(stringPromise);
         when(stringPromise.catchError(any(Operation.class))).thenReturn(stringPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
@@ -109,7 +107,7 @@ public class CommitPresenterTest extends BaseTest {
         when(logPromise.catchError(any(Operation.class))).thenReturn(logPromise);
         when(statusPromise.then(any(Operation.class))).thenReturn(statusPromise);
         when(service.add(any(Path.class), anyBoolean(), any(Path[].class))).thenReturn(voidPromise);
-        when(service.commit(any(Path.class), anyString(), anyBoolean(), any(Path[].class), anyBoolean()))
+        when(service.commit(any(Path.class), anyString(), anyBoolean(), any(Path[].class)))
                 .thenReturn(revisionPromise);
         when(service.diff(any(Path.class),
                           eq(null),

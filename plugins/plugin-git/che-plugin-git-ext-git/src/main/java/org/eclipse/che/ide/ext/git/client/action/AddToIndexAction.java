@@ -109,9 +109,8 @@ public class AddToIndexAction extends GitAction {
     }
 
     private boolean containsInSelected(List<String> items) {
-        Resource[] appContextResources = appContext.getResources();
         for (String item : items) {
-            for (Resource selectedItem : appContextResources) {
+            for (Resource selectedItem : appContext.getResources()) {
                 String selectedItemPath = selectedItem.getLocation()
                                                       .removeFirstSegments(1) // remove project name from path
                                                       .toString();

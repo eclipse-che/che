@@ -48,6 +48,7 @@ public class GitModule extends AbstractModule {
         bind(StatusPageWriter.class);
         bind(TagListWriter.class);
         bind(GitWebSocketMessenger.class);
+        bind(GitJsonRpcMessenger.class);
 
         Multibinder.newSetBinder(binder(), CredentialsProvider.class).addBinding().to(GitBasicAuthenticationCredentialsProvider.class);
 

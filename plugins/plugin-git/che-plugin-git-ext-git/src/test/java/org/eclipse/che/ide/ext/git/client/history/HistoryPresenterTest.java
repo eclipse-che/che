@@ -68,15 +68,13 @@ public class HistoryPresenterTest extends BaseTest {
         when(appContext.getResource()).thenReturn(resource);
         when(appContext.getRootProject()).thenReturn(project);
 
-        when(service.log(
-                any(Path.class),
+        when(service.log(any(Path.class),
                          any(Path[].class),
                          anyInt(),
                          anyInt(),
                          anyBoolean()))
                 .thenReturn(logPromise);
-        when(service.diff(
-                any(Path.class),
+        when(service.diff(any(Path.class),
                           anyList(),
                           any(DiffType.class),
                           anyBoolean(),
@@ -84,8 +82,7 @@ public class HistoryPresenterTest extends BaseTest {
                           anyString(),
                           anyString()))
                 .thenReturn(stringPromise);
-        when(service.showFileContent(
-                any(Path.class),
+        when(service.showFileContent(any(Path.class),
                                      any(Path.class),
                                      anyString()))
                 .thenReturn(showPromise);

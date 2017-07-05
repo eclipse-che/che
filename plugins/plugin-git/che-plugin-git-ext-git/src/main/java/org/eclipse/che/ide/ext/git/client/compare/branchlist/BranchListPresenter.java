@@ -10,19 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.compare.branchlist;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -35,7 +30,6 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -105,13 +99,11 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
         getBranches();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onCloseClicked() {
         view.close();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onCompareClicked() {
 
@@ -120,61 +112,49 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                                                     .removeTrailingSeparator()
                                                     .toString();
 
-        service.diff(
-                project.getLocation(),
+        service.diff(project.getLocation(),
                      selectedItemPath.isEmpty() ? null : singletonList(selectedItemPath),
                      NAME_STATUS,
                      false,
                      0,
                      selectedBranch.getName(),
                      false)
-               .then(new Operation<String>() {
-                   @Override
-                   public void apply(String diff) throws OperationException {
-                       if (diff.isEmpty()) {
-                           dialogFactory.createMessageDialog(locale.compareMessageIdenticalContentTitle(),
-                                                             locale.compareMessageIdenticalContentText(), null).show();
-                       } else {
-                           final String[] changedFiles = diff.split("\n");
-                           if (changedFiles.length == 1) {
-                               project.getFile(changedFiles[0].substring(2)).then(new Operation<Optional<File>>() {
-                                   @Override
-                                   public void apply(Optional<File> file) throws OperationException {
-                                       if (file.isPresent()) {
-                                           comparePresenter.showCompareWithLatest(file.get(),
-                                                                                  defineStatus(changedFiles[0].substring(0, 1)),
-                                                                                  selectedBranch.getName());
-                                       }
-                                   }
-                               });
-                           } else {
-                               Map<String, Status> items = new HashMap<>();
-                               for (String item : changedFiles) {
-                                   items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
+               .then(diff -> {
+                   if (diff.isEmpty()) {
+                       dialogFactory.createMessageDialog(locale.compareMessageIdenticalContentTitle(),
+                                                         locale.compareMessageIdenticalContentText(), null).show();
+                   } else {
+                       final String[] changedFiles = diff.split("\n");
+                       if (changedFiles.length == 1) {
+                           project.getFile(changedFiles[0].substring(2)).then(file -> {
+                               if (file.isPresent()) {
+                                   comparePresenter.showCompareWithLatest(file.get(),
+                                                                          defineStatus(changedFiles[0].substring(0, 1)),
+                                                                          selectedBranch.getName());
                                }
-                               changesListPresenter.show(items, selectedBranch.getName(), null, project);
+                           });
+                       } else {
+                           Map<String, Status> items = new HashMap<>();
+                           for (String item : changedFiles) {
+                               items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
                            }
+                           changesListPresenter.show(items, selectedBranch.getName(), null, project);
                        }
                    }
                })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError error) throws OperationException {
-                       notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
-                   }
+               .catchError(error -> {
+                   notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
                });
 
         view.close();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onBranchUnselected() {
         selectedBranch = null;
         view.setEnableCompareButton(false);
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onBranchSelected(@NotNull Branch branch) {
         selectedBranch = branch;
@@ -184,21 +164,17 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
 
     /** Get list of branches from selected project. */
     private void getBranches() {
-        service.branchList(project.getLocation(), LIST_ALL).then(new Operation<List<Branch>>() {
-            @Override
-            public void apply(List<Branch> branches) throws OperationException {
-                view.setBranches(branches);
-                view.showDialog();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                final String errorMessage = (error.getMessage() != null) ? error.getMessage() : locale.branchesListFailed();
-                GitOutputConsole console = gitOutputConsoleFactory.create(BRANCH_LIST_COMMAND_NAME);
-                console.printError(errorMessage);
-                consolesPanelPresenter.addCommandOutput(console);
-                notificationManager.notify(locale.branchesListFailed(), FAIL, NOT_EMERGE_MODE);
-            }
-        });
+        service.branchList(project.getLocation(), LIST_ALL)
+               .then(branches -> {
+                   view.setBranches(branches);
+                   view.showDialog();
+               })
+               .catchError(error -> {
+                   final String errorMessage = (error.getMessage() != null) ? error.getMessage() : locale.branchesListFailed();
+                   GitOutputConsole console = gitOutputConsoleFactory.create(BRANCH_LIST_COMMAND_NAME);
+                   console.printError(errorMessage);
+                   consolesPanelPresenter.addCommandOutput(console);
+                   notificationManager.notify(locale.branchesListFailed(), FAIL, NOT_EMERGE_MODE);
+               });
     }
 }

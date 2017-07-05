@@ -64,6 +64,9 @@ public final class KubernetesLabelConverter {
      */
     public static Map<String, String> labelsToNames(Map<String, String> labels) {
         Map<String, String> names = new HashMap<>();
+        if (labels == null) {
+            return names;
+        }
         for (Map.Entry<String, String> label : labels.entrySet()) {
 
             if (!hasConversionProblems(label)) {
@@ -103,6 +106,9 @@ public final class KubernetesLabelConverter {
      */
     public static Map<String, String> namesToLabels(Map<String, String> names) {
         Map<String, String> labels = new HashMap<>();
+        if (names == null) {
+            return labels;
+        }
         for (Map.Entry<String, String> entry: names.entrySet()){
             String key = entry.getKey();
             String value = entry.getValue();

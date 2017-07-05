@@ -102,20 +102,21 @@ public class CheckoutReferenceTest extends BaseTest {
 
     @Test
     public void onEnterClickedWhenValueIsCorrect() throws Exception {
+        when(appContext.getRootProject()).thenReturn(project);
         when(dtoFactory.createDto(CheckoutRequest.class)).thenReturn(checkoutRequest);
         when(checkoutRequest.withName(anyString())).thenReturn(checkoutRequest);
         when(checkoutRequest.withCreateNew(anyBoolean())).thenReturn(checkoutRequest);
         reset(service);
-        when(service.checkout(any(Path.class), any(CheckoutRequest.class))).thenReturn(voidPromise);
-        when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
-        when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
+        when(service.checkout(any(Path.class), any(CheckoutRequest.class))).thenReturn(stringPromise);
+        when(stringPromise.then(any(Operation.class))).thenReturn(stringPromise);
+        when(stringPromise.catchError(any(Operation.class))).thenReturn(stringPromise);
         when(view.getReference()).thenReturn(CORRECT_REFERENCE);
 
         presenter.showDialog(project);
         presenter.onEnterClicked();
 
-        verify(voidPromise).then(voidPromiseCaptor.capture());
-        voidPromiseCaptor.getValue().apply(null);
+        verify(stringPromise).then(stringCaptor.capture());
+        stringCaptor.getValue().apply(null);
 
         verify(synchronizePromise).then(synchronizeCaptor.capture());
         synchronizeCaptor.getValue().apply(new Resource[0]);

@@ -15,23 +15,19 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.git.shared.ShowFileContentResponse;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.resource.Path;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
@@ -109,39 +105,26 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
         if (status.equals(DELETED)) {
             service.showFileContent(project.get().getLocation(), relPath, revision)
-                   .then(new Operation<ShowFileContentResponse>() {
-                       @Override
-                       public void apply(ShowFileContentResponse content) throws OperationException {
-                           view.setTitle(file.getLocation().toString());
-                           view.setColumnTitles(locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
-                           view.show(content.getContent(), "", file.getLocation().toString(), false);
-                       }
+                   .then(content -> {
+                       view.setTitle(file.getLocation().toString());
+                       view.setColumnTitles(locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
+                       view.show(content.getContent(), "", file.getLocation().toString(), false);
                    })
-                   .catchError(new Operation<PromiseError>() {
-                       @Override
-                       public void apply(PromiseError error) throws OperationException {
-                           notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                       }
+                   .catchError(error -> {
+                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         } else {
             service.showFileContent(project.get().getLocation(), relPath, revision)
-                   .then(new Operation<ShowFileContentResponse>() {
-                       @Override
-                       public void apply(ShowFileContentResponse content) throws OperationException {
-                           showCompare(content.getContent());
-                       }
+                   .then(content -> {
+                       showCompare(content.getContent());
                    })
-                   .catchError(new Operation<PromiseError>() {
-                       @Override
-                       public void apply(PromiseError error) throws OperationException {
-                           notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                       }
+                   .catchError(error -> {
+                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         }
     }
 
     /**
-     *
      * @param file
      *         path of the file
      * @param status
@@ -164,56 +147,35 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         view.setTitle(file.toString());
         if (status == Status.ADDED) {
             service.showFileContent(projectLocation, file, revisionB)
-                   .then(new Operation<ShowFileContentResponse>() {
-                       @Override
-                       public void apply(ShowFileContentResponse response) throws OperationException {
-                           view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
-                                                revisionA == null ? "" : revisionA + locale.compareReadOnlyTitle());
-                           view.show("", response.getContent(), file.toString(), true);
-                       }
+                   .then(response -> {
+                       view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
+                                            revisionA == null ? "" : revisionA + locale.compareReadOnlyTitle());
+                       view.show("", response.getContent(), file.toString(), true);
                    })
-                   .catchError(new Operation<PromiseError>() {
-                       @Override
-                       public void apply(PromiseError error) throws OperationException {
-                           notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                       }
+                   .catchError(error -> {
+                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         } else if (status == Status.DELETED) {
             service.showFileContent(projectLocation, file, revisionA)
-                   .then(new Operation<ShowFileContentResponse>() {
-                       @Override
-                       public void apply(ShowFileContentResponse response) throws OperationException {
-                           view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(), revisionA + locale.compareReadOnlyTitle());
-                           view.show(response.getContent(), "", file.toString(), true);
-                       }
+                   .then(response -> {
+                       view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(), revisionA + locale.compareReadOnlyTitle());
+                       view.show(response.getContent(), "", file.toString(), true);
                    })
-                   .catchError(new Operation<PromiseError>() {
-                       @Override
-                       public void apply(PromiseError error) throws OperationException {
-                           notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                       }
+                   .catchError(error -> {
+                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         } else {
             service.showFileContent(projectLocation, file, revisionA)
-                   .then(new Operation<ShowFileContentResponse>() {
-                       @Override
-                       public void apply(final ShowFileContentResponse contentAResponse) throws OperationException {
-                           service.showFileContent(projectLocation, file, revisionB)
-                                  .then(new Operation<ShowFileContentResponse>() {
-                                      @Override
-                                      public void apply(ShowFileContentResponse contentBResponse) throws OperationException {
-                                          view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
-                                                               revisionA + locale.compareReadOnlyTitle());
-                                          view.show(contentAResponse.getContent(), contentBResponse.getContent(), file.toString(), true);
-                                      }
-                                  })
-                                  .catchError(new Operation<PromiseError>() {
-                                      @Override
-                                      public void apply(PromiseError error) throws OperationException {
-                                          notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                                      }
-                                  });
-                       }
+                   .then(contentAResponse -> {
+                       service.showFileContent(projectLocation, file, revisionB)
+                              .then(contentBResponse -> {
+                                  view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
+                                                       revisionA + locale.compareReadOnlyTitle());
+                                  view.show(contentAResponse.getContent(), contentBResponse.getContent(), file.toString(), true);
+                              })
+                              .catchError(error -> {
+                                  notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+                              });
                    });
         }
     }
@@ -225,46 +187,32 @@ public class ComparePresenter implements CompareView.ActionDelegate {
             return;
         }
 
-        ConfirmCallback confirmCallback = new ConfirmCallback() {
-            @Override
-            public void accepted() {
-                comparedFile.updateContent(newContent).then(new Operation<Void>() {
-                    @Override
-                    public void apply(Void ignored) throws OperationException {
-                        final Container parent = comparedFile.getParent();
+        ConfirmCallback confirmCallback = () -> comparedFile.updateContent(newContent)
+                                                            .then(ignored -> {
+                                                                final Container parent = comparedFile.getParent();
 
-                        if (parent != null) {
-                            parent.synchronize();
-                        }
+                                                                if (parent != null) {
+                                                                    parent.synchronize();
+                                                                }
 
-                        eventBus.fireEvent(new FileContentUpdateEvent(comparedFile.getLocation().toString()));
-                        view.hide();
-                    }
-                });
-            }
-        };
+                                                                eventBus.fireEvent(new FileContentUpdateEvent(comparedFile.getLocation()
+                                                                                                                          .toString()));
+                                                                view.hide();
+                                                            });
 
-        CancelCallback cancelCallback = new CancelCallback() {
-            @Override
-            public void cancelled() {
-                view.hide();
-            }
-        };
+        CancelCallback cancelCallback = view::hide;
 
         dialogFactory.createConfirmDialog(locale.compareSaveTitle(), locale.compareSaveQuestion(), locale.buttonYes(), locale.buttonNo(),
                                           confirmCallback, cancelCallback).show();
     }
 
     private void showCompare(final String remoteContent) {
-        comparedFile.getContent().then(new Operation<String>() {
-            @Override
-            public void apply(String local) throws OperationException {
-                localContent = local;
-                final String path = comparedFile.getLocation().removeFirstSegments(1).toString();
-                view.setTitle(path);
-                view.setColumnTitles(locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
-                view.show(remoteContent, localContent, path, false);
-            }
+        comparedFile.getContent().then(local -> {
+            localContent = local;
+            final String path = comparedFile.getLocation().removeFirstSegments(1).toString();
+            view.setTitle(path);
+            view.setColumnTitles(locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
+            view.show(remoteContent, localContent, path, false);
         });
     }
 }

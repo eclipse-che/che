@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.git.client.status;
 import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
@@ -40,9 +39,6 @@ public class StatusCommandPresenterTest extends BaseTest {
     private StatusCommandPresenter presenter;
 
     @Mock
-    private WorkspaceAgent workspaceAgent;
-
-    @Mock
     private GitOutputConsoleFactory gitOutputConsoleFactory;
 
     @Mock
@@ -53,7 +49,6 @@ public class StatusCommandPresenterTest extends BaseTest {
         super.disarm();
 
         presenter = new StatusCommandPresenter(service,
-                                               appContext,
                                                gitOutputConsoleFactory,
                                                processesPanelPresenter,
                                                constant,

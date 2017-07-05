@@ -16,13 +16,8 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
@@ -33,7 +28,6 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -48,11 +42,12 @@ import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
  */
 @Singleton
 public class BranchPresenter implements BranchView.ActionDelegate {
-    public static final String BRANCH_RENAME_COMMAND_NAME   = "Git rename branch";
-    public static final String BRANCH_DELETE_COMMAND_NAME   = "Git delete branch";
-    public static final String BRANCH_CHECKOUT_COMMAND_NAME = "Git checkout branch";
-    public static final String BRANCH_CREATE_COMMAND_NAME   = "Git create branch";
-    public static final String BRANCH_LIST_COMMAND_NAME     = "Git list of branches";
+
+    private static final String BRANCH_RENAME_COMMAND_NAME   = "Git rename branch";
+    private static final String BRANCH_DELETE_COMMAND_NAME   = "Git delete branch";
+    private static final String BRANCH_CHECKOUT_COMMAND_NAME = "Git checkout branch";
+    private static final String BRANCH_CREATE_COMMAND_NAME   = "Git create branch";
+    private static final String BRANCH_LIST_COMMAND_NAME     = "Git list of branches";
 
     private final DtoFactory              dtoFactory;
     private final BranchView              view;
@@ -96,24 +91,17 @@ public class BranchPresenter implements BranchView.ActionDelegate {
         getBranches();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onCloseClicked() {
         view.close();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onRenameClicked() {
         if (selectedBranch.isRemote()) {
             dialogFactory.createConfirmDialog(constant.branchConfirmRenameTitle(),
                                               constant.branchConfirmRenameMessage(),
-                                              new ConfirmCallback() {
-                                                  @Override
-                                                  public void accepted() {
-                                                      renameBranch();
-                                                  }
-                                              },
+                                              this::renameBranch,
                                               null).show();
         } else {
             renameBranch();
@@ -127,29 +115,18 @@ public class BranchPresenter implements BranchView.ActionDelegate {
                                         selectedBranchName,
                                         0,
                                         selectedBranchName.length(),
-                                        new InputCallback() {
-                                            @Override
-                                            public void accepted(String newBranchName) {
-                                                renameBranch(newBranchName);
-                                            }
-                                        },
+                                        this::renameBranch,
                                         null).show();
     }
 
     private void renameBranch(String newName) {
         service.branchRename(project.getLocation(), selectedBranch.getDisplayName(), newName)
-               .then(new Operation<Void>() {
-                   @Override
-                   public void apply(Void ignored) throws OperationException {
-                       getBranches();
-                   }
+               .then(ignored -> {
+                   getBranches();
                })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError error) throws OperationException {
-                       handleError(error.getCause(), BRANCH_RENAME_COMMAND_NAME);
-                       getBranches();//rename of remote branch occurs in three stages, so needs update list of branches on view
-                   }
+               .catchError(error -> {
+                   handleError(error.getCause(), BRANCH_RENAME_COMMAND_NAME);
+                   getBranches();//rename of remote branch occurs in three stages, so needs update list of branches on view
                });
     }
 
@@ -160,24 +137,18 @@ public class BranchPresenter implements BranchView.ActionDelegate {
         return tokens.length > 0 ? tokens[tokens.length - 1] : selectedBranchName;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onDeleteClicked() {
 
-        service.branchDelete(project.getLocation(), selectedBranch.getName(), true).then(new Operation<Void>() {
-            @Override
-            public void apply(Void ignored) throws OperationException {
-                getBranches();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                handleError(error.getCause(), BRANCH_DELETE_COMMAND_NAME);
-            }
-        });
+        service.branchDelete(project.getLocation(), selectedBranch.getName(), true)
+               .then(ignored -> {
+                   getBranches();
+               })
+               .catchError(error -> {
+                   handleError(error.getCause(), BRANCH_DELETE_COMMAND_NAME);
+               });
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onCheckoutClicked() {
         final CheckoutRequest checkoutRequest = dtoFactory.createDto(CheckoutRequest.class);
@@ -187,65 +158,48 @@ public class BranchPresenter implements BranchView.ActionDelegate {
             checkoutRequest.setName(selectedBranch.getDisplayName());
         }
 
-        service.checkout(project.getLocation(), checkoutRequest).then(new Operation<Void>() {
-            @Override
-            public void apply(Void ignored) throws OperationException {
-                getBranches();
-
-                project.synchronize();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                handleError(error.getCause(), BRANCH_CHECKOUT_COMMAND_NAME);
-            }
-        });
+        service.checkout(project.getLocation(), checkoutRequest)
+               .then(ignored -> {
+                   getBranches();
+                   project.synchronize();
+               })
+               .catchError(error -> {
+                   handleError(error.getCause(), BRANCH_CHECKOUT_COMMAND_NAME);
+               });
     }
 
     /** Get the list of branches. */
     private void getBranches() {
-        service.branchList(project.getLocation(), LIST_ALL).then(new Operation<List<Branch>>() {
-            @Override
-            public void apply(List<Branch> branches) throws OperationException {
-                if (branches.isEmpty()) {
-                    dialogFactory.createMessageDialog(constant.branchTitle(),
-                                                      constant.initCommitWasNotPerformed(),
-                                                      null).show();
-                } else {
-                    view.setBranches(branches);
-                    view.showDialogIfClosed();
-                }
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                handleError(error.getCause(), BRANCH_LIST_COMMAND_NAME);
-            }
-        });
+        service.branchList(project.getLocation(), LIST_ALL)
+               .then(branches -> {
+                   if (branches.isEmpty()) {
+                       dialogFactory.createMessageDialog(constant.branchTitle(),
+                                                         constant.initCommitWasNotPerformed(),
+                                                         null).show();
+                   } else {
+                       view.setBranches(branches);
+                       view.showDialogIfClosed();
+                   }
+               })
+               .catchError(error -> {
+                   handleError(error.getCause(), BRANCH_LIST_COMMAND_NAME);
+               });
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onCreateClicked() {
-        dialogFactory.createInputDialog(constant.branchCreateNew(), constant.branchTypeNew(), new InputCallback() {
-            @Override
-            public void accepted(String value) {
-                if (value.isEmpty()) {
-                    return;
-                }
-
-                service.branchCreate(project.getLocation(), value, null).then(new Operation<Branch>() {
-                    @Override
-                    public void apply(Branch branch) throws OperationException {
-                        getBranches();
-                    }
-                }).catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError error) throws OperationException {
-                        handleError(error.getCause(), BRANCH_CREATE_COMMAND_NAME);
-                    }
-                });
+        dialogFactory.createInputDialog(constant.branchCreateNew(), constant.branchTypeNew(), value -> {
+            if (value.isEmpty()) {
+                return;
             }
+
+            service.branchCreate(project.getLocation(), value, null)
+                   .then(branch -> {
+                       getBranches();
+                   })
+                   .catchError(error -> {
+                       handleError(error.getCause(), BRANCH_CREATE_COMMAND_NAME);
+                   });
         }, null).show();
     }
 
@@ -258,7 +212,6 @@ public class BranchPresenter implements BranchView.ActionDelegate {
         view.setEnableDeleteButton(false);
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onBranchSelected(@NotNull Branch branch) {
         selectedBranch = branch;

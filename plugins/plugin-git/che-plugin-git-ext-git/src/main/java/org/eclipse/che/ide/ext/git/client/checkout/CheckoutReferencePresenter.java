@@ -14,14 +14,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.git.shared.CheckoutRequest;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
@@ -88,29 +84,21 @@ public class CheckoutReferencePresenter implements CheckoutReferenceView.ActionD
     public void onCheckoutClicked(final String reference) {
 
         service.checkout(project.getLocation(), dtoFactory.createDto(CheckoutRequest.class).withName(reference))
-               .then(new Operation<Void>() {
-                   @Override
-                   public void apply(Void arg) throws OperationException {
-                       project.synchronize().then(new Operation<Resource[]>() {
-                           @Override
-                           public void apply(Resource[] arg) throws OperationException {
-                               view.close();
-                           }
-                       });
-                   }
+               .then(branchName -> {
+                   appContext.getRootProject().synchronize()
+                             .then(arg -> {
+                                 view.close();
+                             });
                })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError error) throws OperationException {
-                       final String errorMessage = (error.getMessage() != null)
-                                                   ? error.getMessage()
-                                                   : constant.checkoutFailed();
-                       GitOutputConsole console = gitOutputConsoleFactory.create(CHECKOUT_COMMAND_NAME);
-                       console.printError(errorMessage);
-                       consolesPanelPresenter.addCommandOutput(console);
-                       notificationManager.notify(constant.checkoutFailed(), FAIL, FLOAT_MODE);
-                       view.close();
-                   }
+               .catchError(error -> {
+                   final String errorMessage = (error.getMessage() != null)
+                                               ? error.getMessage()
+                                               : constant.checkoutFailed();
+                   GitOutputConsole console = gitOutputConsoleFactory.create(CHECKOUT_COMMAND_NAME);
+                   console.printError(errorMessage);
+                   consolesPanelPresenter.addCommandOutput(console);
+                   notificationManager.notify(constant.checkoutFailed(), FAIL, FLOAT_MODE);
+                   view.close();
                });
     }
 

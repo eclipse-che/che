@@ -60,7 +60,7 @@ public class ServerEvaluationStrategyTest {
         expected.put("9090/udp", DEFAULT_HOSTNAME + ":" + "32101");
 
         // when
-        Map<String, String> actual = strategy.getExposedPortsToAddressPorts(DEFAULT_HOSTNAME, ports);
+        Map<String, String> actual = strategy.getExposedPortsToAddressPorts(DEFAULT_HOSTNAME, ports, false);
 
         // then
         assertEquals(actual, expected);
@@ -85,7 +85,7 @@ public class ServerEvaluationStrategyTest {
         expected.put("9090/udp", DEFAULT_HOSTNAME + ":" + "32101");
 
         // when
-        Map<String, String> actual = strategy.getExposedPortsToAddressPorts(DEFAULT_HOSTNAME, ports);
+        Map<String, String> actual = strategy.getExposedPortsToAddressPorts(DEFAULT_HOSTNAME, ports, false);
 
         // then
         assertEquals(actual, expected);
@@ -352,7 +352,7 @@ public class ServerEvaluationStrategyTest {
                                                                          .withHostPort("32101")));
         when(networkSettings.getPorts()).thenReturn(ports);
         Map<String, String> exposedPortsToAddressPorts =
-                strategy.getExposedPortsToAddressPorts(DEFAULT_HOSTNAME, ports);
+                strategy.getExposedPortsToAddressPorts(DEFAULT_HOSTNAME, ports, false);
         when(strategy.getExternalAddressesAndPorts(containerInfo, DEFAULT_HOSTNAME))
                 .thenReturn(exposedPortsToAddressPorts);
         when(strategy.getInternalAddressesAndPorts(containerInfo, DEFAULT_HOSTNAME))
@@ -372,6 +372,11 @@ public class ServerEvaluationStrategyTest {
         protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo,
                                                                    String internalAddress) {
             return null;
+        }
+
+        @Override
+        protected boolean useHttpsForExternalUrls() {
+            return false;
         }
     }
     */

@@ -13,10 +13,6 @@ package org.eclipse.che.ide.ext.git.client.status;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
@@ -44,7 +40,6 @@ public class StatusCommandPresenter {
     public static final String STATUS_COMMAND_NAME = "Git status";
 
     private final GitServiceClient        service;
-    private final AppContext              appContext;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
     private final ProcessesPanelPresenter consolesPanelPresenter;
     private final GitLocalizationConstant constant;
@@ -55,13 +50,11 @@ public class StatusCommandPresenter {
      */
     @Inject
     public StatusCommandPresenter(GitServiceClient service,
-                                  AppContext appContext,
                                   GitOutputConsoleFactory gitOutputConsoleFactory,
                                   ProcessesPanelPresenter processesPanelPresenter,
                                   GitLocalizationConstant constant,
                                   NotificationManager notificationManager) {
         this.service = service;
-        this.appContext = appContext;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
         this.consolesPanelPresenter = processesPanelPresenter;
         this.constant = constant;
@@ -70,17 +63,13 @@ public class StatusCommandPresenter {
 
     /** Show status. */
     public void showStatus(Project project) {
-        service.statusText(project.getLocation(), LONG).then(new Operation<String>() {
-            @Override
-            public void apply(String status) throws OperationException {
-                printGitStatus(status);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(constant.statusFailed(), FAIL, FLOAT_MODE);
-            }
-        });
+        service.statusText(project.getLocation(), LONG)
+               .then(status -> {
+                   printGitStatus(status);
+               })
+               .catchError(error -> {
+                   notificationManager.notify(constant.statusFailed(), FAIL, FLOAT_MODE);
+               });
     }
 
     /**
