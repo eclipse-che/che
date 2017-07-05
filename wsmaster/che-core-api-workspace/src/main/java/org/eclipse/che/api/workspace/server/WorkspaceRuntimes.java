@@ -31,7 +31,6 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
-import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -42,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -98,37 +96,16 @@ public class WorkspaceRuntimes {
         infraByRecipe = ImmutableMap.copyOf(tmp);
     }
 
-    @PostConstruct
-    private void recover() {
-        for (RuntimeInfrastructure infra : infraByRecipe.values()) {
-            try {
-                for (RuntimeIdentity id : infra.getIdentities()) {
-                    runtimes.put(id.getWorkspaceId(), validate(infra.getRuntime(id)));
-                }
-            } catch (UnsupportedOperationException x) {
-                LOG.warn("Not recoverable infrastructure: '{}'", infra.getName());
-            } catch (InfrastructureException x) {
-                LOG.error("An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
-                          infra.getName(),
-                          x.getMessage());
-            }
-        }
-    }
-
-    //TODO do we need some validation on start?
-    private InternalRuntime validate(InternalRuntime runtime) {
-        return runtime;
-    }
-
+    // TODO Doesn't look like correct place for this logic. Where this code should be?
     public Environment estimate(Environment environment) throws NotFoundException, InfrastructureException, ValidationException {
         // TODO decide whether throw exception when dev machine not found
         String type = environment.getRecipe().getType();
-        if (!infraByRecipe.containsKey(type))
+        if (!infraByRecipe.containsKey(type)) {
             throw new NotFoundException("Infrastructure not found for type: " + type);
+        }
 
         return infraByRecipe.get(type).estimate(environment);
     }
-
 
     /**
      * Returns the runtime descriptor describing currently starting/running/stopping
@@ -150,11 +127,11 @@ public class WorkspaceRuntimes {
     public Runtime get(String workspaceId) throws NotFoundException, ServerException {
 
         InternalRuntime runtime = runtimes.get(workspaceId);
-        if (runtime != null)
+        if (runtime != null) {
             return runtime;
-        else
+        } else {
             throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
-
+        }
     }
 
     /**
@@ -221,7 +198,6 @@ public class WorkspaceRuntimes {
             eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                            .withWorkspaceId(workspaceId)
                                            .withStatus(WorkspaceStatus.STARTING)
-                                           .withEventType(EventType.STARTING)
                                            .withPrevStatus(WorkspaceStatus.STOPPED));
             return CompletableFuture.runAsync(ThreadLocalPropagateContext.wrap(() -> {
                 try {
@@ -229,7 +205,6 @@ public class WorkspaceRuntimes {
                     eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                                    .withWorkspaceId(workspaceId)
                                                    .withStatus(WorkspaceStatus.RUNNING)
-                                                   .withEventType(EventType.RUNNING)
                                                    .withPrevStatus(WorkspaceStatus.STARTING));
                 } catch (InfrastructureException e) {
                     runtimes.remove(workspaceId);
@@ -237,7 +212,6 @@ public class WorkspaceRuntimes {
                                                    .withWorkspaceId(workspaceId)
                                                    .withStatus(WorkspaceStatus.STOPPED)
                                                    .withPrevStatus(WorkspaceStatus.STARTING)
-                                                   .withEventType(EventType.ERROR)
                                                    .withError(e.getMessage()));
                     if (e instanceof InternalInfrastructureException) {
                         LOG.error(format("Error occurs on workspace '%s' start. Error: %s", workspaceId, e));
@@ -253,7 +227,6 @@ public class WorkspaceRuntimes {
             LOG.error(e.getLocalizedMessage(), e);
             throw new ServerException(e.getLocalizedMessage(), e);
         }
-
     }
 
     /**
@@ -280,8 +253,7 @@ public class WorkspaceRuntimes {
         eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                        .withWorkspaceId(workspaceId)
                                        .withPrevStatus(WorkspaceStatus.RUNNING)
-                                       .withStatus(WorkspaceStatus.STOPPING)
-                                       .withEventType(EventType.STOPPING));
+                                       .withStatus(WorkspaceStatus.STOPPING));
 
         InternalRuntime runtime = runtimes.get(workspaceId);
         if (runtime == null) {
@@ -295,8 +267,7 @@ public class WorkspaceRuntimes {
         eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                        .withWorkspaceId(workspaceId)
                                        .withPrevStatus(WorkspaceStatus.STOPPING)
-                                       .withStatus(WorkspaceStatus.STOPPED)
-                                       .withEventType(EventType.STOPPED));
+                                       .withStatus(WorkspaceStatus.STOPPED));
     }
 
     /**
@@ -329,14 +300,26 @@ public class WorkspaceRuntimes {
         return runtimes.containsKey(workspaceId);
     }
 
-    private void doStart(EnvironmentImpl environment,
-                         String workspaceId, String envName,
-                         Map<String, String> options) throws InfrastructureException,
-                                                             NotFoundException,
-                                                             ConflictException,
-                                                             ValidationException,
-                                                             IOException {
+    @PostConstruct
+    private void recover() {
+        for (RuntimeInfrastructure infra : infraByRecipe.values()) {
+            try {
+                for (RuntimeIdentity id : infra.getIdentities()) {
+                    runtimes.put(id.getWorkspaceId(), validate(infra.getRuntime(id)));
+                }
+            } catch (UnsupportedOperationException x) {
+                LOG.warn("Not recoverable infrastructure: '{}'", infra.getName());
+            } catch (InfrastructureException x) {
+                LOG.error("An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
+                          infra.getName(),
+                          x.getMessage());
+            }
+        }
+    }
 
+    //TODO do we need some validation on start?
+    private InternalRuntime validate(InternalRuntime runtime) {
+        return runtime;
     }
 
     private static EnvironmentImpl copyEnv(Workspace workspace, String envName) {

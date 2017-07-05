@@ -31,10 +31,6 @@ public class RuntimeImpl implements Runtime {
     private       Map<String, ? extends Machine> machines;
     private       List<WarningImpl>              warnings;
 
-//    public RuntimeImpl(String activeEnv) {
-//        this.activeEnv = activeEnv;
-//    }
-
     public RuntimeImpl(String activeEnv,
                        Map<String, ? extends Machine> machines,
                        String owner) {
@@ -43,11 +39,6 @@ public class RuntimeImpl implements Runtime {
         this.owner = owner;
 //        this.userToken = userToken;
     }
-
-//    public RuntimeImpl(Runtime runtime) {
-//        this(runtime.getActiveEnv(),
-//             runtime.getMachines());
-//    }
 
     @Override
     public String getActiveEnv() {

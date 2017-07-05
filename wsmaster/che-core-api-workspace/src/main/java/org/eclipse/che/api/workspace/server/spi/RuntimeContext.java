@@ -54,9 +54,7 @@ public abstract class RuntimeContext {
         for (Map.Entry<String, ? extends MachineConfig> entry : effectiveMachines.entrySet()) {
             internalMachines.put(entry.getKey(), new InternalMachineConfig(entry.getValue(), installerRegistry));
         }
-
     }
-
 
     /**
      * Context must return the Runtime object whatever its status is (STOPPED status including)
@@ -86,20 +84,6 @@ public abstract class RuntimeContext {
      */
     public abstract URI getOutputChannel() throws InfrastructureException,
                                                   UnsupportedOperationException;
-
-
-//    /**
-//     * Status Channel URL should be passed by Workspace API level. It is used for events about any kind of status changes, such as:
-//     * - Installer installing statuses
-//     * - Servers statuses
-//     * - Infrastructure specific events
-//     * Infrastructure MUST NOT use this channel for long-lived output (process stdout, logs etc)
-//     * @return URL of status channel
-//     */
-//    public URL getStatusChannel() {
-//        return statusChannel;
-//    }
-
 
     /**
      * Runtime Identity contains information allowing uniquely identify a Runtime
@@ -179,6 +163,4 @@ public abstract class RuntimeContext {
         }
 
     }
-
-
 }

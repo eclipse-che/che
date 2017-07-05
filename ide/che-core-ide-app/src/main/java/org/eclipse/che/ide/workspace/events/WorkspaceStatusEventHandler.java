@@ -28,14 +28,10 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
 import static com.google.common.base.Strings.nullToEmpty;
-import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.ERROR;
-import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.RUNNING;
-import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATED;
-import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATING;
-import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATION_ERROR;
-import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.STARTING;
-import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.STOPPED;
-import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.STOPPING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 
 /**
  * Receives notifications about changing workspace's status.
@@ -78,23 +74,17 @@ class WorkspaceStatusEventHandler {
             // Because AppContext always must return an actual workspace model.
             ((AppContextImpl)appContext).setWorkspace(workspace);
 
-            if (event.getEventType() == STARTING) {
+            if (event.getStatus() == STARTING) {
                 eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
-            } else if (event.getEventType() == RUNNING) {
+            } else if (event.getStatus() == RUNNING) {
                 eventBus.fireEvent(new WorkspaceRunningEvent());
 
                 // fire deprecated WorkspaceStatusChangedEvent for backward compatibility with IDE 5.x
                 eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
-            } else if (event.getEventType() == STOPPING) {
+            } else if (event.getStatus() == STOPPING) {
                 eventBus.fireEvent(new WorkspaceStoppingEvent());
-            } else if (event.getEventType() == STOPPED || event.getEventType() == ERROR) {
-                eventBus.fireEvent(new WorkspaceStoppedEvent(workspace, event.getEventType() == ERROR, nullToEmpty(event.getError())));
-            } else if (event.getEventType() == SNAPSHOT_CREATING) {
-                eventBus.fireEvent(new SnapshotCreatingEvent());
-            } else if (event.getEventType() == SNAPSHOT_CREATED) {
-                eventBus.fireEvent(new SnapshotCreatedEvent());
-            } else if (event.getEventType() == SNAPSHOT_CREATION_ERROR) {
-                eventBus.fireEvent(new SnapshotCreationErrorEvent(nullToEmpty(event.getError())));
+            } else if (event.getStatus() == STOPPED) {
+                eventBus.fireEvent(new WorkspaceStoppedEvent(workspace, event.getError() != null, nullToEmpty(event.getError())));
             }
         });
     }

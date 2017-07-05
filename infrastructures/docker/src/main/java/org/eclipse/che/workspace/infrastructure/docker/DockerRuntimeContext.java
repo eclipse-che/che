@@ -32,19 +32,10 @@ import java.util.List;
 import static org.eclipse.che.workspace.infrastructure.docker.output.OutputEndpoint.OUTPUT_WEBSOCKET_ENDPOINT_BASE;
 
 /**
+ * Docker specific implementation of {@link RuntimeContext}.
+ *
  * @author Alexander Garagatyi
  */
-// TODO Check what if start fails and interruption called or stop called
-// TODO interrupted exception, closedbyinteruptionexception
-
-// TODO stop of starting WS - if not supported specific exception
-// TODO stop add warning on errors?
-// TODO stop in which cases to throw an exception?
-
-// TODO exception on start
-// TODO remove starting machine if present
-// TODO Check if interruption came from stop or because of another reason
-// TODO if because of another reason stop environment
 public class DockerRuntimeContext extends RuntimeContext {
     private final DockerEnvironment    dockerEnvironment;
     private final DockerRuntimeFactory dockerRuntimeFactory;
@@ -71,7 +62,7 @@ public class DockerRuntimeContext extends RuntimeContext {
     }
 
     @Override
-    public URI getOutputChannel() throws InfrastructureException, UnsupportedOperationException {
+    public URI getOutputChannel() throws InfrastructureException {
         try {
             final URI apiURI = URI.create(apiEndpoint);
             return UriBuilder.fromUri(apiURI)

@@ -552,16 +552,6 @@ public class WorkspaceManager {
         });
     }
 
-//    private void startAsync(OldMachineConfig machineConfig, String workspaceId) {
-//        sharedPool.execute(() -> {
-//            try {
-//                runtimes.startMachine(workspaceId, machineConfig);
-//            } catch (ApiException | EnvironmentException e) {
-//                LOG.error(e.getLocalizedMessage(), e);
-//            }
-//        });
-//    }
-
     private void checkWorkspaceIsRunning(WorkspaceImpl workspace, String operation) throws ConflictException {
         if (workspace.getStatus() != RUNNING) {
             throw new ConflictException(format("Could not %s the workspace '%s/%s' because its status is '%s'.",

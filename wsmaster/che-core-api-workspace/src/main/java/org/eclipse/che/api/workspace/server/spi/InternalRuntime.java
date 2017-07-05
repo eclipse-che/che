@@ -49,11 +49,6 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
         this.urlRewriter = urlRewriter != null ? urlRewriter : new URLRewriter.NoOpURLRewriter();
     }
 
-    /**
-     * @return Map name -> Machine. Implementation should not return null
-     */
-    public abstract Map<String, ? extends Machine> getInternalMachines();
-
     @Override
     public String getActiveEnv() {
         return context.getIdentity().getEnvName();
@@ -78,6 +73,13 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
                                e -> new MachineImpl(e.getValue().getProperties(),
                                                     rewriteExternalServers(e.getValue().getServers()))));
     }
+
+    /**
+     * Returns map of machine name to machine instance entries.
+     * <p/>
+     * Implementation should not return null
+     */
+    protected abstract Map<String, ? extends Machine> getInternalMachines();
 
     /**
      * Starts Runtime.
@@ -143,7 +145,6 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
     }
 
     protected abstract void internalStop(Map<String, String> stopOptions) throws InfrastructureException;
-
 
     /**
      * @return some implementation specific properties if any
