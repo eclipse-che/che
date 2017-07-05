@@ -71,7 +71,7 @@ public class AnnotationModelImpl implements AnnotationModel {
         try {
             addPosition(position);
         } catch (BadLocationException ignore) {
-            Log.error(getClass(), "BadLocation for "+annotation);
+            Log.error(getClass(), "BadLocation for " + annotation);
             //ignore invalid location
         }
         getAnnotationModelEvent().annotationAdded(annotation);
