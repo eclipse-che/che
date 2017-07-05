@@ -198,8 +198,6 @@ public class WsMasterModule extends AbstractModule {
 //        install(new org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule());
         install(new org.eclipse.che.swagger.deploy.DocsModule());
 // FIXME: spi
-//        install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
-// FIXME: spi
 //        install(new org.eclipse.che.workspace.infrastructure.docker.old.proxy.DockerProxyModule());
         install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
 

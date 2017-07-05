@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.machine.shared.dto.MachineLogMessageDto;
+import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -27,11 +27,11 @@ class EnvironmentOutputHandler {
     EnvironmentOutputHandler(RequestHandlerConfigurator configurator, EventBus eventBus) {
         configurator.newConfiguration()
                     .methodName("event:environment-output:message")
-                    .paramsAsDto(MachineLogMessageDto.class)
+                    .paramsAsDto(MachineLogEvent.class)
                     .noResult()
                     .withBiConsumer((endpointId, log) -> {
                         Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
-                        eventBus.fireEvent(new EnvironmentOutputEvent(log.getContent(), log.getMachineName()));
+                        eventBus.fireEvent(new EnvironmentOutputEvent(log.getText(), log.getMachineName()));
                     });
     }
 }
