@@ -25,9 +25,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.event.ServerIdleEvent;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.event.ServerIdleEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.mockito.ArgumentCaptor;

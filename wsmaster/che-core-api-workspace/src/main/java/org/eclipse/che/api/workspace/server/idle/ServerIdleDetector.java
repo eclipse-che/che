@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.docker.machine.idle;
+package org.eclipse.che.api.workspace.server.idle;
 
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -21,9 +21,10 @@ import javax.annotation.PreDestroy;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.eclipse.che.api.core.event.ServerIdleEvent;
+
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.server.event.ServerIdleEvent;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 /**
  * Notifies about idling the che server
- * Fires {@link org.eclipse.che.api.core.event.ServerIdleEvent} if no workspace
+ * Fires {@link ServerIdleEvent} if no workspace
  * is run for <b>che.openshift.server.inactive.stop.timeout.ms</b> milliseconds
  */
 @Singleton
