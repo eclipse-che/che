@@ -13,14 +13,15 @@ package org.eclipse.che.plugin.maven.shared.dto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Info massage that points to client that messaging started/stopped
- *
- * @author Evgen Vidolob
+ * Message for translating text message from <b>MavenServerNotifier</b>
  */
 @DTO
-public interface StartStopNotification extends MavenOutputEventDto{
+public interface TextMessageDto extends MavenOutputEventDto {
 
-    boolean isStart();
+    String getText();
 
-    void setStart(boolean start);
+    /** Returns text message of the output event. */
+    void setText(String text);
+
+    TextMessageDto withText(String text);
 }

@@ -8,19 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.shared.dto;
-
-import org.eclipse.che.dto.shared.DTO;
+package org.eclipse.che.plugin.maven.shared.event;
 
 /**
- * Info massage that points to client that messaging started/stopped
- *
- * @author Evgen Vidolob
+ * Base maven output event.
  */
-@DTO
-public interface StartStopNotification extends MavenOutputEventDto{
+public interface MavenOutputEvent {
+    /**Returns typ of the event. */
+    TYPE getType();
 
-    boolean isStart();
-
-    void setStart(boolean start);
+    enum TYPE {
+        START_STOP,
+        PERCENT,
+        PERCENT_UNDEFINED,
+        UPDATE,
+        TEXT
+    }
 }

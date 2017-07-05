@@ -8,19 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.shared.dto;
+package org.eclipse.che.plugin.maven.shared.event;
 
-import org.eclipse.che.dto.shared.DTO;
+import java.util.List;
 
 /**
- * Info massage that points to client that messaging started/stopped
- *
- * @author Evgen Vidolob
+ * Event that describes Maven notification output.
  */
-@DTO
-public interface StartStopNotification extends MavenOutputEventDto{
+public interface MavenUpdateEvent extends MavenOutputEvent {
+    /** Returns list of projects which were modified. */
+    List<String> getUpdatedProjects();
 
-    boolean isStart();
-
-    void setStart(boolean start);
+    /** Returns list of projects which were removed. */
+    List<String> getRemovedProjects();
 }
