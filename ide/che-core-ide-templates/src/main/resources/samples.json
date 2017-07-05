@@ -1047,7 +1047,7 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "print-help \ncd ${current.project.path} \nnpm install express@4.13.4 \nexpress -f . \ncp -rn /bitnami/mongodb/conf ${current.project.path} \nnpm install mongodb@2.1.18 --save \nnpm install \ncounter=0; until nc -z localhost 27017; do counter=$((counter+1)); if [ $counter == 10 ]; then echo \"Error: Couldn't connect to MongoDB.\"; exit 1; fi; echo \"Trying to connect to MongoDB at localhost. Attempt $counter.\"; sleep 5; done; echo \"Connected to MongoDB database. Starting application server.\" \nnpm start",
+        "commandLine": "print-help \ncd ${current.project.path} \nexpress -f . \ncp -rn /bitnami/mongodb/conf ${current.project.path} \nnpm install mongodb@2.2.19 --save \nnpm install \ncounter=0; until nc -z localhost 27017; do counter=$((counter+1)); if [ $counter == 10 ]; then echo \"Error: Couldn't connect to MongoDB.\"; exit 1; fi; echo \"Trying to connect to MongoDB at localhost. Attempt $counter.\"; sleep 5; done; echo \"Connected to MongoDB database. Starting application server.\" \nnpm start",
         "attributes": {
           "previewUrl": "http://${server.port.3000}",
           "goal": "Run"
@@ -1141,7 +1141,7 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "print-help \nsudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb \ncp -an /tmp/laravel-sample/. ${current.project.path} \ncd ${current.project.path} \ncomposer update \nphp artisan migrate \nphp artisan serve --host=0.0.0.0 --port=3000",
+        "commandLine": "print-help \nsudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb \ncp -an /tmp/laravel-sample/. ${current.project.path} \ncd ${current.project.path} \nchown bitnami:bitnami -R ${current.project.path} \ncomposer update \nphp artisan migrate \nphp artisan serve --host=0.0.0.0 --port=3000",
         "attributes": {
           "previewUrl": "http://${server.port.3000}/",
           "goal": "Run"
@@ -1188,7 +1188,7 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "print-help \nsudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb \ncd ${current.project.path} \nmv README.md README-CHE.md \nrails new . --skip-bundle --database mysql \nsed -Ei 's/\\s*#\\s*gem(.*)therubyracer/gem\\1therubyracer/' Gemfile \nbundle install \nbundle exec rails db:create \nbundle exec rails db:migrate \nbundle exec rails server -b 0.0.0.0 -p 3000",
+        "commandLine": "print-help \nsudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb \ncd ${current.project.path} \nmv README.md README-CHE.md \nrails new . --skip-bundle --database mysql \nsed -Ei 's/\\s*#\\s*gem(.*)therubyracer/gem\\1therubyracer/' Gemfile \nsed -Ei 's#adapter: mysql2#adapter: mysql2\\n  socket: /opt/bitnami/mariadb/tmp/mysql.sock#g' config/database.yml\nbundle install \nbundle exec rails db:create \nbundle exec rails db:migrate \nbundle exec rails server -b 0.0.0.0 -p 3000",
         "attributes": {
           "previewUrl": "http://${server.port.3000}/",
           "goal": "Run"

@@ -202,6 +202,7 @@ public class EditorFileTracker {
             @Override
             public void run() {
                 if (!Files.exists(FileWatcherUtils.toNormalPath(root.toPath(), it))) {
+                    hashRegistry.remove(path + endpointId);
                     FileStateUpdateDto params = newDto(FileStateUpdateDto.class).withPath(path).withType(DELETED);
                     transmitter.newRequest()
                                .endpointId(endpointId)

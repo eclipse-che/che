@@ -44,7 +44,7 @@ public class KubernetesContainerTest {
                 map(p -> Integer.toString(p.getContainerPort()) +
                          "/" +
                          p.getProtocol().toLowerCase()).collect(Collectors.toList());
-        assertTrue(exposedPorts.stream().anyMatch(portsAndProtocols::contains));
+        assertTrue(exposedPorts.stream().allMatch(portsAndProtocols::contains));
     }
 
     @Test
@@ -61,7 +61,7 @@ public class KubernetesContainerTest {
                 map(p -> Integer.toString(p.getContainerPort()) +
                         "/" +
                         p.getProtocol().toLowerCase()).collect(Collectors.toList());
-        assertTrue(imageExposedPorts.keySet().stream().anyMatch(portsAndProtocols::contains));
+        assertTrue(imageExposedPorts.keySet().stream().allMatch(portsAndProtocols::contains));
     }
 
 }

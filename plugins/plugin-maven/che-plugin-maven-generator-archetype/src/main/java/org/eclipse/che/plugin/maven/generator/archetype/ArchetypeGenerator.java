@@ -11,13 +11,13 @@
 package org.eclipse.che.plugin.maven.generator.archetype;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.CommandLine;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.core.util.ValueHolder;
 import org.eclipse.che.api.core.util.Watchdog;
-import org.eclipse.che.api.core.util.WebsocketMessageConsumer;
 import org.eclipse.che.ide.maven.tools.MavenArtifact;
 import org.eclipse.che.ide.maven.tools.MavenUtils;
 import org.eclipse.che.plugin.maven.shared.MavenArchetype;
@@ -25,6 +25,7 @@ import org.eclipse.che.plugin.maven.shared.dto.ArchetypeOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import java.io.File;
@@ -35,7 +36,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_NAME;
+import static org.eclipse.che.plugin.maven.shared.dto.ArchetypeOutput.State.DONE;
+import static org.eclipse.che.plugin.maven.shared.dto.ArchetypeOutput.State.ERROR;
 
 /**
  * Generates projects with maven-archetype-plugin.
@@ -45,6 +47,13 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYP
 @Singleton
 public class ArchetypeGenerator {
     private static final Logger     LOG            = LoggerFactory.getLogger(ArchetypeGenerator.class);
+
+    private EventService eventService;
+
+    @Inject
+    public ArchetypeGenerator(EventService eventService) {
+        this.eventService = eventService;
+    }
 
     /**
      * Generates a new project from the specified archetype by given maven artifact descriptor.
@@ -100,12 +109,13 @@ public class ArchetypeGenerator {
      */
     private void execute(String[] commandLine, File workDir) throws TimeoutException, IOException, InterruptedException {
         ProcessBuilder pb = new ProcessBuilder(commandLine).redirectErrorStream(true).directory(workDir);
-        WebsocketMessageConsumer<ArchetypeOutput> websocketMessageConsumer = new WebsocketMessageConsumer(MAVEN_ARCHETYPE_CHANEL_NAME);
-        websocketMessageConsumer.consume(new ArchetypeOutputImpl("Start Project generation", ArchetypeOutput.State.START));
+
+        eventService.publish(new ArchetypeOutputImpl("Start Project generation", ArchetypeOutput.State.START));
+
         LineConsumer lineConsumer = new AbstractLineConsumer() {
             @Override
             public void writeLine(String line) throws IOException {
-                websocketMessageConsumer.consume(new ArchetypeOutputImpl(line, ArchetypeOutput.State.IN_PROGRESS));
+                eventService.publish(new ArchetypeOutputImpl(line, ArchetypeOutput.State.IN_PROGRESS));
             }
         };
 
@@ -122,14 +132,14 @@ public class ArchetypeGenerator {
             // consume logs until process ends
             ProcessUtil.process(process, lineConsumer);
             process.waitFor();
-            websocketMessageConsumer.consume(new ArchetypeOutputImpl("Done", ArchetypeOutput.State.DONE));
+            eventService.publish(new ArchetypeOutputImpl("Done", DONE));
             if (isTimeoutExceeded.get()) {
                 LOG.error("Generation project time expired : command-line " + Arrays.toString(commandLine));
-                websocketMessageConsumer.consume(new ArchetypeOutputImpl("Generation project time expired", ArchetypeOutput.State.ERROR));
+                eventService.publish(new ArchetypeOutputImpl("Generation project time expired", ERROR));
                 throw new TimeoutException();
             } else if (process.exitValue() != 0) {
                 LOG.error("Generation project fail : command-line " + Arrays.toString(commandLine));
-                websocketMessageConsumer.consume(new ArchetypeOutputImpl("Generation project occurs error", ArchetypeOutput.State.ERROR));
+                eventService.publish(new ArchetypeOutputImpl("Generation project occurs error", ERROR));
                 throw new IOException("Process failed. Exit code " + process.exitValue() + " command-line : " + Arrays.toString(commandLine));
             }
         } finally {

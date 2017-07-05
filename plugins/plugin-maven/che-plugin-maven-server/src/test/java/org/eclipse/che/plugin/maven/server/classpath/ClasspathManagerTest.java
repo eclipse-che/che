@@ -10,24 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.server.classpath;
 
-import com.google.gson.JsonObject;
 import com.google.inject.Provider;
 
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.server.BaseTest;
 import org.eclipse.che.plugin.maven.server.MavenWrapperManager;
 import org.eclipse.che.plugin.maven.server.core.EclipseWorkspaceProvider;
-import org.eclipse.che.plugin.maven.server.core.MavenCommunication;
 import org.eclipse.che.plugin.maven.server.core.MavenExecutorService;
 import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
 import org.eclipse.che.plugin.maven.server.core.MavenWorkspace;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
-import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
 import org.eclipse.che.plugin.maven.server.rmi.MavenServerManagerTest;
-import org.eclipse.che.plugin.maven.shared.MessageType;
-import org.eclipse.che.plugin.maven.shared.dto.NotificationMessage;
-import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaProject;
@@ -40,8 +35,6 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -81,22 +74,7 @@ public class ClasspathManagerTest extends BaseTest {
                 new MavenProjectManager(wrapperManager, mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
         classpathManager = new ClasspathManager(root.getAbsolutePath(), wrapperManager, mavenProjectManager, terminal, mavenNotifier);
         mavenWorkspace = new MavenWorkspace(mavenProjectManager, mavenNotifier, new MavenExecutorService(), projectRegistryProvider,
-                                            new MavenCommunication() {
-                                                @Override
-                                                public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed) {
-
-                                                }
-
-                                                @Override
-                                                public void sendNotification(NotificationMessage message) {
-                                                    System.out.println(message.toString());
-                                                }
-
-                                                @Override
-                                                public void send(JsonObject object, MessageType type) {
-
-                                                }
-                                            }, classpathManager, eventService, new EclipseWorkspaceProvider());
+                                            classpathManager, eventService, new EclipseWorkspaceProvider());
     }
 
     @AfterMethod

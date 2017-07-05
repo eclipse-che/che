@@ -19,7 +19,7 @@ import java.util.List;
  * @author Evgen Vidolob
  */
 @DTO
-public interface ProjectsUpdateMessage {
+public interface ProjectsUpdateMessage extends MavenOutputEventDto {
 
     List<String> getUpdatedProjects();
 
