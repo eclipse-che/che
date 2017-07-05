@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.ExternalResourceDelta;
-import org.eclipse.che.ide.api.resources.ModificationTracker;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeInfo;
@@ -166,12 +165,6 @@ public class RefactoringUpdater {
 
     private void updateFileContent(VirtualFile virtualFile) {
         String path = virtualFile.getLocation().toString();
-
-        if (virtualFile instanceof ModificationTracker) {
-            String modificationStamp = ((ModificationTracker)virtualFile).getModificationStamp();
-            eventBus.fireEvent(new FileContentUpdateEvent(path, modificationStamp));
-            return;
-        }
 
         eventBus.fireEvent(new FileContentUpdateEvent(path));
     }
