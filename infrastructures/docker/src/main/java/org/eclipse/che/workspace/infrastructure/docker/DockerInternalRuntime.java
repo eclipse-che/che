@@ -10,12 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -25,7 +23,6 @@ import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
@@ -37,17 +34,14 @@ import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundE
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.server.ServerCheckerFactory;
+import org.eclipse.che.workspace.infrastructure.docker.server.ServersReadinessChecker;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotException;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import javax.ws.rs.core.UriBuilder;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.function.Consumer;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
@@ -67,10 +62,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext> {
 
     private static final Logger LOG = getLogger(DockerInternalRuntime.class);
-
-    private static Map<String, String> livenessChecksPaths = ImmutableMap.of("wsagent", "/api/",
-                                                                             "exec-agent", "/process",
-                                                                             "terminal", "/");
 
     private final StartSynchronizer    startSynchronizer;
     private final Map<String, String>  properties;
@@ -85,6 +76,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     private final RuntimeIdentity      identity;
     private final EventService         eventService;
     private final BootstrapperFactory  bootstrapperFactory;
+    private final ServerCheckerFactory serverCheckerFactory;
 
     @Inject
     public DockerInternalRuntime(@Assisted DockerRuntimeContext context,
@@ -99,13 +91,15 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                  SnapshotDao snapshotDao,
                                  DockerRegistryClient dockerRegistryClient,
                                  EventService eventService,
-                                 BootstrapperFactory bootstrapperFactory) {
+                                 BootstrapperFactory bootstrapperFactory,
+                                 ServerCheckerFactory serverCheckerFactory) {
         super(context, urlRewriter);
         this.devMachineName = devMachineName;
         this.dockerEnvironment = dockerEnvironment;
         this.identity = identity;
         this.eventService = eventService;
         this.bootstrapperFactory = bootstrapperFactory;
+        this.serverCheckerFactory = serverCheckerFactory;
         this.properties = new HashMap<>();
         this.startSynchronizer = new StartSynchronizer();
         this.contextsStorage = contextsStorage;
@@ -153,9 +147,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                 startQueue.poll();
                 machineName = startQueue.peek();
             }
-
-        } catch (InfrastructureException | RuntimeException e) {
-            boolean interrupted = Thread.interrupted();
+        } catch (InfrastructureException | InterruptedException | RuntimeException e) {
+            boolean interrupted = e instanceof InterruptedException || Thread.interrupted();
             contextsStorage.remove((DockerRuntimeContext)getContext());
             boolean runtimeDestroyingNeeded = !startSynchronizer.isStopCalled();
             if (runtimeDestroyingNeeded) {
@@ -169,7 +162,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                 throw new InfrastructureException("Docker runtime start was interrupted");
             }
             if (e instanceof InfrastructureException) {
-                throw e;
+                throw (InfrastructureException)e;
             } else {
                 throw new InternalInfrastructureException(e.getLocalizedMessage(), e);
             }
@@ -199,7 +192,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         return Collections.unmodifiableMap(properties);
     }
 
-    private void restoreMachine(String name, DockerContainerConfig originalConfig) throws InfrastructureException {
+    private void restoreMachine(String name, DockerContainerConfig originalConfig)
+            throws InfrastructureException, InterruptedException {
         try {
             SnapshotImpl snapshot = snapshotDao.getSnapshot(identity.getWorkspaceId(), identity.getEnvName(), name);
             startMachine(name, configForSnapshot(snapshot, originalConfig));
@@ -214,7 +208,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         }
     }
 
-    private void startMachine(String name, DockerContainerConfig containerConfig) throws InfrastructureException {
+    private void startMachine(String name, DockerContainerConfig containerConfig)
+            throws InfrastructureException, InterruptedException {
         InternalMachineConfig machineCfg = getContext().getMachineConfigs().get(name);
 
         Map<String, String> labels = new HashMap<>(containerConfig.getLabels());
@@ -232,14 +227,20 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                                             devMachineName.equals(name));
         try {
             startSynchronizer.addMachine(name, machine);
-
-            bootstrapperFactory.create(name, identity, machine, machineCfg.getInstallers()).bootstrap();
-
-            checkServersReadiness(name, machine);
         } catch (InfrastructureException e) {
+            // destroy machine only in case its addition fails
+            // in other cases cleanup of whole runtime will be performed
             destroyMachineQuietly(name, machine);
             throw e;
         }
+        bootstrapperFactory.create(name, identity, machine, machineCfg.getInstallers()).bootstrap();
+
+        ServersReadinessChecker readinessChecker = new ServersReadinessChecker(name,
+                                                                               machine.getServers(),
+                                                                               new ServerReadinessHandler(name),
+                                                                               serverCheckerFactory);
+        readinessChecker.startAsync();
+        readinessChecker.await();
     }
 
     // TODO support configuration properties as well
@@ -252,103 +253,28 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         return stopOpts != null && Boolean.parseBoolean(stopOpts.get("create-snapshot"));
     }
 
-    private void checkServersReadiness(String machineName, DockerMachine dockerMachine)
-            throws InfrastructureException {
-        for (Map.Entry<String, ServerImpl> serverEntry : dockerMachine.getServers().entrySet()) {
-            String serverRef = serverEntry.getKey();
-            ServerImpl server = serverEntry.getValue();
+    private class ServerReadinessHandler implements Consumer<String> {
+        private String machineName;
 
-            LOG.info("Checking server {} of machine {}", serverRef, machineName);
-            checkServerReadiness(machineName, serverRef, server.getUrl());
+        public ServerReadinessHandler(String machineName) {
+            this.machineName = machineName;
         }
-    }
 
-    // TODO rework checks to ping servers concurrently and timeouts each ping in case of network/server hanging
-    private void checkServerReadiness(String machineName,
-                                      String serverRef,
-                                      String serverUrl)
-            throws InfrastructureException {
-
-        if (!livenessChecksPaths.containsKey(serverRef)) {
-            return;
-        }
-        String livenessCheckPath = livenessChecksPaths.get(serverRef);
-        HttpConnectionChecker checker = "terminal".equals(serverRef) ? new TerminalHttpConnectionChecker()
-                                                                     : new HttpConnectionChecker();
-        URL url;
-        try {
-            url = UriBuilder.fromUri(serverUrl)
-                            .replacePath(livenessCheckPath)
-                            .build()
-                            .toURL();
-        } catch (MalformedURLException e) {
-            throw new InternalInfrastructureException("Server " + serverRef +
-                                                      " URL is invalid. Error: " + e.getLocalizedMessage(), e);
-        }
-        // max start time 180 seconds
-        long readinessDeadLine = System.currentTimeMillis() + 3000 * 60;
-        while (System.currentTimeMillis() < readinessDeadLine) {
-            LOG.info("Checking server {} of machine {} at {}", serverRef, machineName,
-                     System.currentTimeMillis());
-            if (isHttpConnectionSucceed(url, checker)) {
-                // TODO protect with lock, from null, from exceptions
-                DockerMachine machine = startSynchronizer.getMachines().get(machineName);
-                machine.setServerStatus(serverRef, ServerStatus.RUNNING);
-
-                eventService.publish(DtoFactory.newDto(ServerStatusEvent.class)
-                                               .withIdentity(DtoConverter.asDto(identity))
-                                               .withMachineName(machineName)
-                                               .withServerName(serverRef)
-                                               .withStatus(ServerStatus.RUNNING)
-                                               .withServerUrl(serverUrl));
-                LOG.info("Server {} of machine {} started", serverRef, machineName);
+        @Override
+        public void accept(String serverRef) {
+            DockerMachine machine = startSynchronizer.getMachines().get(machineName);
+            if (machine == null) {
+                // Probably machine was removed from the list during server check start due to some reason
                 return;
             }
+            machine.setServerStatus(serverRef, ServerStatus.RUNNING);
 
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                throw new InternalInfrastructureException("Interrupted");
-            }
-        }
-
-        throw new InfrastructureException("Server " + serverRef + " in machine " + machineName + " not available.");
-    }
-
-    private boolean isHttpConnectionSucceed(URL serverUrl, HttpConnectionChecker connectionChecker) {
-        HttpURLConnection httpURLConnection = null;
-        try {
-            httpURLConnection = (HttpURLConnection)serverUrl.openConnection();
-            return connectionChecker.isConnectionSucceed(httpURLConnection);
-        } catch (IOException e) {
-            return false;
-        } finally {
-            if (httpURLConnection != null) {
-                httpURLConnection.disconnect();
-            }
-        }
-    }
-
-    private static class HttpConnectionChecker {
-        boolean isConnectionSucceed(HttpURLConnection conn) {
-            try {
-                int responseCode = conn.getResponseCode();
-                return responseCode >= 200 && responseCode < 400;
-            } catch (IOException e) {
-                return false;
-            }
-        }
-    }
-
-    private static class TerminalHttpConnectionChecker extends HttpConnectionChecker {
-        @Override
-        boolean isConnectionSucceed(HttpURLConnection conn) {
-            try {
-                int responseCode = conn.getResponseCode();
-                return responseCode == 404;
-            } catch (IOException e) {
-                return false;
-            }
+            eventService.publish(DtoFactory.newDto(ServerStatusEvent.class)
+                                           .withIdentity(DtoConverter.asDto(identity))
+                                           .withMachineName(machineName)
+                                           .withServerName(serverRef)
+                                           .withStatus(ServerStatus.RUNNING)
+                                           .withServerUrl(machine.getServers().get(serverRef).getUrl()));
         }
     }
 
@@ -512,7 +438,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                 this.machines = null;
                 return machines;
             }
-            throw new InfrastructureException("");
+            throw new InfrastructureException("Runtime doesn't have machines to remove");
         }
 
         public synchronized void setStartThread() throws InternalInfrastructureException {

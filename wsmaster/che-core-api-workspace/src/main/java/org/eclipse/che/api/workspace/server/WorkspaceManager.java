@@ -25,6 +25,8 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -499,10 +501,14 @@ public class WorkspaceManager {
                            }
                            states.remove(workspace.getId());
                            for (Throwable cause : getCausalChain(ex)) {
-                               // TODO spi
-//                             if (cause instanceof SourceNotFoundException) {
-//                                 return;
-//                             }
+                               if (cause instanceof InfrastructureException &&
+                                   !(cause instanceof InternalInfrastructureException)) {
+
+                                   // InfrastructureException is supposed to be an exception that can't be solved
+                                   // by the admin, so should not be logged (but not InternalInfrastructureException).
+                                   // It will prevent bothering the admin when user made a mistake in WS configuration.
+                                   return null;
+                               }
                            }
                            LOG.error(ex.getLocalizedMessage(), ex);
                            return null;
