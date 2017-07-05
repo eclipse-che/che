@@ -10,18 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import static org.eclipse.che.api.languageserver.shared.ProjectLangugageKey.createProjectKey;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -33,6 +21,8 @@ import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
@@ -40,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PreDestroy;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -56,8 +45,8 @@ import java.util.stream.Collectors;
 public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     private final static Logger                LOG                 = LoggerFactory.getLogger(LanguageServerRegistryImpl.class);
     private final static String                PROJECT_FOLDER_PATH = "file:///projects";
-    private final List<LanguageDescription>    languages           = new ArrayList<>();
-    private final List<LanguageServerLauncher> launchers           = new ArrayList<>();
+    private final List<LanguageDescription>    languages;
+    private final List<LanguageServerLauncher> launchers;
     private final AtomicInteger                serverId            = new AtomicInteger();
 
     /**
@@ -68,16 +57,17 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
     private final Provider<ProjectManager> projectManagerProvider;
     private final ServerInitializer        initializer;
-    private EventService eventService;
+    private EventService                   eventService;
 
     @Inject
     public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerLaunchers, Set<LanguageDescription> languages,
-                                      Provider<ProjectManager> projectManagerProvider, ServerInitializer initializer, EventService eventService) {
-        this.languages.addAll(languages);
-        this.launchers.addAll(languageServerLaunchers);
+                                      Provider<ProjectManager> projectManagerProvider, ServerInitializer initializer,
+                                      EventService eventService) {
+        this.languages = new ArrayList<>(languages);
+        this.launchers = new ArrayList<>(languageServerLaunchers);
         this.projectManagerProvider = projectManagerProvider;
         this.initializer = initializer;
-        this.eventService= eventService;
+        this.eventService = eventService;
         this.launchedServers = new HashMap<>();
         this.initializedServers = new HashMap<>();
     }
@@ -92,18 +82,18 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     }
 
     private boolean matchesExtensions(LanguageDescription language, String path) {
-        return language.getFileExtensions().stream().anyMatch(extension->path.endsWith(extension));
+        return language.getFileExtensions().stream().anyMatch(extension -> path.endsWith(extension));
     }
 
     private boolean matchesFilenames(LanguageDescription language, String path) {
-        return language.getFileNames().stream().anyMatch(name->path.endsWith(name));
+        return language.getFileNames().stream().anyMatch(name -> path.endsWith(name));
     }
 
     @Override
     public ServerCapabilities getCapabilities(String fileUri) throws LanguageServerException {
         return getApplicableLanguageServers(fileUri).stream().flatMap(Collection::stream)
                         .map(s -> s.getInitializeResult().getCapabilities())
-                        .reduce(new ServerCapabilities(), (left, right) -> new ServerCapabilitiesOverlay(left, right).compute());
+                        .reduce(null, (left, right) -> left == null ? right : new ServerCapabilitiesOverlay(left, right).compute());
     }
 
     public ServerCapabilities initialize(String fileUri) throws LanguageServerException {
@@ -133,12 +123,12 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                                 initialized = new ArrayList<>();
                                 initializedServers.put(projectPath, initialized);
                             }
-                            initialized.add(new InitializedLanguageServer(id, pair.first,
-                                            pair.second, launcher));
+                            initialized.add(new InitializedLanguageServer(id, pair.first, pair.second, launcher));
                             launchers.remove(launcher);
                             initializedServers.notifyAll();
                         }
                     }).exceptionally(t -> {
+                        eventService.publish(new MessageParams(MessageType.Error, "Failed to initialized LS "+launcher.getDescription().getId()+": "+t.getMessage()));
                         LOG.error("Error launching language server " + launcher, t);
                         synchronized (initializedServers) {
                             launchers.remove(launcher);
@@ -181,9 +171,11 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         }
         List<LanguageServerLauncher> result = new ArrayList<>();
         for (LanguageServerLauncher launcher : launchers) {
-            int score = matchScore(launcher.getDescription(), fileUri, language.getLanguageId());
-            if (score > 0) {
-                result.add(launcher);
+            if (launcher.isAbleToLaunch()) {
+                int score = matchScore(launcher.getDescription(), fileUri, language.getLanguageId());
+                if (score > 0) {
+                    result.add(launcher);
+                }
             }
         }
         return result;

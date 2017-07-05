@@ -19,6 +19,7 @@ import org.eclipse.che.ide.api.editor.EditorProvider;
 import org.eclipse.che.ide.api.editor.defaulteditor.AbstractTextEditorProvider;
 import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
 import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -78,14 +79,14 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
             Promise<ServerCapabilities> promise = registry.getOrInitializeServer(resource.getProject().getPath(), file);
             return promise.then(new Function<ServerCapabilities, EditorPartPresenter>() {
                 @Override
-                public EditorPartPresenter apply(ServerCapabilities arg) throws FunctionException {
+                public EditorPartPresenter apply(ServerCapabilities capabilities) throws FunctionException {
                     if (editorBuilder == null) {
                         Log.debug(AbstractTextEditorProvider.class, "No builder registered for default editor type - giving up.");
                         return null;
                     }
 
                     final TextEditor editor = editorBuilder.buildEditor();
-                    LanguageServerEditorConfiguration configuration = editorConfigurationFactory.build(editor, arg);
+                    TextEditorConfiguration configuration = capabilities == null ? new DefaultTextEditorConfiguration(): editorConfigurationFactory.build(editor, capabilities);
                     editor.initialize(configuration);
                     return editor;
                 }
