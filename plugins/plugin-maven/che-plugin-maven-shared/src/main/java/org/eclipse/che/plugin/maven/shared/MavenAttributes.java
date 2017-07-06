@@ -46,6 +46,9 @@ public interface MavenAttributes {
     String DEFAULT_PACKAGING             = "jar";
     String DEFAULT_OUTPUT_FOLDER         = "target/classes";
 
+    String DEFAULT_OUTPUT_DIRECTORY      = "target/classes";
+    String DEFAULT_TEST_OUTPUT_DIRECTORY = "target/test-classes";
+
     String POM_XML = "pom.xml";
 
     /** Name of WebSocket chanel */

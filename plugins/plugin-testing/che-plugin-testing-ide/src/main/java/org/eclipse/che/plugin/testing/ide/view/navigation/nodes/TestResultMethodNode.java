@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.view.navigation.nodes;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
@@ -25,12 +24,12 @@ import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.eclipse.che.plugin.testing.ide.view.navigation.TestClassNavigation;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Tree node for display the failing methods.
- * 
+ *
  * @author Mirage Abeysekara
  */
 @Deprecated

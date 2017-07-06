@@ -19,24 +19,30 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.api.testing.server.listener.AbstractTestListener;
 import org.eclipse.che.api.testing.server.listener.OutputTestListener;
 import org.eclipse.che.api.testing.shared.TestCase;
+import org.eclipse.che.api.testing.shared.TestDetectionContext;
+import org.eclipse.che.api.testing.shared.TestExecutionContext;
+import org.eclipse.che.api.testing.shared.TestPosition;
 import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.che.commons.lang.execution.ProcessHandler;
 import org.eclipse.che.api.testing.shared.dto.TestResultDto;
 import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.plugin.testing.classpath.server.TestClasspathProvider;
-import org.eclipse.che.plugin.testing.classpath.server.TestClasspathRegistry;
+import org.eclipse.che.plugin.java.testing.TestClasspathProvider;
+import org.eclipse.che.plugin.java.testing.TestClasspathRegistry;
 
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
@@ -58,16 +64,17 @@ import javassist.util.proxy.ProxyFactory;
  * @author Mirage Abeysekara
  * @author David Festal
  */
+@Deprecated
 public class JUnitTestRunner implements TestRunner {
 
     private static final String   JUNIT4X_RUNNER_CLASS = "org.junit.runner.JUnitCore";
     private static final String   JUNIT3X_RUNNER_CLASS = "junit.textui.TestRunner";
     private ClassLoader           projectClassLoader;
-    private ProjectManager        projectManager;
+    private Provider<ProjectManager> projectManager;
     private TestClasspathRegistry classpathRegistry;
 
     @Inject
-    public JUnitTestRunner(ProjectManager projectManager,
+    public JUnitTestRunner(Provider<ProjectManager> projectManager,
                            TestClasspathRegistry classpathRegistry) {
         this.projectManager = projectManager;
         this.classpathRegistry = classpathRegistry;
@@ -84,7 +91,7 @@ public class JUnitTestRunner implements TestRunner {
         String projectPath = testParameters.get("projectPath");
         String projectType = "";
         if (projectManager != null) {
-            projectType = projectManager.getProject(projectPath).getType();
+            projectType = projectManager.get().getProject(projectPath).getType();
         }
 
         ClassLoader currentClassLoader = this.getClass().getClassLoader();
@@ -143,12 +150,27 @@ public class JUnitTestRunner implements TestRunner {
         }
     }
 
+    @Override
+    public ProcessHandler execute(TestExecutionContext context) {
+        return null;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public String getName() {
         return "junit";
+    }
+
+    @Override
+    public int getDebugPort() {
+        return -1;
+    }
+
+    @Override
+    public List<TestPosition> detectTests(TestDetectionContext context) {
+        return Collections.emptyList();
     }
 
     private TestResult run4x(String testClass) throws Exception {
@@ -466,16 +488,16 @@ public class JUnitTestRunner implements TestRunner {
             ClassLoader tccl = Thread.currentThread().getContextClassLoader();
             try {
                 Thread.currentThread().setContextClassLoader(projectClassLoader);
-                clsTestResult.getMethod("addListener", clsTestListener).invoke(
-                                                                               testResult, testListener);
+                clsTestResult.getMethod("addListener", clsTestListener)
+                             .invoke(testResult, testListener);
                 for (Class< ? > testClass : classes) {
                     clsTestSuite.getMethod("addTestSuite", Class.class).invoke(testSuite, testClass);
                 }
                 clsTestSuite.getMethod("run", clsTestResult).invoke(testSuite, testResult);
             } finally {
                 Thread.currentThread().setContextClassLoader(tccl);
-                clsTestResult.getMethod("removeListener", clsTestListener).invoke(
-                                                                                  testResult, testListener);
+                clsTestResult.getMethod("removeListener", clsTestListener)
+                             .invoke(testResult, testListener);
             }
         }
 
@@ -544,7 +566,7 @@ public class JUnitTestRunner implements TestRunner {
         dtoResult.setTestCases(testList);
         return dtoResult;
     }
-    
+
     @Override
     public TestResultRootDto runTests(Map<String, String> testParameters) throws Exception {
         // New API - Not supported yet

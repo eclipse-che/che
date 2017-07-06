@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jsonrpc;
 
-import org.eclipse.che.ide.jsonrpc.WebSocketJsonRpcInitializer;
 import org.eclipse.che.ide.websocket.impl.WebSocketInitializer;
 import org.junit.Test;
 import org.junit.runner.RunWith;

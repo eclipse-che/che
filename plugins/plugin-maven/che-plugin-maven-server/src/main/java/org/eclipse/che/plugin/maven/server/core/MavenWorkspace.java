@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.maven.server.core;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -180,8 +179,17 @@ public class MavenWorkspace {
         IJavaProject javaProject = JavaCore.create(project.getProject());
         try {
             ClasspathHelper helper = new ClasspathHelper(javaProject);
-            project.getSources().stream().map(s -> project.getProject().getFullPath().append(s)).forEach(helper::addSourceEntry);
-            project.getTestSources().stream().map(s -> project.getProject().getFullPath().append(s)).forEach(helper::addSourceEntry);
+            IPath sourceOutputPath = project.getProject().getFullPath().append(project.getOutputDirectory());
+            for (String source : project.getSources()) {
+                IPath sourcePath = project.getProject().getFullPath().append(source);
+                helper.addSourceEntry(sourcePath, sourceOutputPath);
+            }
+
+            IPath testOutputPath = project.getProject().getFullPath().append(project.getTestOutputDirectory());
+            for (String testSource : project.getTestSources()) {
+                IPath testSourcePath = project.getProject().getFullPath().append(testSource);
+                helper.addSourceEntry(testSourcePath, testOutputPath);
+            }
             //add maven classpath container
             helper.addContainerEntry(new Path(MavenClasspathContainer.CONTAINER_ID));
             //add JRE classpath container
@@ -231,13 +239,14 @@ public class MavenWorkspace {
         if (configuration != null) {
             Element sources = configuration.getChild("sources");
             if (sources != null) {
+                IPath outputPath = project.getProject().getFullPath().append(project.getOutputDirectory());
                 for (Object element : sources.getChildren()) {
                     final String path = ((Element)element).getTextTrim();
                     final IPath projectLocation = project.getProject().getLocation();
                     final String projectPath = projectLocation.toOSString();
                     final String sourceFolder = path.contains(projectPath) ? path.substring(projectPath.length() + 1) : path;
 
-                    helper.addSourceEntry(project.getProject().getFullPath().append(sourceFolder));
+                    helper.addSourceEntry(project.getProject().getFullPath().append(sourceFolder), outputPath);
                     if (!attributes.contains(sourceFolder)) {
                         attributes.add(sourceFolder);
                     }
