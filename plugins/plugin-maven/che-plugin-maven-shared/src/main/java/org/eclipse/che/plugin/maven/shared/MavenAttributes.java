@@ -52,8 +52,8 @@ public interface MavenAttributes {
     String MAVEN_CHANEL_NAME = "maven:workspace";
 
 
-    String MAVEN_CHANEL_UNSUBSCRIBE              = "mavenOutput/subscribe";
-    String MAVEN_CHANEL_SUBSCRIBE                = "mavenOutput/unsubscribe";
+    String MAVEN_OUTPUT_UNSUBSCRIBE              = "mavenOutput/unsubscribe";
+    String MAVEN_OUTPUT_SUBSCRIBE                = "mavenOutput/subscribe";
     String MAVEN_OUTPUT_TEXT_METHOD              = "mavenOutput/text";
     String MAVEN_OUTPUT_UPDATE_METHOD            = "mavenOutput/update";
     String MAVEN_OUTPUT_START_STOP_METHOD        = "mavenOutput/start_stop";
