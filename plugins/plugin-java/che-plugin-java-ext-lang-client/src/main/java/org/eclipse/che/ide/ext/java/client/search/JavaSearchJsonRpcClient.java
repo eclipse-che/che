@@ -23,7 +23,7 @@ import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 
 /**
- * WebSocket implementation of JavaSearchService
+ * JSON-RPC implementation of JavaSearchService
  */
 @Singleton
 public class JavaSearchJsonRpcClient implements JavaSearchService {
