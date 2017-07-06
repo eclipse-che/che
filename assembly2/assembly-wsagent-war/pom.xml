@@ -79,7 +79,8 @@
                     <attachClasses>true</attachClasses>
                     <packagingExcludes>WEB-INF/lib/*gwt*.jar,
                         WEB-INF/lib/gin-*.jar,
-                        WEB-INF/lib/jsr305*.jar</packagingExcludes>
+                        WEB-INF/lib/jsr305*.jar,
+                        WEB-INF/classes/org/eclipse/che/wsagent/server/CheWsAgentServletModule.class</packagingExcludes>
                     <webResources>
                         <resource>
                             <directory>${basedir}/src/main/webapp/WEB-INF</directory>

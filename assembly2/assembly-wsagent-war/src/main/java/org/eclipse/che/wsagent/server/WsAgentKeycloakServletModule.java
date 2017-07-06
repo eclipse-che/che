@@ -12,8 +12,10 @@ package org.eclipse.che.wsagent.server;
 
 import com.google.inject.servlet.ServletModule;
 
+import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.keycloak.server.KeycloakAuthenticationFilter;
+import org.everrest.guice.servlet.GuiceEverrestServlet;
 
 import javax.inject.Singleton;
 
@@ -21,6 +23,9 @@ import javax.inject.Singleton;
 public class WsAgentKeycloakServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
+        filter("/*").through(CheCorsFilter.class);
+        serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
+        
         bind(KeycloakAuthenticationFilter.class).in(Singleton.class);
         filter("/*").through(KeycloakAuthenticationFilter.class);
     }
