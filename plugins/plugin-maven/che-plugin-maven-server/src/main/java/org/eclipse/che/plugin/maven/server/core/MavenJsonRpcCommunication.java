@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_CHANEL_SUBSCRIBE;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_CHANEL_UNSUBSCRIBE;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_SUBSCRIBE;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_UNSUBSCRIBE;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_PERCENT_METHOD;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_PERCENT_UNDEFINED_METHOD;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_START_STOP_METHOD;
@@ -75,13 +75,13 @@ public class MavenJsonRpcCommunication implements EventSubscriber<MavenOutputEve
     @Inject
     private void configureHandlers(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
-                    .methodName(MAVEN_CHANEL_SUBSCRIBE)
+                    .methodName(MAVEN_OUTPUT_SUBSCRIBE)
                     .noParams()
                     .noResult()
                     .withConsumer(endpointIds::add);
 
         configurator.newConfiguration()
-                    .methodName(MAVEN_CHANEL_UNSUBSCRIBE)
+                    .methodName(MAVEN_OUTPUT_UNSUBSCRIBE)
                     .noParams()
                     .noResult()
                     .withConsumer(endpointIds::remove);
