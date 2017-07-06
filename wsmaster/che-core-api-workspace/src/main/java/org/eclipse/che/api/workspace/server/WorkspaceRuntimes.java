@@ -21,6 +21,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -29,6 +30,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
@@ -316,14 +318,18 @@ public class WorkspaceRuntimes {
     }
 
     @PostConstruct
+    private void init() {
+        recover();
+        subscribeCleanupOnAbnormalRuntimeStopEvent();
+    }
+
     private void recover() {
         for (RuntimeInfrastructure infra : infraByRecipe.values()) {
             try {
                 for (RuntimeIdentity id : infra.getIdentities()) {
                     // TODO how to identify correct state of runtime
                     if (runtimes.putIfAbsent(id.getWorkspaceId(),
-                                             new RuntimeState(
-                                                     validate(infra.getRuntime(id)), RUNNING)) != null) {
+                                             new RuntimeState(validate(infra.getRuntime(id)), RUNNING)) != null) {
                         // should not happen, violation of SPI contract
                         LOG.error("More than 1 runtime of workspace found. " +
                                   "Runtime identity of duplicate is '{}'. Skipping duplicate.", id);
@@ -337,6 +343,10 @@ public class WorkspaceRuntimes {
                           x.getMessage());
             }
         }
+    }
+
+    private void subscribeCleanupOnAbnormalRuntimeStopEvent() {
+        eventService.subscribe(new CleanupRuntimeOnAbnormalRuntimeStop());
     }
 
     //TODO do we need some validation on start?
@@ -355,6 +365,24 @@ public class WorkspaceRuntimes {
                                                       envName));
         }
         return new EnvironmentImpl(environment);
+    }
+
+    private class CleanupRuntimeOnAbnormalRuntimeStop implements EventSubscriber<RuntimeStatusEvent> {
+        @Override
+        public void onEvent(RuntimeStatusEvent event) {
+            if (event.isFailed()) {
+                RuntimeState state = runtimes.remove(event.getIdentity().getWorkspaceId());
+                if (state != null) {
+                    eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                                   .withWorkspaceId(state.runtime.getContext().getIdentity()
+                                                                         .getWorkspaceId())
+                                                   .withPrevStatus(WorkspaceStatus.RUNNING)
+                                                   .withStatus(STOPPED)
+                                                   .withError("Error occurs on workspace runtime stop. Error: " +
+                                                              event.getError()));
+                }
+            }
+        }
     }
 
     private static class RuntimeState {
