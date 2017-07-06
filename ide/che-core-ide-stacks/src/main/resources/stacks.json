@@ -2675,7 +2675,6 @@
             }
           },
           "recipe": {
-
             "location": "registry.centos.org/che-stacks/centos-go",
             "type": "dockerimage"
           }
