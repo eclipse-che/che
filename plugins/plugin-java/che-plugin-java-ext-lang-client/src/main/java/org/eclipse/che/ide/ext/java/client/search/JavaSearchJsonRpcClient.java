@@ -15,29 +15,28 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.java.shared.dto.search.FindUsagesRequest;
 import org.eclipse.che.ide.ext.java.shared.dto.search.FindUsagesResponse;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 
 import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
  * JSON-RPC implementation of JavaSearchService
  */
 @Singleton
 public class JavaSearchJsonRpcClient implements JavaSearchService {
-
-    private static final int    TIMEOUT               = 20_000;
-    private static final String ENDPOINT_ID           = "ws-agent";
-    private static final String METHOD_NAME           = "javaSearch/findUsages";
-    private static final String TIMEOUT_ERROR_MESSAGE = "Failed due timeout";
-
-    private final RequestTransmitter transmitter;
-    private final MessageLoader      loader;
+    private final RequestTransmitter  transmitter;
+    private final NotificationManager notificationManager;
+    private final MessageLoader       loader;
 
     @Inject
-    public JavaSearchJsonRpcClient(LoaderFactory loaderFactory, RequestTransmitter transmitter) {
+    public JavaSearchJsonRpcClient(NotificationManager notificationManager, LoaderFactory loaderFactory, RequestTransmitter transmitter) {
+        this.notificationManager = notificationManager;
         this.loader = loaderFactory.newLoader();
         this.transmitter = transmitter;
     }
@@ -47,21 +46,21 @@ public class JavaSearchJsonRpcClient implements JavaSearchService {
         return createFromAsyncRequest(callback -> {
             loader.show();
             transmitter.newRequest()
-                       .endpointId(ENDPOINT_ID)
-                       .methodName(METHOD_NAME)
+                       .endpointId("ws-agent")
+                       .methodName("javaSearch/findUsages")
                        .paramsAsDto(request)
-                       .sendAndReceiveResultAsDto(FindUsagesResponse.class, TIMEOUT)
+                       .sendAndReceiveResultAsDto(FindUsagesResponse.class, 20_000)
                        .onSuccess(response -> {
                            loader.hide();
                            callback.onSuccess(response);
                        })
                        .onFailure(error -> {
+                           notificationManager.notify("Find usage request failed", error.getMessage(), FAIL, EMERGE_MODE);
                            loader.hide();
-                           callback.onFailure(new RuntimeException(error.getMessage()));
                        })
                        .onTimeout(() -> {
+                           notificationManager.notify("Find usage request failed", "Failed due timeout", FAIL, EMERGE_MODE);
                            loader.hide();
-                           callback.onFailure(new RuntimeException(TIMEOUT_ERROR_MESSAGE));
                        });
         });
     }
