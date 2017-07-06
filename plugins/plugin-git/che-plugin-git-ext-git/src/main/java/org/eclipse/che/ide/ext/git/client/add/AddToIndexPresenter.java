@@ -13,9 +13,6 @@ package org.eclipse.che.ide.ext.git.client.add;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.machine.DevMachine;
@@ -85,7 +82,6 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
         view.showDialog();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onAddClicked() {
         DevMachine devMachine = appContext.getDevMachine();
@@ -98,26 +94,19 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
         }
         final GitOutputConsole console = gitOutputConsoleFactory.create(constant.addToIndexCommandName());
         consolesPanelPresenter.addCommandOutput(devMachine.getId(), console);
-        service.add(devMachine, projectLocation, view.isUpdated(), paths)
-               .then(new Operation<Void>() {
-                   @Override
-                   public void apply(Void arg) throws OperationException {
-                       console.print(constant.addSuccess());
-                       notificationManager.notify(constant.addSuccess());
-                       view.close();
-                   }
+        service.add(projectLocation, view.isUpdated(), paths)
+               .then(arg -> {
+                   console.print(constant.addSuccess());
+                   notificationManager.notify(constant.addSuccess());
+                   view.close();
                })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError arg) throws OperationException {
-                       console.printError(constant.addFailed());
-                       notificationManager.notify(constant.addFailed(), FAIL, FLOAT_MODE);
-                       view.close();
-                   }
+               .catchError(arg -> {
+                   console.printError(constant.addFailed());
+                   notificationManager.notify(constant.addFailed(), FAIL, FLOAT_MODE);
+                   view.close();
                });
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onCancelClicked() {
         view.close();

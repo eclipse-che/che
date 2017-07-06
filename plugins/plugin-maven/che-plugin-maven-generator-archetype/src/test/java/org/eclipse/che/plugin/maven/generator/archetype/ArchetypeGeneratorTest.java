@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.generator.archetype;
 
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.ide.maven.tools.MavenArtifact;
 import org.eclipse.che.plugin.maven.shared.MavenArchetype;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
+ * Test for {@link ArchetypeGenerator}
  *
  * @author Vitalii Parfonov
  */
@@ -36,11 +38,12 @@ public class ArchetypeGeneratorTest {
     @Ignore
     public void generateFromArchetype() throws Exception {
         MavenArchetype mavenArchetype = mock(MavenArchetype.class);
+        EventService eventService = mock(EventService.class);
         when(mavenArchetype.getArtifactId()).thenReturn("tomee-webapp-archetype");
         when(mavenArchetype.getGroupId()).thenReturn("org.apache.openejb.maven");
         when(mavenArchetype.getVersion()).thenReturn("1.7.1");
         File workDir = Files.createTempDirectory("workDir").toFile();
-        ArchetypeGenerator archetypeGenerator = new ArchetypeGenerator();
+        ArchetypeGenerator archetypeGenerator = new ArchetypeGenerator(eventService);
         String artifactId = NameGenerator.generate("artifactId", 5);
         String groupId = NameGenerator.generate("groupId", 5);
         MavenArtifact mavenArtifact = new MavenArtifact();

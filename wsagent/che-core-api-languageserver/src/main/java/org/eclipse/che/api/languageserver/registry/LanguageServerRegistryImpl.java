@@ -17,7 +17,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
-import org.eclipse.che.api.languageserver.shared.ProjectExtensionKey;
+import org.eclipse.che.api.languageserver.shared.ProjectLangugageKey;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
@@ -27,98 +27,105 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageServer;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
-import static com.google.common.io.Files.getFileExtension;
-import static org.eclipse.che.api.languageserver.shared.ProjectExtensionKey.createProjectKey;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.api.languageserver.shared.ProjectLangugageKey.createProjectKey;
 
 @Singleton
 public class LanguageServerRegistryImpl implements LanguageServerRegistry, ServerInitializerObserver {
     public final static String PROJECT_FOLDER_PATH = "/projects";
-
-    /**
-     * Available {@link LanguageServerLauncher} by extension.
-     */
-    private final ConcurrentHashMap<String, List<LanguageServerLauncher>> extensionToLauncher;
+    private final List<LanguageDescription>           languages;
+    private final Map<String, LanguageServerLauncher> launchers;
 
     /**
      * Started {@link LanguageServer} by project.
      */
-    private final ConcurrentHashMap<ProjectExtensionKey, LanguageServer> projectToServer;
+    private final ConcurrentHashMap<ProjectLangugageKey, LanguageServer> projectToServer = new ConcurrentHashMap<>();
 
     private final Provider<ProjectManager> projectManagerProvider;
     private final ServerInitializer        initializer;
 
     @Inject
     public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerLaunchers,
+                                      Set<LanguageDescription> languages,
                                       Provider<ProjectManager> projectManagerProvider,
                                       ServerInitializer initializer) {
+        this.launchers = languageServerLaunchers.stream()
+                                                .filter(LanguageServerLauncher::isAbleToLaunch)
+                                                .collect(toMap(LanguageServerLauncher::getLanguageId, identity()));
+        this.languages = languages.stream()
+                                  .filter(language -> launchers.containsKey(language.getLanguageId()))
+                                  .collect(toList());
         this.projectManagerProvider = projectManagerProvider;
         this.initializer = initializer;
-        this.extensionToLauncher = new ConcurrentHashMap<>();
-        this.projectToServer = new ConcurrentHashMap<>();
         this.initializer.addObserver(this);
-
-        for (LanguageServerLauncher launcher : languageServerLaunchers) {
-            for (String extension : launcher.getLanguageDescription().getFileExtensions()) {
-                extensionToLauncher.putIfAbsent(extension, new ArrayList<>());
-                extensionToLauncher.get(extension).add(launcher);
-            }
-        }
     }
 
     @Override
     public LanguageServer findServer(String fileUri) throws LanguageServerException {
         String path = URI.create(fileUri).getPath();
 
-        String extension = getFileExtension(path);
         String projectPath = extractProjectPath(path);
 
-        return findServer(extension, projectPath);
+        return doFindServer(projectPath, findLanguageId(path));
     }
 
-    @Nullable
-    protected LanguageServer findServer(String extension, String projectPath) throws LanguageServerException {
-        ProjectExtensionKey projectKey = createProjectKey(projectPath, extension);
-
-        for (LanguageServerLauncher launcher : extensionToLauncher.get(extension)) {
-            if (!projectToServer.containsKey(projectKey)) {
-                synchronized (launcher) {
-                    if (!projectToServer.containsKey(projectKey)) {
-                        LanguageServer server = initializer.initialize(launcher, projectPath);
-                        projectToServer.put(projectKey, server);
-                    }
-                }
+    private LanguageDescription findLanguageId(String path) {
+        for (LanguageDescription language : languages) {
+            if (matchesFilenames(language, path) || matchesExtensions(language, path)) {
+                return language;
             }
-            return projectToServer.get(projectKey);
         }
-
         return null;
     }
 
+    private boolean matchesExtensions(LanguageDescription language, String path) {
+        return language.getFileExtensions().stream().anyMatch(extension -> path.endsWith(extension));
+    }
 
-    @Override
-    public List<LanguageDescription> getSupportedLanguages() {
-        return extensionToLauncher.values()
-                                  .stream()
-                                  .flatMap(Collection::stream)
-                                  .filter(LanguageServerLauncher::isAbleToLaunch)
-                                  .map(LanguageServerLauncher::getLanguageDescription)
-                                  .collect(Collectors.toList());
+    private boolean matchesFilenames(LanguageDescription language, String path) {
+        return language.getFileNames().stream().anyMatch(name -> path.endsWith(name));
+    }
+
+    @Nullable
+    protected LanguageServer doFindServer(String projectPath, LanguageDescription language) throws LanguageServerException {
+        if (language == null || projectPath == null) {
+            return null;
+        }
+        ProjectLangugageKey projectKey = createProjectKey(projectPath, language.getLanguageId());
+        LanguageServerLauncher launcher = launchers.get(language.getLanguageId());
+
+        if (language != null && launcher != null) {
+            synchronized (launcher) {
+                // we're relying on the fact that the following if condition
+                // will
+                // not change unless someone else uses the same launcher
+                if (!projectToServer.containsKey(projectKey)) {
+                    LanguageServer server = initializer.initialize(language, launcher, projectPath);
+                    projectToServer.put(projectKey, server);
+                }
+            }
+        }
+        return projectToServer.get(projectKey);
+
     }
 
     @Override
-    public Map<ProjectExtensionKey, LanguageServerDescription> getInitializedLanguages() {
+    public List<LanguageDescription> getSupportedLanguages() {
+        return Collections.unmodifiableList(languages);
+    }
+
+    @Override
+    public Map<ProjectLangugageKey, LanguageServerDescription> getInitializedLanguages() {
         Map<LanguageServer, LanguageServerDescription> initializedServers = initializer.getInitializedServers();
-        return projectToServer.entrySet()
-                              .stream()
-                              .collect(Collectors.toMap(Map.Entry::getKey, e -> initializedServers.get(e.getValue())));
+        return projectToServer.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> initializedServers.get(e.getValue())));
     }
 
     protected String extractProjectPath(String filePath) throws LanguageServerException {
@@ -148,9 +155,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     }
 
     @Override
-    public void onServerInitialized(LanguageServer server,
-                                    ServerCapabilities capabilities,
-                                    LanguageDescription languageDescription,
+    public void onServerInitialized(LanguageServer server, ServerCapabilities capabilities, LanguageDescription languageDescription,
                                     String projectPath) {
         for (String ext : languageDescription.getFileExtensions()) {
             projectToServer.put(createProjectKey(projectPath, ext), server);

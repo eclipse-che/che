@@ -48,6 +48,6 @@ public class ProjectImportOutputJsonRpcLineConsumer extends BaseProjectImportOut
                                                                                             .withProjectName(projectName);
 
         endpointIdRegistrar.getRegisteredEndpoints()
-                           .forEach(it -> transmitter.newRequest().endpointId(it).methodName(EVENT_IMPORT_OUTPUT_PROGRESS).paramsAsDto(progressRecord).sendAndSkipResult());
+                           .forEach(it -> transmitter.newRequest().endpointId(it).methodName(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName).paramsAsDto(progressRecord).sendAndSkipResult());
     }
 }

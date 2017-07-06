@@ -11,7 +11,6 @@
 package org.eclipse.che.api.languageserver.launcher;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 
@@ -26,9 +25,9 @@ public interface LanguageServerLauncher {
     LanguageServer launch(String projectPath, LanguageClient client) throws LanguageServerException;
 
     /**
-     * Gets supported languages.
+     * Gets supported language ID.
      */
-    LanguageDescription getLanguageDescription();
+    String getLanguageId();
 
     boolean isAbleToLaunch();
 }

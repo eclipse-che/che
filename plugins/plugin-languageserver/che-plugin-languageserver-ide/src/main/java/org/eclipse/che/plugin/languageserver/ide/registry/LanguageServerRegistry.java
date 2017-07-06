@@ -14,20 +14,22 @@ import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
-import org.eclipse.che.api.languageserver.shared.ProjectExtensionKey;
+import org.eclipse.che.api.languageserver.shared.ProjectLangugageKey;
 import org.eclipse.che.api.languageserver.shared.event.LanguageServerInitializeEvent;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedInitializeResult;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper;
-import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
@@ -44,8 +46,9 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import static org.eclipse.che.api.languageserver.shared.ProjectExtensionKey.createProjectKey;
+import static org.eclipse.che.api.languageserver.shared.ProjectLangugageKey.createProjectKey;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
@@ -56,27 +59,35 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WAR
  */
 @Singleton
 public class LanguageServerRegistry {
-    private final EventBus                                                                eventBus;
-    private final LanguageServerRegistryJsonRpcClient                                     jsonRpcClient;
-    private final LanguageServerRegistryServiceClient                                     client;
-    private final Map<ProjectExtensionKey, ExtendedInitializeResult>                      projectToInitResult;
-    private final Map<ProjectExtensionKey, Callback<ExtendedInitializeResult, Throwable>> callbackMap;
-    private       LoaderFactory                                                           loaderFactory;
-    private       NotificationManager                                                     notificationManager;
+    private final EventBus                            eventBus;
+    private final LanguageServerRegistryJsonRpcClient jsonRpcClient;
+    private final LoaderFactory                             loaderFactory;
+    private NotificationManager                       notificationManager;
+    private final LanguageServerRegistryServiceClient client;
+
+    private final Map<ProjectLangugageKey, ExtendedInitializeResult>                      projectToInitResult;
+    private final Map<ProjectLangugageKey, Callback<ExtendedInitializeResult, Throwable>> callbackMap;
+    private final Map<FileType, LanguageDescription>                                      registeredFileTypes = new ConcurrentHashMap<>();
+    private final PromiseProvider                                                         promiseProvider;
+    private final FileTypeRegistry                                                        fileTypeRegistry;
 
     @Inject
     public LanguageServerRegistry(EventBus eventBus,
                                   LoaderFactory loaderFactory,
                                   NotificationManager notificationManager,
                                   LanguageServerRegistryJsonRpcClient jsonRpcClient,
-                                  LanguageServerRegistryServiceClient client) {
+                                  LanguageServerRegistryServiceClient client, 
+                                  PromiseProvider promiseProvider,
+                                  FileTypeRegistry fileTypeRegistry) {
         this.eventBus = eventBus;
         this.loaderFactory = loaderFactory;
         this.notificationManager = notificationManager;
         this.jsonRpcClient = jsonRpcClient;
         this.client = client;
+        this.promiseProvider = promiseProvider;
         this.projectToInitResult = new HashMap<>();
         this.callbackMap = new HashMap<>();
+        this.fileTypeRegistry = fileTypeRegistry;
     }
 
     /**
@@ -84,8 +95,7 @@ public class LanguageServerRegistry {
      */
     protected void register(String projectPath, LanguageDescription languageDescription, ServerCapabilities capabilities) {
         ExtendedInitializeResult initializeResult = new ExtendedInitializeResult(projectPath, capabilities, languageDescription);
-        for (String ext : languageDescription.getFileExtensions()) {
-            ProjectExtensionKey key = createProjectKey(projectPath, ext);
+        ProjectLangugageKey key = createProjectKey(projectPath, languageDescription.getLanguageId());
             projectToInitResult.put(key, initializeResult);
 
             if (callbackMap.containsKey(key)) {
@@ -93,22 +103,22 @@ public class LanguageServerRegistry {
                 callback.onSuccess(initializeResult);
             }
         }
-    }
 
-    public Promise<ExtendedInitializeResult> getOrInitializeServer(String projectPath, String ext, String filePath) {
-        final ProjectExtensionKey key = createProjectKey(projectPath, ext);
+    public Promise<ExtendedInitializeResult> getOrInitializeServer(String projectPath, VirtualFile file) {
+        LanguageDescription languageDescription = getLanguageDescription(file);
+        final ProjectLangugageKey key = createProjectKey(projectPath, languageDescription.getLanguageId());
         if (projectToInitResult.containsKey(key)) {
-            return Promises.resolve(projectToInitResult.get(key));
+            return promiseProvider.resolve(projectToInitResult.get(key));
         } else {
             //call initialize service
-            final MessageLoader loader = loaderFactory.newLoader("Initializing Language Server for " + ext);
+            final MessageLoader loader = loaderFactory.newLoader("Initializing Language Server for " + file.getName());
             loader.show();
 
-            jsonRpcClient.initializeServer(filePath)
+            jsonRpcClient.initializeServer(file.getLocation().toString())
                          .onSuccess(loader::hide)
                          .onFailure((error) -> {
                              notificationManager
-                                     .notify("Failed to initialize language server for " + ext + " : ", error.getMessage(), FAIL,
+                                     .notify("Failed to initialize language server for " + file.getLocation().toString() + " : ", error.getMessage(), FAIL,
                                              EMERGE_MODE);
                              loader.hide();
                          })
@@ -137,9 +147,7 @@ public class LanguageServerRegistry {
                     public void apply(List<ExtendedInitializeResult> initialResults) throws OperationException {
                         for (ExtendedInitializeResult initializeResultDTO : initialResults) {
                             for (LanguageDescription languageDescription : initializeResultDTO.getSupportedLanguages()) {
-                                register(initializeResultDTO.getProject(),
-                                         languageDescription,
-                                         initializeResultDTO.getCapabilities());
+                                register(initializeResultDTO.getProject(), languageDescription, initializeResultDTO.getCapabilities());
                             }
                         }
                     }
@@ -191,4 +199,30 @@ public class LanguageServerRegistry {
             }
         });
     }
+
+    /**
+     * Register a che file type and associate it with the given language
+     * @param type the che file type
+     * @param description the language description to associate with the file type
+     */
+    public void registerFileType(FileType type, LanguageDescription description) {
+        fileTypeRegistry.registerFileType(type);
+        registeredFileTypes.put(type, description);
+    }
+
+    /**
+     * Get the language that is registered for this file. May return null if
+     * none is found.
+     * 
+     * @param file the file in question
+     * @return the langauge that is associated with the given file or <code>null</code> if not found.
+     */
+    public LanguageDescription getLanguageDescription(VirtualFile file) {
+        FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
+        if (fileType == null) {
+            return null;
+        }
+        return registeredFileTypes.get(fileType);
+    }
+
 }

@@ -1617,6 +1617,19 @@ public class DockerConnectorTest {
         assertEquals(containers.size(), 0);
     }
 
+    @Test(expectedExceptions = IOException.class,
+          expectedExceptionsMessageRegExp = "Internal server error. Unexpected response body received from Docker.")
+    public void shouldThrowIOExceptionWhenParseEmptyResponseStringByClass() throws IOException {
+        dockerConnector.parseResponseStreamAndClose(new ByteArrayInputStream("".getBytes()), Version.class);
+    }
+
+    @Test(expectedExceptions = IOException.class,
+          expectedExceptionsMessageRegExp = "Internal server error. Unexpected response body received from Docker.")
+    public void shouldThrowIOExceptionWhenParseEmptyResponseStringByTypeToken() throws IOException {
+        dockerConnector.parseResponseStreamAndClose(new ByteArrayInputStream("".getBytes()),
+                                                    new TypeToken<List<ContainerListEntry>>() {});
+    }
+
     @Test
     public void shouldBeAbleToGetNetworks() throws Exception {
         // given

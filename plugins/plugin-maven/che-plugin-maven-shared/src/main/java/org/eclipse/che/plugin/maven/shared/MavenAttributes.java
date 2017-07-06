@@ -52,7 +52,17 @@ public interface MavenAttributes {
     String POM_XML = "pom.xml";
 
     /** Name of WebSocket chanel */
-    String MAVEN_CHANEL_NAME           = "maven:workspace";
-    /** Name of WebSocket chanel for Maven Archetype output */
-    String MAVEN_ARCHETYPE_CHANEL_NAME = "maven:archetype:output";
+    String MAVEN_CHANEL_NAME = "maven:workspace";
+
+    String MAVEN_CHANEL_UNSUBSCRIBE              = "mavenOutput/subscribe";
+    String MAVEN_CHANEL_SUBSCRIBE                = "mavenOutput/unsubscribe";
+    String MAVEN_OUTPUT_TEXT_METHOD              = "mavenOutput/text";
+    String MAVEN_OUTPUT_UPDATE_METHOD            = "mavenOutput/update";
+    String MAVEN_OUTPUT_START_STOP_METHOD        = "mavenOutput/start_stop";
+    String MAVEN_OUTPUT_PERCENT_METHOD           = "mavenOutput/percent";
+    String MAVEN_OUTPUT_PERCENT_UNDEFINED_METHOD = "mavenOutput/percentUndefined";
+
+    String MAVEN_ARCHETYPE_CHANEL_UNSUBSCRIBE = "mavenArchetype/unsubscribe";
+    String MAVEN_ARCHETYPE_CHANEL_SUBSCRIBE   = "mavenArchetype/subscribe";
+    String MAVEN_ARCHETYPE_CHANEL_OUTPUT      = "mavenArchetype/output";
 }

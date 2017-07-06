@@ -11,7 +11,7 @@
 package org.eclipse.che.api.languageserver.registry;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.shared.ProjectExtensionKey;
+import org.eclipse.che.api.languageserver.shared.ProjectLangugageKey;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -34,5 +34,5 @@ public interface LanguageServerRegistry {
      */
     List<LanguageDescription> getSupportedLanguages();
 
-    Map<ProjectExtensionKey, LanguageServerDescription> getInitializedLanguages();
+    Map<ProjectLangugageKey, LanguageServerDescription> getInitializedLanguages();
 }

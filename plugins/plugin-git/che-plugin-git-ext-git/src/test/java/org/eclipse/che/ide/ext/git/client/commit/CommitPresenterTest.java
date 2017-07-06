@@ -106,21 +106,20 @@ public class CommitPresenterTest extends BaseTest {
         when(logPromise.then(any(Operation.class))).thenReturn(logPromise);
         when(logPromise.catchError(any(Operation.class))).thenReturn(logPromise);
         when(statusPromise.then(any(Operation.class))).thenReturn(statusPromise);
-        when(service.add(any(DevMachine.class), any(Path.class), anyBoolean(), any(Path[].class))).thenReturn(voidPromise);
-        when(service.commit(any(DevMachine.class), any(Path.class), anyString(), anyBoolean(), any(Path[].class), anyBoolean()))
+        when(service.add(any(Path.class), anyBoolean(), any(Path[].class))).thenReturn(voidPromise);
+        when(service.commit(any(Path.class), anyString(), anyBoolean(), any(Path[].class)))
                 .thenReturn(revisionPromise);
-        when(service.diff(any(DevMachine.class),
-                          any(Path.class),
+        when(service.diff(any(Path.class),
                           eq(null),
                           any(DiffType.class),
                           anyBoolean(),
                           anyInt(),
                           anyString(),
                           anyBoolean())).thenReturn(stringPromise);
-        when(service.branchList(any(DevMachine.class), any(Path.class), any(BranchListMode.class))).thenReturn(branchListPromise);
-        when(service.push(any(DevMachine.class), any(Path.class), anyList(), anyString(), anyBoolean())).thenReturn(pushPromise);
-        when(service.log(any(DevMachine.class), any(Path.class), eq(null), anyInt(), anyInt(), anyBoolean())).thenReturn(logPromise);
-        when(service.getStatus(any(DevMachine.class), any(Path.class))).thenReturn(statusPromise);
+        when(service.branchList(any(Path.class), any(BranchListMode.class))).thenReturn(branchListPromise);
+        when(service.push(any(Path.class), anyList(), anyString(), anyBoolean())).thenReturn(pushPromise);
+        when(service.log(any(Path.class), eq(null), anyInt(), anyInt(), anyBoolean())).thenReturn(logPromise);
+        when(service.getStatus(any(Path.class))).thenReturn(statusPromise);
     }
 
     @Test
