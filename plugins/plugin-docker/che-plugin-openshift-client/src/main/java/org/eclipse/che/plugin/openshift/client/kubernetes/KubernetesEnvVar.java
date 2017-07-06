@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.openshift.client.kubernetes;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.EnvVarBuilder;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides API for managing Kubernetes {@link EnvVar}

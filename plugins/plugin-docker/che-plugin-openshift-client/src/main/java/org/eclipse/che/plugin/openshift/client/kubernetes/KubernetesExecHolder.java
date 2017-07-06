@@ -11,9 +11,9 @@
 
 package org.eclipse.che.plugin.openshift.client.kubernetes;
 
-import java.util.Arrays;
-
 import org.eclipse.che.plugin.openshift.client.OpenShiftConnector;
+
+import java.util.Arrays;
 
 /**
  * Holder class for metadata about an exec, to be used with {@link OpenShiftConnector}.

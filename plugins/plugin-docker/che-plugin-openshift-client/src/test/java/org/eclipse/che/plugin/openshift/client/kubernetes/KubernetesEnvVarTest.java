@@ -10,16 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.openshift.client.kubernetes;
 
-import static org.testng.Assert.assertTrue;
+import io.fabric8.kubernetes.api.model.EnvVar;
+
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import io.fabric8.kubernetes.api.model.EnvVar;
+import static org.testng.Assert.assertTrue;
 
 public class KubernetesEnvVarTest {
 

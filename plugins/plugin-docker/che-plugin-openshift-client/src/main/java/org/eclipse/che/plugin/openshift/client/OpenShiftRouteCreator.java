@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.openshift.client;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.fabric8.openshift.api.model.DoneableRoute;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteFluent.SpecNested;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OpenShiftRouteCreator {
     private static final Logger LOG = LoggerFactory.getLogger(OpenShiftRouteCreator.class);
