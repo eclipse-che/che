@@ -67,12 +67,12 @@ public class ServerInitializerImplTest {
         when(server.initialize(any(InitializeParams.class))).thenReturn(completableFuture);
         when(completableFuture.get()).thenReturn(mock(InitializeResult.class));
 
-        when(launcher.getLanguageDescription()).thenReturn(languageDescription);
+        when(launcher.getLanguageId()).thenReturn("languageId");
         when(launcher.launch(anyString(), any())).thenReturn(server);
         doNothing().when(initializer).registerCallbacks(server, launcher);
 
         initializer.addObserver(observer);
-        LanguageServer languageServer = initializer.initialize(launcher, "/path");
+        LanguageServer languageServer = initializer.initialize(languageDescription, launcher, "/path");
 
         assertEquals(server, languageServer);
         verify(observer).onServerInitialized(eq(server), any(ServerCapabilities.class), eq(languageDescription), eq("/path"));

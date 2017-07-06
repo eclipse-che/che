@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
  * @author Evgen Vidolob
  */
 @Singleton
+@Deprecated
 public class MavenWebSocketCommunication implements MavenCommunication {
 
     private static final Logger LOG = LoggerFactory.getLogger(MavenWebSocketCommunication.class);

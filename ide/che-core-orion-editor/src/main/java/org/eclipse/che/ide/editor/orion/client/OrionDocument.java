@@ -12,6 +12,8 @@ package org.eclipse.che.ide.editor.orion.client;
 
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.editor.orion.client.jso.ModelChangedEventOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionPixelPositionOverlay;
@@ -197,6 +199,7 @@ public class OrionDocument extends AbstractDocument {
 
     public void replace(int offset, int length, String text) {
         this.editorOverlay.getModel().setText(text, offset, offset + length);
+        updateModificationTimeStamp();
     }
 
     @Override
@@ -205,6 +208,14 @@ public class OrionDocument extends AbstractDocument {
         int lineStart = model.getLineStart(startLine);
         int lineEnd = model.getLineStart(endLine);
         editorOverlay.setText(text, lineStart + startChar, lineEnd + endChar);
+        updateModificationTimeStamp();
+    }
+
+    private void updateModificationTimeStamp() {
+        VirtualFile file = this.getFile();
+        if (file  instanceof File) {
+            ((File)file).updateModificationStamp(editorOverlay.getText());
+        }
     }
 
     public int getContentsCharCount() {

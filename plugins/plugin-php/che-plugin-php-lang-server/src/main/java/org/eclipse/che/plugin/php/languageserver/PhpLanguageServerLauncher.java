@@ -12,10 +12,9 @@ package org.eclipse.che.plugin.php.languageserver;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.plugin.php.inject.PhpModule;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -25,8 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static java.util.Arrays.asList;
-
 /**
  * @author Evgen Vidolob
  * @author Anatolii Bazko
@@ -34,10 +31,6 @@ import static java.util.Arrays.asList;
  */
 @Singleton
 public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
-    private static final String   LANGUAGE_ID = "php";
-    private static final String[] EXTENSIONS  = new String[]{"php"};
-    private static final String[] MIME_TYPES  = new String[]{"text/x-php"};
-    private static final LanguageDescription description;
     private final Path launchScript;
 
     @Inject
@@ -46,8 +39,8 @@ public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
     }
 
     @Override
-    public LanguageDescription getLanguageDescription() {
-        return description;
+    public String getLanguageId() {
+        return PhpModule.LANGUAGE_ID;
     }
 
     @Override
@@ -73,10 +66,4 @@ public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
         }
     }
 
-    static {
-        description = new LanguageDescription();
-        description.setFileExtensions(asList(EXTENSIONS));
-        description.setLanguageId(LANGUAGE_ID);
-        description.setMimeTypes(asList(MIME_TYPES));
-    }
 }

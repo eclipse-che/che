@@ -14,6 +14,8 @@ package org.eclipse.che.ide.factory.utils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.git.shared.GitCheckoutEvent;
@@ -38,20 +40,18 @@ import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.api.user.Credentials;
+import org.eclipse.che.ide.projectimport.wizard.ProjectImportOutputJsonRpcNotifier;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.util.ExceptionUtils;
 import org.eclipse.che.ide.util.StringUtils;
-import org.eclipse.che.ide.websocket.MessageBus;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
-import org.eclipse.che.ide.websocket.WebSocketException;
-import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.security.oauth.OAuthStatus;
 
+import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -75,17 +75,18 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
  * @author Valeriy Svydenko
  * @author Anton Korneta
  */
+@Singleton
 public class FactoryProjectImporter extends AbstractImporter {
-    private static final String CHANNEL = "git:checkout:";
+    private final AskCredentialsDialog               askCredentialsDialog;
+    private final CoreLocalizationConstant           locale;
+    private final NotificationManager                notificationManager;
+    private final String                             restContext;
+    private final DialogFactory                      dialogFactory;
+    private final OAuth2AuthenticatorRegistry        oAuth2AuthenticatorRegistry;
+    private final RequestTransmitter                 requestTransmitter;
+    private final ProjectImportOutputJsonRpcNotifier subscriber;
 
-    private final MessageBusProvider          messageBusProvider;
-    private final AskCredentialsDialog        askCredentialsDialog;
-    private final CoreLocalizationConstant    locale;
-    private final NotificationManager         notificationManager;
-    private final String                      restContext;
-    private final DialogFactory               dialogFactory;
-    private final OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry;
-    private final DtoUnmarshallerFactory      dtoUnmarshallerFactory;
+    private final Map<String, CheckoutContext> checkoutContextRegistry = new HashMap<>();
 
     private FactoryDto          factory;
     private AsyncCallback<Void> callback;
@@ -99,8 +100,8 @@ public class FactoryProjectImporter extends AbstractImporter {
                                   @RestContext String restContext,
                                   DialogFactory dialogFactory,
                                   OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry,
-                                  MessageBusProvider messageBusProvider,
-                                  DtoUnmarshallerFactory dtoUnmarshallerFactory) {
+                                  RequestTransmitter requestTransmitter,
+                                  ProjectImportOutputJsonRpcNotifier subscriber) {
         super(appContext, subscriberFactory);
         this.notificationManager = notificationManager;
         this.askCredentialsDialog = askCredentialsDialog;
@@ -108,8 +109,34 @@ public class FactoryProjectImporter extends AbstractImporter {
         this.restContext = restContext;
         this.dialogFactory = dialogFactory;
         this.oAuth2AuthenticatorRegistry = oAuth2AuthenticatorRegistry;
-        this.messageBusProvider = messageBusProvider;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
+        this.requestTransmitter = requestTransmitter;
+        this.subscriber = subscriber;
+    }
+
+    @Inject
+    private void configure(RequestHandlerConfigurator requestHandlerConfigurator) {
+        requestHandlerConfigurator.newConfiguration()
+                                  .methodName("git/checkoutOutput")
+                                  .paramsAsDto(GitCheckoutEvent.class)
+                                  .noResult()
+                                  .withConsumer(this::consumeGitCheckoutEvent);
+    }
+
+    private void consumeGitCheckoutEvent(GitCheckoutEvent event) {
+        CheckoutContext context = checkoutContextRegistry.get(event.getWorkspaceId() + event.getProjectName());
+        if (context == null) {
+            return;
+        }
+
+        String projectName = context.projectName;
+        String reference = event.isCheckoutOnly() ? event.getBranchRef() : context.startPoint;
+        String repository = context.repository;
+        String branch = context.branch;
+
+        String title = locale.clonedSource(projectName);
+        String content = locale.clonedSourceWithCheckout(projectName, repository, reference, branch);
+
+        notificationManager.notify(title, content, SUCCESS, FLOAT_MODE);
     }
 
     public void startImporting(FactoryDto factory, AsyncCallback<Void> callback) {
@@ -186,7 +213,6 @@ public class FactoryProjectImporter extends AbstractImporter {
                                       @NotNull final SourceStorage sourceStorage) {
         final String projectName = pathToProject.lastSegment();
         final StatusNotification notification = notificationManager.notify(locale.cloningSource(projectName), null, PROGRESS, FLOAT_MODE);
-        final ProjectNotificationSubscriber subscriber = subscriberFactory.createSubscriber();
         subscriber.subscribe(projectName, notification);
         String location = sourceStorage.getLocation();
         // it's needed for extract repository name from repository url e.g https://github.com/codenvy/che-core.git
@@ -195,37 +221,8 @@ public class FactoryProjectImporter extends AbstractImporter {
         final Map<String, String> parameters = firstNonNull(sourceStorage.getParameters(), Collections.<String, String>emptyMap());
         final String branch = parameters.get("branch");
         final String startPoint = parameters.get("startPoint");
-        final MessageBus messageBus = messageBusProvider.getMachineMessageBus();
-        final String channel = CHANNEL + appContext.getWorkspaceId() + ':' + projectName;
-        final SubscriptionHandler<GitCheckoutEvent> successImportHandler = new SubscriptionHandler<GitCheckoutEvent>(
-                dtoUnmarshallerFactory.newWSUnmarshaller(GitCheckoutEvent.class)) {
-            @Override
-            protected void onMessageReceived(GitCheckoutEvent result) {
-                if (result.isCheckoutOnly()) {
-                    notificationManager.notify(locale.clonedSource(projectName),
-                                               locale.clonedSourceWithCheckout(projectName, repository, result.getBranchRef(), branch),
-                                               SUCCESS,
-                                               FLOAT_MODE);
-                } else {
-                    notificationManager.notify(locale.clonedSource(projectName),
-                                               locale.clonedWithCheckoutOnStartPoint(projectName, repository, startPoint, branch),
-                                               SUCCESS,
-                                               FLOAT_MODE);
-                }
-            }
 
-            @Override
-            protected void onErrorReceived(Throwable e) {
-                try {
-                    messageBus.unsubscribe(channel, this);
-                } catch (WebSocketException ignore) {
-                }
-            }
-        };
-        try {
-            messageBus.subscribe(channel, successImportHandler);
-        } catch (WebSocketException ignore) {
-        }
+        subscribe(projectName, repository, branch, startPoint);
 
         MutableProjectConfig importConfig = new MutableProjectConfig();
         importConfig.setPath(pathToProject.toString());
@@ -239,6 +236,8 @@ public class FactoryProjectImporter extends AbstractImporter {
                              @Override
                              public Project apply(Project project) throws FunctionException {
                                  subscriber.onSuccess();
+                                 unsubscribe(projectName);
+
                                  notification.setContent(locale.clonedSource(projectName));
                                  notification.setStatus(SUCCESS);
 
@@ -249,9 +248,11 @@ public class FactoryProjectImporter extends AbstractImporter {
                              @Override
                              public Promise<Project> apply(PromiseError err) throws FunctionException {
                                  final int errorCode = ExceptionUtils.getErrorCode(err.getCause());
+                                 unsubscribe(projectName);
                                  switch (errorCode) {
                                      case UNAUTHORIZED_GIT_OPERATION:
                                          subscriber.onFailure(err.getMessage());
+
                                          final Map<String, String> attributes = ExceptionUtils.getAttributes(err.getCause());
                                          final String providerName = attributes.get(PROVIDER_NAME);
                                          final String authenticateUrl = attributes.get(AUTHENTICATE_URL);
@@ -299,6 +300,28 @@ public class FactoryProjectImporter extends AbstractImporter {
                          });
     }
 
+    private void subscribe(String projectName, String repository, String branch, String startPoint) {
+        String key = appContext.getWorkspaceId() + projectName;
+
+        checkoutContextRegistry.put(key, new CheckoutContext(projectName, repository, branch, startPoint));
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("git/checkoutOutput/subscribe")
+                          .paramsAsString(key)
+                          .sendAndSkipResult();
+    }
+
+    private void unsubscribe(String projectName) {
+        String key = appContext.getWorkspaceId() + projectName;
+
+        checkoutContextRegistry.remove(key);
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("git/checkoutOutput/unsubscribe")
+                          .paramsAsString(key)
+                          .sendAndSkipResult();
+    }
+
     private Promise<Project> tryAuthenticateAndRepeatImport(@NotNull final String providerName,
                                                             @NotNull final String authenticateUrl,
                                                             @NotNull final Path pathToProject,
@@ -339,5 +362,19 @@ public class FactoryProjectImporter extends AbstractImporter {
                                    .catchError(error -> {
                                               callback.onFailure(error.getCause());
                                           });
+    }
+
+    private class CheckoutContext {
+        private final String projectName;
+        private final String repository;
+        private final String branch;
+        private final String startPoint;
+
+        private CheckoutContext(String projectName, String repository, String branch, String startPoint) {
+            this.projectName = projectName;
+            this.repository = repository;
+            this.branch = branch;
+            this.startPoint = startPoint;
+        }
     }
 }

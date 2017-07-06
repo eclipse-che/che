@@ -10,18 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.compare.revisionslist;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
@@ -127,60 +122,45 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
 
     /** Get list of revisions. */
     private void getRevisions() {
-        service.log(appContext.getDevMachine(), project.getLocation(), new Path[]{selectedFilePath}, false)
-               .then(new Operation<LogResponse>() {
-                   @Override
-                   public void apply(LogResponse log) throws OperationException {
-                       view.setRevisions(log.getCommits());
-                       view.showDialog();
+        service.log(project.getLocation(), new Path[]{selectedFilePath}, -1, -1, false)
+               .then(log -> {
+                   view.setRevisions(log.getCommits());
+                   view.showDialog();
+               }).catchError(error -> {
+                   if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
+                       dialogFactory.createMessageDialog(locale.compareWithRevisionTitle(),
+                                                         locale.initCommitWasNotPerformed(),
+                                                         null).show();
+                   } else {
+                       notificationManager.notify(locale.logFailed(), FAIL, NOT_EMERGE_MODE);
                    }
-               }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
-                    dialogFactory.createMessageDialog(locale.compareWithRevisionTitle(),
-                                                      locale.initCommitWasNotPerformed(),
-                                                      null).show();
-                } else {
-                    notificationManager.notify(locale.logFailed(), FAIL, NOT_EMERGE_MODE);
-                }
-            }
-        });
+               });
     }
 
     private void compare() {
-        service.diff(appContext.getDevMachine(),
-                     project.getLocation(),
+        service.diff(project.getLocation(),
                      singletonList(selectedFilePath.toString()),
                      NAME_STATUS,
                      false,
                      0,
                      selectedRevision.getId(),
                      false)
-               .then(new Operation<String>() {
-                   @Override
-                   public void apply(final String diff) throws OperationException {
-                       if (diff.isEmpty()) {
-                           dialogFactory.createMessageDialog(locale.compareMessageIdenticalContentTitle(),
-                                                             locale.compareMessageIdenticalContentText(), null).show();
-                       } else {
-                           project.getFile(diff.substring(2)).then(new Operation<Optional<File>>() {
-                               @Override
-                               public void apply(Optional<File> file) throws OperationException {
-                                   if (file.isPresent()) {
-                                       comparePresenter.showCompareWithLatest(file.get(), defineStatus(diff.substring(0, 1)), selectedRevision.getId());
-                                   }
-                               }
-                           });
+               .then(diff -> {
+                   if (diff.isEmpty()) {
+                       dialogFactory.createMessageDialog(locale.compareMessageIdenticalContentTitle(),
+                                                         locale.compareMessageIdenticalContentText(), null).show();
+                   } else {
+                       appContext.getRootProject().getFile(diff.substring(2)).then(file -> {
+                           if (file.isPresent()) {
+                               comparePresenter.showCompareWithLatest(file.get(), defineStatus(diff.substring(0, 1)),
+                                                                      selectedRevision.getId());
+                           }
+                       });
 
-                       }
                    }
                })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError arg) throws OperationException {
-                       notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
-                   }
+               .catchError(arg -> {
+                   notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
                });
     }
 }

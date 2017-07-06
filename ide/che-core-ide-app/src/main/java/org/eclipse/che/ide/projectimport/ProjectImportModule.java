@@ -46,5 +46,7 @@ public class ProjectImportModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder()
                         .implement(ProjectNotificationSubscriber.class, ProjectImportOutputJsonRpcNotifier.class)
                         .build(ImportProjectNotificationSubscriberFactory.class));
+
+        bind(ProjectImportNotificationSubscriber.class).asEagerSingleton();
     }
 }

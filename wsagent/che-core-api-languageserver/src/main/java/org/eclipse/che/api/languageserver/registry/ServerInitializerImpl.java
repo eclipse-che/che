@@ -50,14 +50,12 @@ public class ServerInitializerImpl implements ServerInitializer {
 
     private final List<ServerInitializerObserver> observers = new ArrayList<>();
 
-    private final ConcurrentHashMap<String, LanguageServer>                    languageIdToServers;
     private final ConcurrentHashMap<LanguageServer, LanguageServerDescription> serversToInitResult;
 
     private LanguageClient languageClient;
 
     @Inject
     public ServerInitializerImpl(EventService eventService) {
-        this.languageIdToServers = new ConcurrentHashMap<>();
         this.serversToInitResult = new ConcurrentHashMap<>();
 
         languageClient = new LanguageClient() {
@@ -115,19 +113,11 @@ public class ServerInitializerImpl implements ServerInitializer {
     }
 
     @Override
-    public LanguageServer initialize(LanguageServerLauncher launcher, String projectPath) throws LanguageServerException {
-        String languageId = launcher.getLanguageDescription().getLanguageId();
-
+    public LanguageServer initialize(LanguageDescription language, LanguageServerLauncher launcher, String projectPath) throws LanguageServerException {
         synchronized (launcher) {
-            LanguageServer server = languageIdToServers.get(languageId);
-            if (server != null) {
-                server = doInitialize(launcher, projectPath);
-            } else {
-                server = doInitialize(launcher, projectPath);
-                languageIdToServers.put(languageId, server);
-            }
+            LanguageServer server = doInitialize(language, launcher, projectPath);
             onServerInitialized(server, serversToInitResult.get(server).getInitializeResult().getCapabilities(),
-                                launcher.getLanguageDescription(), projectPath);
+                                language, projectPath);
             return server;
         }
     }
@@ -137,8 +127,8 @@ public class ServerInitializerImpl implements ServerInitializer {
         return Collections.unmodifiableMap(serversToInitResult);
     }
 
-    protected LanguageServer doInitialize(LanguageServerLauncher launcher, String projectPath) throws LanguageServerException {
-        String languageId = launcher.getLanguageDescription().getLanguageId();
+    protected LanguageServer doInitialize(LanguageDescription language, LanguageServerLauncher launcher, String projectPath) throws LanguageServerException {
+        String languageId = launcher.getLanguageId();
         InitializeParams initializeParams = prepareInitializeParams(projectPath);
 
         LanguageServer server;
@@ -153,7 +143,7 @@ public class ServerInitializerImpl implements ServerInitializer {
         CompletableFuture<InitializeResult> completableFuture = server.initialize(initializeParams);
         try {
             InitializeResult initializeResult = completableFuture.get();
-            serversToInitResult.put(server, new LanguageServerDescription(initializeResult, launcher.getLanguageDescription()));
+            serversToInitResult.put(server, new LanguageServerDescription(initializeResult, language));
         } catch (InterruptedException | ExecutionException e) {
             server.shutdown();
             server.exit();

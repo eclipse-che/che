@@ -19,7 +19,6 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.delete.DeleteRepositoryPresenter;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -52,11 +51,6 @@ public class DeleteRepositoryAction extends GitAction {
 
         dialogFactory.createConfirmDialog(constant.deleteGitRepositoryTitle(),
                                           constant.deleteGitRepositoryQuestion(project.getName()),
-                                          new ConfirmCallback() {
-                                              @Override
-                                              public void accepted() {
-                                                  presenter.deleteRepository(project);
-                                              }
-                                          }, null).show();
+                                          () -> presenter.deleteRepository(project), null).show();
     }
 }

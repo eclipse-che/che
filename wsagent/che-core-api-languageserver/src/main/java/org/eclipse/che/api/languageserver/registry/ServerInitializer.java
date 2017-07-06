@@ -12,6 +12,7 @@ package org.eclipse.che.api.languageserver.registry;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.services.LanguageServer;
 
 import java.util.Map;
@@ -25,7 +26,7 @@ public interface ServerInitializer extends ServerInitializerObservable {
     /**
      * Initialize new {@link LanguageServer} with given project path.
      */
-    LanguageServer initialize(LanguageServerLauncher launcher, String projectPath) throws LanguageServerException;
+    LanguageServer initialize(LanguageDescription language, LanguageServerLauncher launcher, String projectPath) throws LanguageServerException;
 
     /**
      * Returns initialized servers.

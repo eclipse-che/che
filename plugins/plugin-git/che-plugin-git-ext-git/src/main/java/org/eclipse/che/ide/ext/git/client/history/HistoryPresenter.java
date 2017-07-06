@@ -14,11 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ErrorCodes;
-import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.git.GitServiceClient;
@@ -136,34 +132,26 @@ public class HistoryPresenter implements HistoryView.ActionDelegate {
     }
 
     private void fetchRevisions() {
-        service.log(appContext.getDevMachine(),
-                    project.getLocation(),
-                    selectedPath.isEmpty() ? null : new Path[]{selectedPath},
+        service.log(project.getLocation(), selectedPath.isEmpty() ? null : new Path[]{selectedPath},
                     skip,
                     DEFAULT_PAGE_SIZE,
                     false)
-               .then(new Operation<LogResponse>() {
-                   @Override
-                   public void apply(LogResponse log) throws OperationException {
-                       List<Revision> commits = log.getCommits();
-                       if (!commits.isEmpty()) {
-                           skip += commits.size();
-                           revisions.addAll(commits);
-                           view.setRevisions(revisions);
-                           view.showDialog();
-                       }
+               .then(log -> {
+                   List<Revision> commits = log.getCommits();
+                   if (!commits.isEmpty()) {
+                       skip += commits.size();
+                       revisions.addAll(commits);
+                       view.setRevisions(revisions);
+                       view.showDialog();
                    }
                })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError error) throws OperationException {
-                       if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
-                           dialogFactory.createMessageDialog(locale.historyTitle(),
-                                                             locale.initCommitWasNotPerformed(),
-                                                             null).show();
-                       } else {
-                           notificationManager.notify(locale.logFailed(), FAIL, EMERGE_MODE);
-                       }
+               .catchError(error -> {
+                   if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
+                       dialogFactory.createMessageDialog(locale.historyTitle(),
+                                                         locale.initCommitWasNotPerformed(),
+                                                         null).show();
+                   } else {
+                       notificationManager.notify(locale.logFailed(), FAIL, EMERGE_MODE);
                    }
                });
     }
@@ -172,40 +160,33 @@ public class HistoryPresenter implements HistoryView.ActionDelegate {
         final String revisionA = revisions.indexOf(selectedRevision) + 1 == revisions.size() ? null :
                                  revisions.get(revisions.indexOf(selectedRevision) + 1).getId();
         final String revisionB = selectedRevision.getId();
-        service.diff(appContext.getDevMachine(), project.getLocation(),
-                     singletonList(selectedPath.toString()),
+        service.diff(project.getLocation(), singletonList(selectedPath.toString()),
                      NAME_STATUS,
                      true,
                      0,
                      revisionA,
                      revisionB)
-               .then(new Operation<String>() {
-                   @Override
-                   public void apply(final String diff) throws OperationException {
-                       if (diff.isEmpty()) {
-                           dialogFactory.createMessageDialog(locale.historyTitle(), locale.historyNothingToDisplay(), null).show();
-                           return;
+               .then(diff -> {
+                   if (diff.isEmpty()) {
+                       dialogFactory.createMessageDialog(locale.historyTitle(), locale.historyNothingToDisplay(), null).show();
+                       return;
+                   }
+                   final String[] changedFiles = diff.split("\n");
+                   if (changedFiles.length == 1) {
+                       comparePresenter.showCompareBetweenRevisions(Path.valueOf(diff.substring(2)),
+                                                                    defineStatus(diff.substring(0, 1)),
+                                                                    revisionA,
+                                                                    revisionB);
+                   } else {
+                       Map<String, FileStatus.Status> items = new HashMap<>();
+                       for (String item : changedFiles) {
+                           items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
                        }
-                       final String[] changedFiles = diff.split("\n");
-                       if (changedFiles.length == 1) {
-                           comparePresenter.showCompareBetweenRevisions(Path.valueOf(diff.substring(2)),
-                                                                        defineStatus(diff.substring(0, 1)),
-                                                                        revisionA,
-                                                                        revisionB);
-                       } else {
-                           Map<String, FileStatus.Status> items = new HashMap<>();
-                           for (String item : changedFiles) {
-                               items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
-                           }
-                           changesListPresenter.show(items, revisionA, revisionB, project);
-                       }
+                       changesListPresenter.show(items, revisionA, revisionB, project);
                    }
                })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError error) throws OperationException {
-                       notificationManager.notify(locale.diffFailed(), FAIL, EMERGE_MODE);
-                   }
+               .catchError(error -> {
+                   notificationManager.notify(locale.diffFailed(), FAIL, EMERGE_MODE);
                });
     }
 }

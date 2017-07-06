@@ -30,7 +30,10 @@ import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProjectModifications;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
+import org.eclipse.che.plugin.maven.shared.event.MavenOutputEvent;
+import org.eclipse.che.plugin.maven.shared.impl.MavenUpdateEventImpl;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
@@ -50,6 +53,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
 /**
@@ -62,7 +66,6 @@ public class MavenWorkspace {
 
     private final MavenProjectManager       manager;
     private final Provider<ProjectRegistry> projectRegistryProvider;
-    private final MavenCommunication        communication;
     private final ClasspathManager          classpathManager;
 
     private MavenTaskExecutor resolveExecutor;
@@ -76,12 +79,10 @@ public class MavenWorkspace {
                           MavenProgressNotifier notifier,
                           MavenExecutorService executorService,
                           Provider<ProjectRegistry> projectRegistryProvider,
-                          MavenCommunication communication,
                           ClasspathManager classpathManager,
                           EventService eventService,
                           EclipseWorkspaceProvider workspaceProvider) {
         this.projectRegistryProvider = projectRegistryProvider;
-        this.communication = communication;
         this.classpathManager = classpathManager;
         this.manager = manager;
         resolveExecutor = new MavenTaskExecutor(executorService, notifier);
@@ -110,9 +111,20 @@ public class MavenWorkspace {
                 List<MavenProject> needResolve = manager.findDependentProjects(allChangedProjects);
                 needResolve.addAll(updated.keySet());
 
+                List<String> updatedPaths = updated.keySet().stream()
+                                                   .map(MavenProject::getProject)
+                                                   .map(IResource::getFullPath)
+                                                   .map(IPath::toOSString)
+                                                   .collect(toList());
+                List<String> removedPaths = removed.stream()
+                                                   .map(MavenProject::getProject)
+                                                   .map(IResource::getFullPath)
+                                                   .map(IPath::toOSString)
+                                                   .collect(toList());
+
                 addResolveProjects(needResolve);
 
-                communication.sendUpdateMassage(updated.keySet(), removed);
+                eventService.publish(new MavenUpdateEventImpl(updatedPaths, removedPaths, MavenOutputEvent.TYPE.UPDATE));
             }
         });
     }

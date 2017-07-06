@@ -47,7 +47,7 @@ public class InitRepositoryPresenterTest extends BaseTest {
                                                 service,
                                                 appContext);
 
-        when(service.init(anyObject(), any(Path.class), anyBoolean())).thenReturn(voidPromise);
+        when(service.init(any(Path.class), anyBoolean())).thenReturn(voidPromise);
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
     }

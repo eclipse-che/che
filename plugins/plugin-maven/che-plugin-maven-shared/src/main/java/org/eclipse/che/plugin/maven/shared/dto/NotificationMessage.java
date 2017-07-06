@@ -18,6 +18,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Evgen Vidolob
  */
 @DTO
+@Deprecated
 public interface NotificationMessage {
 
     String getText();

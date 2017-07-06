@@ -13,14 +13,12 @@ package org.eclipse.che.plugin.maven.generator.archetype;
 import org.eclipse.che.plugin.maven.shared.dto.ArchetypeOutput;
 
 /**
+ * Describes information about output object of maven archetype project generation.
  *
  * @author Vitalii Parfonov
  */
 public class ArchetypeOutputImpl implements ArchetypeOutput {
-
-
     private String output;
-
     private State state;
 
     public ArchetypeOutputImpl(String output, State state) {
@@ -36,5 +34,15 @@ public class ArchetypeOutputImpl implements ArchetypeOutput {
     @Override
     public State getState() {
         return state;
+    }
+
+    @Override
+    public void setOutput(String output) {
+        this.output = output;
+    }
+
+    @Override
+    public void setState(State state) {
+        this.state = state;
     }
 }
