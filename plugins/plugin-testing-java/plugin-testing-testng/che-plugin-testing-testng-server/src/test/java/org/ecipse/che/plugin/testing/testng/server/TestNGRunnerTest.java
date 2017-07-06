@@ -21,6 +21,7 @@ import org.eclipse.che.api.testing.server.dto.DtoServerImpls;
 import org.eclipse.che.api.testing.server.framework.TestMessagesOutputTransmitter;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
+import org.eclipse.che.ide.runtime.Assert;
 import org.eclipse.che.jdt.core.launching.JREContainerInitializer;
 import org.eclipse.che.jdt.core.resources.ResourceChangedEvent;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
@@ -39,6 +40,7 @@ import org.testng.annotations.Test;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 public class TestNGRunnerTest extends BaseTest {
     private EndpointIdConfigurator  startEndpointIdConfigurator;
@@ -60,7 +62,7 @@ public class TestNGRunnerTest extends BaseTest {
         runner = new TestNGRunner(new ProjectClasspathProvider(""), new TestNGSuiteUtil());
     }
 
-    @Test
+    @Test()
     public void testName() throws Exception {
         String name = "Test";
         FolderEntry folder = pm.getProjectsRoot().createFolder(name);
@@ -90,19 +92,7 @@ public class TestNGRunnerTest extends BaseTest {
         context.setTestType(TestExecutionContext.TestType.FILE);
         context.setProjectPath("/Test");
         context.setFilePath("/Test/src/tests/TestNGTest.java");
-        ProcessHandler processHandler = runner.execute(context);
-
-        prepareTransmitting(transmitter);
-
-        new TestMessagesOutputTransmitter(processHandler, transmitter, "test");
-
-        Thread.sleep(2000);
-        ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
-
-        //TODO need to compile java resources for testing executing tests
-//        verify(startEndpointIdConfigurator, times(29)).endpointId(eq("test"));
-//        verify(startParamsConfigurator, times(29)).paramsAsString(jsonCaptor.capture());
-//        jsonCaptor.getAllValues().forEach(System.out::println);
+        assertEquals("testng", runner.getName());
     }
 
     private void prepareTransmitting(RequestTransmitter transmitter) {
