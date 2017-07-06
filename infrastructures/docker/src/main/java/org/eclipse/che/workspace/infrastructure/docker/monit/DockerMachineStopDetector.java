@@ -14,19 +14,12 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.params.GetEventsParams;
-import org.eclipse.che.workspace.infrastructure.docker.ContextsStorage;
-import org.eclipse.che.workspace.infrastructure.docker.DockerRuntimeContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +27,13 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import static java.lang.String.format;
 
 /**
  * Track docker containers events to detect containers stop or failure.
@@ -50,11 +44,9 @@ import java.util.concurrent.TimeUnit;
 public class DockerMachineStopDetector {
     private static final Logger LOG = LoggerFactory.getLogger(DockerMachineStopDetector.class);
 
-    private final DockerConnector                   dockerConnector;
-    private final ContextsStorage                   contextsStorage;
-    private final ExecutorService                   executorService;
-    // <containerId, (machineId, workspaceId)>
-    private final Map<String, Pair<String, String>> instances;
+    private final DockerConnector                          dockerConnector;
+    private final ExecutorService                          executorService;
+    private final Map<String, ContainerDeathHandlerHolder> handlers;
     /*
        Helps differentiate container main process OOM from other processes OOM
        Algorithm:
@@ -67,16 +59,14 @@ public class DockerMachineStopDetector {
        That's why cache expires in X seconds.
        X was set as 10 empirically.
     */
-    private final Cache<String, String>             containersOomTimestamps;
+    private final Cache<String, String>                    containersOomTimestamps;
 
     private long lastProcessedEventDate = 0;
 
     @Inject
-    public DockerMachineStopDetector(DockerConnectorProvider dockerConnectorProvider,
-                                     ContextsStorage contextsStorage) {
-        this.dockerConnector = dockerConnectorProvider.get();
-        this.contextsStorage = contextsStorage;
-        this.instances = new ConcurrentHashMap<>();
+    public DockerMachineStopDetector(DockerConnector dockerConnector) {
+        this.dockerConnector = dockerConnector;
+        this.handlers = new ConcurrentHashMap<>();
         this.containersOomTimestamps = CacheBuilder.newBuilder()
                                                    .expireAfterWrite(10, TimeUnit.SECONDS)
                                                    .build();
@@ -93,15 +83,15 @@ public class DockerMachineStopDetector {
      *
      * @param containerId
      *         id of a container to start detection for
-     * @param machineId
-     *         id of a machine which container implements
-     * @param workspaceId
-     *         id of a workspace that owns machine
+     * @param machineName
+     *         name of machine represented by provided container
+     * @param handler
+     *         handler that should be called when machine abnormal stop is detected
      */
     public void startDetection(String containerId,
-                               String machineId,
-                               String workspaceId) {
-        instances.put(containerId, Pair.of(machineId, workspaceId));
+                               String machineName,
+                               AbnormalMachineStopHandler handler) {
+        handlers.put(containerId, new ContainerDeathHandlerHolder(machineName, handler));
     }
 
     /**
@@ -111,7 +101,7 @@ public class DockerMachineStopDetector {
      *         id of a container to start detection for
      */
     public void stopDetection(String containerId) {
-        instances.remove(containerId);
+        handlers.remove(containerId);
     }
 
     @SuppressWarnings("unused")
@@ -148,33 +138,34 @@ public class DockerMachineStopDetector {
                     LOG.debug("OOM of process in container {} has been detected", message.getId());
                     break;
                 case "die":
-                    String stopType;
+                    String stopReason;
                     if (containersOomTimestamps.getIfPresent(message.getId()) != null) {
                         containersOomTimestamps.invalidate(message.getId());
-                        LOG.debug("OOM of container '{}' has been detected", message.getId());
-                        stopType = "oom";
+                        stopReason = "OOM of main process of container was detected.";
                     } else {
-                        stopType = "die";
-                    }
-                    Pair<String, String> instanceIds = instances.get(message.getId());
-                    if (instanceIds != null) {
-                        try {
-                            DockerRuntimeContext context = contextsStorage.get(instanceIds.second);
-                            try {
-                                context.getRuntime().stop(Collections.emptyMap());
-                            } catch (InternalInfrastructureException e) {
-                                LOG.error(e.getLocalizedMessage(), e);
-                            } catch (InfrastructureException ignored) {
-                            } finally {
-                                // TODO spi send event environment abnormally stopped to master #5125
-                            }
-                        } catch (NotFoundException ignore) {}
+                        stopReason = "Please, check that container is designed to run in non-interactive terminal.";
                     }
                     lastProcessedEventDate = message.getTime();
+                    ContainerDeathHandlerHolder holder = handlers.get(message.getId());
+                    if (holder != null) {
+                        holder.handler.handle(format("Container of machine '%s' unexpectedly stopped. %s",
+                                                     holder.machineName, stopReason));
+                    }
                     break;
                 default:
                     // we don't care about other event types
             }
+        }
+    }
+
+    private static class ContainerDeathHandlerHolder {
+        String                     machineName;
+        AbnormalMachineStopHandler handler;
+
+        public ContainerDeathHandlerHolder(String machineName,
+                                           AbnormalMachineStopHandler handler) {
+            this.machineName = machineName;
+            this.handler = handler;
         }
     }
 }

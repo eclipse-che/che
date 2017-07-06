@@ -56,6 +56,7 @@ import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
+import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
 import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyProvider;
 import org.slf4j.Logger;
@@ -303,7 +304,9 @@ public class DockerMachineStarter {
                                       String machineName,
                                       DockerContainerConfig containerConfig,
                                       RuntimeIdentity identity,
-                                      boolean isDev) throws InfrastructureException {
+                                      boolean isDev,
+                                      AbnormalMachineStopHandler abnormalMachineStopHandler)
+            throws InfrastructureException {
         String workspaceId = identity.getWorkspaceId();
 
         // copy to not affect/be affected by changes in origin
@@ -331,9 +334,7 @@ public class DockerMachineStarter {
                                               containerConfig.getId(),
                                               machineLoggerFactory.newLogsProcessor(machineName, identity));
 
-            dockerInstanceStopDetector.startDetection(container,
-                                                      containerConfig.getId(),
-                                                      workspaceId);
+            dockerInstanceStopDetector.startDetection(container, machineName, abnormalMachineStopHandler);
 
             return new DockerMachine(docker,
                                      registry,
