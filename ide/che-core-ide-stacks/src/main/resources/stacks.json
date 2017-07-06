@@ -2618,6 +2618,23 @@
       }
     ],
     "creator": "Dharmit Shah"
+  },
+  {
+    "id": "kotlin-default",
+    "creator": "ide",
+    "name": "Kotlin",
+    "description": "Ubuntu based stack with Kotlin",
+    "scope": "advanced",
+    "tags": [
+      "Kotlin",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [],
+    "source": {
+      "type": "image",
+      "origin": "eclipse/kotlin"
+ }
 },
 {
     "id": "centos-go",
@@ -2730,5 +2747,5 @@
     "name": "type-blank.svg",
     "mediaType": "image/svg+xml"
   }
-}
+ }
 ]
