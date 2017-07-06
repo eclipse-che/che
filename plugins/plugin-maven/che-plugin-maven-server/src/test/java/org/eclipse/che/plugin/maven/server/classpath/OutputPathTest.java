@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.maven.server.classpath;
 
 import com.google.gson.JsonObject;
 import com.google.inject.Provider;
+
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.server.BaseTest;
@@ -47,9 +48,9 @@ import static org.mockito.Mockito.when;
  * Test for checking output location for test sources.
  */
 public class OutputPathTest extends BaseTest {
-    private   MavenProjectManager       mavenProjectManager;
-    private   MavenWorkspace            mavenWorkspace;
-    private   ClasspathManager          classpathManager;
+    private MavenProjectManager mavenProjectManager;
+    private MavenWorkspace      mavenWorkspace;
+    private ClasspathManager    classpathManager;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -69,51 +70,36 @@ public class OutputPathTest extends BaseTest {
         mavenProjectManager =
                 new MavenProjectManager(wrapperManager, mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
         mavenWorkspace = new MavenWorkspace(mavenProjectManager,
-                mavenNotifier,
-                new MavenExecutorService(),
-                projectRegistryProvider,
-                new MavenCommunication() {
-                    @Override
-                    public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed) {
-
-                    }
-
-                    @Override
-                    public void sendNotification(NotificationMessage message) {
-                        System.out.println(message.toString());
-                    }
-
-                    @Override
-                    public void send(JsonObject object, MessageType type) {
-
-                    }
-                }, new ClasspathManager(root.getAbsolutePath(), wrapperManager, mavenProjectManager, terminal,
-                mavenNotifier), eventService, new EclipseWorkspaceProvider());
+                                            mavenNotifier,
+                                            new MavenExecutorService(),
+                                            projectRegistryProvider,
+                                            new ClasspathManager(root.getAbsolutePath(), wrapperManager, mavenProjectManager, terminal,
+                                                                 mavenNotifier), eventService, new EclipseWorkspaceProvider());
     }
 
     @Test
     public void testSourceClasspathEntryShouldHaveOutputLocationPath() throws Exception {
         String pom = "<groupId>test</groupId>" +
-                "<artifactId>testOutputLocation</artifactId>" +
-                "<version>42</version>" +
-                "<dependencies>" +
-                "    <dependency>" +
-                "        <groupId>junit</groupId>" +
-                "        <artifactId>junit</artifactId>" +
-                "        <version>4.12</version>" +
-                "    </dependency>" +
-                "</dependencies>";
+                     "<artifactId>testOutputLocation</artifactId>" +
+                     "<version>42</version>" +
+                     "<dependencies>" +
+                     "    <dependency>" +
+                     "        <groupId>junit</groupId>" +
+                     "        <artifactId>junit</artifactId>" +
+                     "        <version>4.12</version>" +
+                     "    </dependency>" +
+                     "</dependencies>";
         createTestProject("test", pom);
 
         IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
         mavenWorkspace.update(Collections.singletonList(test));
         mavenWorkspace.waitForUpdate();
 
-        JavaProject javaProject = (JavaProject) JavaCore.create(test);
+        JavaProject javaProject = (JavaProject)JavaCore.create(test);
         IClasspathEntry[] classpath = javaProject.getResolvedClasspath();
         IClasspathEntry srcMainJava = null;
         for (IClasspathEntry entry : classpath) {
-            if(entry.getEntryKind() == IClasspathEntry.CPE_SOURCE && entry.getPath().toOSString().endsWith("src/main/java")){
+            if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE && entry.getPath().toOSString().endsWith("src/main/java")) {
                 srcMainJava = entry;
                 break;
             }
@@ -127,18 +113,18 @@ public class OutputPathTest extends BaseTest {
     @Test
     public void testSourceClasspathEntryShouldHaveCustomOutputLocationPath() throws Exception {
         String pom = "<groupId>test</groupId>" +
-                "<artifactId>testOutputLocation</artifactId>" +
-                "<version>42</version>" +
-                "<dependencies>" +
-                "    <dependency>" +
-                "        <groupId>junit</groupId>" +
-                "        <artifactId>junit</artifactId>" +
-                "        <version>4.12</version>" +
-                "    </dependency>" +
-                "</dependencies>" +
-                "<build>" +
-                "  <outputDirectory>bin/classes</outputDirectory>" +
-                "</build>";
+                     "<artifactId>testOutputLocation</artifactId>" +
+                     "<version>42</version>" +
+                     "<dependencies>" +
+                     "    <dependency>" +
+                     "        <groupId>junit</groupId>" +
+                     "        <artifactId>junit</artifactId>" +
+                     "        <version>4.12</version>" +
+                     "    </dependency>" +
+                     "</dependencies>" +
+                     "<build>" +
+                     "  <outputDirectory>bin/classes</outputDirectory>" +
+                     "</build>";
 
         createTestProject("test", pom);
 
@@ -146,11 +132,11 @@ public class OutputPathTest extends BaseTest {
         mavenWorkspace.update(Collections.singletonList(test));
         mavenWorkspace.waitForUpdate();
 
-        JavaProject javaProject = (JavaProject) JavaCore.create(test);
+        JavaProject javaProject = (JavaProject)JavaCore.create(test);
         IClasspathEntry[] classpath = javaProject.getResolvedClasspath();
         IClasspathEntry srcMainJava = null;
         for (IClasspathEntry entry : classpath) {
-            if(entry.getEntryKind() == IClasspathEntry.CPE_SOURCE && entry.getPath().toOSString().endsWith("src/main/java")){
+            if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE && entry.getPath().toOSString().endsWith("src/main/java")) {
                 srcMainJava = entry;
                 break;
             }
@@ -164,26 +150,26 @@ public class OutputPathTest extends BaseTest {
     @Test
     public void testTestSourceClasspathEntryShouldHaveOutputLocationPath() throws Exception {
         String pom = "<groupId>test</groupId>" +
-                "<artifactId>testOutputLocation</artifactId>" +
-                "<version>42</version>" +
-                "<dependencies>" +
-                "    <dependency>" +
-                "        <groupId>junit</groupId>" +
-                "        <artifactId>junit</artifactId>" +
-                "        <version>4.12</version>" +
-                "    </dependency>" +
-                "</dependencies>";
+                     "<artifactId>testOutputLocation</artifactId>" +
+                     "<version>42</version>" +
+                     "<dependencies>" +
+                     "    <dependency>" +
+                     "        <groupId>junit</groupId>" +
+                     "        <artifactId>junit</artifactId>" +
+                     "        <version>4.12</version>" +
+                     "    </dependency>" +
+                     "</dependencies>";
         createTestProject("test", pom);
 
         IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
         mavenWorkspace.update(Collections.singletonList(test));
         mavenWorkspace.waitForUpdate();
 
-        JavaProject javaProject = (JavaProject) JavaCore.create(test);
+        JavaProject javaProject = (JavaProject)JavaCore.create(test);
         IClasspathEntry[] classpath = javaProject.getResolvedClasspath();
         IClasspathEntry srcMainJava = null;
         for (IClasspathEntry entry : classpath) {
-            if(entry.getEntryKind() == IClasspathEntry.CPE_SOURCE && entry.getPath().toOSString().endsWith("src/test/java")){
+            if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE && entry.getPath().toOSString().endsWith("src/test/java")) {
                 srcMainJava = entry;
                 break;
             }
@@ -197,18 +183,18 @@ public class OutputPathTest extends BaseTest {
     @Test
     public void testTestSourceClasspathEntryShouldHaveCustomOutputLocationPath() throws Exception {
         String pom = "<groupId>test</groupId>" +
-                "<artifactId>testOutputLocation</artifactId>" +
-                "<version>42</version>" +
-                "<dependencies>" +
-                "    <dependency>" +
-                "        <groupId>junit</groupId>" +
-                "        <artifactId>junit</artifactId>" +
-                "        <version>4.12</version>" +
-                "    </dependency>" +
-                "</dependencies>" +
-                "<build>" +
-                "  <testOutputDirectory>test/test-classes</testOutputDirectory>" +
-                "</build>";
+                     "<artifactId>testOutputLocation</artifactId>" +
+                     "<version>42</version>" +
+                     "<dependencies>" +
+                     "    <dependency>" +
+                     "        <groupId>junit</groupId>" +
+                     "        <artifactId>junit</artifactId>" +
+                     "        <version>4.12</version>" +
+                     "    </dependency>" +
+                     "</dependencies>" +
+                     "<build>" +
+                     "  <testOutputDirectory>test/test-classes</testOutputDirectory>" +
+                     "</build>";
 
         createTestProject("test", pom);
 
@@ -216,11 +202,11 @@ public class OutputPathTest extends BaseTest {
         mavenWorkspace.update(Collections.singletonList(test));
         mavenWorkspace.waitForUpdate();
 
-        JavaProject javaProject = (JavaProject) JavaCore.create(test);
+        JavaProject javaProject = (JavaProject)JavaCore.create(test);
         IClasspathEntry[] classpath = javaProject.getResolvedClasspath();
         IClasspathEntry srcMainJava = null;
         for (IClasspathEntry entry : classpath) {
-            if(entry.getEntryKind() == IClasspathEntry.CPE_SOURCE && entry.getPath().toOSString().endsWith("src/test/java")){
+            if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE && entry.getPath().toOSString().endsWith("src/test/java")) {
                 srcMainJava = entry;
                 break;
             }

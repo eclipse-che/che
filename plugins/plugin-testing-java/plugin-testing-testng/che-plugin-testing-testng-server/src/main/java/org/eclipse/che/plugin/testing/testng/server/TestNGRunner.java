@@ -117,6 +117,8 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         JavaParameters parameters = new JavaParameters();
         parameters.setJavaExecutable("java");
         parameters.setMainClassName("org.testng.CheTestNGLauncher");
+        String outputDirectory = getOutputDirectory(javaProject);
+        parameters.getParametersList().add("-d", outputDirectory);
         parameters.setWorkingDirectory(PROJECTS_ROOT_FOLDER + javaProject.getPath());
         List<String> classPath = new ArrayList<>();
         Set<String> projectClassPath = classpathProvider.getProjectClassPath(javaProject);
@@ -126,7 +128,6 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         parameters.getClassPath().addAll(classPath);
 
         parameters.getParametersList().add("-suiteFile", suiteFile.getAbsolutePath());
-        parameters.getParametersList().add("-d", getOutputDirectory(javaProject));
         if (context.isDebugModeEnable()) {
             debugPort = generateDebuggerPort();
             parameters.getVmParameters().add("-Xdebug");
