@@ -26,7 +26,9 @@ import org.eclipse.che.plugin.docker.machine.DockerProcess;
 import org.eclipse.che.plugin.docker.machine.LocalDockerCustomServerEvaluationStrategy;
 import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
+import org.eclipse.che.plugin.openshift.client.OpenShiftCommandAppender;
 import org.eclipse.che.plugin.openshift.client.OpenShiftConnector;
+import org.eclipse.che.plugin.openshift.client.OpenShiftWorkspaceLogCommandAppender;
 
 import java.util.Set;
 
@@ -68,6 +70,9 @@ public class LocalDockerModule extends AbstractModule {
         bind(org.eclipse.che.plugin.docker.client.DockerRegistryDynamicAuthResolver.class)
                 .to(org.eclipse.che.plugin.docker.client.NoOpDockerRegistryDynamicAuthResolverImpl.class);
         bind(org.eclipse.che.plugin.docker.client.DockerRegistryChecker.class).asEagerSingleton();
+
+        Multibinder<OpenShiftCommandAppender> goalBinder = Multibinder.newSetBinder(binder(), OpenShiftCommandAppender.class);
+        goalBinder.addBinding().to(OpenShiftWorkspaceLogCommandAppender.class);
 
         MapBinder<String, DockerConnector> dockerConnectors = MapBinder.newMapBinder(binder(), String.class, DockerConnector.class);
         dockerConnectors.addBinding("default").to(DockerConnector.class);
