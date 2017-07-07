@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.messager;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.api.languageserver.registry.ServerInitializer;
 import org.eclipse.che.api.languageserver.registry.ServerInitializerObserver;
@@ -18,8 +20,6 @@ import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.LanguageServ
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageServer;
-import org.everrest.websockets.WSConnectionContext;
-import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,21 +27,20 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.websocket.EncodeException;
-import java.io.IOException;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
-/**
- * @author Anatolii Bazko
- */
 @Singleton
-public class InitializeEventMessenger implements ServerInitializerObserver {
-    private final static Logger LOG = LoggerFactory.getLogger(InitializeEventMessenger.class);
+public class InitializeEventJsonRpcMessenger implements ServerInitializerObserver {
+    private final Set<String> endpointIds = new CopyOnWriteArraySet<>();
 
-    private ServerInitializer initializer;
+    private final RequestTransmitter requestTransmitter;
+    private final ServerInitializer  initializer;
 
     @Inject
-    public InitializeEventMessenger(ServerInitializer initializer) {
+    public InitializeEventJsonRpcMessenger(ServerInitializer initializer, RequestTransmitter requestTransmitter) {
         this.initializer = initializer;
+        this.requestTransmitter = requestTransmitter;
     }
 
     @Override
@@ -55,7 +54,30 @@ public class InitializeEventMessenger implements ServerInitializerObserver {
         initializeEventDto.setServerCapabilities(new DtoServerImpls.ServerCapabilitiesDto(serverCapabilities));
         initializeEventDto.setProjectPath(projectPath.substring(LanguageServerRegistryImpl.PROJECT_FOLDER_PATH.length()));
 
-        send(initializeEventDto);
+        endpointIds.forEach(endpointId -> requestTransmitter.newRequest()
+                                                            .endpointId(endpointId)
+                                                            .methodName("languageServer/initialize/notify")
+                                                            .paramsAsDto(initializeEventDto)
+                                                            .sendAndSkipResult());
+    }
+
+    @Inject
+    private void configureSubscribeHandler(RequestHandlerConfigurator configurator) {
+        configurator.newConfiguration()
+                    .methodName("languageServer/initialize/subscribe")
+                    .noParams()
+                    .noResult()
+                    .withConsumer(endpointIds::add);
+    }
+
+    @Inject
+    private void configureUnSubscribeHandler(RequestHandlerConfigurator configurator) {
+        configurator.newConfiguration()
+                    .methodName("languageServer/initialize/unsubscribe")
+                    .noParams()
+                    .noResult()
+                    .withConsumer(endpointIds::remove);
+
     }
 
     @PostConstruct
@@ -66,17 +88,6 @@ public class InitializeEventMessenger implements ServerInitializerObserver {
     @PreDestroy
     public void removeObserver() {
         initializer.removeObserver(this);
-    }
-
-    protected void send(final LanguageServerInitializeEventDto message) {
-        try {
-            final ChannelBroadcastMessage bm = new ChannelBroadcastMessage();
-            bm.setChannel("languageserver");
-            bm.setBody(message.toJson());
-            WSConnectionContext.sendMessage(bm);
-        } catch (EncodeException | IOException e) {
-            LOG.error(e.getMessage(), e);
-        }
     }
 
 }
