@@ -15,7 +15,7 @@
  *
  * @author Oleksii Kurinnyi
  */
-export class StackSelectorItem {
+export class StackSelectorItem implements ng.IDirective {
   restrict: string = 'E';
   templateUrl: string = 'app/workspaces/create-workspace/stack-selector/stack-selector-item/stack-selector-item.html';
   replace: boolean = true;

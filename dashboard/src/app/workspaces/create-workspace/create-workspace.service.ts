@@ -109,17 +109,16 @@ export class CreateWorkspaceSvc {
   getOrFetchWorkspacesByNamespace(namespaceId: string): ng.IPromise<any> {
     const defer = this.$q.defer();
 
-    const workspacesByNamespaceList = this.cheWorkspace.getWorkspacesByNamespace(namespaceId) || [];
-    if (workspacesByNamespaceList.length) {
-      defer.resolve(workspacesByNamespaceList);
-    } else {
-      this.cheWorkspace.fetchWorkspacesByNamespace(namespaceId).then(() => {
+    this.cheWorkspace.fetchWorkspacesByNamespace(namespaceId).then(() => {
+      defer.resolve(this.cheWorkspace.getWorkspacesByNamespace(namespaceId) || []);
+    }, (error: any) => {
+      if (error.status === 304) {
         defer.resolve(this.cheWorkspace.getWorkspacesByNamespace(namespaceId) || []);
-      }, (error: any) => {
+      } else {
         // not authorized
         defer.reject(error);
-      });
-    }
+      }
+    });
 
     return defer.promise;
   }
