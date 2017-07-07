@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017 RedHat, Inc.
+ * Copyright (c) 2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   RedHat, Inc. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.console;
 
@@ -17,6 +17,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.resource.Path;
 
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.inject.Inject;
 
 /**
  * Output customizer adds an anchor link to the lines that match a .NET C#
@@ -25,15 +26,14 @@ import com.google.gwt.regexp.shared.RegExp;
  * trace line, searches for a candidate C# file to navigate to, opens the found
  * file in editor and reveals it to the required line and column (if available)
  * according to the line information
+ * 
+ * @author Victor Rubezhny
  */
-public class CSharpOutputCustomizer implements OutputCustomizer {
+public class CSharpOutputCustomizer extends AbstractOutputCustomizer {
 
     private static final RegExp COMPILATION_ERROR_OR_WARNING = compile(
             "(.+\\.(cs|CS)\\(\\d+,\\d+\\): (error|warning) .+: .+ \\[.+\\])");
     private static final RegExp LINE_AT = compile("(\\s+at .+ in .+\\.(cs|CS):line \\d+)");
-
-    private AppContext appContext;
-    private EditorAgent editorAgent;
 
     /**
      * Constructs Compound Output Customizer Object
@@ -41,9 +41,9 @@ public class CSharpOutputCustomizer implements OutputCustomizer {
      * @param appContext
      * @param editorAgent
      */
+    @Inject
     public CSharpOutputCustomizer(AppContext appContext, EditorAgent editorAgent) {
-        this.appContext = appContext;
-        this.editorAgent = editorAgent;
+        super(appContext, editorAgent);
 
         exportCompilationMessageAnchorClickHandlerFunction();
         exportStacktraceLineAnchorClickHandlerFunction();
@@ -143,7 +143,7 @@ public class CSharpOutputCustomizer implements OutputCustomizer {
             return;
         }
 
-        DefaultOutputCustomizer.openFileInEditorAndReveal(appContext, editorAgent,
+        openFileInEditorAndReveal(appContext, editorAgent,
                 Path.valueOf(projectFile).removeFirstSegments(1).parent().append(fileName), lineNumber, columnNumber);
     }
 
@@ -159,7 +159,7 @@ public class CSharpOutputCustomizer implements OutputCustomizer {
             return;
         }
 
-        DefaultOutputCustomizer.openFileInEditorAndReveal(appContext, editorAgent,
+        openFileInEditorAndReveal(appContext, editorAgent,
                 Path.valueOf(fileName).removeFirstSegments(1), lineNumber, 0);
     }
 

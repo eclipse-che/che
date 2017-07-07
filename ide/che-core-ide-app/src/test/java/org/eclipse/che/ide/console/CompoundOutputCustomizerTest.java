@@ -1,20 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2017 RedHat, Inc.
+ * Copyright (c) 2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   RedHat, Inc. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.console;
 
-import java.util.stream.Stream;
-
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,62 +28,24 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
  * 
  * See: CHE-15 - Java stacktrace support (From Platform to Che Workspace) See:
  * Issue #5489 - .NET C# stacktrace support #5489
+ * 
+ * @author Victor Rubezhny
  */
 @RunWith(GwtMockitoTestRunner.class)
-public class CompoundOutputCustomizerTest {
+public class CompoundOutputCustomizerTest extends BaseOutputCustomizerTest {
     @Mock
     AppContext appContext;
     @Mock
     EditorAgent editorAgent;
 
-    private CompoundOutputCustomizer outputCustomizer;
-    private OutputCustomizer[] customizers;
-
     @Before
     public void setUp() throws Exception {
-        customizers = new OutputCustomizer[] { new DefaultOutputCustomizer(appContext, editorAgent),
-                new CSharpOutputCustomizer(appContext, editorAgent) };
-        outputCustomizer = new CompoundOutputCustomizer(customizers);
-    }
+        OutputCustomizer[] customizers = new OutputCustomizer[] { 
+                new JavaOutputCustomizer(appContext, editorAgent),
+                new CSharpOutputCustomizer(appContext, editorAgent)
+            };
 
-    /*
-     * Tests non-customizable lines (those that cannot be treated as stacktrace
-     * lines and, as such, shouldn't be customized)
-     */
-    private void testStackTraceLine(String line) throws Exception {
-        testStackTraceLine(null, line, null);
-    }
-
-    /*
-     * Tests customizable and non-customizable lines
-     */
-    private void testStackTraceLine(Class expectedCustomizerClass, String line, String expectedCustomization)
-            throws Exception {
-        boolean shouldBeCustomizable = expectedCustomizerClass != null;
-        Assert.assertEquals(
-                "Line [" + line + "] is " + (shouldBeCustomizable ? "" : "not ") + "customizable while it should"
-                        + (shouldBeCustomizable ? "n\'t " : " ") + "be: ",
-                Boolean.valueOf(shouldBeCustomizable), Boolean.valueOf(outputCustomizer.canCustomize(line)));
-        if (shouldBeCustomizable) {
-            testCustomizerValidity(expectedCustomizerClass, customizers, line);
-            Assert.assertEquals("Wrong customization result:", expectedCustomization, outputCustomizer.customize(line));
-        }
-    }
-
-    /*
-     * Tests that a line can be processed only by expected customizer and not by the
-     * other ones
-     */
-    private void testCustomizerValidity(Class expectedCustomizerClass, OutputCustomizer[] allCustomizers, String text) {
-        Assert.assertTrue(
-                "Expected customizer of type [" + expectedCustomizerClass + "] cannot customize line [" + text + "]",
-                Stream.of(allCustomizers).filter(child -> child.getClass().equals(expectedCustomizerClass))
-                        .allMatch(expected -> expected.canCustomize(text)));
-
-        Assert.assertTrue(
-                "Unexpected customizer of type [" + expectedCustomizerClass + "] can customize line [" + text + "]",
-                Stream.of(allCustomizers).filter(child -> !child.getClass().equals(expectedCustomizerClass))
-                        .noneMatch(expected -> expected.canCustomize(text)));
+        setupTestCustomizers(new CompoundOutputCustomizer(customizers), customizers);
     }
 
     /**
@@ -120,13 +79,13 @@ public class CompoundOutputCustomizerTest {
     @Test
     public void testValuableStackTraceLines() throws Exception {
         // Java Stacktrace lines
-        testStackTraceLine(DefaultOutputCustomizer.class, 
+        testStackTraceLine(JavaOutputCustomizer.class, 
                 "   at org.test.Junk.main(Junk.java:6)",
                 "   at org.test.Junk.main(<a href='javascript:open(\"org.test.Junk.main\", \"Junk.java\", 6);'>Junk.java:6</a>)");
-        testStackTraceLine(DefaultOutputCustomizer.class, 
+        testStackTraceLine(JavaOutputCustomizer.class, 
                 "   at org.test.TrashClass.throwItThere(Junk.java:51)",
                 "   at org.test.TrashClass.throwItThere(<a href='javascript:open(\"org.test.TrashClass.throwItThere\", \"Junk.java\", 51);'>Junk.java:51</a>)");
-        testStackTraceLine(DefaultOutputCustomizer.class, 
+        testStackTraceLine(JavaOutputCustomizer.class, 
                 "   at MyClass$ThrowInConstructor.<init>(MyClass.java:16)",
                 "   at MyClass$ThrowInConstructor.<init>(<a href='javascript:open(\"MyClass$ThrowInConstructor.<init>\", \"MyClass.java\", 16);'>MyClass.java:16</a>)");
 

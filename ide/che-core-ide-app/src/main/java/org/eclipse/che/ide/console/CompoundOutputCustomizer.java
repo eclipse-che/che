@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017 RedHat, Inc.
+ * Copyright (c) 2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   RedHat, Inc. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.console;
 
@@ -17,6 +17,8 @@ import java.util.stream.Stream;
  * Compound customizer allows to combine several different customizers. A text
  * provided will be treated as customize if at least one of nested customizers
  * detects it as customizable
+ * 
+ * @author Victor Rubezhny
  */
 public class CompoundOutputCustomizer implements OutputCustomizer {
     private OutputCustomizer[] customizers = null;
