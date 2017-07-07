@@ -949,10 +949,6 @@ public class ProjectService extends Service {
         }
     }
 
-    /* --------------------------------------------------------------------------- */
-    /* TODO check "upload" methods below, they were copied from old VFS as is      */
-    /* --------------------------------------------------------------------------- */
-
     private void logProjectCreatedEvent(@NotNull String projectName, @NotNull String projectType) {
         LOG.info("EVENT#project-created# PROJECT#{}# TYPE#{}# WS#{}# USER#{}# PAAS#default#",
                  projectName,
