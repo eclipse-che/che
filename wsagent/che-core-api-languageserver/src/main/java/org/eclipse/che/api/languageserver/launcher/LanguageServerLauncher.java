@@ -21,14 +21,22 @@ import org.eclipse.lsp4j.services.LanguageServer;
 public interface LanguageServerLauncher {
 
     /**
-     * Starts {@link io.typefox.lsapi.services.LanguageServer}.
+     * Initializes and starts a language server.
+     * 
+     * @param projectPath
+     *      absolute path to the project
+     * @param client
+     *      an interface implementing handlers for server->client communication
      */
     LanguageServer launch(String projectPath, LanguageClient client) throws LanguageServerException;
 
     /**
-     * Gets supported language ID.
+     * Gets the language server description
      */
     LanguageServerDescription getDescription();
 
+    /**
+     * Indicates if language server is installed and is ready to be started.  
+     */
     boolean isAbleToLaunch();
 }

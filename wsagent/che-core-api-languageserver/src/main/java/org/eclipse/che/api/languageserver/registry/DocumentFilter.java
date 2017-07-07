@@ -12,12 +12,12 @@ package org.eclipse.che.api.languageserver.registry;
 
 public class DocumentFilter {
 
-    private final String globPattern;
+    private final String pathRegex;
     private final String languageId;
     private final String scheme;
 
-    public DocumentFilter(String languageId, String globPattern, String scheme) {
-        this.globPattern = globPattern;
+    public DocumentFilter(String languageId, String pathRegex, String scheme) {
+        this.pathRegex = pathRegex;
         this.languageId = languageId;
         this.scheme = scheme;
     }
@@ -27,7 +27,7 @@ public class DocumentFilter {
     }
 
     public String getPathRegex() {
-        return globPattern;
+        return pathRegex;
     }
 
     public String getScheme() {
