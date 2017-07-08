@@ -21,10 +21,10 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 
 /**
  * JUnit test for Stacktrace and Compilation Error/Message line detection in
- * CompoundOutputCustomizer that is constructed with: - DefaultOutputCustomazer
- * - that is expected to process Java Stacktrace lines - CSharpOutputCustomizer
- * - that is expected to process C# Compilation Error/Warning and Stacktrace
- * lines
+ * CompoundOutputCustomizer that is constructed with: 
+ * - JavaOutputCustomizer - that is expected to process Java Stacktrace lines 
+ * - CSharpOutputCustomizer - that is expected to process C# Compilation 
+ *   Error/Warning and Stacktrace lines
  * 
  * See: CHE-15 - Java stacktrace support (From Platform to Che Workspace) See:
  * Issue #5489 - .NET C# stacktrace support #5489
@@ -50,7 +50,7 @@ public class CompoundOutputCustomizerTest extends BaseOutputCustomizerTest {
 
     /**
      * Test for the detection of initial stacktrace lines in
-     * DefaultOutputCustomazer. These lines are not to be customized, however these
+     * CompoundOutputCustomizer. These lines are not to be customized, however these
      * lines show an examples of beginning the StackTrace and might be used in
      * future to set up the customizer properly.
      * 
@@ -71,7 +71,7 @@ public class CompoundOutputCustomizerTest extends BaseOutputCustomizerTest {
 
     /**
      * Test for the detection of informative stacktrace lines in
-     * DefaultOutputCustomazer. These lines have an information on qualified path,
+     * CompoundOutputCustomizer. These lines have an information on qualified path,
      * file name and line number for an exception
      * 
      * @throws Exception
@@ -107,7 +107,7 @@ public class CompoundOutputCustomizerTest extends BaseOutputCustomizerTest {
     }
 
     /**
-     * Test for the detection of other stacktrace lines in DefaultOutputCustomazer.
+     * Test for the detection of other stacktrace lines in CompoundOutputCustomizer.
      * Other lines that can be a part of Stack Trace, however do not contain any
      * useful information
      * 
@@ -120,7 +120,7 @@ public class CompoundOutputCustomizerTest extends BaseOutputCustomizerTest {
     }
 
     /**
-     * Test for the detection of non-stacktrace lines in DefaultOutputCustomazer.
+     * Test for the detection of non-stacktrace lines in CompoundOutputCustomizer.
      * Other lines that might occur in output console
      * 
      * @throws Exception
