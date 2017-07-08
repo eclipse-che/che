@@ -1,3 +1,5 @@
+package org.eclipse.che.api;
+
 import com.google.inject.AbstractModule;
 import org.eclipse.che.inject.DynaModule;
 /**
