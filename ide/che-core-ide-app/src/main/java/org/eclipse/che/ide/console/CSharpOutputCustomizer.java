@@ -17,7 +17,6 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.resource.Path;
 
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.inject.Inject;
 
 /**
  * Output customizer adds an anchor link to the lines that match a .NET C#
@@ -41,7 +40,6 @@ public class CSharpOutputCustomizer extends AbstractOutputCustomizer {
      * @param appContext
      * @param editorAgent
      */
-    @Inject
     public CSharpOutputCustomizer(AppContext appContext, EditorAgent editorAgent) {
         super(appContext, editorAgent);
 

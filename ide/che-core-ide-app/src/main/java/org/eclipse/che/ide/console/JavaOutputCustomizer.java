@@ -18,7 +18,6 @@ import org.eclipse.che.ide.resource.Path;
 
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.inject.Inject;
 
 /**
  * Java customizer adds an anchor link to the lines that match a stack trace
@@ -39,7 +38,6 @@ public class JavaOutputCustomizer extends AbstractOutputCustomizer {
      * @param appContext
      * @param editorAgent
      */
-    @Inject
     public JavaOutputCustomizer(AppContext appContext, EditorAgent editorAgent) {
         super(appContext, editorAgent);
  
