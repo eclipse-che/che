@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
 /**
- * JUnit test for stacktrace line detection in DefaultOutputCustomazer.
+ * JUnit test for Java/JavaScript stacktrace line detection in JavaOutputCustomizer.
  * 
  * See: CHE-15 - Java stacktrace support (From Platform to Che Workspace)
  * 
@@ -41,7 +41,7 @@ public class JavaOutputCustomizerTest extends BaseOutputCustomizerTest {
 
     /**
      * Test for the detection of initial stacktrace lines in
-     * DefaultOutputCustomazer. These lines are not to be customized, however these
+     * JavaOutputCustomizer. These lines are not to be customized, however these
      * lines show an examples of beginning the StackTrace and might be used in
      * future to set up the customizer properly.
      * 
@@ -61,7 +61,7 @@ public class JavaOutputCustomizerTest extends BaseOutputCustomizerTest {
 
     /**
      * Test for the detection of informative stacktrace lines in
-     * DefaultOutputCustomazer. These lines have an information on qualified path,
+     * JavaOutputCustomizer. These lines have an information on qualified path,
      * file name and line number for an exception
      * 
      * @throws Exception
@@ -80,7 +80,7 @@ public class JavaOutputCustomizerTest extends BaseOutputCustomizerTest {
     }
 
     /**
-     * Test for the detection of other stacktrace lines in DefaultOutputCustomazer.
+     * Test for the detection of other stacktrace lines in JavaOutputCustomizer.
      * Other lines that can be a part of Stack Trace, however do not contain any
      * useful information
      * 
@@ -94,7 +94,7 @@ public class JavaOutputCustomizerTest extends BaseOutputCustomizerTest {
     /**
      * Test for the detection of non-stacktrace lines and parts of other kinds of
      * stacktraces (not the Java ones) that must not be customized in
-     * DefaultOutputCustomazer. Other lines that might occur in output console
+     * JavaOutputCustomizer. Other lines that might occur in output console
      * 
      * @throws Exception
      */

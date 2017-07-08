@@ -21,7 +21,7 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 
 /**
  * JUnit test for C# Compilation Error/Warning and Stacktrace line detection in
- * CSharpOutputCustomazer.
+ * CSharpOutputCustomizer.
  * 
  * See: Issue #5489 - .NET C# stacktrace support #5489
  * 
@@ -41,7 +41,7 @@ public class CSharpOutputCustomizerTest extends BaseOutputCustomizerTest {
     }
 
     /**
-     * Test for the detection of initial stacktrace lines in CSharpOutputCustomazer.
+     * Test for the detection of initial stacktrace lines in CSharpOutputCustomizer.
      * These lines are not to be customized, however these lines show an examples of
      * beginning the StackTrace and might be used in future to set up the customizer
      * properly.
