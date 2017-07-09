@@ -486,11 +486,10 @@ export class WorkspaceDetailsController {
    * @param config {che.IWorkspaceConfig} workspace config
    */
   updateWorkspaceConfigImport(config: che.IWorkspaceConfig): void {
-    this.switchEditMode(config);
-
     if (!config) {
       return;
     }
+    this.switchEditMode(config);
 
     if (this.newName !== config.name) {
       this.newName = config.name;
