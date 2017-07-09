@@ -386,7 +386,7 @@ export class WorkspaceDetailsController {
       this.copyWorkspaceDetails.config.name = this.newName;
     }
 
-    this.switchEditMode();
+    this.switchEditMode(this.workspaceDetails.config);
   }
 
   /**
@@ -486,7 +486,7 @@ export class WorkspaceDetailsController {
    * @param config {che.IWorkspaceConfig} workspace config
    */
   updateWorkspaceConfigImport(config: che.IWorkspaceConfig): void {
-    this.switchEditMode();
+    this.switchEditMode(config);
 
     if (!config) {
       return;
@@ -509,12 +509,12 @@ export class WorkspaceDetailsController {
    */
   updateWorkspaceConfigEnvironment(): void {
     this.workspaceImportedRecipe = null;
-    this.switchEditMode();
+    this.switchEditMode(this.workspaceDetails.config);
   }
 
-  switchEditMode(): void {
+  switchEditMode(changedConfig: che.IWorkspaceConfig): void {
     if (!this.isCreationFlow) {
-      this.editMode = !angular.equals(this.copyWorkspaceDetails.config, this.workspaceDetails.config);
+      this.editMode = !angular.equals(this.copyWorkspaceDetails.config, changedConfig);
 
       let status = this.getWorkspaceStatus();
       if (status === 'STOPPED' || status === 'STOPPING') {
