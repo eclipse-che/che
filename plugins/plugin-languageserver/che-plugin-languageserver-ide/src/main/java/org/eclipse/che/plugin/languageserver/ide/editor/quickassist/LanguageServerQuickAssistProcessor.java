@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.languageserver.ide.editor.quickassist;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
-
+import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.CodeActionParamsDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -135,10 +135,9 @@ public class LanguageServerQuickAssistProcessor implements QuickAssistProcessor 
                 rangeParam.setEnd(rangeEnd);
 
                 TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(document.getFile().getLocation().toString());
-
                 CodeActionParams params = new CodeActionParams(textDocumentIdentifier, rangeParam, context);
 
-                Promise<List<Command>> codeAction = textDocumentService.codeAction(params);
+                Promise<List<Command>> codeAction = textDocumentService.codeAction(new CodeActionParamsDto(params));
                 List<CompletionProposal> proposals = new ArrayList<>();
                 codeAction.then((commands) -> {
                     for (Command command : commands) {

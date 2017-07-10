@@ -11,17 +11,16 @@
 
 package org.eclipse.che.plugin.openshift.client.kubernetes;
 
+import org.eclipse.che.plugin.docker.client.LogMessage;
+import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.che.plugin.docker.client.LogMessage;
-import org.eclipse.che.plugin.docker.client.MessageProcessor;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 
 public class KubernetesOutputAdapterTest {

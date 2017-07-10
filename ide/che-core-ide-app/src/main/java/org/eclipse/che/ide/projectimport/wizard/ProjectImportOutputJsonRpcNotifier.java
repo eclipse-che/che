@@ -66,9 +66,10 @@ public class ProjectImportOutputJsonRpcNotifier implements ProjectNotificationSu
             @Override
             public void onWsAgentStopped(WsAgentStateEvent event) {
                 requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName);
-
-                singletonNotification.setStatus(FAIL);
-                singletonNotification.setContent("");
+                if (singletonNotification != null) {
+                    singletonNotification.setStatus(FAIL);
+                    singletonNotification.setContent("");
+                }
             }
         });
     }

@@ -77,7 +77,7 @@ describe('CheNumberRoundFilter', () => {
         $scope.entry = entry;
 
         let element = angular.element(
-          '<div>{{entry.number | cheNumberRoundFilter:entry.precision}}</div>'
+          '<div>{{entry.number | numberRound:entry.precision}}</div>'
         );
         $compile(element)($scope);
         $scope.$digest();

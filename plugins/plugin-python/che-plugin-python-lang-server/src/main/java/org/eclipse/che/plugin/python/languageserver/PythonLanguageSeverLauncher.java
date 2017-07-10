@@ -12,6 +12,8 @@ package org.eclipse.che.plugin.python.languageserver;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
+import org.eclipse.che.api.languageserver.registry.DocumentFilter;
+import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.plugin.python.shared.ProjectAttributes;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -22,6 +24,7 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 /**
  * Launches language server for Python
@@ -29,15 +32,14 @@ import java.nio.file.Paths;
 @Singleton
 public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate {
 
+
+    private static final LanguageServerDescription DESCRIPTION = createServerDescription();
+    private static final String REGEX = ".*\\.py";
+
     private final Path launchScript;
 
     public PythonLanguageSeverLauncher() {
         launchScript = Paths.get(System.getenv("HOME"), "che/ls-python/launch.sh");
-    }
-
-    @Override
-    public String getLanguageId() {
-        return ProjectAttributes.PYTHON_ID;
     }
 
     @Override
@@ -66,4 +68,15 @@ public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate 
         launcher.startListening();
         return launcher.getRemoteProxy();
     }
-}
+    
+    @Override
+    public LanguageServerDescription getDescription() {
+        return DESCRIPTION;
+    }
+
+    private static LanguageServerDescription createServerDescription() {
+        LanguageServerDescription description = new LanguageServerDescription("org.eclipse.che.plugin.python.languageserver", null,
+                        Arrays.asList(new DocumentFilter(ProjectAttributes.PYTHON_ID, REGEX, null)));
+        return description;
+    }
+  }

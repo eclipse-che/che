@@ -31,7 +31,6 @@ public class LanguageDescription {
      * The fileExtension this language is associated with.
      */
     private List<String> fileExtensions = Collections.emptyList();
-
     /**
      * The file names this language is associated with.
      */
@@ -82,7 +81,7 @@ public class LanguageDescription {
     public void setFileNames(List<String> fileNames) {
         this.fileNames = new ArrayList<>(fileNames);
     }
-
+    
     public String getHighlightingConfiguration() {
         return this.highlightingConfiguration;
     }
@@ -93,14 +92,14 @@ public class LanguageDescription {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-        LanguageDescription that = (LanguageDescription) o;
-        return Objects.equals(languageId, that.languageId) && Objects.equals(mimeType, that.mimeType)
-                        && Objects.equals(fileExtensions, that.fileExtensions) && Objects.equals(fileNames, that.fileNames)
-                        && Objects.equals(highlightingConfiguration, that.highlightingConfiguration);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LanguageDescription that = (LanguageDescription)o;
+        return Objects.equals(languageId, that.languageId) &&
+               Objects.equals(mimeType, that.mimeType) &&
+               Objects.equals(fileExtensions, that.fileExtensions) &&
+               Objects.equals(fileNames, that.fileNames) &&
+               Objects.equals(highlightingConfiguration, that.highlightingConfiguration);
     }
 
     @Override
@@ -110,8 +109,12 @@ public class LanguageDescription {
 
     @Override
     public String toString() {
-        return "LanguageDescriptionImpl{" + "languageId='" + languageId + '\'' + ", mimeTypes=" + mimeType + ", fileExtensions="
-                        + fileExtensions + ", fileNames=" + fileNames + ", highlightingConfiguration='" + highlightingConfiguration + '\''
-                        + '}';
+        return "LanguageDescriptionImpl{" +
+               "languageId='" + languageId + '\'' +
+               ", mimeTypes=" + mimeType +
+               ", fileExtensions=" + fileExtensions +
+               ", fileNames=" + fileNames +
+               ", highlightingConfiguration='" + highlightingConfiguration + '\'' +
+               '}';
     }
 }

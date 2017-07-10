@@ -26,6 +26,7 @@ import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
+import org.eclipse.che.ide.util.browser.BrowserUtils;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
@@ -167,7 +168,7 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
             url.append(separator).append("revision").append('=').append(revision);
         }
 
-        Window.open(url.toString(), "_self", "");
+        BrowserUtils.openHere(url.toString());
         notification.setTitle(constants.exportSuccessful(exportPath.toString()));
         notification.setStatus(SUCCESS);
     }

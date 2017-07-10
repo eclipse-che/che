@@ -17,7 +17,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
-
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -35,7 +34,6 @@ import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClie
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextEdit;
 
 import java.util.List;
@@ -50,7 +48,6 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
     private final String                    currentWord;
     private final TextDocumentServiceClient documentServiceClient;
-    private final TextDocumentIdentifier    documentId;
     private final LanguageServerResources   resources;
     private final Icon                      icon;
     private final ServerCapabilities        serverCapabilities;
@@ -62,7 +59,6 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     CompletionItemBasedCompletionProposal(ExtendedCompletionItem completionItem,
                                           String currentWord,
                                           TextDocumentServiceClient documentServiceClient,
-                                          TextDocumentIdentifier documentId,
                                           LanguageServerResources resources,
                                           Icon icon,
                                           ServerCapabilities serverCapabilities,
@@ -71,7 +67,6 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
         this.completionItem = completionItem;
         this.currentWord = currentWord;
         this.documentServiceClient = documentServiceClient;
-        this.documentId = documentId;
         this.resources = resources;
         this.icon = icon;
         this.serverCapabilities = serverCapabilities;
@@ -82,7 +77,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
     @Override
     public void getAdditionalProposalInfo(final AsyncCallback<Widget> callback) {
-        if (completionItem.getDocumentation() == null && canResolve()) {
+        if (completionItem.getItem().getDocumentation() == null && canResolve()) {
             resolve().then(new Operation<ExtendedCompletionItem>() {
                 @Override
                 public void apply(ExtendedCompletionItem item) throws OperationException {
@@ -102,7 +97,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     }
 
     private Widget createAdditionalInfoWidget() {
-        String documentation = completionItem.getDocumentation();
+        String documentation = completionItem.getItem().getDocumentation();
         if (documentation == null || documentation.trim().isEmpty()) {
             documentation = "No documentation found.";
         }
@@ -122,7 +117,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     public String getDisplayString() {
         SafeHtmlBuilder builder = new SafeHtmlBuilder();
 
-        String label = completionItem.getLabel();
+        String label = completionItem.getItem().getLabel();
         int pos = 0;
         for (Match highlight : highlights) {
             if (highlight.getStart() == highlight.getEnd()) {
@@ -141,8 +136,8 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
             appendPlain(builder, label.substring(pos));
         }
 
-        if (completionItem.getDetail() != null) {
-            appendDetail(builder, completionItem.getDetail());
+        if (completionItem.getItem().getDetail() != null) {
+            appendDetail(builder, completionItem.getItem().getDetail());
         }
 
         return builder.toSafeHtml().asString();
@@ -173,10 +168,10 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     public void getCompletion(final CompletionCallback callback) {
         if (canResolve()) {
             resolve().then(completionItem -> {
-                callback.onCompletion(new CompletionImpl(completionItem, currentWord, offset));
+                callback.onCompletion(new CompletionImpl(completionItem.getItem(), currentWord, offset));
             });
         } else {
-            callback.onCompletion(new CompletionImpl(completionItem, currentWord, offset));
+            callback.onCompletion(new CompletionImpl(completionItem.getItem(), currentWord, offset));
         }
     }
 
@@ -188,7 +183,6 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     }
 
     private Promise<ExtendedCompletionItem> resolve() {
-        completionItem.setTextDocumentIdentifier(documentId);
         return documentServiceClient.resolveCompletionItem(completionItem);
     }
 

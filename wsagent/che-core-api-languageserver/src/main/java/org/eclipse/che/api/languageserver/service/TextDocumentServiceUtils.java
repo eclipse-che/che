@@ -23,4 +23,9 @@ class TextDocumentServiceUtils {
     static String removePrefixUri(String uri) {
         return uri.startsWith(FILE_PROJECTS) ? uri.substring(FILE_PROJECTS.length()) : uri;
     }
+    
+    static boolean truish(Boolean b) {
+        return b != null && b;
+    }
+
 }

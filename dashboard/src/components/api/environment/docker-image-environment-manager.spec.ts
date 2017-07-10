@@ -70,7 +70,7 @@ describe('DockerImageEnvironmentManager', () => {
     let memoryLimit = envManager.getMemoryLimit(machines[0]);
 
     let expectedMemoryLimit = environment.machines['dev-machine'].attributes.memoryLimitBytes;
-    expect(memoryLimit).toEqual(expectedMemoryLimit);
+    expect(memoryLimit.toString()).toEqual(expectedMemoryLimit);
   });
 
   it('the machine should be a dev machine', () => {
