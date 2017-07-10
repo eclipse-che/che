@@ -14,6 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
+import org.eclipse.che.api.languageserver.registry.DocumentFilter;
+import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.csharp.inject.CSharpModule;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 
 /**
@@ -32,7 +35,10 @@ import java.nio.file.Paths;
  */
 @Singleton
 public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate {
+    private static final String REGEX = ".*\\.(cs|csx)";
 
+
+    private static final LanguageServerDescription DESCRIPTION = createServerDescription();
  
     private final Path launchScript;
 
@@ -81,13 +87,19 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
     }
 
     @Override
-    public String getLanguageId() {
-        return CSharpModule.LANGUAGE_ID;
+    public LanguageServerDescription getDescription() {
+        return DESCRIPTION;
+    }
+    
+
+    private static LanguageServerDescription createServerDescription() {
+        LanguageServerDescription description = new LanguageServerDescription("org.eclipse.che.plugin.csharp.languageserver", null,
+                        Arrays.asList(new DocumentFilter(CSharpModule.LANGUAGE_ID, REGEX, null)));
+        return description;
     }
 
     @Override
     public boolean isAbleToLaunch() {
         return Files.exists(launchScript);
     }
-
  }

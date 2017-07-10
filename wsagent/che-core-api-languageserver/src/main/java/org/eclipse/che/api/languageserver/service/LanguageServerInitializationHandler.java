@@ -12,11 +12,12 @@ package org.eclipse.che.api.languageserver.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ServerCapabilitiesDto;
+import org.eclipse.lsp4j.ServerCapabilities;
 
 @Singleton
 public class LanguageServerInitializationHandler {
@@ -26,10 +27,11 @@ public class LanguageServerInitializationHandler {
         requestHandlerConfigurator.newConfiguration()
                                   .methodName("languageServer/initialize")
                                   .paramsAsString()
-                                  .resultAsBoolean()
+                                  .resultAsDto(ServerCapabilitiesDto.class)
                                   .withFunction(path -> {
                                       try {
-                                          return registry.findServer(TextDocumentServiceUtils.prefixURI(path)) != null;
+                                          ServerCapabilities capabilities = registry.initialize(TextDocumentServiceUtils.prefixURI(path));
+                                          return capabilities == null ? null : new ServerCapabilitiesDto(capabilities);
                                       } catch (LanguageServerException e) {
                                           throw new JsonRpcException(-27000, e.getMessage());
                                       }

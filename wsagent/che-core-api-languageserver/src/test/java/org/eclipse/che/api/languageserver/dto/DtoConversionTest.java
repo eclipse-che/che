@@ -17,6 +17,7 @@ import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ParameterInf
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.WorkspaceEditDto;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
+import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.ParameterInformation;
 import org.eclipse.lsp4j.Position;
@@ -43,11 +44,12 @@ public class DtoConversionTest {
         ecl.setInComplete(true);
         List<ExtendedCompletionItem> items = new ArrayList<>();
         ExtendedCompletionItem item = new ExtendedCompletionItemDto();
-        item.setTextEdit(new TextEdit(new Range(new Position(1, 2), new Position(3, 4)), "changed text"));
+        item.setItem(new CompletionItem());
+        item.getItem().setTextEdit(new TextEdit(new Range(new Position(1, 2), new Position(3, 4)), "changed text"));
 
         // cannot unmarshal object type stuff from json. So need to set json
         // element for equality test to work.
-        item.setData(new ParameterInformationDto(new ParameterInformation("the label", "the doc")).toJsonElement());
+        item.getItem().setData(new ParameterInformationDto(new ParameterInformation("the label", "the doc")).toJsonElement());
         items.add(item);
         ecl.setItems(items);
 
