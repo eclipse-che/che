@@ -1,4 +1,4 @@
-package org.eclipse.che.api;
+package org.eclipse.che.datasource.api;
 
 import com.google.inject.AbstractModule;
 import org.eclipse.che.inject.DynaModule;
@@ -10,5 +10,7 @@ public class DatasourceModule extends AbstractModule{
     @Override
     protected void configure() {
         bind(DatasourceService.class);
+        bind(AvailableDriversService.class);
     }
+
 }
