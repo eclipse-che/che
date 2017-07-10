@@ -36,7 +36,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 
 /**
- * Stops the inactive workspaces by given expiration time.
+ * Stops the inactive workspaces by given expiration time. Upon stopping, workspace attributes will be updated with
+ * information like cause and timestamp of workspace stop.
  *
  * <p>Note that the workspace is not stopped immediately, scheduler will stop the workspaces with one minute rate.
  * If workspace idle timeout is negative, then workspace would not be stopped automatically.

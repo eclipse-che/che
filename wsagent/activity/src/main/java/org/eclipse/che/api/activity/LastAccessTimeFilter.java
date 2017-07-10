@@ -24,7 +24,7 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 
 /**
- * Counts every request to the agent as a workspace activity
+ * Counts every HTTP request to the agent as a workspace activity
  *
  * @author Mihail Kuznyetsov
  */
