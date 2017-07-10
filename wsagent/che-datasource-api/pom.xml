@@ -87,16 +87,25 @@
                 <version>${project.version}</version>
                 <executions>
                     <execution>
+                        <id>generate-server-dto</id>
                         <phase>process-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
+                        <configuration>
+                            <dtoPackages>
+                                <package>org.eclipse.che.datasource.shared</package>
+                            </dtoPackages>
+                            <outputDirectory>${dto-generator-out-directory}</outputDirectory>
+                            <genClassName>org.eclipse.che.datasource.server.dto.DtoServerImpls</genClassName>
+                            <impl>server</impl>
+                        </configuration>
                     </execution>
                 </executions>
                 <dependencies>
                     <dependency>
-                        <groupId>${project.groupId}</groupId>
-                        <artifactId>${project.artifactId}</artifactId>
+                        <groupId>org.eclipse.che.core</groupId>
+                        <artifactId>che-datasource-shared</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <!--
