@@ -115,7 +115,7 @@ public class WorkspaceActivityManager {
         }
     }
 
-    @ScheduleRate(periodParameterName = "stop.workspace.scheduler.period")
+    @ScheduleRate(periodParameterName = "che.workspace.activity_check_scheduler_period_s")
     private void invalidate() {
         final long currentTime = System.currentTimeMillis();
         for (Map.Entry<String, Long> workspaceExpireEntry : activeWorkspaces.entrySet()) {
@@ -126,8 +126,8 @@ public class WorkspaceActivityManager {
                     workspace.getAttributes().put(WORKSPACE_STOPPED_BY, ACTIVITY_CHECKER);
                     workspaceManager.updateWorkspace(workspaceId, workspace);
                     workspaceManager.stopWorkspace(workspaceId);
-                } catch (NotFoundException e) {
-                    LOG.info("Workspace already stopped");
+                } catch (NotFoundException ignored) {
+                    // workspace no longer exists, no need to do anything
                 } catch (ConflictException e) {
                     LOG.warn(e.getLocalizedMessage());
                 } catch (Exception ex) {

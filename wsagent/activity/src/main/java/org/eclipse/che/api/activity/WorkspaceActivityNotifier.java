@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.server.activity;
+package org.eclipse.che.api.activity;
 
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.commons.schedule.ScheduleRate;
@@ -21,7 +21,7 @@ import javax.inject.Singleton;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Notifies master about activity in workspace, but not more often than once per minute.
+ * Notifies master about activity in workspace, but not more often than once per given threshold.
  *
  * @author Mihail Kuznyetsov
  * @author Anton Korneta

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.server.activity;
+package org.eclipse.che.api.activity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

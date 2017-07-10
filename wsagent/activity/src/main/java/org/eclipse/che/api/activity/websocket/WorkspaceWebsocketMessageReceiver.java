@@ -8,9 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.server.activity.websocket;
+package org.eclipse.che.api.activity.websocket;
 
-import org.eclipse.che.api.agent.server.activity.WorkspaceActivityNotifier;
+import org.eclipse.che.api.activity.WorkspaceActivityNotifier;
 import org.everrest.websockets.WSMessageReceiver;
 import org.everrest.websockets.message.InputMessage;
 import org.everrest.websockets.message.Pair;
