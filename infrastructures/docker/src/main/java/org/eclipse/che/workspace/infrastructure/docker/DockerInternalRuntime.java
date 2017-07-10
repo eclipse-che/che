@@ -68,7 +68,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     private final StartSynchronizer    startSynchronizer;
     private final Map<String, String>  properties;
     private final Queue<String>        startQueue;
-    private final ContextsStorage      contextsStorage;
     private final NetworkLifecycle     dockerNetworkLifecycle;
     private final String               devMachineName;
     private final DockerEnvironment    dockerEnvironment;
@@ -87,7 +86,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                  @Assisted DockerEnvironment dockerEnvironment,
                                  @Assisted RuntimeIdentity identity,
                                  URLRewriter urlRewriter,
-                                 ContextsStorage contextsStorage,
                                  NetworkLifecycle dockerNetworkLifecycle,
                                  DockerMachineStarter serviceStarter,
                                  SnapshotDao snapshotDao,
@@ -104,7 +102,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         this.serverCheckerFactory = serverCheckerFactory;
         this.properties = new HashMap<>();
         this.startSynchronizer = new StartSynchronizer();
-        this.contextsStorage = contextsStorage;
         this.dockerNetworkLifecycle = dockerNetworkLifecycle;
         this.serviceStarter = serviceStarter;
         this.snapshotDao = snapshotDao;
@@ -116,7 +113,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
         startSynchronizer.setStartThread();
         try {
-            contextsStorage.add((DockerRuntimeContext)getContext());
             dockerNetworkLifecycle.createNetwork(dockerEnvironment.getNetwork());
 
             boolean restore = isRestoreEnabled(startOptions);
@@ -151,7 +147,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             }
         } catch (InfrastructureException | InterruptedException | RuntimeException e) {
             boolean interrupted = e instanceof InterruptedException || Thread.interrupted();
-            contextsStorage.remove((DockerRuntimeContext)getContext());
             boolean runtimeDestroyingNeeded = !startSynchronizer.isStopCalled();
             if (runtimeDestroyingNeeded) {
                 try {
@@ -174,11 +169,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     @Override
     protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
         startSynchronizer.interruptStartThread();
-        try {
-            destroyRuntime(stopOptions);
-        } finally {
-            contextsStorage.remove((DockerRuntimeContext)getContext());
-        }
+        destroyRuntime(stopOptions);
     }
 
     @Override
