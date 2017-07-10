@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.pullrequest.client.parts.contribute;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -28,6 +27,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.util.browser.BrowserUtils;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.pullrequest.client.ContributeMessages;
 import org.eclipse.che.plugin.pullrequest.client.events.ContextInvalidatedEvent;
@@ -247,9 +247,9 @@ public class ContributePartPresenter extends BasePresenter implements Contribute
     public void onOpenPullRequestOnVcsHost() {
         final Context context = workflowExecutor.getCurrentContext();
 
-        Window.open(context.getVcsHostingService().makePullRequestUrl(context.getOriginRepositoryOwner(),
-                                                                      context.getOriginRepositoryName(),
-                                                                      context.getPullRequestIssueNumber()), "", "");
+        BrowserUtils.openInNewTab(context.getVcsHostingService().makePullRequestUrl(context.getOriginRepositoryOwner(),
+                                                                                    context.getOriginRepositoryName(),
+                                                                                    context.getPullRequestIssueNumber()));
     }
 
     @Override
