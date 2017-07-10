@@ -28,6 +28,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
@@ -36,6 +37,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConf
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.server.ServerCheckerFactory;
 import org.eclipse.che.workspace.infrastructure.docker.server.ServersReadinessChecker;
+import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotException;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
@@ -66,7 +68,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     private final StartSynchronizer    startSynchronizer;
     private final Map<String, String>  properties;
     private final Queue<String>        startQueue;
-    private final ContextsStorage      contextsStorage;
     private final NetworkLifecycle     dockerNetworkLifecycle;
     private final String               devMachineName;
     private final DockerEnvironment    dockerEnvironment;
@@ -85,7 +86,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                  @Assisted DockerEnvironment dockerEnvironment,
                                  @Assisted RuntimeIdentity identity,
                                  URLRewriter urlRewriter,
-                                 ContextsStorage contextsStorage,
                                  NetworkLifecycle dockerNetworkLifecycle,
                                  DockerMachineStarter serviceStarter,
                                  SnapshotDao snapshotDao,
@@ -102,7 +102,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         this.serverCheckerFactory = serverCheckerFactory;
         this.properties = new HashMap<>();
         this.startSynchronizer = new StartSynchronizer();
-        this.contextsStorage = contextsStorage;
         this.dockerNetworkLifecycle = dockerNetworkLifecycle;
         this.serviceStarter = serviceStarter;
         this.snapshotDao = snapshotDao;
@@ -114,7 +113,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
         startSynchronizer.setStartThread();
         try {
-            contextsStorage.add((DockerRuntimeContext)getContext());
             dockerNetworkLifecycle.createNetwork(dockerEnvironment.getNetwork());
 
             boolean restore = isRestoreEnabled(startOptions);
@@ -149,7 +147,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             }
         } catch (InfrastructureException | InterruptedException | RuntimeException e) {
             boolean interrupted = e instanceof InterruptedException || Thread.interrupted();
-            contextsStorage.remove((DockerRuntimeContext)getContext());
             boolean runtimeDestroyingNeeded = !startSynchronizer.isStopCalled();
             if (runtimeDestroyingNeeded) {
                 try {
@@ -172,11 +169,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     @Override
     protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
         startSynchronizer.interruptStartThread();
-        try {
-            destroyRuntime(stopOptions);
-        } finally {
-            contextsStorage.remove((DockerRuntimeContext)getContext());
-        }
+        destroyRuntime(stopOptions);
     }
 
     @Override
@@ -224,7 +217,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                                             name,
                                                             containerConfig,
                                                             identity,
-                                                            devMachineName.equals(name));
+                                                            devMachineName.equals(name),
+                                                            new AbnormalMachineStopHandlerImpl());
         try {
             startSynchronizer.addMachine(name, machine);
         } catch (InfrastructureException e) {
@@ -317,6 +311,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     private void destroyRuntime(Map<String, String> stopOptions) throws InfrastructureException {
         Map<String, DockerMachine> machines = startSynchronizer.removeMachines();
         if (isSnapshotEnabled(stopOptions)) {
+            // TODO send other runtime statuses? Which ones? STARTING, STOPPING, RUNNING, STOPPED?
             snapshotMachines(machines);
         }
         for (Map.Entry<String, DockerMachine> entry : machines.entrySet()) {
@@ -405,6 +400,24 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                 dockerRegistryClient.removeInstanceSnapshot(snapshot.getMachineSource());
             } catch (SnapshotException x) {
                 LOG.error(format("Couldn't remove snapshot '%s', workspace id '%s'", snapshot.getId(), snapshot.getWorkspaceId()), x);
+            }
+        }
+    }
+
+    private class AbnormalMachineStopHandlerImpl implements AbnormalMachineStopHandler {
+        @Override
+        public void handle(String error) {
+            try {
+                internalStop(Collections.emptyMap());
+            } catch (InfrastructureException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+            } finally {
+                eventService.publish(DtoFactory.newDto(RuntimeStatusEvent.class)
+                                               .withIdentity(DtoConverter.asDto(identity))
+                                               .withStatus("STOPPED")
+                                               .withPrevStatus("RUNNING")
+                                               .withFailed(true)
+                                               .withError(error));
             }
         }
     }

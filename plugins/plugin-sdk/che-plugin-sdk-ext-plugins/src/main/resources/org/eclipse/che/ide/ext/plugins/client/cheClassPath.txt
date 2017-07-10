@@ -90,7 +90,6 @@
 /projects/che-plugins/plugin-docker/che-plugin-docker-client/src/main/java:\
 /projects/che-plugins/plugin-docker/che-plugin-docker-client/src/main/resources:\
 /projects/che-plugins/plugin-docker/che-plugin-docker-client/target/generated-sources/dto:\
-/projects/che-plugins/plugin-docker/che-plugin-docker-machine/src/main/java:\
 /projects/che-plugins/plugin-dashboard/che-plugin-ext-dashboard/src/main/java:\
 /projects/che-plugins/plugin-dashboard/che-plugin-ext-dashboard/src/main/resources:\
 /projects/che-plugins/plugin-git/che-plugin-git-ext-git/src/main/java:\
@@ -226,7 +225,6 @@
 /projects/che-plugins/plugin-docker/che-plugin-docker-client/target/classes:\
 /home/user/.m2/repository/org/bouncycastle/bcpkix-jdk15on/1.51/bcpkix-jdk15on-1.51.jar:\
 /home/user/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.51/bcprov-jdk15on-1.51.jar:\
-/projects/che-plugins/plugin-docker/che-plugin-docker-machine/target/classes:\
 /projects/che-plugins/plugin-dashboard/che-plugin-ext-dashboard/target/classes:\
 /projects/che-plugins/plugin-git/che-plugin-git-ext-git/target/classes:\
 /projects/che-plugins/plugin-github/che-plugin-github-ext-github/target/classes:\

@@ -76,7 +76,6 @@ import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 public class WorkspaceService extends Service {
 
     private final WorkspaceManager              workspaceManager;
-//    private final WsAgentHealthChecker          agentHealthChecker;
     private final WorkspaceServiceLinksInjector linksInjector;
     private final String                        apiEndpoint;
     //    private final boolean                       cheWorkspaceAutoSnapshot;
@@ -87,14 +86,12 @@ public class WorkspaceService extends Service {
     @Inject
     public WorkspaceService(@Named("che.api") String apiEndpoint,
                             WorkspaceManager workspaceManager,
-//                            WsAgentHealthChecker agentHealthChecker,
                             WorkspaceServiceLinksInjector workspaceServiceLinksInjector
 //                            @Named(CHE_WORKSPACE_AUTO_SNAPSHOT) boolean cheWorkspaceAutoSnapshot,
 //                            @Named(CHE_WORKSPACE_AUTO_RESTORE) boolean cheWorkspaceAutoRestore
     ) {
         this.apiEndpoint = apiEndpoint;
         this.workspaceManager = workspaceManager;
-//        this.agentHealthChecker = agentHealthChecker;
         this.linksInjector = workspaceServiceLinksInjector;
 //        this.cheWorkspaceAutoSnapshot = cheWorkspaceAutoSnapshot;
 //        this.cheWorkspaceAutoRestore = cheWorkspaceAutoRestore;
@@ -629,36 +626,6 @@ public class WorkspaceService extends Service {
             doUpdate(id, workspace);
         }
     }
-
-    /*@GET
-    @Path("/{id}/check")
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Get state of the workspace agent by the workspace id")
-    @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested workspace entity"),
-                   @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
-                   @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public WsAgentHealthStateDto checkAgentHealth(@ApiParam(value = "Workspace id")
-                                                  @PathParam("id") String key,
-                                                  @QueryParam("machine") String machine
-    ) throws NotFoundException, ServerException {
-        final WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
-        if (WorkspaceStatus.RUNNING != workspace.getStatus()) {
-            return newDto(WsAgentHealthStateDto.class).withWorkspaceStatus(workspace.getStatus());
-        }
-
-        //String activeEnv = workspace.getRuntime().getActiveEnv();
-        final Machine devMachine = workspace.getRuntime().getMachines().get(machine); //.getDevMachine();
-        if (devMachine == null) {
-            return newDto(WsAgentHealthStateDto.class)
-                    .withWorkspaceStatus(workspace.getStatus())
-                    .withCode(NOT_FOUND.getStatusCode())
-                    .withReason("Workspace Agent isn't available if Dev machine isn't RUNNING");
-        }
-
-        final WsAgentHealthStateDto check = agentHealthChecker.check(devMachine);
-        check.setWorkspaceStatus(workspace.getStatus());
-        return check;
-    }*/
 
     @GET
     @Path("/settings")

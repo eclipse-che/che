@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Data object for {@link Runtime}.
@@ -38,6 +39,17 @@ public class RuntimeImpl implements Runtime {
         this.machines = machines;
         this.owner = owner;
 //        this.userToken = userToken;
+    }
+
+    public RuntimeImpl(Runtime runtime) {
+        this.activeEnv = runtime.getActiveEnv();
+        this.machines = runtime.getMachines()
+                               .entrySet()
+                               .stream()
+                               .collect(Collectors.toMap(Map.Entry::getKey, e -> new MachineImpl(e.getValue())));
+        this.owner = runtime.getOwner();
+//        this.userToken = null;
+        this.warnings = runtime.getWarnings().stream().map(WarningImpl::new).collect(Collectors.toList());
     }
 
     @Override
