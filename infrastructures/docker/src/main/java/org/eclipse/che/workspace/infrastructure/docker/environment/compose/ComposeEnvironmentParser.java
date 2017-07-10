@@ -27,8 +27,8 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigS
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import java.io.IOException;
 import java.util.Map;
@@ -130,34 +130,36 @@ public class ComposeEnvironmentParser implements DockerConfigSourceSpecificEnvir
     }
 
     private DockerEnvironment asDockerEnvironment(ComposeEnvironment composeEnvironment) {
-        Map<String, DockerContainerConfig> services = Maps.newHashMapWithExpectedSize(composeEnvironment.getServices().size());
+        Map<String, DockerContainerConfig> containers =
+                Maps.newHashMapWithExpectedSize(composeEnvironment.getServices().size());
         for (Map.Entry<String, ComposeService> composeServiceEntry : composeEnvironment.getServices()
                                                                                        .entrySet()) {
             ComposeService service = composeServiceEntry.getValue();
 
-            DockerContainerConfig cheService = new DockerContainerConfig().withCommand(service.getCommand())
-                                                                          .withContainerName(service.getContainerName())
-                                                                          .withDependsOn(service.getDependsOn())
-                                                                          .withEntrypoint(service.getEntrypoint())
-                                                                          .withEnvironment(service.getEnvironment())
-                                                                          .withExpose(service.getExpose())
-                                                                          .withImage(service.getImage())
-                                                                          .withLabels(service.getLabels())
-                                                                          .withLinks(service.getLinks())
-                                                                          .withMemLimit(service.getMemLimit())
-                                                                          .withNetworks(service.getNetworks())
-                                                                          .withPorts(service.getPorts())
-                                                                          .withVolumes(service.getVolumes())
-                                                                          .withVolumesFrom(service.getVolumesFrom());
+            DockerContainerConfig cheContainer = new DockerContainerConfig().withCommand(service.getCommand())
+                                                                            .withContainerName(
+                                                                                    service.getContainerName())
+                                                                            .withDependsOn(service.getDependsOn())
+                                                                            .withEntrypoint(service.getEntrypoint())
+                                                                            .withEnvironment(service.getEnvironment())
+                                                                            .withExpose(service.getExpose())
+                                                                            .withImage(service.getImage())
+                                                                            .withLabels(service.getLabels())
+                                                                            .withLinks(service.getLinks())
+                                                                            .withMemLimit(service.getMemLimit())
+                                                                            .withNetworks(service.getNetworks())
+                                                                            .withPorts(service.getPorts())
+                                                                            .withVolumes(service.getVolumes())
+                                                                            .withVolumesFrom(service.getVolumesFrom());
 
             if (service.getBuild() != null) {
-                cheService.setBuild(new DockerBuildContext().withContext(service.getBuild().getContext())
-                                                            .withDockerfilePath(service.getBuild().getDockerfile())
-                                                            .withArgs(service.getBuild().getArgs()));
+                cheContainer.setBuild(new DockerBuildContext().withContext(service.getBuild().getContext())
+                                                              .withDockerfilePath(service.getBuild().getDockerfile())
+                                                              .withArgs(service.getBuild().getArgs()));
             }
 
-            services.put(composeServiceEntry.getKey(), cheService);
+            containers.put(composeServiceEntry.getKey(), cheContainer);
         }
-        return new DockerEnvironment().withServices(services);
+        return new DockerEnvironment().withContainers(containers);
     }
 }

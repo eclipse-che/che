@@ -19,8 +19,8 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.inject.CheBootstrap;
-import org.eclipse.che.workspace.infrastructure.docker.InstallerConfigApplier;
 import org.eclipse.che.workspace.infrastructure.docker.DefaultInfrastructureProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.InstallerConfigApplier;
 import org.eclipse.che.workspace.infrastructure.docker.local.providers.DockerExtConfBindingProvider;
 import org.eclipse.che.workspace.infrastructure.docker.local.providers.ExecAgentVolumeProvider;
 import org.eclipse.che.workspace.infrastructure.docker.local.providers.TerminalVolumeProvider;
@@ -91,9 +91,9 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
             throw new InfrastructureException("ws-machine is not found on installers applying");
         }
 
-        DockerContainerConfig devMachine = internalEnv.getServices().get(devMachineName);
+        DockerContainerConfig devMachine = internalEnv.getContainers().get(devMachineName);
 
-        for (DockerContainerConfig machine : internalEnv.getServices().values()) {
+        for (DockerContainerConfig machine : internalEnv.getContainers().values()) {
             ArrayList<String> volumes = new ArrayList<>(machine.getVolumes());
             volumes.add(terminalVolumeProvider.get());
             volumes.add(execVolumeProvider.get());
@@ -122,10 +122,10 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         }
         // create volume for each directory to exclude from a snapshot
         List<String> volumes;
-        for (DockerContainerConfig service : internalEnv.getServices().values()) {
-            volumes = new ArrayList<>(service.getVolumes());
+        for (DockerContainerConfig container : internalEnv.getContainers().values()) {
+            volumes = new ArrayList<>(container.getVolumes());
             volumes.addAll(SNAPSHOT_EXCLUDED_DIRECTORIES);
-            service.setVolumes(volumes);
+            container.setVolumes(volumes);
         }
         HashMap<String, String> environmentVars = new HashMap<>(devMachine.getEnvironment());
         environmentVars.put(CheBootstrap.CHE_LOCAL_CONF_DIR, DockerExtConfBindingProvider.EXT_CHE_LOCAL_CONF_DIR);

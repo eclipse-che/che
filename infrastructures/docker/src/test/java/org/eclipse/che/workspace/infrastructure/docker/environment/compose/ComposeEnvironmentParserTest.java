@@ -16,8 +16,8 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.workspace.server.RecipeDownloader;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -110,10 +110,10 @@ public class ComposeEnvironmentParserTest {
         DockerEnvironment expectedEnv = createTestEnv();
 
         //when
-        DockerEnvironment cheServicesEnvironment = parser.parse(environment);
+        DockerEnvironment cheContainersEnvironment = parser.parse(environment);
 
         //then
-        assertEquals(cheServicesEnvironment, expectedEnv);
+        assertEquals(cheContainersEnvironment, expectedEnv);
     }
 
     @Test
@@ -124,10 +124,10 @@ public class ComposeEnvironmentParserTest {
         DockerEnvironment expectedEnv = createTestEnv();
 
         //when
-        DockerEnvironment cheServicesEnvironment = parser.parse(environment);
+        DockerEnvironment cheContainersEnvironment = parser.parse(environment);
 
         //then
-        assertEquals(cheServicesEnvironment, expectedEnv);
+        assertEquals(cheContainersEnvironment, expectedEnv);
     }
 
     @Test
@@ -138,10 +138,10 @@ public class ComposeEnvironmentParserTest {
         DockerEnvironment expectedEnv = createTestEnv();
 
         //when
-        DockerEnvironment cheServicesEnvironment = parser.parse(environment);
+        DockerEnvironment cheContainersEnvironment = parser.parse(environment);
 
         //then
-        assertEquals(cheServicesEnvironment, expectedEnv);
+        assertEquals(cheContainersEnvironment, expectedEnv);
     }
 
     @Test
@@ -153,46 +153,46 @@ public class ComposeEnvironmentParserTest {
         DockerEnvironment expectedEnv = createTestEnv();
 
         //when
-        DockerEnvironment cheServicesEnvironment = parser.parse(environment);
+        DockerEnvironment cheContainersEnvironment = parser.parse(environment);
 
         //then
-        assertEquals(cheServicesEnvironment, expectedEnv);
+        assertEquals(cheContainersEnvironment, expectedEnv);
     }
 
     private DockerEnvironment createTestEnv() {
-        DockerEnvironment cheServicesEnvironment = new DockerEnvironment();
+        DockerEnvironment cheContainersEnvironment = new DockerEnvironment();
 
-        DockerContainerConfig cheService1 = new DockerContainerConfig();
+        DockerContainerConfig cheContainer1 = new DockerContainerConfig();
         String buildContext = "http://host.com:port/location/of/dockerfile/or/git/repo/";
-        cheService1.setBuild(new DockerBuildContext().withContext(buildContext)
-                                                     .withDockerfilePath("dockerfile/Dockerfile_alternate")
-                                                     .withArgs(emptyMap()));
-        cheService1.setCommand(asList("tail", "-f", "/dev/null"));
-        cheService1.setContainerName("some_name");
-        cheService1.setDependsOn(asList("machine2", "machine3"));
-        cheService1.setEntrypoint(asList("/bin/bash", "-c"));
-        cheService1.setEnvironment(ImmutableMap.of("env1", "123",
+        cheContainer1.setBuild(new DockerBuildContext().withContext(buildContext)
+                                                       .withDockerfilePath("dockerfile/Dockerfile_alternate")
+                                                       .withArgs(emptyMap()));
+        cheContainer1.setCommand(asList("tail", "-f", "/dev/null"));
+        cheContainer1.setContainerName("some_name");
+        cheContainer1.setDependsOn(asList("machine2", "machine3"));
+        cheContainer1.setEntrypoint(asList("/bin/bash", "-c"));
+        cheContainer1.setEnvironment(ImmutableMap.of("env1", "123",
                                                    "env2", "345"));
-        cheService1.setExpose(asList("3000", "8080"));
-        cheService1.setImage("codenvy/ubuntu_jdk8");
-        cheService1.setLabels(ImmutableMap.of("com.example.department", "Finance",
+        cheContainer1.setExpose(asList("3000", "8080"));
+        cheContainer1.setImage("codenvy/ubuntu_jdk8");
+        cheContainer1.setLabels(ImmutableMap.of("com.example.department", "Finance",
                                               "com.example.description", "Accounting webapp",
                                               "com.example.label-with-empty-value", ""));
-        cheService1.setLinks(asList("machine1", "machine2:db"));
-        cheService1.setMemLimit(2147483648L);
-        cheService1.setNetworks(asList("some-network", "other-network"));
-        cheService1.setPorts(asList("3000", "3000-3005"));
-        cheService1.setVolumes(asList("/opt/data:/var/lib/mysql", "~/configs:/etc/configs/:ro"));
-        cheService1.setVolumesFrom(asList("machine2:ro", "machine3"));
+        cheContainer1.setLinks(asList("machine1", "machine2:db"));
+        cheContainer1.setMemLimit(2147483648L);
+        cheContainer1.setNetworks(asList("some-network", "other-network"));
+        cheContainer1.setPorts(asList("3000", "3000-3005"));
+        cheContainer1.setVolumes(asList("/opt/data:/var/lib/mysql", "~/configs:/etc/configs/:ro"));
+        cheContainer1.setVolumesFrom(asList("machine2:ro", "machine3"));
 
-        DockerContainerConfig cheService2 = new DockerContainerConfig();
-        cheService2.setImage("codenvy/ubuntu_jdk8");
-        DockerContainerConfig cheService3 = new DockerContainerConfig();
-        cheService3.setImage("codenvy/ubuntu_jdk8");
+        DockerContainerConfig cheContainer2 = new DockerContainerConfig();
+        cheContainer2.setImage("codenvy/ubuntu_jdk8");
+        DockerContainerConfig cheContainer3 = new DockerContainerConfig();
+        cheContainer3.setImage("codenvy/ubuntu_jdk8");
 
-        cheServicesEnvironment.setServices(ImmutableMap.of("machine1", cheService1,
-                                                           "machine2", cheService2,
-                                                           "machine3", cheService3));
-        return cheServicesEnvironment;
+        cheContainersEnvironment.setContainers(ImmutableMap.of("machine1", cheContainer1,
+                                                               "machine2", cheContainer2,
+                                                               "machine3", cheContainer3));
+        return cheContainersEnvironment;
     }
 }

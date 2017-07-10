@@ -18,8 +18,8 @@ import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import java.util.List;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class EnvironmentValidator {
     private static final Pattern SERVER_PORT          = Pattern.compile("^[1-9]+[0-9]*(/(tcp|udp))?$");
     private static final Pattern SERVER_PROTOCOL      = Pattern.compile("^[a-z][a-z0-9-+.]*$");
 
-    // DockerService syntax patterns
+    // DockerContainer syntax patterns
     /**
      * Examples:
      * <ul>
@@ -62,28 +62,28 @@ public class EnvironmentValidator {
      * </ul>
      */
     private static final Pattern LINK_PATTERN   =
-            Pattern.compile("^(?<serviceName>" + MACHINE_NAME_REGEXP + ")(:" + MACHINE_NAME_REGEXP + ")?$");
+            Pattern.compile("^(?<containerName>" + MACHINE_NAME_REGEXP + ")(:" + MACHINE_NAME_REGEXP + ")?$");
 
     private static final Pattern VOLUME_FROM_PATTERN =
-            Pattern.compile("^(?<serviceName>" + MACHINE_NAME_REGEXP + ")(:(ro|rw))?$");
+            Pattern.compile("^(?<containerName>" + MACHINE_NAME_REGEXP + ")(:(ro|rw))?$");
 
     public void validate(Environment env, DockerEnvironment dockerEnvironment) throws ValidationException,
                                                                                       InfrastructureException {
-        checkArgument(dockerEnvironment.getServices() != null && !dockerEnvironment.getServices().isEmpty(),
+        checkArgument(dockerEnvironment.getContainers() != null && !dockerEnvironment.getContainers().isEmpty(),
                       "Environment should contain at least 1 machine");
 
         checkArgument(env.getMachines() != null && !env.getMachines().isEmpty(),
                       "Environment doesn't contain machine with 'org.eclipse.che.ws-agent' agent");
 
-        List<String> missingServices = env.getMachines()
-                                          .keySet()
-                                          .stream()
-                                          .filter(machineName -> !dockerEnvironment.getServices()
-                                                                                   .containsKey(machineName))
-                                          .collect(toList());
-        checkArgument(missingServices.isEmpty(),
+        List<String> missingContainers = env.getMachines()
+                                            .keySet()
+                                            .stream()
+                                            .filter(machineName -> !dockerEnvironment.getContainers()
+                                                                                     .containsKey(machineName))
+                                            .collect(toList());
+        checkArgument(missingContainers.isEmpty(),
                       "Environment 'contains machines that are missing in environment recipe: %s",
-                      Joiner.on(", ").join(missingServices));
+                      Joiner.on(", ").join(missingContainers));
 
         List<String> devMachines = env.getMachines()
                                       .entrySet()
@@ -99,33 +99,33 @@ public class EnvironmentValidator {
                       "All machines with this agent: %s",
                       devMachines.size(), Joiner.on(", ").join(devMachines));
 
-        // needed to validate different kinds of dependencies in services to other services
-        Set<String> servicesNames = dockerEnvironment.getServices().keySet();
+        // needed to validate different kinds of dependencies in containers to other containers
+        Set<String> containersNames = dockerEnvironment.getContainers().keySet();
 
-        for (Map.Entry<String, DockerContainerConfig> entry : dockerEnvironment.getServices().entrySet()) {
+        for (Map.Entry<String, DockerContainerConfig> entry : dockerEnvironment.getContainers().entrySet()) {
             validateMachine(entry.getKey(),
                             env.getMachines().get(entry.getKey()),
                             entry.getValue(),
-                            servicesNames);
+                            containersNames);
         }
     }
 
     private void validateMachine(String machineName,
                                  @Nullable MachineConfig machineConfig,
-                                 DockerContainerConfig service,
-                                 Set<String> servicesNames) throws ValidationException {
+                                 DockerContainerConfig container,
+                                 Set<String> containersNames) throws ValidationException {
         checkArgument(MACHINE_NAME_PATTERN.matcher(machineName).matches(),
                       "Name of machine '%s' in environment is invalid",
                       machineName);
 
-        checkArgument(!isNullOrEmpty(service.getImage()) ||
-                      (service.getBuild() != null && (!isNullOrEmpty(service.getBuild().getContext()) ||
-                                                      !isNullOrEmpty(service.getBuild().getDockerfileContent()))),
+        checkArgument(!isNullOrEmpty(container.getImage()) ||
+                      (container.getBuild() != null && (!isNullOrEmpty(container.getBuild().getContext()) ||
+                                                        !isNullOrEmpty(container.getBuild().getDockerfileContent()))),
                       "Field 'image' or 'build.context' is required in machine '%s' in environment",
                       machineName);
 
-        checkArgument(service.getBuild() == null || (isNullOrEmpty(service.getBuild().getContext()) !=
-                                                     isNullOrEmpty(service.getBuild().getDockerfileContent())),
+        checkArgument(container.getBuild() == null || (isNullOrEmpty(container.getBuild().getContext()) !=
+                                                       isNullOrEmpty(container.getBuild().getDockerfileContent())),
                       "Machine '%s' in environment contains mutually exclusive dockerfile content and build context.",
                       machineName);
 
@@ -133,57 +133,57 @@ public class EnvironmentValidator {
             validateExtendedMachine(machineConfig, machineName);
         }
 
-        for (String expose : service.getExpose()) {
+        for (String expose : container.getExpose()) {
             checkArgument(EXPOSE_PATTERN.matcher(expose).matches(),
                           "Exposed port '%s' in machine '%s' in environment is invalid",
                           expose, machineName);
         }
 
-        for (String link : service.getLinks()) {
+        for (String link : container.getLinks()) {
             Matcher matcher = LINK_PATTERN.matcher(link);
 
             checkArgument(matcher.matches(),
                           "Link '%s' in machine '%s' in environment is invalid",
                           link, machineName);
 
-            String serviceFromLink = matcher.group("serviceName");
-            checkArgument(servicesNames.contains(serviceFromLink),
+            String containerFromLink = matcher.group("containerName");
+            checkArgument(containersNames.contains(containerFromLink),
                           "Machine '%s' in environment contains link to non existing machine '%s'",
-                          machineName, serviceFromLink);
+                          machineName, containerFromLink);
         }
 
-        for (String depends : service.getDependsOn()) {
+        for (String depends : container.getDependsOn()) {
             checkArgument(MACHINE_NAME_PATTERN.matcher(depends).matches(),
                           "Dependency '%s' in machine '%s' in environment is invalid",
                           depends, machineName);
 
-            checkArgument(servicesNames.contains(depends),
+            checkArgument(containersNames.contains(depends),
                           "Machine '%s' in environment contains dependency to non existing machine '%s'",
                           machineName, depends);
         }
 
-        for (String volumesFrom : service.getVolumesFrom()) {
+        for (String volumesFrom : container.getVolumesFrom()) {
             Matcher matcher = VOLUME_FROM_PATTERN.matcher(volumesFrom);
 
             checkArgument(matcher.matches(),
                           "Machine name '%s' in field 'volumes_from' of machine '%s' in environment is invalid",
                           volumesFrom, machineName);
 
-            String serviceFromVolumesFrom = matcher.group("serviceName");
-            checkArgument(servicesNames.contains(serviceFromVolumesFrom),
+            String containerFromVolumesFrom = matcher.group("containerName");
+            checkArgument(containersNames.contains(containerFromVolumesFrom),
                           "OldMachine '%s' in environment contains non existing machine '%s' in 'volumes_from' field",
-                          machineName, serviceFromVolumesFrom);
+                          machineName, containerFromVolumesFrom);
         }
 
-        checkArgument(service.getPorts() == null || service.getPorts().isEmpty(),
+        checkArgument(container.getPorts() == null || container.getPorts().isEmpty(),
                       "Ports binding is forbidden but found in machine '%s' of environment",
                       machineName);
 
-        checkArgument(service.getVolumes() == null || service.getVolumes().isEmpty(),
+        checkArgument(container.getVolumes() == null || container.getVolumes().isEmpty(),
                       "Volumes binding is forbidden but found in machine '%s' of environment",
                       machineName);
 
-        checkArgument(service.getNetworks() == null || service.getNetworks().isEmpty(),
+        checkArgument(container.getNetworks() == null || container.getNetworks().isEmpty(),
                       "Networks configuration is forbidden but found in machine '%s' of environment",
                       machineName);
     }

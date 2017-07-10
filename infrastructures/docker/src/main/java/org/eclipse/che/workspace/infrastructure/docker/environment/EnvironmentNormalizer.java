@@ -56,100 +56,102 @@ public class EnvironmentNormalizer {
         String networkId = NameGenerator.generate(identity.getWorkspaceId() + "_", 16);
         dockerEnvironment.setNetwork(networkId);
 
-        Map<String, DockerContainerConfig> services = dockerEnvironment.getServices();
-        for (Map.Entry<String, DockerContainerConfig> serviceEntry : services.entrySet()) {
-            normalize(identity.getOwner(), identity.getWorkspaceId(), serviceEntry.getKey(), serviceEntry.getValue());
+        Map<String, DockerContainerConfig> containers = dockerEnvironment.getContainers();
+        for (Map.Entry<String, DockerContainerConfig> containerEntry : containers.entrySet()) {
+            normalize(identity.getOwner(), identity.getWorkspaceId(), containerEntry.getKey(),
+                      containerEntry.getValue());
         }
         normalizeNames(dockerEnvironment);
     }
 
     private void normalizeNames(DockerEnvironment dockerEnvironment) throws InfrastructureException {
-        Map<String, DockerContainerConfig> services = dockerEnvironment.getServices();
-        for (Map.Entry<String, DockerContainerConfig> serviceEntry : services.entrySet()) {
-            DockerContainerConfig service = serviceEntry.getValue();
-            normalizeVolumesFrom(service, services);
-            normalizeLinks(service, services);
+        Map<String, DockerContainerConfig> containers = dockerEnvironment.getContainers();
+        for (Map.Entry<String, DockerContainerConfig> containerEntry : containers.entrySet()) {
+            DockerContainerConfig container = containerEntry.getValue();
+            normalizeVolumesFrom(container, containers);
+            normalizeLinks(container, containers);
         }
     }
 
     // replace machines names in volumes_from with containers IDs
-    private void normalizeVolumesFrom(DockerContainerConfig service, Map<String, DockerContainerConfig> services) {
-        if (service.getVolumesFrom() != null) {
-            service.setVolumesFrom(service.getVolumesFrom()
-                                          .stream()
-                                          .map(serviceName -> services.get(serviceName).getContainerName())
-                                          .collect(toList()));
+    private void normalizeVolumesFrom(DockerContainerConfig container, Map<String, DockerContainerConfig> containers) {
+        if (container.getVolumesFrom() != null) {
+            container.setVolumesFrom(container.getVolumesFrom()
+                                              .stream()
+                                              .map(containerName -> containers.get(containerName).getContainerName())
+                                              .collect(toList()));
         }
     }
 
     /**
-     * Replaces linked to this service's name with container name which represents the service in links section.
+     * Replaces linked to this container's name with container name which represents the container in links section.
      * The problem is that a user writes names of other services in links section in compose file.
      * But actually links are constraints and their values should be names of containers (not services) to be linked.
      * <br/>
      * For example: serviceDB:serviceDbAlias -> container_1234:serviceDbAlias <br/>
      * If alias is omitted then service name will be used.
      *
-     * @param serviceToNormalizeLinks
-     *         service which links will be normalized
-     * @param services
-     *         all services in environment
+     * @param containerToNormalizeLinks
+     *         container which links will be normalized
+     * @param containers
+     *         all containers in environment
      */
-    private void normalizeLinks(DockerContainerConfig serviceToNormalizeLinks, Map<String, DockerContainerConfig> services)
+    private void normalizeLinks(DockerContainerConfig containerToNormalizeLinks,
+                                Map<String, DockerContainerConfig> containers)
             throws InfrastructureException {
         List<String> normalizedLinks = new ArrayList<>();
-        for (String link : serviceToNormalizeLinks.getLinks()) {
+        for (String link : containerToNormalizeLinks.getLinks()) {
             // a link has format: 'name:alias' or 'name'
-            String serviceNameAndAliasToLink[] = link.split(":", 2);
-            String serviceName = serviceNameAndAliasToLink[0];
-            String serviceAlias = (serviceNameAndAliasToLink.length > 1) ?
-                                  serviceNameAndAliasToLink[1] : null;
-            DockerContainerConfig serviceLinkTo = services.get(serviceName);
-            if (serviceLinkTo != null) {
-                String containerNameLinkTo = serviceLinkTo.getContainerName();
-                normalizedLinks.add((serviceAlias == null) ?
+            String containerNameAndAliasToLink[] = link.split(":", 2);
+            String containerName = containerNameAndAliasToLink[0];
+            String containerAlias = (containerNameAndAliasToLink.length > 1) ?
+                                    containerNameAndAliasToLink[1] : null;
+            DockerContainerConfig containerLinkTo = containers.get(containerName);
+            if (containerLinkTo != null) {
+                String containerNameLinkTo = containerLinkTo.getContainerName();
+                normalizedLinks.add((containerAlias == null) ?
                                     containerNameLinkTo :
-                                    containerNameLinkTo + ':' + serviceAlias);
+                                    containerNameLinkTo + ':' + containerAlias);
             } else {
                 // should never happens. Errors like this should be filtered by CheEnvironmentValidator
-                throw new InfrastructureException("Attempt to link non existing service " + serviceName +
-                                                  " to " + serviceToNormalizeLinks + " service.");
+                throw new InfrastructureException("Attempt to link non existing container " + containerName +
+                                                  " to " + containerToNormalizeLinks + " container.");
             }
         }
-        serviceToNormalizeLinks.setLinks(normalizedLinks);
+        containerToNormalizeLinks.setLinks(normalizedLinks);
     }
 
     private void normalize(String namespace,
                            String workspaceId,
                            String machineName,
-                           DockerContainerConfig service) throws InfrastructureException {
-        // set default mem limit for service if it is not set
-        if (service.getMemLimit() == null || service.getMemLimit() == 0) {
-            service.setMemLimit(defaultMachineMemorySizeBytes);
+                           DockerContainerConfig container) throws InfrastructureException {
+        // set default mem limit for container if it is not set
+        if (container.getMemLimit() == null || container.getMemLimit() == 0) {
+            container.setMemLimit(defaultMachineMemorySizeBytes);
         }
         // download dockerfile if it is hosted by API to avoid problems with unauthorized requests from docker daemon
-        if (service.getBuild() != null &&
-            service.getBuild().getContext() != null &&
-            recipeApiPattern.matcher(service.getBuild().getContext()).matches()) {
+        if (container.getBuild() != null &&
+            container.getBuild().getContext() != null &&
+            recipeApiPattern.matcher(container.getBuild().getContext()).matches()) {
 
             String recipeContent;
             try {
-                recipeContent = recipeDownloader.getRecipe(service.getBuild().getContext());
+                recipeContent = recipeDownloader.getRecipe(container.getBuild().getContext());
             } catch (ServerException e) {
                 throw new InfrastructureException(e.getLocalizedMessage(), e);
             }
-            service.getBuild().setDockerfileContent(recipeContent);
-            service.getBuild().setContext(null);
-            service.getBuild().setDockerfilePath(null);
+            container.getBuild().setDockerfileContent(recipeContent);
+            container.getBuild().setContext(null);
+            container.getBuild().setDockerfilePath(null);
         }
-        if (service.getId() == null) {
-            service.setId(generateMachineId());
+        if (container.getId() == null) {
+            container.setId(generateMachineId());
         }
 
-        service.setContainerName(containerNameGenerator.generateContainerName(workspaceId,
-                                                                              service.getId(),
-                                                                              namespace,
-                                                                              machineName));
+        container.setContainerName(containerNameGenerator.generateContainerName(workspaceId,
+                                                                                container.getId(),
+                                                                                namespace,
+                                                                                machineName));
     }
 
     private String generateMachineId() {

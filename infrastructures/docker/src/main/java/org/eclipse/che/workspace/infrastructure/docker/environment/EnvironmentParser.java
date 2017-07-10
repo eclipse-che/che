@@ -17,8 +17,8 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import javax.inject.Inject;
 import java.util.Map;
@@ -82,7 +82,7 @@ public class EnvironmentParser {
 
         DockerEnvironment dockerEnvironment = parser.parse(environment);
 
-        for (Map.Entry<String, DockerContainerConfig> entry : dockerEnvironment.getServices().entrySet()) {
+        for (Map.Entry<String, DockerContainerConfig> entry : dockerEnvironment.getContainers().entrySet()) {
             MachineConfig machineConfig = environment.getMachines().get(entry.getKey());
             if (machineConfig != null) {
                 normalizeMachine(entry.getKey(), entry.getValue(), machineConfig);
@@ -92,43 +92,43 @@ public class EnvironmentParser {
         return dockerEnvironment;
     }
 
-    private void normalizeMachine(String name, DockerContainerConfig service, MachineConfig machineConfig)
+    private void normalizeMachine(String name, DockerContainerConfig container, MachineConfig machineConfig)
             throws ValidationException {
         if (machineConfig.getAttributes().containsKey("memoryLimitBytes")) {
             try {
-                service.setMemLimit(Long.parseLong(machineConfig.getAttributes().get("memoryLimitBytes")));
+                container.setMemLimit(Long.parseLong(machineConfig.getAttributes().get("memoryLimitBytes")));
             } catch (NumberFormatException e) {
                 throw new ValidationException(
                         format("Value of attribute 'memoryLimitBytes' of machine '%s' is illegal", name));
             }
         }
-        service.setExpose(service.getExpose()
-                                 .stream()
-                                 .map(expose -> expose.contains("/") ?
+        container.setExpose(container.getExpose()
+                                     .stream()
+                                     .map(expose -> expose.contains("/") ?
                                                 expose :
                                                 expose + "/tcp")
-                                 .collect(toList()));
+                                     .collect(toList()));
         machineConfig.getServers().forEach((serverRef, serverConf) -> {
             String normalizedPort = serverConf.getPort().contains("/") ?
                                     serverConf.getPort() :
                                     serverConf.getPort() + "/tcp";
 
-            service.getExpose().add(normalizedPort);
+            container.getExpose().add(normalizedPort);
 
             String portLabelPrefix = SERVER_CONF_LABEL_PREFIX + normalizedPort;
 
-            service.getLabels().put(portLabelPrefix +
-                                    SERVER_CONF_LABEL_REF_SUFFIX,
-                                    serverRef);
+            container.getLabels().put(portLabelPrefix +
+                                      SERVER_CONF_LABEL_REF_SUFFIX,
+                                      serverRef);
             if (serverConf.getPath() != null) {
-                service.getLabels().put(portLabelPrefix +
-                                        SERVER_CONF_LABEL_PATH_SUFFIX,
-                                        serverConf.getPath());
+                container.getLabels().put(portLabelPrefix +
+                                          SERVER_CONF_LABEL_PATH_SUFFIX,
+                                          serverConf.getPath());
             }
             if (serverConf.getProtocol() != null) {
-                service.getLabels().put(portLabelPrefix +
-                                        SERVER_CONF_LABEL_PROTOCOL_SUFFIX,
-                                        serverConf.getProtocol());
+                container.getLabels().put(portLabelPrefix +
+                                          SERVER_CONF_LABEL_PROTOCOL_SUFFIX,
+                                          serverConf.getProtocol());
             }
         });
     }

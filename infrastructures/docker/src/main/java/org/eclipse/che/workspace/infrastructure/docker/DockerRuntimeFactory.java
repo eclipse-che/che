@@ -23,7 +23,7 @@ import java.util.List;
 public interface DockerRuntimeFactory {
     DockerInternalRuntime createRuntime(@Assisted DockerRuntimeContext context,
                                         @Assisted String devMachineName,
-                                        @Assisted List<String> orderedServices,
+                                        @Assisted List<String> orderedContainers,
                                         @Assisted DockerEnvironment dockerEnvironment,
                                         @Assisted RuntimeIdentity identity);
 }

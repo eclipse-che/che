@@ -300,12 +300,12 @@ public class DockerMachineStarter {
      * @throws InfrastructureException
      *         if any other error occurs
      */
-    public DockerMachine startService(String networkName,
-                                      String machineName,
-                                      DockerContainerConfig containerConfig,
-                                      RuntimeIdentity identity,
-                                      boolean isDev,
-                                      AbnormalMachineStopHandler abnormalMachineStopHandler)
+    public DockerMachine startContainer(String networkName,
+                                        String machineName,
+                                        DockerContainerConfig containerConfig,
+                                        RuntimeIdentity identity,
+                                        boolean isDev,
+                                        AbnormalMachineStopHandler abnormalMachineStopHandler)
             throws InfrastructureException {
         String workspaceId = identity.getWorkspaceId();
 
@@ -356,25 +356,25 @@ public class DockerMachineStarter {
     }
 
     private String prepareImage(String machineName,
-                                DockerContainerConfig service,
+                                DockerContainerConfig container,
                                 ProgressMonitor progressMonitor)
             throws SourceNotFoundException,
                    InternalInfrastructureException {
 
-        String imageName = "eclipse-che/" + service.getContainerName();
-        if ((service.getBuild() == null || (service.getBuild().getContext() == null &&
-                                            service.getBuild().getDockerfileContent() == null)) &&
-            service.getImage() == null) {
+        String imageName = "eclipse-che/" + container.getContainerName();
+        if ((container.getBuild() == null || (container.getBuild().getContext() == null &&
+                                              container.getBuild().getDockerfileContent() == null)) &&
+            container.getImage() == null) {
 
             throw new InternalInfrastructureException(
-                    format("Che service '%s' doesn't have neither build nor image fields", machineName));
+                    format("Che container '%s' doesn't have neither build nor image fields", machineName));
         }
 
-        if (service.getBuild() != null && (service.getBuild().getContext() != null ||
-                                           service.getBuild().getDockerfileContent() != null)) {
-            buildImage(service, imageName, doForcePullImage, progressMonitor);
+        if (container.getBuild() != null && (container.getBuild().getContext() != null ||
+                                             container.getBuild().getDockerfileContent() != null)) {
+            buildImage(container, imageName, doForcePullImage, progressMonitor);
         } else {
-            pullImage(service, imageName, progressMonitor);
+            pullImage(container, imageName, progressMonitor);
         }
 
         return imageName;
@@ -448,8 +448,8 @@ public class DockerMachineStarter {
     /**
      * Pulls docker image for container creation.
      *
-     * @param service
-     *         service that provides description of image that should be pulled
+     * @param container
+     *         container that provides description of image that should be pulled
      * @param machineImageName
      *         name of the image that should be assigned on pull
      * @param progressMonitor
@@ -459,12 +459,12 @@ public class DockerMachineStarter {
      * @throws InternalInfrastructureException
      *         if any other error occurs
      */
-    protected void pullImage(DockerContainerConfig service,
+    protected void pullImage(DockerContainerConfig container,
                              String machineImageName,
                              ProgressMonitor progressMonitor) throws InternalInfrastructureException,
                                                                      SourceNotFoundException {
         DockerMachineSource dockerMachineSource = new DockerMachineSource(
-                new MachineSourceImpl("image").setLocation(service.getImage()));
+                new MachineSourceImpl("image").setLocation(container.getImage()));
         if (dockerMachineSource.getRepository() == null) {
             throw new InternalInfrastructureException(
                     format("Machine creation failed. Machine source is invalid. No repository is defined. Found '%s'.",
@@ -766,9 +766,9 @@ public class DockerMachineStarter {
 
     // TODO spi should we move it into network lifecycle?
     private void connectContainerToAdditionalNetworks(String container,
-                                                      DockerContainerConfig service) throws IOException {
+                                                      DockerContainerConfig containerConfig) throws IOException {
 
-        for (String network : service.getNetworks()) {
+        for (String network : containerConfig.getNetworks()) {
             docker.connectContainerToNetwork(
                     ConnectContainerToNetworkParams.create(network, new ConnectContainer().withContainer(container)));
         }

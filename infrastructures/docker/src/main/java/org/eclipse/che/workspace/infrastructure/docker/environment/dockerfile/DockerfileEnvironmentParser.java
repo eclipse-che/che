@@ -17,8 +17,8 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkArgument;
@@ -46,17 +46,17 @@ public class DockerfileEnvironmentParser implements DockerConfigSourceSpecificEn
                                                       recipe.getContentType()));
         }
 
-        DockerEnvironment cheServiceEnv = new DockerEnvironment();
-        DockerContainerConfig service = new DockerContainerConfig();
-        cheServiceEnv.getServices().put(getMachineName(environment), service);
+        DockerEnvironment cheContainerEnv = new DockerEnvironment();
+        DockerContainerConfig container = new DockerContainerConfig();
+        cheContainerEnv.getContainers().put(getMachineName(environment), container);
 
         if (recipe.getLocation() != null) {
-            service.setBuild(new DockerBuildContext().withContext(recipe.getLocation()));
+            container.setBuild(new DockerBuildContext().withContext(recipe.getLocation()));
         } else {
-            service.setBuild(new DockerBuildContext().withDockerfileContent(recipe.getContent()));
+            container.setBuild(new DockerBuildContext().withDockerfileContent(recipe.getContent()));
         }
 
-        return cheServiceEnv;
+        return cheContainerEnv;
     }
 
     private String getMachineName(Environment environment) throws ValidationException {

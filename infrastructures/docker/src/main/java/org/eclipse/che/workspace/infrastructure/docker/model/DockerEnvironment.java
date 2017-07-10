@@ -22,37 +22,37 @@ import static java.util.stream.Collectors.toMap;
  * @author Alexander Garagatyi
  */
 public class DockerEnvironment {
-    private Map<String, DockerContainerConfig> services;
+    private Map<String, DockerContainerConfig> containers;
     private String                             network;
 
     public DockerEnvironment() {}
 
     public DockerEnvironment(DockerEnvironment environment) {
-        if (environment.getServices() != null) {
-            services = environment.getServices()
-                                  .entrySet()
-                                  .stream()
-                                  .collect(toMap(Map.Entry::getKey,
+        if (environment.getContainers() != null) {
+            containers = environment.getContainers()
+                                    .entrySet()
+                                    .stream()
+                                    .collect(toMap(Map.Entry::getKey,
                                                  entry -> new DockerContainerConfig(entry.getValue())));
         }
     }
 
     /**
-     * Mapping of compose services names to services configuration.
+     * Mapping of containers names to containers configuration.
      */
-    public Map<String, DockerContainerConfig> getServices() {
-        if (services == null) {
-            services = new HashMap<>();
+    public Map<String, DockerContainerConfig> getContainers() {
+        if (containers == null) {
+            containers = new HashMap<>();
         }
-        return services;
+        return containers;
     }
 
-    public void setServices(Map<String, DockerContainerConfig> services) {
-        this.services = services;
+    public void setContainers(Map<String, DockerContainerConfig> containers) {
+        this.containers = containers;
     }
 
-    public DockerEnvironment withServices(Map<String, DockerContainerConfig> services) {
-        this.services = services;
+    public DockerEnvironment withContainers(Map<String, DockerContainerConfig> containers) {
+        this.containers = containers;
         return this;
     }
 
@@ -74,19 +74,19 @@ public class DockerEnvironment {
         if (this == o) return true;
         if (!(o instanceof DockerEnvironment)) return false;
         DockerEnvironment that = (DockerEnvironment)o;
-        return Objects.equals(getServices(), that.getServices()) &&
+        return Objects.equals(getContainers(), that.getContainers()) &&
                Objects.equals(getNetwork(), that.getNetwork());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getServices(), getNetwork());
+        return Objects.hash(getContainers(), getNetwork());
     }
 
     @Override
     public String toString() {
         return "DockerEnvironment{" +
-               "services=" + services +
+               "containers=" + containers +
                ", network='" + network + '\'' +
                '}';
     }

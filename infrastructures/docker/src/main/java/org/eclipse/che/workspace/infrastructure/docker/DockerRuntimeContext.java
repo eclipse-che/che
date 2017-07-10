@@ -39,7 +39,7 @@ import static org.eclipse.che.workspace.infrastructure.docker.output.OutputEndpo
 public class DockerRuntimeContext extends RuntimeContext {
     private final DockerEnvironment    dockerEnvironment;
     private final DockerRuntimeFactory dockerRuntimeFactory;
-    private final List<String>         orderedServices;
+    private final List<String>         orderedContainers;
     private final String               devMachineName;
     private final String               apiEndpoint;
 
@@ -48,14 +48,14 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 @Assisted RuntimeIdentity identity,
                                 @Assisted Environment environment,
                                 @Assisted DockerEnvironment dockerEnvironment,
-                                @Assisted List<String> orderedServices,
+                                @Assisted List<String> orderedContainers,
                                 InstallerRegistry installerRegistry,
                                 DockerRuntimeFactory dockerRuntimeFactory,
                                 String apiEndpoint)
             throws ValidationException, InfrastructureException {
         super(environment, identity, infrastructure, installerRegistry);
         this.devMachineName = Utils.getDevMachineName(environment);
-        this.orderedServices = orderedServices;
+        this.orderedContainers = orderedContainers;
         this.dockerEnvironment = dockerEnvironment;
         this.dockerRuntimeFactory = dockerRuntimeFactory;
         this.apiEndpoint = apiEndpoint;
@@ -80,7 +80,7 @@ public class DockerRuntimeContext extends RuntimeContext {
     public InternalRuntime getRuntime() {
         return dockerRuntimeFactory.createRuntime(this,
                                                   devMachineName,
-                                                  orderedServices,
+                                                  orderedContainers,
                                                   dockerEnvironment,
                                                   identity);
     }

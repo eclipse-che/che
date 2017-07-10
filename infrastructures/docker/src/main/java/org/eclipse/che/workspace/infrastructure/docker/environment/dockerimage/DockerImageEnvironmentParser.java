@@ -16,8 +16,8 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkArgument;
@@ -40,10 +40,10 @@ public class DockerImageEnvironmentParser implements DockerConfigSourceSpecificE
         }
 
         DockerEnvironment dockerEnv = new DockerEnvironment();
-        DockerContainerConfig service = new DockerContainerConfig();
-        dockerEnv.getServices().put(getMachineName(environment), service);
+        DockerContainerConfig container = new DockerContainerConfig();
+        dockerEnv.getContainers().put(getMachineName(environment), container);
 
-        service.setImage(recipe.getLocation());
+        container.setImage(recipe.getLocation());
 
         return dockerEnv;
     }

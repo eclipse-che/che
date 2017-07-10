@@ -77,9 +77,9 @@ public class InstallerConfigApplier {
                                                                                 .entrySet()) {
             String machineName = machineEntry.getKey();
             MachineConfig machineConf = machineEntry.getValue();
-            DockerContainerConfig dockerService = dockerEnvironment.getServices().get(machineName);
+            DockerContainerConfig dockerContainer = dockerEnvironment.getContainers().get(machineName);
 
-            apply(machineConf, dockerService);
+            apply(machineConf, dockerContainer);
         }
     }
 
@@ -104,30 +104,30 @@ public class InstallerConfigApplier {
         }
     }
 
-    private void addLabels(DockerContainerConfig service, Map<String, ? extends ServerConfig> servers) {
+    private void addLabels(DockerContainerConfig container, Map<String, ? extends ServerConfig> servers) {
         for (Map.Entry<String, ? extends ServerConfig> entry : servers.entrySet()) {
             String ref = entry.getKey();
             ServerConfig conf = entry.getValue();
 
-            service.getLabels().put("che:server:" + conf.getPort() + ":protocol", conf.getProtocol());
-            service.getLabels().put("che:server:" + conf.getPort() + ":ref", ref);
+            container.getLabels().put("che:server:" + conf.getPort() + ":protocol", conf.getProtocol());
+            container.getLabels().put("che:server:" + conf.getPort() + ":ref", ref);
 
             String path = conf.getPath();
             if (!isNullOrEmpty(path)) {
-                service.getLabels().put("che:server:" + conf.getPort() + ":path", path);
+                container.getLabels().put("che:server:" + conf.getPort() + ":path", path);
             }
         }
     }
 
-    private void addEnv(DockerContainerConfig service, Map<String, String> properties) {
+    private void addEnv(DockerContainerConfig container, Map<String, String> properties) {
         String environment = properties.get(ENVIRONMENT.toString());
         if (isNullOrEmpty(environment)) {
             return;
         }
 
         Map<String, String> newEnv = new HashMap<>();
-        if (service.getEnvironment() != null) {
-            newEnv.putAll(service.getEnvironment());
+        if (container.getEnvironment() != null) {
+            newEnv.putAll(container.getEnvironment());
         }
 
         for (String env : environment.split(",")) {
@@ -142,12 +142,12 @@ public class InstallerConfigApplier {
             newEnv.put(var, name);
         }
 
-        service.setEnvironment(newEnv);
+        container.setEnvironment(newEnv);
     }
 
-    private void addExposedPorts(DockerContainerConfig service, Map<String, ? extends ServerConfig> servers) {
+    private void addExposedPorts(DockerContainerConfig container, Map<String, ? extends ServerConfig> servers) {
         for (ServerConfig server : servers.values()) {
-            service.getExpose().add(server.getPort());
+            container.getExpose().add(server.getPort());
         }
     }
 
