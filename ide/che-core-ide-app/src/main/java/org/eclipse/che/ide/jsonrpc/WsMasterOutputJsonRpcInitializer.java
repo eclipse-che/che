@@ -31,10 +31,10 @@ public class WsMasterOutputJsonRpcInitializer {
         this.initializer = initializer;
         this.appContext = appContext;
 
-        internalInitialize();
+        initialize();
     }
 
-    private void internalInitialize() {
+    private void initialize() {
         String workspaceMasterUrl = getWsMasterURL();
 
         initializer.initialize("ws-master-output", singletonMap("url", workspaceMasterUrl));
