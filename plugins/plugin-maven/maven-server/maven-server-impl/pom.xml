@@ -238,7 +238,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <exclude>**/**</exclude>
+                        <exclude>**/maven/server/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>
