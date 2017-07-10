@@ -204,10 +204,9 @@ public class TextDocumentServiceClient {
      * @param params
      * @return a {@link Promise} of an array of {@link DocumentHighlight} which will be computed by the language server.
      */
-    public Promise<DocumentHighlight> documentHighlight(TextDocumentPositionParams params) {
-        return transmitDtoAndReceiveDto(params, "textDocument/documentHighlight", DocumentHighlight.class);
+    public Promise<List<DocumentHighlight>> documentHighlight(TextDocumentPositionParams params) {
+        return transmitDtoAndReceiveDtoList(params, "textDocument/documentHighlight", DocumentHighlight.class);
     }
-
 
     public Promise<List<Command>> codeAction(CodeActionParams params) {
         return transmitDtoAndReceiveDtoList(params, "textDocument/codeAction", Command.class);

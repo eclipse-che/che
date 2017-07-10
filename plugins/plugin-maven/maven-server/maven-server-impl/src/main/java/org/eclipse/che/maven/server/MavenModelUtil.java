@@ -389,6 +389,9 @@ public class MavenModelUtil {
         result.getBuild().setSourceDirectory(relativize(projectDir, modelBuild.getSources().get(0)));
         result.getBuild().setTestSourceDirectory(relativize(projectDir, modelBuild.getTestSources().get(0)));
 
+        result.getBuild().setOutputDirectory(modelBuild.getOutputDirectory());
+        result.getBuild().setTestOutputDirectory(modelBuild.getTestOutputDirectory());
+
         result.setProfiles(convertToMavenProfiles(model.getProfiles(), projectDir));
         return result;
     }

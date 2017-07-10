@@ -216,5 +216,7 @@ public class WsMasterModule extends AbstractModule {
 
         bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
         bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);
+
+        bind(org.eclipse.che.api.workspace.server.idle.ServerIdleDetector.class);
     }
 }

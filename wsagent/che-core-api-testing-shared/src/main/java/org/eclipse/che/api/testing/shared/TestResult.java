@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.testing.shared;
 
-import java.util.List;
-
 import org.eclipse.che.dto.shared.DTO;
+
+import java.util.List;
 
 /**
  * DTO for representing the executed test result of a Java unit test.

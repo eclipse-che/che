@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.languageserver.ide.highlighting;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -20,6 +19,7 @@ import org.eclipse.che.api.promises.client.js.JsPromise;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.editor.orion.client.OrionOccurrencesHandler;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionOccurrenceContextOverlay;
@@ -28,9 +28,10 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConf
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.DocumentHighlight;
+import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 
-import java.util.logging.Logger;
+import java.util.List;
 
 /**
  * Provides occurrences highlights for the Orion Editor.
@@ -39,8 +40,6 @@ import java.util.logging.Logger;
  */
 @Singleton
 public class OccurrencesProvider implements OrionOccurrencesHandler {
-
-    private static final Logger LOGGER = Logger.getLogger(OccurrencesProvider.class.getName());
     private final EditorAgent               editorAgent;
     private final TextDocumentServiceClient client;
     private final DtoBuildHelper            helper;
@@ -77,24 +76,24 @@ public class OccurrencesProvider implements OrionOccurrencesHandler {
         }
         final Document document = editor.getDocument();
         final TextDocumentPositionParams paramsDTO = helper.createTDPP(document, context.getStart());
-        // FIXME: the result should be a Promise<List<DocumentHighlightDTO>> but the typefox API returns a single DocumentHighlightDTO
-        Promise<DocumentHighlight> promise = client.documentHighlight(paramsDTO);
-        Promise<OrionOccurrenceOverlay[]> then = promise.then(new Function<DocumentHighlight, OrionOccurrenceOverlay[]>() {
+        Promise<List<DocumentHighlight>> promise = client.documentHighlight(paramsDTO);
+        Promise<OrionOccurrenceOverlay[]> then = promise.then(new Function<List<DocumentHighlight>, OrionOccurrenceOverlay[]>() {
             @Override
-            public OrionOccurrenceOverlay[] apply(DocumentHighlight highlight) throws FunctionException {
-                if (highlight == null) {
-                    return new OrionOccurrenceOverlay[0];
+            public OrionOccurrenceOverlay[] apply(List<DocumentHighlight> highlights) throws FunctionException {
+                final OrionOccurrenceOverlay[] occurrences = new OrionOccurrenceOverlay[highlights.size()];
+                for (int i = 0; i < occurrences.length; i++) {
+                    DocumentHighlight highlight = highlights.get(i);
+                    final OrionOccurrenceOverlay occurrence = OrionOccurrenceOverlay.create();
+                    Position start = highlight.getRange().getStart();
+                    Position end = highlight.getRange().getEnd();
+                    int startIndex = document.getIndexFromPosition(new TextPosition(start.getLine(), start.getCharacter()));
+                    int endIndex = document.getIndexFromPosition(new TextPosition(end.getLine(), end.getCharacter()));
+                   
+                    occurrence.setStart(startIndex);
+                    occurrence.setEnd(endIndex+1);
+                    occurrences[i]= occurrence;
+                    
                 }
-                final OrionOccurrenceOverlay[] occurrences = new OrionOccurrenceOverlay[1];
-                final OrionOccurrenceOverlay occurrence = OrionOccurrenceOverlay.create();
-                // FIXME: this assumes that the language server will
-                // compute a range based on 'line 1', ie, the whole
-                // file content is on line 1 and the location to
-                // highlight is given by the 'character' position
-                // only.
-                occurrence.setStart(highlight.getRange().getStart().getCharacter());
-                occurrence.setEnd(highlight.getRange().getEnd().getCharacter() + 1);
-                occurrences[0] = occurrence;
                 return occurrences;
             }
         });
