@@ -48,7 +48,8 @@ cmd_sync() {
   # Determine the mount path to do the mount
   info "mount" "Starting sync process to ${SYNC_MOUNT}"
 
-  docker_run --cap-add SYS_ADMIN \
+  docker_run -ti \
+	     --cap-add SYS_ADMIN \
              --device /dev/fuse \
              --security-opt apparmor:unconfined \
              -e CHE_VERSION=${CHE_VERSION} \
