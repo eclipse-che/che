@@ -97,5 +97,7 @@ public class CurrentWorkspaceManager {
         subscriptionManagerClient.subscribe("ws-master", "workspace/statusChanged", scope);
         subscriptionManagerClient.subscribe("ws-master", "machine/statusChanged", scope);
         subscriptionManagerClient.subscribe("ws-master", "server/statusChanged", scope);
+        subscriptionManagerClient.subscribe("ws-master-output", "machine/log", scope);
+        subscriptionManagerClient.subscribe("ws-master-output", "installer/log", scope);
     }
 }

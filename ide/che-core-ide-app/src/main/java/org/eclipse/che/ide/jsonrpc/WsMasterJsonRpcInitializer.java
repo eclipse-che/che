@@ -27,12 +27,13 @@ import static java.util.Collections.singletonMap;
  * Initializes JSON-RPC connection to workspace master
  */
 @Singleton
-public class WorkspaceMasterJsonRpcInitializer {
+public class WsMasterJsonRpcInitializer {
+
     private final JsonRpcInitializer initializer;
     private final AppContext         appContext;
 
     @Inject
-    public WorkspaceMasterJsonRpcInitializer(JsonRpcInitializer initializer, AppContext appContext) {
+    public WsMasterJsonRpcInitializer(JsonRpcInitializer initializer, AppContext appContext) {
         this.initializer = initializer;
         this.appContext = appContext;
 
@@ -48,11 +49,11 @@ public class WorkspaceMasterJsonRpcInitializer {
     }-*/;
 
     public void initialize() {
-        Log.debug(WorkspaceMasterJsonRpcInitializer.class, "Initializing JSON RPC websocket connection to workspace master");
+        Log.debug(WsMasterJsonRpcInitializer.class, "Initializing JSON RPC websocket connection to workspace master");
         try {
             internalInitialize();
         } catch (Exception e) {
-            Log.debug(WorkspaceMasterJsonRpcInitializer.class, "Failed, will try one more time.");
+            Log.debug(WsMasterJsonRpcInitializer.class, "Failed, will try one more time.");
             new Timer() {
                 @Override
                 public void run() {

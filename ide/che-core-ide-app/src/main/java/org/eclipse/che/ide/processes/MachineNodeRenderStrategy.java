@@ -71,8 +71,7 @@ public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy,
     }
 
     private SpanElement createMachineElement(final ProcessTreeNode node) {
-        final MachineImpl machine = (MachineImpl)node.getData();
-        final String machineId = machine.getName();
+        final String machineName = (String)node.getData();
 
         SpanElement root = Elements.createSpanElement();
 
@@ -89,7 +88,7 @@ public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy,
                 event.preventDefault();
 
                 if (addTerminalClickHandler != null) {
-                    addTerminalClickHandler.onAddTerminalClick(machineId);
+                    addTerminalClickHandler.onAddTerminalClick(machineName);
                 }
             }, true);
 
@@ -111,7 +110,7 @@ public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy,
 
             sshButton.addEventListener(Event.CLICK, event -> {
                 if (previewSshClickHandler != null) {
-                    previewSshClickHandler.onPreviewSshClick(machineId);
+                    previewSshClickHandler.onPreviewSshClick(machineName);
                 }
             }, true);
 
@@ -121,12 +120,12 @@ public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy,
         Element monitorsElement = Elements.createSpanElement(resources.getCss().machineMonitors());
         root.appendChild(monitorsElement);
 
-        Node monitorNode = (Node)machineMonitors.getMonitorWidget(machineId, this).getElement();
+        Node monitorNode = (Node)machineMonitors.getMonitorWidget(machineName, this).getElement();
         monitorsElement.appendChild(monitorNode);
 
         Element nameElement = Elements.createSpanElement(resources.getCss().nameLabel());
-        nameElement.setTextContent(machine.getName());
-        Tooltip.create(nameElement, BOTTOM, MIDDLE, machine.getName());
+        nameElement.setTextContent(machineName);
+        Tooltip.create(nameElement, BOTTOM, MIDDLE, machineName);
         root.appendChild(nameElement);
 
         return root;
