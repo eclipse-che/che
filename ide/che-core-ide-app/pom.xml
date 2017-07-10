@@ -337,8 +337,14 @@
                         <exclude>**/*.gif</exclude>
                         <exclude>**/*.jpg</exclude>
                         <exclude>**/OutputCustomizer.java</exclude>
-                        <exclude>**/DefaultOutputCustomizer.java</exclude>
-                        <exclude>**/DefaultOutputCustomizerTest.java</exclude>
+                        <exclude>**/AbstractOutputCustomizer.java</exclude>
+                        <exclude>**/BaseOutputCustomizerTest.java</exclude>
+                        <exclude>**/JavaOutputCustomizer.java</exclude>
+                        <exclude>**/JavaOutputCustomizerTest.java</exclude>
+                        <exclude>**/CompoundOutputCustomizer.java</exclude>
+                        <exclude>**/CompoundOutputCustomizerTest.java</exclude>
+                        <exclude>**/CSharpOutputCustomizer.java</exclude>
+                        <exclude>**/CSharpOutputCustomizerTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
