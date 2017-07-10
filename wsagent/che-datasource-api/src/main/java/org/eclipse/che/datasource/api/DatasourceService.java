@@ -1,4 +1,4 @@
-package org.eclipse.che.api;
+package org.eclipse.che.datasource.api;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -6,7 +6,7 @@ import javax.ws.rs.PathParam;
 /**
  * Created by sudaraka on 7/7/17.
  */
-@Path("datasource")
+@Path("tkt")
 public class DatasourceService {
     @GET
     @Path("{name}")
