@@ -97,7 +97,7 @@
                                 <package>org.eclipse.che.datasource.shared</package>
                             </dtoPackages>
                             <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                            <genClassName>org.eclipse.che.datasource.server.dto.DtoServerImpls</genClassName>
+                            <genClassName>org.eclipse.che.datasource.api.server.dto.DtoServerImpls</genClassName>
                             <impl>server</impl>
                         </configuration>
                     </execution>
@@ -108,18 +108,7 @@
                         <artifactId>che-datasource-shared</artifactId>
                         <version>${project.version}</version>
                     </dependency>
-                    <!--
-                Other dependencies if DTOs from current project need them.
-                -->
                 </dependencies>
-                <configuration>
-                    <dtoPackages>
-                        <package>com.codenvy.test.dto</package>
-                    </dtoPackages>
-                    <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                    <genClassName>com.codenvy.test.server.dto.DtoServerImpls</genClassName>
-                    <impl>server</impl>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
