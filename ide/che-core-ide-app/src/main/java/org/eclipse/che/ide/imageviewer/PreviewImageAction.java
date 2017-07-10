@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.imageviewer;
 
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -23,6 +22,8 @@ import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.util.browser.BrowserUtils;
+
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import java.util.ArrayList;
@@ -91,7 +92,7 @@ public class PreviewImageAction extends AbstractPerspectiveAction {
         final Resource selectedResource = appContext.getResource();
         if (Resource.FILE == selectedResource.getResourceType()) {
             final String contentUrl = ((File)selectedResource).getContentUrl();
-            Window.open(wsAgentURLModifier.modify(contentUrl), "_blank", null);
+            BrowserUtils.openInNewTab(wsAgentURLModifier.modify(contentUrl));
         }
     }
 
