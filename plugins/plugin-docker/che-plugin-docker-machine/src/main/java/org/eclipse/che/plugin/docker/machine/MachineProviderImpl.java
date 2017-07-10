@@ -70,11 +70,11 @@ import org.eclipse.che.plugin.docker.client.params.ListImagesParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.slf4j.Logger;
 
@@ -713,10 +713,11 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         }
     }
 
-    private void readContainerLogsInSeparateThread(String container,
-                                                   String workspaceId,
-                                                   String machineId,
-                                                   LineConsumer outputConsumer) {
+    @VisibleForTesting
+    void readContainerLogsInSeparateThread(String container,
+                                           String workspaceId,
+                                           String machineId,
+                                           LineConsumer outputConsumer) {
         executor.execute(() -> {
             long lastProcessedLogDate = 0;
             boolean isContainerRunning = true;
