@@ -54,7 +54,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     @Override
-    public void executeCommand(Command command, MachineImpl machine) {
+    public void executeCommand(Command command, String machineName) {
         final String name = command.getName();
         final String type = command.getType();
         final String commandLine = command.getCommandLine();
@@ -62,12 +62,11 @@ public class CommandExecutorImpl implements CommandExecutor {
 
         macroProcessor.expandMacros(commandLine).then(expandedCommandLine -> {
             final CommandImpl expandedCommand = new CommandImpl(name, expandedCommandLine, type, attributes);
-            final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
-            final String machineId = machine.getName();
+            final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machineName);
 
-            processesPanelPresenter.addCommandOutput(machineId, console);
+            processesPanelPresenter.addCommandOutput(machineName, console);
 
-            execAgentClient.startProcess(machineId, expandedCommand)
+            execAgentClient.startProcess(machineName, expandedCommand)
                            .thenIfProcessStartedEvent(console.getProcessStartedConsumer())
                            .thenIfProcessDiedEvent(console.getProcessDiedConsumer())
                            .thenIfProcessStdOutEvent(console.getStdOutConsumer())
@@ -80,10 +79,10 @@ public class CommandExecutorImpl implements CommandExecutor {
         final MachineImpl selectedMachine = getSelectedMachine();
 
         if (selectedMachine != null) {
-            executeCommand(command, selectedMachine);
+            executeCommand(command, selectedMachine.getName());
         } else {
             machineChooser.show().then(machine -> {
-                executeCommand(command, machine);
+                executeCommand(command, machine.getName());
             });
         }
     }

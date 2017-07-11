@@ -85,7 +85,7 @@ public class ExecuteCommandPresenter implements Presenter, ExecuteCommandView.Ac
 
     @Override
     public void onCommandExecute(CommandImpl command, MachineImpl machine) {
-        commandExecutorProvider.get().executeCommand(command, machine);
+        commandExecutorProvider.get().executeCommand(command, machine.getName());
     }
 
     @Override

@@ -186,11 +186,10 @@ public class TestServiceClient {
                             CommandImpl expandedCommand = new CommandImpl(command.getName(), expandedCommandLine,
                                                                           command.getType(), attributes);
 
-                            final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
-                            final String machineId = machine.getName();
+                            final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine.getName());
 
                             processesPanelPresenter.addCommandOutput(console);
-                            ExecAgentConsumer<ProcessStartResponseDto> processPromise = execAgentCommandManager.startProcess(machineId,
+                            ExecAgentConsumer<ProcessStartResponseDto> processPromise = execAgentCommandManager.startProcess(machine.getName(),
                                                                                                                              expandedCommand);
                             processPromise.then(startResonse -> {
                                 if (!startResonse.getAlive()) {

@@ -92,7 +92,7 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
             dialogFactory.createMessageDialog("", messages.messageNoMachine(), null).show();
         } else {
             machineChooser.show().then(machine -> {
-                commandExecutor.executeCommand(command, machine);
+                commandExecutor.executeCommand(command, machine.getName());
             });
         }
     }

@@ -93,10 +93,11 @@ public class ExecuteCommandPresenterTest {
     public void shouldExecuteCommandOnMachine() throws Exception {
         CommandImpl command = mock(CommandImpl.class);
         MachineImpl machine = mock(MachineImpl.class);
+        when(machine.getName()).thenReturn("machine_name");
 
         presenter.onCommandExecute(command, machine);
 
-        verify(commandExecutor).executeCommand(eq(command), eq(machine));
+        verify(commandExecutor).executeCommand(eq(command), eq("machine_name"));
     }
 
     @Test

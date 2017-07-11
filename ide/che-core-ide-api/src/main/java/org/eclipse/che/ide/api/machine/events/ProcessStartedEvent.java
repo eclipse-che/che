@@ -13,26 +13,24 @@ package org.eclipse.che.ide.api.machine.events;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.ide.api.workspace.model.MachineImpl;
-
 public class ProcessStartedEvent extends GwtEvent<ProcessStartedEvent.Handler> {
 
     public static final Type<ProcessStartedEvent.Handler> TYPE = new Type<>();
 
-    private final int         processID;
-    private final MachineImpl machine;
+    private final int    processID;
+    private final String machineName;
 
-    public ProcessStartedEvent(int processID, MachineImpl machine) {
+    public ProcessStartedEvent(int processID, String machineName) {
         this.processID = processID;
-        this.machine = machine;
+        this.machineName = machineName;
     }
 
     public int getProcessID() {
         return processID;
     }
 
-    public MachineImpl getMachine() {
-        return machine;
+    public String getMachineName() {
+        return machineName;
     }
 
     @Override

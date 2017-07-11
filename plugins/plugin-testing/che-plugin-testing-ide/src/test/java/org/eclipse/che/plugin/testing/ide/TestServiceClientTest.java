@@ -170,7 +170,7 @@ public class TestServiceClientTest implements MockitoPrinter {
             return new PromiseMocker<String>().applyOnThenOperation(processedCommandLine).getPromise();
         })).when(macroProcessor).expandMacros(anyString());
 
-        when(commandConsoleFactory.create(any(CommandImpl.class), any(MachineImpl.class))).then(createCall -> {
+        when(commandConsoleFactory.create(any(CommandImpl.class), anyString())).then(createCall -> {
             CommandOutputConsole commandOutputConsole = mock(CommandOutputConsole.class);
             when(commandOutputConsole.getProcessStartedConsumer()).thenReturn(processStartedEvent -> {
                 consoleEvents.add(processStartedEvent);

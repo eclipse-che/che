@@ -42,12 +42,11 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.ActivateProcessOutputEvent;
+import org.eclipse.che.ide.api.machine.events.ExecAgentServerRunningEvent;
 import org.eclipse.che.ide.api.machine.events.MachineRunningEvent;
 import org.eclipse.che.ide.api.machine.events.MachineStartingEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.TerminalAgentServerRunningEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
@@ -63,12 +62,12 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessOutputClosedEvent;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.CommandOutputConsole;
 import org.eclipse.che.ide.console.CommandOutputConsolePresenter;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
 import org.eclipse.che.ide.processes.ProcessTreeNodeSelectedEvent;
@@ -112,10 +111,11 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                                       MachineStartingEvent.Handler,
                                                                       MachineRunningEvent.Handler,
                                                                       TerminalAgentServerRunningEvent.Handler,
-                                                                      WsAgentStateHandler,
+                                                                      ExecAgentServerRunningEvent.Handler,
                                                                       EnvironmentOutputEvent.Handler,
                                                                       DownloadWorkspaceOutputEvent.Handler,
-                                                                      PartStackStateChangedEvent.Handler {
+                                                                      PartStackStateChangedEvent.Handler,
+                                                                      BasicIDEInitializedEvent.Handler {
 
     public static final  String SSH_PORT              = "22";
     public static final  String TERMINAL_AGENT        = "org.eclipse.che.terminal";
@@ -139,7 +139,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final CommandTypeRegistry           commandTypeRegistry;
     private final ExecAgentCommandManager       execAgentCommandManager;
     private final Provider<MacroProcessor>      macroProcessorProvider;
-    private final DtoFactory                    dtoFactory;
     private final EventBus                      eventBus;
     private final Map<String, ProcessTreeNode>  machineNodes;
     ProcessTreeNode rootNode;
@@ -161,8 +160,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                    CommandTypeRegistry commandTypeRegistry,
                                    SshServiceClient sshServiceClient,
                                    ExecAgentCommandManager execAgentCommandManager,
-                                   Provider<MacroProcessor> macroProcessorProvider,
-                                   DtoFactory dtoFactory) {
+                                   Provider<MacroProcessor> macroProcessorProvider) {
         this.view = view;
         this.localizationConstant = localizationConstant;
         this.resources = resources;
@@ -178,7 +176,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         this.commandTypeRegistry = commandTypeRegistry;
         this.execAgentCommandManager = execAgentCommandManager;
         this.macroProcessorProvider = macroProcessorProvider;
-        this.dtoFactory = dtoFactory;
 
         machineNodes = new HashMap<>();
         machines = new HashMap<>();
@@ -192,14 +189,15 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         eventBus.addHandler(ProcessFinishedEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
-        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
         eventBus.addHandler(MachineStartingEvent.TYPE, this);
         eventBus.addHandler(MachineRunningEvent.TYPE, this);
         eventBus.addHandler(TerminalAgentServerRunningEvent.TYPE, this);
+        eventBus.addHandler(ExecAgentServerRunningEvent.TYPE, this);
         eventBus.addHandler(EnvironmentOutputEvent.TYPE, this);
         eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
         eventBus.addHandler(PartStackStateChangedEvent.TYPE, this);
         eventBus.addHandler(ActivateProcessOutputEvent.TYPE, event -> setActiveProcessOutput(event.getPid()));
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, this);
 
         Scheduler.get().scheduleDeferred(this::updateMachineList);
     }
@@ -345,17 +343,24 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     /**
      * Selects dev machine.
      */
-    public void selectDevMachine() {
-        // TODO (spi ide)
-//        for (final ProcessTreeNode processTreeNode : machineNodes.values()) {
-//            if (processTreeNode.getData() instanceof MachineImpl) {
-//                final MachineImpl machine = (MachineImpl)processTreeNode.getData();
-//                    if (machine.getServerByName(WSAGENT_REFERENCE).isPresent()) {
-//                    view.selectNode(processTreeNode);
-//                    notifyTreeNodeSelected(processTreeNode);
-//                }
-//            }
-//        }
+    private void selectDevMachine() {
+        Optional<MachineImpl> devMachine = appContext.getWorkspace().getDevMachine();
+        if (!devMachine.isPresent()) {
+            return;
+        }
+
+        for (ProcessTreeNode processTreeNode : machineNodes.values()) {
+            if (processTreeNode.getData() instanceof MachineImpl) {
+                String machineName = (String)processTreeNode.getData();
+
+                if (machineName.equals(devMachine.get().getName())) {
+                    view.selectNode(processTreeNode);
+                    notifyTreeNodeSelected(processTreeNode);
+
+                    return;
+                }
+            }
+        }
     }
 
     /** Set active output of the process with the given PID. */
@@ -993,22 +998,29 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     @Override
-    public void onWsAgentStarted(WsAgentStateEvent event) {
-        List<MachineImpl> machines = getMachines();
-        if (machines.isEmpty()) {
-            return;
-        }
-
-        for (MachineImpl machine : machines) {
-            restoreState(machine);
+    public void onIDEInitialized(BasicIDEInitializedEvent event) {
+        for (MachineImpl machine : getMachines()) {
+            restoreProcessesState(machine.getName());
         }
 
         selectDevMachine();
         newTerminal(this);
     }
 
-    private void restoreState(final MachineImpl machine) {
-        execAgentCommandManager.getProcesses(machine.getName(), false)
+    @Override
+    public void onTerminalAgentServerRunning(TerminalAgentServerRunningEvent event) {
+        provideMachineNode(event.getMachineName(), true);
+
+        newTerminal(this);
+    }
+
+    @Override
+    public void onExecAgentServerRunning(ExecAgentServerRunningEvent event) {
+        restoreProcessesState(event.getMachineName());
+    }
+
+    private void restoreProcessesState(String machineName) {
+        execAgentCommandManager.getProcesses(machineName, false)
                                .onSuccess(new BiConsumer<String, List<GetProcessesResponseDto>>() {
                                    @Override
                                    public void accept(String endpointId, List<GetProcessesResponseDto> processes) {
@@ -1034,12 +1046,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                if (commandByName == null) {
                                                    final String commandLine = process.getCommandLine();
                                                    final CommandImpl command = new CommandImpl(processName, commandLine, type);
-                                                   final CommandOutputConsole console = commandConsoleFactory.create(command, machine);
+                                                   final CommandOutputConsole console = commandConsoleFactory.create(command, machineName);
 
                                                    getAndPrintProcessLogs(console, pid);
                                                    subscribeToProcess(console, pid);
 
-                                                   addCommandOutput(machine.getName(), console);
+                                                   addCommandOutput(machineName, console);
                                                } else {
                                                    macroProcessorProvider.get().expandMacros(commandByName.getCommandLine())
                                                                          .then(new Operation<String>() {
@@ -1053,12 +1065,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                                                                          commandByName.getAttributes());
 
                                                                                  final CommandOutputConsole console =
-                                                                                         commandConsoleFactory.create(command, machine);
+                                                                                         commandConsoleFactory.create(command, machineName);
 
                                                                                  getAndPrintProcessLogs(console, pid);
                                                                                  subscribeToProcess(console, pid);
 
-                                                                                 addCommandOutput(machine.getName(), console);
+                                                                                 addCommandOutput(machineName, console);
                                                                              }
                                                                          });
                                                }
@@ -1071,7 +1083,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                        String till = null;
                                        int limit = 50;
                                        int skip = 0;
-                                       execAgentCommandManager.getProcessLogs(machine.getName(), pid, from, till, limit, skip)
+                                       execAgentCommandManager.getProcessLogs(machineName, pid, from, till, limit, skip)
                                                               .onSuccess(logs -> {
                                                                   for (GetProcessLogsResponseDto log : logs) {
                                                                       String text = log.getText();
@@ -1090,7 +1102,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                        String processStatus = "process_status";
                                        String after = null;
                                        execAgentCommandManager
-                                               .subscribe(machine.getName(), pid, asList(stderr, stdout, processStatus), after)
+                                               .subscribe(machineName, pid, asList(stderr, stdout, processStatus), after)
                                                .thenIfProcessStartedEvent(console.getProcessStartedConsumer())
                                                .thenIfProcessDiedEvent(console.getProcessDiedConsumer())
                                                .thenIfProcessStdOutEvent(console.getStdOutConsumer())
@@ -1098,7 +1110,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                .then(console.getProcessSubscribeConsumer());
                                    }
                                }).onFailure(
-                (endpointId, error) -> notificationManager.notify(localizationConstant.failedToGetProcesses(machine.getName())));
+                (endpointId, error) -> notificationManager.notify(localizationConstant.failedToGetProcesses(machineName)));
     }
 
     private CommandImpl getWorkspaceCommandByName(String name) {
@@ -1109,10 +1121,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         return null;
-    }
-
-    @Override
-    public void onWsAgentStopped(WsAgentStateEvent event) {
     }
 
     @Override
@@ -1318,9 +1326,4 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         $doc.body.removeChild(element);
     }-*/;
-
-    @Override
-    public void onTerminalAgentServerRunning(TerminalAgentServerRunningEvent event) {
-        provideMachineNode(event.getMachineName(), true);
-    }
 }

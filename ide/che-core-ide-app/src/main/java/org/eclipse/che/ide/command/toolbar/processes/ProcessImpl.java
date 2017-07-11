@@ -10,25 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.processes;
 
-import org.eclipse.che.ide.api.workspace.model.MachineImpl;
-
 import java.util.Objects;
 
 /** Data object for {@link Process}. */
 public class ProcessImpl implements Process {
 
-    private final String      commandName;
-    private final String      commandLine;
-    private final int         pid;
-    private final boolean     alive;
-    private final MachineImpl machine;
+    private final String  commandName;
+    private final String  commandLine;
+    private final int     pid;
+    private final boolean alive;
+    private final String  machineName;
 
-    public ProcessImpl(String commandName, String commandLine, int pid, boolean alive, MachineImpl machine) {
+    public ProcessImpl(String commandName, String commandLine, int pid, boolean alive, String machineName) {
         this.commandName = commandName;
         this.commandLine = commandLine;
         this.pid = pid;
         this.alive = alive;
-        this.machine = machine;
+        this.machineName = machineName;
     }
 
     @Override
@@ -52,8 +50,8 @@ public class ProcessImpl implements Process {
     }
 
     @Override
-    public MachineImpl getMachine() {
-        return machine;
+    public String getMachineName() {
+        return machineName;
     }
 
     @Override
@@ -67,11 +65,11 @@ public class ProcessImpl implements Process {
                alive == process.alive &&
                Objects.equals(commandName, process.commandName) &&
                Objects.equals(commandLine, process.commandLine) &&
-               Objects.equals(machine, process.machine);
+               Objects.equals(machineName, process.machineName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(commandName, commandLine, pid, alive, machine);
+        return Objects.hash(commandName, commandLine, pid, alive, machineName);
     }
 }

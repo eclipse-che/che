@@ -19,7 +19,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -29,9 +28,12 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.macro.ServerAddressMacroRegistrar;
 import org.eclipse.che.lib.terminal.client.TerminalResources;
 import org.eclipse.che.requirejs.RequireJsLoader;
+
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 /**
  * Terminal entry point.
@@ -68,9 +70,11 @@ public class TerminalInitializer {
 
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> maximizeTerminal());
 
-        if (appContext.getWorkspace() == null || WorkspaceStatus.RUNNING != appContext.getWorkspace().getStatus()) {
-            maximizeTerminal();
-        }
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, event -> {
+            if (RUNNING != appContext.getWorkspace().getStatus()) {
+                maximizeTerminal();
+            }
+        });
 
         Promise<Void> termInitPromise = AsyncPromiseHelper.createFromAsyncRequest(callback -> injectTerminal(requireJsLoader, callback));
         terminalModule.setInitializerPromise(termInitPromise);

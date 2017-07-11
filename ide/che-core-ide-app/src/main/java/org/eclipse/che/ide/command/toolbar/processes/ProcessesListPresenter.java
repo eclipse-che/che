@@ -83,7 +83,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
         });
 
         eventBus.addHandler(ProcessStartedEvent.TYPE, event -> addProcessToList(event.getProcessID(),
-                                                                                event.getMachine()));
+                                                                                event.getMachineName()));
 
         eventBus.addHandler(ProcessFinishedEvent.TYPE, event -> {
             final Process process = runningProcesses.get(event.getProcessID());
@@ -121,7 +121,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
                                                             p.getCommandLine(),
                                                             p.getPid(),
                                                             p.isAlive(),
-                                                            machine);
+                                                            machine.getName());
                     runningProcesses.put(process.getPid(), process);
 
                     view.addProcess(process);
@@ -138,13 +138,13 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
      * @param machine
      *         machine where process were run or currently running
      */
-    private void addProcessToList(int pid, MachineImpl machine) {
-        execAgentClient.getProcess(machine.getName(), pid).onSuccess(processDto -> {
+    private void addProcessToList(int pid, String machineName) {
+        execAgentClient.getProcess(machineName, pid).onSuccess(processDto -> {
             final Process process = new ProcessImpl(processDto.getName(),
                                                     processDto.getCommandLine(),
                                                     processDto.getPid(),
                                                     processDto.isAlive(),
-                                                    machine);
+                                                    machineName);
             runningProcesses.put(process.getPid(), process);
 
             view.addProcess(process);
@@ -164,12 +164,12 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
     @Override
     public void onReRunProcess(Process process) {
         commandManager.getCommand(process.getName())
-                      .ifPresent(command -> commandExecutorProvider.get().executeCommand(command, process.getMachine()));
+                      .ifPresent(command -> commandExecutorProvider.get().executeCommand(command, process.getMachineName()));
     }
 
     @Override
     public void onStopProcess(Process process) {
-        execAgentClient.killProcess(process.getMachine().getName(), process.getPid());
+        execAgentClient.killProcess(process.getMachineName(), process.getPid());
     }
 
     @Override
