@@ -32,7 +32,6 @@ import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
-import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -54,7 +53,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     private final MachineResources        resources;
     private final CommandImpl             command;
     private final EventBus                eventBus;
-    private final MachineImpl             machine;
+    private final String                  machineName;
     private final CommandExecutor         commandExecutor;
     private final ExecAgentCommandManager execAgentCommandManager;
 
@@ -79,14 +78,14 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                                          EventBus eventBus,
                                          ExecAgentCommandManager execAgentCommandManager,
                                          @Assisted CommandImpl command,
-                                         @Assisted MachineImpl machine,
+                                         @Assisted String machineName,
                                          AppContext appContext,
                                          EditorAgent editorAgent) {
         this.view = view;
         this.resources = resources;
         this.execAgentCommandManager = execAgentCommandManager;
         this.command = command;
-        this.machine = machine;
+        this.machineName = machineName;
         this.eventBus = eventBus;
         this.commandExecutor = commandExecutor;
 
@@ -179,7 +178,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
             pid = event.getPid();
 
-            eventBus.fireEvent(new ProcessStartedEvent(pid, machine));
+            eventBus.fireEvent(new ProcessStartedEvent(pid, machineName));
         };
     }
 
@@ -190,7 +189,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
             view.enableStopButton(false);
             view.toggleScrollToEndButton(false);
 
-            eventBus.fireEvent(new ProcessFinishedEvent(pid, machine));
+            eventBus.fireEvent(new ProcessFinishedEvent(pid, machineName));
         };
     }
 
@@ -211,7 +210,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
     @Override
     public void stop() {
-        execAgentCommandManager.killProcess(machine.getName(), pid);
+        execAgentCommandManager.killProcess(machineName, pid);
     }
 
     @Override
@@ -227,10 +226,10 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     @Override
     public void reRunProcessButtonClicked() {
         if (isFinished()) {
-            commandExecutor.executeCommand(command, machine);
+            commandExecutor.executeCommand(command, machineName);
         } else {
-            execAgentCommandManager.killProcess(machine.getName(), pid)
-                                   .onSuccess(() -> commandExecutor.executeCommand(command, machine));
+            execAgentCommandManager.killProcess(machineName, pid)
+                                   .onSuccess(() -> commandExecutor.executeCommand(command, machineName));
         }
     }
 

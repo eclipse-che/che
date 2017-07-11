@@ -71,7 +71,7 @@ public class RunCommandActionTest {
         when(event.getParameters()).thenReturn(Collections.singletonMap("otherParam", "MCI"));
         action.actionPerformed(event);
 
-        verify(commandExecutor, never()).executeCommand(any(CommandImpl.class), any(MachineImpl.class));
+        verify(commandExecutor, never()).executeCommand(any(CommandImpl.class), anyString());
     }
 
     @Test
@@ -85,7 +85,7 @@ public class RunCommandActionTest {
 
         action.actionPerformed(event);
 
-        verify(commandExecutor).executeCommand(eq(command), any(MachineImpl.class));
+        verify(commandExecutor).executeCommand(eq(command), anyString());
     }
 
 }

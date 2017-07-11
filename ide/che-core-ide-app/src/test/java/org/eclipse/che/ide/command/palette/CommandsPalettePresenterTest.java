@@ -137,6 +137,7 @@ public class CommandsPalettePresenterTest {
 
         Map<String, MachineImpl> machines = new HashMap<>();
         MachineImpl chosenMachine = mock(MachineImpl.class);
+        when(chosenMachine.getName()).thenReturn("machine_id");
         machines.put("machine_id", chosenMachine);
         when(workspaceRuntime.getMachines()).thenReturn(machines);
 
@@ -154,6 +155,6 @@ public class CommandsPalettePresenterTest {
         verify(machinePromise).then(selectedMachineCaptor.capture());
         selectedMachineCaptor.getValue().apply(chosenMachine);
 
-        verify(commandExecutor).executeCommand(eq(commandToExecute), eq(chosenMachine));
+        verify(commandExecutor).executeCommand(eq(commandToExecute), eq("machine_id"));
     }
 }

@@ -61,6 +61,6 @@ public class RunCommandAction extends Action {
 
         final WorkspaceImpl workspace = appContext.getWorkspace();
         workspace.getDevMachine().ifPresent(m -> commandManager.getCommand(name)
-                                                               .ifPresent(command -> commandExecutor.executeCommand(command, m)));
+                                                               .ifPresent(command -> commandExecutor.executeCommand(command, m.getName())));
     }
 }

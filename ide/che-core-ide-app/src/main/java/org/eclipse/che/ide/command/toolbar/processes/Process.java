@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.processes;
 
-import org.eclipse.che.ide.api.workspace.model.MachineImpl;
-
 /** Model of the process. */
 public interface Process {
 
@@ -23,5 +21,5 @@ public interface Process {
 
     boolean isAlive();
 
-    MachineImpl getMachine();
+    String getMachineName();
 }
