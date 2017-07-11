@@ -79,21 +79,4 @@ public class AvailableDriversService {
         }
         return newDto(DriversDTO.class).withDrivers(drivers);
     }
-
-
-
-
-    public String getAvailableDatabaseDriversT() {
-        final Enumeration<Driver> loadedDrivers = DriverManager.getDrivers();
-        final List<String> drivers = new ArrayList<>();
-        while (loadedDrivers.hasMoreElements()) {
-            Driver driver = loadedDrivers.nextElement();
-            drivers.add(driver.getClass().getCanonicalName());
-        }
-        final DriversDTO driversDTO = DtoFactory.getInstance().createDto(DriversDTO.class).withDrivers(drivers);
-        final String msg = DtoFactory.getInstance().toJson(driversDTO);
-        LOG.debug(msg);
-//        return msg;
-        return String.valueOf(drivers.size());
-    }
 }
