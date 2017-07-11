@@ -95,10 +95,10 @@ public class CurrentWorkspaceManager {
         Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
 
         // TODO (spi ide): consider shared constants for the endpoints
-        subscriptionManagerClient.subscribe("ws-master", "workspace/statusChanged", scope);
-        subscriptionManagerClient.subscribe("ws-master", "machine/statusChanged", scope);
-        subscriptionManagerClient.subscribe("ws-master", "server/statusChanged", scope);
-        subscriptionManagerClient.subscribe("ws-master-output", "machine/log", scope);
-        subscriptionManagerClient.subscribe("ws-master-output", "installer/log", scope);
+        subscriptionManagerClient.subscribe("workspace/statuses", "workspace/statusChanged", scope);
+        subscriptionManagerClient.subscribe("workspace/statuses", "machine/statusChanged", scope);
+        subscriptionManagerClient.subscribe("workspace/statuses", "server/statusChanged", scope);
+        subscriptionManagerClient.subscribe("workspace/output", "machine/log", scope);
+        subscriptionManagerClient.subscribe("workspace/output", "installer/log", scope);
     }
 }

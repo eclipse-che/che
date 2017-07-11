@@ -20,6 +20,7 @@ import static com.google.gwt.user.client.Window.Location.getHost;
 import static com.google.gwt.user.client.Window.Location.getProtocol;
 import static java.util.Collections.singletonMap;
 
+/** Initializes JSON-RPC connection to the workspace master for listening to the output of intallers, machines. */
 @Singleton
 public class WsMasterOutputJsonRpcInitializer {
 
@@ -37,7 +38,7 @@ public class WsMasterOutputJsonRpcInitializer {
     private void initialize() {
         String workspaceMasterUrl = getWsMasterURL();
 
-        initializer.initialize("ws-master-output", singletonMap("url", workspaceMasterUrl));
+        initializer.initialize("workspace/output", singletonMap("url", workspaceMasterUrl));
     }
 
     private String getWsMasterURL() {
@@ -49,6 +50,6 @@ public class WsMasterOutputJsonRpcInitializer {
     }
 
     public void terminate() {
-        initializer.terminate("ws-master-output");
+        initializer.terminate("workspace/output");
     }
 }

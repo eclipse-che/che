@@ -32,11 +32,11 @@ class WorkspaceEventsUnsubscriber {
             Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
 
             // TODO (spi ide): consider shared constants for the endpoints
-            subscriptionManagerClient.unSubscribe("ws-master", "workspace/statusChanged", scope);
-            subscriptionManagerClient.unSubscribe("ws-master", "machine/statusChanged", scope);
-            subscriptionManagerClient.unSubscribe("ws-master", "server/statusChanged", scope);
-            subscriptionManagerClient.unSubscribe("ws-master-output", "machine/log", scope);
-            subscriptionManagerClient.unSubscribe("ws-master-output", "installer/log", scope);
+            subscriptionManagerClient.unSubscribe("workspace/statuses", "workspace/statusChanged", scope);
+            subscriptionManagerClient.unSubscribe("workspace/statuses", "machine/statusChanged", scope);
+            subscriptionManagerClient.unSubscribe("workspace/statuses", "server/statusChanged", scope);
+            subscriptionManagerClient.unSubscribe("workspace/output", "machine/log", scope);
+            subscriptionManagerClient.unSubscribe("workspace/output", "installer/log", scope);
         });
     }
 }
