@@ -330,15 +330,15 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         if (selectedTreeNode.getType() == MACHINE_NODE) {
-            MachineImpl machine = (MachineImpl)selectedTreeNode.getData();
-            onAddTerminal(machine.getName(), source);
+            String machineName = (String)selectedTreeNode.getData();
+            onAddTerminal(machineName, source);
             return;
         }
 
         ProcessTreeNode parent = selectedTreeNode.getParent();
         if (parent != null && parent.getType() == MACHINE_NODE) {
-            MachineImpl machine = (MachineImpl)parent.getData();
-            onAddTerminal(machine.getName(), source);
+            String machineName = (String)parent.getData();
+            onAddTerminal(machineName, source);
         }
     }
 
@@ -346,15 +346,16 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      * Selects dev machine.
      */
     public void selectDevMachine() {
-        for (final ProcessTreeNode processTreeNode : machineNodes.values()) {
-            if (processTreeNode.getData() instanceof MachineImpl) {
-                final MachineImpl machine = (MachineImpl)processTreeNode.getData();
-                    if (machine.getServerByName(WSAGENT_REFERENCE).isPresent()) {
-                    view.selectNode(processTreeNode);
-                    notifyTreeNodeSelected(processTreeNode);
-                }
-            }
-        }
+        // TODO (spi ide)
+//        for (final ProcessTreeNode processTreeNode : machineNodes.values()) {
+//            if (processTreeNode.getData() instanceof MachineImpl) {
+//                final MachineImpl machine = (MachineImpl)processTreeNode.getData();
+//                    if (machine.getServerByName(WSAGENT_REFERENCE).isPresent()) {
+//                    view.selectNode(processTreeNode);
+//                    notifyTreeNodeSelected(processTreeNode);
+//                }
+//            }
+//        }
     }
 
     /** Set active output of the process with the given PID. */
@@ -855,12 +856,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         if (runtime == null) {
             return null;
         }
-        Optional<MachineImpl> machineByName = runtime.getMachineByName(machineName);
-        if (!machineByName.isPresent()) {
-            return null;
-        }
 
-        final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machineByName.get(), null, children);
+        final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machineName, null, children);
+        // TODO (spi ide)
         newMachineNode.setRunning(/*RUNNING == machine.getStatus()*/true);
         newMachineNode.setHasTerminalAgent(hasAgent(machineName, TERMINAL_AGENT) || hasTerminal(machineName));
         newMachineNode.setHasSSHAgent(hasAgent(machineName, SSH_AGENT));
@@ -1261,32 +1259,33 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onDownloadWorkspaceOutput(DownloadWorkspaceOutputEvent event) {
-        MachineImpl devMachine = null;
-
-        for (ProcessTreeNode machineNode : machineNodes.values()) {
-            if (!(machineNode.getData() instanceof MachineImpl)) {
-                continue;
-            }
-
-            MachineImpl machine = (MachineImpl)machineNode.getData();
-
-            if (!machine.getServerByName(WSAGENT_REFERENCE).isPresent()) {
-                continue;
-            }
-
-            devMachine = machine;
-            break;
-        }
-
-        if (devMachine == null) {
-            return;
-        }
-
-        String fileName = appContext.getWorkspace().getNamespace() + "-" + appContext.getWorkspace().getConfig().getName() +
-                          " " + DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) +
-                          ".log";
-
-        download(fileName, getText(devMachine.getName()));
+        // TODO (spi ide)
+//        MachineImpl devMachine = null;
+//
+//        for (ProcessTreeNode machineNode : machineNodes.values()) {
+//            if (!(machineNode.getData() instanceof MachineImpl)) {
+//                continue;
+//            }
+//
+//            MachineImpl machine = (MachineImpl)machineNode.getData();
+//
+//            if (!machine.getServerByName(WSAGENT_REFERENCE).isPresent()) {
+//                continue;
+//            }
+//
+//            devMachine = machine;
+//            break;
+//        }
+//
+//        if (devMachine == null) {
+//            return;
+//        }
+//
+//        String fileName = appContext.getWorkspace().getNamespace() + "-" + appContext.getWorkspace().getConfig().getName() +
+//                          " " + DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) +
+//                          ".log";
+//
+//        download(fileName, getText(devMachine.getName()));
     }
 
     @Override

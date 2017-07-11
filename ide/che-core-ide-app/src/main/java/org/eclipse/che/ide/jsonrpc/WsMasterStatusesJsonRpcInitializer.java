@@ -23,16 +23,15 @@ import static com.google.gwt.user.client.Window.Location.getHost;
 import static com.google.gwt.user.client.Window.Location.getProtocol;
 import static java.util.Collections.singletonMap;
 
-/**
- * Initializes JSON-RPC connection to workspace master
- */
+/** Initializes JSON-RPC connection to the workspace master for listening to the statuses of workspaces, machines, servers. */
 @Singleton
-public class WorkspaceMasterJsonRpcInitializer {
+public class WsMasterStatusesJsonRpcInitializer {
+
     private final JsonRpcInitializer initializer;
     private final AppContext         appContext;
 
     @Inject
-    public WorkspaceMasterJsonRpcInitializer(JsonRpcInitializer initializer, AppContext appContext) {
+    public WsMasterStatusesJsonRpcInitializer(JsonRpcInitializer initializer, AppContext appContext) {
         this.initializer = initializer;
         this.appContext = appContext;
 
@@ -48,11 +47,11 @@ public class WorkspaceMasterJsonRpcInitializer {
     }-*/;
 
     public void initialize() {
-        Log.debug(WorkspaceMasterJsonRpcInitializer.class, "Initializing JSON RPC websocket connection to workspace master");
+        Log.debug(WsMasterStatusesJsonRpcInitializer.class, "Initializing JSON RPC websocket connection to workspace master");
         try {
             internalInitialize();
         } catch (Exception e) {
-            Log.debug(WorkspaceMasterJsonRpcInitializer.class, "Failed, will try one more time.");
+            Log.debug(WsMasterStatusesJsonRpcInitializer.class, "Failed, will try one more time.");
             new Timer() {
                 @Override
                 public void run() {
@@ -77,7 +76,7 @@ public class WorkspaceMasterJsonRpcInitializer {
             workspaceMasterUrl = getWsMasterURL();
         }
 
-        initializer.initialize("ws-master", singletonMap("url", workspaceMasterUrl));
+        initializer.initialize("workspace/statuses", singletonMap("url", workspaceMasterUrl));
     }
 
     private String getWsMasterURL() {
@@ -89,6 +88,6 @@ public class WorkspaceMasterJsonRpcInitializer {
     }
 
     public void terminate() {
-        initializer.terminate("ws-master");
+        initializer.terminate("workspace/statuses");
     }
 }

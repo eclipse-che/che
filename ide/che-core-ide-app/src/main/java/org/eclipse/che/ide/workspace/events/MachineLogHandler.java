@@ -17,21 +17,17 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
-import org.eclipse.che.ide.util.loging.Log;
 
-// TODO (spi ide): rework according to the new messages format
 @Singleton
-class EnvironmentOutputHandler {
+class MachineLogHandler {
 
     @Inject
-    EnvironmentOutputHandler(RequestHandlerConfigurator configurator, EventBus eventBus) {
+    MachineLogHandler(RequestHandlerConfigurator configurator, EventBus eventBus) {
         configurator.newConfiguration()
-                    .methodName("event:environment-output:message")
+                    .methodName("machine/log")
                     .paramsAsDto(MachineLogEvent.class)
                     .noResult()
-                    .withBiConsumer((endpointId, log) -> {
-                        Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
-                        eventBus.fireEvent(new EnvironmentOutputEvent(log.getText(), log.getMachineName()));
-                    });
+                    .withBiConsumer((endpointId, log) -> eventBus.fireEvent(new EnvironmentOutputEvent(log.getText(),
+                                                                                                       log.getMachineName())));
     }
 }

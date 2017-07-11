@@ -27,7 +27,8 @@ public class JsonRpcModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        bind(WorkspaceMasterJsonRpcInitializer.class).asEagerSingleton();
+        bind(WsMasterStatusesJsonRpcInitializer.class).asEagerSingleton();
+        bind(WsMasterOutputJsonRpcInitializer.class).asEagerSingleton();
         bind(WsAgentJsonRpcInitializer.class).asEagerSingleton();
         bind(ExecAgentJsonRpcInitializer.class).asEagerSingleton();
 

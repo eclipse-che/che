@@ -53,10 +53,10 @@ public class ProcessTreeNode {
 
         switch (type) {
             case MACHINE_NODE:
-                if (data instanceof MachineImpl) {
-                    MachineImpl machine = (MachineImpl) data;
-                    id = machine.getName();
-                    displayName = machine.getName();
+                if (data instanceof String) {
+                    String machineName = (String) data;
+                    id = machineName;
+                    displayName = machineName;
                 } else {
                     throw new IllegalArgumentException("Data type is not a machine setting default value");
                 }

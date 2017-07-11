@@ -22,21 +22,21 @@ import java.util.Map;
 
 import static java.util.Collections.singletonMap;
 
-/**
- * Unsubscribes from receiving notifications about changing statuses
- * of the workspace, machines and servers when workspace is stopped.
- */
+/** Unsubscribes from receiving JSON-RPC notifications from WS-master when workspace is stopped. */
 @Singleton
 class WorkspaceEventsUnsubscriber {
 
     @Inject
     WorkspaceEventsUnsubscriber(EventBus eventBus, AppContext appContext, SubscriptionManagerClient subscriptionManagerClient) {
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> {
-            final Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
+            Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
 
-            subscriptionManagerClient.unSubscribe("ws-master", "workspace/statusChanged", scope);
-            subscriptionManagerClient.unSubscribe("ws-master", "machine/statusChanged", scope);
-            subscriptionManagerClient.unSubscribe("ws-master", "server/statusChanged", scope);
+            // TODO (spi ide): consider shared constants for the endpoints
+            subscriptionManagerClient.unSubscribe("workspace/statuses", "workspace/statusChanged", scope);
+            subscriptionManagerClient.unSubscribe("workspace/statuses", "machine/statusChanged", scope);
+            subscriptionManagerClient.unSubscribe("workspace/statuses", "server/statusChanged", scope);
+            subscriptionManagerClient.unSubscribe("workspace/output", "machine/log", scope);
+            subscriptionManagerClient.unSubscribe("workspace/output", "installer/log", scope);
         });
     }
 }
