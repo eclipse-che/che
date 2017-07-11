@@ -37,6 +37,9 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 @Listeners(value = MockitoTestNGListener.class)
+/**
+ * Tests for {@link WorkspaceActivityNotifier}
+ */
 public class WorkspaceActivityManagerTest {
     private static final long EXPIRE_PERIOD_MS = 60_000L;//1 minute
 

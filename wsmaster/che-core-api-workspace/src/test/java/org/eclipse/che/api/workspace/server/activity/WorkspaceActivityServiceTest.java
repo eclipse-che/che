@@ -43,6 +43,8 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 /**
+ * Tests for {@link WorkspaceActivityService}
+ *
  * @author Mihail Kuznyetsov
  */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
