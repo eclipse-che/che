@@ -1,0 +1,75 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<md-content md-scroll-y flex layout="column" md-theme="maincontent-theme" class="workspace-machines">
+  <div class="warning-message" ng-hide="workspaceMachinesController.isCompose()">
+    <span>Add another machine by changing the environment type to <b>compose</b></span>
+  </div>
+  <che-list-header che-add-button-title="Add machine"
+                   che-add-button-="{{workspaceMachinesController.workspaceCreationLink}}"
+                   che-hide-add="!workspaceMachinesController.isCompose()"
+                   che-on-add="workspaceMachinesController.editMachine()"
+                   che-delete-button-title="Delete"
+                   che-on-delete="workspaceMachinesController.deleteSelectedMachines()"
+                   che-hide-delete="workspaceMachinesController.cheListHelper.isNoItemSelected"
+                   che-hide-header="workspaceMachinesController.cheListHelper.visibleItemsNumber === 0">
+    <div flex="100"
+         layout="row"
+         layout-align="start stretch"
+         class="che-list-item-row">
+      <!-- Checkbox -->
+      <div layout="column" layout-align="center center" class="che-list-item-checkbox">
+        <md-checkbox aria-label="Machines-list-checkbox"
+                     ng-show="workspaceMachinesController.cheListHelper.getVisibleItems().length > 1"
+                     ng-checked="workspaceMachinesController.cheListHelper.areAllItemsSelected === true"
+                     ng-click="workspaceMachinesController.cheListHelper.changeBulkSelection()"></md-checkbox>
+      </div>
+      <div flex layout="row" layout-align="start center" class="che-list-item-details">
+        <che-list-header-column flex="30" layout="column" layout-align="center start"
+                                che-sort-value="workspaceMachinesController.orderBy"
+                                che-sort-item="name"
+                                che-column-title="Name"></che-list-header-column>
+
+        <che-list-header-column flex="30" layout="column" layout-align="center start"
+                                che-sort-value="workspaceMachinesController.orderBy"
+                                che-sort-item="image"
+                                che-column-title="Image"></che-list-header-column>
+
+        <che-list-header-column flex="10" layout="column" layout-align="center start"
+                                che-sort-value="workspaceMachinesController.orderBy"
+                                che-sort-item="isDev"
+                                che-column-title="DEV"></che-list-header-column>
+
+        <che-list-header-column flex="20" layout="column" layout-align="center start"
+                                che-sort-value="workspaceMachinesController.orderBy"
+                                che-sort-item="memoryLimitGBytes"
+                                che-column-title="RAM"></che-list-header-column>
+
+        <che-list-header-column flex="10" layout="column" layout-align="center end"
+                                che-column-title="Actions"></che-list-header-column>
+      </div>
+
+    </div>
+  </che-list-header>
+  <!-- Machines list -->
+  <che-list class="workspace-machines-list">
+    <workspace-machine-item
+      ng-repeat="machine in workspaceMachinesController.cheListHelper.getVisibleItems() | orderBy: [workspaceMachinesController.orderBy, 'name']"
+      machine="machine"
+      page-url="{{workspaceMachinesController.absUrl}}"
+      machine-dev-on-change="workspaceMachinesController.changeDevMachine(name)"
+      edit-machine="workspaceMachinesController.editMachine(name)"
+      on-ram-change="workspaceMachinesController.onRamChange(name, memoryLimitGBytes)"
+      che-list-helper="workspaceMachinesController.cheListHelper"
+      delete-machine="workspaceMachinesController.deleteMachine(name)"></workspace-machine-item>
+  </che-list>
+</md-content>

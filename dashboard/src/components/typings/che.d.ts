@@ -122,7 +122,7 @@ declare namespace che {
     config: IWorkspaceConfig;
     runtime?: IWorkspaceRuntime;
     isLocked?: boolean;
-    usedResources: string;
+    usedResources?: string;
   }
 
   export interface IWorkspaceConfig {

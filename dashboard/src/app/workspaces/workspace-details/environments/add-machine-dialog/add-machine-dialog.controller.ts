@@ -57,7 +57,7 @@ export class AddMachineDialogController {
       lineWrapping: true,
       lineNumbers: true,
       matchBrackets: true,
-      mode: 'compose',
+      mode: 'text/x-yaml',
       onLoad: (editor: any) => {
         this.$timeout(() => {
           editor.refresh();

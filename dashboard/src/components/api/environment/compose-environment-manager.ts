@@ -52,6 +52,8 @@ import {ComposeParser, IComposeRecipe} from './compose-parser';
  *  @author Ann Shumilova
  */
 
+const COMPOSE = 'compose';
+
 export class ComposeEnvironmentManager extends EnvironmentManager {
   parser: ComposeParser;
 
@@ -59,6 +61,10 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
     super($log);
 
     this.parser = new ComposeParser();
+  }
+
+  get type(): string {
+    return COMPOSE;
   }
 
   get editorMode(): string {
@@ -108,8 +114,8 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    */
   getMachines(environment: che.IWorkspaceEnvironment, runtime?: any): IEnvironmentManagerMachine[] {
     let recipe: any = null,
-        machines: IEnvironmentManagerMachine[] = super.getMachines(environment, runtime),
-        machineNames: string[] = [];
+      machines: IEnvironmentManagerMachine[] = super.getMachines(environment, runtime),
+      machineNames: string[] = [];
 
     if (environment.recipe.content) {
       recipe = this._parseRecipe(environment.recipe.content);
@@ -128,7 +134,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
       });
 
       if (!machine) {
-        machine = { name: machineName };
+        machine = {name: machineName};
         machines.push(machine);
       }
 
@@ -271,7 +277,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    */
   renameMachine(environment: che.IWorkspaceEnvironment, oldName: string, newName: string): che.IWorkspaceEnvironment {
     try {
-      let recipe: IComposeRecipe = this._parseRecipe(environment.recipe.content);
+      const recipe: IComposeRecipe = this._parseRecipe(environment.recipe.content);
 
       // fix relations to other machines in recipe
       Object.keys(recipe.services).forEach((serviceName: string) => {
@@ -280,21 +286,21 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
         }
 
         // fix 'depends_on'
-        let dependsOn = recipe.services[serviceName].depends_on || [],
-            index = dependsOn.indexOf(oldName);
+        const dependsOn = recipe.services[serviceName].depends_on || [],
+          index = dependsOn.indexOf(oldName);
         if (index > -1) {
           dependsOn.splice(index, 1);
           dependsOn.push(newName);
         }
 
         // fix 'links'
-        let links = recipe.services[serviceName].links || [],
-            re = new RegExp('^' + oldName + '(?:$|:(.+))');
+        const links = recipe.services[serviceName].links || [],
+          re = new RegExp('^' + oldName + '(?:$|:(.+))');
         for (let i = 0; i < links.length; i++) {
           if (re.test(links[i])) {
-            let match = links[i].match(re),
-                alias = match[1] || '',
-                newLink = alias ? newName + ':' + alias : newName;
+            const match = links[i].match(re),
+              alias = match[1] || '',
+              newLink = alias ? newName + ':' + alias : newName;
             links.splice(i, 1);
             links.push(newLink);
 
@@ -321,6 +327,76 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
   }
 
   /**
+   * Create a new default machine.
+   *
+   * @param {che.IWorkspaceEnvironment} environment
+   *
+   * @return {IEnvironmentManagerMachine}
+   */
+  createNewDefaultMachine(environment: che.IWorkspaceEnvironment): IEnvironmentManagerMachine {
+    const usedMachinesNames: Array<string> = environment && environment.machines ? Object.keys(environment.machines) : [];
+
+    let machineName = 'new-machine';
+    for (let pos: number = 1; pos < 1000; pos++) {
+      if (usedMachinesNames.indexOf(machineName + pos.toString()) === -1) {
+        machineName += pos.toString();
+        break;
+      }
+    }
+
+    const newDefaultMachine: IEnvironmentManagerMachine = {
+      'name': machineName,
+      'agents': [],
+      'attributes': {
+        memoryLimitBytes: 2147483648
+      },
+      'recipe': jsyaml.load(`image: codenvy/ubuntu_jdk8\nmem_limit: 2147483648\n`)
+    };
+    newDefaultMachine.agents.push(this.SSH_AGENT_NAME);
+    newDefaultMachine.agents.push(this.TERMINAL_AGENT_NAME);
+
+    return newDefaultMachine;
+  }
+
+  /**
+   * Add machine.
+   *
+   * @param {che.IWorkspaceEnvironment} environment
+   * @param {IEnvironmentManagerMachine} machine
+   *
+   * @return {che.IWorkspaceEnvironment}
+   */
+  addMachine(environment: che.IWorkspaceEnvironment, machine: IEnvironmentManagerMachine): che.IWorkspaceEnvironment {
+    if (!machine || !machine.name || !machine.recipe) {
+      this.$log.error('EnvironmentManager: cannot add machine.');
+      return environment;
+    }
+
+    machine = angular.copy(machine);
+
+    const machineRecipe = machine.recipe;
+    delete machine.recipe;
+    const machineName = machine.name;
+    delete machine.name;
+
+    machine.agents = machine.agents ? machine.agents : [];
+    if (machine.agents.indexOf(this.SSH_AGENT_NAME) < 0) {
+      machine.agents.push(this.SSH_AGENT_NAME);
+    }
+    if (machine.agents.indexOf(this.TERMINAL_AGENT_NAME) < 0) {
+      machine.agents.push(this.TERMINAL_AGENT_NAME);
+    }
+
+    environment.machines[machineName] = machine;
+
+    const recipe: IComposeRecipe = this._parseRecipe(environment.recipe.content);
+    angular.extend(recipe.services, {[machineName]: machineRecipe});
+    environment.recipe.content = this._stringifyRecipe(recipe);
+
+    return environment;
+  }
+
+  /**
    * Removes machine.
    *
    * @param {che.IWorkspaceEnvironment} environment
@@ -339,7 +415,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
 
         // fix 'depends_on'
         let dependsOn = recipe.services[serviceName].depends_on || [],
-            index = dependsOn.indexOf(name);
+          index = dependsOn.indexOf(name);
         if (index > -1) {
           dependsOn.splice(index, 1);
           if (dependsOn.length === 0) {
@@ -349,7 +425,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
 
         // fix 'links'
         let links = recipe.services[serviceName].links || [],
-            re = new RegExp('^' + name + '(?:$|:(.+))');
+          re = new RegExp('^' + name + '(?:$|:(.+))');
         for (let i = 0; i < links.length; i++) {
           if (re.test(links[i])) {
             links.splice(i, 1);

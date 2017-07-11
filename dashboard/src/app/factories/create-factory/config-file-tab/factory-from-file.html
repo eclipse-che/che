@@ -22,7 +22,7 @@
     <div layout="row">
       <button ng-disabled="factoryFromFileCtrl.uploader.queue.length > 0 || factoryFromFileCtrl.uploader.isUploading" tabindex="0"
               md-theme="default" ng-click="clickUpload()"
-              class="md-accent md-raised md-hue-2 md-button md-default-theme">
+              class="md-accent md-raised md-hue-2 md-button">
         <span class="ng-scope">Upload file</span>
       </button>
       <input type="file" accept="application/json" uploader="factoryFromFileCtrl.uploader" nv-file-select/>

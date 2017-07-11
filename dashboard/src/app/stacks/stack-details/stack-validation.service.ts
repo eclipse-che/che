@@ -32,6 +32,18 @@ export class StackValidationService {
     this.dockerfileParser = new DockerfileParser();
   }
 
+  get COMPOSE(): string {
+    return COMPOSE;
+  }
+
+  get DOCKERFILE(): string {
+    return DOCKERFILE;
+  }
+
+  get DOCKERIMAGE(): string {
+    return DOCKERIMAGE;
+  }
+
   /**
    * Return result of recipe validation.
    * @param stack {che.IStack}

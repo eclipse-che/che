@@ -39,9 +39,13 @@ export class CheEditorController {
    */
   private editorState: IEditorState = {isValid: true, errors: []};
   /**
-   * Custom validator.
+   * Custom validator callback.
    */
-  private customValidator: Function;
+  private validator: Function;
+  /**
+   * On content change callback.
+   */
+  private onContentChange: Function;
   /**
    * Editor mode.
    */
@@ -73,8 +77,8 @@ export class CheEditorController {
               }
               return {id: mark.id, message: message};
             });
-            if (angular.isFunction(this.customValidator)) {
-              const customValidatorState: IEditorState = this.customValidator();
+            if (angular.isFunction(this.validator)) {
+              const customValidatorState: IEditorState = this.validator();
               if (customValidatorState && angular.isArray(customValidatorState.errors)) {
                 customValidatorState.errors.forEach((error: string) => {
                   this.editorState.errors.push(error);
@@ -85,6 +89,9 @@ export class CheEditorController {
               this.editorState.errors.push(editorError.message);
             });
             this.editorState.isValid = this.editorState.errors.length === 0;
+            if (angular.isFunction(this.onContentChange)) {
+              this.onContentChange({editorState: this.editorState});
+            }
           }, 1000);
         });
       }

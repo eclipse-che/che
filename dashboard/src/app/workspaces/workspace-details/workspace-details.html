@@ -24,8 +24,31 @@
            md-selected="workspaceDetailsController.selectedTabIndex"
            md-no-ink-bar>
 
+    <!-- Overview tab -->
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Overview);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Overview</span>
+      </md-tab-label>
+      <md-tab-body>
+
+
+
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Machines tab -->
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Machines);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Machines</span>
+      </md-tab-label>
+      <md-tab-body>
+        <workspace-machines workspace-details="workspaceDetailsController.workspaceDetails"
+                            workspace-on-change="workspaceDetailsController.switchEditMode()"></workspace-machines>
+      </md-tab-body>
+    </md-tab>
+
     <!-- Settings Tab -->
-    <md-tab>
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Settings);">
       <md-tab-label>
         <span class="che-tab-label-title">Settings</span>
       </md-tab-label>
@@ -43,7 +66,7 @@
                            che-place-holder="Name of the workspace"
                            aria-label="Name of the workspace"
                            ng-model="workspaceDetailsController.newName"
-                           ng-change="workspaceDetailsController.updateName(workspaceNameForm)"
+                           ng-change="workspaceNameForm.$valid && workspaceDetailsController.updateName()"
                            ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 }, allowInvalid: true }"
                            required
                            custom-validator="workspaceDetailsController.isNameUnique($value)"
@@ -96,20 +119,6 @@
                    ng-show="(workspaceDetailsController.errorMessage)">
                 {{workspaceDetailsController.errorMessage}}
               </div>
-              <div layout="row" class="workspace-details-action-buttons">
-                <div>
-                  <che-button-default ng-disabled="(workspaceDetailsController.isCreationFlow)"
-                                      ng-show="(workspaceDetailsController.getWorkspaceStatus() !== 'RUNNING' && workspaceDetailsController.getWorkspaceStatus() !== 'STOPPING' && workspaceDetailsController.getWorkspaceStatus() !== 'SNAPSHOTTING') && workspaceDetailsController.getWorkspaceStatus() !== 'STARTING'"
-                                      che-button-title="Run" name="runButton"
-                                      ng-click="workspaceDetailsController.runWorkspace()"></che-button-default>
-                  <che-button-default
-                    ng-disabled="(workspaceDetailsController.isCreationFlow || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING' || workspaceDetailsController.getWorkspaceStatus() === 'SNAPSHOTTING')"
-                    ng-show="(workspaceDetailsController.getWorkspaceStatus() === 'RUNNING' || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING' || workspaceDetailsController.getWorkspaceStatus() === 'SNAPSHOTTING') || workspaceDetailsController.getWorkspaceStatus() === 'STARTING'"
-                    che-button-title="{{workspaceDetailsController.getAutoSnapshot() || workspaceDetailsController.getWorkspaceStatus() === 'STARTING' ? 'Stop' : 'Stop without snapshot'}}"
-                    name="stopButton"
-                    ng-click="workspaceDetailsController.stopWorkspace()"></che-button-default>
-                </div>
-              </div>
             </div>
           </che-label-container>
 
@@ -141,7 +150,7 @@
     </md-tab>
 
     <!-- Config tab -->
-    <md-tab>
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Config);">
       <md-tab-label>
         <span class="che-tab-label-title">Config</span>
       </md-tab-label>
@@ -150,7 +159,7 @@
           <ng-form name="workspaceConfigForm">
             <che-workspace-config-import
               ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Config, workspaceConfigForm)"
-              workspace-config="workspaceDetailsController.copyWorkspaceDetails.config"
+              workspace-config="workspaceDetailsController.workspaceDetails.config"
               workspace-config-on-change="workspaceDetailsController.updateWorkspaceConfigImport(config)"></che-workspace-config-import>
           </ng-form>
         </che-label-container>
@@ -158,7 +167,7 @@
     </md-tab>
 
     <!-- Runtime Tab -->
-    <md-tab>
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Runtime);">
       <md-tab-label>
         <span class="che-tab-label-title">Runtime</span>
       </md-tab-label>
@@ -166,12 +175,12 @@
         <ng-form name="workspaceRuntimeForm">
           <workspace-environments
             ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Runtime, workspaceRuntimeForm)"
-            workspace-runtime="workspaceDetailsController.copyWorkspaceDetails.runtime"
+            workspace-runtime="workspaceDetailsController.workspaceDetails.runtime"
             workspace-creation-flow="workspaceDetailsController.isCreationFlow"
             workspace-name="workspaceDetailsController.newName"
             stack-id="workspaceDetailsController.stackId"
-            environment-name="workspaceDetailsController.copyWorkspaceDetails.config.defaultEnv"
-            workspace-config="workspaceDetailsController.copyWorkspaceDetails.config"
+            environment-name="workspaceDetailsController.workspaceDetails.config.defaultEnv"
+            workspace-config="workspaceDetailsController.workspaceDetails.config"
             workspace-imported-recipe="workspaceDetailsController.workspaceImportedRecipe"
             machines-view-status="workspaceDetailsController.machinesViewStatus"
             environment-on-change="workspaceDetailsController.updateWorkspaceConfigEnvironment()"></workspace-environments>
@@ -181,7 +190,9 @@
 
     <!-- Other tabs -->
     <md-tab ng-if="workspaceDetailsController.isCreationFlow === false"
-            ng-repeat="section in workspaceDetailsController.getPages()">
+            ng-init="workspaceDetailsController.addTab(section.title);"
+            md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab[section.title]);"
+            ng-repeat="section in workspaceDetailsController.getPages() track by $index" >
       <md-tab-label>
         <span class="che-tab-label-title">{{section.title}}</span>
       </md-tab-label>

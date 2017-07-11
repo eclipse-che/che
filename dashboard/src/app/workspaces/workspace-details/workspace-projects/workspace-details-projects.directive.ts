@@ -19,23 +19,33 @@
  * @description
  * <workspace-details-project></workspace-details-projects>` for displaying workspace projects entry.
  *
+ * @param {Function=} get-workspace-status
+ *
  * @usage
- *   <workspace-details-project></workspace-details-project>
+ *   <workspace-details-project get-workspace-status="ctrl.getWorkspaceStatus()"></workspace-details-project>
  *
  * @author Ann Shumilova
  */
-export class WorkspaceDetailsProjects {
+export class WorkspaceDetailsProjects implements ng.IDirective {
+  restrict = 'E';
+  templateUrl = 'app/workspaces/workspace-details/workspace-projects/workspace-details-projects.html';
+
+  controller = 'WorkspaceDetailsProjectsCtrl';
+  controllerAs = 'workspaceDetailsProjectsCtrl';
+
+  bindToController = true;
+
+  scope: {
+    [propName: string]: string
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor () {
-    this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/workspace-details/workspace-projects/workspace-details-projects.html';
-
-    this.controller = 'WorkspaceDetailsProjectsCtrl';
-    this.controllerAs = 'workspaceDetailsProjectsCtrl';
-    this.bindToController = true;
+    this.scope = {
+      getWorkspaceStatus: '&'
+    };
   }
 }

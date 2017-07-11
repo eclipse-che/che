@@ -31,6 +31,7 @@ export class WorkspaceDetailsProjectsCtrl {
   profileCreationDate: any;
   workspace: che.IWorkspace;
   projects: Array<che.IProject>;
+  getWorkspaceStatus: Function;
 
   private $q: ng.IQService;
   private $log: ng.ILogService;
@@ -71,9 +72,7 @@ export class WorkspaceDetailsProjectsCtrl {
     promise.then(() => {
       this.updateProjectsData();
     }, (error: any) => {
-      if (error.status === 304) {
-        this.updateProjectsData();
-      }
+      this.$log.error(error);
     });
   }
 
@@ -149,11 +148,7 @@ export class WorkspaceDetailsProjectsCtrl {
         this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey).then(() => {
           this.updateProjectsData();
         }, (error: any) => {
-          if (error.status === 304) {
-            this.updateProjectsData();
-          } else {
-            this.$log.error(error);
-          }
+          this.$log.error(error);
         });
         if (isError) {
           this.cheNotification.showError('Delete failed.');
