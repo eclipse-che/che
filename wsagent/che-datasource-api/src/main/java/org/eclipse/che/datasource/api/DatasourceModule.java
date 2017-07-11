@@ -9,7 +9,6 @@ import org.eclipse.che.inject.DynaModule;
 public class DatasourceModule extends AbstractModule{
     @Override
     protected void configure() {
-        bind(DatasourceService.class);
         bind(AvailableDriversService.class);
     }
 
