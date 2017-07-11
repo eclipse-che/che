@@ -70,19 +70,14 @@ public class AvailableDriversService {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public String getAvailableDatabaseDrivers() {
+    public DriversDTO getAvailableDatabaseDrivers() {
         final Enumeration<Driver> loadedDrivers = DriverManager.getDrivers();
         final List<String> drivers = new ArrayList<>();
         while (loadedDrivers.hasMoreElements()) {
             Driver driver = loadedDrivers.nextElement();
             drivers.add(driver.getClass().getCanonicalName());
         }
-        try{
-            newDto(DriversDTO.class).withDrivers(drivers);
-            return "ok";
-        }catch (Exception ex){
-            return ex.getLocalizedMessage();
-        }
+        return newDto(DriversDTO.class).withDrivers(drivers);
     }
 
 
