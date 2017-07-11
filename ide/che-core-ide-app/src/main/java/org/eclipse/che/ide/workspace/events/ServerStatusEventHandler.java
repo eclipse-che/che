@@ -37,6 +37,7 @@ import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.STOP
 import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.ide.api.machine.events.WsAgentStateEvent.createWsAgentStartedEvent;
 
 /**
@@ -61,7 +62,7 @@ class ServerStatusEventHandler {
         this.eventBus = eventBus;
 
         configurator.newConfiguration()
-                    .methodName("server/statusChanged")
+                    .methodName(SERVER_STATUS_CHANGED_METHOD)
                     .paramsAsDto(ServerStatusEvent.class)
                     .noResult()
                     .withBiConsumer((endpointId, event) -> {

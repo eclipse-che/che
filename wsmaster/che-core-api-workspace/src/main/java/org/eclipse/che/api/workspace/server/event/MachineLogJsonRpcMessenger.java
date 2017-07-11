@@ -18,6 +18,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Map;
 
+import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
+
 /**
  * Register subscriber on {@link MachineLogEvent machine log event} for resending
  * this type of event via JSON-RPC to clients.
@@ -36,7 +38,7 @@ public class MachineLogJsonRpcMessenger {
 
     @PostConstruct
     private void postConstruct() {
-        subscriptionManager.register("machine/log",
+        subscriptionManager.register(MACHINE_LOG_METHOD,
                                      MachineLogEvent.class,
                                      this::predicate);
     }

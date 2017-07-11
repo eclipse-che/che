@@ -33,6 +33,7 @@ import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
+import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.CREATING;
 import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.DESTROYED;
 import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.RUNNING;
@@ -108,7 +109,7 @@ class MachineStatusEventHandler {
         };
 
         configurator.newConfiguration()
-                    .methodName("machine/statusChanged")
+                    .methodName(MACHINE_STATUS_CHANGED_METHOD)
                     .paramsAsDto(MachineStatusEvent.class)
                     .noResult()
                     .withBiConsumer(operation);

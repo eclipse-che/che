@@ -18,13 +18,15 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 
+import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
+
 @Singleton
 class MachineLogHandler {
 
     @Inject
     MachineLogHandler(RequestHandlerConfigurator configurator, EventBus eventBus) {
         configurator.newConfiguration()
-                    .methodName("machine/log")
+                    .methodName(MACHINE_LOG_METHOD)
                     .paramsAsDto(MachineLogEvent.class)
                     .noResult()
                     .withBiConsumer((endpointId, log) -> eventBus.fireEvent(new EnvironmentOutputEvent(log.getText(),

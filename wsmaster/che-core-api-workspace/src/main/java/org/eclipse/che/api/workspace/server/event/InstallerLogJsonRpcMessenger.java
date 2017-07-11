@@ -18,6 +18,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Map;
 
+import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_LOG_METHOD;
+
 /**
  * Register subscriber on {@link InstallerLogEvent installer log event} for resending
  * this type of event via JSON-RPC to clients.
@@ -36,7 +38,7 @@ public class InstallerLogJsonRpcMessenger {
 
     @PostConstruct
     private void postConstruct() {
-        subscriptionManager.register("installer/log",
+        subscriptionManager.register(INSTALLER_LOG_METHOD,
                                      InstallerLogEvent.class,
                                      this::predicate);
     }

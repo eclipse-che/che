@@ -33,6 +33,11 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
+import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_LOG_METHOD;
+import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
+import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STATUS_CHANGED_METHOD;
 
 /** Performs the routines required to start/stop the current workspace. */
 @Singleton
@@ -95,10 +100,10 @@ public class CurrentWorkspaceManager {
         Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
 
         // TODO (spi ide): consider shared constants for the endpoints
-        subscriptionManagerClient.subscribe("workspace/statuses", "workspace/statusChanged", scope);
-        subscriptionManagerClient.subscribe("workspace/statuses", "machine/statusChanged", scope);
-        subscriptionManagerClient.subscribe("workspace/statuses", "server/statusChanged", scope);
-        subscriptionManagerClient.subscribe("workspace/output", "machine/log", scope);
-        subscriptionManagerClient.subscribe("workspace/output", "installer/log", scope);
+        subscriptionManagerClient.subscribe("workspace/statuses", WORKSPACE_STATUS_CHANGED_METHOD, scope);
+        subscriptionManagerClient.subscribe("workspace/statuses", MACHINE_STATUS_CHANGED_METHOD, scope);
+        subscriptionManagerClient.subscribe("workspace/statuses", SERVER_STATUS_CHANGED_METHOD, scope);
+        subscriptionManagerClient.subscribe("workspace/output", MACHINE_LOG_METHOD, scope);
+        subscriptionManagerClient.subscribe("workspace/output", INSTALLER_LOG_METHOD, scope);
     }
 }

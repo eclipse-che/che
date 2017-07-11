@@ -17,6 +17,8 @@ import org.eclipse.che.api.workspace.shared.dto.event.InstallerLogEvent;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_LOG_METHOD;
+
 /**
  * Defines a JSON-RPC methods for handling machine output.
  *
@@ -36,7 +38,7 @@ public class OutputService {
     @Inject
     public void configureMethods(RequestHandlerConfigurator requestHandler) {
         requestHandler.newConfiguration()
-                      .methodName("installer/log")
+                      .methodName(INSTALLER_LOG_METHOD)
                       .paramsAsDto(InstallerLogEvent.class)
                       .noResult()
                       .withConsumer(this::handleInstallerLog);

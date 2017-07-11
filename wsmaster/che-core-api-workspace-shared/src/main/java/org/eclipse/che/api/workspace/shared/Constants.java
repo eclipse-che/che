@@ -55,5 +55,11 @@ public final class Constants {
     public static final String COMMAND_PREVIEW_URL_ATTRIBUTE_NAME = "previewUrl";
     public static final String COMMAND_GOAL_ATTRIBUTE_NAME        = "goal";
 
+    public static final String WORKSPACE_STATUS_CHANGED_METHOD = "workspace/statusChanged";
+    public static final String MACHINE_STATUS_CHANGED_METHOD   = "machine/statusChanged";
+    public static final String SERVER_STATUS_CHANGED_METHOD    = "server/statusChanged";
+    public static final String MACHINE_LOG_METHOD              = "machine/log";
+    public static final String INSTALLER_LOG_METHOD            = "installer/log";
+
     private Constants() {}
 }
