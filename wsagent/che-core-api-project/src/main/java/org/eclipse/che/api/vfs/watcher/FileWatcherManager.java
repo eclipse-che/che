@@ -34,18 +34,23 @@ public class FileWatcherManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileWatcherManager.class);
 
-    private final FileWatcherByPathValue   fileWatcherByPathValue;
-    private final FileWatcherByPathMatcher fileWatcherByPathMatcher;
-    private final FileWatcherService       service;
-    private final Path                     root;
+    private final FileWatcherByPathValue             fileWatcherByPathValue;
+    private final FileWatcherByPathMatcher           fileWatcherByPathMatcher;
+    private final FileWatcherService                 service;
+    private final Path                               root;
+    private final FileWatcherExcludePatternsRegistry excludePatternsRegistry;
 
     @Inject
-    public FileWatcherManager(@Named("che.user.workspaces.storage") File root, FileWatcherByPathValue watcherByPathValue,
-                              FileWatcherByPathMatcher watcherByPathMatcher, FileWatcherService service) {
+    public FileWatcherManager(@Named("che.user.workspaces.storage") File root,
+                              FileWatcherByPathValue watcherByPathValue,
+                              FileWatcherByPathMatcher watcherByPathMatcher,
+                              FileWatcherService service,
+                              FileWatcherExcludePatternsRegistry excludePatternsRegistry) {
         this.fileWatcherByPathMatcher = watcherByPathMatcher;
         this.fileWatcherByPathValue = watcherByPathValue;
         this.service = service;
         this.root = root.toPath().normalize().toAbsolutePath();
+        this.excludePatternsRegistry = excludePatternsRegistry;
     }
 
     /**
@@ -86,7 +91,6 @@ public class FileWatcherManager {
      *         consumer for modify event
      * @param delete
      *         consumer for delete event
-     *
      * @return operation set identifier
      */
     public int registerByPath(String path, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
@@ -136,7 +140,6 @@ public class FileWatcherManager {
      *         consumer for modify event
      * @param delete
      *         consumer for delete event
-     *
      * @return operation set identifier
      */
     public int registerByMatcher(PathMatcher matcher, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
@@ -161,5 +164,62 @@ public class FileWatcherManager {
         LOG.debug("Canceling registering of an operation with id '{}' registered to path matcher", id);
 
         fileWatcherByPathMatcher.unwatch(id);
+    }
+
+    /**
+     * Registers a matcher to skip tracking of creation,
+     * modification and deletion events for corresponding entries.
+     *
+     * @param exclude
+     *         matcher's pattern
+     */
+    public void addExcludeMatcher(PathMatcher exclude) {
+        excludePatternsRegistry.addExcludeMatcher(exclude);
+    }
+
+    /**
+     * Removes a matcher from excludes to resume tracking of corresponding entries creation,
+     * modification and deletion events.
+     *
+     * @param exclude
+     *         matcher's pattern
+     */
+    public void removeExcludeMatcher(PathMatcher exclude) {
+        excludePatternsRegistry.removeExcludeMatcher(exclude);
+    }
+
+    /**
+     * Adds entries to includes by path matcher for tracking creation,
+     * modification and deletion events for corresponding entries.
+     * Note: the goal of this method is to add some entries to includes in case when parent directory is added to excludes.
+     *
+     * @param matcher
+     *         matcher's pattern
+     */
+    public void addIncludeMatcher(PathMatcher matcher) {
+        excludePatternsRegistry.addIncludeMatcher(matcher);
+    }
+
+    /**
+     * Removes entries from includes by path matcher.
+     * Note: use this method to remove some entries from includes
+     * in case when these one are added to includes by {@link #addIncludeMatcher}.
+     *
+     * @param matcher
+     *         matcher's pattern
+     */
+    public void removeIncludeMatcher(PathMatcher matcher) {
+        excludePatternsRegistry.removeIncludeMatcher(matcher);
+    }
+
+    /**
+     * Checks if specified path is within excludes
+     *
+     * @param path
+     *         path being examined
+     * @return true if path is within excludes, false otherwise
+     */
+    public boolean isExcluded(Path path) {
+        return excludePatternsRegistry.isExcluded(path);
     }
 }
