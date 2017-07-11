@@ -49,6 +49,6 @@ public class WsMasterOutputJsonRpcInitializer {
     }
 
     public void terminate() {
-        initializer.terminate("ws-master");
+        initializer.terminate("ws-master-output");
     }
 }

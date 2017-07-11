@@ -94,6 +94,7 @@ public class CurrentWorkspaceManager {
     private void subscribeToEvents() {
         Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
 
+        // TODO (spi ide): consider shared constants for the endpoints
         subscriptionManagerClient.subscribe("ws-master", "workspace/statusChanged", scope);
         subscriptionManagerClient.subscribe("ws-master", "machine/statusChanged", scope);
         subscriptionManagerClient.subscribe("ws-master", "server/statusChanged", scope);

@@ -29,8 +29,9 @@ class WorkspaceEventsUnsubscriber {
     @Inject
     WorkspaceEventsUnsubscriber(EventBus eventBus, AppContext appContext, SubscriptionManagerClient subscriptionManagerClient) {
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> {
-            final Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
+            Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
 
+            // TODO (spi ide): consider shared constants for the endpoints
             subscriptionManagerClient.unSubscribe("ws-master", "workspace/statusChanged", scope);
             subscriptionManagerClient.unSubscribe("ws-master", "machine/statusChanged", scope);
             subscriptionManagerClient.unSubscribe("ws-master", "server/statusChanged", scope);
