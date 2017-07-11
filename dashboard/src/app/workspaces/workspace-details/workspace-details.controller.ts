@@ -18,6 +18,7 @@ import {CheNamespaceRegistry} from '../../../components/api/namespace/che-namesp
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 import {CheUser} from '../../../components/api/che-user.factory';
 
+
 /**
  * @ngdoc controller
  * @name workspaces.workspace.details.controller:WorkspaceDetailsController
@@ -26,7 +27,7 @@ import {CheUser} from '../../../components/api/che-user.factory';
  * @author Oleksii Kurinnyi
  */
 
-enum Tab {Settings, Config, Runtime}
+const TAB: Array<string> = ['Overview', 'Machines', 'Settings', 'Config', 'Runtime'];
 
 export class WorkspaceDetailsController {
   $location: ng.ILocationService;
@@ -37,7 +38,7 @@ export class WorkspaceDetailsController {
   $rootScope: ng.IRootScopeService;
   $scope: ng.IScope;
   $timeout: ng.ITimeoutService;
-  lodash: _.LoDashStatic;
+  lodash: any;
   cheEnvironmentRegistry: CheEnvironmentRegistry;
   cheNotification: CheNotification;
   cheWorkspace: CheWorkspace;
@@ -71,7 +72,7 @@ export class WorkspaceDetailsController {
   usedNamesList: any = [];
 
   forms: Map<number, any> = new Map();
-  tab: Object = Tab;
+  tab: {[key: string]: string} = {};
 
   private confirmDialogService: ConfirmDialogService;
 
@@ -83,7 +84,7 @@ export class WorkspaceDetailsController {
               $route: ng.route.IRouteService, $rootScope: ng.IRootScopeService, $scope: ng.IScope, $timeout: ng.ITimeoutService,
               cheEnvironmentRegistry: CheEnvironmentRegistry, cheNotification: CheNotification, cheWorkspace: CheWorkspace,
               ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, cheNamespaceRegistry: CheNamespaceRegistry,
-              confirmDialogService: ConfirmDialogService, lodash: _.LoDashStatic, cheUser: CheUser) {
+              confirmDialogService: ConfirmDialogService, lodash: any, cheUser: CheUser) {
     this.$log = $log;
     this.$location = $location;
     this.$mdDialog = $mdDialog;
@@ -102,11 +103,11 @@ export class WorkspaceDetailsController {
     this.lodash = lodash;
     this.cheUser = cheUser;
 
-    (this.$rootScope as any).showIDE = false;
-
     this.init();
 
-    $scope.$watch(() => { return this.getWorkspaceStatus(); }, (newStatus: string, oldStatus: string) => {
+    const workspaceStatusDeRegistrationFn = $scope.$watch(() => {
+      return this.getWorkspaceStatus();
+    }, (newStatus: string, oldStatus: string) => {
       if (oldStatus === 'SNAPSHOTTING') {
         // status was not changed
         return;
@@ -119,9 +120,78 @@ export class WorkspaceDetailsController {
       }
     });
 
+    this.updateSelectedTab(this.$location.search().tab);
+    const searchDeRegistrationFn = $scope.$watch(() => {
+      return $location.search().tab;
+    }, (tab: string) => {
+      if (angular.isDefined(tab)) {
+        this.updateSelectedTab(tab);
+      }
+    }, true);
+    $scope.$on('$destroy', () => {
+      workspaceStatusDeRegistrationFn();
+      searchDeRegistrationFn();
+    });
+
+  }
+
+  /**
+   * Update tabs.
+   */
+  updateTabs(): void {
+    this.tab = {};
+    TAB.forEach((tab: string, $index: number) => {
+      const index = $index.toString();
+      this.tab[tab] = index;
+      this.tab[index] = tab;
+    });
+  }
+
+  /**
+   * Add a new tab.
+   *
+   * @param tab
+   */
+  addTab(tab: string): void {
+    if (this.tab[tab]) {
+      return;
+    }
+    const pos = (Object.keys(this.tab).length / 2).toString();
+    this.tab[tab] = pos;
+    this.tab[pos] = tab;
+  }
+
+  /**
+   * Update selected tab index by search part of URL.
+   *
+   * @param {string} tab
+   */
+  updateSelectedTab(tab: string): void {
+    const value = this.tab[tab];
+    if (angular.isDefined(value)) {
+      this.selectedTabIndex = parseInt(value, 10);
+    }
+  }
+
+  /**
+   * Changes search part of URL.
+   *
+   * @param {number} tabIndex
+   */
+  onSelectTab(tabIndex?: number): void {
+    let param: { tab?: string } = {};
+    if (angular.isDefined(tabIndex)) {
+      param.tab = this.tab[tabIndex.toString()];
+    }
+    if (angular.isUndefined(this.$location.search().tab)) {
+      this.$location.replace().search(param);
+    } else {
+      this.$location.search(param);
+    }
   }
 
   init(): void {
+    this.updateTabs();
     let routeParams = this.$route.current.params;
     if (routeParams && routeParams.namespace && routeParams.workspaceName) {
       this.isCreationFlow = false;
@@ -134,36 +204,6 @@ export class WorkspaceDetailsController {
       }).finally(() => {
         this.loading = false;
       });
-
-      // search the selected page
-      let page = this.$location.search().page;
-
-      if (page) {
-        let selectedTabIndex = Tab.Settings;
-        switch (page) {
-          case 'info' || 'Settings':
-            selectedTabIndex = Tab.Settings;
-            break;
-          case 'Config':
-            selectedTabIndex = Tab.Config;
-            break;
-          case 'Runtime':
-            selectedTabIndex = Tab.Runtime;
-            break;
-          case 'projects':
-            selectedTabIndex = 3;
-            break;
-          case 'share':
-            selectedTabIndex = 4;
-            break;
-          default:
-            this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceName);
-            break;
-        }
-        this.$timeout(() => {
-          this.selectedTabIndex = selectedTabIndex;
-        });
-      }
 
       this.fillInListOfUsedNames();
 
@@ -221,7 +261,7 @@ export class WorkspaceDetailsController {
         defer.resolve();
       } else {
         this.cheUser.fetchUser().then(() => {
-          this.namespaceId = user.name;
+          this.namespaceId = this.cheUser.getUser().name;
           defer.resolve();
         }, (error: any) => {
           defer.reject(error);
@@ -230,7 +270,7 @@ export class WorkspaceDetailsController {
     }
     defer.promise.then(() => {
       return this.getOrFetchWorkspacesByNamespace();
-    }).catch((error: any) => {
+    }).catch(() => {
       // user is not authorized to get workspaces by namespace
       return this.getOrFetchWorkspaces();
     }).then((workspaces: Array<che.IWorkspace>) => {
@@ -243,7 +283,7 @@ export class WorkspaceDetailsController {
    * Triggers form validation on Settings tab.
    */
   reValidateName(): void {
-    const form: ng.IFormController = this.forms.get(Tab.Settings);
+    const form: ng.IFormController = this.forms.get((<any>this.tab).Settings);
 
     if (!form) {
       return;
@@ -369,30 +409,26 @@ export class WorkspaceDetailsController {
     if (this.loading) {
       this.loading = false;
     }
-
-    angular.copy(this.workspaceDetails, this.copyWorkspaceDetails);
-
     this.workspaceId = this.workspaceDetails.id;
-    this.newName = (this.workspaceDetails.config && this.workspaceDetails.config.name) ? this.workspaceDetails.config.name : '';
+    this.copyWorkspaceDetails = angular.copy(this.workspaceDetails);
+    this.switchEditMode();
   }
 
   /**
    * Updates name of workspace in config.
-   *
-   * @param form {any}
    */
-  updateName(form: any): void {
-    if (this.copyWorkspaceDetails && this.copyWorkspaceDetails.config) {
-      this.copyWorkspaceDetails.config.name = this.newName;
+  updateName(): void {
+    if (this.workspaceDetails && this.workspaceDetails.config) {
+      this.workspaceDetails.config.name = this.newName;
     }
 
-    this.switchEditMode(this.workspaceDetails.config);
+    this.switchEditMode();
   }
 
   /**
    * Returns current status of workspace.
    *
-   * @returns {String}
+   * @returns {string}
    */
   getWorkspaceStatus(): string {
     if (this.isCreationFlow) {
@@ -489,18 +525,16 @@ export class WorkspaceDetailsController {
     if (!config) {
       return;
     }
-    this.switchEditMode(config);
 
     if (this.newName !== config.name) {
       this.newName = config.name;
     }
-
     if (!config.environments[config.defaultEnv]) {
       return;
     }
-
-    this.copyWorkspaceDetails.config = config;
+    this.workspaceDetails.config = config;
     this.workspaceImportedRecipe = config.environments[config.defaultEnv].recipe;
+    this.switchEditMode();
   }
 
   /**
@@ -508,12 +542,12 @@ export class WorkspaceDetailsController {
    */
   updateWorkspaceConfigEnvironment(): void {
     this.workspaceImportedRecipe = null;
-    this.switchEditMode(this.workspaceDetails.config);
+    this.switchEditMode();
   }
 
-  switchEditMode(changedConfig: che.IWorkspaceConfig): void {
+  switchEditMode(): void {
     if (!this.isCreationFlow) {
-      this.editMode = !angular.equals(this.copyWorkspaceDetails.config, changedConfig);
+      this.editMode = !angular.equals(this.copyWorkspaceDetails.config, this.workspaceDetails.config);
 
       let status = this.getWorkspaceStatus();
       if (status === 'STOPPED' || status === 'STOPPING') {
@@ -580,8 +614,7 @@ export class WorkspaceDetailsController {
     if (this.isCreationFlow) {
       this.$location.path('/workspaces');
     }
-
-    this.editMode = false;
+    this.workspaceDetails = angular.copy(this.copyWorkspaceDetails);
     this.updateWorkspaceData();
   }
 
@@ -591,9 +624,9 @@ export class WorkspaceDetailsController {
    * @returns {ng.IPromise<any>}
    */
   doUpdateWorkspace(): ng.IPromise<any> {
-    delete this.copyWorkspaceDetails.links;
+    delete this.workspaceDetails.links;
 
-    let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, this.copyWorkspaceDetails);
+    let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, this.workspaceDetails);
     promise.then((data: any) => {
       this.workspaceName = data.config.name;
       this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespaceId, this.workspaceName);
@@ -616,7 +649,7 @@ export class WorkspaceDetailsController {
    */
   generateWorkspaceName(): string {
     let name: string,
-        iterations: number = 100;
+      iterations: number = 100;
     while (iterations--) {
       /* tslint:disable */
       name = 'wksp-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4));
@@ -633,7 +666,7 @@ export class WorkspaceDetailsController {
    */
   createWorkspace(): void {
     let attributes = this.stackId ? {stackId: this.stackId} : {};
-    let creationPromise = this.cheWorkspace.createWorkspaceFromConfig(this.namespaceId, this.copyWorkspaceDetails.config, attributes);
+    let creationPromise = this.cheWorkspace.createWorkspaceFromConfig(this.namespaceId, this.workspaceDetails.config, attributes);
     this.redirectAfterSubmitWorkspace(creationPromise);
   }
 
@@ -649,7 +682,7 @@ export class WorkspaceDetailsController {
       // for new workspace to show in recent workspaces
       this.updateRecentWorkspace(workspaceData.id);
       this.cheWorkspace.fetchWorkspaces().then(() => {
-        this.$location.path('/workspace/' + workspaceData.namespace + '/' +  workspaceData.config.name);
+        this.$location.path('/workspace/' + workspaceData.namespace + '/' + workspaceData.config.name);
         this.$location.search({page: this.tab[this.selectedTabIndex]});
       });
     }, (error: any) => {
@@ -666,27 +699,6 @@ export class WorkspaceDetailsController {
    */
   updateRecentWorkspace(workspaceId: string): void {
     this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
-  }
-
-  /**
-   * Updates the workspace's environment with data entered by user.
-   *
-   * @param workspace workspace to update
-   */
-  setEnvironment(workspace: any): void {
-    if (!workspace.defaultEnv || !workspace.environments || workspace.environments.length === 0) {
-      return;
-    }
-
-    let environment = workspace.environments[workspace.defaultEnv];
-    if (!environment) {
-      return;
-    }
-
-    let recipeType = environment.recipe.type;
-    let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
-    let machinesList = environmentManager.getMachines(environment);
-    workspace.environments[workspace.defaultEnv] = environmentManager.getEnvironment(environment, machinesList);
   }
 
   // perform workspace deletion.
@@ -790,11 +802,11 @@ export class WorkspaceDetailsController {
    * @returns {boolean}
    */
   isSaveButtonDisabled(): boolean {
-    let tabs = [Tab.Settings, Tab.Config, Tab.Runtime];
+    let tabs = [(<any>this.tab).Settings, (<any>this.tab).Config, (<any>this.tab).Runtime];
 
     return tabs.some((tabIndex: number) => {
-      return this.checkFormsNotValid(tabIndex);
-    }) || this.isDisableWorkspaceCreation();
+        return this.checkFormsNotValid(tabIndex);
+      }) || this.isDisableWorkspaceCreation();
   }
 
   /**
@@ -804,23 +816,23 @@ export class WorkspaceDetailsController {
    * @returns {boolean}
    */
   isTabDisabled(tabIndex: number): boolean {
-    if (tabIndex === Tab.Settings) {
+    if (tabIndex === (<any>this.tab).Settings) {
       // never disable 'Settings' tab
       return false;
     }
 
     // activate tab which contains invalid form
     // to let user see the problem
-    if (this.checkFormsNotValid(Tab.Settings)) {
-      this.selectedTabIndex = Tab.Settings;
-    } else if (this.checkFormsNotValid(Tab.Runtime)) {
-      this.selectedTabIndex = Tab.Runtime;
+    if (this.checkFormsNotValid((<any>this.tab).Settings)) {
+      this.selectedTabIndex = (<any>this.tab).Settings;
+    } else if (this.checkFormsNotValid((<any>this.tab).Runtime)) {
+      this.selectedTabIndex = (<any>this.tab).Runtime;
     }
 
-    if (tabIndex === Tab.Runtime) {
-      return this.checkFormsNotValid(Tab.Settings);
+    if (tabIndex === (<any>this.tab).Runtime) {
+      return this.checkFormsNotValid((<any>this.tab).Settings);
     } else {
-      return this.checkFormsNotValid(Tab.Settings) || this.checkFormsNotValid(Tab.Runtime);
+      return this.checkFormsNotValid((<any>this.tab).Settings) || this.checkFormsNotValid((<any>this.tab).Runtime);
     }
   }
 

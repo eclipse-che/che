@@ -1,0 +1,77 @@
+<div class="workspace-machine-item">
+  <che-list-item flex>
+    <div flex="100"
+         layout="row"
+         layout-align="start stretch"
+         class="che-list-item-row">
+      <!-- Checkbox -->
+      <div layout="column" layout-align="center center" class="che-list-item-checkbox">
+        <md-checkbox aria-label="Machine-{{machine.name}}"
+                     ng-disabled="machine.isDev"
+                     ng-model="cheListHelper.itemsSelectionStatus[machine.name]"
+                     ng-change="cheListHelper.updateBulkSelectionStatus()"></md-checkbox>
+      </div>
+      <!-- Icon -->
+      <div layout="column" layout-align="center center" lass="workspace-machine-item-icon">
+        <span class="workspace-machine-item-icon chefont cheico-stacks"></span>
+      </div>
+      <div flex layout="row" layout-align="start center">
+        <!-- Name -->
+        <div flex="30" layout="column" layout-align="center start">
+          <span class="che-list-item-name workspace-machine-item-item-name">{{machine.name}}</span>
+        </div>
+        <!-- Image -->
+        <div flex="30" layout="column" layout-align="center start">
+          <span class="che-list-item-secondary workspace-machine-item-secondary-color">{{machine.image}}</span>
+        </div>
+        <!-- Is Dev -->
+        <div flex="10" layout="column" layout-align="center start">
+          <md-switch ng-model="machine.isDev"
+                     ng-change="machineDevOnChange({name: machine.name})"
+                     aria-label="Dev machine">
+          </md-switch>
+        </div>
+        <!-- RAM limit -->
+        <div flex="20" layout="column" layout-align="center start">
+          <ng-form name="ramAmountForm">
+            <che-number-spinner che-form="ramAmountForm"
+                                che-name="memory"
+                                che-step="0.5"
+                                che-tofixed="1"
+                                che-minvalue="0.5"
+                                che-maxvalue="100"
+                                che-unit="GB"
+                                id="machine-{{machine.name}}-ram"
+                                ng-model="machine.memoryLimitGBytes"
+                                ng-change="onRamChange({name: machine.name, memoryLimitGBytes: value})"
+                                required>
+            </che-number-spinner>
+          </ng-form>
+        </div>
+        <!-- Actions -->
+        <div flex="10" layout="column" layout-align="center end">
+          <did flax layout="row" class="machine-actions">
+            <div ng-click="editMachine({name: machine.name, event: $event})">
+              <span class="fa fa-pencil"></span>
+            </div>
+            <div popover-placement="bottom"
+                 popover-append-to-body="true"
+                 popover-trigger="outsideClick"
+                 popover-class="workspace-machine-actions-popover"
+                 uib-popover-html="
+                '<a href=\'{{pageUrl}}?tab=Agents\'>Agents</a>
+                 <a href=\'{{pageUrl}}?tab=Settings\'>Settings</a>
+                 <a href=\'{{pageUrl}}?tab=Servers\'>Servers</a>
+                 <a href=\'{{pageUrl}}?tab=Env%20Variables\'>Environment Variables</a>
+                 <a href=\'{{pageUrl}}?tab=Links\'>Links</a>'">
+              <span class="material-design icon-ic_settings_24px"></span>
+            </div>
+            <div ng-click="deleteMachine({name: machine.name, event: $event})">
+              <span class="fa fa-trash-o"></span>
+            </div>
+          </did>
+        </div>
+      </div>
+    </div>
+  </che-list-item>
+</div>

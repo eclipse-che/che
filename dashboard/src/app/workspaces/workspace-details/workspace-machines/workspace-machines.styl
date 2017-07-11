@@ -1,0 +1,58 @@
+.workspace-machines
+  margin-top 10px
+  .warning-message
+    display inline-block
+    margin-left 45px
+    line-height 50px
+  .che-list-header
+    .che-list-header-additional
+      padding-left 40px
+    .che-list-add-button
+
+      button
+        min-width 110px
+        text-align right
+        span:before
+          position absolute
+          display inline
+          line-height 35px
+          font-size 35px
+          font-weight 100
+          content "+"
+          bottom 1px
+          left 15px
+
+    md-item
+      border-top none
+    .che-list-header-content
+      div.che-list-item-row
+        min-height 47px
+        line-height 47px
+        background-color $cat-gray-color
+        border 1px solid $very-light-grey-color
+
+      .che-list-item-checkbox
+        margin-right 90px
+        min-width 50px
+        height inherit
+
+        md-checkbox
+          top 0
+          margin 0
+
+          div.md-container
+            left calc(50% - 10px)
+
+  div.che-list-header-column
+    line-height inherit
+    .header-sort-direction
+      position absolute
+    &:last-child
+      display block
+      text-align right
+      span
+        padding-right 25px
+
+  .workspace-machines-list
+    margin-bottom 1px
+    che-box-shadow()

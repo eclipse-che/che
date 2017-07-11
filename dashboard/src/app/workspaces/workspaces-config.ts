@@ -117,6 +117,13 @@ import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
 
 import {WorkspaceConfigService} from './workspace-config.service';
 
+import {WorkspaceMachines} from './workspace-details/workspace-machines/workspace-machines.directive';
+import {WorkspaceMachinesController} from './workspace-details/workspace-machines/workspace-machines.controller';
+import {WorkspaceMachineItem} from './workspace-details/workspace-machines/machine-item/workspace-machine-item.directive';
+import {EditMachineDialogController} from './workspace-details/workspace-machines/edit-machine-dialog/edit-machine-dialog.controller';
+import {ChangeDevMachineDialogController} from './workspace-details/workspace-machines/change-dev-machine-dialog/change-dev-machine-dialog.controller';
+
+
 /**
  * @ngdoc controller
  * @name workspaces:WorkspacesConfig
@@ -246,6 +253,15 @@ export class WorkspacesConfig {
     register.controller('ListAgentsController', ListAgentsController);
     register.directive('listAgents', ListAgents);
 
+    register.controller('WorkspaceMachinesController', WorkspaceMachinesController);
+    register.directive('workspaceMachines', WorkspaceMachines);
+
+    register.directive('workspaceMachineItem', WorkspaceMachineItem);
+
+    register.controller('ChangeDevMachineDialogController', ChangeDevMachineDialogController);
+
+    register.controller('EditMachineDialogController', EditMachineDialogController);
+
     register.directive('workspaceStatusButton', CheWorkspaceStatusButton);
 
     register.controller('CreateWorkspaceController', CreateWorkspaceController);
@@ -263,6 +279,7 @@ export class WorkspacesConfig {
       })
       .accessWhen('/workspace/:namespace*/:workspaceName', {
         title: (params: any) => { return params.workspaceName; },
+        reloadOnSearch: false,
         templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
         controller: 'WorkspaceDetailsController',
         controllerAs: 'workspaceDetailsController'

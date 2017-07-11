@@ -71,7 +71,7 @@ export class WorkspaceDetailsService {
       title: title,
       description: description,
       content: content
-    }
+    };
 
     this.sections.push(section);
   }
