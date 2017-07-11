@@ -36,6 +36,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 
 /**
+ * Provides API for updating activity timestamp of running workspaces.
  * Stops the inactive workspaces by given expiration time. Upon stopping, workspace attributes will be updated with
  * information like cause and timestamp of workspace stop.
  *

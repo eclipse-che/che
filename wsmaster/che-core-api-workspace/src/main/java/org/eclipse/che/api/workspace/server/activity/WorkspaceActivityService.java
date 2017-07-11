@@ -33,7 +33,7 @@ import javax.ws.rs.PathParam;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 /**
- * Monitors the activity of the runtime workspace.
+ * Service for accessing API for updating activity timestamp of running workspaces.
  *
  * @author Anton Korneta
  */

@@ -11,6 +11,7 @@
 package org.eclipse.che.api.activity.websocket;
 
 import org.eclipse.che.api.activity.WorkspaceActivityNotifier;
+import org.eclipse.che.api.core.websocket.commons.WebSocketMessageReceiver;
 import org.everrest.websockets.WSMessageReceiver;
 import org.everrest.websockets.message.InputMessage;
 import org.everrest.websockets.message.Pair;
@@ -21,6 +22,7 @@ import java.util.Arrays;
 /**
  * Updates workspace activity on message receival by websocket.
  *
+ * This listener covers only old Everrest based websockets.
  * @author Mihail Kuznyetsov
  * @author Anton Korneta
  */

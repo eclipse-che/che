@@ -56,16 +56,18 @@ public class LastAccessTimeFilterTest {
         filter.doFilter(request, response, chain);
         // then
         verify(workspaceActivityNotifier).onActivity();
+        verify(chain).doFilter(request, response);
     }
 
     @Test
-    public void shouldLogExceptionUponActivityNotification() throws IOException, ServletException {
+    public void shouldCallActivityNotifierInCaseOfException() throws IOException, ServletException {
         // given
         doThrow(RuntimeException.class).when(workspaceActivityNotifier).onActivity();
         // when
         filter.doFilter(request, response, chain);
         // then
         verify(workspaceActivityNotifier).onActivity();
+        verify(chain).doFilter(request, response);
 
     }
 }
