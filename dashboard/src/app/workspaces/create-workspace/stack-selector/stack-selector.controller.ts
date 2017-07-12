@@ -21,7 +21,6 @@ import {StackSelectorSvc} from './stack-selector.service';
  * @description This class is handling the controller of stack selector.
  * @author Oleksii Kurinnyi
  */
-
 export class StackSelectorController {
   /**
    * Filter service.
@@ -165,18 +164,21 @@ export class StackSelectorController {
         this.stackIconLinks[stack.id] = findLink.href;
       }
 
-      // get machines memory limits
-      const defaultEnv = stack.workspaceConfig.defaultEnv,
-            environment = stack.workspaceConfig.environments[defaultEnv],
-            environmentManager = this.getEnvironmentManager(environment.recipe.type),
-            machines = environmentManager.getMachines(environment);
       this.stackMachines[stack.id] = [];
-      machines.forEach((machine: any) => {
-        this.stackMachines[stack.id].push({
-          name: machine.name,
-          memoryLimitBytes: environmentManager.getMemoryLimit(machine)
-        });
-      });
+      if (stack.workspaceConfig) {
+        // get machines memory limits
+              const defaultEnv = stack.workspaceConfig.defaultEnv,
+                    environment = stack.workspaceConfig.environments[defaultEnv],
+                    environmentManager = this.getEnvironmentManager(environment.recipe.type),
+                    machines = environmentManager.getMachines(environment);
+
+              machines.forEach((machine: any) => {
+                this.stackMachines[stack.id].push({
+                  name: machine.name,
+                  memoryLimitBytes: environmentManager.getMemoryLimit(machine)
+                });
+              });
+      }
     });
   }
 
