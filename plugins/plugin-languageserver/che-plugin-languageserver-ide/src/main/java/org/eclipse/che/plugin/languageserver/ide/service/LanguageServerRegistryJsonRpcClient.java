@@ -15,9 +15,8 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.rest.AsyncRequestFactory;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
 
 @Singleton
 public class LanguageServerRegistryJsonRpcClient {
@@ -31,7 +30,7 @@ public class LanguageServerRegistryJsonRpcClient {
 
     public JsonRpcPromise<Boolean> initializeServer(String path) {
         return requestTransmitter.newRequest()
-                                 .endpointId("ws-agent")
+                                 .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
                                  .methodName("languageServer/initialize")
                                  .paramsAsString(path)
                                  .sendAndReceiveResultAsBoolean(30_000);

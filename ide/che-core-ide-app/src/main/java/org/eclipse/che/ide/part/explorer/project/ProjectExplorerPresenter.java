@@ -57,6 +57,7 @@ import java.util.Set;
 
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.STOP;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -148,7 +149,6 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
     @Inject
     public void initFileWatchers() {
-        final String endpointId = "ws-agent";
         final String method = "track:project-tree";
 
         getTree().addExpandHandler(event -> {
@@ -157,7 +157,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             if (node instanceof ResourceNode) {
                 Resource data = ((ResourceNode)node).getData();
                 requestTransmitter.newRequest()
-                                  .endpointId(endpointId)
+                                  .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
                                   .methodName(method)
                                   .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
                                                          .withPath(data.getLocation().toString())
@@ -173,7 +173,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             if (node instanceof ResourceNode) {
                 Resource data = ((ResourceNode)node).getData();
                 requestTransmitter.newRequest()
-                                  .endpointId(endpointId)
+                                  .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
                                   .methodName(method)
                                   .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
                                                          .withPath(data.getLocation().toString())

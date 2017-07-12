@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_SUBSCRIBE;
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
 
 /**
  * Subscriber that register and deregister a listener for import project progress.
@@ -29,20 +30,18 @@ import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_U
 @Singleton
 public class ProjectImportNotificationSubscriber {
 
-    public static final String WS_AGENT_ENDPOINT = "ws-agent";
-
     @Inject
     public ProjectImportNotificationSubscriber(EventBus eventBus, RequestTransmitter transmitter) {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
-                transmitter.newRequest().endpointId(WS_AGENT_ENDPOINT).methodName(EVENT_IMPORT_OUTPUT_SUBSCRIBE).noParams()
+                transmitter.newRequest().endpointId(WORKSAPCE_AGENT_ENDPOINT_ID).methodName(EVENT_IMPORT_OUTPUT_SUBSCRIBE).noParams()
                            .sendAndSkipResult();
             }
 
             @Override
             public void onWsAgentStopped(WsAgentStateEvent event) {
-                transmitter.newRequest().endpointId(WS_AGENT_ENDPOINT).methodName(EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE).noParams()
+                transmitter.newRequest().endpointId(WORKSAPCE_AGENT_ENDPOINT_ID).methodName(EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE).noParams()
                            .sendAndSkipResult();
             }
         });

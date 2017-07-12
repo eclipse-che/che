@@ -27,13 +27,13 @@ import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperation
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.START;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.STOP;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
 
 /**
  * @author Roman Nikitenko
  */
 @Singleton
 public class ClientServerEventServiceImpl implements ClientServerEventService {
-    private static final String ENDPOINT_ID      = "ws-agent";
     private static final String OUTCOMING_METHOD = "track:editor-file";
 
     private final DtoFactory         dtoFactory;
@@ -81,7 +81,7 @@ public class ClientServerEventServiceImpl implements ClientServerEventService {
                                                        .withOldPath(oldPath);
         return promises.create((AsyncCallback<Void> callback) -> {
             JsonRpcPromise<Void> jsonRpcPromise = requestTransmitter.newRequest()
-                                                                    .endpointId(ENDPOINT_ID)
+                                                                    .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
                                                                     .methodName(OUTCOMING_METHOD)
                                                                     .paramsAsDto(dto)
                                                                     .sendAndReceiveResultAsEmpty();
