@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.machine.shared.Constants;
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.machine.chooser.MachineChooserView;
 import org.eclipse.che.ide.machine.chooser.MachineChooserViewImpl;
 import org.eclipse.che.requirejs.ModuleHolder;
@@ -31,9 +30,6 @@ public class MachineApiModule extends AbstractGinModule {
         bind(MachineChooserView.class).to(MachineChooserViewImpl.class);
         bind(ModuleHolder.class).in(Singleton.class);
         bindConstant().annotatedWith(Names.named("machine.extension.api_port")).to(Constants.WS_AGENT_PORT);
-
-        bind(WsAgentStateController.class).to(WsAgentStateControllerImpl.class).in(Singleton.class);
-        bind(WsAgentStateControllerImpl.class).asEagerSingleton();
 
         bind(WsAgentURLModifierInitializer.class).asEagerSingleton();
     }

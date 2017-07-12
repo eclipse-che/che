@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.project;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequest;
@@ -41,8 +40,6 @@ import static org.mockito.Mockito.when;
 public class ProjectServiceClientTest {
 
     @Mock
-    private WsAgentStateController wsAgentStateController;
-    @Mock
     private LoaderFactory          loaderFactory;
     @Mock
     private AsyncRequestFactory    asyncRequestFactory;
@@ -57,8 +54,7 @@ public class ProjectServiceClientTest {
 
     @Before
     public void setUp() throws Exception {
-        projectServiceClient = new ProjectServiceClient(wsAgentStateController,
-                                                        loaderFactory,
+        projectServiceClient = new ProjectServiceClient(loaderFactory,
                                                         asyncRequestFactory,
                                                         dtoFactory,
                                                         dtoUnmarshallerFactory,

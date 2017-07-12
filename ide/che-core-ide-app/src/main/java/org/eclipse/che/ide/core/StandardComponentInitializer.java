@@ -48,7 +48,6 @@ import org.eclipse.che.ide.actions.ShowPreferencesAction;
 import org.eclipse.che.ide.actions.ShowReferenceAction;
 import org.eclipse.che.ide.actions.SignatureHelpAction;
 import org.eclipse.che.ide.actions.SoftWrapAction;
-import org.eclipse.che.ide.workspace.StopWorkspaceAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;
@@ -74,7 +73,6 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.command.editor.CommandEditorProvider;
 import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
-import org.eclipse.che.ide.connection.WsConnectionListener;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.imageviewer.PreviewImageAction;
 import org.eclipse.che.ide.machine.MachineResources;
@@ -111,6 +109,7 @@ import org.eclipse.che.ide.ui.toolbar.MainToolbar;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
+import org.eclipse.che.ide.workspace.StopWorkspaceAction;
 import org.eclipse.che.ide.xml.NewXmlFileAction;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -469,8 +468,6 @@ public class StandardComponentInitializer {
     @Inject
     @Named("CommandFileType")
     private FileType              commandFileType;
-    @Inject
-    private WsConnectionListener  wsConnectionListener;
 
     @Inject
     private ProjectConfigSynchronized projectConfigSynchronized;

@@ -17,7 +17,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -25,9 +24,6 @@ import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.MessageBus;
-import org.eclipse.che.ide.websocket.WebSocketException;
-import org.eclipse.che.ide.websocket.events.MessageHandler;
 import org.eclipse.che.plugin.composer.shared.dto.ComposerOutput;
 
 import static org.eclipse.che.plugin.composer.shared.Constants.COMPOSER_CHANNEL_NAME;
@@ -49,7 +45,6 @@ public class ComposerOutputHandler {
     @Inject
     public ComposerOutputHandler(EventBus eventBus,
                                  DtoFactory factory,
-                                 WsAgentStateController wsAgentStateController,
                                  ProcessesPanelPresenter processesPanelPresenter,
                                  CommandConsoleFactory commandConsoleFactory,
                                  AppContext appContext) {
@@ -59,59 +54,60 @@ public class ComposerOutputHandler {
         this.commandConsoleFactory = commandConsoleFactory;
         this.appContext = appContext;
 
-        handleOperations(factory, wsAgentStateController);
+        // TODO (spi ide): should be reworked with JSON-RPC
+//        handleOperations(factory, wsAgentStateController);
     }
 
-    private void handleOperations(final DtoFactory factory, final WsAgentStateController wsAgentStateController) {
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
-                wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
-                    @Override
-                    public void apply(MessageBus messageBus) throws OperationException {
-                        handleComposerOutput(messageBus);
-                    }
-                });
-            }
+//    private void handleOperations(final DtoFactory factory, final WsAgentStateController wsAgentStateController) {
+//        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
+//            @Override
+//            public void onWsAgentStarted(WsAgentStateEvent event) {
+//                wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
+//                    @Override
+//                    public void apply(MessageBus messageBus) throws OperationException {
+//                        handleComposerOutput(messageBus);
+//                    }
+//                });
+//            }
+//
+//            @Override
+//            public void onWsAgentStopped(WsAgentStateEvent event) {
+//            }
+//        });
+//    }
 
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-            }
-        });
-    }
-
-    private void handleComposerOutput(final MessageBus messageBus)  {
-        final DefaultOutputConsole outputConsole = (DefaultOutputConsole) commandConsoleFactory.create("Composer");
-
-        try {
-            messageBus.subscribe(COMPOSER_CHANNEL_NAME, new MessageHandler() {
-                @Override
-                public void onMessage(String message) {
-                    Log.info(getClass(), message);
-                    ComposerOutput archetypeOutput = factory.createDtoFromJson(message, ComposerOutput.class);
-                    processesPanelPresenter.addCommandOutput(outputConsole);
-                    switch (archetypeOutput.getState()) {
-                        case START:
-                            outputConsole.clearOutputsButtonClicked();
-                            outputConsole.printText(archetypeOutput.getOutput(),"green");
-                            break;
-                        case IN_PROGRESS:
-                            outputConsole.printText(archetypeOutput.getOutput());
-                            break;
-                        case DONE:
-                            outputConsole.printText(archetypeOutput.getOutput(),"green");
-                            break;
-                        case ERROR:
-                            outputConsole.printText(archetypeOutput.getOutput(),"red");
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            });
-        } catch (WebSocketException e) {
-            e.printStackTrace();
-        }
-    }
+//    private void handleComposerOutput(final MessageBus messageBus)  {
+//        final DefaultOutputConsole outputConsole = (DefaultOutputConsole) commandConsoleFactory.create("Composer");
+//
+//        try {
+//            messageBus.subscribe(COMPOSER_CHANNEL_NAME, new MessageHandler() {
+//                @Override
+//                public void onMessage(String message) {
+//                    Log.info(getClass(), message);
+//                    ComposerOutput archetypeOutput = factory.createDtoFromJson(message, ComposerOutput.class);
+//                    processesPanelPresenter.addCommandOutput(outputConsole);
+//                    switch (archetypeOutput.getState()) {
+//                        case START:
+//                            outputConsole.clearOutputsButtonClicked();
+//                            outputConsole.printText(archetypeOutput.getOutput(),"green");
+//                            break;
+//                        case IN_PROGRESS:
+//                            outputConsole.printText(archetypeOutput.getOutput());
+//                            break;
+//                        case DONE:
+//                            outputConsole.printText(archetypeOutput.getOutput(),"green");
+//                            break;
+//                        case ERROR:
+//                            outputConsole.printText(archetypeOutput.getOutput(),"red");
+//                            break;
+//                        default:
+//                            break;
+//                    }
+//                }
+//            });
+//        } catch (WebSocketException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 }
