@@ -23,8 +23,6 @@ import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.websocket.MessageBus;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,11 +49,7 @@ public class NavigateToFilePresenterTest {
     @Mock
     private EventBus                eventBus;
     @Mock
-    private MessageBusProvider      messageBusProvider;
-    @Mock
     private Container               container;
-    @Mock
-    private MessageBus              messageBus;
     @Mock
     private DtoUnmarshallerFactory  dtoUnmarshallerFactory;
     @Mock
@@ -77,7 +71,6 @@ public class NavigateToFilePresenterTest {
     public void setUp() {
         when(appContext.getWorkspaceRoot()).thenReturn(container);
         when(container.getFile(any(Path.class))).thenReturn(optFilePromise);
-        when(messageBusProvider.getMachineMessageBus()).thenReturn(messageBus);
 
         presenter = new NavigateToFilePresenter(view,
                                                 appContext,

@@ -24,7 +24,6 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
@@ -33,10 +32,6 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.rest.UrlBuilder;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
-import org.eclipse.che.ide.websocket.Message;
-import org.eclipse.che.ide.websocket.MessageBuilder;
-import org.eclipse.che.ide.websocket.WebSocketException;
-import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import java.util.List;
 import java.util.Map;
@@ -72,7 +67,6 @@ public class ProjectServiceClient {
     private static final String RESOLVE  = "/resolve";
     private static final String ESTIMATE = "/estimate";
 
-    private final WsAgentStateController wsAgentStateController;
     private final LoaderFactory          loaderFactory;
     private final AsyncRequestFactory    reqFactory;
     private final DtoFactory             dtoFactory;
@@ -80,13 +74,11 @@ public class ProjectServiceClient {
     private final AppContext             appContext;
 
     @Inject
-    ProjectServiceClient(WsAgentStateController wsAgentStateController,
-                         LoaderFactory loaderFactory,
+    ProjectServiceClient(LoaderFactory loaderFactory,
                          AsyncRequestFactory reqFactory,
                          DtoFactory dtoFactory,
                          DtoUnmarshallerFactory unmarshaller,
                          AppContext appContext) {
-        this.wsAgentStateController = wsAgentStateController;
         this.loaderFactory = loaderFactory;
         this.reqFactory = reqFactory;
         this.dtoFactory = dtoFactory;
@@ -166,29 +158,30 @@ public class ProjectServiceClient {
                                        final SourceStorageDto source) {
         return createFromAsyncRequest(callback -> {
             final String url = PROJECT + IMPORT + path(path.toString());
-            final Message message = new MessageBuilder(POST, url).data(dtoFactory.toJson(source))
-                                                                 .header(CONTENTTYPE, APPLICATION_JSON)
-                                                                 .build();
+            // TODO (spi ide): must be reworked with JSON-RPC
+//            final Message message = new MessageBuilder(POST, url).data(dtoFactory.toJson(source))
+//                                                                 .header(CONTENTTYPE, APPLICATION_JSON)
+//                                                                 .build();
 
-            wsAgentStateController.getMessageBus().then(messageBus -> {
-                try {
-                    messageBus.send(message, new RequestCallback<Void>() {
-                        @Override
-                        protected void onSuccess(Void result) {
-                            callback.onSuccess(result);
-                        }
-
-                        @Override
-                        protected void onFailure(Throwable exception) {
-                            callback.onFailure(exception);
-                        }
-                    });
-                } catch (WebSocketException e) {
-                    callback.onFailure(e);
-                }
-            }).catchError(error -> {
-                callback.onFailure(error.getCause());
-            });
+//            wsAgentStateController.getMessageBus().then(messageBus -> {
+//                try {
+//                    messageBus.send(message, new RequestCallback<Void>() {
+//                        @Override
+//                        protected void onSuccess(Void result) {
+//                            callback.onSuccess(result);
+//                        }
+//
+//                        @Override
+//                        protected void onFailure(Throwable exception) {
+//                            callback.onFailure(exception);
+//                        }
+//                    });
+//                } catch (WebSocketException e) {
+//                    callback.onFailure(e);
+//                }
+//            }).catchError(error -> {
+//                callback.onFailure(error.getCause());
+//            });
         });
     }
 

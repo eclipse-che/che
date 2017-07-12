@@ -39,6 +39,7 @@ import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.ide.api.machine.events.WsAgentStateEvent.createWsAgentStartedEvent;
+import static org.eclipse.che.ide.api.machine.events.WsAgentStateEvent.createWsAgentStoppedEvent;
 
 /**
  * Receives notifications about changing servers' statuses.
@@ -103,6 +104,9 @@ class ServerStatusEventHandler {
 
                 if (WSAGENT_REFERENCE.equals(event.getServerName())) {
                     eventBus.fireEvent(new WsAgentServerStoppedEvent(event.getMachineName()));
+
+                    // fire deprecated WsAgentStateEvent for backward compatibility with IDE 5.x
+                    eventBus.fireEvent(createWsAgentStoppedEvent());
                 } else if (TERMINAL_REFERENCE.equals(event.getServerName())) {
                     eventBus.fireEvent(new TerminalAgentServerStoppedEvent(event.getMachineName()));
                 } else if (EXEC_AGENT_REFERENCE.equals(event.getServerName())) {

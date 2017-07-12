@@ -20,7 +20,6 @@ import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.websocket.MessageBus;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -54,8 +53,6 @@ public abstract class BaseTest {
     protected NotificationManager          notificationManager;
     @Mock
     protected EventBus                     eventBus;
-    @Mock
-    protected MessageBus                   messageBus;
     @Mock
     protected DtoFactory                   dtoFactory;
     @Mock
