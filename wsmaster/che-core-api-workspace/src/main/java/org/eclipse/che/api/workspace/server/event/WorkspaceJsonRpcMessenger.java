@@ -10,23 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.event;
 
-import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionManager;
-import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STATUS_CHANGED_METHOD;
 
 /**
  * Send workspace events using JSON RPC to the clients
@@ -42,7 +34,7 @@ public class WorkspaceJsonRpcMessenger {
 
     @PostConstruct
     private void postConstruct() {
-        remoteSubscriptionManager.register("workspace/statusChanged", WorkspaceStatusEvent.class, this::predicate);
+        remoteSubscriptionManager.register(WORKSPACE_STATUS_CHANGED_METHOD, WorkspaceStatusEvent.class, this::predicate);
     }
 
     private boolean predicate(WorkspaceStatusEvent event, Map<String, String> scope) {

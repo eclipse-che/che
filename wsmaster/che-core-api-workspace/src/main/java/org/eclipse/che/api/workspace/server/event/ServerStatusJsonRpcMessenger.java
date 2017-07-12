@@ -18,6 +18,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Map;
 
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
+
 /**
  * Send workspace events using JSON RPC to the clients
  */
@@ -32,7 +34,7 @@ public class ServerStatusJsonRpcMessenger {
 
     @PostConstruct
     private void postConstruct() {
-        remoteSubscriptionManager.register("server/statusChanged", ServerStatusEvent.class, this::predicate);
+        remoteSubscriptionManager.register(SERVER_STATUS_CHANGED_METHOD, ServerStatusEvent.class, this::predicate);
     }
 
     private boolean predicate(ServerStatusEvent event, Map<String, String> scope) {

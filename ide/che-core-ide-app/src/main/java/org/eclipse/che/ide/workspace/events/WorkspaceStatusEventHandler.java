@@ -32,6 +32,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STATUS_CHANGED_METHOD;
 
 /**
  * Receives notifications about changing workspace's status.
@@ -55,7 +56,7 @@ class WorkspaceStatusEventHandler {
         this.eventBus = eventBus;
 
         configurator.newConfiguration()
-                    .methodName("workspace/statusChanged")
+                    .methodName(WORKSPACE_STATUS_CHANGED_METHOD)
                     .paramsAsDto(WorkspaceStatusEvent.class)
                     .noResult()
                     .withBiConsumer((endpointId, event) -> {
