@@ -127,6 +127,12 @@ export class CreateWorkspaceController {
 
     this.stack = this.stackSelectorSvc.getStackById(stackId);
 
+    if (!this.stack.workspaceConfig) {
+      this.memoryByMachine = {};
+      this.stackMachines = []
+      return;
+    }
+
     const environmentName = this.stack.workspaceConfig.defaultEnv;
     const environment = this.stack.workspaceConfig.environments[environmentName];
     const recipeType = environment.recipe.type;
@@ -192,7 +198,7 @@ export class CreateWorkspaceController {
    * @return {boolean}
    */
   isCreateButtonDisabled(): boolean {
-    if (!this.namespaceId) {
+    if (!this.namespaceId || (this.stack && !this.stack.workspaceConfig)) {
       return true;
     }
 
