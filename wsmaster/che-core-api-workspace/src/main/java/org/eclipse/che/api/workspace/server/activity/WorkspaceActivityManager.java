@@ -60,7 +60,7 @@ public class WorkspaceActivityManager {
     @Inject
     public WorkspaceActivityManager(WorkspaceManager workspaceManager,
                                     EventService eventService,
-                                    @Named("che.machine.ws.agent.inactive.stop.timeout.ms") long timeout) {
+                                    @Named("che.workspace.agent.dev.inactive_stop_timeout_ms") long timeout) {
         this.timeout = timeout;
         this.workspaceManager = workspaceManager;
         this.eventService = eventService;
