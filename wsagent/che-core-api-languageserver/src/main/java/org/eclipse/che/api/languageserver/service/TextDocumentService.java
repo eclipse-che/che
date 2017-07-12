@@ -68,8 +68,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.prefixURI;
-import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.removePrefixUri;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
 
 /**
  * Json RPC API for the textDoc

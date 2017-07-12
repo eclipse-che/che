@@ -10,19 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.core.notification.EventService;
+
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
+import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.ShowMessageRequestParams;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
@@ -114,7 +111,7 @@ public class ServerInitializerImpl implements ServerInitializer {
     private InitializeParams prepareInitializeParams(String projectPath) {
         InitializeParams initializeParams = new InitializeParams();
         initializeParams.setProcessId(PROCESS_ID);
-        initializeParams.setRootPath(projectPath);
+        initializeParams.setRootPath(LanguageServiceUtils.removeUriScheme(projectPath));
         initializeParams.setCapabilities(new ClientCapabilities());
         initializeParams.setClientName(CLIENT_NAME);
         return initializeParams;

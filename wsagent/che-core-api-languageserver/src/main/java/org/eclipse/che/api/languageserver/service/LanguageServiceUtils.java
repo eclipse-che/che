@@ -11,21 +11,29 @@
 package org.eclipse.che.api.languageserver.service;
 
 /**
- * Text document service utilities
+ * Language service service utilities
  */
-class TextDocumentServiceUtils {
+public class LanguageServiceUtils {
     private static final String FILE_PROJECTS = "file:///projects";
 
-    static String prefixURI(String relativePath) {
+    public static String prefixURI(String relativePath) {
         return FILE_PROJECTS + relativePath;
     }
 
-    static String removePrefixUri(String uri) {
+    public static String removePrefixUri(String uri) {
         return uri.startsWith(FILE_PROJECTS) ? uri.substring(FILE_PROJECTS.length()) : uri;
     }
+
+    public static String removeUriScheme(String uri) {
+        return uri.startsWith(FILE_PROJECTS) ? uri.substring("file://".length()) : uri;
+    }
     
-    static boolean truish(Boolean b) {
+    public static boolean truish(Boolean b) {
         return b != null && b;
+    }
+
+    public static  boolean isProjectUri(String path) {
+        return path.startsWith(FILE_PROJECTS);
     }
 
 }

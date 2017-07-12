@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
+import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
@@ -44,7 +45,6 @@ import java.util.stream.Collectors;
 @Singleton
 public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     private final static Logger                LOG                 = LoggerFactory.getLogger(LanguageServerRegistryImpl.class);
-    private final static String                PROJECT_FOLDER_PATH = "file:///projects";
     private final List<LanguageDescription>    languages;
     private final List<LanguageServerLauncher> launchers;
     private final AtomicInteger                serverId            = new AtomicInteger();
@@ -194,13 +194,13 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
             throw new LanguageServerException("Project not found for " + filePath, e);
         }
 
-        if (!filePath.startsWith(PROJECT_FOLDER_PATH)) {
+        if (!LanguageServiceUtils.isProjectUri(filePath)) {
             throw new LanguageServerException("Project not found for " + filePath);
         }
 
         VirtualFileEntry fileEntry;
         try {
-            fileEntry = root.getChild(filePath.substring(PROJECT_FOLDER_PATH.length() + 1));
+            fileEntry = root.getChild(LanguageServiceUtils.removePrefixUri(filePath));
         } catch (ServerException e) {
             throw new LanguageServerException("Project not found for " + filePath, e);
         }
@@ -209,7 +209,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
             throw new LanguageServerException("Project not found for " + filePath);
         }
 
-        return PROJECT_FOLDER_PATH + fileEntry.getProject();
+        return LanguageServiceUtils.prefixURI(fileEntry.getProject());
     }
 
     public List<Collection<InitializedLanguageServer>> getApplicableLanguageServers(String fileUri) throws LanguageServerException {
