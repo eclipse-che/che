@@ -13,7 +13,7 @@
 export class CheNumberRoundFilter {
 
   constructor(register: che.IRegisterService) {
-    register.filter('cheNumberRoundFilter', () => {
+    register.filter('numberRound', () => {
       return (number: number, precision: number) => {
         number = parseFloat(number);
         precision = parseInt(precision, 10);
@@ -25,9 +25,9 @@ export class CheNumberRoundFilter {
           precision = 0;
         }
 
-        let  factor = Math.pow(10, precision);
-        let  tempNumber = number * factor;
-        let  roundedTempNumber = Math.round(tempNumber);
+        const factor = Math.pow(10, precision);
+        const tempNumber = number * factor;
+        const roundedTempNumber = Math.round(tempNumber);
         return (roundedTempNumber / factor).toString();
       };
     });

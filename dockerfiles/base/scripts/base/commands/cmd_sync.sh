@@ -48,7 +48,11 @@ cmd_sync() {
   # Determine the mount path to do the mount
   info "mount" "Starting sync process to ${SYNC_MOUNT}"
 
-  docker_run --cap-add SYS_ADMIN \
+# grab docker run options to enable tty
+DOCKER_RUN_OPTIONS=$(get_docker_run_terminal_options)
+
+  docker_run ${DOCKER_RUN_OPTIONS} \
+	     --cap-add SYS_ADMIN \
              --device /dev/fuse \
              --security-opt apparmor:unconfined \
              -e CHE_VERSION=${CHE_VERSION} \

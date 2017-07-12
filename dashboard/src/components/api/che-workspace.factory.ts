@@ -386,9 +386,9 @@ export class CheWorkspace {
       return item[0] + ':' + item[1];
     });
     let promise = namespace ? this.remoteWorkspaceAPI.createWithNamespace({
-      namespace: namespace,
-      attribute: attrs
-    }, data).$promise :
+        namespace: namespace,
+        attribute: attrs
+      }, data).$promise :
       this.remoteWorkspaceAPI.create({attribute: attrs}, data).$promise;
     return promise;
   }
@@ -398,9 +398,9 @@ export class CheWorkspace {
       return item[0] + ':' + item[1];
     });
     return namespace ? this.remoteWorkspaceAPI.createWithNamespace({
-      namespace: namespace,
-      attribute: attrs
-    }, workspaceConfig).$promise :
+        namespace: namespace,
+        attribute: attrs
+      }, workspaceConfig).$promise :
       this.remoteWorkspaceAPI.create({attribute: attrs}, workspaceConfig).$promise;
   }
 

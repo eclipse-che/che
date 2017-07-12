@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.languageserver.ide;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -39,6 +38,7 @@ import org.eclipse.che.plugin.languageserver.ide.navigation.declaration.FindDefi
 import org.eclipse.che.plugin.languageserver.ide.navigation.references.FindReferencesAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.GoToSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.workspace.FindSymbolAction;
+import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -97,28 +97,28 @@ public class LanguageServerExtension {
     protected void registerFileEventHandler(final EventBus eventBus,
                                             final TextDocumentServiceClient serviceClient,
                                             final DtoFactory dtoFactory,
-                                            final LanguageServerFileTypeRegister fileTypeRegister) {
-        eventBus.addHandler(FileEvent.TYPE, event -> {
-            Path location = event.getFile().getLocation();
-            if (!checkIsLSExist(location, fileTypeRegister)) {
-                return;
-            }
-            final TextDocumentIdentifier documentId = dtoFactory.createDto(TextDocumentIdentifier.class);
-            documentId.setUri(location.toString());
-            switch (event.getOperationType()) {
-                case CLOSE:
-                    onClose(documentId, dtoFactory, serviceClient);
-                    break;
-                case SAVE:
-                    onSave(documentId, dtoFactory, serviceClient);
-                    break;
-            }
-        });
+                                            final LanguageServerRegistry lsRegistry) {
+        eventBus.addHandler(FileEvent.TYPE, new FileEvent.FileEventHandler() {
 
-        eventBus.addHandler(EditorOpenedEvent.TYPE, event ->{
-            Path location = event.getFile().getLocation();
-            if (!checkIsLSExist(location, fileTypeRegister)) {
-                return;
+            @Override
+            public void onFileOperation(final FileEvent event) {
+                Path location = event.getFile().getLocation();
+                if (lsRegistry.getLanguageDescription(event.getFile()) == null) {
+                    return;
+                }
+                final TextDocumentIdentifier documentId = dtoFactory.createDto(TextDocumentIdentifier.class);
+                documentId.setUri(location.toString());
+                switch (event.getOperationType()) {
+                    case OPEN:
+                        onOpen(event, dtoFactory, serviceClient, lsRegistry);
+                        break;
+                    case CLOSE:
+                        onClose(documentId, dtoFactory, serviceClient);
+                        break;
+                    case SAVE:
+                        onSave(documentId, dtoFactory, serviceClient);
+                        break;
+                }
             }
             onOpen(event.getEditor(), event.getFile(), dtoFactory, serviceClient, fileTypeRegister);
         });
@@ -144,19 +144,18 @@ public class LanguageServerExtension {
         serviceClient.didClose(closeEvent);
     }
 
-    private void onOpen(EditorPartPresenter editor,
-                        VirtualFile file,
-                        DtoFactory dtoFactory,
-                        TextDocumentServiceClient serviceClient,
-                        LanguageServerFileTypeRegister fileTypeRegister) {
-
-        if (editor instanceof TextEditor) {
-            String text = ((TextEditor)editor).getDocument().getContents();
-            TextDocumentItem documentItem = dtoFactory.createDto(TextDocumentItem.class);
-            documentItem.setUri(file.getLocation().toString());
-            documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
-            documentItem.setText(text);
-            documentItem.setLanguageId(fileTypeRegister.findLangId(file.getLocation().getFileExtension()));
+    private void onOpen(final FileEvent event,
+                        final DtoFactory dtoFactory,
+                        final TextDocumentServiceClient serviceClient,
+                        final LanguageServerRegistry lsRegistry) {
+        event.getFile().getContent().then(new Operation<String>() {
+            @Override
+            public void apply(String text) throws OperationException {
+                TextDocumentItem documentItem = dtoFactory.createDto(TextDocumentItem.class);
+                documentItem.setUri(event.getFile().getLocation().toString());
+                documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
+                documentItem.setText(text);
+                documentItem.setLanguageId(lsRegistry.getLanguageDescription(event.getFile()).getLanguageId());
 
             DidOpenTextDocumentParams openEvent = dtoFactory.createDto(DidOpenTextDocumentParams.class);
             openEvent.setTextDocument(documentItem);

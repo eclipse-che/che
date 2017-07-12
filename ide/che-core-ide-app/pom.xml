@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-ide-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.14.0-SNAPSHOT</version>
+        <version>5.15.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-ide-app</artifactId>
     <packaging>jar</packaging>
@@ -336,6 +336,15 @@
                         <exclude>**/*.png</exclude>
                         <exclude>**/*.gif</exclude>
                         <exclude>**/*.jpg</exclude>
+                        <exclude>**/OutputCustomizer.java</exclude>
+                        <exclude>**/AbstractOutputCustomizer.java</exclude>
+                        <exclude>**/BaseOutputCustomizerTest.java</exclude>
+                        <exclude>**/JavaOutputCustomizer.java</exclude>
+                        <exclude>**/JavaOutputCustomizerTest.java</exclude>
+                        <exclude>**/CompoundOutputCustomizer.java</exclude>
+                        <exclude>**/CompoundOutputCustomizerTest.java</exclude>
+                        <exclude>**/CSharpOutputCustomizer.java</exclude>
+                        <exclude>**/CSharpOutputCustomizerTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

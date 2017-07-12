@@ -14,16 +14,16 @@
  * Defines the class for filter selector widget.
  * @author Ann Shumilova
  */
-export class CheFilterSelector {
+export class CheFilterSelector implements ng.IDirective {
 
-  private restrict: string = 'E';
-  private bindToController: boolean = true;
-  private templateUrl: string = 'components/widget/filter-selector/che-filter-selector.html';
-  private controller: string = 'CheFilterSelectorController';
-  private controllerAs: string = 'cheFilterSelectorController';
-  private require: Array<string> = ['ngModel'];
+  restrict: string = 'E';
+  bindToController: boolean = true;
+  templateUrl: string = 'components/widget/filter-selector/che-filter-selector.html';
+  controller: string = 'CheFilterSelectorController';
+  controllerAs: string = 'cheFilterSelectorController';
+  require: Array<string> = ['ngModel'];
 
-  private scope: {
+  scope: {
     [propName: string]: string
   };
 
@@ -36,7 +36,7 @@ export class CheFilterSelector {
       valueModel: '=ngModel',
       values: '=cheValues',
       isDisabled: '=cheDisabled',
-      onChange: '=cheOnChange',
+      onChange: '&cheOnChange',
       width: '@?cheWidth'
     };
   }

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-testing-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.14.0-SNAPSHOT</version>
+        <version>5.15.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-testing-ide</artifactId>
     <name>Che Plugin :: Testing :: IDE</name>
@@ -49,6 +49,10 @@
             <artifactId>guice-assistedinject</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
         </dependency>
@@ -63,6 +67,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-project-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -141,14 +149,7 @@
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                        <exclude>**/**/TestingHandler.java</exclude>
-                        <exclude>**/**/ExecutorPromiseMocker.java</exclude>
-                        <exclude>**/**/PromiseMocker.java</exclude>
-                        <exclude>**/**/FunctionAnswer.java</exclude>
-                        <exclude>**/**/MockitoPrinter.java</exclude>
-                        <exclude>**/**/TestServiceClientTest.java</exclude>
-                    </excludes>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
             <plugin>

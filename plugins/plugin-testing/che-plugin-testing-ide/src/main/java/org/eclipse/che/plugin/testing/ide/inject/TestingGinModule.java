@@ -14,9 +14,6 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.plugin.testing.ide.view.TestResultView;
-import org.eclipse.che.plugin.testing.ide.view.TestResultViewImpl;
-import org.eclipse.che.plugin.testing.ide.view.navigation.factory.TestResultNodeFactory;
 /**
  * Gin Module for test runner extension.
  *
@@ -26,7 +23,10 @@ import org.eclipse.che.plugin.testing.ide.view.navigation.factory.TestResultNode
 public class TestingGinModule extends AbstractGinModule{
     @Override
     protected void configure() {
-        install(new GinFactoryModuleBuilder().build(TestResultNodeFactory.class));
-        bind(TestResultView.class).to(TestResultViewImpl.class);
+        install(new GinFactoryModuleBuilder().build(org.eclipse.che.plugin.testing.ide.view.navigation.factory.TestResultNodeFactory.class));
+        install(new GinFactoryModuleBuilder().build(org.eclipse.che.plugin.testing.ide.view2.navigation.factory.TestResultNodeFactory.class));
+
+        bind(org.eclipse.che.plugin.testing.ide.view2.TestResultView.class).to(org.eclipse.che.plugin.testing.ide.view2.TestResultViewImpl.class);
+        bind(org.eclipse.che.plugin.testing.ide.view.TestResultView.class).to(org.eclipse.che.plugin.testing.ide.view.TestResultViewImpl.class);
     }
 }

@@ -20,13 +20,12 @@ export class CreateProjectGithub {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($http, $q, $window, $location, $browser, $modal, $filter, GitHub, githubPopup, gitHubTokenStore, githubOrganizationNameResolver) {
+  constructor($http, $q, $window, $location, $browser, $filter, GitHub, githubPopup, gitHubTokenStore, githubOrganizationNameResolver) {
     this.$http = $http;
     this.$q = $q;
     this.$window = $window;
     this.$location = $location;
     this.$browser = $browser;
-    this.$modal = $modal;
     this.$filter = $filter;
     this.GitHub = GitHub;
     this.gitHubTokenStore = gitHubTokenStore;

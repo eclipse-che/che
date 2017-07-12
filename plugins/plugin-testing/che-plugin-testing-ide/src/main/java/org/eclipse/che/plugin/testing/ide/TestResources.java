@@ -10,27 +10,31 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide;
 
-import org.vectomatic.dom.svg.ui.SVGResource;
-
 import com.google.gwt.resources.client.ClientBundle;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Resources for test extension.
  *
  * @author Mirage Abeysekara
- * 
  */
 public interface TestResources extends ClientBundle {
-
+    
     @Source("org/eclipse/che/plugin/testing/ide/svg/test.svg")
+    @Deprecated
     SVGResource testIcon();
 
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_all.svg")
+    SVGResource debugIcon();
+
     @Source("org/eclipse/che/plugin/testing/ide/svg/test_results_pass.svg")
+    @Deprecated
     SVGResource testResultsPass();
 
     @Source("org/eclipse/che/plugin/testing/ide/svg/test_results_fail.svg")
+    @Deprecated
     SVGResource testResultsFail();
-
+    
     @Source("org/eclipse/che/plugin/testing/ide/svg/test_method_fail.svg")
     SVGResource testMethodFail();
 
@@ -42,4 +46,19 @@ public interface TestResources extends ClientBundle {
 
     @Source("org/eclipse/che/plugin/testing/ide/svg/show_failures_only_icon.svg")
     SVGResource showFailuresOnlyButtonIcon();
+    
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_result_failure.svg")
+    SVGResource testResultFailureIcon();
+    
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_result_success.svg")
+    SVGResource testResultSuccessIcon();
+    
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_result_warning.svg")
+    SVGResource testResultWarningIcon();
+    
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_result_skipped.svg")
+    SVGResource testResultSkippedIcon();
+    
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_result_trace_frame.svg")
+    SVGResource testResultTraceFrameIcon();
 }

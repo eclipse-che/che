@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-docker-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.14.0-SNAPSHOT</version>
+        <version>5.15.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-docker-machine</artifactId>
     <packaging>jar</packaging>
@@ -165,6 +165,8 @@
                         <exclude>**/DefaultServerEvaluationStrategyTest.java</exclude>
                         <exclude>**/LocalDockerServerEvaluationStrategy.java</exclude>
                         <exclude>**/LocalDockerServerEvaluationStrategyTest.java</exclude>
+                        <exclude>**/LocalDockerCustomServerEvaluationStrategy.java</exclude>
+                        <exclude>**/LocalDockerCustomServerEvaluationStrategyTest.java</exclude>
                         <exclude>**/DockerInstanceRuntimeInfo.java</exclude>
                         <exclude>**/DockerInstanceRuntimeInfoTest.java</exclude>
                         <!-- End excluded files -->

@@ -10,18 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.openshift.client.kubernetes;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import io.fabric8.kubernetes.api.model.IntOrString;
+import io.fabric8.kubernetes.api.model.ServicePort;
 
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ImageConfig;
 import org.eclipse.che.plugin.openshift.client.CheServicePorts;
 
-import io.fabric8.kubernetes.api.model.IntOrString;
-import io.fabric8.kubernetes.api.model.ServicePort;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Provides API for managing Kubernetes {@link ServicePort}
@@ -47,7 +47,7 @@ public final class KubernetesService {
 
             int portNumber = Integer.parseInt(port);
             String portName = CheServicePorts.get().get(portNumber);
-            portName = isNullOrEmpty(portName) ? exposedPort.replace("/", "-") : portName;
+            portName = isNullOrEmpty(portName) ? "server-" + exposedPort.replace("/", "-") : portName;
 
             int targetPortNumber = portNumber;
             ServicePort servicePort = new ServicePort();

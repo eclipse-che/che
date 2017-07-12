@@ -41,4 +41,7 @@ public interface ArchetypeOutput {
      */
     State getState();
 
+    void setOutput(String output);
+
+    void setState(State state);
 }

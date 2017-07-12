@@ -159,6 +159,9 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
         /** Handle scrolling the output. */
         void onOutputScrolled(boolean bottomReached);
 
+        /** Returns the customizer for the console output */ 
+        OutputCustomizer getCustomizer(); 
+
     }
 
 }

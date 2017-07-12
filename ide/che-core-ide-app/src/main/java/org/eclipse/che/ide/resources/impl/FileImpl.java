@@ -110,7 +110,7 @@ class FileImpl extends ResourceImpl implements File {
     /** {@inheritDoc} */
     @Override
     public Promise<Void> updateContent(String content) {
-        setModificationStamp(TextUtils.md5(content));
+        updateModificationStamp(content);
 
         return resourceManager.write(this, content);
     }
@@ -139,5 +139,10 @@ class FileImpl extends ResourceImpl implements File {
     @Override
     public String getModificationStamp() {
         return modificationStamp;
+    }
+
+    @Override
+    public void updateModificationStamp(String content) {
+        this.modificationStamp = TextUtils.md5(content);
     }
 }

@@ -12,8 +12,8 @@ package org.eclipse.che.ide.api.machine.execagent;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsRequestDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsResponseDto;

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-agent-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.14.0-SNAPSHOT</version>
+        <version>5.15.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-testing</artifactId>
     <name>Che Core :: API :: Testing</name>
@@ -66,7 +66,15 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -124,11 +132,7 @@
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                        <exclude>**/**/TestingOutputImpl.java</exclude>
-                        <exclude>**/**/AbstractTestListener.java</exclude>
-                        <exclude>**/**/OutputTestListener.java</exclude>
-                    </excludes>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
             <plugin>
