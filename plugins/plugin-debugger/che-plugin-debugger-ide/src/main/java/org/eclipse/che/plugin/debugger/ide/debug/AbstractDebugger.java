@@ -75,6 +75,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -86,7 +87,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     public static final String LOCAL_STORAGE_DEBUGGER_SESSION_KEY = "che-debugger-session";
     public static final String LOCAL_STORAGE_DEBUGGER_STATE_KEY   = "che-debugger-state";
-    public static final String WS_AGENT_ENDPOINT                  = "ws-agent";
 
     public static final String EVENT_DEBUGGER_MESSAGE_BREAKPOINT = "event:debugger:breakpoint";
     public static final String EVENT_DEBUGGER_MESSAGE_DISCONNECT = "event:debugger:disconnect";
@@ -288,7 +288,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
     private void subscribeToDebuggerEvents() {
         transmitter.newRequest()
-                   .endpointId(WS_AGENT_ENDPOINT)
+                   .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
                    .methodName(EVENT_DEBUGGER_SUBSCRIBE)
                    .noParams()
                    .sendAndSkipResult();
@@ -296,7 +296,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
     private void unsubscribeFromDebuggerEvents() {
         transmitter.newRequest()
-                   .endpointId(WS_AGENT_ENDPOINT)
+                   .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
                    .methodName(EVENT_DEBUGGER_UN_SUBSCRIBE)
                    .noParams()
                    .sendAndSkipResult();

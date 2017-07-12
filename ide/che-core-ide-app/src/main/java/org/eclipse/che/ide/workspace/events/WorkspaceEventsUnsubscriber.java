@@ -26,6 +26,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STATUS_CHANGED_METHOD;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_OUTPUT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_STATUSES_ENDPOINT_ID;
 
 /** Unsubscribes from receiving JSON-RPC notifications from WS-master when workspace is stopped. */
 @Singleton
@@ -36,12 +38,11 @@ class WorkspaceEventsUnsubscriber {
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> {
             Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
 
-            // TODO (spi ide): consider shared constants for the endpoints
-            subscriptionManagerClient.unSubscribe("workspace/statuses", WORKSPACE_STATUS_CHANGED_METHOD, scope);
-            subscriptionManagerClient.unSubscribe("workspace/statuses", MACHINE_STATUS_CHANGED_METHOD, scope);
-            subscriptionManagerClient.unSubscribe("workspace/statuses", SERVER_STATUS_CHANGED_METHOD, scope);
-            subscriptionManagerClient.unSubscribe("workspace/output", MACHINE_LOG_METHOD, scope);
-            subscriptionManagerClient.unSubscribe("workspace/output", INSTALLER_LOG_METHOD, scope);
+            subscriptionManagerClient.unSubscribe(WORKSAPCE_STATUSES_ENDPOINT_ID, WORKSPACE_STATUS_CHANGED_METHOD, scope);
+            subscriptionManagerClient.unSubscribe(WORKSAPCE_STATUSES_ENDPOINT_ID, MACHINE_STATUS_CHANGED_METHOD, scope);
+            subscriptionManagerClient.unSubscribe(WORKSAPCE_STATUSES_ENDPOINT_ID, SERVER_STATUS_CHANGED_METHOD, scope);
+            subscriptionManagerClient.unSubscribe(WORKSAPCE_OUTPUT_ENDPOINT_ID, MACHINE_LOG_METHOD, scope);
+            subscriptionManagerClient.unSubscribe(WORKSAPCE_OUTPUT_ENDPOINT_ID, INSTALLER_LOG_METHOD, scope);
         });
     }
 }

@@ -22,6 +22,7 @@ import javax.inject.Singleton;
 import static com.google.gwt.user.client.Window.Location.getHost;
 import static com.google.gwt.user.client.Window.Location.getProtocol;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_STATUSES_ENDPOINT_ID;
 
 /** Initializes JSON-RPC connection to the workspace master for listening to the statuses of workspaces, machines, servers. */
 @Singleton
@@ -76,7 +77,7 @@ public class WsMasterStatusesJsonRpcInitializer {
             workspaceMasterUrl = getWsMasterURL();
         }
 
-        initializer.initialize("workspace/statuses", singletonMap("url", workspaceMasterUrl));
+        initializer.initialize(WORKSAPCE_STATUSES_ENDPOINT_ID, singletonMap("url", workspaceMasterUrl));
     }
 
     private String getWsMasterURL() {
@@ -88,6 +89,6 @@ public class WsMasterStatusesJsonRpcInitializer {
     }
 
     public void terminate() {
-        initializer.terminate("workspace/statuses");
+        initializer.terminate(WORKSAPCE_STATUSES_ENDPOINT_ID);
     }
 }

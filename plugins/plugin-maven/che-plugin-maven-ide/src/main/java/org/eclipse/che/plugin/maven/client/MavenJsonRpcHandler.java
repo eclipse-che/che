@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_OUTPUT;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_SUBSCRIBE;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_CHANEL_SUBSCRIBE;
@@ -40,8 +41,6 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_U
  */
 @Singleton
 public class MavenJsonRpcHandler {
-    private static final String WS_AGENT_ENDPOINT = "ws-agent";
-
     private RequestHandlerConfigurator configurator;
 
     private Set<Consumer<TextMessageDto>>             textConsumers             = new HashSet<>();
@@ -67,13 +66,13 @@ public class MavenJsonRpcHandler {
         }
 
         requestTransmitter.newRequest()
-                          .endpointId(WS_AGENT_ENDPOINT)
+                          .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
                           .methodName(MAVEN_CHANEL_SUBSCRIBE)
                           .noParams()
                           .sendAndSkipResult();
 
         requestTransmitter.newRequest()
-                          .endpointId(WS_AGENT_ENDPOINT)
+                          .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
                           .methodName(MAVEN_ARCHETYPE_CHANEL_SUBSCRIBE)
                           .noParams()
                           .sendAndSkipResult();

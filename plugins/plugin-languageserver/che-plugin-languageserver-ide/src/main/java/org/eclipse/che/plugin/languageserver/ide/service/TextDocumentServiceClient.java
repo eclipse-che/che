@@ -44,6 +44,8 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 
 import java.util.List;
 
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
+
 
 @Singleton
 public class TextDocumentServiceClient {
@@ -215,7 +217,7 @@ public class TextDocumentServiceClient {
 
     private <T> Promise<T> transmitDtoAndReceiveDto(Object jsonSerializable, String name, Class<T> resultDtoClass) {
         return Promises.create((resolve, reject) -> requestTransmitter.newRequest()
-                                                                      .endpointId("ws-agent")
+                                                                      .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
                                                                       .methodName(name)
                                                                       .paramsAsDto(jsonSerializable)
                                                                       .sendAndReceiveResultAsDto(resultDtoClass)
@@ -225,7 +227,7 @@ public class TextDocumentServiceClient {
 
     private <T> Promise<List<T>> transmitDtoAndReceiveDtoList(Object jsonSerializable, String name, Class<T> resultDtoClass) {
         return Promises.create((resolve, reject) -> requestTransmitter.newRequest()
-                                                                      .endpointId("ws-agent")
+                                                                      .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
                                                                       .methodName(name)
                                                                       .paramsAsDto(jsonSerializable)
                                                                       .sendAndReceiveResultAsListOfDto(resultDtoClass)
@@ -235,7 +237,7 @@ public class TextDocumentServiceClient {
 
     private void transmitDtoAndReceiveNothing(Object jsonSerializable, String name) {
         requestTransmitter.newRequest()
-                          .endpointId("ws-agent")
+                          .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
                           .methodName(name)
                           .paramsAsDto(jsonSerializable)
                           .sendAndSkipResult();
