@@ -12,6 +12,8 @@ package org.eclipse.che.plugin.web.typescript;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
+import org.eclipse.che.api.languageserver.registry.DocumentFilter;
+import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.plugin.web.shared.Constants;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 
 /**
@@ -30,6 +33,10 @@ import java.nio.file.Paths;
  */
 @Singleton
 public class TSLSLauncher extends LanguageServerLauncherTemplate {
+
+    private static final String   REGEX = ".*\\.ts";
+    private static final LanguageServerDescription DESCRIPTION = createServerDescription();
+    
     private final Path launchScript;
 
     public TSLSLauncher() {
@@ -56,9 +63,17 @@ public class TSLSLauncher extends LanguageServerLauncherTemplate {
         return launcher.getRemoteProxy();
     }
 
+
     @Override
-    public String getLanguageId() {
-        return Constants.TS_LANG;
+    public LanguageServerDescription getDescription() {
+        return DESCRIPTION;
+    }
+
+
+    private static LanguageServerDescription createServerDescription() {
+        LanguageServerDescription description = new LanguageServerDescription("org.eclipse.che.plugin.web.typescript", null,
+                        Arrays.asList(new DocumentFilter(Constants.TS_LANG, REGEX, null)));
+        return description;
     }
 
     @Override

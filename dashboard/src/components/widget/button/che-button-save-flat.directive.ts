@@ -29,12 +29,12 @@ import {CheButton} from './che-button.directive';
  *   <che-button-save-flat che-button-title="save"></che-button-save-flat>
  *
  * @example
- <example module="userDashboard">
- <file name="index.html">
- <che-button-save-flat che-button-title="Save"></che-button-save-flat>
- <che-button-save-flat che-button-title="Save" che-button-icon="fa fa-floppy-o"></che-button-save-flat>
- </file>
- </example>
+ * <example module="userDashboard">
+ * <file name="index.html">
+ * <che-button-save-flat che-button-title="Save"></che-button-save-flat>
+ * <che-button-save-flat che-button-title="Save" che-button-icon="fa fa-floppy-o"></che-button-save-flat>
+ * </file>
+ * </example>
  * @author Oleksii Kurinnyi
  */
 export class CheButtonSaveFlat extends CheButton {
@@ -51,7 +51,7 @@ export class CheButtonSaveFlat extends CheButton {
   /**
    * Template for the buttons
    */
-  getTemplateStart() {
+  getTemplateStart(): string {
     return '<md-button md-theme=\"chesave\" class=\"che-button md-accent md-raised md-hue-1\"';
   }
 

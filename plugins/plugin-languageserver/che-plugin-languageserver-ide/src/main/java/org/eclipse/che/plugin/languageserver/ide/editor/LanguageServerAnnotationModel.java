@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModelImpl;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
@@ -21,11 +20,13 @@ import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.EditorResources;
 import org.eclipse.che.ide.editor.orion.client.OrionAnnotationSeverityProvider;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +35,11 @@ import java.util.Map;
  * @author Evgen Vidolob
  */
 public class LanguageServerAnnotationModel extends AnnotationModelImpl implements DiagnosticCollector, OrionAnnotationSeverityProvider {
-    private final LanguageServerResources.LSCss lsCss;
-    private final EditorResources.EditorCss     editorCss;
-    private       List<Diagnostic>              diagnostics;
-    private List<DiagnosticAnnotation> generatedAnnotations = new ArrayList<>();
+    private final LanguageServerResources.LSCss         lsCss;
+    private final EditorResources.EditorCss             editorCss;
+    private final Map<String, List<Diagnostic>>         diagnostics          = new HashMap<>();
+    private final Map<String, List<Diagnostic>>         collectedDiagnostics = new HashMap<>();
+    private final Map<Diagnostic, DiagnosticAnnotation> generatedAnnotations = new HashMap<>();
 
     @AssistedInject
     public LanguageServerAnnotationModel(@Assisted final DocumentPositionMap docPositionMap,
@@ -75,47 +77,64 @@ public class LanguageServerAnnotationModel extends AnnotationModelImpl implement
     }
 
     @Override
-    public void acceptDiagnostic(final Diagnostic problem) {
-        diagnostics.add(problem);
+    public void acceptDiagnostic(String diagnosticCollection, final Diagnostic problem) {
+        collectedDiagnostics.get(diagnosticCollection).add(problem);
     }
 
     @Override
-    public void beginReporting() {
-        diagnostics = new ArrayList<>();
+    public void beginReporting(String diagnosticCollection) {
+        collectedDiagnostics.put(diagnosticCollection, new ArrayList<>());
     }
 
     @Override
-    public void endReporting() {
-        reportDiagnostic();
+    public void endReporting(String diagnosticCollection) {
+        reportDiagnostic(diagnosticCollection, collectedDiagnostics.remove(diagnosticCollection));
     }
 
-    private void reportDiagnostic() {
+    private void reportDiagnostic(String diagnosticCollection, List<Diagnostic> newDiagnostics) {
         boolean temporaryProblemsChanged = false;
 
-        if (!generatedAnnotations.isEmpty()) {
-            temporaryProblemsChanged = true;
-            super.clear();
-            generatedAnnotations.clear();
-        }
+        List<Diagnostic> currentDiagnostics = diagnostics.getOrDefault(diagnosticCollection, Collections.emptyList());
+        // new list becomes previous list, but make a copy; the collection is modified below.
+        diagnostics.put(diagnosticCollection, new ArrayList<>(newDiagnostics));
 
-        if (diagnostics != null && !diagnostics.isEmpty()) {
-
-            for (final Diagnostic diagnostic : diagnostics) {
-                final Position position = createPositionFromDiagnostic(diagnostic);
-
-                if (position != null) {
-                    final DiagnosticAnnotation annotation = new DiagnosticAnnotation(diagnostic);
-                    addAnnotation(annotation, position, false);
-                    generatedAnnotations.add(annotation);
-
-                    temporaryProblemsChanged = true;
-                }
+        for (Diagnostic diagnostic : currentDiagnostics) {
+            // go through the current set and remove those that are not present
+            // in the new set.
+            if (!newDiagnostics.contains(diagnostic)) {
+                removeAnnotationFor(diagnostic);
+                temporaryProblemsChanged= true;
+            } else {
+                newDiagnostics.remove(diagnostic);
             }
         }
-
+        for (Diagnostic diagnostic : newDiagnostics) {
+            // now go through the ones left in the new set: they are new
+            addAnnotationFor(diagnostic);
+            temporaryProblemsChanged= true;
+        }
+        
         if (temporaryProblemsChanged) {
             fireModelChanged();
         }
+    }
+
+    private void addAnnotationFor(Diagnostic diagnostic) {
+        Log.debug(getClass(), "adding annotation for "+diagnostic);
+        DiagnosticAnnotation annotation = new DiagnosticAnnotation(diagnostic);
+        generatedAnnotations.put(diagnostic, annotation);
+        Position position = createPositionFromDiagnostic(diagnostic);
+        if (position != null) {
+            addAnnotation(annotation, position, false);
+        } else {
+            Log.error(getClass(), "Position is null for "+diagnostic);
+        }
+    }
+
+    private void removeAnnotationFor(Diagnostic diagnostic) {
+        Log.debug(getClass(), "removing annotation for "+diagnostic);
+        DiagnosticAnnotation annotation = generatedAnnotations.remove(diagnostic);
+        removeAnnotation(annotation, false);
     }
 
     @Override

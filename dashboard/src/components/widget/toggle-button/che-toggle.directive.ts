@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheToggleController} from "./che-toggle.controller";
+import {CheToggleController} from './che-toggle.controller';
 
 /**
  * Defines a directive for the toggle button.

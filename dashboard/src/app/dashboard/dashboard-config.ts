@@ -36,11 +36,11 @@ export class DashboardConfig {
           check: ['$q', '$location', 'cheWorkspace', 'cheService', ($q: ng.IQService, $location: ng.ILocationService, cheWorkspace: CheWorkspace, cheService: CheService) => {
             cheWorkspace.fetchWorkspaces().then(() => {
               if (cheWorkspace.getWorkspaces().length === 0) {
-                $location.path('/create-project');
+                $location.path('/create-workspace');
               }
             }, (error: any) => {
               if (error.status === 304 && cheWorkspace.getWorkspaces().length === 0) {
-                $location.path('/create-project');
+                $location.path('/create-workspace');
               }
             });
 

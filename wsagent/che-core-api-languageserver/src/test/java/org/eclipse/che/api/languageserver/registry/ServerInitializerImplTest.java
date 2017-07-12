@@ -13,6 +13,7 @@ package org.eclipse.che.api.languageserver.registry;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -29,8 +30,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -42,39 +43,41 @@ import static org.testng.Assert.assertEquals;
 public class ServerInitializerImplTest {
 
     @Mock
-    private ServerInitializerObserver           observer;
+    private ServerInitializerObserver observer;
     @Mock
-    private LanguageDescription                 languageDescription;
+    private LanguageDescription       languageDescription;
     @Mock
-    private LanguageServerLauncher              launcher;
+    private LanguageServerDescription serverDescription;
     @Mock
-    private LanguageServer                      server;
+    private LanguageServerLauncher    launcher;
     @Mock
-    private CompletableFuture<InitializeResult> completableFuture;
+    private LanguageServer            server;
     @Mock
-    private EventService                        eventService;
+    private EventService              eventService;
 
+    private CompletableFuture<InitializeResult> completableFuture;
     private ServerInitializerImpl               initializer;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        initializer = spy(new ServerInitializerImpl(eventService));
+        initializer = spy(new ServerInitializerImpl());
+        completableFuture = CompletableFuture.completedFuture(new InitializeResult(new ServerCapabilities()));
     }
 
     @Test
     public void initializerShouldNotifyObservers() throws Exception {
         when(languageDescription.getLanguageId()).thenReturn("languageId");
         when(server.initialize(any(InitializeParams.class))).thenReturn(completableFuture);
-        when(completableFuture.get()).thenReturn(mock(InitializeResult.class));
 
-        when(launcher.getLanguageId()).thenReturn("languageId");
         when(launcher.launch(anyString(), any())).thenReturn(server);
-        doNothing().when(initializer).registerCallbacks(server, launcher);
+        when(launcher.getDescription()).thenReturn(serverDescription);
+        when(serverDescription.getId()).thenReturn("launcherId");
+        doNothing().when(initializer).registerCallbacks(any(), any());
 
         initializer.addObserver(observer);
-        LanguageServer languageServer = initializer.initialize(languageDescription, launcher, "/path");
+        Pair<LanguageServer, InitializeResult> initResult = initializer.initialize(launcher, null, "/path").get();
 
-        assertEquals(server, languageServer);
-        verify(observer).onServerInitialized(eq(server), any(ServerCapabilities.class), eq(languageDescription), eq("/path"));
+        assertEquals(server, initResult.first);
+        verify(observer, timeout(2000)).onServerInitialized(eq(launcher), eq(server), any(ServerCapabilities.class), eq("/path"));
     }
 }

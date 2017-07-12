@@ -13,11 +13,13 @@ package org.eclipse.che.api.languageserver.messager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.PublishDiagnosticsParamsDto;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedPublishDiagnosticsParamsDto;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -31,15 +33,16 @@ public class PublishDiagnosticsParamsJsonRpcTransmitter {
     @Inject
     private void subscribe(EventService eventService, RequestTransmitter requestTransmitter) {
         eventService.subscribe(event -> {
-            if(event.getUri() != null) {
-                event.setUri(event.getUri().substring(16));
+            PublishDiagnosticsParams params = event.getParams();
+            if(params.getUri() != null) {
+                params.setUri(params.getUri().substring(16));
             }
             endpointIds.forEach(endpointId -> requestTransmitter.newRequest()
                                                                 .endpointId(endpointId)
                                                                 .methodName("textDocument/publishDiagnostics")
-                                                                .paramsAsDto(new PublishDiagnosticsParamsDto(event))
+                                                                .paramsAsDto(new ExtendedPublishDiagnosticsParamsDto(event))
                                                                 .sendAndSkipResult());
-        }, PublishDiagnosticsParams.class);
+        }, ExtendedPublishDiagnosticsParams.class);
     }
 
     @Inject

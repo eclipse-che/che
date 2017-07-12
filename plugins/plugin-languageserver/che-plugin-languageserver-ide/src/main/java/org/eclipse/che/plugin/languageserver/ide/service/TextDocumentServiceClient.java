@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.languageserver.ide.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcError;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
@@ -71,7 +70,7 @@ public class TextDocumentServiceClient {
      * @param completionItem
      * @return
      */
-    public Promise<ExtendedCompletionItem> resolveCompletionItem(CompletionItem completionItem) {
+    public Promise<ExtendedCompletionItem> resolveCompletionItem(ExtendedCompletionItem completionItem) {
         return transmitDtoAndReceiveDto(completionItem, "textDocument/completionItem/resolve", ExtendedCompletionItem.class);
 
     }

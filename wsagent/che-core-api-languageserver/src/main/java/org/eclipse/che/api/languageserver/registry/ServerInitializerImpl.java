@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
@@ -28,15 +28,10 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PreDestroy;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 /**
  * @author Anatoliy Bazko
@@ -49,43 +44,6 @@ public class ServerInitializerImpl implements ServerInitializer {
     private static final String CLIENT_NAME = "EclipseChe";
 
     private final List<ServerInitializerObserver> observers = new ArrayList<>();
-
-    private final ConcurrentHashMap<LanguageServer, LanguageServerDescription> serversToInitResult;
-
-    private LanguageClient languageClient;
-
-    @Inject
-    public ServerInitializerImpl(EventService eventService) {
-        this.serversToInitResult = new ConcurrentHashMap<>();
-
-        languageClient = new LanguageClient() {
-
-            @Override
-            public void telemetryEvent(Object object) {
-                // TODO Auto-generated method stub
-            }
-
-            @Override
-            public CompletableFuture<Void> showMessageRequest(ShowMessageRequestParams requestParams) {
-                return CompletableFuture.completedFuture(null);
-            }
-
-            @Override
-            public void showMessage(MessageParams messageParams) {
-                eventService.publish(messageParams);
-            }
-
-            @Override
-            public void publishDiagnostics(PublishDiagnosticsParams diagnostics) {
-                eventService.publish(diagnostics);
-            }
-
-            @Override
-            public void logMessage(MessageParams message) {
-                LOG.error(message.getType() + " " + message.getMessage());
-            }
-        };
-    }
 
     private static int getProcessId() {
         String name = ManagementFactory.getRuntimeMXBean().getName();
@@ -113,52 +71,39 @@ public class ServerInitializerImpl implements ServerInitializer {
     }
 
     @Override
-    public LanguageServer initialize(LanguageDescription language, LanguageServerLauncher launcher, String projectPath) throws LanguageServerException {
-        synchronized (launcher) {
-            LanguageServer server = doInitialize(language, launcher, projectPath);
-            onServerInitialized(server, serversToInitResult.get(server).getInitializeResult().getCapabilities(),
-                                language, projectPath);
-            return server;
-        }
-    }
-
-    @Override
-    public Map<LanguageServer, LanguageServerDescription> getInitializedServers() {
-        return Collections.unmodifiableMap(serversToInitResult);
-    }
-
-    protected LanguageServer doInitialize(LanguageDescription language, LanguageServerLauncher launcher, String projectPath) throws LanguageServerException {
-        String languageId = launcher.getLanguageId();
+    public CompletableFuture<Pair<LanguageServer, InitializeResult>> initialize(LanguageServerLauncher launcher, LanguageClient client, String projectPath)
+                    throws LanguageServerException {
         InitializeParams initializeParams = prepareInitializeParams(projectPath);
+        String launcherId = launcher.getDescription().getId();
+        CompletableFuture<Pair<LanguageServer, InitializeResult>> result= new CompletableFuture<Pair<LanguageServer,InitializeResult>>();
 
         LanguageServer server;
         try {
-            server = launcher.launch(projectPath, languageClient);
+            server = launcher.launch(projectPath, client);
         } catch (LanguageServerException e) {
-            throw new LanguageServerException(
-                    "Can't initialize Language Server " + languageId + " on " + projectPath + ". " + e.getMessage(), e);
+            result.completeExceptionally(new LanguageServerException(
+                            "Can't initialize Language Server " + launcherId + " on " + projectPath + ". " + e.getMessage(), e));
+            return result;
         }
         registerCallbacks(server, launcher);
 
         CompletableFuture<InitializeResult> completableFuture = server.initialize(initializeParams);
-        try {
-            InitializeResult initializeResult = completableFuture.get();
-            serversToInitResult.put(server, new LanguageServerDescription(initializeResult, language));
-        } catch (InterruptedException | ExecutionException e) {
+        completableFuture.thenAccept((InitializeResult res) -> {
+            onServerInitialized(launcher, server, res.getCapabilities(), projectPath);
+            result.complete(Pair.of(server, res));
+            LOG.info("Initialized Language Server {} on project {}", launcherId, projectPath);
+        }).exceptionally((Throwable e) -> {
             server.shutdown();
             server.exit();
-
-            throw new LanguageServerException("Error fetching server capabilities " + languageId + ". " + e.getMessage(), e);
-        }
-
-        LOG.info("Initialized Language Server {} on project {}", languageId, projectPath);
-        return server;
+            result.completeExceptionally(e);
+            return null;
+        });
+        return result;
     }
 
     protected void registerCallbacks(LanguageServer server, LanguageServerLauncher launcher) {
-
         if (server instanceof ServerInitializerObserver) {
-            addObserver((ServerInitializerObserver)server);
+            addObserver((ServerInitializerObserver) server);
         }
 
         if (launcher instanceof ServerInitializerObserver) {
@@ -166,7 +111,7 @@ public class ServerInitializerImpl implements ServerInitializer {
         }
     }
 
-    protected InitializeParams prepareInitializeParams(String projectPath) {
+    private InitializeParams prepareInitializeParams(String projectPath) {
         InitializeParams initializeParams = new InitializeParams();
         initializeParams.setProcessId(PROCESS_ID);
         initializeParams.setRootPath(projectPath);
@@ -175,19 +120,7 @@ public class ServerInitializerImpl implements ServerInitializer {
         return initializeParams;
     }
 
-    protected void onServerInitialized(LanguageServer server,
-                                       ServerCapabilities capabilities,
-                                       LanguageDescription languageDescription,
-                                       String projectPath) {
-        observers.forEach(observer -> observer.onServerInitialized(server, capabilities, languageDescription, projectPath));
+    private void onServerInitialized(LanguageServerLauncher launcher, LanguageServer server, ServerCapabilities capabilities, String projectPath) {
+        observers.forEach(observer -> observer.onServerInitialized(launcher, server, capabilities   , projectPath));
     }
-
-    @PreDestroy
-    protected void shutdown() {
-        for (LanguageServer server : serversToInitResult.keySet()) {
-            server.shutdown();
-            server.exit();
-        }
-    }
-
 }
