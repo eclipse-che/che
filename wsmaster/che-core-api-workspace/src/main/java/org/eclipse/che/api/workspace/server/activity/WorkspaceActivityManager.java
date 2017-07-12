@@ -144,7 +144,7 @@ public class WorkspaceActivityManager {
 
     @VisibleForTesting
     @PostConstruct
-    void subscribe() {
+    public void subscribe() {
         eventService.subscribe(workspaceEventsSubscriber);
     }
 }
