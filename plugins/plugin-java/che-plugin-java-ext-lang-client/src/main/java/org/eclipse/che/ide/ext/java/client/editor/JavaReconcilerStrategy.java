@@ -52,6 +52,7 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
     private final SemanticHighlightRenderer           highlighter;
     private final ResolvingProjectStateHolderRegistry resolvingProjectStateHolderRegistry;
     private final JavaLocalizationConstant            localizationConstant;
+    private final EventBus                            eventBus;
     private final JavaReconcileClient                 client;
 
     private EditorWithErrors            editorWithErrors;
@@ -74,6 +75,7 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
         this.highlighter = highlighter;
         this.resolvingProjectStateHolderRegistry = resolvingProjectStateHolderRegistry;
         this.localizationConstant = localizationConstant;
+        this.eventBus = eventBus;
         if (editor instanceof EditorWithErrors) {
             this.editorWithErrors = ((EditorWithErrors)editor);
         }
@@ -136,6 +138,7 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
 
                 doReconcile(reconcileResult.getProblems());
                 highlighter.reconcile(reconcileResult.getHighlightedPositions());
+                eventBus.fireEvent(new JavaReconsilerEvent(editor));
             }).onFailure(jsonRpcError -> {
                 Log.info(getClass(), jsonRpcError.getMessage());
             });

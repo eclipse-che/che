@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.view.navigation.nodes;
 
-import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
-import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
+import elemental.events.Event;
+import elemental.events.EventListener;
+import elemental.html.SpanElement;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
+import com.google.gwt.dom.client.Element;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -31,17 +32,15 @@ import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import com.google.gwt.dom.client.Element;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
-import elemental.events.Event;
-import elemental.events.EventListener;
-import elemental.html.SpanElement;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /**
  * Tree node for display the failing class.
- * 
+ *
  * @author Mirage Abeysekara
  */
 @Deprecated

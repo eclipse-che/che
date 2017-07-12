@@ -18,6 +18,7 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.server.JsonArrayImpl;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -124,6 +125,13 @@ public class TestService extends Service {
         return Response.ok()
                        .entity(page.getItems())
                        .header("Link", createLinkHeader(page, "getStringList", singletonMap("query-param", param), value))
+                       .build();
+    }
+
+    @DELETE
+    @Path("no-content")
+    public Response noContent() {
+        return Response.noContent()
                        .build();
     }
 }

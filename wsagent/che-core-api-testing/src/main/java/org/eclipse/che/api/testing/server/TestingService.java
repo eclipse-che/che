@@ -49,6 +49,7 @@ import io.swagger.annotations.ApiResponses;
  */
 @Api(value = "/che-testing")
 @Path("che/testing")
+@Deprecated
 public class TestingService {
 
     public static final Logger LOG = LoggerFactory.getLogger(TestingService.class);
@@ -167,7 +168,7 @@ public class TestingService {
         }
         return map;
     }
-    
+
     private WebApplicationException translateException(Throwable e) {
         if (e instanceof WebApplicationException) {
             return (WebApplicationException)e;

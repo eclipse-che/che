@@ -14,35 +14,41 @@
  * Defines a directive for creating header column.
  * @author Oleksii Orel
  */
-export class CheListHeaderColumn {
+export class CheListHeaderColumn implements ng.IDirective {
+  restrict = 'E';
+  replace = true;
+  templateUrl = 'components/widget/list/che-list-header-column.html';
+
+  // scope values
+  scope = {
+    sortValue: '=?cheSortValue',
+    onSortChange: '&?',
+    sortItem: '@?cheSortItem',
+    columnTitle: '@cheColumnTitle'
+  };
+
+  private $timeout: ng.ITimeoutService;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor() {
-    this.restrict = 'E';
-    this.replace = true;
-    this.templateUrl = 'components/widget/list/che-list-header-column.html';
-
-    // scope values
-    this.scope = {
-      sortValue: '=?cheSortValue',
-      sortItem: '@?cheSortItem',
-      columnTitle: '@cheColumnTitle'
-    };
+  constructor($timeout: ng.ITimeoutService) {
+    this.$timeout = $timeout;
   }
 
-  link($scope) {
+  link($scope: ng.IScope) {
     $scope.updateSortValue = () => {
       if (!$scope.sortItem || $scope.sortItem.length === 0) {
         return;
       }
-      if ($scope.sortItem === $scope.sortValue) {
-        $scope.sortValue = '-' + $scope.sortValue;
-        return;
+      const sortValue = angular.equals($scope.sortItem, $scope.sortValue) ? '-' + $scope.sortItem : $scope.sortItem;
+      $scope.sortValue = sortValue;
+      if (angular.isFunction($scope.onSortChange)) {
+        this.$timeout(() => {
+          $scope.onSortChange({sortValue: sortValue});
+        });
       }
-      $scope.sortValue = $scope.sortItem;
     };
   }
 }

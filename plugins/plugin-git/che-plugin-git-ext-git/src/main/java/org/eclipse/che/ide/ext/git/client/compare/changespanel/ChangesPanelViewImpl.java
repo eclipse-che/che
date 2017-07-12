@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.Comparator.naturalOrder;
 import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.TREE;
 
 /**
@@ -281,6 +282,7 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
 
     private List<String> getCommonPaths(List<String> allPaths) {
         List<String> commonPaths = new ArrayList<>();
+        allPaths.sort(naturalOrder());
         for (String path : allPaths) {
             int pathIndex = allPaths.indexOf(path);
             if (pathIndex + 1 == allPaths.size()) {

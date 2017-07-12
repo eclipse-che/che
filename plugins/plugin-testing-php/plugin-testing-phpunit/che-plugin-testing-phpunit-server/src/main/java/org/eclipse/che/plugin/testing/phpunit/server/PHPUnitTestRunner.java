@@ -10,18 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.phpunit.server;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
+import org.eclipse.che.api.testing.shared.TestDetectionContext;
+import org.eclipse.che.api.testing.shared.TestExecutionContext;
+import org.eclipse.che.api.testing.shared.TestPosition;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.api.testing.shared.dto.TestResultDto;
 import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
+import org.eclipse.che.commons.lang.execution.ProcessHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Collections.emptyList;
 
 /**
  * PHPUnit implementation for the test runner service.
@@ -56,6 +61,16 @@ public class PHPUnitTestRunner implements TestRunner {
         return RUNNER_ID;
     }
 
+    @Override
+    public int getDebugPort() {
+        return -1;
+    }
+
+    @Override
+    public List<TestPosition> detectTests(TestDetectionContext context) {
+        return emptyList();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -70,6 +85,11 @@ public class PHPUnitTestRunner implements TestRunner {
     @Override
     public List<TestResultDto> getTestResults(List<String> testResultsPath) {
         return testEngine.getTestResults(testResultsPath);
+    }
+
+    @Override
+    public ProcessHandler execute(TestExecutionContext context) {
+        throw new UnsupportedOperationException();
     }
 
     /**

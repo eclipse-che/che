@@ -19,7 +19,9 @@ import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.maven.server.MavenTerminal;
+import org.eclipse.che.plugin.maven.generator.archetype.MavenArchetypeJsonRpcMessenger;
 import org.eclipse.che.plugin.maven.server.PomModificationDetector;
+import org.eclipse.che.plugin.maven.server.core.MavenJsonRpcCommunication;
 import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.plugin.maven.server.core.MavenServerNotifier;
 import org.eclipse.che.plugin.maven.server.core.MavenTerminalImpl;
@@ -60,6 +62,8 @@ public class MavenModule extends AbstractModule {
         bind(MavenProgressNotifier.class).to(MavenServerNotifier.class).in(Singleton.class);
 
         bind(MavenServerService.class);
+        bind(MavenJsonRpcCommunication.class);
+        bind(MavenArchetypeJsonRpcMessenger.class);
 
         bind(PomChangeListener.class).asEagerSingleton();
         bind(PomModificationDetector.class).asEagerSingleton();

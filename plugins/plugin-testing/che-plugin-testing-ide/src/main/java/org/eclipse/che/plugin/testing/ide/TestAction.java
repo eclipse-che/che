@@ -19,6 +19,7 @@ import org.eclipse.che.ide.api.action.DefaultActionGroup;
  *
  * @author Mirage Abeysekara
  */
+@Deprecated
 public interface TestAction {
 
     /**

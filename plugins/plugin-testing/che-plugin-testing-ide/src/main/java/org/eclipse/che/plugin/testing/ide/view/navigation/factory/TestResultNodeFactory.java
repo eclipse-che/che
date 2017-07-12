@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.view.navigation.factory;
 
+import com.google.inject.assistedinject.Assisted;
+
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.api.testing.shared.dto.TestResultDto;
 import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
@@ -22,11 +24,9 @@ import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultNode;
 import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultRootNode;
 import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultTraceFrameNode;
 
-import com.google.inject.assistedinject.Assisted;
-
 /**
  * Factory for providing test navigation tree nodes.
- * 
+ *
  * @author Mirage Abeysekara
  */
 public interface TestResultNodeFactory {

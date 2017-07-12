@@ -22,7 +22,6 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.server.JsonArrayImpl;
 import org.eclipse.che.dto.server.JsonSerializable;
@@ -281,7 +280,9 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
                                                     UriBuilder.fromUri(url).replaceQuery("token").build(), method, responseCode, str));
             }
             final String contentType = conn.getContentType();
-            if (contentType != null && !contentType.startsWith(MediaType.APPLICATION_JSON)) {
+            if (responseCode != HttpURLConnection.HTTP_NO_CONTENT
+                && contentType != null
+                && !contentType.startsWith(MediaType.APPLICATION_JSON)) {
                 throw new IOException(conn.getResponseMessage());
             }
 

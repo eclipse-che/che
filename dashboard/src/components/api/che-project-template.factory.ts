@@ -16,12 +16,19 @@
  * @author Florent Benoit
  */
 export class CheProjectTemplate {
+  $resource: ng.resource.IResourceService;
+  templatesPerCategory: {
+    [category: string]: Array<che.IProjectTemplate>;
+  };
+  templates: Array<che.IProjectTemplate>;
+
+  remoteProjectTemplateAPI: ng.resource.IResourceClass<any>;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($resource) {
+  constructor ($resource: ng.resource.IResourceService) {
 
     // keep resource
     this.$resource = $resource;
@@ -33,67 +40,64 @@ export class CheProjectTemplate {
     this.templates = [];
 
     // remote call
-    this.remoteProjectTemplateAPI = this.$resource('/api/project-template/all');
+    this.remoteProjectTemplateAPI = <ng.resource.IResourceClass<any>> this.$resource('/api/project-template/all');
   }
 
 
 
   /**
    * Fetch the project templates
+   *
+   * @return {IPromise<any>}
    */
-  fetchTemplates() {
+  fetchTemplates(): ng.IPromise<any> {
 
-    let promise = this.remoteProjectTemplateAPI.query().$promise;
-    let updatedPromise = promise.then((projectTemplates) => {
-
+    const promise = this.remoteProjectTemplateAPI.query().$promise;
+    const updatedPromise = promise.then((projectTemplates: Array<che.IProjectTemplate>) => {
 
       // reset global list
       this.templates.length = 0;
-      for (var member in this.templatesPerCategory) {
-        delete this.templatesPerCategory[member];
+      for (const member in this.templatesPerCategory) {
+        if (this.templatesPerCategory.hasOwnProperty(member)) {
+          delete this.templatesPerCategory[member];
+        }
       }
 
-      projectTemplates.forEach((projectTemplate) => {
-
+      projectTemplates.forEach((projectTemplate: che.IProjectTemplate) => {
         // get attributes
-        var category = projectTemplate.category;
+        const category = projectTemplate.category;
 
         // get list
-        var lst = this.templatesPerCategory[category];
-        if (!lst) {
-          lst = [];
-          this.templatesPerCategory[category] = lst;
+        if (!this.templatesPerCategory[category]) {
+          this.templatesPerCategory[category] = [];
         }
 
         // add element on the list
         this.templatesPerCategory[category].push(projectTemplate);
 
-
-
         this.templates.push(projectTemplate);
       });
 
-
-
     });
+
     return updatedPromise;
   }
 
-
-
   /**
    * Gets all project templates
-   * @returns {Array}
+   *
+   * @return {Array<che.IProjectTemplate>}
    */
-  getAllProjectTemplates() {
+  getAllProjectTemplates(): Array<che.IProjectTemplate> {
     return this.templates;
   }
 
   /**
    * The templates per category
-   * @returns {CheProjectTemplate.templatesPerCategory|*}
+   *
+   * @return {{[p: string]: Array<che.IProjectTemplate>}}
    */
-  getTemplatesByCategory() {
+  getTemplatesByCategory(): {[category: string]: Array<che.IProjectTemplate>} {
     return this.templatesPerCategory;
   }
 

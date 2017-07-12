@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
@@ -20,7 +20,6 @@ import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.PublishDiagnosticsParams;
 
 /**
  * @author Anatolii Bazko
@@ -35,8 +34,8 @@ public class PublishDiagnosticsProcessor {
         this.editorAgent = editorAgent;
     }
 
-    public void processDiagnostics(PublishDiagnosticsParams diagnosticsMessage) {
-        EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(new Path(diagnosticsMessage.getUri()));
+    public void processDiagnostics(ExtendedPublishDiagnosticsParams diagnosticsMessage) {
+        EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(new Path(diagnosticsMessage.getParams().getUri()));
         //TODO add markers
         if (openedEditor == null) {
             return;
@@ -47,13 +46,14 @@ public class PublishDiagnosticsProcessor {
             AnnotationModel annotationModel = editorConfiguration.getAnnotationModel();
             if (annotationModel != null && annotationModel instanceof DiagnosticCollector) {
                 DiagnosticCollector collector = (DiagnosticCollector)annotationModel;
-                collector.beginReporting();
+                String languageServerId = diagnosticsMessage.getLanguageServerId();
+                collector.beginReporting(languageServerId);
                 try {
-                    for (Diagnostic diagnostic : diagnosticsMessage.getDiagnostics()) {
-                        collector.acceptDiagnostic(diagnostic);
+                    for (Diagnostic diagnostic : diagnosticsMessage.getParams().getDiagnostics()) {
+                        collector.acceptDiagnostic(languageServerId, diagnostic);
                     }
                 } finally {
-                    collector.endReporting();
+                    collector.endReporting(languageServerId);
                 }
             }
         }

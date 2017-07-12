@@ -79,7 +79,7 @@ export class AddMachineDialogController {
       'servers': {},
       'attributes': {}
     };
-    this.machineRecipeScript = 'new-machine:\n  image: codenvy/ubuntu_jdk8\n  mem_limit: 2147483648\n';
+    this.machineRecipeScript = 'new-machine:\n  image: eclipse/ubuntu_jdk8\n  mem_limit: 2147483648\n';
     this.updateMachineRecipe();
     if (this.isUnique(this.machineName)) {
       return;

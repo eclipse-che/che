@@ -26,6 +26,7 @@ import java.util.Set;
  * @author Evgen Vidolob
  */
 @ImplementedBy(MavenWebSocketCommunication.class)
+@Deprecated
 public interface MavenCommunication {
 
     void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed);

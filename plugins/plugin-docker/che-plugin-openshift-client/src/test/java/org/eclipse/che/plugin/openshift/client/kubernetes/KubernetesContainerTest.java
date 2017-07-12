@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.openshift.client.kubernetes;
 
-import static org.testng.Assert.assertTrue;
+import io.fabric8.kubernetes.api.model.ContainerPort;
+
+import org.eclipse.che.plugin.docker.client.json.ExposedPort;
+import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,11 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.che.plugin.docker.client.json.ExposedPort;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import io.fabric8.kubernetes.api.model.ContainerPort;
+import static org.testng.Assert.assertTrue;
 
 public class KubernetesContainerTest {
 
@@ -44,7 +43,7 @@ public class KubernetesContainerTest {
                 map(p -> Integer.toString(p.getContainerPort()) +
                          "/" +
                          p.getProtocol().toLowerCase()).collect(Collectors.toList());
-        assertTrue(exposedPorts.stream().anyMatch(portsAndProtocols::contains));
+        assertTrue(exposedPorts.stream().allMatch(portsAndProtocols::contains));
     }
 
     @Test
@@ -61,7 +60,7 @@ public class KubernetesContainerTest {
                 map(p -> Integer.toString(p.getContainerPort()) +
                         "/" +
                         p.getProtocol().toLowerCase()).collect(Collectors.toList());
-        assertTrue(imageExposedPorts.keySet().stream().anyMatch(portsAndProtocols::contains));
+        assertTrue(imageExposedPorts.keySet().stream().allMatch(portsAndProtocols::contains));
     }
 
 }

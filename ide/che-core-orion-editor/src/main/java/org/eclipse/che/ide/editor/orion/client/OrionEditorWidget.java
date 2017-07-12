@@ -101,6 +101,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.requirejs.ModuleHolder;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -687,14 +688,16 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
     }
 
     public void showErrors(AnnotationModelEvent event) {
-        List<Annotation> addedAnnotations = event.getAddedAnnotations();
         JsArray<OrionProblemOverlay> jsArray = JsArray.createArray().cast();
         AnnotationModel annotationModel = event.getAnnotationModel();
         OrionAnnotationSeverityProvider severityProvider = null;
         if (annotationModel instanceof OrionAnnotationSeverityProvider) {
             severityProvider = (OrionAnnotationSeverityProvider)annotationModel;
         }
-        for (Annotation annotation : addedAnnotations) {
+        
+        Iterator<Annotation> annotationIterator = annotationModel.getAnnotationIterator();
+        while (annotationIterator.hasNext()) {
+            Annotation annotation = annotationIterator.next();
             Position position = annotationModel.getPosition(annotation);
 
             OrionProblemOverlay problem = JavaScriptObject.createObject().cast();

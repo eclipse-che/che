@@ -68,7 +68,7 @@ public class AddToIndexPresenterTest extends BaseTest {
         when(appContext.getRootProject()).thenReturn(mock(Project.class));
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
-        when(service.add(any(DevMachine.class), any(Path.class), anyBoolean(), any(Path[].class))).thenReturn(voidPromise);
+        when(service.add(any(Path.class), anyBoolean(), any(Path[].class))).thenReturn(voidPromise);
         when(gitOutputConsoleFactory.create(anyString())).thenReturn(console);
     }
 
