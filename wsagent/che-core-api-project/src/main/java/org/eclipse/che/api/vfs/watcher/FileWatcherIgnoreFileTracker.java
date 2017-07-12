@@ -133,7 +133,6 @@ public class FileWatcherIgnoreFileTracker {
                     .resultAsBoolean()
                     .withFunction((endpointId, pathsToExclude) -> addExcludesToIgnoreFile(pathsToExclude));
 
-
         configurator.newConfiguration()
                     .methodName(REMOVE_FROM_EXCLUDES)
                     .paramsAsListOfString().resultAsBoolean()

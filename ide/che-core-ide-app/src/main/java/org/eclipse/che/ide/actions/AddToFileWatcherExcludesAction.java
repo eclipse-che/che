@@ -60,7 +60,6 @@ public class AddToFileWatcherExcludesAction extends AbstractPerspectiveAction {
         this.fileWatcherExcludesOperation = fileWatcherExcludesOperation;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
         final Resource[] resources = appContext.getResources();
@@ -73,7 +72,6 @@ public class AddToFileWatcherExcludesAction extends AbstractPerspectiveAction {
                                     });
     }
 
-    /** {@inheritDoc} */
     @Override
     public void updateInPerspective(@NotNull ActionEvent e) {
         Resource[] resources = appContext.getResources();
