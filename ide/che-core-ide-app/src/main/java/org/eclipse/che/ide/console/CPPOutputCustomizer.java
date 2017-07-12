@@ -55,8 +55,8 @@ public class CPPOutputCustomizer extends AbstractOutputCustomizer {
      */
     @Override
     public boolean canCustomize(String text) {
-        return (COMPILATION_MESSAGE.exec(text) != null || 
-                LINKER_MESSAGE.exec(text) != null);
+        return (COMPILATION_MESSAGE.test(text) || 
+                LINKER_MESSAGE.test(text));
     }
 
     /*
@@ -67,10 +67,10 @@ public class CPPOutputCustomizer extends AbstractOutputCustomizer {
      */
     @Override
     public String customize(String text) {
-        if (COMPILATION_MESSAGE.exec(text) != null)
+        if (COMPILATION_MESSAGE.test(text))
             return customizeCompilationMessage(text);
 
-        if (LINKER_MESSAGE.exec(text) != null)
+        if (LINKER_MESSAGE.test(text))
             return customizeLinkerMessage(text);
 
         return text;
@@ -81,11 +81,13 @@ public class CPPOutputCustomizer extends AbstractOutputCustomizer {
      */
     private String customizeCompilationMessage(String text) {
         try {
-            int lineStart = text.indexOf(":") + ":".length(), lineEnd = text.indexOf(":", lineStart),
-                    columnStart = lineEnd + ":".length(), columnEnd = text.indexOf(":", columnStart);
+            int lineStart = text.indexOf(":") + ":".length();
+            int lineEnd = text.indexOf(":", lineStart);
+            int columnStart = lineEnd + ":".length();
+            int columnEnd = text.indexOf(":", columnStart);
             String fileName = text.substring(0, text.indexOf(":")).trim();
-            int lineNumber = Integer.valueOf(text.substring(lineStart, lineEnd).trim()),
-                    columnNumber = Integer.valueOf(text.substring(columnStart, columnEnd).trim());
+            int lineNumber = Integer.valueOf(text.substring(lineStart, lineEnd).trim());
+            int columnNumber = Integer.valueOf(text.substring(columnStart, columnEnd).trim());
 
             String customText = "<a href='javascript:openCM(\"" + fileName + "\"," + lineNumber + "," + columnNumber
                     + ");'>";
