@@ -13,8 +13,15 @@ package org.eclipse.che.plugin.languageserver.ide.service;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcError;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.lsp4j.ServerCapabilities;
+
+import java.util.concurrent.TimeoutException;
 
 import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
 
@@ -28,12 +35,40 @@ public class LanguageServerRegistryJsonRpcClient {
         this.requestTransmitter = requestTransmitter;
     }
 
-    public JsonRpcPromise<Boolean> initializeServer(String path) {
-        return requestTransmitter.newRequest()
-                                 .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
-                                 .methodName("languageServer/initialize")
-                                 .paramsAsString(path)
-                                 .sendAndReceiveResultAsBoolean(30_000);
+    public Promise<ServerCapabilities> initializeServer(String path) {
+        return Promises.create((resolve, reject) -> requestTransmitter.newRequest().endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
+                        .methodName("languageServer/initialize").paramsAsString(path)
+                        .sendAndReceiveResultAsDto(ServerCapabilities.class, 30000).onSuccess(resolve::apply)
+                        .onFailure(error -> reject.apply(getPromiseError(error)))
+                        .onTimeout(() -> {
+                            final TimeoutException e = new TimeoutException();
+                            reject.apply(new PromiseError() {
+
+                                @Override
+                                public String getMessage() {
+                                    return "Timeout initializing error";
+                                }
+
+                                @Override
+                                public Throwable getCause() {
+                                    return e;
+                                }
+                            });
+                        }));
+    }
+
+    private PromiseError getPromiseError(JsonRpcError jsonRpcError) {
+        return new PromiseError() {
+            @Override
+            public String getMessage() {
+                return jsonRpcError.getMessage();
+            }
+
+            @Override
+            public Throwable getCause() {
+                return new JsonRpcException(jsonRpcError.getCode(), jsonRpcError.getMessage());
+            }
+        };
     }
 
 }

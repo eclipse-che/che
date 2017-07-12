@@ -61,8 +61,10 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Boolean.parseBoolean;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_OUTPUT_DIRECTORY;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_RESOURCES_FOLDER;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_SOURCE_FOLDER;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_OUTPUT_DIRECTORY;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER;
 
@@ -203,6 +205,16 @@ public class MavenModelReader {
                 result.getBuild().setTestSources(singletonList(testSourceDirectory));
             }
             result.getBuild().setResources(convertResources(build.getResources()));
+            String testOutputDirectory = build.getTestOutputDirectory();
+            if(testOutputDirectory != null) {
+                result.getBuild().setTestOutputDirectory(testOutputDirectory);
+            }
+
+            String outputDirectory = build.getOutputDirectory();
+            if (outputDirectory != null) {
+                result.getBuild().setOutputDirectory(outputDirectory);
+            }
+
         }
 
         List<Profile> profiles = model.getProfiles();
@@ -360,6 +372,8 @@ public class MavenModelReader {
                                                                null,
                                                                emptyList(),
                                                                emptyList())));
+        build.setOutputDirectory(DEFAULT_OUTPUT_DIRECTORY);
+        build.setTestOutputDirectory(DEFAULT_TEST_OUTPUT_DIRECTORY);
     }
 
     private String getNotNull(String value, String defaultValue) {

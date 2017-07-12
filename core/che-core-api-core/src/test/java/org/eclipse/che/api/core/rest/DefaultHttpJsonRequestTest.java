@@ -256,6 +256,11 @@ public class DefaultHttpJsonRequestTest {
     }
 
     @Test
+    public void shouldThrowIOExceptionIfServerDoesNotReturnContentTypeOnNoContentResponse(ITestContext ctx) throws Exception {
+        new DefaultHttpJsonRequest(getUrl(ctx) + "/no-content").useDeleteMethod().request();
+    }
+
+    @Test
     public void shouldReadJsonObjectBodyAsString(ITestContext ctx) throws Exception {
         final DefaultHttpJsonRequest request = new DefaultHttpJsonRequest(getUrl(ctx) + "/application-json");
         request.useGetMethod();

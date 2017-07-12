@@ -37,7 +37,7 @@ export class CheFilterSelectorController {
    */
   selectValue(value: string): void {
     this.valueModel = value;
-    this.onChange(value);
+    this.onChange({value: value});
   }
 }
 

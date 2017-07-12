@@ -89,7 +89,10 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         this.eventBus = eventBus;
         this.commandExecutor = commandExecutor;
 
-        setCustomizer(new DefaultOutputCustomizer(appContext, editorAgent));
+        setCustomizer(new CompoundOutputCustomizer(
+                new JavaOutputCustomizer(appContext, editorAgent),
+                new CSharpOutputCustomizer(appContext, editorAgent)));
+        
         view.setDelegate(this);
 
         final String previewUrl = command.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);

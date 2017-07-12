@@ -52,7 +52,7 @@ import org.eclipse.che.ide.ext.java.client.resource.ClassInterceptor;
 import org.eclipse.che.ide.ext.java.client.resource.JavaSourceRenameValidator;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderInterceptor;
 import org.eclipse.che.ide.ext.java.client.search.JavaSearchService;
-import org.eclipse.che.ide.ext.java.client.search.JavaSearchServiceWS;
+import org.eclipse.che.ide.ext.java.client.search.JavaSearchJsonRpcClient;
 import org.eclipse.che.ide.ext.java.client.search.node.NodeFactory;
 import org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorsWarningsPreferenceManager;
 import org.eclipse.che.ide.ext.java.client.settings.compiler.JavaCompilerPreferenceManager;
@@ -84,7 +84,7 @@ public class JavaGinModule extends AbstractGinModule {
         bind(NewJavaSourceFileView.class).to(NewJavaSourceFileViewImpl.class).in(Singleton.class);
         bind(QuickDocumentation.class).to(QuickDocPresenter.class).in(Singleton.class);
         bind(JavaNavigationService.class).to(JavaNavigationServiceImpl.class);
-        bind(JavaSearchService.class).to(JavaSearchServiceWS.class);
+        bind(JavaSearchService.class).to(JavaSearchJsonRpcClient.class);
 
         GinMultibinder.newSetBinder(binder(), NodeInterceptor.class).addBinding().to(TestFolderDecorator.class);
         GinMultibinder.newSetBinder(binder(), NodeInterceptor.class).addBinding().to(JavaPackageConnector.class);

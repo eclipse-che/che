@@ -206,7 +206,6 @@
                         <exclude>**/LocalDockerCustomServerEvaluationStrategyTest.java</exclude>
                         <exclude>**/DockerInstanceRuntimeInfo.java</exclude>
                         <exclude>**/DockerInstanceRuntimeInfoTest.java</exclude>
-                        <exclude>**/ServerIdleDetector.java</exclude>
                         <!-- End excluded files -->
                     </excludes>
                 </configuration>

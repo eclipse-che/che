@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.previews;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -32,6 +31,7 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
+import org.eclipse.che.ide.util.browser.BrowserUtils;
 
 /** Drives the UI for displaying preview URLs of the running processes. */
 @Singleton
@@ -109,6 +109,6 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
 
     @Override
     public void onUrlChosen(String previewUrl) {
-        Window.open(previewUrl, "_blank", null);
+        BrowserUtils.openInNewTab(previewUrl);
     }
 }

@@ -11,28 +11,27 @@
 
 package org.eclipse.che.plugin.openshift.client;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
+import com.google.common.annotations.VisibleForTesting;
 
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
+import org.eclipse.che.api.workspace.server.event.ServerIdleEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.event.ServerIdleEvent;
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.annotations.VisibleForTesting;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Class used to remove workspace directories in Persistent Volume when a workspace

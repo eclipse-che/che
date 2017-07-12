@@ -46,14 +46,17 @@ public interface MavenAttributes {
     String DEFAULT_PACKAGING             = "jar";
     String DEFAULT_OUTPUT_FOLDER         = "target/classes";
 
+    String DEFAULT_OUTPUT_DIRECTORY      = "target/classes";
+    String DEFAULT_TEST_OUTPUT_DIRECTORY = "target/test-classes";
+
     String POM_XML = "pom.xml";
 
     /** Name of WebSocket chanel */
     String MAVEN_CHANEL_NAME = "maven:workspace";
 
 
-    String MAVEN_CHANEL_UNSUBSCRIBE              = "mavenOutput/subscribe";
-    String MAVEN_CHANEL_SUBSCRIBE                = "mavenOutput/unsubscribe";
+    String MAVEN_OUTPUT_UNSUBSCRIBE              = "mavenOutput/unsubscribe";
+    String MAVEN_OUTPUT_SUBSCRIBE                = "mavenOutput/subscribe";
     String MAVEN_OUTPUT_TEXT_METHOD              = "mavenOutput/text";
     String MAVEN_OUTPUT_UPDATE_METHOD            = "mavenOutput/update";
     String MAVEN_OUTPUT_START_STOP_METHOD        = "mavenOutput/start_stop";

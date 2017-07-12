@@ -279,7 +279,9 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
                                                     UriBuilder.fromUri(url).replaceQuery("token").build(), method, responseCode, str));
             }
             final String contentType = conn.getContentType();
-            if (contentType != null && !contentType.startsWith(MediaType.APPLICATION_JSON)) {
+            if (responseCode != HttpURLConnection.HTTP_NO_CONTENT
+                && contentType != null
+                && !contentType.startsWith(MediaType.APPLICATION_JSON)) {
                 throw new IOException(conn.getResponseMessage());
             }
 

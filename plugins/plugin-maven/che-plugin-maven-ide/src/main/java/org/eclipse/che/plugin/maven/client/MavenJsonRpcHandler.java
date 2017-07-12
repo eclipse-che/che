@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_OUTPUT;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_SUBSCRIBE;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_CHANEL_SUBSCRIBE;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_SUBSCRIBE;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_PERCENT_METHOD;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_PERCENT_UNDEFINED_METHOD;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_START_STOP_METHOD;
@@ -67,7 +67,7 @@ public class MavenJsonRpcHandler {
 
         requestTransmitter.newRequest()
                           .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
-                          .methodName(MAVEN_CHANEL_SUBSCRIBE)
+                          .methodName(MAVEN_OUTPUT_SUBSCRIBE)
                           .noParams()
                           .sendAndSkipResult();
 

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.web.html;
 
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -21,6 +20,7 @@ import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.web.WebLocalizationConstant;
+import org.eclipse.che.ide.util.browser.BrowserUtils;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
@@ -71,8 +71,7 @@ public class PreviewHTMLAction extends AbstractPerspectiveAction {
         final Resource selectedResource = appContext.getResource();
         if (Resource.FILE == selectedResource.getResourceType()) {
             final String contentUrl = ((File)selectedResource).getContentUrl();
-
-            Window.open(wsAgentURLModifier.modify(contentUrl), "_blank", null);
+            BrowserUtils.openInNewTab(wsAgentURLModifier.modify(contentUrl));
         }
     }
 }

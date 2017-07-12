@@ -63,9 +63,9 @@ public class LanguageServerFileTypeRegister {
                                           OrionContentTypeRegistrant contentTypeRegistrant,
                                           OrionHoverRegistrant orionHoverRegistrant,
                                           OrionOccurrencesRegistrant orionOccurrencesRegistrant,
-                                          LanguageServerEditorProvider editorProvider,
+                                          LanguageServerEditorProvider editorProvider, 
                                           HoverProvider hoverProvider,
-                                          OccurrencesProvider occurrencesProvider) {
+                                          OccurrencesProvider occurrencesProvider) { 
         this.serverLanguageRegistry = serverLanguageRegistry;
         this.lsRegistry = lsRegistry;
         this.resources = resources;
@@ -96,6 +96,7 @@ public class LanguageServerFileTypeRegister {
                             final FileType fileType = new FileType(resources.file(), null, RegExp.quote(fileName));
                             lsRegistry.registerFileType(fileType, lang);
                             editorRegistry.registerDefaultEditor(fileType, editorProvider);
+
                         }
                         String mimeType = lang.getMimeType();
                         contentTypes.push(mimeType);

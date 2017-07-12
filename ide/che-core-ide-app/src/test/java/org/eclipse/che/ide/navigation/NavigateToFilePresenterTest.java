@@ -13,12 +13,14 @@ package org.eclipse.che.ide.navigation;
 import com.google.common.base.Optional;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.websocket.MessageBus;
@@ -64,6 +66,10 @@ public class NavigateToFilePresenterTest {
     private AppContext              appContext;
     @Mock
     private EditorAgent             editorAgent;
+    @Mock
+    private DtoFactory              dtoFactory;
+    @Mock
+    private RequestTransmitter      requestTransmitter;
 
     private NavigateToFilePresenter presenter;
 
@@ -74,13 +80,10 @@ public class NavigateToFilePresenterTest {
         when(messageBusProvider.getMachineMessageBus()).thenReturn(messageBus);
 
         presenter = new NavigateToFilePresenter(view,
-                                                eventBus,
-                                                dtoUnmarshallerFactory,
-                                                messageBusProvider,
                                                 appContext,
-                                                editorAgent);
-
-        presenter.onWsAgentStarted(wsAgentStateEvent);
+                                                editorAgent,
+                                                requestTransmitter,
+                                                dtoFactory);
     }
 
     @Test

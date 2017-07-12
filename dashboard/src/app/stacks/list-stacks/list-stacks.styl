@@ -7,6 +7,31 @@
 .stacks-list-content
   margin 0
 
+  .template-list
+    position relative
+    margin-bottom 130px
+
+    & > div
+      overflow-y auto
+      max-height 288px
+      margin-top 45px
+      border-top 1px solid $list-separator-color
+
+      .che-list-header .che-list-header-content > *
+        border-bottom none
+
+      .che-list-header .che-list-item-row
+        margin 0
+        margin-top -40px
+
+      .che-list-header-column > *
+         position absolute
+         top -40px
+         line-height 40px
+
+  stack-item
+    display block
+
 md-progress-linear.stack-list-progress
   height 10px
 

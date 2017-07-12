@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
@@ -63,7 +64,7 @@ public class PHPRunScriptTestAction extends AbstractPerspectiveAction {
         final Selection<?> selection = selectionAgent.getSelection();
         final Object possibleNode = selection.getHeadElement();
         if (possibleNode instanceof FileNode) {
-            VirtualFile file = ((FileNode) possibleNode).getData();
+            VirtualFile file = ((FileNode)possibleNode).getData();
             final Project project = appContext.getRootProject();
             Map<String, String> parameters = new HashMap<>();
             parameters.put("testTarget", file.getLocation().toString());
@@ -88,9 +89,16 @@ public class PHPRunScriptTestAction extends AbstractPerspectiveAction {
             return;
         }
         final Object possibleNode = selection.getHeadElement();
-        boolean enable = possibleNode instanceof FileNode
-                         && (((FileNode) possibleNode).getData().getExtension().equals("php")
-                             || ((FileNode) possibleNode).getData().getExtension().equals("phtml"));
+        boolean enable = false;
+        if (possibleNode instanceof FileNode) {
+            FileNode fileNode = (FileNode)possibleNode;
+            File data = fileNode.getData();
+            String extension = data.getExtension();
+            if ("php".equals(extension) || "phtml".equals(extension)) {
+                enable = true;
+            }
+        }
+
         e.getPresentation().setEnabled(enable);
         e.getPresentation().setVisible(enable);
     }

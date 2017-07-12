@@ -10,10 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.util;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import org.eclipse.che.dto.server.JsonSerializable;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Utility to convert stuff that is not statically typed in lsp4j (java.lang.Object)
@@ -35,6 +41,24 @@ public class JsonUtil {
             return ((JsonSerializable)value).toJsonElement();
         } else if (value instanceof JsonElement) {
             return (JsonElement)value;
+        } else if (value instanceof Map) {
+            // assumption here is that this is a json-like structure with map for object, list for array, etc.
+            @SuppressWarnings("unchecked")
+            Map<String, Object> object= (Map<String, Object>) value;
+            JsonObject result= new JsonObject();
+            for (Entry<String, Object> prop : object.entrySet()) {
+                result.add(prop.getKey(), convertToJson(prop.getValue()));
+            }
+            return result;
+        } else if (value instanceof List) {
+            // assumption here is that this is a json-like structure with map for object, list for array, etc.
+            @SuppressWarnings("unchecked")
+            List<Object> array= (List<Object>) value;
+            JsonArray result= new JsonArray();
+            for (Object object : array) {
+                result.add(convertToJson(object));
+            }
+            return result;
         }
         throw new RuntimeException("Unexpected runtime value: " + value);
     }

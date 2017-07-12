@@ -14,6 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
+import org.eclipse.che.api.languageserver.registry.DocumentFilter;
+import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.plugin.php.inject.PhpModule;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 /**
  * @author Evgen Vidolob
@@ -31,16 +34,16 @@ import java.nio.file.Paths;
  */
 @Singleton
 public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
+
+    private static final String REGEX = ".*\\.php";
+
     private final Path launchScript;
+
+    private static final LanguageServerDescription DESCRIPTION = createServerDescription();
 
     @Inject
     public PhpLanguageServerLauncher() {
         this.launchScript = Paths.get(System.getenv("HOME"), "che/ls-php/launch.sh");
-    }
-
-    @Override
-    public String getLanguageId() {
-        return PhpModule.LANGUAGE_ID;
     }
 
     @Override
@@ -66,4 +69,14 @@ public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
         }
     }
 
+    @Override
+    public LanguageServerDescription getDescription() {
+        return DESCRIPTION;
+    }
+
+    private static LanguageServerDescription createServerDescription() {
+        LanguageServerDescription description = new LanguageServerDescription("org.eclipse.che.plugin.php.languageserver", null,
+                        Arrays.asList(new DocumentFilter(PhpModule.LANGUAGE_ID, REGEX, null)));
+        return description;
+    }
 }

@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.ide;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
-
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
@@ -118,6 +118,9 @@ public class TestServiceClientTest implements MockitoPrinter {
 
     private TestServiceClient          testServiceClient         = null;
 
+    @Mock
+    private RequestTransmitter requestTransmitter;
+
     @Spy
     private final List<DtoWithPid>     consoleEvents             = new ArrayList<>();
 
@@ -135,7 +138,7 @@ public class TestServiceClientTest implements MockitoPrinter {
 
         testServiceClient = spy(new TestServiceClient(appContext, asyncRequestFactory, dtoUnmarshallerFactory, dtoFactory, commandManager,
                                                       execAgentCommandManager, promiseProvider, macroProcessor, commandConsoleFactory,
-                                                      processesPanelPresenter, testGoal));
+                processesPanelPresenter, testGoal, requestTransmitter));
 
         doReturn(new PromiseMocker<TestResult>().getPromise()).when(testServiceClient).sendTests(anyString(), anyString(),
                                                                                                  anyMapOf(String.class, String.class));

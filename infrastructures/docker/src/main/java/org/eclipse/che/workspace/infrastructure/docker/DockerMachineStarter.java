@@ -55,6 +55,7 @@ import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
+import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
@@ -657,7 +658,8 @@ public class DockerMachineStarter {
         }
     }
 
-    private void readContainerLogsInSeparateThread(String container,
+    @VisibleForTesting
+    void readContainerLogsInSeparateThread(String container,
                                                    String workspaceId,
                                                    String machineId,
                                                    MessageProcessor<LogMessage> logsProcessor) {

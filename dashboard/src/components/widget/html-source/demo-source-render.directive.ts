@@ -38,7 +38,6 @@ export class DemoSourceRender {
 
   restrict: string = 'EA';
   replace: boolean = true;
-  scope: Object = {};
 
   /**
    * Default constructor that is using resource

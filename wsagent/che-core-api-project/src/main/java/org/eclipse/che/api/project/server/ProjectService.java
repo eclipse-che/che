@@ -25,6 +25,8 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.project.type.Value;
 import org.eclipse.che.api.core.notification.EventService;
@@ -40,6 +42,8 @@ import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
+import org.eclipse.che.api.project.shared.dto.ProjectSearchRequestDto;
+import org.eclipse.che.api.project.shared.dto.ProjectSearchResponseDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.vfs.VirtualFile;
@@ -920,6 +924,29 @@ public class ProjectService extends Service {
         }
 
         return items;
+    }
+
+    @Inject
+    private void configureProjectSearchRequestHandler(RequestHandlerConfigurator requestHandlerConfigurator){
+        requestHandlerConfigurator.newConfiguration()
+                                  .methodName("project/search")
+                                  .paramsAsDto(ProjectSearchRequestDto.class)
+                                  .resultAsDto(ProjectSearchResponseDto.class)
+                                  .withFunction(this::search);
+    }
+
+    public ProjectSearchResponseDto search(ProjectSearchRequestDto request) {
+        String path = request.getPath();
+        String name = request.getName();
+        String text = request.getText();
+        int maxItems = request.getMaxItems();
+        int skipCount = request.getSkipCount();
+
+        try {
+            return newDto(ProjectSearchResponseDto.class).withItemReferences(search(path, name, text, maxItems, skipCount));
+        } catch (ServerException | ConflictException | NotFoundException | ForbiddenException e) {
+            throw new JsonRpcException(-27000, e.getMessage());
+        }
     }
 
     private void logProjectCreatedEvent(@NotNull String projectName, @NotNull String projectType) {

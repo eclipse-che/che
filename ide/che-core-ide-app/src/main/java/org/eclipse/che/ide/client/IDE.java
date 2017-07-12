@@ -15,6 +15,8 @@ import org.eclipse.che.ide.client.inject.IDEInjector;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 
+import org.eclipse.che.ide.client.inject.IDEInjector;
+
 /** The EntryPoint of the IDE application */
 public class IDE implements EntryPoint {
     /** This is the entry point method. */

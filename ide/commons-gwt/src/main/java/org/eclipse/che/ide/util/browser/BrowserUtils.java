@@ -92,4 +92,25 @@ public abstract class BrowserUtils {
 
     private BrowserUtils() {
     }
+
+    /**
+     * Open given URL in new tab
+     *
+     * in some reason GWT function Window.open() don't work for now
+     * @param url
+     */
+    public static native void openInNewTab(String url) /*-{
+        window.open(url, '_blank');
+    }-*/;
+
+    /**
+     * Open given URL in current tab
+     *
+     * in some reason GWT function Window.open() don't work for now
+     * @param url
+     */
+    public static native void openHere(String url) /*-{
+        window.open(url, '_self');
+    }-*/;
+
 }

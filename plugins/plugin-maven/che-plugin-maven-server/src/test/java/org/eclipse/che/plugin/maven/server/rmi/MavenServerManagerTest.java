@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.server.rmi;
 
-import org.eclipse.che.plugin.maven.server.MavenServerManager;
-import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
-import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
-import org.eclipse.che.plugin.maven.server.execution.JavaParameters;
+import org.eclipse.che.commons.lang.execution.JavaParameters;
 import org.eclipse.che.maven.data.MavenArtifact;
 import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.che.maven.data.MavenModel;
@@ -21,6 +18,9 @@ import org.eclipse.che.maven.data.MavenWorkspaceCache;
 import org.eclipse.che.maven.server.MavenProjectInfo;
 import org.eclipse.che.maven.server.MavenServerResult;
 import org.eclipse.che.maven.server.MavenTerminal;
+import org.eclipse.che.plugin.maven.server.MavenServerManager;
+import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
+import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
