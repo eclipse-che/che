@@ -61,5 +61,7 @@ public final class Constants {
     public static final String MACHINE_LOG_METHOD              = "machine/log";
     public static final String INSTALLER_LOG_METHOD            = "installer/log";
 
+    public static final String ACTIVITY_CHECKER     = "activity-checker";
+
     private Constants() {}
 }

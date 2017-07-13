@@ -24,7 +24,6 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
 import static com.google.common.base.Strings.nullToEmpty;
@@ -59,11 +58,7 @@ class WorkspaceStatusEventHandler {
                     .methodName(WORKSPACE_STATUS_CHANGED_METHOD)
                     .paramsAsDto(WorkspaceStatusEvent.class)
                     .noResult()
-                    .withBiConsumer((endpointId, event) -> {
-                        Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
-
-                        processStatus(event);
-                    });
+                    .withBiConsumer((endpointId, event) -> processStatus(event));
     }
 
     private void processStatus(WorkspaceStatusEvent event) {

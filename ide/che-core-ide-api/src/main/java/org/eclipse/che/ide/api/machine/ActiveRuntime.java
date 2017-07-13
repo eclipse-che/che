@@ -14,7 +14,6 @@ import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
-import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,8 +36,6 @@ public class ActiveRuntime {
     public ActiveRuntime(Workspace workspace) {
         Runtime workspaceRuntime = workspace.getRuntime();
 
-        Log.info(ActiveRuntime.class, workspaceRuntime);
-        Log.info(ActiveRuntime.class, workspaceRuntime.getMachines().entrySet());
 //        WorkspaceConfig workspaceConfig = workspace.getConfig();
 //        String envName = workspaceRuntime.getActiveEnv();
 ////        String defaultEnv = workspaceConfig.getDefaultEnv();
@@ -58,7 +55,6 @@ public class ActiveRuntime {
             }
         }
 
-        Log.info(ActiveRuntime.class, devMachine);
 //        if(this.devMachine == null)
 //            throw new RuntimeException("No WS-AGENT Server configured for workspace: " + workspace.getId());
 

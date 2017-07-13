@@ -43,8 +43,6 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Represents the default strategy for initializing Basic IDE.
@@ -57,8 +55,6 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
-
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultIdeInitializationStrategy.class);
 
     protected final WorkspaceServiceClient                 workspaceServiceClient;
     protected final AppContext                             appContext;
@@ -124,10 +120,7 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
 
     @Override
     public Promise<WorkspaceImpl> getWorkspaceToStart() {
-        final String workspaceKey = browserAddress.getWorkspaceKey();
-        Promise<WorkspaceImpl> ws = workspaceServiceClient.getWorkspace(workspaceKey);
-        LOG.debug("Got workspace: " + workspaceKey);
-        return ws;
+        return workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey());
     }
 
     private Operation<Void> initUI() {
@@ -138,7 +131,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
     }
 
     protected Promise<Void> initAppContext() {
-
         return getWorkspaceToStart()
                 .then((Function<WorkspaceImpl, Void>)workspace -> {
 
