@@ -44,6 +44,7 @@ import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
+import org.eclipse.che.machine.authentication.server.MachineTokenRegistry;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -142,6 +143,9 @@ public class MachineProviderImplTest {
 
     @Mock
     private RecipeRetriever recipeRetriever;
+
+    @Mock
+    private MachineTokenRegistry tokenRegistry;
 
     @Mock
     private WindowsPathEscaper pathEscaper;
@@ -1784,6 +1788,7 @@ public class MachineProviderImplTest {
                                                                           dockerInstanceStopDetector,
                                                                           transmitter,
                                                                           jsonRpcEndpointToMachineNameHolder,
+                                                                          tokenRegistry ,
                                                                           devMachineServers,
                                                                           allMachineServers,
                                                                           devMachineVolumes,

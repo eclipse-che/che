@@ -76,6 +76,7 @@ import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNet
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
+import org.eclipse.che.machine.authentication.server.MachineTokenRegistry;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -149,6 +150,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
     private final RequestTransmitter                            transmitter;
     private final JsonRpcEndpointToMachineNameHolder            jsonRpcEndpointToMachineNameHolder;
+    private final MachineTokenRegistry                          machineTokenRegistry;
     private final boolean                                       doForcePullImage;
     private final boolean                                       privilegedMode;
     private final int                                           pidsLimit;
@@ -179,6 +181,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                DockerInstanceStopDetector dockerInstanceStopDetector,
                                RequestTransmitter transmitter,
                                JsonRpcEndpointToMachineNameHolder jsonRpcEndpointToMachineNameHolder,
+                               MachineTokenRegistry machineTokenRegistry,
                                @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
                                @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
                                @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
@@ -204,6 +207,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.docker = dockerProvider.get();
         this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
+        this.machineTokenRegistry = machineTokenRegistry;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
         this.transmitter = transmitter;
         this.doForcePullImage = doForcePullImage;
@@ -658,6 +662,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
             env = new HashMap<>(devMachineEnvVariables);
             env.put(DockerInstanceRuntimeInfo.USER_TOKEN, getUserToken(workspaceId));
+            env.put(DockerInstanceRuntimeInfo.MACHINE_TOKEN, getMachineToken(workspaceId));
         } else {
             portsToExpose = commonMachinePortsToExpose;
             env = new HashMap<>(commonMachineEnvVariables);
@@ -786,6 +791,15 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     // you need to know exactly which workspace and which user to apply the token.
     protected String getUserToken(String wsId) {
         return EnvironmentContext.getCurrent().getSubject().getToken();
+    }
+
+    protected String getMachineToken(String wsId) {
+        String userToken = null;
+        try {
+            userToken = machineTokenRegistry.getOrCreateToken(EnvironmentContext.getCurrent().getSubject().getUserId(), wsId);
+        } catch (NotFoundException ignore) {
+        }
+        return MoreObjects.firstNonNull(userToken, "");
     }
 
     /**
