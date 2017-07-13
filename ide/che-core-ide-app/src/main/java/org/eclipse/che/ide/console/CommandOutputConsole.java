@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.console;
 
-import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessSubscribeResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
@@ -42,12 +41,6 @@ public interface CommandOutputConsole extends OutputConsole {
      */
     @Deprecated
     void listenToOutput(String wsChannel);
-
-    /**
-     * Attaches to the process launched by the command.
-     */
-    @Deprecated
-    void attachToProcess(MachineProcessDto process);
 
     /**
      * Get an output console related operations that should be performed when

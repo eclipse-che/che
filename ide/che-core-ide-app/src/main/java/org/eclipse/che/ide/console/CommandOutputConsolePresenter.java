@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessSubscribeResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
@@ -138,10 +137,6 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
     @Override
     public void listenToOutput(String wsChannel) {
-    }
-
-    @Override
-    public void attachToProcess(MachineProcessDto process) {
     }
 
     @Override
