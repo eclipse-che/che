@@ -1,8 +1,8 @@
 --- src/app/index.module.ts
 +++ src/app/index.module.ts
-@@ -36,12 +36,36 @@
- import {CheBranding} from '../components/branding/che-branding.factory';
- import {ChePreferences} from '../components/api/che-preferences.factory';
+@@ -32,12 +32,36 @@
+ import {StacksConfig} from './stacks/stacks-config';
+ import {DemoComponentsCtrl} from './demo-components/demo-components.controller';
 -
 +import * as Keycloak from '../components/keycloak/keycloak';
 +
