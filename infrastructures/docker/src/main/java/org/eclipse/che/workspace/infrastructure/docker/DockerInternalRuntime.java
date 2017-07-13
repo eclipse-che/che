@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.machine.MachineSource;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSource;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -22,7 +22,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
-import org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;

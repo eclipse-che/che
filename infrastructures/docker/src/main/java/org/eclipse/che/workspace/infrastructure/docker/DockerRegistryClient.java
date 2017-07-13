@@ -12,7 +12,7 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.machine.MachineSource;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSource;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;

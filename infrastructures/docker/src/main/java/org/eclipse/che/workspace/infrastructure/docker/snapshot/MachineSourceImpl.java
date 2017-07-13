@@ -8,9 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.server.model.impl;
-
-import org.eclipse.che.api.core.model.machine.MachineSource;
+package org.eclipse.che.workspace.infrastructure.docker.snapshot;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
