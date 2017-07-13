@@ -143,6 +143,7 @@ public class ServerInitializerImpl implements ServerInitializer {
         InitializeParams initializeParams = new InitializeParams();
         initializeParams.setProcessId(PROCESS_ID);
         initializeParams.setRootPath(LanguageServiceUtils.removeUriScheme(projectPath));
+        initializeParams.setRootUri(projectPath);
 
         if (CLIENT_CAPABILITIES == null) {
             CLIENT_CAPABILITIES = new ClientCapabilities();
