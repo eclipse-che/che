@@ -92,6 +92,7 @@ import java.util.function.BiConsumer;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -999,12 +1000,14 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onIDEInitialized(BasicIDEInitializedEvent event) {
-        for (MachineImpl machine : getMachines()) {
-            restoreProcessesState(machine.getName());
-        }
+        if (appContext.getWorkspace().getStatus() == RUNNING) {
+            for (MachineImpl machine : getMachines()) {
+                restoreProcessesState(machine.getName());
+            }
 
-        selectDevMachine();
-        newTerminal(this);
+            selectDevMachine();
+            newTerminal(this);
+        }
     }
 
     @Override
