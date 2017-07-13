@@ -2,10 +2,13 @@
 * @vparfonov
 
 # dashboard
-dashboard/** @ashumilova
+dashboard/** @ashumilova @benoitf
 
 # dockerfiles
 dockerfiles/** @riuvshin @benoitf
+
+# ide
+ide/che-core-ide-stacks/** @ashumilova
 
 # agents
 agents/** @tolusha
