@@ -143,19 +143,19 @@ public class ServerInitializerImpl implements ServerInitializer {
             CLIENT_CAPABILITIES = new ClientCapabilities();
             WorkspaceClientCapabilities workspace = new WorkspaceClientCapabilities();
             workspace.setApplyEdit(false); //Change when support added
-            workspace.setDidChangeConfiguration(new DidChangeConfigurationCapabilities(false));
-            workspace.setDidChangeWatchedFiles(new DidChangeWatchedFilesCapabilities(false));
-            workspace.setExecuteCommand(new ExecuteCommandCapabilities(false));
-            workspace.setSymbol(new SymbolCapabilities(false));
-            workspace.setWorkspaceEdit(new WorkspaceEditCapabilities(false));
+            workspace.setDidChangeConfiguration(new DidChangeConfigurationCapabilities());
+            workspace.setDidChangeWatchedFiles(new DidChangeWatchedFilesCapabilities());
+            workspace.setExecuteCommand(new ExecuteCommandCapabilities());
+            workspace.setSymbol(new SymbolCapabilities());
+            workspace.setWorkspaceEdit(new WorkspaceEditCapabilities());
             CLIENT_CAPABILITIES.setWorkspace(workspace);
 
             TextDocumentClientCapabilities textDocument = new TextDocumentClientCapabilities();
-            textDocument.setCodeAction(new CodeActionCapabilities(false));
-            textDocument.setCodeLens(new CodeLensCapabilities(false));
-            textDocument.setCompletion(new CompletionCapabilities(new CompletionItemCapabilities(true)));
-            textDocument.setDefinition(new DefinitionCapabilities(false));
-            textDocument.setDocumentHighlight(new DocumentHighlightCapabilities(true));
+            textDocument.setCodeAction(new CodeActionCapabilities());
+            textDocument.setCodeLens(new CodeLensCapabilities());
+            textDocument.setCompletion(new CompletionCapabilities(new CompletionItemCapabilities()));
+            textDocument.setDefinition(new DefinitionCapabilities());
+            textDocument.setDocumentHighlight(new DocumentHighlightCapabilities());
             textDocument.setDocumentLink(new DocumentLinkCapabilities());
             textDocument.setDocumentSymbol(new DocumentSymbolCapabilities());
             textDocument.setFormatting(new FormattingCapabilities());

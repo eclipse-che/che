@@ -14,7 +14,6 @@ import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.JsPromise;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -77,7 +76,7 @@ public class HoverProvider implements OrionHoverHandler {
         TextDocumentPositionParams paramsDTO = helper.createTDPP(document, context.getOffset());
 
         Promise<Hover> promise = client.hover(paramsDTO);
-        Promise<OrionHoverOverlay> then = promise.then((Function<Hover, OrionHoverOverlay>)arg -> {
+        Promise<OrionHoverOverlay> then = promise.then((Hover arg) -> {
             OrionHoverOverlay hover = OrionHoverOverlay.create();
             hover.setType("markdown");
             String content = renderContent(arg);
@@ -96,7 +95,7 @@ public class HoverProvider implements OrionHoverHandler {
     private String renderContent(Hover hover) {
         List<String> contents = new ArrayList<>();
         for (Either<String, MarkedString> dto : hover.getContents()) {
-            if(dto.isLeft()) {
+            if (dto.isLeft()) {
                 // plain markdown text
                 contents.add(dto.getLeft());
             } else {

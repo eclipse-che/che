@@ -11,6 +11,7 @@
 package org.eclipse.che.api.languageserver.service;
 
 import com.google.inject.Singleton;
+
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
@@ -56,7 +57,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -69,7 +69,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
 
@@ -101,7 +100,7 @@ public class TextDocumentService {
         dtoToDtoList("references", ReferenceParams.class, LocationDto.class, this::references);
         dtoToDtoList("onTypeFormatting", DocumentOnTypeFormattingParams.class, TextEditDto.class, this::onTypeFormatting);
 
-        dtoToDto("completionItem/resolve", ExtendedCompletionItem.class, ExtendedCompletionItem.class, this::completionItemResolve);
+        dtoToDto("completionItem/resolve", ExtendedCompletionItem.class, ExtendedCompletionItemDto.class, this::completionItemResolve);
         dtoToDto("documentHighlight", TextDocumentPositionParams.class, DocumentHighlight.class, this::documentHighlight);
         dtoToDto("completion", TextDocumentPositionParams.class, ExtendedCompletionListDto.class, this::completion);
         dtoToDto("hover", TextDocumentPositionParams.class, HoverDto.class, this::hover);
