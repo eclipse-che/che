@@ -29,12 +29,12 @@ import {CheButton} from './che-button.directive';
  *   <che-button-cancel-flat che-button-title="hello"></che-button-cancel-flat>
  *
  * @example
- <example module="userDashboard">
- <file name="index.html">
- <che-button-cancel-flat che-button-title="Hello"></che-button-cancel-flat>
- <che-button-cancel-flat che-button-title="Hello" che-button-icon="fa fa-ban"></che-button-cancel-flat>
- </file>
- </example>
+ * <example module="userDashboard">
+ * <file name="index.html">
+ * <che-button-cancel-flat che-button-title="Hello"></che-button-cancel-flat>
+ * <che-button-cancel-flat che-button-title="Hello" che-button-icon="fa fa-ban"></che-button-cancel-flat>
+ * </file>
+ * </example>
  * @author Oleksii Kurinnyi
  */
 export class CheButtonCancelFlat extends CheButton {
@@ -50,7 +50,7 @@ export class CheButtonCancelFlat extends CheButton {
   /**
    * Template for the buttons
    */
-  getTemplateStart() {
+  getTemplateStart(): string {
     return '<md-button md-theme=\"checancel\" class=\"che-button md-accent md-hue-2\"';
   }
 

@@ -30,4 +30,12 @@ public interface ModificationTracker {
      * @return modification tracker value
      */
     String getModificationStamp();
+
+    /**
+     * Update modification tracker value by content. Modification tracker is a value is changed by any modification of the content
+     * of the file.
+     *
+     * @param content actual file content
+     */
+    void updateModificationStamp(String content);
 }

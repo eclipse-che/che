@@ -12,7 +12,7 @@
 import {CheAPI} from '../../../components/api/che-api.factory';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
-import {CheNamespaceRegistry, INamespace} from '../../../components/api/namespace/che-namespace-registry.factory';
+import {CheNamespaceRegistry} from '../../../components/api/namespace/che-namespace-registry.factory';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 import {CheBranding} from '../../../components/branding/che-branding.factory';
 
@@ -58,7 +58,7 @@ export class ListWorkspacesCtrl {
   constructor($log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService, lodash: any,
               cheAPI: CheAPI, cheNotification: CheNotification, cheBranding: CheBranding,
               cheWorkspace: CheWorkspace, cheNamespaceRegistry: CheNamespaceRegistry,
-              confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactor) {
+              confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.cheAPI = cheAPI;
     this.$q = $q;
     this.$log = $log;
@@ -105,7 +105,7 @@ export class ListWorkspacesCtrl {
       if (label === this.ALL_NAMESPACES) {
         this.namespaceFilter.namespace = '';
       } else {
-        let namespace = this.cheNamespaceRegistry.getNamespaces().find((namespace: INamespace) => {
+        let namespace = this.cheNamespaceRegistry.getNamespaces().find((namespace: che.INamespace) => {
           return namespace.label === label;
         });
         this.namespaceFilter.namespace = namespace.id;

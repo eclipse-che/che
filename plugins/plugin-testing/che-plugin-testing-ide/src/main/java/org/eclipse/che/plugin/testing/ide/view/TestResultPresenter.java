@@ -37,8 +37,10 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
     private final TestResultView view;
 
     @Inject
-    public TestResultPresenter(WorkspaceAgent workspaceAgent, TestLocalizationConstant localizationConstant,
-            TestResources resources, TestResultView view) {
+    public TestResultPresenter(WorkspaceAgent workspaceAgent,
+                               TestLocalizationConstant localizationConstant,
+                               TestResources resources,
+                               TestResultView view) {
         this.workspaceAgent = workspaceAgent;
         this.localizationConstant = localizationConstant;
         this.resources = resources;
@@ -95,7 +97,7 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
         workspaceAgent.setActivePart(this);
         view.showResults(response);
     }
-    
+
     public void clear() {
         view.clear();
     }

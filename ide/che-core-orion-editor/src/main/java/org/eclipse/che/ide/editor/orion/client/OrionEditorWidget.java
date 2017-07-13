@@ -104,6 +104,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.requirejs.ModuleHolder;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -694,7 +695,6 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
     }
 
     public void showErrors(AnnotationModelEvent event) {
-        List<Annotation> addedAnnotations = event.getAddedAnnotations();
         AnnotationModel annotationModel = event.getAnnotationModel();
         OrionAnnotationSeverityProvider severityProvider = null;
         if (annotationModel instanceof OrionAnnotationSeverityProvider) {
@@ -704,13 +704,14 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
         for (OrionAnnotationOverlay annotationOverlay : problems) {
             editorOverlay.getAnnotationModel().removeAnnotation(annotationOverlay);
         }
-        problems.clear();
-        for (Annotation annotation : addedAnnotations) {
+
+        Iterator<Annotation> annotationIterator = annotationModel.getAnnotationIterator();
+        while (annotationIterator.hasNext()) {
+            Annotation annotation = annotationIterator.next();
             OrionAnnotationOverlay problem = getOrionAnnotationOverlay(annotationModel, severityProvider, annotation);
             editorOverlay.getAnnotationModel().addAnnotation(problem);
             problems.add(problem);
         }
-
     }
 
     private OrionAnnotationOverlay getOrionAnnotationOverlay(AnnotationModel annotationModel,
@@ -722,7 +723,6 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
                                                position.getOffset() + position.getLength(),
                                                annotation.getText());
     }
-
     private String getSeverity(String type, OrionAnnotationSeverityProvider provider) {
         if (provider != null) {
             return provider.getSeverity(type);

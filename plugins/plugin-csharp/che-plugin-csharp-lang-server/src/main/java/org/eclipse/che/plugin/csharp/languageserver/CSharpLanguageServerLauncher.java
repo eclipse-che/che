@@ -15,8 +15,11 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.api.languageserver.registry.DocumentFilter;
+import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
+import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.plugin.csharp.inject.CSharpModule;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -28,20 +31,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-import static java.util.Arrays.asList;
-
 
 /**
  * @author Evgen Vidolob
  */
 @Singleton
 public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate {
+    private static final String REGEX = ".*\\.(cs|csx)";
 
-    private static final String   LANGUAGE_ID = "csharp";
-    private static final String[] EXTENSIONS  = new String[]{"cs", "csx"};
-    private static final String[] MIME_TYPES  = new String[]{"text/x-csharp"};
-    private static final LanguageDescription description;
 
+    private static final LanguageServerDescription DESCRIPTION = createServerDescription();
+ 
     private final Path launchScript;
 
     @Inject
@@ -66,7 +66,7 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
 
     private void restoreDependencies(String projectPath) throws LanguageServerException {
         ProcessBuilder processBuilder = new ProcessBuilder("dotnet", "restore");
-        processBuilder.directory(new File(projectPath));
+        processBuilder.directory(new File(LanguageServiceUtils.removeUriScheme(projectPath)));
         try {
             Process process = processBuilder.start();
             int resultCode = process.waitFor();
@@ -89,7 +89,14 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
     }
 
     @Override
-    public LanguageDescription getLanguageDescription() {
+    public LanguageServerDescription getDescription() {
+        return DESCRIPTION;
+    }
+    
+
+    private static LanguageServerDescription createServerDescription() {
+        LanguageServerDescription description = new LanguageServerDescription("org.eclipse.che.plugin.csharp.languageserver", null,
+                        Arrays.asList(new DocumentFilter(CSharpModule.LANGUAGE_ID, REGEX, null)));
         return description;
     }
 
@@ -97,11 +104,4 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
     public boolean isAbleToLaunch() {
         return Files.exists(launchScript);
     }
-
-    static {
-        description = new LanguageDescription();
-        description.setFileExtensions(asList(EXTENSIONS));
-        description.setLanguageId(LANGUAGE_ID);
-        description.setMimeTypes(Arrays.asList(MIME_TYPES));
-    }
-}
+ }

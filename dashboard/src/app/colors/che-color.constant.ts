@@ -34,7 +34,9 @@ export class CheColorsConfig {
   '$mouse-gray-color': '#D3D3D3',
   '$light-gray-color': '#F1F1F1',
   '$stroke-color': '#979797',
-  '$very-light-grey-color': '#CBCBCB'
+  '$very-light-grey-color': '#CBCBCB',
+  '$grey-chateau': '#91979F',
+  '$white-smoke': '#F7F7F7'
 }
 ));
 

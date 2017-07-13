@@ -10,12 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.api.testing.server.framework;
 
-import java.util.List;
-import java.util.Map;
-
+import org.eclipse.che.api.testing.shared.TestDetectionContext;
+import org.eclipse.che.api.testing.shared.TestExecutionContext;
+import org.eclipse.che.api.testing.shared.TestPosition;
 import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.execution.ProcessHandler;
 import org.eclipse.che.api.testing.shared.dto.TestResultDto;
 import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Interface for defining test frameworks for the test runner. All test
@@ -32,12 +38,13 @@ public interface TestRunner {
      * tests.
      *
      * @param testParameters
-     *            Map of parameters for executing the test cases. Most of the
-     *            parameters are coming from the REST service request are passed
-     *            as a map.
+     *         Map of parameters for executing the test cases. Most of the
+     *         parameters are coming from the REST service request are passed
+     *         as a map.
      * @return the test results.
      * @throws Exception
-     *             when test runner execution fails.
+     *         when test runner execution fails.
+     * @deprecated use {@link TestRunner#execute(TestExecutionContext)} instead
      */
     @Deprecated
     TestResult execute(Map<String, String> testParameters) throws Exception;
@@ -55,17 +62,23 @@ public interface TestRunner {
      * @throws Exception
      *             when test runner execution fails.
      */
+    @Deprecated
     TestResultRootDto runTests(Map<String, String> testParameters) throws Exception;
 
     /**
      * Call this method to get child elements for test result that is stored
      * under given path (i.e. test cases/test suites that are grouped by related
      * test suite).
-     * 
+     *
      * @param testResultsPath
      * @return child elements for test result under given path
      */
+    @Deprecated
     List<TestResultDto> getTestResults(List<String> testResultsPath);
+
+
+    @Nullable
+    ProcessHandler execute(TestExecutionContext context);
 
     /**
      * The test runner framework will call this method to get the framework name
@@ -74,4 +87,17 @@ public interface TestRunner {
      * @return the implementation framework name
      */
     String getName();
+
+    /** @return port for connecting to the debugger */
+    int getDebugPort();
+
+    /**
+     * Detect is any test present at given context
+     *
+     * @param context
+     *         the current context
+     * @return list of the test positions if any test present, empty list otherwise
+     */
+    @NotNull
+    List<TestPosition> detectTests(TestDetectionContext context);
 }

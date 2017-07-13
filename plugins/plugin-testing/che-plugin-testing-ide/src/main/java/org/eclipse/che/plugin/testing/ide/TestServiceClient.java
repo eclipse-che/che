@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -26,6 +30,11 @@ import org.eclipse.che.api.promises.client.js.Executor.ExecutorBody;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.api.promises.client.js.ResolveFunction;
+import org.eclipse.che.api.testing.shared.Constants;
+import org.eclipse.che.api.testing.shared.TestDetectionContext;
+import org.eclipse.che.api.testing.shared.TestDetectionResult;
+import org.eclipse.che.api.testing.shared.TestExecutionContext;
+import org.eclipse.che.api.testing.shared.TestLaunchResult;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.api.testing.shared.dto.TestResultDto;
 import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
@@ -38,19 +47,17 @@ import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.command.goal.TestGoal;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.CommandOutputConsole;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.HTTPHeader;
 
-import com.google.gwt.http.client.URL;
-import com.google.gwt.regexp.shared.MatchResult;
-import com.google.gwt.regexp.shared.RegExp;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
@@ -63,18 +70,19 @@ import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL
 @Singleton
 public class TestServiceClient {
 
-    private final static RegExp           mavenCleanBuildPattern            =
-                                                                 RegExp.compile("(.*)mvn +clean +install +(\\-f +\\$\\{current\\.project\\.path\\}.*)");
+    private final static RegExp mavenCleanBuildPattern =
+            RegExp.compile("(.*)mvn +clean +install +(\\-f +\\$\\{current\\.project\\.path\\}.*)");
 
-    public static final String            PROJECT_BUILD_NOT_STARTED_MESSAGE = "The project build could not be started (see Build output). "
-                                                                              + "Test run is cancelled.\n"
-                                                                              + "You should probably check the settings of the 'test-compile' command.";
+    public static final String PROJECT_BUILD_NOT_STARTED_MESSAGE = "The project build could not be started (see Build output). "
+                                                                   + "Test run is cancelled.\n"
+                                                                   +
+                                                                   "You should probably check the settings of the 'test-compile' command.";
 
-    public static final String            PROJECT_BUILD_FAILED_MESSAGE      = "The project build failed (see Build output). "
-                                                                              + "Test run is cancelled.\n"
-                                                                              + "You might want to check the settings of the 'test-compile' command.";
+    public static final String PROJECT_BUILD_FAILED_MESSAGE = "The project build failed (see Build output). "
+                                                              + "Test run is cancelled.\n"
+                                                              + "You might want to check the settings of the 'test-compile' command.";
 
-    public static final String            EXECUTING_TESTS_MESSAGE           = "Executing test session.";
+    public static final String EXECUTING_TESTS_MESSAGE = "Executing test session.";
 
 
     private final AppContext              appContext;
@@ -87,6 +95,7 @@ public class TestServiceClient {
     private final CommandConsoleFactory   commandConsoleFactory;
     private final ProcessesPanelPresenter processesPanelPresenter;
     private final TestGoal                testGoal;
+    private final RequestTransmitter      requestTransmitter;
 
 
     @Inject
@@ -100,7 +109,8 @@ public class TestServiceClient {
                              MacroProcessor macroProcessor,
                              CommandConsoleFactory commandConsoleFactory,
                              ProcessesPanelPresenter processesPanelPresenter,
-                             TestGoal testGoal) {
+                             TestGoal testGoal,
+                             RequestTransmitter requestTransmitter) {
         this.appContext = appContext;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
@@ -111,7 +121,10 @@ public class TestServiceClient {
         this.commandConsoleFactory = commandConsoleFactory;
         this.processesPanelPresenter = processesPanelPresenter;
         this.testGoal = testGoal;
+        this.requestTransmitter = requestTransmitter;
     }
+
+    @Deprecated
     public Promise<CommandImpl> getOrCreateTestCompileCommand() {
         List<CommandImpl> commands = commandManager.getCommands();
 
@@ -126,7 +139,11 @@ public class TestServiceClient {
                 MatchResult result = mavenCleanBuildPattern.exec(commandLine);
                 if (result != null) {
                     String testCompileCommandLine = mavenCleanBuildPattern.replace(commandLine, "$1mvn test-compile $2");
-                    return commandManager.createCommand(testGoal.getId(), "mvn", "test-compile", testCompileCommandLine, new HashMap<String, String>());
+                    return commandManager.createCommand(testGoal.getId(),
+                                                        "mvn",
+                                                        "test-compile",
+                                                        testCompileCommandLine,
+                                                        new HashMap<>());
                 }
             }
         }
@@ -212,16 +229,16 @@ public class TestServiceClient {
                                     sendTests(projectPath,
                                               testFramework,
                                               parameters).then(new Operation<TestResult>() {
-                                                  @Override
-                                                  public void apply(TestResult result) throws OperationException {
-                                                      resolve.apply(result);
-                                                  }
-                                              }, new Operation<PromiseError>() {
-                                                  @Override
-                                                  public void apply(PromiseError error) throws OperationException {
-                                                      reject.apply(error);
-                                                  }
-                                              });
+                                        @Override
+                                        public void apply(TestResult result) throws OperationException {
+                                            resolve.apply(result);
+                                        }
+                                    }, new Operation<PromiseError>() {
+                                        @Override
+                                        public void apply(PromiseError error) throws OperationException {
+                                            reject.apply(error);
+                                        }
+                                    });
                                 } else {
                                     reject.apply(promiseFromThrowable(new Throwable(PROJECT_BUILD_FAILED_MESSAGE)));
                                 }
@@ -233,6 +250,7 @@ public class TestServiceClient {
         });
     }
 
+    @Deprecated
     public Promise<TestResult> getTestResult(String projectPath,
                                              String testFramework,
                                              Map<String, String> parameters,
@@ -241,6 +259,7 @@ public class TestServiceClient {
                                         getOrCreateTestCompileCommand());
     }
 
+    @Deprecated
     public Promise<TestResult> sendTests(String projectPath, String testFramework, Map<String, String> parameters) {
         StringBuilder sb = new StringBuilder();
         if (parameters != null) {
@@ -255,6 +274,22 @@ public class TestServiceClient {
                      + "&testFramework=" + testFramework + "&" + sb.toString();
         return asyncRequestFactory.createGetRequest(url).header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(TestResult.class));
+    }
+
+    public JsonRpcPromise<TestLaunchResult> runTests(TestExecutionContext context) {
+        return requestTransmitter.newRequest()
+                                 .endpointId("ws-agent")
+                                 .methodName(Constants.RUN_TESTS_METHOD)
+                                 .paramsAsDto(context)
+                                 .sendAndReceiveResultAsDto(TestLaunchResult.class);
+    }
+
+    public JsonRpcPromise<TestDetectionResult> detectTests(TestDetectionContext context) {
+        return requestTransmitter.newRequest()
+                                 .endpointId("ws-agent")
+                                 .methodName(Constants.TESTING_RPC_TEST_DETECTION_NAME)
+                                 .paramsAsDto(context)
+                                 .sendAndReceiveResultAsDto(TestDetectionResult.class);
     }
 
     public Promise<TestResultRootDto> runTests(String testFramework, String projectPath, Map<String, String> parameters) {

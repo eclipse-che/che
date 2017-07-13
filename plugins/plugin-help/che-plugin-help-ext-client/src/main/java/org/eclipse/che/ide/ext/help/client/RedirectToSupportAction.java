@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.help.client;
 
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.util.browser.BrowserUtils;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -40,7 +40,7 @@ public class RedirectToSupportAction extends Action {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Window.open(productInfoDataProvider.getSupportLink(), "_blank", null);
+        BrowserUtils.openInNewTab(productInfoDataProvider.getSupportLink());
     }
 
     @Override

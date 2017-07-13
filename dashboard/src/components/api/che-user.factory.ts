@@ -376,7 +376,7 @@ export class CheUser {
       return user;
     }, (error: any) => {
       if (error && error.status === 304) {
-        return this.user;
+        return this.$q.when(this.user);
       }
       return this.$q.reject(error);
     });

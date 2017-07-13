@@ -88,7 +88,7 @@ export class CheStack {
               }
             },
             'recipe': {
-              'content': 'services:\n dev-machine:\n  image: codenvy/ubuntu_jdk8\n',
+              'content': 'services:\n dev-machine:\n  image: eclipse/ubuntu_jdk8\n',
               'contentType': 'application/x-yaml',
               'type': 'compose'
             }

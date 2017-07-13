@@ -39,7 +39,7 @@
            class="che-list-item-name"
            ng-click="factoryItemController.redirectToFactoryDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Factory</span>
-        <span tooltip="Created: {{factoryItemController.factory.creator.created | amDateFormat:'dddd, MMMM Do, YYYY'}}"
+        <span uib-tooltip="Created: {{factoryItemController.factory.creator.created | amDateFormat:'dddd, MMMM Do, YYYY'}}"
               class="che-hover">{{factoryItemController.factory.name ? factoryItemController.factory.name : factoryItemController.getFactoryLinks()[0]}}</span>
       </div>
       <div flex-gt-xs="60" ng-click="factoryItemController.redirectToFactoryDetails();">
@@ -49,7 +49,7 @@
       <div flex-gt-xs="15">
         <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
         <span class="che-list-actions">
-          <a tooltip="Open in IDE" ng-href="#/load-factory/{{factoryItemController.factory.id}}">
+          <a uib-tooltip="Open in IDE" ng-href="#/load-factory/{{factoryItemController.factory.id}}">
             <span class="fa fa-chevron-circle-right factory-action"></span>
           </a>
         </span>

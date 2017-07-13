@@ -29,7 +29,7 @@ import com.google.inject.assistedinject.Assisted;
 
 /**
  * Tree (root) node for display the failing tests.
- * 
+ *
  * @author Mirage Abeysekara
  */
 @Deprecated

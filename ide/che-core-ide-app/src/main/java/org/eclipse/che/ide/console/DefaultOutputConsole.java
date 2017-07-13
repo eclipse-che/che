@@ -54,7 +54,9 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
         this.resources = resources;
         this.view.enableAutoScroll(true);
 
-        setCustomizer(new DefaultOutputCustomizer(appContext, editorAgent));
+        setCustomizer(new CompoundOutputCustomizer(
+                new JavaOutputCustomizer(appContext, editorAgent),
+                new CSharpOutputCustomizer(appContext, editorAgent)));
 
         view.setDelegate(this);
 

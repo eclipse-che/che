@@ -19,7 +19,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.commons.exception.ServerException;
@@ -115,9 +114,9 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         view.setEnableAmendCheckBox(true);
         view.setEnablePushAfterCommitCheckBox(true);
         view.setEnableRemoteBranchesDropDownLis(false);
-        service.diff(appContext.getDevMachine(), project.getLocation(), null, NAME_STATUS, true, 0, "HEAD", false)
+        service.diff(project.getLocation(), null, NAME_STATUS, true, 0, "HEAD", false)
                .then(diff -> {
-                   service.log(appContext.getDevMachine(), project.getLocation(), null, -1, 1, false)
+                   service.log(project.getLocation(), null, -1, 1, false)
                           .then(arg -> {
                               if (diff.isEmpty()) {
                                   showAskForAmendDialog();
@@ -127,7 +126,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                           })
                           .catchError(error -> {
                               if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
-                                  service.getStatus(appContext.getDevMachine(), project.getLocation()).then(
+                                  service.getStatus(project.getLocation()).then(
                                           status -> {
                                               view.setEnableAmendCheckBox(false);
                                               view.setEnablePushAfterCommitCheckBox(false);
@@ -143,7 +142,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                    notificationManager.notify(constant.diffFailed(), FAIL, FLOAT_MODE);
                });
 
-        service.branchList(appContext.getDevMachine(), project.getLocation(), LIST_REMOTE)
+        service.branchList(project.getLocation(), LIST_REMOTE)
                .then(view::setRemoteBranchesList)
                .catchError(error -> {
                    notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
@@ -188,22 +187,19 @@ public class CommitPresenter implements CommitView.ActionDelegate {
 
     @Override
     public void onCommitClicked() {
-        DevMachine devMachine = appContext.getDevMachine();
         Path location = project.getLocation();
         Path[] filesToCommitArray = getFilesToCommitArray();
 
-        service.add(devMachine, location, false, filesToCommitArray)
+        service.add(location, false, filesToCommitArray)
                .then(arg -> {
-                   service.commit(devMachine,
-                                  location,
+                   service.commit(location,
                                   view.getMessage(),
-                                  false,
-                                  filesToCommitArray,
-                                  view.isAmend())
+                                  view.isAmend(),
+                                  filesToCommitArray)
                           .then(revision -> {
                               onCommitSuccess(revision);
                               if (view.isPushAfterCommit()) {
-                                  push(devMachine, location);
+                                  push(location);
                               }
                               view.close();
                           })
@@ -223,12 +219,11 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         return filesToCommitArray;
     }
 
-    private void push(DevMachine devMachine, Path location) {
+    private void push(Path location) {
         String remoteBranch = view.getRemoteBranch();
         String remote = remoteBranch.split("/")[0];
         String branch = remoteBranch.split("/")[1];
-        service.push(devMachine,
-                     location,
+        service.push(location,
                      singletonList(branch),
                      remote,
                      false)
@@ -252,7 +247,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
 
     @Override
     public void setAmendCommitMessage() {
-        service.log(appContext.getDevMachine(), project.getLocation(), null, -1, -1, false)
+        service.log(project.getLocation(), null, -1, -1, false)
                .then(log -> {
                    String message = "";
                    final Revision revision = getFirst(log.getCommits(), null);

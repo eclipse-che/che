@@ -13,11 +13,10 @@ package org.eclipse.che.plugin.languageserver.ide.service;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
 import org.eclipse.che.plugin.languageserver.ide.editor.PublishDiagnosticsProcessor;
-import org.eclipse.lsp4j.PublishDiagnosticsParams;
 
 /**
  * Subscribes and receives JSON-RPC messages related to 'textDocument/publishDiagnostics' events
@@ -28,7 +27,7 @@ public class PublishDiagnosticsReceiver {
     private void configureReceiver(Provider<PublishDiagnosticsProcessor> provider, RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
                     .methodName("textDocument/publishDiagnostics")
-                    .paramsAsDto(PublishDiagnosticsParams.class)
+                    .paramsAsDto(ExtendedPublishDiagnosticsParams.class)
                     .noResult()
                     .withConsumer(params -> provider.get().processDiagnostics(params));
     }

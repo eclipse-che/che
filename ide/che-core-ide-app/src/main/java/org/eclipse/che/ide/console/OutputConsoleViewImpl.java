@@ -36,7 +36,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.machine.MachineResources;
@@ -73,13 +72,13 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     private ActionDelegate delegate;
 
     @UiField
-    DockLayoutPanel consolePanel;
+    protected DockLayoutPanel consolePanel;
 
     @UiField
-    FlowPanel commandPanel;
+    protected FlowPanel commandPanel;
 
     @UiField
-    FlowPanel previewPanel;
+    protected FlowPanel previewPanel;
 
     @UiField
     Label commandTitle;
@@ -97,16 +96,16 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     Anchor previewUrlLabel;
 
     @UiField
-    FlowPanel reRunProcessButton;
+    protected FlowPanel reRunProcessButton;
 
     @UiField
-    FlowPanel stopProcessButton;
+    protected FlowPanel stopProcessButton;
 
     @UiField
-    FlowPanel clearOutputsButton;
+    protected FlowPanel clearOutputsButton;
 
     @UiField
-    FlowPanel downloadOutputsButton;
+    protected FlowPanel downloadOutputsButton;
 
     @UiField
     FlowPanel wrapTextButton;

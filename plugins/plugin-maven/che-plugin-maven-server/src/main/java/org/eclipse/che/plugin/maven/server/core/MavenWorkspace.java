@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.maven.server.core;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -30,7 +29,10 @@ import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProjectModifications;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
+import org.eclipse.che.plugin.maven.shared.event.MavenOutputEvent;
+import org.eclipse.che.plugin.maven.shared.impl.MavenUpdateEventImpl;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
@@ -50,6 +52,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
 /**
@@ -62,7 +65,6 @@ public class MavenWorkspace {
 
     private final MavenProjectManager       manager;
     private final Provider<ProjectRegistry> projectRegistryProvider;
-    private final MavenCommunication        communication;
     private final ClasspathManager          classpathManager;
 
     private MavenTaskExecutor resolveExecutor;
@@ -76,12 +78,10 @@ public class MavenWorkspace {
                           MavenProgressNotifier notifier,
                           MavenExecutorService executorService,
                           Provider<ProjectRegistry> projectRegistryProvider,
-                          MavenCommunication communication,
                           ClasspathManager classpathManager,
                           EventService eventService,
                           EclipseWorkspaceProvider workspaceProvider) {
         this.projectRegistryProvider = projectRegistryProvider;
-        this.communication = communication;
         this.classpathManager = classpathManager;
         this.manager = manager;
         resolveExecutor = new MavenTaskExecutor(executorService, notifier);
@@ -110,9 +110,20 @@ public class MavenWorkspace {
                 List<MavenProject> needResolve = manager.findDependentProjects(allChangedProjects);
                 needResolve.addAll(updated.keySet());
 
+                List<String> updatedPaths = updated.keySet().stream()
+                                                   .map(MavenProject::getProject)
+                                                   .map(IResource::getFullPath)
+                                                   .map(IPath::toOSString)
+                                                   .collect(toList());
+                List<String> removedPaths = removed.stream()
+                                                   .map(MavenProject::getProject)
+                                                   .map(IResource::getFullPath)
+                                                   .map(IPath::toOSString)
+                                                   .collect(toList());
+
                 addResolveProjects(needResolve);
 
-                communication.sendUpdateMassage(updated.keySet(), removed);
+                eventService.publish(new MavenUpdateEventImpl(updatedPaths, removedPaths, MavenOutputEvent.TYPE.UPDATE));
             }
         });
     }
@@ -168,8 +179,17 @@ public class MavenWorkspace {
         IJavaProject javaProject = JavaCore.create(project.getProject());
         try {
             ClasspathHelper helper = new ClasspathHelper(javaProject);
-            project.getSources().stream().map(s -> project.getProject().getFullPath().append(s)).forEach(helper::addSourceEntry);
-            project.getTestSources().stream().map(s -> project.getProject().getFullPath().append(s)).forEach(helper::addSourceEntry);
+            IPath sourceOutputPath = project.getProject().getFullPath().append(project.getOutputDirectory());
+            for (String source : project.getSources()) {
+                IPath sourcePath = project.getProject().getFullPath().append(source);
+                helper.addSourceEntry(sourcePath, sourceOutputPath);
+            }
+
+            IPath testOutputPath = project.getProject().getFullPath().append(project.getTestOutputDirectory());
+            for (String testSource : project.getTestSources()) {
+                IPath testSourcePath = project.getProject().getFullPath().append(testSource);
+                helper.addSourceEntry(testSourcePath, testOutputPath);
+            }
             //add maven classpath container
             helper.addContainerEntry(new Path(MavenClasspathContainer.CONTAINER_ID));
             //add JRE classpath container
@@ -219,13 +239,14 @@ public class MavenWorkspace {
         if (configuration != null) {
             Element sources = configuration.getChild("sources");
             if (sources != null) {
+                IPath outputPath = project.getProject().getFullPath().append(project.getOutputDirectory());
                 for (Object element : sources.getChildren()) {
                     final String path = ((Element)element).getTextTrim();
                     final IPath projectLocation = project.getProject().getLocation();
                     final String projectPath = projectLocation.toOSString();
                     final String sourceFolder = path.contains(projectPath) ? path.substring(projectPath.length() + 1) : path;
 
-                    helper.addSourceEntry(project.getProject().getFullPath().append(sourceFolder));
+                    helper.addSourceEntry(project.getProject().getFullPath().append(sourceFolder), outputPath);
                     if (!attributes.contains(sourceFolder)) {
                         attributes.add(sourceFolder);
                     }

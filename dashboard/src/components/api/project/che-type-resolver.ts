@@ -70,21 +70,11 @@ export class CheTypeResolver {
    * @returns {ng.IPromise<any>}
    */
   resolveProjectType(projectDetails: che.IProject): ng.IPromise<any> {
-    let deferredResolve = this.$q.defer();
-    this.fetchTypes().then(() => {
-      this.autoCheckType(projectDetails, this.typesIds).then((projectDetails: che.IProject) => {
-        this.cheProject.updateProjectDetails(projectDetails).then(() => {
-          deferredResolve.resolve();
-        }, (error: any) => {
-          deferredResolve.reject(error);
-        });
-      }, (error: any) => {
-        deferredResolve.reject(error);
-      });
-    }, (error: any) => {
-      deferredResolve.reject(error);
+    return this.fetchTypes().then(() => {
+      return this.autoCheckType(projectDetails, this.typesIds);
+    }).then((projectDetails: che.IProject) => {
+      return this.cheProject.updateProjectDetails(projectDetails);
     });
-    return deferredResolve.promise;
   }
 
   /**

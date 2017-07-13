@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.server;
 
-import com.google.gson.JsonObject;
 import com.google.inject.Provider;
+
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
@@ -22,15 +22,12 @@ import org.eclipse.che.maven.data.MavenArtifact;
 import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.server.core.EclipseWorkspaceProvider;
-import org.eclipse.che.plugin.maven.server.core.MavenCommunication;
 import org.eclipse.che.plugin.maven.server.core.MavenExecutorService;
 import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
 import org.eclipse.che.plugin.maven.server.core.MavenWorkspace;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
 import org.eclipse.che.plugin.maven.server.rmi.MavenServerManagerTest;
-import org.eclipse.che.plugin.maven.shared.MessageType;
-import org.eclipse.che.plugin.maven.shared.dto.NotificationMessage;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -51,7 +48,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -92,22 +88,7 @@ public class WorkspaceTest extends BaseTest {
                                             mavenNotifier,
                                             new MavenExecutorService(),
                                             projectRegistryProvider,
-                                            new MavenCommunication() {
-                                                @Override
-                                                public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed) {
-
-                                                }
-
-                                                @Override
-                                                public void sendNotification(NotificationMessage message) {
-                                                    System.out.println(message.toString());
-                                                }
-
-                                                @Override
-                                                public void send(JsonObject object, MessageType type) {
-
-                                                }
-                                            }, new ClasspathManager(root.getAbsolutePath(), wrapperManager, mavenProjectManager, terminal,
+                                            new ClasspathManager(root.getAbsolutePath(), wrapperManager, mavenProjectManager, terminal,
                                                                     mavenNotifier), eventService, new EclipseWorkspaceProvider());
     }
 

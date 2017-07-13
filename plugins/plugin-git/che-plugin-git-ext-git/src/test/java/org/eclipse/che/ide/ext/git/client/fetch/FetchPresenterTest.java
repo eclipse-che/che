@@ -64,11 +64,11 @@ public class FetchPresenterTest extends BaseTest {
                                        gitOutputConsoleFactory,
                                        processesPanelPresenter);
 
-        when(service.remoteList(anyObject(), any(Path.class), anyString(), anyBoolean())).thenReturn(remoteListPromise);
+        when(service.remoteList(any(Path.class), anyString(), anyBoolean())).thenReturn(remoteListPromise);
         when(remoteListPromise.then(any(Operation.class))).thenReturn(remoteListPromise);
         when(remoteListPromise.catchError(any(Operation.class))).thenReturn(remoteListPromise);
 
-        when(service.branchList(anyObject(), any(Path.class), anyObject())).thenReturn(branchListPromise);
+        when(service.branchList(any(Path.class), anyObject())).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
 

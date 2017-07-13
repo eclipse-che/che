@@ -40,14 +40,50 @@ import {CreateProjectStackLibraryController} from './workspace-details/select-st
 import {CreateProjectStackLibrary} from './workspace-details/select-stack/stack-library/create-project-stack-library.directive';
 import {WorkspaceSelectStackController} from './workspace-details/select-stack/workspace-select-stack.controller';
 import {WorkspaceSelectStack} from './workspace-details/select-stack/workspace-select-stack.directive';
+import {StackSelectorController} from './create-workspace/stack-selector/stack-selector.controller';
+import {StackSelectorSvc} from './create-workspace/stack-selector/stack-selector.service';
+import {StackSelector} from './create-workspace/stack-selector/stack-selector.directive';
+import {StackSelectorItem} from './create-workspace/stack-selector/stack-selector-item/stack-selector-item.directive';
+import {RamSettingsController} from './create-workspace/ram-settings/ram-settings.controller';
+import {RamSettings} from './create-workspace/ram-settings/ram-settings.directive';
+import {RamSettingsMachineItemController} from './create-workspace/ram-settings/ram-settings-machine-item/ram-settings-machine-item.controller';
+import {RamSettingsMachineItem} from './create-workspace/ram-settings/ram-settings-machine-item/ram-settings-machine-item.directive';
+
+import {NamespaceSelectorController} from './create-workspace/namespace-selector/namespace-selector.controller';
+import {NamespaceSelectorSvc} from './create-workspace/namespace-selector/namespace-selector.service';
+import {NamespaceSelector} from './create-workspace/namespace-selector/namespace-selector.directive';
+
+import {ProjectSourceSelectorController} from './create-workspace/project-source-selector/project-source-selector.controller';
+import {ProjectSourceSelectorService} from './create-workspace/project-source-selector/project-source-selector.service';
+import {ProjectSourceSelector} from './create-workspace/project-source-selector/project-source-selector.directive';
+import {ImportBlankProjectController} from './create-workspace/project-source-selector/import-blank-project/import-blank-project.controller';
+import {ImportBlankProjectService} from './create-workspace/project-source-selector/import-blank-project/import-blank-project.service';
+import {ImportBlankProject} from './create-workspace/project-source-selector/import-blank-project/import-blank-project.directive';
+import {ImportGitProjectController} from './create-workspace/project-source-selector/import-git-project/import-git-project.controller';
+import {ImportGitProjectService} from './create-workspace/project-source-selector/import-git-project/import-git-project.service';
+import {ImportGitProject} from './create-workspace/project-source-selector/import-git-project/import-git-project.directive';
+import {ImportZipProjectController} from './create-workspace/project-source-selector/import-zip-project/import-zip-project.controller';
+import {ImportZipProjectService} from './create-workspace/project-source-selector/import-zip-project/import-zip-project.service';
+import {ImportZipProject} from './create-workspace/project-source-selector/import-zip-project/import-zip-project.directive';
+import {ImportGithubProjectController} from './create-workspace/project-source-selector/import-github-project/import-github-project.controller';
+import {ImportGithubProjectService} from './create-workspace/project-source-selector/import-github-project/import-github-project.service';
+import {ImportGithubProject} from './create-workspace/project-source-selector/import-github-project/import-github-project.directive';
+import {GithubRepositoryItem} from './create-workspace/project-source-selector/import-github-project/github-repository-item/github-repository-item.directive';
+import {TemplateSelectorController} from './create-workspace/project-source-selector/template-selector/template-selector.controller';
+import {TemplateSelectorSvc} from './create-workspace/project-source-selector/template-selector/template-selector.service';
+import {TemplateSelector} from './create-workspace/project-source-selector/template-selector/template-selector.directive';
+import {TemplateSelectorItem} from './create-workspace/project-source-selector/template-selector/template-selector-item/template-selector-item.directive';
+import {ProjectMetadataController} from './create-workspace/project-source-selector/project-metadata/project-metadata.controller';
+import {ProjectMetadataService} from './create-workspace/project-source-selector/project-metadata/project-metadata.service';
+import {ProjectMetadata} from './create-workspace/project-source-selector/project-metadata/project-metadata.directive';
 
 import {CheWorkspaceRamAllocationSliderController} from './workspace-ram-slider/che-workspace-ram-allocation-slider.controller';
 import {CheWorkspaceRamAllocationSlider} from './workspace-ram-slider/che-workspace-ram-allocation-slider.directive';
 import {WorkspaceStatus} from './workspace-status/workspace-status.directive';
 import {WorkspaceStatusIndicator} from './workspace-status/workspace-status-indicator.directive';
 
-import {CheStackLibraryFilterController} from './workspace-details/select-stack/stack-library/stack-library-filter/che-stack-library-filter.controller';
-import {CheStackLibraryFilter}     from './workspace-details/select-stack/stack-library/stack-library-filter/che-stack-library-filter.directive';
+import {CheStackLibraryFilterController} from './create-workspace/stack-selector/stack-library-filter/che-stack-library-filter.controller';
+import {CheStackLibraryFilter}     from './create-workspace/stack-selector/stack-library-filter/che-stack-library-filter.directive';
 import {WorkspaceEnvironmentsController} from './workspace-details/environments/environments.controller';
 import {WorkspaceEnvironments} from './workspace-details/environments/environments.directive';
 import {WorkspaceMachineConfigController} from './workspace-details/environments/machine-config/machine-config.controller';
@@ -71,7 +107,14 @@ import {EditCommandDialogController} from  './workspace-details/list-commands/ed
 import {ListAgentsController} from  './workspace-details/environments/list-agents/list-agents.controller';
 import {AddMachineDialogController} from  './workspace-details/environments/add-machine-dialog/add-machine-dialog.controller';
 import {ListAgents} from  './workspace-details/environments/list-agents/list-agents.directive';
+import {StackSelectorScopeFilter} from './create-workspace/stack-selector/stack-selector-scope.filter';
+import {StackSelectorSearchFilter} from './create-workspace/stack-selector/stack-selector-search.filter';
+import {StackSelectorTagsFilter} from './create-workspace/stack-selector/stack-selector-tags.filter';
 
+import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
+import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
+
+import {WorkspaceConfigService} from './workspace-config.service';
 
 /**
  * @ngdoc controller
@@ -82,6 +125,11 @@ import {ListAgents} from  './workspace-details/environments/list-agents/list-age
 export class WorkspacesConfig {
 
   constructor(register: che.IRegisterService) {
+
+    new StackSelectorScopeFilter(register);
+    new StackSelectorSearchFilter(register);
+    new StackSelectorTagsFilter(register);
+
     register.controller('WorkspaceDetailsSshCtrl', WorkspaceDetailsSshCtrl);
     register.directive('workspaceDetailsSsh', WorkspaceDetailsSsh);
 
@@ -132,6 +180,44 @@ export class WorkspacesConfig {
     register.controller('WorkspaceSelectStackController', WorkspaceSelectStackController);
     register.directive('workspaceSelectStack', WorkspaceSelectStack);
 
+    register.controller('StackSelectorController', StackSelectorController);
+    register.service('stackSelectorSvc', StackSelectorSvc);
+    register.directive('stackSelector', StackSelector);
+    register.directive('stackSelectorItem', StackSelectorItem);
+
+    register.controller('RamSettingsController', RamSettingsController);
+    register.directive('ramSettings', RamSettings);
+    register.controller('RamSettingsMachineItemController', RamSettingsMachineItemController);
+    register.directive('ramSettingsMachineItem', RamSettingsMachineItem);
+
+    register.controller('NamespaceSelectorController', NamespaceSelectorController);
+    register.service('namespaceSelectorSvc', NamespaceSelectorSvc);
+    register.directive('namespaceSelector', NamespaceSelector);
+
+    register.controller('ProjectSourceSelectorController', ProjectSourceSelectorController);
+    register.service('projectSourceSelectorService', ProjectSourceSelectorService);
+    register.directive('projectSourceSelector', ProjectSourceSelector);
+    register.controller('ImportBlankProjectController', ImportBlankProjectController);
+    register.service('importBlankProjectService', ImportBlankProjectService);
+    register.directive('importBlankProject', ImportBlankProject);
+    register.controller('ImportGitProjectController', ImportGitProjectController);
+    register.service('importGitProjectService', ImportGitProjectService);
+    register.directive('importGitProject', ImportGitProject);
+    register.controller('ImportGithubProjectController', ImportGithubProjectController);
+    register.service('importGithubProjectService', ImportGithubProjectService);
+    register.directive('importGithubProject', ImportGithubProject);
+    register.directive('githubRepositoryItem', GithubRepositoryItem);
+    register.controller('ImportZipProjectController', ImportZipProjectController);
+    register.service('importZipProjectService', ImportZipProjectService);
+    register.directive('importZipProject', ImportZipProject);
+    register.controller('TemplateSelectorController', TemplateSelectorController);
+    register.service('templateSelectorSvc', TemplateSelectorSvc);
+    register.directive('templateSelector', TemplateSelector);
+    register.directive('templateSelectorItem', TemplateSelectorItem);
+    register.controller('ProjectMetadataController', ProjectMetadataController);
+    register.service('projectMetadataService', ProjectMetadataService);
+    register.directive('projectMetadata', ProjectMetadata);
+
     register.controller('CheStackLibraryFilterController', CheStackLibraryFilterController);
     register.directive('cheStackLibraryFilter', CheStackLibraryFilter);
 
@@ -159,8 +245,13 @@ export class WorkspacesConfig {
     register.controller('ListAgentsController', ListAgentsController);
     register.directive('listAgents', ListAgents);
 
+    register.controller('CreateWorkspaceController', CreateWorkspaceController);
+    register.service('createWorkspaceSvc', CreateWorkspaceSvc);
+
+    register.service('workspaceConfigService', WorkspaceConfigService);
+
     // config routes
-    register.app.config(($routeProvider: any) => {
+    register.app.config(($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/workspaces', {
         title: 'Workspaces',
         templateUrl: 'app/workspaces/list-workspaces/list-workspaces.html',
@@ -175,9 +266,14 @@ export class WorkspacesConfig {
       })
       .accessWhen('/create-workspace', {
         title: 'New Workspace',
-        templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
-        controller: 'WorkspaceDetailsController',
-        controllerAs: 'workspaceDetailsController'
+        templateUrl: 'app/workspaces/create-workspace/create-workspace.html',
+        controller: 'CreateWorkspaceController',
+        controllerAs: 'createWorkspaceController',
+        resolve: {
+          initData: ['workspaceConfigService', (workspaceConfigService: WorkspaceConfigService) => {
+            return workspaceConfigService.resolveCreateWorkspaceRoute();
+          }]
+        }
       });
     });
   }
