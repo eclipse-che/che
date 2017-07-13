@@ -26,6 +26,16 @@ public class ParametersList {
         parameters.add(value);
     }
 
+    /**
+     * Adds a parameter without name.
+     *
+     * @param value
+     *         value of the parameter
+     */
+    public void add(String value) {
+        parameters.add(value);
+    }
+
     public List<String> getParameters() {
         return unmodifiableList(parameters);
     }

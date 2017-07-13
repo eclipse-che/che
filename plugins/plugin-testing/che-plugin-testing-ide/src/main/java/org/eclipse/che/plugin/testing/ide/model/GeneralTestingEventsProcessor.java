@@ -35,7 +35,7 @@ import java.util.function.Function;
 import static org.eclipse.che.plugin.testing.ide.model.Printer.OutputType;
 
 /**
- * Event processor converts events form runner to internal form.
+ * Event processor converts events from runner to internal form.
  */
 public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcessor {
     private final TestRootState testRootState;
