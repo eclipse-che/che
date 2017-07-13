@@ -44,7 +44,5 @@
         <module>integration-tests</module>
         <module>che-core-api-system</module>
         <module>che-core-api-system-shared</module>
-        <module>che-machine-authentication-shared</module>
-        <module>che-machine-authentication</module>
     </modules>
 </project>
