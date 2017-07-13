@@ -23,6 +23,8 @@ import java.io.PrintStream;
 public class CheJUnitTestListener {
     private final PrintStream out;
 
+    private long myCurrentTestStart;
+
     public CheJUnitTestListener() {
         this.out = System.out;
         TestingMessageHelper.reporterAttached(out);
@@ -46,7 +48,9 @@ public class CheJUnitTestListener {
      *         (generally a class and method name)
      */
     public void testStarted(Description description) {
-        TestingMessageHelper.testStarted(out, description.getMethodName());
+        myCurrentTestStart = System.currentTimeMillis();
+
+        TestingMessageHelper.testStarted(out, description);
     }
 
     /**
@@ -56,7 +60,9 @@ public class CheJUnitTestListener {
      *         the description of the test that just ran
      */
     public void testFinished(Description description) {
-        TestingMessageHelper.testFinished(out, description.getMethodName());
+        long duration = System.currentTimeMillis() - myCurrentTestStart;
+
+        TestingMessageHelper.testFinished(out, description, duration);
     }
 
     /**
@@ -66,7 +72,9 @@ public class CheJUnitTestListener {
      *         describes the test that failed and the exception that was thrown
      */
     public void testFailure(Failure failure) {
-        TestingMessageHelper.testFailed(out, failure);
+        long duration = System.currentTimeMillis() - myCurrentTestStart;
+
+        TestingMessageHelper.testFailed(out, failure, duration);
     }
 
     /**

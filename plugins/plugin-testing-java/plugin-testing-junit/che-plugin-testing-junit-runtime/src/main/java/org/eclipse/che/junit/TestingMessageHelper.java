@@ -11,6 +11,7 @@
 package org.eclipse.che.junit;
 
 
+import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
@@ -55,13 +56,17 @@ public class TestingMessageHelper {
     /**
      * Prints an information when an atomic test is about to be started.
      *
-     * @param name
-     *         method name
+     * @param description
+     *         information about test
      * @param out
      *         output stream
      */
-    public static void testStarted(PrintStream out, String name) {
-        out.println(create("testStarted", new Pair("name", escape(name))));
+    public static void testStarted(PrintStream out, Description description) {
+        int count = description.testCount();
+        String location = description.getClassName() + "." + description.getMethodName() + (count >= 0 ? "[" + count + "]" : "");
+        out.println(create("testStarted",
+                           new Pair("name", escape(description.getMethodName())),
+                           new Pair("locationHint", "java:test://" + escape(location))));
     }
 
     /**
@@ -79,13 +84,17 @@ public class TestingMessageHelper {
     /**
      * Prints an information when an atomic test has finished.
      *
-     * @param name
-     *         method name
+     * @param description
+     *         information about test method
      * @param out
      *         output stream
+     * @param duration
+     *         time of test running
      */
-    public static void testFinished(PrintStream out, String name) {
-        out.println(create("testFinished", new Pair("name", escape(name))));
+    public static void testFinished(PrintStream out, Description description, long duration) {
+        out.println(create("testFinished",
+                           new Pair("name", escape(description.getMethodName())),
+                           new Pair("duration", String.valueOf(duration))));
     }
 
     /**
@@ -95,8 +104,10 @@ public class TestingMessageHelper {
      *         output stream
      * @param failure
      *         describes the test that failed and the exception that was thrown
+     * @param duration
+     *         time of test running
      */
-    public static void testFailed(PrintStream out, Failure failure) {
+    public static void testFailed(PrintStream out, Failure failure, long duration) {
         List<Pair> attributes = new ArrayList<>();
         attributes.add(new Pair("name", escape(failure.getDescription().getMethodName())));
         Throwable exception = failure.getException();
@@ -111,6 +122,7 @@ public class TestingMessageHelper {
         } else {
             attributes.add(new Pair("message", ""));
         }
+        attributes.add(new Pair("duration", String.valueOf(duration)));
 
         out.println(create("testFailed", attributes));
     }
