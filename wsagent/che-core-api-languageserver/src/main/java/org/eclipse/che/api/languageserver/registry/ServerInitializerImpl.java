@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
+import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.CodeActionCapabilities;
@@ -141,7 +142,7 @@ public class ServerInitializerImpl implements ServerInitializer {
     private InitializeParams prepareInitializeParams(String projectPath) {
         InitializeParams initializeParams = new InitializeParams();
         initializeParams.setProcessId(PROCESS_ID);
-        initializeParams.setRootPath(projectPath);
+        initializeParams.setRootPath(LanguageServiceUtils.removeUriScheme(projectPath));
 
         if (CLIENT_CAPABILITIES == null) {
             CLIENT_CAPABILITIES = new ClientCapabilities();
