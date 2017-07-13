@@ -14,6 +14,7 @@ import {CheEnvironmentRegistry} from '../../../../components/api/environment/che
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
 import {StackSelectorScope} from './stack-selector-scope.enum';
 import {StackSelectorSvc} from './stack-selector.service';
+import {CheBranding} from '../../../../components/branding/che-branding.factory';
 
 /**
  * @ngdoc controller
@@ -110,21 +111,32 @@ export class StackSelectorController {
    * The list of tags of visible stacks.
    */
   private allStackTags: Array<string>;
+  /**
+   * The default stack to be preselected (comes from configuration).
+   */
+  private defaultStack: string;
+  /**
+   * The priority stacks to be placed before others (comes from configuration).
+   */
+  private priorityStacks: Array<string>;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($filter: ng.IFilterService, lodash: _.LoDashStatic, cheStack: CheStack, cheEnvironmentRegistry: CheEnvironmentRegistry, stackSelectorSvc: StackSelectorSvc) {
+  constructor($filter: ng.IFilterService, lodash: _.LoDashStatic, cheStack: CheStack, cheBranding: CheBranding,
+              cheEnvironmentRegistry: CheEnvironmentRegistry, stackSelectorSvc: StackSelectorSvc) {
     this.$filter = $filter;
     this.lodash = lodash;
     this.cheStack = cheStack;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.stackSelectorSvc = stackSelectorSvc;
 
+    this.priorityStacks = cheBranding.getWorkspace().priorityStacks;
+    this.defaultStack = cheBranding.getWorkspace().defaultStack;
     this.scope = StackSelectorScope;
     this.showFilters = false;
-    this.selectedScope = StackSelectorScope.ALL;
+    this.selectedScope = StackSelectorScope.QUICK_START;
     this.stackOrderBy = 'name';
     this.stacksByScope = {};
     this.stacksFiltered = [];
@@ -252,6 +264,14 @@ export class StackSelectorController {
 
     this.stacksFiltered = this.$filter('orderBy')(this.stacksFiltered, this.stackOrderBy);
 
+    if (this.priorityStacks) {
+      let priorityStacks = this.lodash.remove(this.stacksFiltered, (stack: che.IStack) => {
+        return this.priorityStacks.indexOf(stack.name) >= 0;
+      });
+
+      this.stacksFiltered = priorityStacks.concat(this.stacksFiltered);
+    }
+
     this.updateTags();
 
     if (this.stacksFiltered.length === 0) {
@@ -259,7 +279,9 @@ export class StackSelectorController {
     }
 
     if (this.needToSelectStack()) {
-      this.selectStack(this.stacksFiltered[0].id);
+      let ids = this.lodash.pluck(this.stacksFiltered, 'id');
+      let stackId = (this.defaultStack && ids.indexOf(this.defaultStack) >= 0) ? this.defaultStack : this.stacksFiltered[0].id;
+      this.selectStack(stackId);
     }
   }
 
