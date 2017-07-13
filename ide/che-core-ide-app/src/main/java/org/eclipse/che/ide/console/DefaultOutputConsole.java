@@ -56,7 +56,8 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
 
         setCustomizer(new CompoundOutputCustomizer(
                 new JavaOutputCustomizer(appContext, editorAgent),
-                new CSharpOutputCustomizer(appContext, editorAgent)));
+                new CSharpOutputCustomizer(appContext, editorAgent),
+                new CPPOutputCustomizer(appContext, editorAgent)));
 
         view.setDelegate(this);
 
