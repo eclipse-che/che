@@ -1,0 +1,42 @@
+# Global Owners
+* @vparfonov
+
+# dashboard
+dashboard/** @ashumilova
+
+# dockerfiles
+dockerfiles/** @riuvshin @benoitf
+
+# agents
+agents/** @tolusha
+agents/go-agents/** @skabashnyuk
+
+# assembly
+assembly/** @riuvshin @skabashnyuk
+
+# core
+core/** @skabashnyuk
+
+# plugins
+plugins/plugin*debugger/** @tolusha
+plugins/plugin-gdb/** @tolusha
+plugins/plugin-docker/** @garagatyi
+plugins/plugin-java/** @evidolob
+plugins/plugin-languageserver/** @evidolob @dkuleshov
+plugins/plugin-machine/** @garagatyi
+plugins/plugin-maven/** @evidolob
+plugins/plugin-orion/** @azatsarynnyy
+plugins/plugin-testing*/** @evidolob
+plugins/plugin-traefik/** @benoitf
+
+# wsmaster
+wsmaster/** @skabashnyuk
+
+# wsagent
+wsagent/activity/** @skabashnyuk
+wsagent/agent/** @tolusha
+wsagent/che-core-api-debug*/** @tolusha
+wsagent/che-core-api-languageserver*/** @evidolob @dkuleshov
+wsagent/che-core-api-testing*/** @evidolob
+wsagent/che-wsagent-core/** @skabashnyuk
+wsagent/wsagent-local/** @skabashnyuk
