@@ -155,6 +155,8 @@ public class MavenModelReader {
             problems.add(MavenProjectProblem.newProblem(pom.getPath(), e.getMessage(), MavenProblemType.SYNTAX));
         } catch (XMLTreeException xmlExc) {
             problems.add(MavenProjectProblem.newProblem(pom.getPath(), xmlExc.getMessage(), MavenProblemType.STRUCTURE));
+        } catch (Exception exc) {
+            problems.add(MavenProjectProblem.newProblem(pom.getPath(), exc.getMessage(), MavenProblemType.STRUCTURE));
         }
 
         if (model == null) {
