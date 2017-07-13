@@ -8,10 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.junit;
+package org.eclipse.che.junit.junit4;
 
-import org.junit.listeners.CheJUnitTestListener;
-import org.junit.listeners.JUnitExecutionListener;
+import org.eclipse.che.junit.TestingMessageHelper;
+import org.eclipse.che.junit.junit4.listeners.JUnitExecutionListener;
+import org.eclipse.che.junit.junit4.listeners.CheJUnitTestListener;
 
 /**
  * Main JUnit4 test runner.
@@ -24,7 +25,7 @@ public class CheJUnitLauncher {
      *         arrays of tests to be executed
      */
     public static void main(String[] args) {
-        CheJUnit jUnitCore = new CheJUnit();
+        CheJUnitCoreRunner jUnitCore = new CheJUnitCoreRunner();
         CheJUnitTestListener cheJUnitTestListener = new CheJUnitTestListener();
         jUnitCore.addListener(new JUnitExecutionListener(cheJUnitTestListener));
         if (args.length == 0) {

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.junit;
+package org.eclipse.che.junit.junit4;
 
 import org.junit.runner.Request;
 
@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Utility class for building test executing request.
  */
-public class JUnit4TestRunnerUtil {
+public class TestRunnerUtil {
     /**
      * Creates a request which contains all tests to be executed.
      *

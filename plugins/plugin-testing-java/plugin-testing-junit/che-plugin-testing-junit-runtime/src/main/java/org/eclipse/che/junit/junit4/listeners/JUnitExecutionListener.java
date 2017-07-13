@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.junit.listeners;
+package org.eclipse.che.junit.junit4.listeners;
 
 import org.junit.runner.Description;
 import org.junit.runner.Result;

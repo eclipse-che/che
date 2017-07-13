@@ -8,16 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.junit.listeners;
+package org.eclipse.che.junit.junit4.listeners;
 
-import org.junit.TestingMessageHelper;
+import org.eclipse.che.junit.TestingMessageHelper;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
 import java.io.PrintStream;
-
-import static org.junit.TestingMessageHelper.reporterAttached;
 
 /**
  * Listener for whole life cycle of the JUnit test run.
@@ -27,7 +25,7 @@ public class CheJUnitTestListener {
 
     public CheJUnitTestListener() {
         this.out = System.out;
-        reporterAttached(out);
+        TestingMessageHelper.reporterAttached(out);
     }
 
     /**

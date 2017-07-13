@@ -12,9 +12,8 @@ package org.eclipse.che.plugin.testing.junit.server.inject;
 
 import com.google.inject.AbstractModule;
 
-import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.testing.junit.server.JUnit4TestRunner;
+import org.eclipse.che.plugin.testing.junit.server.junit4.TestRunner;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
@@ -25,6 +24,6 @@ import static com.google.inject.multibindings.Multibinder.newSetBinder;
 public class JunitGuiceModule extends AbstractModule {
     @Override
     protected void configure() {
-        newSetBinder(binder(), TestRunner.class).addBinding().to(JUnit4TestRunner.class);
+        newSetBinder(binder(), org.eclipse.che.api.testing.server.framework.TestRunner.class).addBinding().to(TestRunner.class);
     }
 }

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.testing.junit.server;
+package org.eclipse.che.plugin.testing.junit.server.junit4;
 
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.che.junit.junit4.CheJUnitCoreRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,17 +43,17 @@ import java.util.Set;
 /**
  * JUnit implementation for the test runner service.
  */
-public class JUnit4TestRunner extends AbstractJavaTestRunner {
-    private static final Logger LOG = LoggerFactory.getLogger(JUnit4TestRunner.class);
+public class TestRunner extends AbstractJavaTestRunner {
+    private static final Logger LOG = LoggerFactory.getLogger(TestRunner.class);
 
     private static final String JUNIT_TEST_ANNOTATION = "org.junit.Test";
     private static final String JUNIT_TEST_NAME       = "junit";
-    private static final String MAIN_CLASS_NAME       = "org.junit.CheJUnitLauncher";
+    private static final String MAIN_CLASS_NAME       = "org.eclipse.che.junit.junit4.CheJUnitLauncher";
 
     private ProjectClasspathProvider classpathProvider;
 
     @Inject
-    public JUnit4TestRunner(ProjectClasspathProvider classpathProvider) {
+    public TestRunner(ProjectClasspathProvider classpathProvider) {
         this.classpathProvider = classpathProvider;
     }
 
@@ -97,7 +98,7 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
         List<String> classPath = new ArrayList<>();
         Set<String> projectClassPath = classpathProvider.getProjectClassPath(javaProject);
         classPath.addAll(projectClassPath);
-        classPath.add(ClasspathUtil.getJarPathForClass(org.junit.CheJUnit.class));
+        classPath.add(ClasspathUtil.getJarPathForClass(CheJUnitCoreRunner.class));
         parameters.getClassPath().addAll(classPath);
 
         String suite = createTestSuite(context, javaProject);

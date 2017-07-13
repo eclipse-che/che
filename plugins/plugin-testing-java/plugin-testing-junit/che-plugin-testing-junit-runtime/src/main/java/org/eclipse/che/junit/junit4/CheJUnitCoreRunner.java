@@ -8,16 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.junit;
+package org.eclipse.che.junit.junit4;
 
+import org.eclipse.che.junit.junit4.listeners.CheJUnitTestListener;
+import org.eclipse.che.junit.TestingMessageHelper;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Request;
 import org.junit.runner.notification.RunListener;
 
 /**
- * Custom JUnit4 runner that reports results visa {@link org.junit.listeners.CheJUnitTestListener}.
+ * Custom JUnit4 runner that reports results visa {@link CheJUnitTestListener}.
  */
-public class CheJUnit extends JUnitCore {
+public class CheJUnitCoreRunner extends JUnitCore {
     /**
      * Create a <code>request</code> where all tests are described and run it.
      *
@@ -27,7 +29,7 @@ public class CheJUnit extends JUnitCore {
      *         (for example full.qualified.ClassName#methodName)
      */
     public void run(String[] suites) {
-        Request request = JUnit4TestRunnerUtil.buildRequest(suites);
+        Request request = TestRunnerUtil.buildRequest(suites);
         if (request == null) {
             TestingMessageHelper.reporterAttached(System.out);
             System.err.print("No test found to run.");
