@@ -13,21 +13,17 @@ package org.eclipse.che.plugin.languageserver.ide;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
-import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
-import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.browser.UserAgent;
@@ -43,7 +39,6 @@ import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClie
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
-import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
 
@@ -120,13 +115,13 @@ public class LanguageServerExtension {
                         break;
                 }
             }
-            onOpen(event.getEditor(), event.getFile(), dtoFactory, serviceClient, fileTypeRegister);
+//            onOpen(event.getEditor(), event.getFile(), dtoFactory, serviceClient, fileTypeRegister);
         });
     }
 
-    private boolean checkIsLSExist(Path location, LanguageServerFileTypeRegister fileTypeRegister){
-        return !(location.getFileExtension() == null || !fileTypeRegister.hasLSForExtension(location.getFileExtension()));
-    }
+//    private boolean checkIsLSExist(Path location, LanguageServerFileTypeRegister fileTypeRegister){
+//        return !(location.getFileExtension() == null || !fileTypeRegister.hasLSForExtension(location.getFileExtension()));
+//    }
 
     private void onSave(TextDocumentIdentifier documentId,
                         DtoFactory dtoFactory,
@@ -148,21 +143,19 @@ public class LanguageServerExtension {
                         final DtoFactory dtoFactory,
                         final TextDocumentServiceClient serviceClient,
                         final LanguageServerRegistry lsRegistry) {
-        event.getFile().getContent().then(new Operation<String>() {
-            @Override
-            public void apply(String text) throws OperationException {
-                TextDocumentItem documentItem = dtoFactory.createDto(TextDocumentItem.class);
-                documentItem.setUri(event.getFile().getLocation().toString());
-                documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
-                documentItem.setText(text);
-                documentItem.setLanguageId(lsRegistry.getLanguageDescription(event.getFile()).getLanguageId());
+        event.getFile().getContent().then(text -> {
+            TextDocumentItem documentItem = dtoFactory.createDto(TextDocumentItem.class);
+            documentItem.setUri(event.getFile().getLocation().toString());
+            documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
+            documentItem.setText(text);
+            documentItem.setLanguageId(lsRegistry.getLanguageDescription(event.getFile()).getLanguageId());
 
             DidOpenTextDocumentParams openEvent = dtoFactory.createDto(DidOpenTextDocumentParams.class);
             openEvent.setTextDocument(documentItem);
-            openEvent.getTextDocument().setUri(file.getLocation().toString());
+            openEvent.getTextDocument().setUri(event.getFile().getLocation().toString());
             openEvent.setText(text);
 
             serviceClient.didOpen(openEvent);
-        }
+        });
     }
 }

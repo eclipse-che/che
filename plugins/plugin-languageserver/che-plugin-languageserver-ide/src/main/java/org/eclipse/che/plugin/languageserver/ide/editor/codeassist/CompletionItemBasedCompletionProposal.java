@@ -53,10 +53,10 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     private final ServerCapabilities        serverCapabilities;
     private final List<Match>               highlights;
     private final int                       offset;
-    private       CompletionItem    completionItem;
+    private       ExtendedCompletionItem    completionItem;
     private       boolean                   resolved;
 
-    CompletionItemBasedCompletionProposal(CompletionItem completionItem,
+    CompletionItemBasedCompletionProposal(ExtendedCompletionItem completionItem,
                                           String currentWord,
                                           TextDocumentServiceClient documentServiceClient,
                                           LanguageServerResources resources,
@@ -184,21 +184,6 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
     private Promise<ExtendedCompletionItem> resolve() {
         return documentServiceClient.resolveCompletionItem(completionItem);
-        DtoClientImpls.ExtendedCompletionItemDto item = new DtoClientImpls.ExtendedCompletionItemDto();
-        item.setLabel(completionItem.getLabel());
-        item.setKind(completionItem.getKind());
-        item.setDetail(completionItem.getDetail());
-        item.setDocumentation(completionItem.getDocumentation());
-        item.setSortText(completionItem.getSortText());
-        item.setFilterText(completionItem.getFilterText());
-        item.setInsertText(completionItem.getInsertText());
-        item.setInsertTextFormat(completionItem.getInsertTextFormat());
-        item.setTextEdit(completionItem.getTextEdit());
-        item.setAdditionalTextEdits(completionItem.getAdditionalTextEdits());
-        item.setCommand(completionItem.getCommand());
-        item.setData(completionItem.getData());
-        item.setTextDocumentIdentifier(documentId);
-        return documentServiceClient.resolveCompletionItem(item);
     }
 
     private static class CompletionImpl implements Completion {

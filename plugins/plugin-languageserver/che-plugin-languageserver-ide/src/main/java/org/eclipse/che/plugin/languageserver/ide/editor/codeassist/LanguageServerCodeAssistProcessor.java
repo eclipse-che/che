@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistCallback;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
