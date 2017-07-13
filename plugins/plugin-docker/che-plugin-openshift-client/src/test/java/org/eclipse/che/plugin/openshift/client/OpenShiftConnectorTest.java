@@ -16,13 +16,20 @@ import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
+import org.eclipse.che.plugin.docker.client.json.ImageConfig;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -61,14 +68,10 @@ public class OpenShiftConnectorTest {
 
     private OpenShiftConnector                 openShiftConnector;
 
-    @Test
-    public void shouldGetWorkspaceIDWhenAValidOneIsProvidedInCreateContainerParams() throws IOException {
-        //Given
-        String expectedWorkspaceID="abcd1234";
-        ContainerConfig containerConfig = mock(ContainerConfig.class);
-        CreateContainerParams createContainerParams = CreateContainerParams.create(containerConfig);
+    private Set<OpenShiftCommandAppender>      openShiftCommandAppenderSet = new HashSet<>();
 
-        when(containerConfig.getEnv()).thenReturn(CONTAINER_ENV_VARIABLES);
+    @BeforeMethod
+    public void setup() {
 
         //When
         openShiftConnector = new OpenShiftConnector(dockerConnectorConfiguration,
@@ -88,10 +91,63 @@ public class OpenShiftConnectorTest {
                                                     CHE_WORKSPACE_CPU_LIMIT,
                                                     null,
                                                     SECURE_ROUTES,
-                                                    CREATE_WORKSPACE_DIRS);
+                                                    CREATE_WORKSPACE_DIRS,
+                                                    openShiftCommandAppenderSet);
+    }
+
+    @Test
+    public void shouldGetWorkspaceIDWhenAValidOneIsProvidedInCreateContainerParams() throws IOException {
+        //Given
+        String expectedWorkspaceID="abcd1234";
+        ContainerConfig containerConfig = mock(ContainerConfig.class);
+        CreateContainerParams createContainerParams = CreateContainerParams.create(containerConfig);
+
+        when(containerConfig.getEnv()).thenReturn(CONTAINER_ENV_VARIABLES);
+
         String workspaceID = openShiftConnector.getCheWorkspaceId(createContainerParams);
 
         //Then
         assertEquals(workspaceID, expectedWorkspaceID);
+    }
+
+
+    @Test
+    public void shouldGetCommandOverrides() {
+
+        openShiftCommandAppenderSet.add(new OpenShiftWorkspaceLogCommandAppender());
+        ImageConfig imageConfig = Mockito.mock(ImageConfig.class);
+        when(imageConfig.getCmd()).thenReturn(new String[] {"/bin/sh", "-c", "tail -f /dev/null"});
+
+        List<String> updatedCommand = this.openShiftConnector.getCommand(imageConfig);
+        Assert.assertNotNull(updatedCommand);
+        Assert.assertEquals(updatedCommand.size(), 3);
+        Assert.assertTrue(updatedCommand.get(2).contains("logs"));
+    }
+
+
+    @Test
+    public void shouldGetCommandNotOverridesWithoutAppender() {
+
+        ImageConfig imageConfig = Mockito.mock(ImageConfig.class);
+        when(imageConfig.getCmd()).thenReturn(new String[] {"/bin/sh", "-c", "tail -f /dev/null"});
+
+        List<String> updatedCommand = this.openShiftConnector.getCommand(imageConfig);
+        Assert.assertNotNull(updatedCommand);
+        Assert.assertEquals(updatedCommand.size(), 3);
+        Assert.assertFalse(updatedCommand.get(2).contains("logs"));
+    }
+
+
+
+    @Test
+    public void shouldGetCommandNotOverridesWithoutRightCommand() {
+
+        ImageConfig imageConfig = Mockito.mock(ImageConfig.class);
+        when(imageConfig.getCmd()).thenReturn(new String[] {"/bin/python"});
+
+        List<String> updatedCommand = this.openShiftConnector.getCommand(imageConfig);
+        Assert.assertNotNull(updatedCommand);
+        Assert.assertEquals(updatedCommand.size(), 1);
+        Assert.assertFalse(updatedCommand.get(0).contains("logs"));
     }
 }

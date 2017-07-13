@@ -80,6 +80,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerState;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
+import org.eclipse.che.plugin.docker.client.json.ImageConfig;
 import org.eclipse.che.plugin.docker.client.json.ImageInfo;
 import org.eclipse.che.plugin.docker.client.json.NetworkCreated;
 import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
@@ -150,6 +151,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Arrays.asList;
 
 /**
  * Client for OpenShift API.
@@ -203,6 +205,11 @@ public class OpenShiftConnector extends DockerConnector {
     private final boolean            createWorkspaceDirs;
     private final OpenShiftPvcHelper openShiftPvcHelper;
 
+    /**
+     * Extra commands to run
+     */
+    private final Set<OpenShiftCommandAppender> workspaceCommandAppenders;
+
     @Inject
     public OpenShiftConnector(DockerConnectorConfiguration connectorConfiguration,
                               DockerConnectionFactory connectionFactory,
@@ -221,7 +228,8 @@ public class OpenShiftConnector extends DockerConnector {
                               @Nullable @Named("che.openshift.workspace.memory.request") String cheWorkspaceMemoryRequest,
                               @Nullable @Named("che.openshift.workspace.memory.override") String cheWorkspaceMemoryLimit,
                               @Named("che.openshift.secure.routes") boolean secureRoutes,
-                              @Named("che.openshift.precreate.workspace.dirs") boolean createWorkspaceDirs) {
+                              @Named("che.openshift.precreate.workspace.dirs") boolean createWorkspaceDirs,
+                              Set<OpenShiftCommandAppender> workspaceCommandAppenders) {
 
         super(connectorConfiguration, connectionFactory, authResolver, dockerApiVersionPathPrefixProvider);
         this.cheServerExternalAddress = cheServerExternalAddress;
@@ -237,6 +245,7 @@ public class OpenShiftConnector extends DockerConnector {
         this.secureRoutes = secureRoutes;
         this.createWorkspaceDirs = createWorkspaceDirs;
         this.openShiftPvcHelper = openShiftPvcHelper;
+        this.workspaceCommandAppenders = workspaceCommandAppenders;
         eventService.subscribe(new EventSubscriber<ServerIdleEvent>() {
 
             @Override
@@ -340,8 +349,8 @@ public class OpenShiftConnector extends DockerConnector {
                                                           imageStreamTagPullSpec);
 
         Set<String> containerExposedPorts = createContainerParams.getContainerConfig().getExposedPorts().keySet();
-        Set<String> imageExposedPorts = inspectImage(InspectImageParams.create(imageForDocker))
-                                                    .getConfig().getExposedPorts().keySet();
+        ImageConfig imageConfig = inspectImage(InspectImageParams.create(imageForDocker)).getConfig();
+        Set<String> imageExposedPorts = imageConfig.getExposedPorts().keySet();
         Set<String> exposedPorts = getExposedPorts(containerExposedPorts, imageExposedPorts);
 
         String[] envVariables = createContainerParams.getContainerConfig().getEnv();
@@ -394,7 +403,8 @@ public class OpenShiftConnector extends DockerConnector {
                                                 envVariables,
                                                 volumes,
                                                 resourceLimits,
-                                                resourceRequests);
+                                                resourceRequests,
+                                                imageConfig);
 
             containerID = waitAndRetrieveContainerID(deploymentName);
             if (containerID == null) {
@@ -1162,6 +1172,38 @@ public class OpenShiftConnector extends DockerConnector {
                                           secureRoutes);
     }
 
+
+    /**
+     * Override the command with some appenders if defined
+     * @param imageConfig the configuration of the image with the image command
+     * @return the updated command.
+     */
+    protected List<String> getCommand(ImageConfig imageConfig) {
+        String[] cmdLine = imageConfig.getCmd();
+        List<String> updatedCommand;
+
+        // Only update sh -c commands
+        if (cmdLine.length >= 3 && "/bin/sh".equals(cmdLine[0]) && "-c".equals(cmdLine[1])) {
+            ArrayList<String> existingCommandLine = new ArrayList<>(asList(cmdLine));
+            updatedCommand = new ArrayList<>();
+            // add invoker
+            updatedCommand.addAll(existingCommandLine.subList(0, 2));
+
+            // insert custom commands
+            final StringBuilder commandLine = new StringBuilder();
+            workspaceCommandAppenders.stream().forEach(command -> commandLine.append(command.getCommand()).append(" && "));
+            // add previous command line
+            commandLine.append(cmdLine[2]);
+            updatedCommand.add(commandLine.toString());
+
+            // insert remaining command arguments
+            updatedCommand.addAll(existingCommandLine.subList(2, cmdLine.length - 1));
+        } else {
+            updatedCommand = asList(cmdLine);
+        }
+        return updatedCommand;
+    }
+
     private void createOpenShiftDeployment(String deploymentName,
                                              String imageName,
                                              String sanitizedContainerName,
@@ -1169,7 +1211,8 @@ public class OpenShiftConnector extends DockerConnector {
                                              String[] envVariables,
                                              String[] volumes,
                                              Map<String, Quantity> resourceLimits,
-                                             Map<String, Quantity> resourceRequests) throws OpenShiftException {
+                                             Map<String, Quantity> resourceRequests,
+                                             ImageConfig imageConfig) throws OpenShiftException {
 
         LOG.info("Creating OpenShift deployment {}", deploymentName);
 
@@ -1184,6 +1227,7 @@ public class OpenShiftConnector extends DockerConnector {
         Container container = new ContainerBuilder()
                                     .withName(sanitizedContainerName)
                                     .withImage(imageName)
+                                    .withCommand(getCommand(imageConfig))
                                     .withEnv(KubernetesEnvVar.getEnvFrom(envVariables))
                                     .withPorts(KubernetesContainer.getContainerPortsFrom(exposedPorts))
                                     .withImagePullPolicy(OPENSHIFT_IMAGE_PULL_POLICY_IFNOTPRESENT)
@@ -1306,7 +1350,7 @@ public class OpenShiftConnector extends DockerConnector {
         hostConfig.setBinds(new String[0]);
 
         // Env vars
-        List<String> imageEnv = Arrays.asList(imageContainerConfig.getEnv());
+        List<String> imageEnv = asList(imageContainerConfig.getEnv());
         List<String> containerEnv = container.getEnv()
                                              .stream()
                                              .map(e -> String.format("%s=%s", e.getName(), e.getValue()))
