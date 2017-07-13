@@ -12,7 +12,7 @@ ide/che-core-ide-stacks/** @ashumilova
 
 # agents
 agents/** @tolusha
-agents/go-agents/** @skabashnyuk
+agents/go-agents/** @garagatyi
 
 # assembly
 assembly/** @riuvshin @skabashnyuk
@@ -24,9 +24,9 @@ core/** @skabashnyuk
 plugins/plugin*debugger/** @tolusha
 plugins/plugin-gdb/** @tolusha
 plugins/plugin-docker/** @garagatyi
+plugins/plugin-docker/che-plugin-openshift-client/** @l0rd
 plugins/plugin-java/** @evidolob
 plugins/plugin-languageserver/** @evidolob @dkuleshov
-plugins/plugin-machine/** @garagatyi
 plugins/plugin-maven/** @evidolob
 plugins/plugin-orion/** @azatsarynnyy
 plugins/plugin-testing*/** @evidolob
@@ -34,6 +34,7 @@ plugins/plugin-traefik/** @benoitf
 
 # wsmaster
 wsmaster/** @skabashnyuk
+wsmaster/che-core-api-workspace*/** @garagatyi
 
 # wsagent
 wsagent/activity/** @skabashnyuk
