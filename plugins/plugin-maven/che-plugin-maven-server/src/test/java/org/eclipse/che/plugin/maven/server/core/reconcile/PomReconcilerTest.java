@@ -11,7 +11,6 @@
 package org.eclipse.che.plugin.maven.server.core.reconcile;
 
 import com.google.inject.Provider;
-
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.server.EditorWorkingCopyManager;
 import org.eclipse.che.api.project.server.FolderEntry;
@@ -30,6 +29,7 @@ import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
 import org.eclipse.che.plugin.maven.server.rmi.MavenServerManagerTest;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.lsp4j.services.LanguageClient;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -93,7 +93,7 @@ public class PomReconcilerTest extends BaseTest {
         EditorWorkingCopyManager editorWorkingCopyManager =
                 new EditorWorkingCopyManager(projectManagerProvider, eventService, requestTransmitter);
         pomReconciler =
-                new PomReconciler(projectManagerProvider, mavenProjectManager, editorWorkingCopyManager, eventService, requestTransmitter);
+                new PomReconciler(mavenProjectManager, editorWorkingCopyManager, eventService, mock(LanguageClient.class));
     }
 
     @Test
@@ -103,7 +103,7 @@ public class PomReconcilerTest extends BaseTest {
         String newContent = getPomContent("<ss");
         child.getVirtualFile().updateContent(newContent);
 
-        List<Problem> problems = pomReconciler.reconcile("/A/pom.xml");
+        List<Problem> problems = pomReconciler.reconcile("/A/pom.xml", "/A", newContent);
         assertThat(problems).isNotEmpty();
         Problem problem = problems.get(0);
 
@@ -117,7 +117,8 @@ public class PomReconcilerTest extends BaseTest {
         FolderEntry testProject = createTestProject(PROJECT_NAME, "");
         VirtualFileEntry pom = testProject.getChild("pom.xml");
 
-        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
+        String projectPath = format("/%s/pom.xml", PROJECT_NAME);
+        List<Problem> problems = pomReconciler.reconcile(projectPath+"/pom.xml", projectPath, pom.getVirtualFile().getContentAsString());
 
         assertThat(problems).isEmpty();
         assertThat(pom).isNotNull();
@@ -137,7 +138,8 @@ public class PomReconcilerTest extends BaseTest {
         mavenWorkspace.update(Collections.singletonList(project));
         mavenWorkspace.waitForUpdate();
 
-        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
+        String projectPath = format("/%s/pom.xml", PROJECT_NAME);
+        List<Problem> problems = pomReconciler.reconcile(projectPath+"/pom.xml", projectPath, pom.getVirtualFile().getContentAsString());
 
         assertThat(problems).isEmpty();
         assertThat(pom).isNotNull();
@@ -157,7 +159,8 @@ public class PomReconcilerTest extends BaseTest {
         mavenWorkspace.update(Collections.singletonList(project));
         mavenWorkspace.waitForUpdate();
 
-        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
+        String projectPath = "/"+PROJECT_NAME;
+        List<Problem> problems = pomReconciler.reconcile(projectPath+"/pom.xml", projectPath, pom.getVirtualFile().getContentAsString());
 
         assertThat(problems).hasSize(1);
         assertThat(problems.get(0).isError()).isTrue();
@@ -178,7 +181,8 @@ public class PomReconcilerTest extends BaseTest {
         mavenWorkspace.update(Collections.singletonList(project));
         mavenWorkspace.waitForUpdate();
 
-        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
+        String projectPath = "/"+PROJECT_NAME;
+        List<Problem> problems = pomReconciler.reconcile(projectPath+"/pom.xml", projectPath, pom.getVirtualFile().getContentAsString());
 
         assertThat(problems).hasSize(1);
         assertThat(problems.get(0).isError()).isTrue();
@@ -199,7 +203,8 @@ public class PomReconcilerTest extends BaseTest {
         mavenWorkspace.update(Collections.singletonList(project));
         mavenWorkspace.waitForUpdate();
 
-        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
+        String projectPath = "/"+PROJECT_NAME;
+        List<Problem> problems = pomReconciler.reconcile(projectPath+"/pom.xml", projectPath, pom.getVirtualFile().getContentAsString());
 
         assertThat(problems).hasSize(1);
         assertThat(problems.get(0).isError()).isTrue();
