@@ -31,7 +31,9 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.singletonMap;
 
@@ -181,6 +183,46 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
     private WorkspaceConfigDto getWorkspaceConfig() {
         String wsName = view.getWorkspaceName();
 
+        return dtoFactory.createDto(WorkspaceConfigDto.class)
+                         .withName(wsName)
+                         .withDefaultEnv(wsName)
+                         .withEnvironments(singletonMap(wsName, getSingleMachineEnvironment()));
+    }
+
+    private EnvironmentDto getMultiMachineEnvironment() {
+        RecipeDto recipe = dtoFactory.createDto(RecipeDto.class)
+                                     .withType("compose")
+                                     .withContentType("application/x-yaml")
+                                     .withContent("services:\n db:\n  image: eclipse/mysql\n  environment:\n   MYSQL_ROOT_PASSWORD: password\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 1073741824\n dev-machine:\n  image: eclipse/ubuntu_jdk8\n  mem_limit: 2147483648\n  depends_on:\n    - db");
+
+        List<String> devInstallers = new ArrayList<>();
+        devInstallers.add("org.eclipse.che.exec");
+        devInstallers.add("org.eclipse.che.terminal");
+        devInstallers.add("org.eclipse.che.ws-agent");
+        devInstallers.add("org.eclipse.che.ssh");
+
+        MachineConfigDto devMachine = dtoFactory.createDto(MachineConfigDto.class)
+                                                .withInstallers(devInstallers)
+                                                .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
+
+        List<String> dbInstallers = new ArrayList<>();
+        dbInstallers.add("org.eclipse.che.exec");
+        dbInstallers.add("org.eclipse.che.terminal");
+
+        MachineConfigDto dbMachine = dtoFactory.createDto(MachineConfigDto.class)
+                                               .withInstallers(dbInstallers)
+                                               .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
+
+        Map<String, MachineConfigDto> machines = new HashMap<>();
+        machines.put("dev-machine", devMachine);
+        machines.put("db", dbMachine);
+
+        return dtoFactory.createDto(EnvironmentDto.class)
+                         .withRecipe(recipe)
+                         .withMachines(machines);
+    }
+
+    private EnvironmentDto getSingleMachineEnvironment() {
         RecipeDto recipe = dtoFactory.createDto(RecipeDto.class)
                                      .withType("dockerimage")
                                      .withLocation("eclipse/ubuntu_jdk8");
@@ -196,13 +238,8 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
                                              .withInstallers(installers)
                                              .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
-        EnvironmentDto environment = dtoFactory.createDto(EnvironmentDto.class)
-                                               .withRecipe(recipe)
-                                               .withMachines(singletonMap("default", machine));
-
-        return dtoFactory.createDto(WorkspaceConfigDto.class)
-                         .withName(wsName)
-                         .withDefaultEnv(wsName)
-                         .withEnvironments(singletonMap(wsName, environment));
+        return dtoFactory.createDto(EnvironmentDto.class)
+                         .withRecipe(recipe)
+                         .withMachines(singletonMap("default", machine));
     }
 }

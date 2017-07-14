@@ -19,10 +19,12 @@ import elemental.html.SpanElement;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.monitoring.MachineMonitors;
 import org.eclipse.che.ide.terminal.AddTerminalClickHandler;
@@ -31,7 +33,8 @@ import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
+import static org.eclipse.che.api.workspace.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
@@ -75,8 +78,7 @@ public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy,
 
         SpanElement root = Elements.createSpanElement();
 
-        Workspace workspace = appContext.getWorkspace();
-        if (workspace != null && RUNNING == workspace.getStatus() && node.hasTerminalAgent()) {
+        if (isTerminalServerRunning(machineName)) {
             SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().newTerminalButton());
             newTerminalButton.appendChild((Node)new SVGImage(resources.addTerminalIcon()).getElement());
             root.appendChild(newTerminalButton);
@@ -129,6 +131,26 @@ public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy,
         root.appendChild(nameElement);
 
         return root;
+    }
+
+    private boolean isTerminalServerRunning(String machineName) {
+        Workspace workspace = appContext.getWorkspace();
+        Runtime runtime = workspace.getRuntime();
+        if (runtime == null) {
+            return false;
+        }
+
+        Machine machine = runtime.getMachines().get(machineName);
+        if (machine == null) {
+            return false;
+        }
+
+        Server terminalServer = machine.getServers().get(TERMINAL_REFERENCE);
+        if (terminalServer == null) {
+            return false;
+        }
+
+        return terminalServer.getStatus() == RUNNING;
     }
 
     @Override
