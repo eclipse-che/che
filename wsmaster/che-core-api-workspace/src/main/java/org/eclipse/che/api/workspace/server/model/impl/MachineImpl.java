@@ -43,7 +43,7 @@ public class MachineImpl implements Machine {
             this.servers = servers.entrySet()
                                   .stream()
                                   .collect(HashMap::new,
-                                           (map, entry) -> map.put(entry.getKey(), new ServerImpl(entry.getValue().getUrl())),
+                                           (map, entry) -> map.put(entry.getKey(), new ServerImpl(entry.getValue())),
                                            HashMap::putAll);
         }
     }
