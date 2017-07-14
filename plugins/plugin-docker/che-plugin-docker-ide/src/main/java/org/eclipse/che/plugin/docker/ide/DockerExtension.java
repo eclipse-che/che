@@ -8,17 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.workspace;
+package org.eclipse.che.plugin.docker.ide;
 
-import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-public class WorkspaceApiModule extends AbstractGinModule {
+import org.eclipse.che.ide.api.extension.Extension;
 
-    @Override
-    protected void configure() {
-        bind(CurrentWorkspaceManager.class).asEagerSingleton();
+@Singleton
+@Extension(title = "Docker", version = "1.0.0")
+public class DockerExtension {
 
-        bind(WorkspaceStatusNotification.class).asEagerSingleton();
-        bind(StartWorkspaceNotification.class).asEagerSingleton();
+    @Inject
+    public DockerExtension(WorkspaceSnapshotNotifier workspaceSnapshotNotifier) {
     }
 }

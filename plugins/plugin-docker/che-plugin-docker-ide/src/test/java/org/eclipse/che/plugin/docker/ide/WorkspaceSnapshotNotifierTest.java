@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.workspace;
+package org.eclipse.che.plugin.docker.ide;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.inject.Provider;
