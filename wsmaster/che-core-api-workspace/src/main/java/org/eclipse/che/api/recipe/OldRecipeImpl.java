@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.recipe;
 
-import org.eclipse.che.api.core.model.machine.OldRecipe;
-import org.eclipse.che.api.machine.shared.ManagedOldRecipe;
+import org.eclipse.che.api.workspace.shared.recipe.OldRecipe;
+import org.eclipse.che.api.workspace.shared.recipe.ManagedOldRecipe;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;

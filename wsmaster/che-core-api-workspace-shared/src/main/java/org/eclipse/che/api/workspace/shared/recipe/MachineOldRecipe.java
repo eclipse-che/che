@@ -8,9 +8,8 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared.dto.recipe;
+package org.eclipse.che.api.workspace.shared.recipe;
 
-import org.eclipse.che.api.core.model.machine.OldRecipe;
 import org.eclipse.che.dto.shared.DTO;
 
 /**

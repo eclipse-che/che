@@ -8,38 +8,46 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared.dto.recipe;
+package org.eclipse.che.api.workspace.shared.recipe;
 
-import org.eclipse.che.api.machine.shared.ManagedOldRecipe;
+import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
 
 /**
- * Describes new recipe
+ * Describes recipe
  *
  * @author Eugene Voevodin
  */
 @DTO
-public interface NewOldRecipe extends ManagedOldRecipe {
+public interface OldRecipeDescriptor extends Hyperlinks, ManagedOldRecipe {
 
-    void setType(String type);
+    void setId(String id);
 
-    NewOldRecipe withType(String type);
+    OldRecipeDescriptor withId(String id);
 
     void setName(String name);
 
-    NewOldRecipe withName(String name);
+    OldRecipeDescriptor withName(String name);
+
+    void setType(String type);
+
+    OldRecipeDescriptor withType(String type);
 
     void setScript(String script);
 
-    NewOldRecipe withScript(String script);
+    OldRecipeDescriptor withScript(String script);
+
+    void setCreator(String creator);
+
+    OldRecipeDescriptor withCreator(String creator);
 
     void setTags(List<String> tags);
 
-    NewOldRecipe withTags(List<String> tags);
+    OldRecipeDescriptor withTags(List<String> tags);
 
     void setDescription(String description);
 
-    NewOldRecipe withDescription(String description);
+    OldRecipeDescriptor withDescription(String description);
 }
