@@ -11,9 +11,7 @@
 package org.eclipse.che.plugin.maven.client.service;
 
 import com.google.inject.ImplementedBy;
-
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 
 import java.util.List;
 
@@ -56,5 +54,5 @@ public interface MavenServerServiceClient {
      * @param pomPath tha path to pom.xml file
      * @return list of problems if any
      */
-    Promise<List<Problem>> reconcilePom(String pomPath);
+    Promise<Void> reconcilePom(String pomPath);
 }
