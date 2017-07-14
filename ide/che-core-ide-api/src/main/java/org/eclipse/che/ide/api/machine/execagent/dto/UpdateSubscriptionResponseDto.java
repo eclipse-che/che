@@ -8,21 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared.dto.execagent.event;
+package org.eclipse.che.ide.api.machine.execagent.dto;
 
+import org.eclipse.che.ide.api.machine.execagent.dto.event.DtoWithPid;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface ConnectedEventDto {
-    String getTime();
+public interface UpdateSubscriptionResponseDto extends DtoWithPid {
+    UpdateSubscriptionResponseDto withPid(int pid);
 
-    ConnectedEventDto withTime(String time);
+    String getEventTypes();
 
-    String getChannel();
-
-    ConnectedEventDto withChannel(String channel);
+    UpdateSubscriptionResponseDto withEventTypes(String eventTypes);
 
     String getText();
 
-    ConnectedEventDto withText(String text);
+    UpdateSubscriptionResponseDto withText(String text);
 }

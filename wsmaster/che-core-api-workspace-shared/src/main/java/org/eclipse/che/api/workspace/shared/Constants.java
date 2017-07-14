@@ -40,6 +40,12 @@ public final class Constants {
     public static final String LINK_REL_GET_STACKS_BY_CREATOR = "get stacks by creator";
     public static final String LINK_REL_SEARCH_STACKS         = "search stacks";
 
+    public static final String LINK_REL_REMOVE_RECIPE              = "remove recipe";
+    public static final String LINK_REL_GET_RECIPE_SCRIPT          = "get recipe script";
+    public static final String LINK_REL_CREATE_RECIPE              = "create recipe";
+    public static final String LINK_REL_SEARCH_RECIPES             = "search recipes";
+    public static final String LINK_REL_UPDATE_RECIPE              = "update recipe";
+
     public static final String LINK_REL_GET_ICON    = "get icon link";
     public static final String LINK_REL_UPLOAD_ICON = "upload icon link";
     public static final String LINK_REL_DELETE_ICON = "delete icon link";
@@ -60,6 +66,22 @@ public final class Constants {
     public static final String SERVER_STATUS_CHANGED_METHOD    = "server/statusChanged";
     public static final String MACHINE_LOG_METHOD              = "machine/log";
     public static final String INSTALLER_LOG_METHOD            = "installer/log";
+
+    public static final String LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL = "environment.output_channel";
+    public static final String ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE = "workspace:%s:environment_output";
+    public static final String LINK_REL_ENVIRONMENT_STATUS_CHANNEL = "environment.status_channel";
+    public static final String ENVIRONMENT_STATUS_CHANNEL_TEMPLATE = "workspace:%s:machines_statuses";
+
+    public static final String WSAGENT_REFERENCE                   = "wsagent";
+    public static final String WSAGENT_WEBSOCKET_REFERENCE         = "wsagent.websocket";
+    public static final String WSAGENT_DEBUG_REFERENCE             = "wsagent.debug";
+
+    public static final String TERMINAL_REFERENCE = "terminal";
+    public static final String EXEC_AGENT_REFERENCE = "exec-agent";
+
+    public static final String WS_AGENT_PORT = "4401/tcp";
+
+    public static final String WS_MACHINE_NAME = "default";
 
     public static final String ACTIVITY_CHECKER     = "activity-checker";
 

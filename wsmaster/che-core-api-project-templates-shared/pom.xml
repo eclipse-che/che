@@ -75,11 +75,6 @@
                     </dependency>
                     <dependency>
                         <groupId>org.eclipse.che.core</groupId>
-                        <artifactId>che-core-api-machine-shared</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.eclipse.che.core</groupId>
                         <artifactId>che-core-api-workspace-shared</artifactId>
                         <version>${project.version}</version>
                     </dependency>

@@ -8,8 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared.dto.execagent.event;
+package org.eclipse.che.ide.api.machine.execagent.dto;
 
-public interface DtoWithPid {
-    int getPid();
+import org.eclipse.che.ide.api.machine.execagent.dto.event.DtoWithPid;
+import org.eclipse.che.dto.shared.DTO;
+
+@DTO
+public interface UpdateSubscriptionRequestDto extends DtoWithPid {
+    UpdateSubscriptionRequestDto withPid(int pid);
+
+    String getEventTypes();
+
+    UpdateSubscriptionRequestDto withEventTypes(String eventTypes);
 }

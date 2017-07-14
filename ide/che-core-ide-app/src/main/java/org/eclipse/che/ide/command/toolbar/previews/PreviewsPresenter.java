@@ -16,7 +16,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -25,6 +24,7 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
+import org.eclipse.che.ide.api.machine.execagent.dto.GetProcessesResponseDto;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;

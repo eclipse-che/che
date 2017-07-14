@@ -8,16 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared.dto.execagent;
+package org.eclipse.che.ide.api.machine.execagent.dto;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface ProcessUnSubscribeResponseDto extends DtoWithPid{
-    ProcessUnSubscribeResponseDto withPid(int pid);
+public interface ProcessStartRequestDto {
+    String getName();
 
-    String getText();
+    ProcessStartRequestDto withName(String name);
 
-    ProcessUnSubscribeResponseDto withText(String text);
+    String getCommandLine();
+
+    ProcessStartRequestDto withCommandLine(String commandLine);
+
+    String getType();
+
+    ProcessStartRequestDto withType(String type);
 }

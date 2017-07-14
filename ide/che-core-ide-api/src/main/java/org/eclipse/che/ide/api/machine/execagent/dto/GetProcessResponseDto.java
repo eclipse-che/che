@@ -8,32 +8,32 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared.dto.execagent;
+package org.eclipse.che.ide.api.machine.execagent.dto;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
+import org.eclipse.che.ide.api.machine.execagent.dto.event.DtoWithPid;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface GetProcessesResponseDto extends DtoWithPid {
-    GetProcessesResponseDto withPid(int pid);
+public interface GetProcessResponseDto extends DtoWithPid {
+    GetProcessResponseDto withPid(int pid);
 
     String getName();
 
-    GetProcessesResponseDto withName(String name);
+    GetProcessResponseDto withName(String name);
 
     String getCommandLine();
 
-    GetProcessesResponseDto withCommandLine(String commandLine);
+    GetProcessResponseDto withCommandLine(String commandLine);
 
     String getType();
 
-    GetProcessesResponseDto withType(String type);
+    GetProcessResponseDto withType(String type);
 
     boolean isAlive();
 
-    GetProcessesResponseDto withAlive(boolean alive);
+    GetProcessResponseDto withAlive(boolean alive);
 
     int getNativePid();
 
-    GetProcessesResponseDto withNativePid(int nativePid);
+    GetProcessResponseDto withNativePid(int nativePid);
 }

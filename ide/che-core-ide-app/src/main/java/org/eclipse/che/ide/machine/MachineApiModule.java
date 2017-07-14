@@ -14,7 +14,7 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.machine.shared.Constants;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.ide.machine.chooser.MachineChooserView;
 import org.eclipse.che.ide.machine.chooser.MachineChooserViewImpl;
 import org.eclipse.che.requirejs.ModuleHolder;

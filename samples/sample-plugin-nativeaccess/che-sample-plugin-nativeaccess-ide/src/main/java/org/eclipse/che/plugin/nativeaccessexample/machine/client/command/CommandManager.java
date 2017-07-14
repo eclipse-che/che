@@ -13,11 +13,11 @@ package org.eclipse.che.plugin.nativeaccessexample.machine.client.command;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
+import org.eclipse.che.ide.api.machine.execagent.dto.ProcessStartResponseDto;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.dto.DtoFactory;

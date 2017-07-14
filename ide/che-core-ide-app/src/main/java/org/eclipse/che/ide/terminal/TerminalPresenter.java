@@ -40,7 +40,7 @@ import org.eclipse.che.requirejs.ModuleHolder;
 import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
-import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
