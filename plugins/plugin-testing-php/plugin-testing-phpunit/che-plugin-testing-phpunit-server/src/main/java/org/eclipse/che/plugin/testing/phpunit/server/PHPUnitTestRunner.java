@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.phpunit.server;
 
-import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
@@ -23,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -49,8 +50,8 @@ public class PHPUnitTestRunner implements TestRunner {
     private final PHPUnitTestEngine testEngine;
 
     @Inject
-    public PHPUnitTestRunner(ProjectManager projectManager) {
-        testEngine = new PHPUnitTestEngine(projectManager);
+    public PHPUnitTestRunner(@Named("che.user.workspaces.storage") File projectsRoot) {
+        testEngine = new PHPUnitTestEngine(projectsRoot);
     }
 
     /**

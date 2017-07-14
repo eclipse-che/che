@@ -36,15 +36,19 @@ public class EitherUtil {
         if (decision == JsonDecision.LIST) {
             return element.isJsonArray();
         }
-        if (decision == JsonDecision.BOOLEAN) {
-            return element.isJsonPrimitive() && ((JsonPrimitive)element).isBoolean();
+        if (element.isJsonPrimitive()) {
+            JsonPrimitive jsonPrimitive = element.getAsJsonPrimitive();
+            if (decision == JsonDecision.BOOLEAN) {
+                return jsonPrimitive.isBoolean();
+            }
+            if (decision == JsonDecision.NUMBER) {
+                return jsonPrimitive.isNumber();
+            }
+            if (decision == JsonDecision.STRING) {
+                return jsonPrimitive.isString();
+            }
         }
-        if (decision == JsonDecision.NUMBER) {
-            return element.isJsonPrimitive() && ((JsonPrimitive)element).isNumber();
-        }
-        if (decision == JsonDecision.STRING) {
-            return element.isJsonPrimitive() && ((JsonPrimitive)element).isString();
-        }
+
         return element.isJsonObject();
     }
 }

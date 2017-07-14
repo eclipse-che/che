@@ -22,7 +22,6 @@ export class StackSelectorScopeFilter {
     // register this factory
     register.filter('stackScopeFilter', () => {
       return (stacksList: che.IStack[], scope: number, stackMachines: {[stackId: string]: any[]}) => {
-
         switch (scope) {
           case StackSelectorScope.QUICK_START:
             return stacksList.filter((stack: che.IStack) => {

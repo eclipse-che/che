@@ -32,7 +32,7 @@ public class EitherUtil {
     private static Type getDisjointType(Type type, int index) {
         if (type instanceof ParameterizedType) {
             final ParameterizedType parameterizedType = (ParameterizedType)type;
-            return parameterizedType.getActualTypeArguments()[0];
+            return parameterizedType.getActualTypeArguments()[index];
         }
         if (type instanceof Class) {
             final Class<?> cls = (Class<?>)type;

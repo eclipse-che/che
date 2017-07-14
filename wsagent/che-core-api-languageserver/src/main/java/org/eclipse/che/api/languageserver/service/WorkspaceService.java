@@ -35,8 +35,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.removePrefixUri;
-import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.truish;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.truish;
 
 /**
  * REST API for the workspace/* services defined in
