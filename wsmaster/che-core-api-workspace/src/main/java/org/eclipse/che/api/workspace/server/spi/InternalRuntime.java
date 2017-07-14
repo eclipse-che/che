@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
@@ -165,12 +166,14 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
      */
     private Map<String, Server> rewriteExternalServers(Map<String, ? extends Server> incoming) {
         Map<String, Server> outgoing = new HashMap<>();
+        RuntimeIdentity identity = context.getIdentity();
         for (Map.Entry<String, ? extends Server> entry : incoming.entrySet()) {
             String name = entry.getKey();
-            String strUrl = entry.getValue().getUrl();
+            Server incomingServer = entry.getValue();
             try {
-                URL url = new URL(strUrl);
-                ServerImpl server = new ServerImpl(urlRewriter.rewriteURL(context.getIdentity(), name, url).toString());
+                URL url = new URL(incomingServer.getUrl());
+                ServerImpl server = new ServerImpl(urlRewriter.rewriteURL(identity, name, url).toString(),
+                                                   incomingServer.getStatus());
                 outgoing.put(name, server);
             } catch (MalformedURLException e) {
                 warnings.add(new Warning() {

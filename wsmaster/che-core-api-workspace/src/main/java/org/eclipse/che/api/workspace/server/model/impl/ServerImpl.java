@@ -30,6 +30,9 @@ public class ServerImpl implements Server {
         this.status = status;
     }
 
+    public ServerImpl(Server server) {
+        this(server.getUrl(), server.getStatus());
+    }
 
     @Override
     public String getUrl() {
