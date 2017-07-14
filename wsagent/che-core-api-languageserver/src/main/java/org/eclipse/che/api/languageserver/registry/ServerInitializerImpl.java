@@ -17,9 +17,32 @@ import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.lsp4j.ClientCapabilities;
+import org.eclipse.lsp4j.CodeActionCapabilities;
+import org.eclipse.lsp4j.CodeLensCapabilities;
+import org.eclipse.lsp4j.CompletionCapabilities;
+import org.eclipse.lsp4j.CompletionItemCapabilities;
+import org.eclipse.lsp4j.DefinitionCapabilities;
+import org.eclipse.lsp4j.DidChangeConfigurationCapabilities;
+import org.eclipse.lsp4j.DidChangeWatchedFilesCapabilities;
+import org.eclipse.lsp4j.DocumentHighlightCapabilities;
+import org.eclipse.lsp4j.DocumentLinkCapabilities;
+import org.eclipse.lsp4j.DocumentSymbolCapabilities;
+import org.eclipse.lsp4j.ExecuteCommandCapabilities;
+import org.eclipse.lsp4j.FormattingCapabilities;
+import org.eclipse.lsp4j.HoverCapabilities;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.OnTypeFormattingCapabilities;
+import org.eclipse.lsp4j.RangeFormattingCapabilities;
+import org.eclipse.lsp4j.ReferencesCapabilities;
+import org.eclipse.lsp4j.RenameCapabilities;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.SignatureHelpCapabilities;
+import org.eclipse.lsp4j.SymbolCapabilities;
+import org.eclipse.lsp4j.SynchronizationCapabilities;
+import org.eclipse.lsp4j.TextDocumentClientCapabilities;
+import org.eclipse.lsp4j.WorkspaceClientCapabilities;
+import org.eclipse.lsp4j.WorkspaceEditCapabilities;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
@@ -39,6 +62,8 @@ public class ServerInitializerImpl implements ServerInitializer {
 
     private static final int    PROCESS_ID  = getProcessId();
     private static final String CLIENT_NAME = "EclipseChe";
+
+    public static ClientCapabilities CLIENT_CAPABILITIES;
 
     private final List<ServerInitializerObserver> observers = new ArrayList<>();
 
@@ -104,7 +129,7 @@ public class ServerInitializerImpl implements ServerInitializer {
         }
 
         if (launcher instanceof ServerInitializerObserver) {
-            addObserver((ServerInitializerObserver) launcher);
+            addObserver((ServerInitializerObserver)launcher);
         }
     }
 
@@ -112,7 +137,38 @@ public class ServerInitializerImpl implements ServerInitializer {
         InitializeParams initializeParams = new InitializeParams();
         initializeParams.setProcessId(PROCESS_ID);
         initializeParams.setRootPath(LanguageServiceUtils.removeUriScheme(projectPath));
-        initializeParams.setCapabilities(new ClientCapabilities());
+        initializeParams.setRootUri(projectPath);
+
+        if (CLIENT_CAPABILITIES == null) {
+            CLIENT_CAPABILITIES = new ClientCapabilities();
+            WorkspaceClientCapabilities workspace = new WorkspaceClientCapabilities();
+            workspace.setApplyEdit(false); //Change when support added
+            workspace.setDidChangeConfiguration(new DidChangeConfigurationCapabilities());
+            workspace.setDidChangeWatchedFiles(new DidChangeWatchedFilesCapabilities());
+            workspace.setExecuteCommand(new ExecuteCommandCapabilities());
+            workspace.setSymbol(new SymbolCapabilities());
+            workspace.setWorkspaceEdit(new WorkspaceEditCapabilities());
+            CLIENT_CAPABILITIES.setWorkspace(workspace);
+
+            TextDocumentClientCapabilities textDocument = new TextDocumentClientCapabilities();
+            textDocument.setCodeAction(new CodeActionCapabilities());
+            textDocument.setCodeLens(new CodeLensCapabilities());
+            textDocument.setCompletion(new CompletionCapabilities(new CompletionItemCapabilities()));
+            textDocument.setDefinition(new DefinitionCapabilities());
+            textDocument.setDocumentHighlight(new DocumentHighlightCapabilities());
+            textDocument.setDocumentLink(new DocumentLinkCapabilities());
+            textDocument.setDocumentSymbol(new DocumentSymbolCapabilities());
+            textDocument.setFormatting(new FormattingCapabilities());
+            textDocument.setHover(new HoverCapabilities());
+            textDocument.setOnTypeFormatting(new OnTypeFormattingCapabilities());
+            textDocument.setRangeFormatting(new RangeFormattingCapabilities());
+            textDocument.setReferences(new ReferencesCapabilities());
+            textDocument.setRename(new RenameCapabilities());
+            textDocument.setSignatureHelp(new SignatureHelpCapabilities());
+            textDocument.setSynchronization(new SynchronizationCapabilities(true, false, true));
+            CLIENT_CAPABILITIES.setTextDocument(textDocument);
+        }
+        initializeParams.setCapabilities(CLIENT_CAPABILITIES);
         initializeParams.setClientName(CLIENT_NAME);
         return initializeParams;
     }

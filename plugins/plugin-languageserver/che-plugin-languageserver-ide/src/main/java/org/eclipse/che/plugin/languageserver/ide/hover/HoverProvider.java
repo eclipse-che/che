@@ -14,8 +14,6 @@ import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.JsPromise;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -30,7 +28,9 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConf
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.Hover;
+import org.eclipse.lsp4j.MarkedString;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,31 +76,33 @@ public class HoverProvider implements OrionHoverHandler {
         TextDocumentPositionParams paramsDTO = helper.createTDPP(document, context.getOffset());
 
         Promise<Hover> promise = client.hover(paramsDTO);
-        Promise<OrionHoverOverlay> then = promise.then(new Function<Hover, OrionHoverOverlay>() {
-            @Override
-            public OrionHoverOverlay apply(Hover arg) throws FunctionException {
-                OrionHoverOverlay hover = OrionHoverOverlay.create();
-                hover.setType("markdown");
-                String content = renderContent(arg);
-                // do not show hover with only white spaces
-                if (StringUtils.isNullOrWhitespace(content)) {
-                    return null;
-                }
-                hover.setContent(content);
-
-                return hover;
+        Promise<OrionHoverOverlay> then = promise.then((Hover arg) -> {
+            OrionHoverOverlay hover = OrionHoverOverlay.create();
+            hover.setType("markdown");
+            String content = renderContent(arg);
+            // do not show hover with only white spaces
+            if (StringUtils.isNullOrWhitespace(content)) {
+                return null;
             }
+            hover.setContent(content);
 
-            private String renderContent(Hover hover) {
-                List<String> contents = new ArrayList<String>();
-                for (String dto : hover.getContents()) {
-                    // plain markdown text
-                    contents.add(dto);
-                }
-                return Joiner.on("\n\n").join(contents);
-            }
+            return hover;
         });
         return (JsPromise<OrionHoverOverlay>)then;
 
+    }
+
+    private String renderContent(Hover hover) {
+        List<String> contents = new ArrayList<>();
+        for (Either<String, MarkedString> dto : hover.getContents()) {
+            if (dto.isLeft()) {
+                // plain markdown text
+                contents.add(dto.getLeft());
+            } else {
+                contents.add(dto.getRight().getLanguage());
+                contents.add(dto.getRight().getValue());
+            }
+        }
+        return Joiner.on("\n\n").join(contents);
     }
 }

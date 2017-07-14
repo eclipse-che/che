@@ -23,6 +23,8 @@ import org.eclipse.che.plugin.languageserver.ide.editor.sync.TextDocumentSynchro
 import org.eclipse.che.plugin.languageserver.ide.editor.sync.TextDocumentSynchronizeFactory;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
+import org.eclipse.lsp4j.TextDocumentSyncOptions;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 /**
  * Responsible for document synchronization
@@ -38,7 +40,14 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
     public LanguageServerReconcileStrategy(TextDocumentSynchronizeFactory synchronizeFactory,
                                            @Assisted ServerCapabilities serverCapabilities) {
 
-        TextDocumentSyncKind documentSync = serverCapabilities.getTextDocumentSync();
+        Either<TextDocumentSyncKind, TextDocumentSyncOptions> sync = serverCapabilities.getTextDocumentSync();
+        TextDocumentSyncKind documentSync;
+        if(sync.isLeft()){
+            documentSync = sync.getLeft();
+        } else {
+            documentSync = sync.getRight().getChange();
+        }
+
         synchronize = synchronizeFactory.getSynchronize(documentSync);
     }
 

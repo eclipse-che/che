@@ -12,6 +12,7 @@ package org.eclipse.che.api.languageserver.registry;
 
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
+import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
@@ -44,7 +45,7 @@ public class CheLanguageClient implements LanguageClient {
     }
 
     @Override
-    public CompletableFuture<Void> showMessageRequest(ShowMessageRequestParams requestParams) {
+    public CompletableFuture<MessageActionItem> showMessageRequest(ShowMessageRequestParams requestParams) {
         return CompletableFuture.completedFuture(null);
     }
 
