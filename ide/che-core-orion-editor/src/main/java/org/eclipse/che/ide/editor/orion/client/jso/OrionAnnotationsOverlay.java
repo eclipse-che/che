@@ -8,24 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.languageserver.service;
+
+
+package org.eclipse.che.ide.editor.orion.client.jso;
+
+import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * Text document service utilities
+ * Annotations object, returned by 'orion/editor/annotations' AMD module
  */
-class TextDocumentServiceUtils {
-    private static final String FILE_PROJECTS = "file:///projects";
-
-    static String prefixURI(String relativePath) {
-        return FILE_PROJECTS + relativePath;
+public class OrionAnnotationsOverlay extends JavaScriptObject {
+    protected OrionAnnotationsOverlay() {
     }
 
-    static String removePrefixUri(String uri) {
-        return uri.startsWith(FILE_PROJECTS) ? uri.substring(FILE_PROJECTS.length()) : uri;
-    }
-    
-    static boolean truish(Boolean b) {
-        return b != null && b;
-    }
-
+    public native final OrionAnnotationTypeOverlay getAnnotationType() /*-{
+        return this.AnnotationType;
+    }-*/;
 }

@@ -100,7 +100,12 @@ public class JavaOutputCustomizerTest extends BaseOutputCustomizerTest {
      */
     @Test
     public void testNonStackTraceLines() throws Exception {
+        // Terminal Console
         testStackTraceLine("[STDOUT] Listening for transport dt_socket at address: 4403");
+        testStackTraceLine(
+                "[STDOUT] 2017-07-06 08:58:34,647 [ForkJoinPool.commonPool-worker-3] DEBUG o.j.t.l.t.DocumentManager.findSelectedWord - Looking for word at Position 2 in 'textDocument/badWord:Warning:name:So bad! '");
+
+        // C#
         testStackTraceLine(
                 "Unhandled Exception: System.NullReferenceException: Object reference not set to an instance of an object.");
         testStackTraceLine(
@@ -111,5 +116,17 @@ public class JavaOutputCustomizerTest extends BaseOutputCustomizerTest {
                 "Program.cs(2,13): error CS0234: The type or namespace name 'ppp' does not exist in the namespace 'hwapp' (are you missing an assembly reference?) [/home/jeremy/projects/csharp/hwapp/hwapp.csproj]");
         testStackTraceLine(
                 "ppp/PPPProgram.cs(9,17): warning CS0219: The variable 'testIntValue' is assigned but its value is never used [/home/jeremy/projects/csharp/hwapp/hwapp.csproj]");
+        testStackTraceLine(
+                "[STDOUT] 2017-07-06 08:58:34,647 [ForkJoinPool.commonPool-worker-3] DEBUG o.j.t.l.t.DocumentManager.findSelectedWord - Looking for word at Position 2 in 'textDocument/badWord:Warning:name:So bad! '");
+
+        // C/CPP 
+        testStackTraceLine(
+                "hello.cc: In function ‘int main()’:");
+        testStackTraceLine("hello.cc:8:13: warning: division by zero [-Wdiv-by-zero]");
+        testStackTraceLine("hello.cc:8:2: error: ‘Module’ was not declared in this scope");
+        testStackTraceLine("hello.cc:4:25: fatal error: module/Module: No such file or directory");
+        testStackTraceLine("/projects/console-cc-simple/hello.cc:23: undefined reference to `Module::sayHello[abi:cxx11]()'");
+        testStackTraceLine("     return 0/0;");
+        testStackTraceLine("             ^");
     }
 }

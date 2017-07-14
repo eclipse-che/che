@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.actions.AddToFileWatcherExcludesAction;
 import org.eclipse.che.ide.actions.CloseActiveEditorAction;
 import org.eclipse.che.ide.actions.CollapseAllAction;
 import org.eclipse.che.ide.actions.CompleteAction;
@@ -38,6 +39,7 @@ import org.eclipse.che.ide.actions.OpenFileAction;
 import org.eclipse.che.ide.actions.ProjectConfigurationAction;
 import org.eclipse.che.ide.actions.RedoAction;
 import org.eclipse.che.ide.actions.RefreshPathAction;
+import org.eclipse.che.ide.actions.RemoveFromFileWatcherExcludesAction;
 import org.eclipse.che.ide.actions.RenameItemAction;
 import org.eclipse.che.ide.actions.RunCommandAction;
 import org.eclipse.che.ide.actions.SaveAction;
@@ -413,6 +415,12 @@ public class StandardComponentInitializer {
     private ShowConsoleTreeAction showConsoleTreeAction;
 
     @Inject
+    private AddToFileWatcherExcludesAction addToFileWatcherExcludesAction;
+
+    @Inject
+    private RemoveFromFileWatcherExcludesAction removeFromFileWatcherExcludesAction;
+
+    @Inject
     private PerspectiveManager perspectiveManager;
 
     @Inject
@@ -711,6 +719,10 @@ public class StandardComponentInitializer {
         resourceOperation.add(linkWithEditorAction);
         resourceOperation.addSeparator();
         resourceOperation.add(convertFolderToProjectAction);
+        resourceOperation.addSeparator();
+        resourceOperation.addSeparator();
+        resourceOperation.add(addToFileWatcherExcludesAction);
+        resourceOperation.add(removeFromFileWatcherExcludesAction);
         resourceOperation.addSeparator();
 
         DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);

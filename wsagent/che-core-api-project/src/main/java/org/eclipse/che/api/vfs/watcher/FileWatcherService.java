@@ -19,14 +19,12 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchEvent.Modifier;
@@ -35,7 +33,6 @@ import java.nio.file.WatchService;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -50,7 +47,6 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.eclipse.che.api.vfs.watcher.FileWatcherUtils.isExcluded;
 
 /**
  * Watches directories for interactions with their entries. Based on
@@ -71,18 +67,19 @@ public class FileWatcherService {
     private final Map<WatchKey, Path> keys          = new ConcurrentHashMap<>();
     private final Map<Path, Integer>  registrations = new ConcurrentHashMap<>();
 
-    private final Set<PathMatcher>        excludes;
-    private final FileWatcherEventHandler handler;
-    private final WatchService            service;
-    private final Modifier[]              eventModifiers;
-    private final Kind<?>[]               eventKinds;
+    private final FileWatcherExcludePatternsRegistry excludePatternsRegistry;
+    private final FileWatcherEventHandler            handler;
+    private final WatchService                       service;
+    private final Modifier[]                         eventModifiers;
+    private final Kind<?>[]                          eventKinds;
 
     private ExecutorService executor;
 
     @Inject
-    public FileWatcherService(@Named("che.user.workspaces.storage.excludes") Set<PathMatcher> excludes,
-                              FileWatcherEventHandler handler, WatchService service) {
-        this.excludes = excludes;
+    public FileWatcherService(FileWatcherExcludePatternsRegistry excludePatternsRegistry,
+                              FileWatcherEventHandler handler,
+                              WatchService service) {
+        this.excludePatternsRegistry = excludePatternsRegistry;
         this.handler = handler;
         this.service = service;
 
@@ -305,7 +302,7 @@ public class FileWatcherService {
                     Path item = ev.context();
                     Path path = dir.resolve(item).toAbsolutePath();
 
-                    if (isExcluded(excludes, path)) {
+                    if (excludePatternsRegistry.isExcluded(path)) {
                         LOG.debug("Path is within exclude list, skipping...");
                         continue;
                     }

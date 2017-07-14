@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.watcher;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,11 +37,13 @@ public class FileWatcherManagerTest {
     public TemporaryFolder rootFolder = new TemporaryFolder();
 
     @Mock
-    FileWatcherByPathValue   fileWatcherByPathValue;
+    FileWatcherByPathValue             fileWatcherByPathValue;
     @Mock
-    FileWatcherByPathMatcher fileWatcherByPathMatcher;
+    FileWatcherByPathMatcher           fileWatcherByPathMatcher;
     @Mock
-    FileWatcherService       service;
+    FileWatcherExcludePatternsRegistry fileWatcherExcludePatternsRegistry;
+    @Mock
+    FileWatcherService                 service;
 
     FileWatcherManager manager;
 
@@ -57,7 +58,8 @@ public class FileWatcherManagerTest {
 
     @Before
     public void setUp() throws Exception {
-        manager = new FileWatcherManager(rootFolder.getRoot(), fileWatcherByPathValue, fileWatcherByPathMatcher, service);
+        manager = new FileWatcherManager(rootFolder.getRoot(), fileWatcherByPathValue, fileWatcherByPathMatcher, service,
+                                         fileWatcherExcludePatternsRegistry);
     }
 
     @Test

@@ -30,7 +30,7 @@ public class LanguageServerInitializationHandler {
                                   .resultAsDto(ServerCapabilitiesDto.class)
                                   .withFunction(path -> {
                                       try {
-                                          ServerCapabilities capabilities = registry.initialize(TextDocumentServiceUtils.prefixURI(path));
+                                          ServerCapabilities capabilities = registry.initialize(LanguageServiceUtils.prefixURI(path));
                                           return capabilities == null ? null : new ServerCapabilitiesDto(capabilities);
                                       } catch (LanguageServerException e) {
                                           throw new JsonRpcException(-27000, e.getMessage());

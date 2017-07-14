@@ -90,7 +90,8 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
         setCustomizer(new CompoundOutputCustomizer(
                 new JavaOutputCustomizer(appContext, editorAgent),
-                new CSharpOutputCustomizer(appContext, editorAgent)));
+                new CSharpOutputCustomizer(appContext, editorAgent),
+                new CPPOutputCustomizer(appContext, editorAgent)));
         
         view.setDelegate(this);
 

@@ -11,6 +11,7 @@
 package org.eclipse.che.api.languageserver.service;
 
 import com.google.inject.Singleton;
+
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
@@ -50,12 +51,12 @@ import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -68,8 +69,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.prefixURI;
-import static org.eclipse.che.api.languageserver.service.TextDocumentServiceUtils.removePrefixUri;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
 
 /**
  * Json RPC API for the textDoc
@@ -100,7 +101,7 @@ public class TextDocumentService {
         dtoToDtoList("onTypeFormatting", DocumentOnTypeFormattingParams.class, TextEditDto.class, this::onTypeFormatting);
 
         dtoToDto("completionItem/resolve", ExtendedCompletionItem.class, ExtendedCompletionItemDto.class, this::completionItemResolve);
-        dtoToDto("documentHighlight", TextDocumentPositionParams.class, DocumentHighlightDto.class, this::documentHighlight);
+        dtoToDto("documentHighlight", TextDocumentPositionParams.class, DocumentHighlight.class, this::documentHighlight);
         dtoToDto("completion", TextDocumentPositionParams.class, ExtendedCompletionListDto.class, this::completion);
         dtoToDto("hover", TextDocumentPositionParams.class, HoverDto.class, this::hover);
         dtoToDto("signatureHelp", TextDocumentPositionParams.class, SignatureHelpDto.class, this::signatureHelp);
@@ -164,9 +165,10 @@ public class TextDocumentService {
                 public CompletableFuture<ExtendedCompletionListDto> start(Collection<InitializedLanguageServer> element) {
                     return CompletableFuture.supplyAsync(() -> {
                         ExtendedCompletionListDto res = new ExtendedCompletionListDto();
-                        List<ExtendedCompletionItem> items = new ArrayList<ExtendedCompletionItem>();
+                        List<ExtendedCompletionItem> items = new ArrayList<>();
                         res.setItems(items);
-                        LSOperation<InitializedLanguageServer, CompletionList> op2 = new LSOperation<InitializedLanguageServer, CompletionList>() {
+                        LSOperation<InitializedLanguageServer, Either<List<CompletionItem>, CompletionList>> op2 =
+                                new LSOperation<InitializedLanguageServer, Either<List<CompletionItem>, CompletionList>> () {
 
                             @Override
                             public boolean canDo(InitializedLanguageServer element) {
@@ -174,14 +176,21 @@ public class TextDocumentService {
                             }
 
                             @Override
-                            public CompletableFuture<CompletionList> start(InitializedLanguageServer element) {
+                            public CompletableFuture<Either<List<CompletionItem>, CompletionList>> start(InitializedLanguageServer element) {
                                 return element.getServer().getTextDocumentService().completion(textDocumentPositionParams);
                             }
 
                             @Override
-                            public boolean handleResult(InitializedLanguageServer element, CompletionList result) {
-                                res.setInComplete(res.isInComplete() && result.isIncomplete());
-                                for (CompletionItem item : result.getItems()) {
+                            public boolean handleResult(InitializedLanguageServer element, Either<List<CompletionItem>, CompletionList> result) {
+                                List<CompletionItem> itemList;
+                                if(result.isRight()) {
+                                    res.setInComplete(res.isInComplete() && result.getRight().isIncomplete());
+                                    itemList = result.getRight().getItems();
+                                } else {
+                                    itemList = result.getLeft();
+                                }
+
+                                for (CompletionItem item : itemList) {
                                     ExtendedCompletionItemDto exItem = new ExtendedCompletionItemDto();
                                     exItem.setItem(new CompletionItemDto(item));
                                     exItem.setLanguageServerId(element.getId());
@@ -317,7 +326,7 @@ public class TextDocumentService {
         try {
             InitializedLanguageServer server = languageServerRegistry.getServer(unresolved.getLanguageServerId());
 
-            if (server != null) { 
+            if (server != null) {
                 ExtendedCompletionItem res = new ExtendedCompletionItem();
                 res.setItem(server.getServer().getTextDocumentService().resolveCompletionItem(unresolved.getItem()).get());
                 res.setLanguageServerId(unresolved.getLanguageServerId());
