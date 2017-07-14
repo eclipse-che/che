@@ -1000,6 +1000,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onIDEInitialized(BasicIDEInitializedEvent event) {
+        if (appContext.getFactory() == null && partStack != null) {
+            partStack.setActivePart(this);
+        }
+
         if (appContext.getWorkspace().getStatus() == RUNNING) {
             for (MachineImpl machine : getMachines()) {
                 restoreProcessesState(machine.getName());
@@ -1012,9 +1016,13 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onTerminalAgentServerRunning(TerminalAgentServerRunningEvent event) {
-        provideMachineNode(event.getMachineName(), true);
+        // open terminal automatically for dev-machine only
+        Optional<MachineImpl> devMachine = appContext.getWorkspace().getDevMachine();
 
-        newTerminal(this);
+        if (devMachine.isPresent() && event.getMachineName().equals(devMachine.get().getName())) {
+            provideMachineNode(event.getMachineName(), true);
+            newTerminal(this);
+        }
     }
 
     @Override
