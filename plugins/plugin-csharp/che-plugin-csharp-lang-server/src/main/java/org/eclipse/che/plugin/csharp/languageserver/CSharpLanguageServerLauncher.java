@@ -12,10 +12,12 @@ package org.eclipse.che.plugin.csharp.languageserver;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
 import org.eclipse.che.api.languageserver.registry.DocumentFilter;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
+import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.csharp.inject.CSharpModule;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
@@ -64,7 +66,7 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
 
     private void restoreDependencies(String projectPath) throws LanguageServerException {
         ProcessBuilder processBuilder = new ProcessBuilder("dotnet", "restore");
-        processBuilder.directory(new File(projectPath));
+        processBuilder.directory(new File(LanguageServiceUtils.removeUriScheme(projectPath)));
         try {
             Process process = processBuilder.start();
             int resultCode = process.waitFor();

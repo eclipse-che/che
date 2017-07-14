@@ -22,7 +22,7 @@ public interface LanguageServerLauncher {
 
     /**
      * Initializes and starts a language server.
-     * 
+     *
      * @param projectPath
      *      absolute path to the project
      * @param client
@@ -36,7 +36,7 @@ public interface LanguageServerLauncher {
     LanguageServerDescription getDescription();
 
     /**
-     * Indicates if language server is installed and is ready to be started.  
+     * Indicates if language server is installed and is ready to be started.
      */
     boolean isAbleToLaunch();
 }

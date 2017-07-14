@@ -11,12 +11,15 @@
 package org.eclipse.che.api.languageserver.registry;
 
 import com.google.common.base.Function;
+
 import org.eclipse.lsp4j.CodeLensOptions;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.DocumentOnTypeFormattingOptions;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SignatureHelpOptions;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
+import org.eclipse.lsp4j.TextDocumentSyncOptions;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -113,11 +116,13 @@ public class ServerCapabilitiesOverlay {
         return result;
     }
 
-    public TextDocumentSyncKind getTextDocumentSync() {
+    public Either<TextDocumentSyncKind, TextDocumentSyncOptions> getTextDocumentSync() {
         return mergeTextDocumentSync(left.getTextDocumentSync(), right.getTextDocumentSync());
     }
 
-    private TextDocumentSyncKind mergeTextDocumentSync(TextDocumentSyncKind left, TextDocumentSyncKind right) {
+    private Either<TextDocumentSyncKind, TextDocumentSyncOptions> mergeTextDocumentSync(
+            Either<TextDocumentSyncKind, TextDocumentSyncOptions> left,
+            Either<TextDocumentSyncKind, TextDocumentSyncOptions> right) {
         if (left == null) {
             return right;
         }
@@ -127,15 +132,41 @@ public class ServerCapabilitiesOverlay {
         if (left.equals(right)) {
             return left;
         }
-        if (left == TextDocumentSyncKind.Full) {
+
+        if (left.isLeft() && left.getLeft() == TextDocumentSyncKind.Full) {
             return left;
         }
-        if (left == TextDocumentSyncKind.Incremental) {
-            if (right == TextDocumentSyncKind.Full) {
-                return TextDocumentSyncKind.Full;
+
+        if (left.isLeft() && left.getLeft() == TextDocumentSyncKind.Incremental) {
+            if (right.isLeft() && right.getLeft() == TextDocumentSyncKind.Full) {
+                return right;
             } else {
-                return TextDocumentSyncKind.Incremental;
+                return left;
             }
+        }
+
+        if (left.isRight() && right.isRight()) {
+            TextDocumentSyncOptions leftRight = left.getRight();
+            TextDocumentSyncOptions rightRight = right.getRight();
+            if (leftRight.getChange() == TextDocumentSyncKind.Full) {
+                return left;
+            }
+
+            if (leftRight.getChange() == TextDocumentSyncKind.Incremental) {
+                if (rightRight.getChange() == TextDocumentSyncKind.Full) {
+                    return right;
+                } else {
+                    return left;
+                }
+            }
+        }
+
+        if (left.isLeft() && right.isRight()) {
+            return right;
+        }
+
+        if (left.isRight() && right.isLeft()) {
+            return left;
         }
         return right;
     }

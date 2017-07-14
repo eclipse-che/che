@@ -14,9 +14,10 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
-import org.eclipse.che.ide.api.event.ng.FileOpenCloseEventListener;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventServiceImpl;
 import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationOperation;
+import org.eclipse.che.ide.api.event.ng.FileOpenCloseEventListener;
+import org.eclipse.che.ide.api.event.ng.FileWatcherExcludesOperation;
 
 /** GIN module for configuring client server events. */
 public class ClientServerEventModule extends AbstractGinModule {
@@ -27,5 +28,6 @@ public class ClientServerEventModule extends AbstractGinModule {
         bind(ClientServerEventService.class).to(ClientServerEventServiceImpl.class).in(Singleton.class);
 
         bind(EditorFileStatusNotificationOperation.class).asEagerSingleton();
+        bind(FileWatcherExcludesOperation.class).asEagerSingleton();
     }
 }

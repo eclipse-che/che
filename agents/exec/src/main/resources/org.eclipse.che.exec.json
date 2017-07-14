@@ -1,6 +1,6 @@
 {
   "id": "org.eclipse.che.exec",
-  "name": "Exec-agent",
+  "name": "Exec",
   "description": "Agent for command execution",
   "dependencies": [],
   "properties": {},

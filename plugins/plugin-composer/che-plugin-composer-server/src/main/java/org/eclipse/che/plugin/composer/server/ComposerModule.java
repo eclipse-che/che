@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Rogue Wave Software, Inc.
+ * Copyright (c) 2016-2017 Rogue Wave Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.composer.server.executor.ComposerJsonRpcMessenger;
 import org.eclipse.che.plugin.composer.server.projecttype.ComposerProjectGenerator;
 import org.eclipse.che.plugin.composer.server.projecttype.ComposerProjectInitializer;
 import org.eclipse.che.plugin.composer.server.projecttype.ComposerProjectType;
@@ -46,5 +47,7 @@ public class ComposerModule extends AbstractModule {
         Multibinder<ProjectHandler> projectHandlerMultibinder = newSetBinder(binder(), ProjectHandler.class);
         projectHandlerMultibinder.addBinding().to(ComposerProjectGenerator.class);
         projectHandlerMultibinder.addBinding().to(ComposerProjectInitializer.class);
+
+        bind(ComposerJsonRpcMessenger.class);
     }
 }

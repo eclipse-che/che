@@ -14,10 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
-import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistCallback;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
@@ -81,17 +77,11 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
             // no need to send new completion request
             computeProposals(currentWord, offset - latestCompletionResult.getOffset(), callback);
         } else {
-            documentServiceClient.completion(documentPosition).then(new Operation<ExtendedCompletionList>() {
-                @Override
-                public void apply(ExtendedCompletionList list) throws OperationException {
-                    latestCompletionResult.update(documentId, offset, currentWord, list);
-                    computeProposals(currentWord, 0, callback);
-                }
-            }).catchError(new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError error) throws OperationException {
-                    lastErrorMessage = error.getMessage();
-                }
+            documentServiceClient.completion(documentPosition).then(list -> {
+                latestCompletionResult.update(documentId, offset, currentWord, list);
+                computeProposals(currentWord, 0, callback);
+            }).catchError(error -> {
+                lastErrorMessage = error.getMessage();
             });
         }
     }
@@ -133,7 +123,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
             // return the highlights based on the label
             List<Match> highlights = fuzzyMatches.fuzzyMatch(word, label);
             // return empty list of highlights if nothing matches the label
-            return (highlights == null) ? new ArrayList<Match>() : highlights;
+            return (highlights == null) ? new ArrayList<>() : highlights;
         }
 
         return null;
