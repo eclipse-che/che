@@ -28,7 +28,7 @@ import java.util.Optional;
 
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
 
 /** Initializes JSON-RPC connection to the ws-agent server. */

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.snapshot;
 
-import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 
 import javax.persistence.Column;

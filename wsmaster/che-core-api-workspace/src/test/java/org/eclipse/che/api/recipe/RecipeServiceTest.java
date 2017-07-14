@@ -15,9 +15,9 @@ import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.api.machine.shared.dto.recipe.NewOldRecipe;
-import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeDescriptor;
-import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeUpdate;
+import org.eclipse.che.api.workspace.shared.recipe.NewOldRecipe;
+import org.eclipse.che.api.workspace.shared.recipe.OldRecipeDescriptor;
+import org.eclipse.che.api.workspace.shared.recipe.OldRecipeUpdate;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;

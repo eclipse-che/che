@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.old;
 
-import org.eclipse.che.api.core.model.machine.MachineSource;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSource;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.DockerMachineSource;
 import org.mockito.Mock;

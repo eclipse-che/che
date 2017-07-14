@@ -34,9 +34,9 @@ import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.STOPPED;
-import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
-import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
-import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.EXEC_AGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.TERMINAL_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.ide.api.machine.events.WsAgentStateEvent.createWsAgentStartedEvent;
 import static org.eclipse.che.ide.api.machine.events.WsAgentStateEvent.createWsAgentStoppedEvent;

@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.machine.execagent;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
+import org.eclipse.che.ide.api.machine.execagent.dto.event.ProcessStartedEventDto;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;

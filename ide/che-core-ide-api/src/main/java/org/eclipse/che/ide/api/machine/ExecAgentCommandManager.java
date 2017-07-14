@@ -12,14 +12,14 @@ package org.eclipse.che.ide.api.machine;
 
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
-import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsResponseDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessResponseDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.ProcessKillResponseDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.ProcessSubscribeResponseDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.ProcessUnSubscribeResponseDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.UpdateSubscriptionResponseDto;
+import org.eclipse.che.ide.api.machine.execagent.dto.GetProcessLogsResponseDto;
+import org.eclipse.che.ide.api.machine.execagent.dto.GetProcessResponseDto;
+import org.eclipse.che.ide.api.machine.execagent.dto.GetProcessesResponseDto;
+import org.eclipse.che.ide.api.machine.execagent.dto.ProcessKillResponseDto;
+import org.eclipse.che.ide.api.machine.execagent.dto.ProcessStartResponseDto;
+import org.eclipse.che.ide.api.machine.execagent.dto.ProcessSubscribeResponseDto;
+import org.eclipse.che.ide.api.machine.execagent.dto.ProcessUnSubscribeResponseDto;
+import org.eclipse.che.ide.api.machine.execagent.dto.UpdateSubscriptionResponseDto;
 import org.eclipse.che.ide.api.machine.execagent.ExecAgentConsumer;
 
 import java.util.List;

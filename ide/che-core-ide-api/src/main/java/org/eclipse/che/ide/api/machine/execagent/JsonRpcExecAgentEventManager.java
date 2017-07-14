@@ -12,10 +12,10 @@ package org.eclipse.che.ide.api.machine.execagent;
 
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
+import org.eclipse.che.ide.api.machine.execagent.dto.event.ProcessDiedEventDto;
+import org.eclipse.che.ide.api.machine.execagent.dto.event.ProcessStartedEventDto;
+import org.eclipse.che.ide.api.machine.execagent.dto.event.ProcessStdErrEventDto;
+import org.eclipse.che.ide.api.machine.execagent.dto.event.ProcessStdOutEventDto;
 import org.eclipse.che.ide.api.machine.ExecAgentEventManager;
 import org.eclipse.che.ide.util.loging.Log;
 

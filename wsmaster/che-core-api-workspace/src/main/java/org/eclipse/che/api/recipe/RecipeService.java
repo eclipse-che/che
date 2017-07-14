@@ -16,10 +16,10 @@ import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.util.LinksHelper;
-import org.eclipse.che.api.machine.shared.ManagedOldRecipe;
-import org.eclipse.che.api.machine.shared.dto.recipe.NewOldRecipe;
-import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeDescriptor;
-import org.eclipse.che.api.machine.shared.dto.recipe.OldRecipeUpdate;
+import org.eclipse.che.api.workspace.shared.recipe.ManagedOldRecipe;
+import org.eclipse.che.api.workspace.shared.recipe.NewOldRecipe;
+import org.eclipse.che.api.workspace.shared.recipe.OldRecipeDescriptor;
+import org.eclipse.che.api.workspace.shared.recipe.OldRecipeUpdate;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -48,11 +48,11 @@ import static java.util.Arrays.asList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.CREATED;
-import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_CREATE_RECIPE;
-import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_RECIPE_SCRIPT;
-import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_REMOVE_RECIPE;
-import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_SEARCH_RECIPES;
-import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_UPDATE_RECIPE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_CREATE_RECIPE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_RECIPE_SCRIPT;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_RECIPE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_SEARCH_RECIPES;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_UPDATE_RECIPE;
 
 /**
  * OldRecipe API

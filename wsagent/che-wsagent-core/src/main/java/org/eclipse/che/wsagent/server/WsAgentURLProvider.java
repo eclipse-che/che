@@ -24,7 +24,7 @@ import javax.inject.Provider;
 import java.io.IOException;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.WSAGENT_REFERENCE;
 
 /**
  * Provides URL to workspace agent inside container.

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.workspace.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSource;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.plugin.docker.client.DockerFileException;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;

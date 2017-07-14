@@ -18,7 +18,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import org.eclipse.che.api.core.model.machine.OldRecipe;
+import org.eclipse.che.api.workspace.shared.recipe.OldRecipe;
 import org.eclipse.che.api.recipe.OldRecipeImpl;
 
 import java.lang.reflect.Type;

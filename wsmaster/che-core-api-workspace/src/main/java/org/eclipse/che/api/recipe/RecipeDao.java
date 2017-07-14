@@ -13,7 +13,7 @@ package org.eclipse.che.api.recipe;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.shared.ManagedOldRecipe;
+import org.eclipse.che.api.workspace.shared.recipe.ManagedOldRecipe;
 
 import java.util.List;
 

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine.execagent;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
+import org.eclipse.che.ide.api.machine.execagent.dto.event.DtoWithPid;
 
 import java.util.HashMap;
 import java.util.HashSet;

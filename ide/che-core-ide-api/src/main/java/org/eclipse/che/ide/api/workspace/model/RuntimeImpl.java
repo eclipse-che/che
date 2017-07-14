@@ -23,7 +23,7 @@ import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.WSAGENT_REFERENCE;
 
 /** Data object for {@link Runtime}. */
 public class RuntimeImpl implements Runtime {

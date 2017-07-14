@@ -29,7 +29,7 @@ import java.util.Optional;
 
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.EXEC_AGENT_REFERENCE;
 
 /** Initializes JSON-RPC connection to the ws-agent server. */
 @Singleton

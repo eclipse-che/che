@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -39,12 +38,6 @@ public class RecipeRetrieverTest {
 //     */
 //    @Mock
 //    private OldMachineConfig machineConfig;
-
-    /**
-     * OldMachine source embedded in machine config.
-     */
-    @Mock
-    private MachineSource machineSource;
 
     /**
      * Instance used in tests.

@@ -11,7 +11,7 @@
 package org.eclipse.che.api.recipe;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
-import org.eclipse.che.api.machine.shared.ManagedOldRecipe;
+import org.eclipse.che.api.workspace.shared.recipe.ManagedOldRecipe;
 import org.eclipse.che.core.db.cascade.event.PersistEvent;
 
 /**
