@@ -19,8 +19,23 @@
             <version>2.3.1</version>
         </dependency>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>20.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.10</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.3.2</version>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
@@ -33,7 +48,8 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-dto</artifactId>
+            <artifactId>che-core-api-core</artifactId>
+            <version>5.15.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -46,7 +62,22 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-json</artifactId>
+            <version>5.15.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-lang</artifactId>
+            <version>5.15.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-datasource-shared</artifactId>
+            <version>5.15.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-datasource-ssl-socket-factory</artifactId>
             <version>5.15.0-SNAPSHOT</version>
         </dependency>
         <dependency>
